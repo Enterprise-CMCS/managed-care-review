@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-035 Deterministic-to-LLM clause-resolution fallback hardening`.
+The next implementation ticket is `AIFA-021 Cache validation results`.
 
 ## Completed
 
@@ -41,6 +41,7 @@ The next implementation ticket is `AIFA-035 Deterministic-to-LLM clause-resoluti
 - AIFA-032 ✔ Mismatch message specificity hardening
 - AIFA-033 ✔ Clause-precedence resolution hardening
 - AIFA-034 ✔ Clause-evidence retrieval and fallback hardening
+- AIFA-035 ✔ Deterministic-to-LLM clause-resolution fallback hardening
 - AIFA-024 ✔ Bedrock follow-up for production-like evaluation
 
 ## Current State
@@ -96,6 +97,8 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - clause-precedence handling now prefers stronger operative amendment language over weaker summary-style dates when one unique strongest reading remains
 - retrieval now expands narrowly toward clause-heavy amendment/superseding text when initial hits are dominated by competing summary dates
 - stored result artifacts now include optional retrieval diagnostics so evaluation can separate clause-recall misses from resolver misses
+- clause-only operative term text can now resolve start/end dates deterministically when one unique reading exists
+- OCR-concatenated clause end dates now stay on the conservative ambiguity path instead of being over-resolved to a single end date
 
 ### Malformed-output observability
 
@@ -171,19 +174,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-035 Deterministic-to-LLM clause-resolution fallback hardening
-
-Reduce over-reliance on deterministic regex-style precedence cues when clause-heavy evidence is already retrieved but phrased outside the currently supported patterns.
-
 ### AIFA-021 Cache validation results
 
 Avoid unnecessary re-validation when the documents and form data have not changed.
 
 ## Suggested Next Step
 
-- Use the retrieved clause-heavy evidence to add a narrow fallback when deterministic precedence cues do not match.
-- Keep evaluation focused on separating clause-recall wins from true clause-resolution misses.
-- Watch for over-broad fallback behavior on noisy or OCR-weakened clause text.
+- Reuse stored validation results when `artifactVersion` and form snapshot inputs have not changed.
+- Keep cache invalidation aligned with stale-result handling for document and form-value changes.
+- Watch for local artifact reads masking incomplete or failed prior runs.
 
 ## Source of Truth Docs
 
@@ -211,3 +210,4 @@ Avoid unnecessary re-validation when the documents and form data have not change
 - The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
 - Timeout handling remains intentionally deferred while validation quality measurement is still the larger credibility risk.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
+- Clause-resolution hardening now passes the current 8-scenario corpus, but OCR-heavy term text still depends on narrow heuristics rather than a broader parsing layer.

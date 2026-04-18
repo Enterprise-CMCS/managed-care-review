@@ -595,7 +595,7 @@ Clause-precedence logic only helps when the worker actually retrieves the operat
 - When deterministic precedence cues still do not match, the LLM fallback receives clause-focused evidence instead of only weaker header or summary dates
 - Evaluation output makes clause-retrieval misses visible enough to distinguish retrieval failure from resolver failure
 - Existing start and end date scenarios continue to pass without regression"
-AIFA-035 Deterministic-to-LLM clause-resolution fallback hardening,Backlog,5-Testing & Evaluation,Medium,AIFA-034,"Reduce over-reliance on deterministic regex-style precedence cues when clause-heavy evidence is already retrieved but phrased outside the currently supported patterns.
+AIFA-035 Deterministic-to-LLM clause-resolution fallback hardening,Done,5-Testing & Evaluation,Medium,AIFA-034,"Reduce over-reliance on deterministic regex-style precedence cues when clause-heavy evidence is already retrieved but phrased outside the currently supported patterns.
 - Route clause-heavy competing-date evidence into a narrower clause-resolution LLM fallback when deterministic precedence does not find a known cue
 - Keep the fallback focused on contractStartDate and contractEndDate only
 - Preserve the current conservative behavior when the retrieved clause evidence still supports more than one plausible reading

@@ -2,6 +2,7 @@ export type {
   ParsedValidationOutput,
   ValidationResponseIssue
 } from './parser'
+export { shouldFallbackConflictingClauseResolutionToLlm } from './clauseResolutionFallback'
 export { runDeterministicDateValidation } from './deterministicDateValidation'
 export {
   extractJsonArray,

@@ -4,6 +4,7 @@ import { canonicalizeDateToken } from './dateToken'
 const MONTH_PATTERN =
   '(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
 const DATE_PATTERN = `${MONTH_PATTERN}\\s+\\d{1,2},?\\s*\\d{4}|\\d{1,2}/\\d{1,2}/\\d{4}|\\d{4}-\\d{2}-\\d{2}`
+const DATE_AT_START_PATTERN = new RegExp(`^(?:${DATE_PATTERN})`, 'i')
 
 interface PrecedenceMatchPattern {
   pattern: RegExp
@@ -137,6 +138,17 @@ export function resolveSingleTermRangeDateFromChunks(
         continue
       }
 
+      if (
+        field === 'contractEndDate' &&
+        hasImmediateTrailingDateToken(chunk.text, match)
+      ) {
+        // OCR can concatenate a second end date directly after the matched
+        // clause date (for example "...2022December 31, 2023"), which would
+        // otherwise look like a clean single end-date read. Ignore those
+        // matches so callers keep the field in an ambiguity path instead.
+        continue
+      }
+
       const rangeDate = pattern.extractDate(field, match)
 
       if (!rangeDate) {
@@ -186,4 +198,17 @@ export function resolveSingleTermRangeDateFromChunks(
   }
 
   return highestPrecedenceDates[0] ?? null
+}
+
+function hasImmediateTrailingDateToken(
+  text: string,
+  match: RegExpMatchArray
+): boolean {
+  if (match.index == null) {
+    return false
+  }
+
+  const trailingText = text.slice(match.index + match[0].length)
+
+  return DATE_AT_START_PATTERN.test(trailingText)
 }

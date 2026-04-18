@@ -270,3 +270,47 @@ test('normalizeLlmValidationResult rewrites llm not-enough-evidence output into 
     'Document contains conflicting end date evidence, so the end date could not be verified. Conflicting dates found: 12/31/2022 and 12/31/2023.'
   )
 })
+
+test('normalizeLlmValidationResult rewrites llm match output to include the resolved full date from cited evidence', () => {
+  const normalized = normalizeLlmValidationResult({
+    field: {
+      field: 'contractEndDate',
+      label: 'Contract End Date',
+      value: '12/31/2025'
+    },
+    result: {
+      field: 'contractEndDate',
+      outcome: 'match',
+      confidence: 'medium',
+      message: 'The cited amendment language supports the submitted value.',
+      decisionSource: 'llm',
+      citations: [
+        {
+          chunkId: 'chunk-1',
+          documentName: 'fixture.pdf',
+          page: 2,
+          startPage: 2,
+          endPage: 2,
+          order: 1
+        }
+      ]
+    },
+    retrievedChunks: [
+      {
+        chunkId: 'chunk-1',
+        documentName: 'fixture.pdf',
+        page: 2,
+        startPage: 2,
+        endPage: 2,
+        order: 1,
+        text:
+          'Paragraph 2 is amended to read: January 1, 2024 through December 31, 2025.'
+      }
+    ]
+  })
+
+  assert.equal(
+    normalized.message,
+    'Document text supports end date as 12/31/2025.'
+  )
+})

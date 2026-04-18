@@ -105,6 +105,7 @@ export function buildDateValidationPrompt(
     '- Use only the provided evidence',
     '- Do not guess',
     '- If the evidence is missing, incomplete, or ambiguous, return "not-enough-evidence"',
+    '- When summary labels conflict with operative amendment or superseding clause language, prefer the stronger operative clause text',
     '- For "mismatch", include both the full submitted date and the full document date when the evidence supports month/day/year precision',
     '- Do not collapse a full document-backed date to a year-only summary',
     '- Cite only the chunks that support your conclusion',

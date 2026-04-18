@@ -4,7 +4,8 @@ export type {
 } from './clauseEvidence'
 export {
   buildFieldRetrievalQuery,
-  expandClauseEvidenceForField
+  expandClauseEvidenceForField,
+  hasClauseEvidenceForField
 } from './clauseEvidence'
 export type {
   OrderedChunkMetadata,

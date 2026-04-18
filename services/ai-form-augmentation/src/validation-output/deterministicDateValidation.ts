@@ -3,6 +3,7 @@ import type {
   DateValidationFieldInput,
   DateValidationResult
 } from '../prompts'
+import { hasClauseEvidenceForField } from '../retrieval'
 import { VALIDATION_FIELD_CONFIG } from '../validationFields'
 import { canonicalizeDateToken } from './dateToken'
 import { buildFieldSpecificMismatchMessage } from './mismatchMessage'
@@ -135,6 +136,46 @@ function extractLabeledDates(
   return [...labeledDates]
 }
 
+function extractClauseDateCandidates(
+  field: SupportedField,
+  chunks: DateValidationCitationInput[]
+): string[] {
+  const candidateDates = new Set<string>()
+
+  for (const chunk of chunks) {
+    const canonicalDates = [...chunk.text.matchAll(DATE_PATTERN_GLOBAL)]
+      .flatMap((match) => {
+        const value = match[0]?.trim()
+
+        if (!value) {
+          return []
+        }
+
+        const canonicalDate = canonicalizeDateToken(value)
+        return canonicalDate ? [canonicalDate] : []
+      })
+
+    if (field === 'contractStartDate') {
+      const firstDate = canonicalDates[0]
+
+      if (firstDate) {
+        candidateDates.add(firstDate)
+      }
+
+      continue
+    }
+
+    const trailingDates =
+      canonicalDates.length > 1 ? canonicalDates.slice(1) : canonicalDates
+
+    for (const date of trailingDates) {
+      candidateDates.add(date)
+    }
+  }
+
+  return [...candidateDates].sort()
+}
+
 export function resolveSingleLabeledDateFromChunks(
   field: SupportedField,
   chunks: DateValidationCitationInput[]
@@ -206,6 +247,67 @@ export function runDeterministicDateValidation(input: {
     })
 
     if (labeledCandidates.length === 0) {
+      const clauseChunks = input.retrievedChunks.filter((chunk) =>
+        hasClauseEvidenceForField(field.field, chunk.text)
+      )
+
+      // Some amendment fixtures surface only operative term-clause language and
+      // never expose the scoped fields as explicit labels. Handle those here so
+      // clause-only evidence can still resolve deterministically before the
+      // worker falls back to the LLM path.
+      const resolvedClauseDate = resolveSingleTermRangeDateFromChunks(
+        field.field,
+        clauseChunks
+      )
+
+      if (resolvedClauseDate) {
+        const normalizedResolvedDate = normalizeDateToken(resolvedClauseDate.date)
+
+        resolvedResults.push({
+          field: field.field,
+          outcome:
+            normalizedResolvedDate === normalizeDateToken(field.value)
+              ? 'match'
+              : 'mismatch',
+          confidence: 'high',
+          message:
+            normalizedResolvedDate === normalizeDateToken(field.value)
+              ? `Document text supports ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} as ${field.value}.`
+              : buildFieldSpecificMismatchMessage({
+                  field,
+                  documentDate: resolvedClauseDate.date,
+                  formDate: field.value
+                }),
+          decisionSource: 'deterministic',
+          citations: resolvedClauseDate.chunks.map(buildCitation)
+        })
+        continue
+      }
+
+      if (clauseChunks.length > 0) {
+        const conflictingClauseDates = extractClauseDateCandidates(
+          field.field,
+          clauseChunks
+        )
+
+        if (conflictingClauseDates.length <= 1) {
+          unresolvedFields.push(field)
+          continue
+        }
+
+        // Keep OCR-weakened clause-only evidence conservative when it surfaces
+        // multiple plausible dates but not one unique operative reading.
+        resolvedResults.push({
+          field: field.field,
+          outcome: 'not-enough-evidence',
+          confidence: 'medium',
+          message: buildConflictingDateDetail(field, conflictingClauseDates),
+          decisionSource: 'deterministic',
+          citations: clauseChunks.map(buildCitation)
+        })
+        continue
+      }
+
       unresolvedFields.push(field)
       continue
     }

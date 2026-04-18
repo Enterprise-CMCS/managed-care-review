@@ -8,6 +8,7 @@ import {
   resolveMultipleLabeledDatesFromChunks,
   resolveSingleLabeledDateFromChunks
 } from './deterministicDateValidation'
+import { VALIDATION_FIELD_CONFIG } from '../validationFields'
 import { resolveSingleTermRangeDateFromChunks } from './termRangeDateResolution'
 import { buildFieldSpecificMismatchMessage } from './mismatchMessage'
 
@@ -46,6 +47,25 @@ export function normalizeLlmValidationResult(input: {
     }
 
     return result
+  }
+
+  if (result.outcome === 'match') {
+    const resolvedDocumentDate = resolveSingleLabeledDateFromChunks(
+      field.field,
+      citedChunks
+    )
+    const fallbackDocumentDate =
+      resolvedDocumentDate ??
+      resolveSingleTermRangeDateFromChunks(field.field, citedChunks)?.date
+
+    if (fallbackDocumentDate == null) {
+      return result
+    }
+
+    return {
+      ...result,
+      message: `Document text supports ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} as ${fallbackDocumentDate}.`
+    }
   }
 
   if (result.outcome !== 'mismatch') {

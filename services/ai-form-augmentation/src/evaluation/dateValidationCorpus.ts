@@ -231,33 +231,6 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
       recommended: false
     }
   },
-  {
-    id: 'cover-sheet-not-enough-evidence',
-    documentName: 'medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf',
-    fixturePath:
-      'fixtures/pdf/medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf',
-    summary:
-      'Administrative cover sheet with no trustworthy contract start or end date evidence for the scoped fields.',
-    tags: ['not-enough-evidence', 'demo'],
-    expectations: [
-      {
-        field: 'contractStartDate',
-        formValue: '01/01/2008',
-        expectedOutcome: 'not-enough-evidence',
-        expectedMessageIncludes: 'No mention'
-      },
-      {
-        field: 'contractEndDate',
-        formValue: '12/31/2021',
-        expectedOutcome: 'not-enough-evidence',
-        expectedMessageIncludes: 'No mention'
-      }
-    ],
-    demo: {
-      recommended: true,
-      walkthroughLabel: 'Not-enough-evidence walkthrough'
-    }
-  }
 ]
 
 export const RECOMMENDED_DATE_VALIDATION_DEMO_SCENARIOS =

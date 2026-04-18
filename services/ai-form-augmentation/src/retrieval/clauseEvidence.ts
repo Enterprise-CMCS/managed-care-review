@@ -69,7 +69,7 @@ export function expandClauseEvidenceForField(input: {
     input.retrievedChunks
   )
   const clauseEvidencePresentInitially = input.retrievedChunks.some((chunk) =>
-    hasClauseEvidence(input.field, chunk.text)
+    hasClauseEvidenceForField(input.field, chunk.text)
   )
 
   if (
@@ -133,7 +133,7 @@ export function expandClauseEvidenceForField(input: {
     }
   )
   const clauseEvidencePresentFinally = chunks.some((chunk) =>
-    hasClauseEvidence(input.field, chunk.text)
+    hasClauseEvidenceForField(input.field, chunk.text)
   )
 
   return {
@@ -256,7 +256,7 @@ function extractLabeledDates(
   return [...labeledDates]
 }
 
-function hasClauseEvidence(
+export function hasClauseEvidenceForField(
   field: DateValidationFieldInput['field'],
   text: string
 ): boolean {

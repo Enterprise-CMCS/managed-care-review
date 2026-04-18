@@ -34,6 +34,7 @@ import {
   normalizeLlmValidationResult,
   parseValidationResponse,
   runDeterministicDateValidation,
+  shouldFallbackConflictingClauseResolutionToLlm,
   type ValidationResponseIssue
 } from '../validation-output'
 import { BruteForceVectorStore } from '../vector-store'
@@ -232,9 +233,26 @@ export async function validationHandler(
         retrievedChunks: retrievedChunksForField
       })
 
-      deterministicResults.push(...deterministicValidation.resolvedResults)
+      const fallbackToLlmResults = deterministicValidation.resolvedResults.filter(
+        (result) =>
+          shouldFallbackConflictingClauseResolutionToLlm({
+            field: field.field,
+            deterministicResult: result,
+            retrievedChunks: retrievedChunksForField,
+            retrievalDiagnostic: retrievalDiagnostics.get(field.field)
+          })
+      )
 
-      if (deterministicValidation.unresolvedFields.length > 0) {
+      deterministicResults.push(
+        ...deterministicValidation.resolvedResults.filter(
+          (result) => !fallbackToLlmResults.includes(result)
+        )
+      )
+
+      if (
+        deterministicValidation.unresolvedFields.length > 0 ||
+        fallbackToLlmResults.length > 0
+      ) {
         unresolvedFields.push({
           field,
           retrievedChunks: retrievedChunksForField
