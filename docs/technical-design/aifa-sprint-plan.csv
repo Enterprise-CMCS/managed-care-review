@@ -570,6 +570,18 @@ The current PoC can reach the right mismatch outcome while still understating th
 - The AHF mismatch case is represented in corpus coverage or equivalent focused evaluation notes
 - Any normalization logic stays small, explicit, and limited to recoverable mismatch-message cases
 - Existing outcome classification and citation behavior remain unchanged"
+AIFA-033 Clause-precedence resolution hardening,Backlog,5-Testing & Evaluation,High,"AIFA-023, AIFA-032","Improve how the worker resolves competing term clauses when one clause appears to supersede weaker header or summary dates.
+- Detect precedence cues across competing term clauses instead of treating every multi-date case as the same kind of ambiguity
+- Distinguish header or summary dates from stronger operative clause language when the document text supports that distinction
+- Recognize amendment-style precedence signals such as amended to read, replaced as follows, shall be, and termination date
+- Keep the worker conservative: only resolve to a final date when one clause is clearly stronger; otherwise preserve the conflict-style not-enough-evidence result
+- Add corpus coverage for resolvable-precedence cases and genuinely unresolved clause conflicts
+
+Why this matters:
+The current PoC now explains conflicting dates better, but it still relies on narrow heuristics when multiple plausible clauses disagree. This ticket improves correctness without backing away from the conservative trust model.","- The worker can prefer a clearly superseding operative clause over weaker header or summary date fields when the document text supports that precedence
+- Truly conflicting clauses still return not-enough-evidence with a conflict-style message
+- Corpus scenarios cover both resolvable-precedence and unresolved-conflict cases
+- Existing amendment and AHF competing-date scenarios continue to pass without regression"
 AIFA-021 Cache validation results,Backlog,6-Production Prep,Medium,AIFA-015,"Avoid unnecessary re-validation when the documents and form data have not changed.
 - Define the cache key using artifactVersion and formSnapshotHash
 - Check for an existing matching validation result before re-running the full validation step
@@ -583,7 +595,7 @@ Caching lowers cost, speeds up the user experience, and prevents duplicate model
 - Cache invalidation behavior is documented clearly
 - The implementation does not accidentally reuse stale results
 - The behavior can be demonstrated with a manual or automated test"
-AIFA-024 Bedrock follow-up for production-like evaluation,Backlog,6-Production Prep,Low,"AIFA-022, AIFA-023","Prepare the path for evaluating the same validation flow against production-like Bedrock models.
+AIFA-024 Bedrock follow-up for production-like evaluation,Done,6-Production Prep,Low,"AIFA-022, AIFA-023","Prepare the path for evaluating the same validation flow against production-like Bedrock models.
 - Reuse the existing provider seams instead of rewriting the pipeline
 - Add only the provider work needed to run the evaluation corpus in a production-like environment
 - Document packaging, credentials, and account prerequisites honestly

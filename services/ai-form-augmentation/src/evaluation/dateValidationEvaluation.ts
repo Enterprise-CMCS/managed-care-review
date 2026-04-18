@@ -27,6 +27,10 @@ import {
   getEvaluationStorageConfig,
   type EvaluationStorageConfig
 } from './evaluationStorage'
+import {
+  describeEvaluationLlmConfig,
+  getEvaluationLlmConfig
+} from './evaluationLlmConfig'
 
 const FIELD_LABELS = {
   contractStartDate: 'Contract Start Date',
@@ -70,17 +74,24 @@ export interface DateValidationEvaluationSummary {
   deterministicResults: number
   llmResults: number
   malformedLlmResults: number
+  llmProvider: string
   reports: DateValidationEvaluationScenarioReport[]
 }
 
 export async function runDateValidationEvaluation(): Promise<DateValidationEvaluationSummary> {
   const evaluationStorage = getEvaluationStorageConfig()
+  const evaluationLlmConfig = getEvaluationLlmConfig()
   await assertEvaluationStorageReady(evaluationStorage)
 
   const s3Client = newArtifactS3Client(evaluationStorage.s3Config)
   const reports = await Promise.all(
     DATE_VALIDATION_CORPUS.map(async (scenario) =>
-      evaluateScenario(scenario, s3Client, evaluationStorage)
+      evaluateScenario(
+        scenario,
+        s3Client,
+        evaluationStorage,
+        evaluationLlmConfig
+      )
     )
   )
 
@@ -101,6 +112,7 @@ export async function runDateValidationEvaluation(): Promise<DateValidationEvalu
       report.llmIssue === 'invalid-json' ||
       report.llmIssue === 'invalid-result-shape'
     ).length,
+    llmProvider: describeEvaluationLlmConfig(evaluationLlmConfig),
     reports
   }
 }
@@ -108,7 +120,8 @@ export async function runDateValidationEvaluation(): Promise<DateValidationEvalu
 async function evaluateScenario(
   scenario: DateValidationCorpusScenario,
   s3Client: ArtifactS3Client,
-  evaluationStorage: EvaluationStorageConfig
+  evaluationStorage: EvaluationStorageConfig,
+  evaluationLlmConfig: ReturnType<typeof getEvaluationLlmConfig>
 ): Promise<DateValidationEvaluationScenarioReport> {
   try {
     const fixtureAbsolutePath = path.resolve(
@@ -134,6 +147,7 @@ async function evaluateScenario(
       artifactVersion,
       bucket: evaluationStorage.bucket,
       s3Config: evaluationStorage.s3Config,
+      validationLlmConfig: evaluationLlmConfig,
       formFields: scenario.expectations.map((expectation) => ({
         field: expectation.field,
         label: FIELD_LABELS[expectation.field],

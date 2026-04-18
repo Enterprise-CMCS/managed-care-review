@@ -54,9 +54,14 @@ export { buildDateValidationPrompt } from './prompts'
 export type {
   GenerateValidationInput,
   GenerateValidationResult,
-  ValidationLlmClient
+  ValidationLlmClient,
+  ValidationLlmConfig
 } from './llm'
-export { OllamaValidationClient } from './llm'
+export {
+  BedrockValidationClient,
+  newValidationLlmClient,
+  OllamaValidationClient
+} from './llm'
 
 // Validation output
 export type { ParsedValidationOutput } from './validation-output'

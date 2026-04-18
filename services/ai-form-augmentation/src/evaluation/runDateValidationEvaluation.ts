@@ -14,6 +14,7 @@ function formatEvaluationSummary(
 ): string {
   const lines = [
     'Date validation evaluation summary',
+    `LLM provider: ${summary.llmProvider}`,
     `Scenarios: ${summary.passedScenarios}/${summary.totalScenarios} passed`,
     `Decision sources: deterministic=${summary.deterministicResults}, llm=${summary.llmResults}`,
     `Malformed LLM results: ${summary.malformedLlmResults}`

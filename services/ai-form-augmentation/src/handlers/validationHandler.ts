@@ -4,7 +4,8 @@ import {
 } from '../artifacts'
 import { chunkDocument } from '../chunking'
 import { XenovaEmbeddingProvider } from '../embeddings'
-import { OllamaValidationClient } from '../llm'
+import { newValidationLlmClient } from '../llm'
+import type { ValidationLlmConfig } from '../llm'
 import { parsePdf } from '../parsing'
 import type {
   DateValidationFieldInput,
@@ -45,6 +46,7 @@ export interface ValidationHandlerEvent {
   artifactVersion: string
   bucket: string
   s3Config: ArtifactS3ClientConfig
+  validationLlmConfig?: ValidationLlmConfig
   formFields: DateValidationFieldInput[]
   documents: ValidationSourceDocument[]
 }
@@ -237,7 +239,11 @@ export async function validationHandler(
         buildValidationStatusArtifact('llm-validation', event.artifactVersion)
       )
 
-      const validationClient = new OllamaValidationClient()
+      // Keep Ollama as the default runtime, but let evaluation code opt into a
+      // Bedrock-backed client without reshaping the worker flow itself.
+      const validationClient = newValidationLlmClient(
+        event.validationLlmConfig
+      )
       const llmResults = await Promise.all(
         unresolvedFields.map(async ({ field, retrievedChunks }) => {
           // Convert only the unresolved field plus its own retrieved evidence

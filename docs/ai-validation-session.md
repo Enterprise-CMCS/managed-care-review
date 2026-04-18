@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-024 Bedrock follow-up for production-like evaluation`.
+The next implementation ticket is `AIFA-033 Clause-precedence resolution hardening`.
 
 ## Completed
 
@@ -39,6 +39,7 @@ The next implementation ticket is `AIFA-024 Bedrock follow-up for production-lik
 - AIFA-030 ✔ LLM output robustness and malformed-response handling
 - AIFA-031 ✔ Reduce malformed LLM output rate
 - AIFA-032 ✔ Mismatch message specificity hardening
+- AIFA-024 ✔ Bedrock follow-up for production-like evaluation
 
 ## Current State
 
@@ -79,6 +80,8 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - the corpus can now be executed through the real validation handler instead of an ad hoc manual walkthrough
 - the harness compares expected outcomes, message fragments, citation orders, and decision source against stored validation results
 - the output is designed to make deterministic wins, LLM fallbacks, and false positives/negatives visible enough to guide the next quality change
+- the evaluation path can now opt into a Bedrock-backed validation model without changing the default local Ollama flow
+- evaluation output now records which LLM provider ran the corpus
 
 ### Coverage hardening
 
@@ -130,6 +133,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - OCR-heavy fixtures are present, but not yet exercised in a repeatable evaluation loop
 - term-clause precedence is still heuristic when header dates and amended-term language disagree across more than one plausible clause
 - LLM conflict wording now improves cited ambiguity cases, but it still depends on the cited chunk set surfacing the relevant competing dates
+- the Bedrock evaluation path is in place, but live verification still depends on valid AWS credentials, regional model access, and a real model ID
 - evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
 - corpus evaluation now depends on reachable LocalStack S3 plus the repo `nvm` runtime, so local environment drift can still block verification before the worker runs
 
@@ -161,9 +165,9 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-024 Bedrock follow-up for production-like evaluation
+### AIFA-033 Clause-precedence resolution hardening
 
-Prepare the path for evaluating the same validation flow against production-like Bedrock models.
+Improve how the worker resolves competing term clauses when one clause appears to supersede weaker header or summary dates.
 
 ### AIFA-021 Cache validation results
 
@@ -171,9 +175,9 @@ Avoid unnecessary re-validation when the documents and form data have not change
 
 ## Suggested Next Step
 
-- Add the narrowest Bedrock-backed provider/evaluation path that can run the existing corpus without reshaping the worker.
-- Reuse the existing provider seams and document packaging, credentials, and account prerequisites honestly.
-- Keep local-first behavior unchanged while making production-like comparison possible.
+- Add narrow precedence cues so operative amendment clauses can outrank weaker header or summary dates when the text clearly supports that reading.
+- Keep conflict behavior conservative when more than one plausible clause still remains.
+- Extend the corpus with both resolvable-precedence and unresolved-conflict clause scenarios.
 
 ## Source of Truth Docs
 
