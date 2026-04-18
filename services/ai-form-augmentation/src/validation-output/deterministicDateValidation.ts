@@ -1,10 +1,12 @@
-import { dayjs } from '../../../../packages/dates/src/dayjs'
 import type {
   DateValidationCitationInput,
   DateValidationFieldInput,
   DateValidationResult
 } from '../prompts'
 import { VALIDATION_FIELD_CONFIG } from '../validationFields'
+import { canonicalizeDateToken } from './dateToken'
+import { buildFieldSpecificMismatchMessage } from './mismatchMessage'
+import { resolveSingleTermRangeDateFromChunks } from './termRangeDateResolution'
 
 type SupportedField = DateValidationFieldInput['field']
 const KNOWN_LABEL_PATTERNS = Object.values(VALIDATION_FIELD_CONFIG).flatMap(
@@ -19,29 +21,8 @@ const DATE_PATTERN_GLOBAL = new RegExp(
   `${MONTH_PATTERN}\\s+\\d{1,2},?\\s*\\d{4}|${SLASH_DATE_PATTERN}|${ISO_DATE_PATTERN}`,
   'gi'
 )
-const ACCEPTED_DATE_FORMATS = [
-  'M/D/YYYY',
-  'MM/DD/YYYY',
-  'YYYY-MM-DD',
-  'MMMM D, YYYY',
-  'MMMM D YYYY',
-  'MMM D, YYYY',
-  'MMM D YYYY'
-] as const
-
 function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, ' ').trim()
-}
-
-function canonicalizeDateToken(value: string): string | null {
-  const normalizedValue = normalizeWhitespace(value).replace(/\s*,\s*/g, ', ')
-  const parsedDate = dayjs(normalizedValue, [...ACCEPTED_DATE_FORMATS], true)
-
-  if (parsedDate.isValid()) {
-    return parsedDate.format('MM/DD/YYYY')
-  }
-
-  return null
 }
 
 function normalizeDateToken(value: string): string {
@@ -68,6 +49,47 @@ function buildCitation(
     ...(chunk.endPage != null ? { endPage: chunk.endPage } : {}),
     order: chunk.order
   }
+}
+
+function buildConflictingDateMessage(
+  field: DateValidationFieldInput
+): string {
+  return `Document contains conflicting ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} evidence, so the ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} could not be verified.`
+}
+
+export function buildConflictingDateDetail(
+  field: DateValidationFieldInput,
+  candidateDates: string[]
+): string {
+  if (candidateDates.length === 0) {
+    return buildConflictingDateMessage(field)
+  }
+
+  if (candidateDates.length === 1) {
+    return `${buildConflictingDateMessage(field)} Conflicting date found: ${candidateDates[0]}.`
+  }
+
+  const listedDates =
+    candidateDates.length === 2
+      ? `${candidateDates[0]} and ${candidateDates[1]}`
+      : `${candidateDates.slice(0, -1).join(', ')}, and ${candidateDates[candidateDates.length - 1]}`
+
+  return `${buildConflictingDateMessage(field)} Conflicting dates found: ${listedDates}.`
+}
+
+export function resolveMultipleLabeledDatesFromChunks(
+  field: SupportedField,
+  chunks: DateValidationCitationInput[]
+): string[] {
+  const candidateDates = new Set<string>()
+
+  for (const chunk of chunks) {
+    for (const labeledDate of extractLabeledDates(field, chunk)) {
+      candidateDates.add(canonicalizeDateToken(labeledDate) ?? labeledDate)
+    }
+  }
+
+  return [...candidateDates].sort()
 }
 
 function extractLabeledDates(
@@ -111,6 +133,30 @@ function extractLabeledDates(
   }
 
   return [...labeledDates]
+}
+
+export function resolveSingleLabeledDateFromChunks(
+  field: SupportedField,
+  chunks: DateValidationCitationInput[]
+): string | null {
+  const uniqueCandidates = new Map<string, string>()
+
+  for (const chunk of chunks) {
+    for (const labeledDate of extractLabeledDates(field, chunk)) {
+      const normalizedDate = normalizeDateToken(labeledDate)
+
+      if (!uniqueCandidates.has(normalizedDate)) {
+        uniqueCandidates.set(normalizedDate, labeledDate)
+      }
+    }
+  }
+
+  if (uniqueCandidates.size !== 1) {
+    return null
+  }
+
+  const [resolvedCandidate] = uniqueCandidates.values()
+  return canonicalizeDateToken(resolvedCandidate) ?? resolvedCandidate
 }
 
 function truncateAtNextKnownLabel(value: string): string | null {
@@ -185,11 +231,45 @@ export function runDeterministicDateValidation(input: {
     }
 
     if (uniqueCandidates.size > 1) {
+      const resolvedTermRange = resolveSingleTermRangeDateFromChunks(
+        field.field,
+        input.retrievedChunks
+      )
+
+      if (resolvedTermRange) {
+        const normalizedResolvedDate = normalizeDateToken(resolvedTermRange.date)
+
+        resolvedResults.push({
+          field: field.field,
+          outcome:
+            normalizedResolvedDate === normalizeDateToken(field.value)
+              ? 'match'
+              : 'mismatch',
+          confidence: 'high',
+          message:
+            normalizedResolvedDate === normalizeDateToken(field.value)
+              ? `Document text supports ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} as ${field.value}.`
+              : buildFieldSpecificMismatchMessage({
+                  field,
+                  documentDate: resolvedTermRange.date,
+                  formDate: field.value
+                }),
+          decisionSource: 'deterministic',
+          citations: resolvedTermRange.chunks.map(buildCitation)
+        })
+        continue
+      }
+
+      const conflictingDates = resolveMultipleLabeledDatesFromChunks(
+        field.field,
+        input.retrievedChunks
+      )
+
       resolvedResults.push({
         field: field.field,
         outcome: 'not-enough-evidence',
         confidence: 'medium',
-        message: `Document text contains multiple labeled ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} values in the retrieved evidence.`,
+        message: buildConflictingDateDetail(field, conflictingDates),
         decisionSource: 'deterministic',
         citations: [
           ...new Map(
@@ -224,7 +304,11 @@ export function runDeterministicDateValidation(input: {
       field: field.field,
       outcome: 'mismatch',
       confidence: 'high',
-      message: `Document text labels ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} as ${displayedLabeledDate}, not ${field.value}.`,
+      message: buildFieldSpecificMismatchMessage({
+        field,
+        documentDate: displayedLabeledDate,
+        formDate: field.value
+      }),
       decisionSource: 'deterministic',
       citations: resolvedCandidate.chunks.map(buildCitation)
     })

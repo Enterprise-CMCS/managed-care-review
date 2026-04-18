@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-032 Mismatch message specificity hardening`.
+The next implementation ticket is `AIFA-024 Bedrock follow-up for production-like evaluation`.
 
 ## Completed
 
@@ -38,6 +38,7 @@ The next implementation ticket is `AIFA-032 Mismatch message specificity hardeni
 - AIFA-029 ✔ Field-label and retrieval coverage hardening
 - AIFA-030 ✔ LLM output robustness and malformed-response handling
 - AIFA-031 ✔ Reduce malformed LLM output rate
+- AIFA-032 ✔ Mismatch message specificity hardening
 
 ## Current State
 
@@ -85,6 +86,8 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - deterministic extraction now stops at the next known label boundary instead of bleeding into adjacent fields
 - competing labeled values now resolve to deterministic `not-enough-evidence` instead of being left entirely to the LLM
 - malformed LLM JSON now degrades to the existing `not-enough-evidence` path instead of breaking the run
+- mismatch findings now preserve field-specific full-date wording when cited evidence supports it
+- competing-date findings now name conflicting dates instead of falling back to a vague ambiguity message
 
 ### Malformed-output observability
 
@@ -125,8 +128,8 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - retrieval is still narrower than it should be across different contract families and label variants
 - local Ollama quality is still a confound when judging whether a miss is retrieval, prompting, or model reasoning
 - OCR-heavy fixtures are present, but not yet exercised in a repeatable evaluation loop
-- the AHF term-clause fixture still shows a real ambiguity gap around mixed term language and competing end dates
-- mismatch messages can still understate the actual date difference when the model summarizes only the year instead of the full month/day/year
+- term-clause precedence is still heuristic when header dates and amended-term language disagree across more than one plausible clause
+- LLM conflict wording now improves cited ambiguity cases, but it still depends on the cited chunk set surfacing the relevant competing dates
 - evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
 - corpus evaluation now depends on reachable LocalStack S3 plus the repo `nvm` runtime, so local environment drift can still block verification before the worker runs
 
@@ -158,10 +161,6 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-032 Mismatch message specificity hardening
-
-Tighten mismatch wording so the stored finding and Review-page text reflect full date differences when the cited evidence supports that precision.
-
 ### AIFA-024 Bedrock follow-up for production-like evaluation
 
 Prepare the path for evaluating the same validation flow against production-like Bedrock models.
@@ -172,9 +171,9 @@ Avoid unnecessary re-validation when the documents and form data have not change
 
 ## Suggested Next Step
 
-- Tighten mismatch messages so full-date discrepancies are preserved when the cited evidence supports them.
-- Keep the change narrow to prompt/message shaping or small post-parse normalization instead of broader retrieval or UI work.
-- Add focused corpus coverage for the AHF mismatch scenario so this regression can be measured.
+- Add the narrowest Bedrock-backed provider/evaluation path that can run the existing corpus without reshaping the worker.
+- Reuse the existing provider seams and document packaging, credentials, and account prerequisites honestly.
+- Keep local-first behavior unchanged while making production-like comparison possible.
 
 ## Source of Truth Docs
 

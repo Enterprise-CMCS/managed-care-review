@@ -63,6 +63,8 @@ export type { ParsedValidationOutput } from './validation-output'
 export {
   runDeterministicDateValidation,
   extractJsonArray,
+  normalizeLlmValidationResult,
+  normalizeMismatchMessage,
   normalizeValidationResponse,
   parseValidationResponse
 } from './validation-output'

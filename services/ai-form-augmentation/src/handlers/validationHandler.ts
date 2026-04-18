@@ -25,6 +25,7 @@ import {
   getValidationStatusKey
 } from '../status'
 import {
+  normalizeLlmValidationResult,
   parseValidationResponse,
   runDeterministicDateValidation,
   type ValidationResponseIssue
@@ -258,8 +259,14 @@ export async function validationHandler(
             llmDiagnostics.push(parsedLlmResponse.diagnostic)
           }
 
+          const normalizedResult = normalizeLlmValidationResult({
+            field,
+            result: { ...parsedLlmResponse.result, decisionSource: 'llm' },
+            retrievedChunks
+          })
+
           return reconcileValidationResults(
-            [{ ...parsedLlmResponse.result, decisionSource: 'llm' }],
+            [normalizedResult],
             retrievedChunks
           )
         })

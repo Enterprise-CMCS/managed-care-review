@@ -9,3 +9,4 @@ export {
   parseValidationResponse,
   ValidationResponseParseError
 } from './parser'
+export { normalizeMismatchMessage, normalizeLlmValidationResult } from './normalizeMismatchMessage'

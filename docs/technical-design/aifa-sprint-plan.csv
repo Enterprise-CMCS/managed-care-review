@@ -557,7 +557,7 @@ AIFA-030 makes malformed responses visible and safe, but it does not reduce how 
 - Prompt changes remain narrow and specific to the single-field date-validation contract
 - Any recovery logic is small, explicit, and covered by focused tests
 - The runtime path still falls back safely and preserves malformed-response diagnostics when output cannot be trusted"
-AIFA-032 Mismatch message specificity hardening,Backlog,5-Testing & Evaluation,Medium,"AIFA-023, AIFA-031","Make mismatch findings specific enough that the Review page reflects the actual document-versus-form difference instead of a coarse year-only summary.
+AIFA-032 Mismatch message specificity hardening,Done,5-Testing & Evaluation,Medium,"AIFA-023, AIFA-031","Make mismatch findings specific enough that the Review page reflects the actual document-versus-form difference instead of a coarse year-only summary.
 - Tighten the single-field date-validation prompt so mismatch messages include the full submitted date and the full document date when the evidence supports it
 - Add a small normalization step after parsing so recoverable year-only mismatch wording can be upgraded to a full-date message from cited evidence when the cited text is parseable
 - Add or extend corpus coverage for the AHF term-clause mismatch case so month/day loss is measured instead of treated as anecdotal

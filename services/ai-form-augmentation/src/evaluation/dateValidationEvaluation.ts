@@ -246,6 +246,21 @@ function compareExpectation(
     )
   }
 
+  if (expectation.expectedMessageIncludesAll) {
+    // Some scenarios now care about two or more dates appearing in the stored
+    // finding text, so evaluation needs a simple multi-fragment assertion
+    // instead of only checking one favorite substring.
+    const missingFragments = expectation.expectedMessageIncludesAll.filter(
+      (fragment) => !matchingResult.message.includes(fragment)
+    )
+
+    if (missingFragments.length > 0) {
+      problems.push(
+        `Expected message to include all of: ${missingFragments.join(', ')}.`
+      )
+    }
+  }
+
   const actualCitationOrders = matchingResult.citations.map(
     (citation) => citation.order
   )

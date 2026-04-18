@@ -3,6 +3,7 @@ export interface DateValidationCorpusExpectation {
   formValue: string
   expectedOutcome: 'match' | 'mismatch' | 'not-enough-evidence'
   expectedMessageIncludes?: string
+  expectedMessageIncludesAll?: string[]
   expectedCitationOrders?: number[]
 }
 
@@ -147,7 +148,8 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
       {
         field: 'contractEndDate',
         formValue: '12/31/2025',
-        expectedOutcome: 'not-enough-evidence'
+        expectedOutcome: 'match',
+        expectedMessageIncludes: '12/31/2025'
       }
     ],
     demo: {
@@ -171,7 +173,33 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
       {
         field: 'contractEndDate',
         formValue: '12/31/2025',
-        expectedOutcome: 'not-enough-evidence'
+        expectedOutcome: 'match',
+        expectedMessageIncludes: '12/31/2025'
+      }
+    ],
+    demo: {
+      recommended: false
+    }
+  },
+  {
+    id: 'ahf-start-date-mismatch-end-competing',
+    documentName: 'AHF 11-88286 A21 text.final.pdf',
+    fixturePath: 'fixtures/pdf/AHF 11-88286 A21 text.final.pdf',
+    summary:
+      'AHF term-clause fixture with a start-date mismatch plus competing end dates in the same clause.',
+    tags: ['mismatch', 'competing-dates'],
+    expectations: [
+      {
+        field: 'contractStartDate',
+        formValue: '04/01/2014',
+        expectedOutcome: 'mismatch',
+        expectedMessageIncludesAll: ['01/01/2012', '04/01/2014']
+      },
+      {
+        field: 'contractEndDate',
+        formValue: '12/31/2023',
+        expectedOutcome: 'not-enough-evidence',
+        expectedMessageIncludesAll: ['12/31/2022', '12/31/2023']
       }
     ],
     demo: {
@@ -195,7 +223,8 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
       {
         field: 'contractEndDate',
         formValue: '12/31/2023',
-        expectedOutcome: 'not-enough-evidence'
+        expectedOutcome: 'not-enough-evidence',
+        expectedMessageIncludesAll: ['12/31/2022', '12/31/2023']
       }
     ],
     demo: {
