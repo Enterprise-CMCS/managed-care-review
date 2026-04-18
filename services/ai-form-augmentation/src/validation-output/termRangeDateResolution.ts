@@ -4,31 +4,111 @@ import { canonicalizeDateToken } from './dateToken'
 const MONTH_PATTERN =
   '(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
 const DATE_PATTERN = `${MONTH_PATTERN}\\s+\\d{1,2},?\\s*\\d{4}|\\d{1,2}/\\d{1,2}/\\d{4}|\\d{4}-\\d{2}-\\d{2}`
-const TERM_RANGE_PATTERNS: RegExp[] = [
-  new RegExp(
-    `term of this agreement is\\s*:?\\s*(${DATE_PATTERN})\\s*(?:through|to|-)\\s*(${DATE_PATTERN})`,
-    'i'
-  ),
-  new RegExp(
-    `term of this contract shall be[\\s\\S]{0,120}?from\\s*(${DATE_PATTERN})[\\s\\S]{0,80}?through\\s*(${DATE_PATTERN})`,
-    'i'
-  ),
-  new RegExp(
-    `contract year,?\\s*(${DATE_PATTERN})\\s*(?:through|to|-)\\s*(${DATE_PATTERN})`,
-    'i'
-  ),
-  new RegExp(
-    `amended to read\\s*:?\\s*(${DATE_PATTERN})\\s*(?:through|to|-)\\s*(${DATE_PATTERN})`,
-    'i'
-  ),
-  new RegExp(
-    `deemed to read\\s*:?\\s*(${DATE_PATTERN})\\s*(?:through|to|-)\\s*(${DATE_PATTERN})`,
-    'i'
-  ),
-  new RegExp(
-    `will become effective\\s*(${DATE_PATTERN})[\\s\\S]{0,200}?through\\s*(${DATE_PATTERN})`,
-    'i'
-  )
+
+interface PrecedenceMatchPattern {
+  pattern: RegExp
+  precedence: number
+  extractDate: (
+    field: DateValidationFieldInput['field'],
+    match: RegExpMatchArray
+  ) => string | null
+}
+
+// Higher precedence values represent stronger operative term language than
+// header-style or summary-style date mentions. Keep this table intentionally
+// narrow so the deterministic layer only wins when the clause text is clearly
+// stronger than the surrounding competing labels.
+const TERM_RANGE_PATTERNS: PrecedenceMatchPattern[] = [
+  {
+    pattern: new RegExp(
+      `amended to read\\s*:?\\s*(${DATE_PATTERN})\\s*(?:through|to|-)\\s*(${DATE_PATTERN})`,
+      'i'
+    ),
+    precedence: 4,
+    extractDate: (field, match) =>
+      field === 'contractStartDate' ? match[1] ?? null : match[2] ?? null
+  },
+  {
+    pattern: new RegExp(
+      `deemed to read\\s*:?\\s*(${DATE_PATTERN})\\s*(?:through|to|-)\\s*(${DATE_PATTERN})`,
+      'i'
+    ),
+    precedence: 4,
+    extractDate: (field, match) =>
+      field === 'contractStartDate' ? match[1] ?? null : match[2] ?? null
+  },
+  {
+    pattern: new RegExp(
+      `(?:shall|is)\\s+(?:be\\s+)?(?:amended|extended)[\\s\\S]{0,120}?through\\s*(${DATE_PATTERN})`,
+      'i'
+    ),
+    precedence: 4,
+    extractDate: (field, match) =>
+      field === 'contractEndDate' ? match[1] ?? null : null
+  },
+  {
+    pattern: new RegExp(
+      `continue in full force and effect through\\s*(${DATE_PATTERN})`,
+      'i'
+    ),
+    precedence: 3,
+    extractDate: (field, match) =>
+      field === 'contractEndDate' ? match[1] ?? null : null
+  },
+  {
+    pattern: new RegExp(
+      `term of this agreement is\\s*:?\\s*(${DATE_PATTERN})\\s*(?:through|to|-)\\s*(${DATE_PATTERN})`,
+      'i'
+    ),
+    precedence: 2,
+    extractDate: (field, match) =>
+      field === 'contractStartDate' ? match[1] ?? null : match[2] ?? null
+  },
+  {
+    pattern: new RegExp(
+      `term of this contract shall be[\\s\\S]{0,120}?from\\s*(${DATE_PATTERN})[\\s\\S]{0,80}?through\\s*(${DATE_PATTERN})`,
+      'i'
+    ),
+    precedence: 2,
+    extractDate: (field, match) =>
+      field === 'contractStartDate' ? match[1] ?? null : match[2] ?? null
+  },
+  {
+    pattern: new RegExp(
+      `contract year,?\\s*(${DATE_PATTERN})\\s*(?:through|to|-)\\s*(${DATE_PATTERN})`,
+      'i'
+    ),
+    precedence: 2,
+    extractDate: (field, match) =>
+      field === 'contractStartDate' ? match[1] ?? null : match[2] ?? null
+  },
+  {
+    pattern: new RegExp(
+      `will become effective\\s*(${DATE_PATTERN})[\\s\\S]{0,200}?through\\s*(${DATE_PATTERN})`,
+      'i'
+    ),
+    precedence: 2,
+    extractDate: (field, match) =>
+      field === 'contractStartDate' ? match[1] ?? null : match[2] ?? null
+  },
+  {
+    pattern: new RegExp(`term begins on\\s*(${DATE_PATTERN})`, 'i'),
+    precedence: 2,
+    extractDate: (field, match) =>
+      field === 'contractStartDate' ? match[1] ?? null : null
+  },
+  {
+    pattern: new RegExp(`term starts on\\s*(${DATE_PATTERN})`, 'i'),
+    precedence: 2,
+    extractDate: (field, match) =>
+      field === 'contractStartDate' ? match[1] ?? null : null
+  },
+  {
+    pattern: new RegExp(`term (?:ends|expires) on\\s*(${DATE_PATTERN})`, 'i'),
+    precedence: 2,
+    extractDate: (field, match) =>
+      field === 'contractEndDate' ? match[1] ?? null : null
+  }
 ]
 
 export interface ResolvedTermRangeDate {
@@ -42,19 +122,22 @@ export function resolveSingleTermRangeDateFromChunks(
 ): ResolvedTermRangeDate | null {
   const resolvedDates = new Map<
     string,
-    { date: string; chunks: DateValidationCitationInput[] }
+    {
+      date: string
+      chunks: DateValidationCitationInput[]
+      precedence: number
+    }
   >()
 
   for (const chunk of chunks) {
     for (const pattern of TERM_RANGE_PATTERNS) {
-      const match = chunk.text.match(pattern)
+      const match = chunk.text.match(pattern.pattern)
 
       if (!match) {
         continue
       }
 
-      const rangeDate =
-        field === 'contractStartDate' ? match[1] : match[2]
+      const rangeDate = pattern.extractDate(field, match)
 
       if (!rangeDate) {
         continue
@@ -69,6 +152,7 @@ export function resolveSingleTermRangeDateFromChunks(
       const existing = resolvedDates.get(canonicalDate)
 
       if (existing) {
+        existing.precedence = Math.max(existing.precedence, pattern.precedence)
         if (!existing.chunks.some((candidate) => candidate.chunkId === chunk.chunkId)) {
           existing.chunks.push(chunk)
         }
@@ -77,17 +161,29 @@ export function resolveSingleTermRangeDateFromChunks(
 
       resolvedDates.set(canonicalDate, {
         date: canonicalDate,
-        chunks: [chunk]
+        chunks: [chunk],
+        precedence: pattern.precedence
       })
     }
   }
 
-  // Only use term-clause text as a tie-breaker when it resolves to one unique
-  // canonical date. If multiple term clauses disagree, callers should keep the
-  // result in a conservative conflict/not-enough-evidence state.
-  if (resolvedDates.size !== 1) {
+  if (resolvedDates.size === 0) {
     return null
   }
 
-  return [...resolvedDates.values()][0] ?? null
+  const highestPrecedence = Math.max(
+    ...[...resolvedDates.values()].map((resolvedDate) => resolvedDate.precedence)
+  )
+  const highestPrecedenceDates = [...resolvedDates.values()].filter(
+    (resolvedDate) => resolvedDate.precedence === highestPrecedence
+  )
+
+  // Only let clause-precedence cues break a conflict when one unique strongest
+  // reading remains. If equally strong operative clauses disagree, callers
+  // should keep the field in a conservative conflict/not-enough-evidence state.
+  if (highestPrecedenceDates.length !== 1) {
+    return null
+  }
+
+  return highestPrecedenceDates[0] ?? null
 }

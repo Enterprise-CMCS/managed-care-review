@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-033 Clause-precedence resolution hardening`.
+The next implementation ticket is `AIFA-034 Clause-evidence retrieval and fallback hardening`.
 
 ## Completed
 
@@ -39,6 +39,7 @@ The next implementation ticket is `AIFA-033 Clause-precedence resolution hardeni
 - AIFA-030 ✔ LLM output robustness and malformed-response handling
 - AIFA-031 ✔ Reduce malformed LLM output rate
 - AIFA-032 ✔ Mismatch message specificity hardening
+- AIFA-033 ✔ Clause-precedence resolution hardening
 - AIFA-024 ✔ Bedrock follow-up for production-like evaluation
 
 ## Current State
@@ -91,6 +92,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - malformed LLM JSON now degrades to the existing `not-enough-evidence` path instead of breaking the run
 - mismatch findings now preserve field-specific full-date wording when cited evidence supports it
 - competing-date findings now name conflicting dates instead of falling back to a vague ambiguity message
+- clause-precedence handling now prefers stronger operative amendment language over weaker summary-style dates when one unique strongest reading remains
 
 ### Malformed-output observability
 
@@ -131,7 +133,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - retrieval is still narrower than it should be across different contract families and label variants
 - local Ollama quality is still a confound when judging whether a miss is retrieval, prompting, or model reasoning
 - OCR-heavy fixtures are present, but not yet exercised in a repeatable evaluation loop
-- term-clause precedence is still heuristic when header dates and amended-term language disagree across more than one plausible clause
+- clause-precedence handling is still heuristic and depends on retrieval surfacing clause text plus the clause matching one of the supported deterministic cues
 - LLM conflict wording now improves cited ambiguity cases, but it still depends on the cited chunk set surfacing the relevant competing dates
 - the Bedrock evaluation path is in place, but live verification still depends on valid AWS credentials, regional model access, and a real model ID
 - evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
@@ -165,9 +167,9 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-033 Clause-precedence resolution hardening
+### AIFA-034 Clause-evidence retrieval and fallback hardening
 
-Improve how the worker resolves competing term clauses when one clause appears to supersede weaker header or summary dates.
+Improve clause-evidence recall so precedence logic is more likely to receive the operative amendment or superseding clause text it needs.
 
 ### AIFA-021 Cache validation results
 
@@ -175,9 +177,9 @@ Avoid unnecessary re-validation when the documents and form data have not change
 
 ## Suggested Next Step
 
-- Add narrow precedence cues so operative amendment clauses can outrank weaker header or summary dates when the text clearly supports that reading.
-- Keep conflict behavior conservative when more than one plausible clause still remains.
-- Extend the corpus with both resolvable-precedence and unresolved-conflict clause scenarios.
+- Add clause-oriented retrieval cues so operative amendment language is more likely to be retrieved alongside competing summary dates.
+- Preserve clause-heavy evidence for LLM fallback when deterministic precedence cues do not match a known pattern.
+- Measure retrieval misses separately from resolver misses so remaining precedence failures are easier to diagnose.
 
 ## Source of Truth Docs
 

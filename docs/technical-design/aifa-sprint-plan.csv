@@ -570,7 +570,7 @@ The current PoC can reach the right mismatch outcome while still understating th
 - The AHF mismatch case is represented in corpus coverage or equivalent focused evaluation notes
 - Any normalization logic stays small, explicit, and limited to recoverable mismatch-message cases
 - Existing outcome classification and citation behavior remain unchanged"
-AIFA-033 Clause-precedence resolution hardening,Backlog,5-Testing & Evaluation,High,"AIFA-023, AIFA-032","Improve how the worker resolves competing term clauses when one clause appears to supersede weaker header or summary dates.
+AIFA-033 Clause-precedence resolution hardening,Done,5-Testing & Evaluation,High,"AIFA-023, AIFA-032","Improve how the worker resolves competing term clauses when one clause appears to supersede weaker header or summary dates.
 - Detect precedence cues across competing term clauses instead of treating every multi-date case as the same kind of ambiguity
 - Distinguish header or summary dates from stronger operative clause language when the document text supports that distinction
 - Recognize amendment-style precedence signals such as amended to read, replaced as follows, shall be, and termination date
@@ -582,6 +582,19 @@ The current PoC now explains conflicting dates better, but it still relies on na
 - Truly conflicting clauses still return not-enough-evidence with a conflict-style message
 - Corpus scenarios cover both resolvable-precedence and unresolved-conflict cases
 - Existing amendment and AHF competing-date scenarios continue to pass without regression"
+AIFA-034 Clause-evidence retrieval and fallback hardening,Backlog,5-Testing & Evaluation,High,AIFA-033,"Improve clause-evidence recall so precedence logic is more likely to receive the operative amendment or superseding clause text it needs.
+- Add clause-oriented retrieval cues for competing-date language such as amended to read, replaced as follows, shall be amended, termination date, and continue in full force and effect
+- Improve retrieval inputs so operative clause text is more likely to outrank weaker header or summary date mentions in competing-date fixtures
+- Preserve clause-heavy chunk sets for LLM fallback when deterministic precedence cues do not match a known pattern
+- Add evaluation coverage for cases where operative clause retrieval succeeds, where clause wording falls outside current deterministic cues, and where retrieval still misses the clause so the result stays conservative
+- Keep scope narrow to contractStartDate and contractEndDate; do not broaden field scope or replace the current deterministic layer
+
+Why this matters:
+Clause-precedence logic only helps when the worker actually retrieves the operative clause text. This ticket hardens the evidence-retrieval and fallback path so precedence misses can be distinguished from retrieval misses without expanding the PoC beyond its current field scope.","- Retrieval inputs or ranking behavior better surface operative amendment or superseding clause text in competing-date scenarios
+- Existing precedence logic receives the needed chunk set more reliably on amendment and conflict fixtures
+- When deterministic precedence cues still do not match, the LLM fallback receives clause-focused evidence instead of only weaker header or summary dates
+- Evaluation output makes clause-retrieval misses visible enough to distinguish retrieval failure from resolver failure
+- Existing start and end date scenarios continue to pass without regression"
 AIFA-021 Cache validation results,Backlog,6-Production Prep,Medium,AIFA-015,"Avoid unnecessary re-validation when the documents and form data have not changed.
 - Define the cache key using artifactVersion and formSnapshotHash
 - Check for an existing matching validation result before re-running the full validation step
