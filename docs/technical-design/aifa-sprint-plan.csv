@@ -608,7 +608,7 @@ Even after clause retrieval improves, the worker can still miss valid operative 
 - Ambiguous competing-clause cases still remain conservative and return not-enough-evidence when the fallback cannot justify one final reading
 - Evaluation output distinguishes unsupported deterministic phrasing from retrieval misses
 - Existing start and end date scenarios continue to pass without regression"
-AIFA-021 Cache validation results,Backlog,6-Production Prep,Medium,AIFA-015,"Avoid unnecessary re-validation when the documents and form data have not changed.
+AIFA-021 Cache validation results,Done,6-Production Prep,Medium,AIFA-015,"Avoid unnecessary re-validation when the documents and form data have not changed.
 - Define the cache key using artifactVersion and formSnapshotHash
 - Check for an existing matching validation result before re-running the full validation step
 - Return or reuse the cached result when appropriate

@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-021 Cache validation results`.
+The next implementation ticket is `AIFA-020 Timeout handling`.
 
 ## Completed
 
@@ -42,6 +42,7 @@ The next implementation ticket is `AIFA-021 Cache validation results`.
 - AIFA-033 ✔ Clause-precedence resolution hardening
 - AIFA-034 ✔ Clause-evidence retrieval and fallback hardening
 - AIFA-035 ✔ Deterministic-to-LLM clause-resolution fallback hardening
+- AIFA-021 ✔ Cache validation results
 - AIFA-024 ✔ Bedrock follow-up for production-like evaluation
 
 ## Current State
@@ -64,6 +65,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - local validation runs through a dedicated `ai-form-augmentation` execution path
 - trigger and polling behavior now line up around current document keys plus current form date values
 - stale results are surfaced when dates change, not just when document sets change
+- completed validation artifacts can now be reused when both `artifactVersion` and form snapshot inputs still match the current draft
 
 ### Validation result quality and evidence fidelity
 
@@ -174,15 +176,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-021 Cache validation results
+### AIFA-020 Timeout handling
 
-Avoid unnecessary re-validation when the documents and form data have not changed.
+Prevent AI validation from trapping the user on the Review page.
 
 ## Suggested Next Step
 
-- Reuse stored validation results when `artifactVersion` and form snapshot inputs have not changed.
-- Keep cache invalidation aligned with stale-result handling for document and form-value changes.
-- Watch for local artifact reads masking incomplete or failed prior runs.
+- Keep Review-page polling from leaving the user stuck in a long-running validation state.
+- Reuse the existing staged status contract instead of inventing a second timeout mechanism.
+- Watch for timeout UI behavior drifting from cached or stale-result paths.
 
 ## Source of Truth Docs
 
@@ -211,3 +213,4 @@ Avoid unnecessary re-validation when the documents and form data have not change
 - Timeout handling remains intentionally deferred while validation quality measurement is still the larger credibility risk.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Clause-resolution hardening now passes the current 8-scenario corpus, but OCR-heavy term text still depends on narrow heuristics rather than a broader parsing layer.
+- Cache reuse now depends on `complete` status plus matching `artifactVersion` and form snapshot hash; partial or failed artifacts still force a fresh run.

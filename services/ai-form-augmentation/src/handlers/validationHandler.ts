@@ -4,6 +4,7 @@ import {
 } from '../artifacts'
 import { chunkDocument } from '../chunking'
 import { XenovaEmbeddingProvider } from '../embeddings'
+import { readReusableValidationResult } from './validationCache'
 import { newValidationLlmClient } from '../llm'
 import type { ValidationLlmConfig } from '../llm'
 import { parsePdf } from '../parsing'
@@ -66,12 +67,37 @@ export async function validationHandler(
   event: ValidationHandlerEvent
 ): Promise<ValidationHandlerResult> {
   const s3Client = newArtifactS3Client(event.s3Config)
+  const formSnapshotHash = computeFormSnapshotHash(
+    event.formFields.map((field) => ({
+      field: field.field,
+      value: field.value
+    }))
+  )
   // status.json is the coordination point the frontend polls, so every major
   // worker phase updates the same key rather than scattering progress across
   // multiple artifacts.
   const statusKey = getValidationStatusKey(event.formId)
 
   try {
+    // Keep cache reuse inside the worker so app-api continues to fire the same
+    // payload shape while the artifact-driven runtime decides whether the
+    // current inputs need fresh validation work.
+    const reusableResult = await readReusableValidationResult({
+      s3Client,
+      bucket: event.bucket,
+      formId: event.formId,
+      artifactVersion: event.artifactVersion,
+      formSnapshotHash
+    })
+
+    if (reusableResult) {
+      return {
+        formId: event.formId,
+        artifactVersion: event.artifactVersion,
+        status: 'completed'
+      }
+    }
+
     await s3Client.putJson(
       event.bucket,
       statusKey,
@@ -336,12 +362,7 @@ export async function validationHandler(
         event.artifactVersion,
         // Persist the form-value hash alongside the results so later cache logic
         // can distinguish document changes from form-only edits.
-        computeFormSnapshotHash(
-          event.formFields.map((field) => ({
-            field: field.field,
-            value: field.value
-          }))
-        ),
+        formSnapshotHash,
         reconciledResults,
         llmDiagnostics,
         event.formFields.flatMap((field) => {
