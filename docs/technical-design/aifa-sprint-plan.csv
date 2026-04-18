@@ -1,5 +1,5 @@
 Name,Status,Phase,Priority,Dependencies,Summary,Acceptance Criteria
-AIFA-001 Create AI service workspace,Ready,0-Setup,High,,"Set up a new workspace inside the monorepo to contain all AI validation pipeline code.
+AIFA-001 Create AI service workspace,Done,0-Setup,High,,"Set up a new workspace inside the monorepo to contain all AI validation pipeline code.
 - Create a new folder such as services/ai-form-augmentation
 - Add a package.json with a name, version, scripts, and dependencies section
 - Register the workspace in pnpm-workspace.yaml
@@ -13,7 +13,7 @@ This gives you a safe, isolated place to build the PoC without cluttering the ex
 - TypeScript compiles successfully with a basic file in src/
 - You can run a simple script such as a console log or no-op main function
 - The new workspace follows existing repo conventions closely enough that another engineer could recognize how it fits into the monorepo"
-AIFA-002 Add dev script,Backlog,0-Setup,High,AIFA-001,"Enable a fast local development loop for the new AI workspace.
+AIFA-002 Add dev script,Done,0-Setup,High,AIFA-001,"Enable a fast local development loop for the new AI workspace.
 - Add a dev script to package.json
 - Choose a local runner such as tsx, ts-node, nodemon, or whatever matches repo conventions best
 - Make the script run a small entry point such as src/index.ts
@@ -26,7 +26,7 @@ AI integrations involve a lot of small experiments. A quick feedback loop will s
 - The process starts without runtime errors
 - There is also a working build script for explicit compile checks
 - You understand how to start and stop the workspace locally without needing to rediscover commands each time"
-AIFA-003 Create S3 client,Backlog,0-Setup,High,AIFA-001,"Create a small S3 helper inside the AI service workspace for reading and writing pipeline artifacts. Keep the API narrow and artifact-focused, and shape the client construction so local S3 via LocalStack can be added cleanly later. Do not expand into full runtime verification yet.
+AIFA-003 Create S3 client,Done,0-Setup,High,AIFA-001,"Create a small S3 helper inside the AI service workspace for reading and writing pipeline artifacts. Keep the API narrow and artifact-focused, and shape the client construction so local S3 via LocalStack can be added cleanly later. Do not expand into full runtime verification yet.
 - Add @aws-sdk/client-s3 to the AI workspace
 - Create a small local helper module inside services/ai-form-augmentation/src/s3
 - Expose a narrow API for artifact operations such as:
@@ -50,7 +50,7 @@ The AI pipeline will rely on S3 for intermediate artifacts, but the most importa
 - The AI workspace builds successfully with the new S3 helper included
 - The helper remains local to the AI workspace and is not prematurely extracted into shared packages
 - Runtime verification against real S3 or LocalStack is intentionally deferred until the first artifact-persistence ticket"
-AIFA-004 PDF parsing only,Backlog,1-Core Pipeline,High,AIFA-003,"Implement document parsing for PDFs only.
+AIFA-004 PDF parsing only,Done,1-Core Pipeline,High,AIFA-003,"Implement document parsing for PDFs only.
 - Install a PDF parser such as pdf-parse
 - Read a PDF file from a local fixture or S3 object body
 - Extract raw text from the PDF
@@ -70,7 +70,7 @@ Reducing the input surface area is one of the smartest ways to de-risk a first A
 - The output shape is documented and consistent
 - You can log or inspect parsed output and see meaningful document text
 - The ticket explicitly limits the PoC to PDF support so scope does not accidentally expand"
-AIFA-005 Chunking service,Backlog,1-Core Pipeline,High,AIFA-004,"Split parsed document text into deterministic chunks that are safe to embed and retrieve. Start with a simple fixed-size character window approach with overlap, and keep the chunking utility focused on text transformation rather than storage or pipeline concerns.
+AIFA-005 Chunking service,Done,1-Core Pipeline,High,AIFA-004,"Split parsed document text into deterministic chunks that are safe to embed and retrieve. Start with a simple fixed-size character window approach with overlap, and keep the chunking utility focused on text transformation rather than storage or pipeline concerns.
 - Create a small chunking module inside services/ai-form-augmentation/src/chunking
 - Start with a fixed-size character window strategy with overlap
 - Generate deterministic chunk ordering and IDs
@@ -95,7 +95,7 @@ Embeddings and retrieval work on chunks, not giant full documents. The important
 - The implementation uses a simple local chunking strategy first and does not require LangChain
 - The chunking utility stays focused on text transformation and does not depend on S3, embeddings, or other downstream pipeline concerns
 - If page-level mapping is not yet available, the implementation handles that honestly rather than fabricating page metadata"
-AIFA-006 Store chunks.json,Backlog,1-Core Pipeline,High,AIFA-005,"Persist chunks.json as the first real AI pipeline artifact and make the artifact flow work end to end in local development. This ticket owns the first real LocalStack-backed read/write verification for the AI service.
+AIFA-006 Store chunks.json,Done,1-Core Pipeline,High,AIFA-005,"Persist chunks.json as the first real AI pipeline artifact and make the artifact flow work end to end in local development. This ticket owns the first real LocalStack-backed read/write verification for the AI service.
 - Define the artifact path convention, for example rag-indexes/{formId}/chunks.json
 - Use the AIFA-003 S3 helper rather than raw AWS SDK calls
 - Attach pipeline context such as formId when building the persisted artifact shape rather than pushing it into the lowest-level chunking utility
@@ -122,7 +122,7 @@ This is the first point where the pipeline stops being just code structure and s
 - Local S3 configuration is wired through runtime/dev configuration rather than hardcoded into the exported helper surface
 - The artifact-writing code uses the AIFA-003 S3 helper rather than raw AWS SDK calls
 - The local workflow is documented clearly enough to repeat the write/read verification without rediscovering setup"
-AIFA-007 Create EmbeddingProvider interface and local embedding implementation,Backlog,1-Core Pipeline,High,AIFA-005,"Create an abstraction for embedding generation, then implement the local PoC version.
+AIFA-007 Create EmbeddingProvider interface and local embedding implementation,Done,1-Core Pipeline,High,AIFA-005,"Create an abstraction for embedding generation, then implement the local PoC version.
 - Define an EmbeddingProvider interface before writing provider-specific logic
 - Add a local implementation using @xenova/transformers
 - Keep provider-specific initialization isolated inside the implementation class/module
@@ -147,7 +147,7 @@ This is one of the most important architectural seams in the system. By adding t
 - Each chunk can receive an embedding vector of consistent length
 - Calling code does not directly depend on Xenova-specific details
 - The ticket notes clearly state that local embeddings are acceptable for PoC development but not authoritative for final quality evaluation against production behavior"
-AIFA-008 Create VectorStore interface and brute-force retrieval implementation,Backlog,1-Core Pipeline,High,AIFA-007,"Create an abstraction for retrieval, then implement a simple brute-force cosine similarity version for the PoC.
+AIFA-008 Create VectorStore interface and brute-force retrieval implementation,Done,1-Core Pipeline,High,AIFA-007,"Create an abstraction for retrieval, then implement a simple brute-force cosine similarity version for the PoC.
 - Define a VectorStore interface before committing to FAISS or any other backend
 - Implement cosine similarity search over in-memory vectors or vectors loaded from JSON
 - Accept query embeddings and return top-k matching chunks with scores
@@ -173,7 +173,7 @@ This is the second major architectural seam. The interface lets you keep retriev
 - Calling code depends on VectorStore, not a brute-force-specific implementation
 - The implementation is simple enough to test without native dependencies
 - The ticket notes make it clear that FAISS is deferred intentionally, not forgotten"
-AIFA-009 OP-RAG ordering,Backlog,1-Core Pipeline,Medium,AIFA-008,"Reorder retrieved chunks into their original document order before sending them to the LLM.
+AIFA-009 OP-RAG ordering,Done,1-Core Pipeline,Medium,AIFA-008,"Reorder retrieved chunks into their original document order before sending them to the LLM.
 - Retrieve top-k chunks based on similarity
 - Re-sort those retrieved chunks using original document order metadata
 - Preserve continuity within each document so the model sees clauses in a more natural sequence
@@ -185,7 +185,7 @@ This is the feature that turns the pipeline from generic RAG into the more contr
 - No duplicated or missing chunks appear after reordering
 - The output shape passed to the next step preserves document name, page, order, and text
 - You can explain in plain language how OP-RAG changes the final prompt context versus raw similarity ranking"
-AIFA-009A Production-like PDF extraction fallback,Backlog,1-Core Pipeline,High,AIFA-009,"Add a stronger extraction path for production-like PDFs when pdf-parse alone does not surface the needed text fields.
+AIFA-009A Production-like PDF extraction fallback,Done,1-Core Pipeline,High,AIFA-009,"Add a stronger extraction path for production-like PDFs when pdf-parse alone does not surface the needed text fields.
 - Keep pdf-parse as the default path for normal text PDFs
 - Add a fallback strategy for PDFs with sparse, partial, or low-quality extracted text
 - Evaluate the representative SCAN PDF already added to the repo against the fallback path
@@ -206,7 +206,7 @@ The prompt and retrieval layers can only validate what the parser actually extra
 - Date-related text that was missing with the default parser is either recovered or the limitation is explicitly documented
 - The fallback behavior is isolated inside the parsing layer rather than leaking into prompt or retrieval code
 - The ticket notes clearly state whether the PoC now supports this document type or whether a known limitation remains"
-AIFA-010 Validation prompt v1,Backlog,2-LLM Validation,High,AIFA-009A,"Create the first validation prompt focused only on effective dates or contract periods.
+AIFA-010 Validation prompt v1,Done,2-LLM Validation,High,AIFA-009A,"Create the first validation prompt focused only on effective dates or contract periods.
 - Define the exact input fields the prompt will receive
 - Define the retrieved context format the prompt will receive
 - Define the exact JSON shape you expect back
@@ -227,7 +227,7 @@ A narrow, structured prompt is much easier to debug than a broad 'validate every
 - The expected JSON shape aligns with your validation result schema
 - The prompt includes citation instructions and anti-guessing language
 - A manual test run produces a response that is at least mostly parseable and relevant to date validation only"
-AIFA-011 Ollama integration,Backlog,2-LLM Validation,High,AIFA-010,"Integrate a local LLM via Ollama so the PoC can run without Bedrock.
+AIFA-011 Ollama integration,Done,2-LLM Validation,High,AIFA-010,"Integrate a local LLM via Ollama so the PoC can run without Bedrock.
 - Install Ollama locally
 - Pull an appropriate model such as llama3 or another supported local model
 - Create a small client that sends the prompt and receives the response
@@ -242,7 +242,7 @@ This lets you prove the full workflow locally without being blocked on AWS acces
 - Raw model output is captured and logged when needed for debugging
 - Common failures such as unavailable Ollama, missing local model, or empty response are handled clearly
 - The model client is isolated enough that you can replace it later rather than weaving Ollama calls throughout the codebase"
-AIFA-011A Normalize and parse validation LLM output,Backlog,2-LLM Validation,High,AIFA-011,"Add a small response-normalization and parsing layer for validation results so the pipeline can handle real local LLM output, not just ideal JSON.
+AIFA-011A Normalize and parse validation LLM output,Done,2-LLM Validation,High,AIFA-011,"Add a small response-normalization and parsing layer for validation results so the pipeline can handle real local LLM output, not just ideal JSON.
 - Accept raw model text from the local validation client
 - Strip common wrappers such as markdown code fences
 - Handle extra leading or trailing explanation text when a JSON payload is still present
@@ -268,7 +268,7 @@ Real LLM output often drifts from ideal formatting even when the reasoning is co
 - The parser fails with a clear error when no valid JSON payload can be extracted
 - The implementation is verified against at least one real local Ollama response, not only idealized mock JSON
 - The prompt is updated to discourage markdown fences and extra prose, but the parser does not depend on perfect model compliance"
-AIFA-014 Artifact versioning,Backlog,3-Infra & API,High,AIFA-006,"Implement artifact versioning so stale pipeline outputs can be detected and ignored.
+AIFA-014 Artifact versioning,Done,3-Infra & API,High,AIFA-006,"Implement artifact versioning so stale pipeline outputs can be detected and ignored.
 - Define how artifactVersion is created, such as hashing the current document keys
 - Add artifactVersion to every persisted artifact shape
 - Add helper utilities to compute and compare versions
@@ -281,7 +281,7 @@ Without versioning, a user can change files while older pipeline work is still f
 - Version comparison logic exists and is easy to call from resolvers or pipeline code
 - A mismatch scenario is documented and testable
 - This ticket is completed before any later artifact-writing steps rely on it"
-AIFA-012 Validation Lambda,Backlog,3-Infra & API,High,AIFA-006,"Create a dedicated Lambda for the validation pipeline.
+AIFA-012 Validation Lambda,Done,3-Infra & API,High,AIFA-006,"Create a dedicated Lambda for the validation pipeline.
 - Add a Lambda handler entry point for the pipeline
 - Deploy it through CDK using patterns consistent with the existing repo
 - Give it access to required S3 paths and any other needed permissions
@@ -294,7 +294,7 @@ This preserves clean separation between your API layer and the heavier parsing/r
 - CloudWatch logs or equivalent are available for debugging
 - Permissions are scoped well enough for the PoC to function
 - The overall architecture still uses the existing app-api layer as the entry point/orchestrator"
-AIFA-013 Status tracking,Backlog,3-Infra & API,High,"AIFA-012, AIFA-014","Track pipeline progress by writing a versioned status artifact.
+AIFA-013 Status tracking,Done,3-Infra & API,High,"AIFA-012, AIFA-014","Track pipeline progress by writing a versioned status artifact.
 - Define a status.json shape with stages such as parsing, embedding, validating, complete, and failed
 - Include artifactVersion in the status file
 - Write status updates as the pipeline advances
@@ -315,7 +315,7 @@ Status tracking powers the Review page progress UI and gives you observability i
 - Failure states are represented clearly enough for the UI or resolver to react
 - Status writes do not silently omit version metadata
 - You can manually inspect the file and understand where a pipeline run is currently stuck or completed"
-AIFA-015 Validation result storage,Backlog,2-LLM Validation,High,"AIFA-011A, AIFA-014","Persist validation results as a versioned artifact.
+AIFA-015 Validation result storage,Done,2-LLM Validation,High,"AIFA-011A, AIFA-014","Persist validation results as a versioned artifact.
 - Define the JSON shape for validation-result.json
 - Include artifactVersion and formSnapshotHash
 - Save the result to S3 after validation completes
@@ -330,7 +330,7 @@ Stored results allow the frontend to poll for completion, enable simple caching,
 - Citation metadata is validated or reconciled against known chunk records rather than trusting echoed LLM values blindly
 - The file can be read back and parsed without custom cleanup logic
 - This artifact can be used later for cache hits or to avoid re-running validation unnecessarily"
-AIFA-016 GraphQL trigger resolver,Backlog,3-Infra & API,High,"AIFA-012, AIFA-014","Add a GraphQL resolver that triggers the validation Lambda.
+AIFA-016 GraphQL trigger resolver,Done,3-Infra & API,High,"AIFA-012, AIFA-014","Add a GraphQL resolver that triggers the validation Lambda.
 - Decide whether this is a mutation or part of an existing flow
 - Compute artifactVersion before invoking the worker
 - Pass enough identifiers for the Lambda to locate documents and artifacts
@@ -343,7 +343,7 @@ This is the bridge between the existing app workflow and the new AI worker. It k
 - The resolver logs enough information to debug invocation failures
 - The resolver shape fits existing API patterns in the repo
 - A manual test can confirm that a user action in the app could realistically kick off the pipeline"
-AIFA-017 Status polling resolver,Backlog,3-Infra & API,High,"AIFA-013, AIFA-015","Add a GraphQL query/resolver that returns validation status and results for the frontend.
+AIFA-017 Status polling resolver,Done,3-Infra & API,High,"AIFA-013, AIFA-015","Add a GraphQL query/resolver that returns validation status and results for the frontend.
 - Read status.json and validation-result.json from S3
 - Compare artifactVersion when appropriate
 - Return a response shape the Review page can poll repeatedly
@@ -356,7 +356,7 @@ This is how the frontend learns whether validation is still running, has failed,
 - Missing or failed artifact cases are handled in a defined way
 - Stale artifact/version mismatch scenarios are accounted for
 - The response shape is stable enough for the frontend polling loop to depend on"
-AIFA-018 Review page UI state,Backlog,4-Frontend Integration,Medium,AIFA-017,"Add Review page UI states for AI validation progress.
+AIFA-018 Review page UI state,Done,4-Frontend Integration,Medium,AIFA-017,"Add Review page UI states for AI validation progress.
 - Decide where the validation status belongs on the Review page
 - Start polling the status resolver on page load or the relevant user transition
 - Show clear stage messaging such as reviewing documents, validating inputs, and complete
@@ -369,7 +369,7 @@ The backend may be correct, but users will not trust the feature if the UI is co
 - The UI updates when the backend stage changes
 - The messaging is understandable to a non-technical user
 - Failure or unavailable states do not break the rest of the page"
-AIFA-019 Display validation results,Backlog,4-Frontend Integration,High,"AIFA-015, AIFA-017","Render validation findings on the Review page.
+AIFA-019 Display validation results,Done,4-Frontend Integration,High,"AIFA-015, AIFA-017","Render validation findings on the Review page.
 - Decide on a UI pattern for warnings and informational findings
 - Show message text and citations clearly
 - Make it obvious that findings are advisory, not hard blockers
@@ -489,7 +489,7 @@ Feature flags are useful when rolling out AI features because they let you limit
 - The implementation follows existing LaunchDarkly patterns in the repo
 - Turning the flag on exposes the intended experience without additional code changes
 - Another engineer can understand exactly what the flag does from the code and ticket notes"
-AIFA-022 Minimal test corpus,Backlog,5-Testing & Evaluation,High,AIFA-020C,"Create a small reusable corpus for start/end date validation and the client demo.
+AIFA-022 Minimal test corpus,Done,5-Testing & Evaluation,High,AIFA-020C,"Create a small reusable corpus for start/end date validation and the client demo.
 - Gather 5 to 10 PDF fixtures
 - Record expected outcomes for `contractStartDate` and `contractEndDate`
 - Include at least one match case, one mismatch case, and one not-enough-evidence case
