@@ -463,7 +463,7 @@ The PoC needs to be credible not just in the network tab but in the page the cli
 - Match, mismatch, and not-enough-evidence outcomes are easy to distinguish
 - The wording remains non-blocking and consistent with existing product patterns
 - The UI copy changes are covered by focused tests or clear acceptance notes"
-AIFA-020 Timeout handling,Backlog,4-Frontend Integration,High,"AIFA-017, AIFA-018","Prevent AI validation from trapping the user on the Review page.
+AIFA-020 Timeout handling,Done,4-Frontend Integration,High,"AIFA-017, AIFA-018","Prevent AI validation from trapping the user on the Review page.
 - Add a timeout window for polling, such as 90 seconds
 - If the timeout is reached, stop treating validation as a blocker for the submit control
 - Show a neutral fallback message when validation could not complete

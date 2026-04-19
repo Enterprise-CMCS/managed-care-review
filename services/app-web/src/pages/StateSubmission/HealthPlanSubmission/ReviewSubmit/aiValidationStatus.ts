@@ -9,8 +9,19 @@ export function getAIValidationDisplayState(args: {
     stage?: string | null
     isStale?: boolean
     error?: string | null
+    hasTimedOut?: boolean
 }): AIValidationDisplayState {
-    const { stage, isStale, error } = args
+    const { stage, isStale, error, hasTimedOut } = args
+
+    if (hasTimedOut) {
+        return {
+            title: 'Document review still in progress',
+            message:
+                'Document review is still in progress. You can continue reviewing your submission and submit without waiting for these results.',
+            alertType: 'warning',
+            isPolling: false,
+        }
+    }
 
     if (isStale) {
         return {

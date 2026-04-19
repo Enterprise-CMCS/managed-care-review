@@ -44,6 +44,9 @@ import { getAIValidationDisplayState } from './aiValidationStatus'
 import { mapAIValidationFindings } from './aiValidationFindings'
 import { shouldTriggerAIValidation } from './shouldTriggerAIValidation'
 
+const VALIDATION_POLL_INTERVAL_MS = 5000
+const VALIDATION_TIMEOUT_MS = 90_000
+
 export const ReviewSubmit = (): React.ReactElement => {
     const navigate = useNavigate()
     const modalRef = useRef<ModalRef>(null)
@@ -52,6 +55,7 @@ export const ReviewSubmit = (): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
     const { id } = useRouteParams()
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const [validationTimedOut, setValidationTimedOut] = useState<boolean>(false)
     const triggerAttemptedRef = useRef<Set<string>>(new Set())
     const [triggerValidation] = useTriggerValidationMutation()
     const ldClient = useLDClient()
@@ -83,6 +87,8 @@ export const ReviewSubmit = (): React.ReactElement => {
         data: validationData,
         loading: validationLoading,
         error: validationError,
+        startPolling,
+        stopPolling,
     } = useValidationStatusQuery({
         variables: {
             input: {
@@ -90,16 +96,10 @@ export const ReviewSubmit = (): React.ReactElement => {
             },
         },
         fetchPolicy: 'network-only',
-        pollInterval: 5000,
         skip: !id,
     })
 
     const validationStatus = validationData?.validationStatus
-    const validationDisplayState = getAIValidationDisplayState({
-        stage: validationStatus?.stage,
-        isStale: validationStatus?.isStale,
-        error: validationStatus?.error,
-    })
     const showInitialValidationLoading =
         validationLoading && !validationStatus && !validationError
     const validationFindings = validationStatus?.results ?? []
@@ -126,6 +126,28 @@ export const ReviewSubmit = (): React.ReactElement => {
     const validationTriggerKey = `${id ?? 'unknown'}::${
         validationStatus?.artifactVersion ?? 'no-artifact-version'
     }`
+    const validationBaseDisplayState = getAIValidationDisplayState({
+        stage: validationStatus?.stage,
+        isStale: validationStatus?.isStale,
+        error: validationStatus?.error,
+    })
+    const validationShouldPoll =
+        hasContractId &&
+        !validationTimedOut &&
+        (!validationStatus ||
+            shouldTriggerValidation ||
+            validationBaseDisplayState.isPolling)
+    const validationDisplayState = getAIValidationDisplayState({
+        stage: validationStatus?.stage,
+        isStale: validationStatus?.isStale,
+        error: validationStatus?.error,
+        hasTimedOut:
+            validationTimedOut &&
+            !showValidationFindings &&
+            !validationError &&
+            validationStatus?.stage !== 'complete' &&
+            validationStatus?.stage !== 'failed',
+    })
 
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitMainContent'
@@ -134,6 +156,35 @@ export const ReviewSubmit = (): React.ReactElement => {
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
+
+    useEffect(() => {
+        // Reset the timeout whenever the current artifact changes so each new
+        // validation attempt gets its own polling window.
+        setValidationTimedOut(false)
+    }, [validationTriggerKey])
+
+    useEffect(() => {
+        if (!hasContractId) {
+            stopPolling()
+            return
+        }
+
+        if (!validationShouldPoll) {
+            stopPolling()
+            return
+        }
+
+        startPolling(VALIDATION_POLL_INTERVAL_MS)
+        const timeoutId = window.setTimeout(() => {
+            setValidationTimedOut(true)
+            stopPolling()
+        }, VALIDATION_TIMEOUT_MS)
+
+        return () => {
+            window.clearTimeout(timeoutId)
+            stopPolling()
+        }
+    }, [hasContractId, startPolling, stopPolling, validationShouldPoll])
 
     useEffect(() => {
         if (!shouldTriggerValidation || !id) {
