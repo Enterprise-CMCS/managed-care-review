@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-027 Add cleanup and lifecycle rules for pipeline artifacts`.
+The next implementation ticket is `AIFA-028 Incremental parsing and selective re-indexing`.
 
 ## Completed
 
@@ -47,6 +47,7 @@ The next implementation ticket is `AIFA-027 Add cleanup and lifecycle rules for 
 - AIFA-035 ✔ Deterministic-to-LLM clause-resolution fallback hardening
 - AIFA-021 ✔ Cache validation results
 - AIFA-024 ✔ Bedrock follow-up for production-like evaluation
+- AIFA-027 ✔ Add cleanup and lifecycle rules for pipeline artifacts
 
 ## Current State
 
@@ -129,6 +130,12 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - the same flag gates both the Review-page validation UI and the earlier Contract Details background trigger path
 - with the flag off, the submission flow stays unchanged and validation queries/triggers do not run from the frontend
 
+### Artifact cleanup
+
+- the scheduled cleanup handler now deletes expired `rag-indexes/` artifacts from the AI validation artifact bucket
+- retention is currently 30 days for `chunks.json`, `status.json`, and `validation-result.json`, which matches the current draft-cleanup safety-net expectation
+- cleanup is prefix-scoped so the current artifact layout and stale/current cache behavior stay unchanged for active drafts
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -143,6 +150,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - reusable corpus fixtures for repeatable manual and harness-driven evaluation
 - repeatable harness-driven evaluation of corpus scenarios through the worker path
 - improved deterministic handling for competing start/end-date labels in real amendment fixtures
+- scheduled cleanup of expired AI validation artifacts by `rag-indexes/` prefix
 
 ## What Is Still Weak
 
@@ -156,6 +164,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - the Bedrock evaluation path is in place, but live verification still depends on valid AWS credentials, regional model access, and a real model ID
 - evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
 - corpus evaluation now depends on reachable LocalStack S3 plus the repo `nvm` runtime, so local environment drift can still block verification before the worker runs
+- the artifact retention safety net currently relies on the scheduled cleanup path and configured 30-day cutoff; no separate bucket-lifecycle rule is managed in this repo yet
 
 ## Current PoC Direction
 
@@ -185,15 +194,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-027 Add cleanup and lifecycle rules for pipeline artifacts
+### AIFA-028 Incremental parsing and selective re-indexing
 
-Add cleanup behavior for extracted-text and validation artifacts so the local-first PoC does not accumulate stale artifacts indefinitely by default.
+Optimize the pipeline so file changes do not always require a full reparse/re-embed.
 
 ## Suggested Next Step
 
-- Define which validation artifacts should expire or be cleaned up and when.
-- Follow the current artifact layout and avoid introducing a parallel storage model.
-- Keep cache reuse and stale/current artifact behavior understandable after cleanup is added.
+- Inspect the current chunk and retrieval flow to see whether selective document-level reuse can fit without breaking the current `artifactVersion` contract.
+- Keep any reuse logic subordinate to correctness; stale artifact reuse is a bigger risk than re-embedding too much in the PoC.
+- Follow the current artifact layout before introducing any new index or cache shape.
 
 ## Source of Truth Docs
 
@@ -224,6 +233,7 @@ Add cleanup behavior for extracted-text and validation artifacts so the local-fi
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.
 - Clause-resolution hardening now passes the current 8-scenario corpus, but OCR-heavy term text still depends on narrow heuristics rather than a broader parsing layer.
 - Cache reuse now depends on `complete` status plus matching `artifactVersion` and form snapshot hash; partial or failed artifacts still force a fresh run.
+- AI validation artifacts currently retain for 30 days before scheduled cleanup deletes old `rag-indexes/` objects; this retention is intended as an operational safety net for abandoned or deleted drafts, not a long-lived archive.
 - Contract Details is now treated as the preferred point to start background validation because it is the first place in the current workflow where both scoped date fields and supporting documents are usually present.
 - The early trigger now depends on a second `validationStatus` read after the draft save, so future trigger-path changes need to stay aligned with the current stale/current artifact contract.
 - The validation rollout is currently frontend-only, so LaunchDarkly dashboard setup and any future backend trigger paths need to stay aligned with the client-side flag behavior.

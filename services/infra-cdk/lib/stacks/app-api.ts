@@ -311,6 +311,12 @@ export class AppApiStack extends BaseStack {
             AI_VALIDATION_ARTIFACT_BUCKET: 'ai-form-augmentation-artifacts',
         }
 
+        const cleanupEnvironment = {
+            ...environment,
+            AI_VALIDATION_ARTIFACT_BUCKET: 'ai-form-augmentation-artifacts',
+            AI_VALIDATION_ARTIFACT_RETENTION_DAYS: '30',
+        }
+
         // OTEL function needs the ADOT layer and collector.yml file
 
         this.otelFunction = new NodejsFunction(this, 'otelFunction', {
@@ -385,7 +391,7 @@ export class AppApiStack extends BaseStack {
             {
                 timeout: Duration.seconds(30),
                 memorySize: 1024,
-                environment,
+                environment: cleanupEnvironment,
                 role,
                 layers: [this.otelLayer],
             }
@@ -898,6 +904,8 @@ export class AppApiStack extends BaseStack {
         // TODO: Remove after database migration updates all s3URL references to new bucket
         const legacyDocumentsBucket = `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}`
         const legacyQABucket = `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}`
+        const aiValidationArtifactBucketArn =
+            'arn:aws:s3:::ai-form-augmentation-artifacts'
 
         role.addToPolicy(
             new PolicyStatement({
@@ -916,6 +924,22 @@ export class AppApiStack extends BaseStack {
                 effect: Effect.ALLOW,
                 actions: ['s3:ListBucket', 's3:GetBucketLocation'],
                 resources: [legacyDocumentsBucket, legacyQABucket],
+            })
+        )
+
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['s3:DeleteObject'],
+                resources: [`${aiValidationArtifactBucketArn}/rag-indexes/*`],
+            })
+        )
+
+        role.addToPolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ['s3:ListBucket', 's3:GetBucketLocation'],
+                resources: [aiValidationArtifactBucketArn],
             })
         )
 

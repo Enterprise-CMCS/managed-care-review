@@ -660,7 +660,7 @@ The PoC intentionally avoided premature complexity. This ticket exists so the te
 - Any FAISS work remains behind the VectorStore abstraction
 - The team can make an informed keep/defer decision based on actual evidence
 - The outcome is documented clearly enough that future work does not re-open the same question from scratch"
-AIFA-027 Add cleanup and lifecycle rules for pipeline artifacts,Backlog,6-Production Prep,Medium,"AIFA-006, AIFA-015","Add cleanup behavior for abandoned or deleted draft artifacts.
+AIFA-027 Add cleanup and lifecycle rules for pipeline artifacts,Done,6-Production Prep,Medium,"AIFA-006, AIFA-015","Add cleanup behavior for abandoned or deleted draft artifacts.
 - Identify which S3 artifact paths need cleanup
 - Extend existing cleanup flows if the repo already has a cleanup function
 - Add lifecycle expiration rules as a safety net where appropriate
