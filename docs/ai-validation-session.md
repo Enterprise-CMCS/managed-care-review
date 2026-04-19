@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-026 Add LaunchDarkly feature flag for validation UI`.
+The next implementation ticket is `AIFA-027 Add cleanup and lifecycle rules for pipeline artifacts`.
 
 ## Completed
 
@@ -35,6 +35,7 @@ The next implementation ticket is `AIFA-026 Add LaunchDarkly feature flag for va
 - AIFA-020D ✔ Review-page wording refinement
 - AIFA-020 ✔ Timeout handling
 - AIFA-036 ✔ Trigger background validation from Contract Details continue
+- AIFA-026 ✔ Add LaunchDarkly feature flag for validation UI
 - AIFA-022 ✔ Minimal test corpus
 - AIFA-023 ✔ Validation evaluation harness
 - AIFA-029 ✔ Field-label and retrieval coverage hardening
@@ -122,6 +123,12 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - finding labels now read as advisory review results instead of backend-oriented validation jargon
 - evidence labels now better describe what the cited document references represent on the page
 
+### Validation rollout control
+
+- the AI validation experience is now behind a client-side LaunchDarkly flag
+- the same flag gates both the Review-page validation UI and the earlier Contract Details background trigger path
+- with the flag off, the submission flow stays unchanged and validation queries/triggers do not run from the frontend
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -178,15 +185,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-026 Add LaunchDarkly feature flag for validation UI
+### AIFA-027 Add cleanup and lifecycle rules for pipeline artifacts
 
-Add a feature flag so the validation experience can be rolled out gradually.
+Add cleanup behavior for extracted-text and validation artifacts so the local-first PoC does not accumulate stale artifacts indefinitely by default.
 
 ## Suggested Next Step
 
-- Follow the repo’s existing LaunchDarkly patterns to gate the validation experience cleanly.
-- Decide whether the flag should guard just the Review-page UI or the earlier/background trigger path too.
-- Keep the disabled behavior explicit so existing submission flow still works without validation UI.
+- Define which validation artifacts should expire or be cleaned up and when.
+- Follow the current artifact layout and avoid introducing a parallel storage model.
+- Keep cache reuse and stale/current artifact behavior understandable after cleanup is added.
 
 ## Source of Truth Docs
 
@@ -219,3 +226,4 @@ Add a feature flag so the validation experience can be rolled out gradually.
 - Cache reuse now depends on `complete` status plus matching `artifactVersion` and form snapshot hash; partial or failed artifacts still force a fresh run.
 - Contract Details is now treated as the preferred point to start background validation because it is the first place in the current workflow where both scoped date fields and supporting documents are usually present.
 - The early trigger now depends on a second `validationStatus` read after the draft save, so future trigger-path changes need to stay aligned with the current stale/current artifact contract.
+- The validation rollout is currently frontend-only, so LaunchDarkly dashboard setup and any future backend trigger paths need to stay aligned with the client-side flag behavior.

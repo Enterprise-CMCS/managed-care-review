@@ -489,7 +489,7 @@ Contract Details is the first point in the current workflow where both the relev
 - Review & Submit still works as a fallback trigger when no current validation run/result exists
 - Repeated visits to Contract Details do not trigger redundant runs for the same current artifactVersion and form snapshot
 - The implementation follows the existing artifactVersion, stale-result, and advisory-status model instead of introducing a parallel trigger state"
-AIFA-026 Add LaunchDarkly feature flag for validation UI,Backlog,4-Frontend Integration,Medium,"AIFA-018, AIFA-019","Add a feature flag so the validation experience can be rolled out gradually.
+AIFA-026 Add LaunchDarkly feature flag for validation UI,Done,4-Frontend Integration,Medium,"AIFA-018, AIFA-019","Add a feature flag so the validation experience can be rolled out gradually.
 - Decide whether the flag gates just the UI, the backend trigger, or both
 - Add flag checks using the repo's existing LaunchDarkly patterns
 - Default the feature to off in environments where it is not ready

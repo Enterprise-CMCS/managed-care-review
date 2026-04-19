@@ -6,6 +6,13 @@
  */
 
 const featureFlags = {
+    /**
+     * Enables the AI validation review UI and frontend trigger paths.
+     */
+    AI_VALIDATION: {
+        flag: 'ai-validation',
+        defaultValue: false,
+    },
     CONTRACT_438_ATTESTATION: {
         flag: '438-attestation',
         defaultValue: false,

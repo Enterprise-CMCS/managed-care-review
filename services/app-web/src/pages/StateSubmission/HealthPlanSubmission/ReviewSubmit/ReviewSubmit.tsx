@@ -64,6 +64,10 @@ export const ReviewSubmit = (): React.ReactElement => {
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
+    const aiValidationEnabled = ldClient?.variation(
+        featureFlags.AI_VALIDATION.flag,
+        featureFlags.AI_VALIDATION.defaultValue
+    )
 
     const getPath = (route: RouteT) => {
         return generatePath(RoutesRecord[route], {
@@ -96,7 +100,7 @@ export const ReviewSubmit = (): React.ReactElement => {
             },
         },
         fetchPolicy: 'network-only',
-        skip: !id,
+        skip: !id || !aiValidationEnabled,
     })
 
     const validationStatus = validationData?.validationStatus
@@ -118,6 +122,7 @@ export const ReviewSubmit = (): React.ReactElement => {
     const validationReady = !validationLoading && !validationError
     const hasContractId = Boolean(id)
     const shouldTriggerValidation =
+        aiValidationEnabled &&
         hasContractId &&
         contractReady &&
         validationReady &&
@@ -132,6 +137,7 @@ export const ReviewSubmit = (): React.ReactElement => {
         error: validationStatus?.error,
     })
     const validationShouldPoll =
+        aiValidationEnabled &&
         hasContractId &&
         !validationTimedOut &&
         (!validationStatus ||
@@ -268,38 +274,40 @@ export const ReviewSubmit = (): React.ReactElement => {
                 />
             </FormNotificationContainer>
             <GridContainer className={styles.reviewSectionWrapper}>
-                <section
-                    className={styles.validationStatusSection}
-                    aria-label="Document review status"
-                >
-                    <AIValidationStatusCard
-                        mode={validationBannerMode}
-                        findings={
-                            showValidationFindings
-                                ? validationFindingDisplayItems
-                                : []
-                        }
-                        state={
-                            showInitialValidationLoading
-                                ? {
-                                      title: 'Loading document review',
-                                      message:
-                                          'We are loading the latest document review results for this submission.',
-                                      alertType: 'info',
-                                      isPolling: true,
-                                  }
-                                : validationError
-                                  ? {
-                                        title: 'Document review unavailable',
-                                        message:
-                                            'We could not load document review results right now, but you can still continue reviewing your submission.',
-                                        alertType: 'warning',
-                                        isPolling: false,
-                                    }
-                                  : validationDisplayState
-                        }
-                    />
-                </section>
+                {aiValidationEnabled && (
+                    <section
+                        className={styles.validationStatusSection}
+                        aria-label="Document review status"
+                    >
+                        <AIValidationStatusCard
+                            mode={validationBannerMode}
+                            findings={
+                                showValidationFindings
+                                    ? validationFindingDisplayItems
+                                    : []
+                            }
+                            state={
+                                showInitialValidationLoading
+                                    ? {
+                                          title: 'Loading document review',
+                                          message:
+                                              'We are loading the latest document review results for this submission.',
+                                          alertType: 'info',
+                                          isPolling: true,
+                                      }
+                                    : validationError
+                                      ? {
+                                            title: 'Document review unavailable',
+                                            message:
+                                                'We could not load document review results right now, but you can still continue reviewing your submission.',
+                                            alertType: 'warning',
+                                            isPolling: false,
+                                        }
+                                      : validationDisplayState
+                            }
+                        />
+                    </section>
+                )}
                 <SubmissionTypeSummarySection
                     contract={contract}
                     submissionName={submissionName}

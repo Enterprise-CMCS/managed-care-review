@@ -39,6 +39,10 @@ import {
     ValidationStatusDocument,
 } from '../../../../gen/gqlClient'
 
+const aiValidationFeatureFlags = {
+    'ai-validation': true,
+}
+
 const validationStatusMock = (overrides?: {
     stage?: string
     isStale?: boolean
@@ -1901,6 +1905,7 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/15/edit/contract-details',
                     },
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -1963,6 +1968,7 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/15/edit/contract-details',
                     },
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -1977,6 +1983,60 @@ describe('ContractDetails', () => {
             await waitFor(() => {
                 expect(triggerValidationResult).not.toHaveBeenCalled()
             })
+        })
+
+        it('does not start background validation when the feature flag is off', async () => {
+            const draftContract = {
+                ...mockContractPackageUnlockedWithUnlockedType(),
+                id: '15',
+                contractSubmissionType: 'HEALTH_PLAN' as const,
+            }
+            const updatedContract = {
+                ...draftContract,
+                __typename: 'Contract' as const,
+            }
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                        element={<div>Next page</div>}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<div>Next page</div>}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: draftContract,
+                            }),
+                            updateContractDraftRevisionMockSuccess({
+                                contract: updatedContract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/15/edit/contract-details',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.click(continueButton)
+
+            expect(await screen.findByText('Next page')).toBeInTheDocument()
         })
     })
 })

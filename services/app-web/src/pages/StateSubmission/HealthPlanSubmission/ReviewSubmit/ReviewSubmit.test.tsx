@@ -18,6 +18,10 @@ import {
     ValidationStatusDocument,
 } from '../../../../gen/gqlClient'
 
+const aiValidationFeatureFlags = {
+    'ai-validation': true,
+}
+
 const validationStatusMock = (overrides?: {
     stage?: string
     isStale?: boolean
@@ -470,7 +474,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -514,7 +518,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -552,7 +556,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -591,7 +595,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -669,7 +673,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -747,7 +751,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -807,7 +811,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -850,7 +854,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -905,7 +909,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -952,7 +956,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -990,7 +994,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -1038,7 +1042,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -1088,7 +1092,7 @@ describe('ReviewSubmit', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
                     },
-                    featureFlags: {},
+                    featureFlags: aiValidationFeatureFlags,
                 }
             )
 
@@ -1097,6 +1101,47 @@ describe('ReviewSubmit', () => {
                     name: 'Refreshing document review',
                 })
             ).toBeInTheDocument()
+        })
+
+        it('does not render validation UI when the feature flag is off', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', { name: 'Contract details' })
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByLabelText('Document review status')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.queryByRole('heading', {
+                    name: /Document review/i,
+                })
+            ).not.toBeInTheDocument()
         })
     })
 })

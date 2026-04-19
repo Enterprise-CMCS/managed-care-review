@@ -164,6 +164,10 @@ export const ContractDetails = ({
         featureFlags.DSNP.flag,
         featureFlags.DSNP.defaultValue
     )
+    const aiValidationEnabled = ldClient?.variation(
+        featureFlags.AI_VALIDATION.flag,
+        featureFlags.AI_VALIDATION.defaultValue
+    )
 
     // Contract documents state management
     const { getKey, handleUploadFile, handleScanFile } = useS3()
@@ -572,13 +576,16 @@ export const ContractDetails = ({
             setSubmitting(false)
         } else {
             if (
+                aiValidationEnabled &&
                 options.type === 'CONTINUE' &&
                 updatedDraftSubmissionFormData.contractDateStart &&
                 updatedDraftSubmissionFormData.contractDateEnd &&
                 updatedDraftSubmissionFormData.contractDocuments?.length
             ) {
                 // Run validation in the background so later form pages can
-                // reuse the existing Review-page polling/results flow.
+                // reuse the existing Review-page polling/results flow. Keep
+                // this behind the same frontend flag as the Review page UI so
+                // rollout stays consistent.
                 void triggerBackgroundValidation(updatedSubmission.id)
             }
 
