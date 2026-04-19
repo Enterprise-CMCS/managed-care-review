@@ -8,6 +8,7 @@ import {
     fetchCurrentUserMock,
     fetchContractMockSuccess,
     mockContractPackageUnlockedWithUnlockedType,
+    updateContractDraftRevisionMockSuccess,
 } from '@mc-review/mocks'
 
 import {
@@ -33,6 +34,61 @@ import {
     StatutoryRegulatoryAttestationDescription,
     StatutoryRegulatoryAttestationQuestion,
 } from '@mc-review/constants'
+import {
+    TriggerValidationDocument,
+    ValidationStatusDocument,
+} from '../../../../gen/gqlClient'
+
+const validationStatusMock = (overrides?: {
+    stage?: string
+    isStale?: boolean
+    error?: string | null
+}) => ({
+    request: {
+        query: ValidationStatusDocument,
+        variables: {
+            input: {
+                contractID: '15',
+            },
+        },
+    },
+    result: {
+        data: {
+            validationStatus: {
+                __typename: 'ValidationStatusPayload' as const,
+                stage: overrides?.stage ?? 'not-started',
+                artifactVersion: 'test-artifact-version',
+                isStale: overrides?.isStale ?? false,
+                error: overrides?.error ?? null,
+                results: [],
+            },
+        },
+    },
+})
+
+const triggerValidationMock = (result = vi.fn()) => ({
+    request: {
+        query: TriggerValidationDocument,
+        variables: {
+            input: {
+                contractID: '15',
+            },
+        },
+    },
+    result: () => {
+        result()
+
+        return {
+            data: {
+                triggerValidation: {
+                    __typename: 'TriggerValidationPayload' as const,
+                    ok: true,
+                    artifactVersion: 'test-artifact-version',
+                },
+            },
+        }
+    },
+})
 
 const scrollIntoViewMock = vi.fn()
 HTMLElement.prototype.scrollIntoView = scrollIntoViewMock
@@ -1794,6 +1850,132 @@ describe('ContractDetails', () => {
                         'You must provide a description of the contract’s non-compliance'
                     )
                 ).toHaveLength(0)
+            })
+        })
+    })
+
+    describe('background AI validation trigger', () => {
+        it('triggers validation in the background after continuing when current validation has not started', async () => {
+            const triggerValidationResult = vi.fn()
+            const draftContract = {
+                ...mockContractPackageUnlockedWithUnlockedType(),
+                id: '15',
+                contractSubmissionType: 'HEALTH_PLAN' as const,
+            }
+            const updatedContract = {
+                ...draftContract,
+                __typename: 'Contract' as const,
+            }
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                        element={<div>Next page</div>}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<div>Next page</div>}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: draftContract,
+                            }),
+                            updateContractDraftRevisionMockSuccess({
+                                contract: updatedContract,
+                            }),
+                            validationStatusMock({
+                                stage: 'not-started',
+                            }),
+                            triggerValidationMock(triggerValidationResult),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/15/edit/contract-details',
+                    },
+                }
+            )
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.click(continueButton)
+
+            await screen.findByText('Next page')
+
+            await waitFor(() => {
+                expect(triggerValidationResult).toHaveBeenCalledTimes(1)
+            })
+        })
+
+        it('does not trigger validation again when the current validation is already complete', async () => {
+            const triggerValidationResult = vi.fn()
+            const draftContract = {
+                ...mockContractPackageUnlockedWithUnlockedType(),
+                id: '15',
+                contractSubmissionType: 'HEALTH_PLAN' as const,
+            }
+            const updatedContract = {
+                ...draftContract,
+                __typename: 'Contract' as const,
+            }
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                        element={<div>Next page</div>}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<div>Next page</div>}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: draftContract,
+                            }),
+                            updateContractDraftRevisionMockSuccess({
+                                contract: updatedContract,
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                            }),
+                            triggerValidationMock(triggerValidationResult),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/15/edit/contract-details',
+                    },
+                }
+            )
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.click(continueButton)
+
+            await screen.findByText('Next page')
+
+            await waitFor(() => {
+                expect(triggerValidationResult).not.toHaveBeenCalled()
             })
         })
     })

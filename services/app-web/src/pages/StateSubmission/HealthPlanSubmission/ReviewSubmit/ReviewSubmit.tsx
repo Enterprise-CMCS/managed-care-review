@@ -42,7 +42,7 @@ import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { AIValidationStatusCard } from './AIvalidationStatusCard'
 import { getAIValidationDisplayState } from './aiValidationStatus'
 import { mapAIValidationFindings } from './aiValidationFindings'
-import { shouldTriggerAIValidation } from './shouldTriggerAIValidation'
+import { shouldTriggerAIValidation } from '../aiValidation/shouldTriggerAIValidation'
 
 const VALIDATION_POLL_INTERVAL_MS = 5000
 const VALIDATION_TIMEOUT_MS = 90_000

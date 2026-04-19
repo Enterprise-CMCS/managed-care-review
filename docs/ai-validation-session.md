@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-036 Trigger background validation from Contract Details continue`.
+The next implementation ticket is `AIFA-026 Add LaunchDarkly feature flag for validation UI`.
 
 ## Completed
 
@@ -34,6 +34,7 @@ The next implementation ticket is `AIFA-036 Trigger background validation from C
 - AIFA-020C ✔ Trustworthy start/end validation flow
 - AIFA-020D ✔ Review-page wording refinement
 - AIFA-020 ✔ Timeout handling
+- AIFA-036 ✔ Trigger background validation from Contract Details continue
 - AIFA-022 ✔ Minimal test corpus
 - AIFA-023 ✔ Validation evaluation harness
 - AIFA-029 ✔ Field-label and retrieval coverage hardening
@@ -177,15 +178,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-036 Trigger background validation from Contract Details continue
+### AIFA-026 Add LaunchDarkly feature flag for validation UI
 
-Start validation earlier from the Contract Details continue action so the AI run can happen in the background while the user completes later steps.
+Add a feature flag so the validation experience can be rolled out gradually.
 
 ## Suggested Next Step
 
-- Add a non-blocking trigger from Contract Details continue when the required validation inputs are already present.
-- Keep Review & Submit as the fallback trigger so the earlier path is an optimization, not a new single point of failure.
-- Add a dedupe guard around current artifactVersion plus current form snapshot so repeated visits to Contract Details do not create redundant background runs.
+- Follow the repo’s existing LaunchDarkly patterns to gate the validation experience cleanly.
+- Decide whether the flag should guard just the Review-page UI or the earlier/background trigger path too.
+- Keep the disabled behavior explicit so existing submission flow still works without validation UI.
 
 ## Source of Truth Docs
 
@@ -217,4 +218,4 @@ Start validation earlier from the Contract Details continue action so the AI run
 - Clause-resolution hardening now passes the current 8-scenario corpus, but OCR-heavy term text still depends on narrow heuristics rather than a broader parsing layer.
 - Cache reuse now depends on `complete` status plus matching `artifactVersion` and form snapshot hash; partial or failed artifacts still force a fresh run.
 - Contract Details is now treated as the preferred point to start background validation because it is the first place in the current workflow where both scoped date fields and supporting documents are usually present.
-- The planned earlier trigger should be guarded by the same current artifactVersion and form snapshot inputs used elsewhere so revisiting Contract Details does not create unnecessary reruns.
+- The early trigger now depends on a second `validationStatus` read after the draft save, so future trigger-path changes need to stay aligned with the current stale/current artifact contract.

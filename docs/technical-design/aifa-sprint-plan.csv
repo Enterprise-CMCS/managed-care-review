@@ -476,6 +476,19 @@ An AI enhancement should never make the base product unusable. Timeouts and grac
 - Polling stops or transitions cleanly after timeout
 - Failure/unavailable states also allow the user to proceed
 - The timeout implementation is consistent with the resolver contract and status stages"
+AIFA-036 Trigger background validation from Contract Details continue,Done,4-Frontend Integration,High,"AIFA-016, AIFA-017, AIFA-018, AIFA-021","Start AI validation earlier in the form flow by triggering it when the user continues from Contract Details, while keeping Review & Submit as a fallback trigger.
+- Add a non-blocking trigger path from the Contract Details continue action when the current draft has both validation date fields and persisted contract documents
+- Keep Review & Submit able to trigger validation if the earlier trigger did not run, failed, or the current result later becomes stale
+- Reuse the existing triggerValidation mutation and artifact-driven status flow instead of creating a second validation pipeline
+- Add a lightweight dedupe guard so continue does not start a redundant run when the current artifactVersion and form snapshot already have a current in-progress or complete validation state
+- Preserve the current advisory behavior; navigation from Contract Details must not wait for validation to finish
+
+Why this matters:
+Contract Details is the first point in the current workflow where both the relevant dates and the supporting documents are usually present. Triggering validation there lets the work run in the background while the user continues through the form, so Review & Submit is more likely to show ready results instead of starting the process late. The dedupe guard keeps that earlier trigger from turning repeated visits or small workflow loops into unnecessary reruns.","- Continuing from Contract Details can start validation in the background when the required validation inputs are present
+- The user can continue through the form without waiting for validation to finish
+- Review & Submit still works as a fallback trigger when no current validation run/result exists
+- Repeated visits to Contract Details do not trigger redundant runs for the same current artifactVersion and form snapshot
+- The implementation follows the existing artifactVersion, stale-result, and advisory-status model instead of introducing a parallel trigger state"
 AIFA-026 Add LaunchDarkly feature flag for validation UI,Backlog,4-Frontend Integration,Medium,"AIFA-018, AIFA-019","Add a feature flag so the validation experience can be rolled out gradually.
 - Decide whether the flag gates just the UI, the backend trigger, or both
 - Add flag checks using the repo's existing LaunchDarkly patterns

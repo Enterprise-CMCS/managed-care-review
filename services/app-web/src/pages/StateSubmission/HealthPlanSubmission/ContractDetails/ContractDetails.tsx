@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useApolloClient } from '@apollo/client'
 import {
     Form as UswdsForm,
     FormGroup,
@@ -84,9 +85,12 @@ import {
     ManagedCareEntity,
     ContractExecutionStatus,
     FederalAuthority,
+    TriggerValidationDocument,
+    ValidationStatusDocument,
 } from '../../../../gen/gqlClient'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { usePage } from '../../../../contexts/PageContext'
+import { shouldTriggerAIValidation } from '../aiValidation/shouldTriggerAIValidation'
 
 export type ContractDetailsFormValues = {
     contractDocuments: FileItemT[]
@@ -123,6 +127,7 @@ export type FormError =
 export const ContractDetails = ({
     showValidations = false,
 }: ContractFormPageProps): React.ReactElement => {
+    const apolloClient = useApolloClient()
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [draftSaved, setDraftSaved] = useState(false)
     useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
@@ -377,6 +382,44 @@ export const ContractDetails = ({
         return errorsObject
     }
 
+    const triggerBackgroundValidation = async (contractID: string) => {
+        try {
+            // Re-read status after the draft save so the trigger decision uses
+            // the current artifact/form snapshot instead of stale page data.
+            const { data } = await apolloClient.query({
+                query: ValidationStatusDocument,
+                variables: {
+                    input: {
+                        contractID,
+                    },
+                },
+                fetchPolicy: 'network-only',
+            })
+
+            if (
+                !shouldTriggerAIValidation({
+                    validationStatus: data?.validationStatus,
+                })
+            ) {
+                return
+            }
+
+            await apolloClient.mutate({
+                mutation: TriggerValidationDocument,
+                variables: {
+                    input: {
+                        contractID,
+                    },
+                },
+            })
+        } catch (error) {
+            console.error(
+                'Failed to trigger AI validation from ContractDetails',
+                error
+            )
+        }
+    }
+
     const handleFormSubmit = async (
         values: ContractDetailsFormValues,
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
@@ -528,6 +571,17 @@ export const ContractDetails = ({
             setDraftSaved(true)
             setSubmitting(false)
         } else {
+            if (
+                options.type === 'CONTINUE' &&
+                updatedDraftSubmissionFormData.contractDateStart &&
+                updatedDraftSubmissionFormData.contractDateEnd &&
+                updatedDraftSubmissionFormData.contractDocuments?.length
+            ) {
+                // Run validation in the background so later form pages can
+                // reuse the existing Review-page polling/results flow.
+                void triggerBackgroundValidation(updatedSubmission.id)
+            }
+
             //Can assume back or continue was clicked at this point
             if (options.redirectPath) {
                 navigate(
