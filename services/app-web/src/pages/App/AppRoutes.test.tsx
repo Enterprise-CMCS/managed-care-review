@@ -204,6 +204,148 @@ describe('AppRoutes and routing configuration', () => {
         })
     })
 
+    describe('/contactus', () => {
+        it('can be accessed by state user', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/contactus' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Contact Us/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('can be accessed by CMS user', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/contactus' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Contact Us/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('can be accessed by unauthenticated users', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/contactus' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Contact Us/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('/resources', () => {
+        it('can be accessed by state user', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Resources and Training/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('can be accessed by CMS user', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Resources and Training/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('can be accessed by unauthenticated users', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Resources and Training/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+    })
+
     describe('invalid routes', () => {
         it('redirect to landing page when no user', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {

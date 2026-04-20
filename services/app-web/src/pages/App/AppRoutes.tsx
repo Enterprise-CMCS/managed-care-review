@@ -20,6 +20,8 @@ import { Settings } from '../Settings/Settings'
 import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
+import { ContactUs } from '../ContactUs/ContactUs'
+import { Resources } from '../Resources/Resources'
 import { Landing } from '../Landing/Landing'
 import { MccrsId } from '../MccrsId/MccrsId'
 import {
@@ -86,6 +88,8 @@ function componentForAuthMode(
 const UniversalRoutes = (
     <Fragment>
         <Route path={RoutesRecord.HELP} element={<Help />} />
+        <Route path={RoutesRecord.CONTACT_US} element={<ContactUs />} />
+        <Route path={RoutesRecord.RESOURCES} element={<Resources />} />
     </Fragment>
 )
 
@@ -465,6 +469,8 @@ export const AppRoutes = ({
             'ROOT' as const,
             'AUTH' as const,
             'HELP' as const,
+            'CONTACT_US' as const,
+            'RESOURCES' as const,
             'UNKNOWN_ROUTE' as const,
         ]
         if (!loggedInUser) {
