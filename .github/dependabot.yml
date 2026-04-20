@@ -16,6 +16,11 @@ updates:
       - dependency-name: '@prisma/client'
         update-types: ['version-update:semver-major']
     groups:
+      aws-cdk:
+        applies-to: version-updates
+        patterns:
+          - 'aws-cdk'
+          - 'aws-cdk-lib'
       aws-sdk:
         applies-to: version-updates
         patterns:
