@@ -673,7 +673,7 @@ AI pipeline artifacts often contain extracted text and intermediate outputs that
 - Cleanup behavior is compatible with draft deletion/abandonment flows
 - Retention assumptions are written down clearly
 - Future production rollout would not leave AI artifacts accumulating indefinitely by default"
-AIFA-028 Incremental parsing and selective re-indexing,Backlog,6-Production Prep,Low,"AIFA-006, AIFA-008","Optimize the pipeline so file changes do not always require a full reparse/re-embed.
+AIFA-028 Incremental parsing and selective re-indexing,Done,6-Production Prep,Low,"AIFA-006, AIFA-008","Optimize the pipeline so file changes do not always require a full reparse/re-embed.
 - Detect added files, removed files, and unchanged files
 - Re-parse or re-embed only the changed parts when practical
 - Rebuild or update retrieval artifacts accordingly
@@ -686,3 +686,16 @@ The PoC can accept full reprocessing on change, but production systems often ben
 - The optimization does not compromise correctness or artifact versioning
 - The ticket notes clearly explain that the PoC intentionally used full reprocessing as the simpler first implementation
 - The resulting behavior is documented well enough that later engineers understand what is optimized and what is not"
+AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts,Backlog,6-Production Prep,Low,AIFA-027,"Add an S3 lifecycle-rule safety net for the AI validation artifact bucket so old `rag-indexes/` artifacts age out even if scheduled cleanup does not run.
+- Scope the rule to the AI validation artifact prefix rather than the whole bucket
+- Match or intentionally document the retention window used by the scheduled cleanup path
+- Keep application-level cleanup as the primary mechanism; this is a backup retention control
+- Document any interaction with versioning if the bucket keeps prior object versions
+- Keep the change narrow and infrastructure-focused rather than reshaping the runtime artifact contract
+
+Why this matters:
+Scheduled cleanup is useful, but it still depends on application code and operational health. A bucket lifecycle rule gives the PoC a storage-level retention backstop for extracted text and validation artifacts.","- A lifecycle rule exists for the AI validation artifact prefix rather than relying only on scheduled cleanup
+- The configured retention window is documented and consistent with the intended artifact policy
+- The ticket notes make clear that lifecycle is a safety net, not the primary cleanup path
+- The change does not broaden retention behavior for unrelated bucket contents
+- Any versioned-object limitation or follow-up is documented clearly"

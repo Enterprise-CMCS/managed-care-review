@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-028 Incremental parsing and selective re-indexing`.
+The next implementation ticket is `AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts`.
 
 ## Completed
 
@@ -48,6 +48,7 @@ The next implementation ticket is `AIFA-028 Incremental parsing and selective re
 - AIFA-021 ✔ Cache validation results
 - AIFA-024 ✔ Bedrock follow-up for production-like evaluation
 - AIFA-027 ✔ Add cleanup and lifecycle rules for pipeline artifacts
+- AIFA-028 ✔ Incremental parsing and selective re-indexing
 
 ## Current State
 
@@ -136,6 +137,12 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - retention is currently 30 days for `chunks.json`, `status.json`, and `validation-result.json`, which matches the current draft-cleanup safety-net expectation
 - cleanup is prefix-scoped so the current artifact layout and stale/current cache behavior stay unchanged for active drafts
 
+### Incremental indexing
+
+- unchanged documents can now reuse per-document chunk and embedding artifacts instead of always reparsing and re-embedding the full set
+- the worker still rebuilds the current form-level `chunks.json` snapshot from the active document set so retrieval behavior stays unchanged
+- `chunks.json` now records the current document set so later runs can classify unchanged, added, and removed files
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -151,6 +158,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - repeatable harness-driven evaluation of corpus scenarios through the worker path
 - improved deterministic handling for competing start/end-date labels in real amendment fixtures
 - scheduled cleanup of expired AI validation artifacts by `rag-indexes/` prefix
+- selective document-level chunk and embedding reuse for unchanged files
 
 ## What Is Still Weak
 
@@ -165,6 +173,13 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
 - corpus evaluation now depends on reachable LocalStack S3 plus the repo `nvm` runtime, so local environment drift can still block verification before the worker runs
 - the artifact retention safety net currently relies on the scheduled cleanup path and configured 30-day cutoff; no separate bucket-lifecycle rule is managed in this repo yet
+- document-level reuse currently keys off document name plus S3 bucket/key identity, so any future upload flow that overwrites content in place without changing those inputs would need a stronger content fingerprint
+
+## Follow-On Tickets
+
+### AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts
+
+Add a storage-level retention safety net for `rag-indexes/` artifacts so old extracted text and validation outputs still age out if the scheduled cleanup path fails or stops running.
 
 ## Current PoC Direction
 
@@ -194,15 +209,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-028 Incremental parsing and selective re-indexing
+### AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts
 
-Optimize the pipeline so file changes do not always require a full reparse/re-embed.
+Add a storage-level retention backstop for `rag-indexes/` artifacts in case scheduled cleanup does not run.
 
 ## Suggested Next Step
 
-- Inspect the current chunk and retrieval flow to see whether selective document-level reuse can fit without breaking the current `artifactVersion` contract.
-- Keep any reuse logic subordinate to correctness; stale artifact reuse is a bigger risk than re-embedding too much in the PoC.
-- Follow the current artifact layout before introducing any new index or cache shape.
+- Add a prefix-scoped lifecycle rule for AI validation artifacts without widening retention behavior for unrelated bucket contents.
+- Match the current 30-day cleanup window unless there is a clear reason to document an intentional difference.
+- Keep scheduled cleanup as the primary path and lifecycle as a storage-level safety net.
 
 ## Source of Truth Docs
 
@@ -233,6 +248,7 @@ Optimize the pipeline so file changes do not always require a full reparse/re-em
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.
 - Clause-resolution hardening now passes the current 8-scenario corpus, but OCR-heavy term text still depends on narrow heuristics rather than a broader parsing layer.
 - Cache reuse now depends on `complete` status plus matching `artifactVersion` and form snapshot hash; partial or failed artifacts still force a fresh run.
+- Incremental document reuse now depends on per-document identity derived from document name plus S3 bucket/key, while the form-level `artifactVersion` contract remains the source of truth for current results.
 - AI validation artifacts currently retain for 30 days before scheduled cleanup deletes old `rag-indexes/` objects; this retention is intended as an operational safety net for abandoned or deleted drafts, not a long-lived archive.
 - Contract Details is now treated as the preferred point to start background validation because it is the first place in the current workflow where both scoped date fields and supporting documents are usually present.
 - The early trigger now depends on a second `validationStatus` read after the draft save, so future trigger-path changes need to stay aligned with the current stale/current artifact contract.

@@ -1,6 +1,12 @@
 import {
   buildChunksArtifact,
-  getChunksArtifactKey
+  buildIndexedDocumentArtifact,
+  classifyDocumentSetChanges,
+  computeDocumentCacheKey,
+  getChunksArtifactKey,
+  getDocumentIndexArtifactKey,
+  type ChunksArtifact,
+  type IndexedDocumentArtifact
 } from '../artifacts'
 import { chunkDocument } from '../chunking'
 import { XenovaEmbeddingProvider } from '../embeddings'
@@ -24,7 +30,7 @@ import {
   type ValidationRetrievalDiagnostic
 } from '../results'
 import { newArtifactS3Client } from '../s3'
-import type { ArtifactS3ClientConfig } from '../s3'
+import type { ArtifactS3Client, ArtifactS3ClientConfig } from '../s3'
 import {
   buildCompletedValidationStatusArtifact,
   buildFailedValidationStatusArtifact,
@@ -104,29 +110,89 @@ export async function validationHandler(
       buildValidationStatusArtifact('parsing', event.artifactVersion)
     )
 
-    // Parse each source document inside the worker so the app flow no longer
-    // depends on a separate manual script to create chunks or prompt context.
-    const parsedDocuments = await Promise.all(
+    const previousChunksArtifact = await readOptionalArtifact<ChunksArtifact>(
+      s3Client,
+      event.bucket,
+      getChunksArtifactKey(event.formId)
+    )
+    const documentChanges = classifyDocumentSetChanges(
+      previousChunksArtifact?.documents ?? [],
+      event.documents
+    )
+    const unchangedDocumentCacheKeys = new Set(
+      documentChanges.unchanged.map((document) => document.cacheKey)
+    )
+    const embeddingProvider = new XenovaEmbeddingProvider()
+    const embeddingModel = embeddingProvider.getModelInfo()
+
+    const indexedDocuments = await Promise.all(
       event.documents.map(async (document) => {
+        const documentCacheKey = computeDocumentCacheKey(document)
+        const documentArtifactKey = getDocumentIndexArtifactKey(
+          event.formId,
+          documentCacheKey
+        )
+
+        if (unchangedDocumentCacheKeys.has(documentCacheKey)) {
+          const cachedDocumentArtifact =
+            await readOptionalArtifact<IndexedDocumentArtifact>(
+              s3Client,
+              event.bucket,
+              documentArtifactKey
+            )
+
+          if (
+            cachedDocumentArtifact != null &&
+            cachedDocumentArtifact.embeddingModel === embeddingModel
+          ) {
+            return cachedDocumentArtifact
+          }
+        }
+
+        // Parse and embed only documents that are new, changed, or missing a
+        // reusable per-document artifact for the current embedding model.
         const fileBuffer = await s3Client.getBuffer(
           document.sourceBucket,
           document.sourceKey
         )
         const parsed = await parsePdf(fileBuffer, document.documentName)
+        const chunks = chunkDocument(parsed.fileName, parsed.rawText, {
+          pageTexts: parsed.pageTexts
+        })
 
-        return {
-          document,
-          parsed
+        if (chunks.length === 0) {
+          throw new Error(
+            `Validation could not create chunks for document ${document.documentName}`
+          )
         }
+
+        const chunkVectors = await embeddingProvider.embedTexts(
+          chunks.map((chunk) => chunk.text)
+        )
+        const indexedDocumentArtifact = buildIndexedDocumentArtifact({
+          documentName: document.documentName,
+          sourceBucket: document.sourceBucket,
+          sourceKey: document.sourceKey,
+          chunks,
+          chunkVectors,
+          embeddingModel
+        })
+
+        await s3Client.putJson(
+          event.bucket,
+          documentArtifactKey,
+          indexedDocumentArtifact
+        )
+
+        return indexedDocumentArtifact
       })
     )
 
-    // Flatten parsed documents into one chunk set for this form so retrieval
-    // can search across all currently attached contract PDFs as one evidence pool.
-    const chunks = parsedDocuments.flatMap(({ parsed }) =>
-      chunkDocument(parsed.fileName, parsed.rawText, {
-        pageTexts: parsed.pageTexts
-      })
+    // Rebuild the current form-level chunk snapshot from the active document
+    // set so retrieval still sees one combined evidence pool for the form.
+    const chunks = indexedDocuments.flatMap((document) => document.chunks)
+    const chunkVectors = indexedDocuments.flatMap(
+      (document) => document.chunkVectors
     )
 
     if (chunks.length === 0) {
@@ -138,14 +204,11 @@ export async function validationHandler(
     await s3Client.putJson(
       event.bucket,
       getChunksArtifactKey(event.formId),
-      buildChunksArtifact(event.artifactVersion, chunks)
-    )
-
-    // Re-embed the stored chunk text inside the worker so the runtime path does
-    // not depend on a separate manual precomputation step from src/dev.ts.
-    const embeddingProvider = new XenovaEmbeddingProvider()
-    const chunkVectors = await embeddingProvider.embedTexts(
-      chunks.map((chunk) => chunk.text)
+      buildChunksArtifact(
+        event.artifactVersion,
+        chunks,
+        indexedDocuments.map((document) => document.document)
+      )
     )
 
     await s3Client.putJson(
@@ -449,6 +512,22 @@ function reconcileValidationResults(
       ]
     })
   }))
+}
+
+async function readOptionalArtifact<T>(
+  s3Client: ArtifactS3Client,
+  bucket: string,
+  key: string
+): Promise<T | null> {
+  try {
+    return await s3Client.getJson<T>(bucket, key)
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('S3 object not found')) {
+      return null
+    }
+
+    throw error
+  }
 }
 
 function logMissingCitationPages(
