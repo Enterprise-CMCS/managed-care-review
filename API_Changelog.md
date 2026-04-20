@@ -1,6 +1,13 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### April 20, 2026
+#### Updated
+- **`indexRates`** endpoint updated to accept an optional `rateIDs` parameter (via `IndexRatesInput`):
+    - **`rateIDs`**: an optional array of rate ID strings. When provided, only rates matching those IDs are returned. Useful for batch-fetching a known set of rates in a single request.
+    - When omitted, behavior is unchanged — all submitted rates are returned (filtered by state for state users).
+    - Draft rates are excluded from results regardless of whether their ID is in the list.
+
 ### April 1, 2026
 #### Added
 - `isDeprecated` and `deprecatedByProgramId` added to the `Program` GraphQL type.
