@@ -86,11 +86,7 @@ function componentForAuthMode(
 // Routes that are agnostic to user login and authentication
 // Should be available on all defined routes lists
 // Hide Contact us and Resources pages behind the feature flag
-const renderUniversalRoutes = ({
-    showResourcesNavPages,
-}: {
-    showResourcesNavPages: boolean
-}) => (
+const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
     <Fragment>
         <Route path={RoutesRecord.HELP} element={<Help />} />
         <Route
@@ -215,7 +211,7 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
-                {renderUniversalRoutes({ showResourcesNavPages })}
+                {renderUniversalRoutes(showResourcesNavPages)}
                 {isExplorerAllowed(stageName) && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
@@ -421,7 +417,7 @@ const CMSUserRoutes = ({
                     // one and just redirecting.
                     element={<Navigate to="/mc-review-settings" />}
                 />
-                {renderUniversalRoutes({ showResourcesNavPages })}
+                {renderUniversalRoutes(showResourcesNavPages)}
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -440,7 +436,7 @@ const UnauthenticatedRoutes = ({
     return (
         <Routes>
             <Route path={RoutesRecord.ROOT} element={<Landing />} />
-            {renderUniversalRoutes({ showResourcesNavPages })}
+            {renderUniversalRoutes(showResourcesNavPages)}
             {/* no /auth page for IDM auth, we just have the login redirect link */}
             {authComponent && (
                 <Route path={RoutesRecord.AUTH} element={authComponent} />
