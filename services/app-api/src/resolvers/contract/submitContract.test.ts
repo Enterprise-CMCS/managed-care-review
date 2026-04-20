@@ -2460,4 +2460,121 @@ describe('submitContract', () => {
             )
         })
     })
+
+    describe('HEALTH_PLAN CHIP review determination', () => {
+        const chipAutomationLD = testLDService({
+            'chip-submission-automation': true,
+        })
+
+        it('records NOT_SUBJECT_TO_REVIEW action on a CHIP-only submission', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+                ldService: chipAutomationLD,
+            })
+
+            const draft = await createAndUpdateTestContractWithoutRates(
+                stateServer,
+                undefined,
+                {
+                    submissionType: 'CONTRACT_ONLY',
+                    populationCovered: 'CHIP',
+                    federalAuthorities: ['TITLE_XXI'],
+                }
+            )
+
+            const contract = await submitTestContract(stateServer, draft.id)
+
+            expect(contract.contractSubmissionType).toBe('HEALTH_PLAN')
+            expect(contract.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+            expect(contract.reviewStatusActions).toHaveLength(1)
+            expect(contract.reviewStatusActions?.[0].actionType).toBe(
+                'NOT_SUBJECT_TO_REVIEW'
+            )
+        })
+
+        it('records UNDER_REVIEW action on non-CHIP HEALTH_PLAN submission', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+                ldService: chipAutomationLD,
+            })
+
+            const contract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            expect(contract.contractSubmissionType).toBe('HEALTH_PLAN')
+            expect(contract.consolidatedStatus).toBe('SUBMITTED')
+            expect(contract.reviewStatusActions).toHaveLength(1)
+            expect(contract.reviewStatusActions?.[0].actionType).toBe(
+                'UNDER_REVIEW'
+            )
+        })
+
+        it('appends a new NOT_SUBJECT_TO_REVIEW row on CHIP resubmit', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+                ldService: chipAutomationLD,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+                ldService: chipAutomationLD,
+                context: {
+                    user: testCMSUser(),
+                },
+            })
+
+            const draft = await createAndUpdateTestContractWithoutRates(
+                stateServer,
+                undefined,
+                {
+                    submissionType: 'CONTRACT_ONLY',
+                    populationCovered: 'CHIP',
+                    federalAuthorities: ['TITLE_XXI'],
+                }
+            )
+
+            const firstSubmit = await submitTestContract(stateServer, draft.id)
+            expect(firstSubmit.reviewStatusActions).toHaveLength(1)
+
+            const unlocked = await unlockTestContract(
+                cmsServer,
+                firstSubmit.id,
+                'unlock CHIP submission'
+            )
+            expect(unlocked.consolidatedStatus).toBe('UNLOCKED')
+
+            const resubmitted = await submitTestContract(
+                stateServer,
+                unlocked.id,
+                'resubmit CHIP submission'
+            )
+
+            expect(resubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+            expect(resubmitted.reviewStatusActions).toHaveLength(2)
+            resubmitted.reviewStatusActions?.forEach((a) => {
+                expect(a.actionType).toBe('NOT_SUBJECT_TO_REVIEW')
+            })
+        })
+
+        it('does not add a review action when chip-submission-automation flag is off', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+
+            const draft = await createAndUpdateTestContractWithoutRates(
+                stateServer,
+                undefined,
+                {
+                    submissionType: 'CONTRACT_ONLY',
+                    populationCovered: 'CHIP',
+                    federalAuthorities: ['TITLE_XXI'],
+                }
+            )
+
+            const contract = await submitTestContract(stateServer, draft.id)
+
+            expect(contract.contractSubmissionType).toBe('HEALTH_PLAN')
+            expect(contract.consolidatedStatus).toBe('SUBMITTED')
+            expect(contract.reviewStatusActions ?? []).toHaveLength(0)
+        })
+    })
 })

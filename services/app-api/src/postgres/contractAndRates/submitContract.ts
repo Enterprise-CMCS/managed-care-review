@@ -140,10 +140,57 @@ async function eqroContractReviewDeterminationAction(
     return updatedContract
 }
 
+async function healthPlanContractReviewDeterminationAction(
+    tx: PrismaTransactionType,
+    contract: ContractType
+): Promise<ContractType | Error> {
+    if (contract.contractSubmissionType !== 'HEALTH_PLAN') {
+        return new Error('Cannot determine review on non-HEALTH_PLAN contracts')
+    }
+
+    const canDetermineReview =
+        ['SUBMITTED', 'RESUBMITTED'].includes(contract.status) &&
+        !['APPROVED', 'WITHDRAWN'].includes(contract.reviewStatus)
+
+    if (!canDetermineReview) {
+        return new Error(
+            `Cannot determine review on contract with status ${contract.consolidatedStatus}`
+        )
+    }
+
+    const latestSubmission = contract.packageSubmissions[0]
+    if (!latestSubmission) {
+        return new Error(
+            'Cannot determine review: contract has no submitted revision'
+        )
+    }
+
+    const isChipOnly =
+        latestSubmission.contractRevision.formData.populationCovered === 'CHIP'
+
+    await tx.contractActionTable.create({
+        data: {
+            updatedByID: undefined,
+            actionType: isChipOnly ? 'NOT_SUBJECT_TO_REVIEW' : 'UNDER_REVIEW',
+            contractID: contract.id,
+        },
+    })
+
+    const updatedContract = await findContractWithHistory(tx, contract.id)
+    if (updatedContract instanceof Error) {
+        return updatedContract
+    }
+
+    return updatedContract
+}
+
 type SubmitContractArgsType = {
     contractID: string // revision ID
     submittedByUserID: string
     submittedReason: UpdateInfoType['updatedReason']
+    // Value of the `chip-submission-automation` LaunchDarkly flag, plumbed
+    // through from the resolver. Gates HEALTH_PLAN CHIP review determination.
+    chipSubmissionAutomationFlag?: boolean
 }
 // Update the given revision
 // * invalidate relationships of previous revision by marking as outdated
@@ -152,7 +199,12 @@ async function submitContract(
     client: ExtendedPrismaClient,
     args: SubmitContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    const { contractID, submittedByUserID, submittedReason } = args
+    const {
+        contractID,
+        submittedByUserID,
+        submittedReason,
+        chipSubmissionAutomationFlag,
+    } = args
 
     try {
         return await client.$transaction(async (tx) => {
@@ -181,6 +233,25 @@ async function submitContract(
                 return eqroReviewUpdate
             }
 
+            // HEALTH_PLAN CHIP-only submissions are not subject to review.
+            // Gated behind the `chip-submission-automation` LaunchDarkly flag.
+            if (
+                chipSubmissionAutomationFlag &&
+                result.contractSubmissionType === 'HEALTH_PLAN'
+            ) {
+                const healthPlanReviewUpdate =
+                    await healthPlanContractReviewDeterminationAction(
+                        tx,
+                        result
+                    )
+
+                if (healthPlanReviewUpdate instanceof Error) {
+                    throw healthPlanReviewUpdate
+                }
+
+                return healthPlanReviewUpdate
+            }
+
             return result
         })
     } catch (err) {
@@ -193,6 +264,7 @@ export {
     submitContract,
     submitContractInsideTransaction,
     eqroContractReviewDeterminationAction,
+    healthPlanContractReviewDeterminationAction,
 }
 
 export type { SubmitContractArgsType }

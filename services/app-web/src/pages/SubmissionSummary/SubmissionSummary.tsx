@@ -245,7 +245,9 @@ export const SubmissionSummary = (): React.ReactElement => {
         ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
     const showUnlockBtn =
         hasCMSPermissions &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+        ['SUBMITTED', 'RESUBMITTED', 'NOT_SUBJECT_TO_REVIEW'].includes(
+            consolidatedStatus
+        )
     const showWithdrawBtn =
         hasCMSPermissions &&
         withdrawSubmissionFlag &&
