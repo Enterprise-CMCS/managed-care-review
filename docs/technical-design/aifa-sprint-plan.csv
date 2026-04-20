@@ -686,7 +686,7 @@ The PoC can accept full reprocessing on change, but production systems often ben
 - The optimization does not compromise correctness or artifact versioning
 - The ticket notes clearly explain that the PoC intentionally used full reprocessing as the simpler first implementation
 - The resulting behavior is documented well enough that later engineers understand what is optimized and what is not"
-AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts,Backlog,6-Production Prep,Low,AIFA-027,"Add an S3 lifecycle-rule safety net for the AI validation artifact bucket so old `rag-indexes/` artifacts age out even if scheduled cleanup does not run.
+AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts,Done,6-Production Prep,Low,AIFA-027,"Add an S3 lifecycle-rule safety net for the AI validation artifact bucket so old `rag-indexes/` artifacts age out even if scheduled cleanup does not run.
 - Scope the rule to the AI validation artifact prefix rather than the whole bucket
 - Match or intentionally document the retention window used by the scheduled cleanup path
 - Keep application-level cleanup as the primary mechanism; this is a backup retention control

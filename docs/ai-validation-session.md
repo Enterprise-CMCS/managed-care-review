@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts`.
+The next implementation ticket is `AIFA-025 Evaluate FAISS implementation behind VectorStore`.
 
 ## Completed
 
@@ -49,6 +49,7 @@ The next implementation ticket is `AIFA-037 Add S3 lifecycle rule safety net for
 - AIFA-024 ✔ Bedrock follow-up for production-like evaluation
 - AIFA-027 ✔ Add cleanup and lifecycle rules for pipeline artifacts
 - AIFA-028 ✔ Incremental parsing and selective re-indexing
+- AIFA-037 ✔ Add S3 lifecycle rule safety net for AI validation artifacts
 
 ## Current State
 
@@ -143,6 +144,12 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - the worker still rebuilds the current form-level `chunks.json` snapshot from the active document set so retrieval behavior stays unchanged
 - `chunks.json` now records the current document set so later runs can classify unchanged, added, and removed files
 
+### Lifecycle safety net
+
+- the CDK app-api stack now applies a prefix-scoped S3 lifecycle rule for `rag-indexes/` in the dedicated AI validation artifact bucket
+- the lifecycle window matches the current 30-day cleanup setting and expires noncurrent versions too when bucket versioning is enabled
+- scheduled cleanup remains the primary cleanup path; lifecycle is now a storage-level backstop
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -159,6 +166,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - improved deterministic handling for competing start/end-date labels in real amendment fixtures
 - scheduled cleanup of expired AI validation artifacts by `rag-indexes/` prefix
 - selective document-level chunk and embedding reuse for unchanged files
+- prefix-scoped S3 lifecycle expiration for AI validation artifacts
 
 ## What Is Still Weak
 
@@ -172,14 +180,14 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - the Bedrock evaluation path is in place, but live verification still depends on valid AWS credentials, regional model access, and a real model ID
 - evaluation currently reports malformed-output frequency, but does not yet enforce a pass/fail threshold for that rate
 - corpus evaluation now depends on reachable LocalStack S3 plus the repo `nvm` runtime, so local environment drift can still block verification before the worker runs
-- the artifact retention safety net currently relies on the scheduled cleanup path and configured 30-day cutoff; no separate bucket-lifecycle rule is managed in this repo yet
 - document-level reuse currently keys off document name plus S3 bucket/key identity, so any future upload flow that overwrites content in place without changing those inputs would need a stronger content fingerprint
+- the lifecycle safety net currently assumes `ai-form-augmentation-artifacts` stays dedicated to AI validation storage because the custom-resource call owns that bucket's lifecycle configuration
 
 ## Follow-On Tickets
 
-### AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts
+### AIFA-025 Evaluate FAISS implementation behind VectorStore
 
-Add a storage-level retention safety net for `rag-indexes/` artifacts so old extracted text and validation outputs still age out if the scheduled cleanup path fails or stops running.
+Evaluate whether FAISS is worth introducing after the PoC instead of keeping brute-force retrieval.
 
 ## Current PoC Direction
 
@@ -209,15 +217,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-037 Add S3 lifecycle rule safety net for AI validation artifacts
+### AIFA-025 Evaluate FAISS implementation behind VectorStore
 
-Add a storage-level retention backstop for `rag-indexes/` artifacts in case scheduled cleanup does not run.
+Evaluate whether FAISS earns its complexity for the current retrieval shape and corpus size.
 
 ## Suggested Next Step
 
-- Add a prefix-scoped lifecycle rule for AI validation artifacts without widening retention behavior for unrelated bucket contents.
-- Match the current 30-day cleanup window unless there is a clear reason to document an intentional difference.
-- Keep scheduled cleanup as the primary path and lifecycle as a storage-level safety net.
+- Inspect the current `VectorStore` seam and current corpus/runtime sizes before changing the retrieval backend.
+- Compare the current brute-force path against the operational cost and packaging complexity FAISS would add.
+- Keep the seam stable so a decision either way does not disturb the current worker flow.
 
 ## Source of Truth Docs
 
@@ -250,6 +258,7 @@ Add a storage-level retention backstop for `rag-indexes/` artifacts in case sche
 - Cache reuse now depends on `complete` status plus matching `artifactVersion` and form snapshot hash; partial or failed artifacts still force a fresh run.
 - Incremental document reuse now depends on per-document identity derived from document name plus S3 bucket/key, while the form-level `artifactVersion` contract remains the source of truth for current results.
 - AI validation artifacts currently retain for 30 days before scheduled cleanup deletes old `rag-indexes/` objects; this retention is intended as an operational safety net for abandoned or deleted drafts, not a long-lived archive.
+- The lifecycle safety net is now managed by CDK through an S3 API custom resource because the dedicated artifact bucket is referenced by fixed name rather than modeled as a first-class CDK `Bucket` in this stack.
 - Contract Details is now treated as the preferred point to start background validation because it is the first place in the current workflow where both scoped date fields and supporting documents are usually present.
 - The early trigger now depends on a second `validationStatus` read after the draft save, so future trigger-path changes need to stay aligned with the current stale/current artifact contract.
 - The validation rollout is currently frontend-only, so LaunchDarkly dashboard setup and any future backend trigger paths need to stay aligned with the client-side flag behavior.

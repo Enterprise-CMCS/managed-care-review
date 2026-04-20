@@ -40,6 +40,11 @@ import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
+import {
+    AwsCustomResource,
+    AwsCustomResourcePolicy,
+    PhysicalResourceId,
+} from 'aws-cdk-lib/custom-resources'
 import { AWS_OTEL_LAYER_ARN } from './constants'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
@@ -57,6 +62,13 @@ export class AppApiStack extends BaseStack {
     // ESM banner for Lambda bundling - provides CommonJS compatibility shims
     private static readonly ESM_BANNER =
         'import { createRequire as __createRequire } from "module";import { fileURLToPath as __fileURLToPath } from "url";import { dirname as __dirnameFn } from "path";const require = __createRequire(import.meta.url);const __filename = __fileURLToPath(import.meta.url);const __dirname = __dirnameFn(__filename);'
+    private static readonly AI_VALIDATION_ARTIFACT_BUCKET_NAME =
+        'ai-form-augmentation-artifacts'
+    private static readonly AI_VALIDATION_ARTIFACT_BUCKET_ARN = `arn:aws:s3:::${AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_NAME}`
+    private static readonly AI_VALIDATION_ARTIFACT_PREFIX = 'rag-indexes/'
+    private static readonly AI_VALIDATION_ARTIFACT_RETENTION_DAYS = 30
+    private static readonly AI_VALIDATION_ARTIFACT_LIFECYCLE_RULE_ID =
+        'expire-ai-validation-artifacts'
 
     // API Gateway
     public readonly apiGateway: RestApi
@@ -308,13 +320,17 @@ export class AppApiStack extends BaseStack {
         const graphqlEnvironment = {
             ...environment,
             VALIDATION_FUNCTION_NAME: this.validationFunction.functionName,
-            AI_VALIDATION_ARTIFACT_BUCKET: 'ai-form-augmentation-artifacts',
+            AI_VALIDATION_ARTIFACT_BUCKET:
+                AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_NAME,
         }
 
         const cleanupEnvironment = {
             ...environment,
-            AI_VALIDATION_ARTIFACT_BUCKET: 'ai-form-augmentation-artifacts',
-            AI_VALIDATION_ARTIFACT_RETENTION_DAYS: '30',
+            AI_VALIDATION_ARTIFACT_BUCKET:
+                AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_NAME,
+            AI_VALIDATION_ARTIFACT_RETENTION_DAYS: String(
+                AppApiStack.AI_VALIDATION_ARTIFACT_RETENTION_DAYS
+            ),
         }
 
         // OTEL function needs the ADOT layer and collector.yml file
@@ -625,6 +641,8 @@ export class AppApiStack extends BaseStack {
         // even though the shared role currently allows broad Lambda invocation.
         this.validationFunction.grantInvoke(this.graphqlFunction)
 
+        this.setupAiValidationArtifactLifecycleSafetyNet()
+
         // Create API Gateway resources and methods first
         this.setupApiGatewayRoutes(this.apiGateway)
 
@@ -904,9 +922,6 @@ export class AppApiStack extends BaseStack {
         // TODO: Remove after database migration updates all s3URL references to new bucket
         const legacyDocumentsBucket = `arn:aws:s3:::uploads-${this.stage}-uploads-${this.account}`
         const legacyQABucket = `arn:aws:s3:::uploads-${this.stage}-qa-${this.account}`
-        const aiValidationArtifactBucketArn =
-            'arn:aws:s3:::ai-form-augmentation-artifacts'
-
         role.addToPolicy(
             new PolicyStatement({
                 effect: Effect.ALLOW,
@@ -931,7 +946,9 @@ export class AppApiStack extends BaseStack {
             new PolicyStatement({
                 effect: Effect.ALLOW,
                 actions: ['s3:DeleteObject'],
-                resources: [`${aiValidationArtifactBucketArn}/rag-indexes/*`],
+                resources: [
+                    `${AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_ARN}/${AppApiStack.AI_VALIDATION_ARTIFACT_PREFIX}*`,
+                ],
             })
         )
 
@@ -939,7 +956,7 @@ export class AppApiStack extends BaseStack {
             new PolicyStatement({
                 effect: Effect.ALLOW,
                 actions: ['s3:ListBucket', 's3:GetBucketLocation'],
-                resources: [aiValidationArtifactBucketArn],
+                resources: [AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_ARN],
             })
         )
 
@@ -1071,6 +1088,61 @@ export class AppApiStack extends BaseStack {
             INTERNAL_ALLOWED_ORIGINS:
                 process.env.INTERNAL_ALLOWED_ORIGINS || '',
         }
+    }
+
+    private setupAiValidationArtifactLifecycleSafetyNet(): void {
+        // The AI artifact bucket is currently consumed by fixed name rather than
+        // created as a first-class CDK Bucket in this stack, so apply the
+        // lifecycle rule through an explicit S3 API call instead of reshaping
+        // bucket ownership as part of this narrow ticket. This call owns the
+        // bucket's lifecycle configuration, which is acceptable here because
+        // the bucket is treated as dedicated AI artifact storage.
+        const lifecycleParameters = {
+            Bucket: AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_NAME,
+            LifecycleConfiguration: {
+                Rules: [
+                    {
+                        ID: AppApiStack.AI_VALIDATION_ARTIFACT_LIFECYCLE_RULE_ID,
+                        Status: 'Enabled',
+                        Filter: {
+                            Prefix: AppApiStack.AI_VALIDATION_ARTIFACT_PREFIX,
+                        },
+                        Expiration: {
+                            Days: AppApiStack.AI_VALIDATION_ARTIFACT_RETENTION_DAYS,
+                        },
+                        // Expire noncurrent versions too when bucket versioning is
+                        // enabled so the safety net covers old artifact history,
+                        // not just the latest visible object.
+                        NoncurrentVersionExpiration: {
+                            NoncurrentDays:
+                                AppApiStack.AI_VALIDATION_ARTIFACT_RETENTION_DAYS,
+                        },
+                    },
+                ],
+            },
+        }
+
+        new AwsCustomResource(this, 'AiValidationArtifactLifecycleSafetyNet', {
+            onCreate: {
+                service: 'S3',
+                action: 'putBucketLifecycleConfiguration',
+                parameters: lifecycleParameters,
+                physicalResourceId: PhysicalResourceId.of(
+                    `${AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_NAME}-${AppApiStack.AI_VALIDATION_ARTIFACT_LIFECYCLE_RULE_ID}`
+                ),
+            },
+            onUpdate: {
+                service: 'S3',
+                action: 'putBucketLifecycleConfiguration',
+                parameters: lifecycleParameters,
+                physicalResourceId: PhysicalResourceId.of(
+                    `${AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_NAME}-${AppApiStack.AI_VALIDATION_ARTIFACT_LIFECYCLE_RULE_ID}`
+                ),
+            },
+            policy: AwsCustomResourcePolicy.fromSdkCalls({
+                resources: [AppApiStack.AI_VALIDATION_ARTIFACT_BUCKET_ARN],
+            }),
+        })
     }
 
     private setupApiGatewayRoutes(apiGateway: IRestApi): void {
