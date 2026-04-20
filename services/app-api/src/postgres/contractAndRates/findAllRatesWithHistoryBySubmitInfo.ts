@@ -40,8 +40,36 @@ async function findAllRatesWithHistoryBySubmitInfo(
                     : {
                           not: 'AS', // exclude test state as per ADR 019
                       },
-                updatedAt: args?.updatedSince
-                    ? { gte: args.updatedSince }
+                AND: args?.updatedSince
+                    ? [
+                          {
+                              OR: [
+                                  { updatedAt: { gte: args.updatedSince } },
+                                  {
+                                      revisions: {
+                                          some: {
+                                              submitInfoID: { not: null },
+                                              updatedAt: {
+                                                  gte: args.updatedSince,
+                                              },
+                                          },
+                                      },
+                                  },
+                                  {
+                                      revisions: {
+                                          some: {
+                                              submitInfoID: { not: null },
+                                              submitInfo: {
+                                                  updatedAt: {
+                                                      gte: args.updatedSince,
+                                                  },
+                                              },
+                                          },
+                                      },
+                                  },
+                              ],
+                          },
+                      ]
                     : undefined,
             },
             include: {

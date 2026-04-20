@@ -58,15 +58,20 @@ export function indexRatesStripped(
 
         if (adminPermissions || cmsUser || stateUser) {
             let ratesWithHistory
+            const updatedSince = input?.updatedSince
+                ? new Date(input.updatedSince)
+                : undefined
             if (stateUser) {
                 ratesWithHistory = await store.findAllRatesStripped({
                     stateCode: user.stateCode,
                     rateIDs: input?.rateIDs ?? undefined,
+                    updatedSince,
                 })
             } else {
                 ratesWithHistory = await store.findAllRatesStripped({
                     stateCode: input?.stateCode ?? undefined,
                     rateIDs: input?.rateIDs ?? undefined,
+                    updatedSince,
                 })
             }
             if (ratesWithHistory instanceof Error) {

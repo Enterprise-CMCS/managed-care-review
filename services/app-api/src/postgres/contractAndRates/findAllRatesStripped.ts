@@ -15,6 +15,7 @@ type StrippedRateOrErrorArrayType = StrippedRateOrErrorType[]
 type FindAllRatesStrippedType = {
     stateCode?: string
     rateIDs?: string[]
+    updatedSince?: Date
 }
 
 async function findAllRatesStrippedInTransaction(
@@ -23,6 +24,7 @@ async function findAllRatesStrippedInTransaction(
 ): Promise<StrippedRateOrErrorArrayType | Error> {
     const stateCode = args?.stateCode
     const rateIDs = args?.rateIDs
+    const updatedSince = args?.updatedSince
     const rates = await tx.rateTable.findMany({
         where: {
             revisions: {
@@ -43,6 +45,33 @@ async function findAllRatesStrippedInTransaction(
                 ? {
                       in: rateIDs,
                   }
+                : undefined,
+            AND: updatedSince
+                ? [
+                      {
+                          OR: [
+                              { updatedAt: { gte: updatedSince } },
+                              {
+                                  revisions: {
+                                      some: {
+                                          submitInfoID: { not: null },
+                                          updatedAt: { gte: updatedSince },
+                                      },
+                                  },
+                              },
+                              {
+                                  revisions: {
+                                      some: {
+                                          submitInfoID: { not: null },
+                                          submitInfo: {
+                                              updatedAt: { gte: updatedSince },
+                                          },
+                                      },
+                                  },
+                              },
+                          ],
+                      },
+                  ]
                 : undefined,
         },
         include: includeStrippedRate,

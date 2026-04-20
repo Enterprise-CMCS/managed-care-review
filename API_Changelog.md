@@ -6,9 +6,9 @@
 
 #### Updated
 
-- **`indexRates`** endpoint updated to accept two new optional parameters (via `IndexRatesInput`):
+- **`indexRates`** and **`indexRatesStripped`** endpoints updated to accept two new optional parameters (via `IndexRatesInput`):
     - **`rateIDs`**: an optional array of rate ID strings. When provided, only rates matching those IDs are returned. Useful for batch-fetching a known set of rates in a single request. Draft rates are excluded regardless of whether their ID is in the list.
-    - **`updatedSince`**: an optional `DateTime`. When provided, only rates with an `updatedAt` at or after this timestamp are returned. Designed for incremental pulls — pass your last-run timestamp to receive only rates that are new or have changed since then.
+    - **`updatedSince`**: an optional `DateTime`. When provided, only rates where the rate row, any submitted revision, or the revision's submit record has an `updatedAt` at or after this timestamp are returned. Designed for incremental pulls — pass your last-run timestamp to receive only rates that are new or have changed since then.
     - When both are omitted, behavior is unchanged — all submitted rates are returned.
 
 ### April 1, 2026
@@ -80,6 +80,7 @@
 #### Added
 
 - `EQRO` contract submission type fields to `ContractFormData` GraphQL type.
+
     ```graphql
         type ContractFormData {
             ...existing fields,
