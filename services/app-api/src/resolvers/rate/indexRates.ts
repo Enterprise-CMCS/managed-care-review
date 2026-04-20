@@ -70,17 +70,20 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo({
                         stateCode: user.stateCode,
+                        rateIDs: input?.rateIDs ?? undefined,
                         useZod: true,
                     })
             } else if (input && input.stateCode) {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo({
                         stateCode: input.stateCode,
+                        rateIDs: input?.rateIDs ?? undefined,
                         useZod: true,
                     })
             } else {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo({
+                        rateIDs: input?.rateIDs ?? undefined,
                         useZod: false,
                     })
             }

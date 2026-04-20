@@ -146,6 +146,73 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         )
     })
 
+    it('returns only rates matching the provided rateIDs', async () => {
+        const client = await sharedTestPrismaClient()
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const contractA = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({
+                    submissionDescription: 'one contract',
+                })
+            )
+        )
+
+        const rateOne = must(
+            await insertDraftRate(
+                client,
+                contractA.id,
+                mockInsertRateArgs({ rateCertificationName: 'rate one' })
+            )
+        )
+        const rateTwo = must(
+            await insertDraftRate(
+                client,
+                contractA.id,
+                mockInsertRateArgs({ rateCertificationName: 'rate two' })
+            )
+        )
+        must(
+            await insertDraftRate(
+                client,
+                contractA.id,
+                mockInsertRateArgs({ rateCertificationName: 'rate three' })
+            )
+        )
+
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Submitting rates',
+            })
+        )
+
+        const rates = must(
+            await findAllRatesWithHistoryBySubmitInfo(client, {
+                rateIDs: [rateOne.id, rateTwo.id],
+            })
+        )
+
+        expect(rates).toHaveLength(2)
+        expect(rates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ rateID: rateOne.id }),
+                expect.objectContaining({ rateID: rateTwo.id }),
+            ])
+        )
+    })
+
     it('can return rates only for a specific state if stateCode passed in', async () => {
         const client = await sharedTestPrismaClient()
         const stateUser = await client.user.create({
