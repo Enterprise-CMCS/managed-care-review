@@ -67,6 +67,13 @@ async function findAllRatesStrippedInTransaction(
                               },
                           },
                       },
+                      {
+                          reviewStatusActions: {
+                              some: {
+                                  updatedAt: { gte: updatedSince },
+                              },
+                          },
+                      },
                   ]
                 : undefined,
         },

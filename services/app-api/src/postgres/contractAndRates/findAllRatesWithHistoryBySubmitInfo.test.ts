@@ -309,6 +309,70 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         )
     })
 
+    it('returns a rate when a review status action occurs after updatedSince', async () => {
+        const client = await sharedTestPrismaClient()
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const contractA = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({
+                    submissionDescription: 'one contract',
+                })
+            )
+        )
+        const rate = must(
+            await insertDraftRate(
+                client,
+                contractA.id,
+                mockInsertRateArgs({ rateCertificationName: 'a rate' })
+            )
+        )
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Initial submission',
+            })
+        )
+
+        // Set cutoff after submission
+        const cutoff = new Date()
+
+        // Directly insert a review status action after the cutoff — this does NOT
+        // touch RateTable.updatedAt or any revision row, so only the
+        // reviewStatusActions OR branch should catch it
+        await client.rateActionTable.create({
+            data: {
+                rateID: rate.id,
+                updatedByID: stateUser.id,
+                updatedReason: 'Withdrawing rate',
+                actionType: 'WITHDRAW',
+            },
+        })
+
+        const rates = must(
+            await findAllRatesWithHistoryBySubmitInfo(client, {
+                updatedSince: cutoff,
+            })
+        )
+
+        expect(rates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ rateID: rate.id }),
+            ])
+        )
+    })
+
     it('returns a rate after unlock and resubmit when updatedSince is set between the two submissions', async () => {
         const client = await sharedTestPrismaClient()
         const stateUser = await client.user.create({

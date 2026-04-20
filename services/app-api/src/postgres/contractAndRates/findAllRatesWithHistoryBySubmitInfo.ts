@@ -61,6 +61,13 @@ async function findAllRatesWithHistoryBySubmitInfo(
                                   },
                               },
                           },
+                          {
+                              reviewStatusActions: {
+                                  some: {
+                                      updatedAt: { gte: args.updatedSince },
+                                  },
+                              },
+                          },
                       ]
                     : undefined,
             },
