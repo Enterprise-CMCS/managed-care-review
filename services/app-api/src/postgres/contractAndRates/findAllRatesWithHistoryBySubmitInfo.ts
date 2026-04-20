@@ -40,34 +40,26 @@ async function findAllRatesWithHistoryBySubmitInfo(
                     : {
                           not: 'AS', // exclude test state as per ADR 019
                       },
-                AND: args?.updatedSince
+                OR: args?.updatedSince
                     ? [
+                          { updatedAt: { gte: args.updatedSince } },
                           {
-                              OR: [
-                                  { updatedAt: { gte: args.updatedSince } },
-                                  {
-                                      revisions: {
-                                          some: {
-                                              submitInfoID: { not: null },
-                                              updatedAt: {
-                                                  gte: args.updatedSince,
-                                              },
-                                          },
+                              revisions: {
+                                  some: {
+                                      submitInfoID: { not: null },
+                                      updatedAt: { gte: args.updatedSince },
+                                  },
+                              },
+                          },
+                          {
+                              revisions: {
+                                  some: {
+                                      submitInfoID: { not: null },
+                                      submitInfo: {
+                                          updatedAt: { gte: args.updatedSince },
                                       },
                                   },
-                                  {
-                                      revisions: {
-                                          some: {
-                                              submitInfoID: { not: null },
-                                              submitInfo: {
-                                                  updatedAt: {
-                                                      gte: args.updatedSince,
-                                                  },
-                                              },
-                                          },
-                                      },
-                                  },
-                              ],
+                              },
                           },
                       ]
                     : undefined,

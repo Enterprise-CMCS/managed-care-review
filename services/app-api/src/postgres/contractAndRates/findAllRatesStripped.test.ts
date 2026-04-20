@@ -206,3 +206,64 @@ it('returns all rates with stripped down data', async () => {
     // ID should not exist so we expect no results
     expect(notRealRateSelectedOrError).toHaveLength(0)
 })
+
+it('returns no stripped rates when updatedSince is in the future', async () => {
+    const client = await sharedTestPrismaClient()
+    const stateServer = await constructTestPostgresServer({
+        context: { user: testStateUser() },
+    })
+
+    const submitted = await createAndSubmitTestContractWithRate(stateServer)
+    const rateID = submitted.packageSubmissions[0].rateRevisions[0].rateID
+
+    const farFuture = new Date('2099-01-01')
+    const results = must(
+        await findAllRatesStripped(client, { updatedSince: farFuture })
+    )
+
+    const found = results.find((r) => r.rateID === rateID)
+    expect(found).toBeUndefined()
+})
+
+it('returns stripped rates when updatedSince is in the past', async () => {
+    const client = await sharedTestPrismaClient()
+    const stateServer = await constructTestPostgresServer({
+        context: { user: testStateUser() },
+    })
+
+    const submitted = await createAndSubmitTestContractWithRate(stateServer)
+    const rateID = submitted.packageSubmissions[0].rateRevisions[0].rateID
+
+    const farPast = new Date('2000-01-01')
+    const results = must(
+        await findAllRatesStripped(client, { updatedSince: farPast })
+    )
+
+    const found = results.find((r) => r.rateID === rateID)
+    expect(found).toBeDefined()
+})
+
+it('returns stripped rate after unlock and resubmit when updatedSince is set between the two submissions', async () => {
+    const client = await sharedTestPrismaClient()
+    const stateServer = await constructTestPostgresServer({
+        context: { user: testStateUser() },
+    })
+    const cmsServer = await constructTestPostgresServer({
+        context: { user: testCMSUser() },
+    })
+
+    const submitted = await createAndSubmitTestContractWithRate(stateServer)
+    const rateID = submitted.packageSubmissions[0].rateRevisions[0].rateID
+
+    const cutoff = new Date()
+
+    await unlockTestContract(cmsServer, submitted.id, 'Making a change')
+    await submitTestContract(stateServer, submitted.id, 'Resubmission')
+
+    const results = must(
+        await findAllRatesStripped(client, { updatedSince: cutoff })
+    )
+
+    const found = results.find((r) => r.rateID === rateID)
+    expect(found).toBeDefined()
+})

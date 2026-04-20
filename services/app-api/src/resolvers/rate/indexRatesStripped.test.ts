@@ -17,6 +17,7 @@ import {
 import {
     createAndSubmitTestContractWithRate,
     submitTestContract,
+    unlockTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
@@ -341,5 +342,73 @@ describe('indexRatesStripped', () => {
         )
 
         expect(virginiaRateStateCodes.every((code) => code === 'VA')).toBe(true)
+    })
+
+    it('returns no rates when updatedSince is in the future', async () => {
+        const stateServer = await constructTestPostgresServer({ ldService })
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: testCMSUser() },
+            ldService,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        const result = await executeGraphQLOperation(cmsServer, {
+            query: IndexRatesStrippedDocument,
+            variables: { input: { updatedSince: new Date('2099-01-01') } },
+        })
+
+        expect(result.errors).toBeUndefined()
+        const edges = result.data?.indexRatesStripped.edges ?? []
+        const found = edges.find((e: RateStrippedEdge) => e.node.id === rateID)
+        expect(found).toBeUndefined()
+    })
+
+    it('returns submitted rates when updatedSince is in the past', async () => {
+        const stateServer = await constructTestPostgresServer({ ldService })
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: testCMSUser() },
+            ldService,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        const result = await executeGraphQLOperation(cmsServer, {
+            query: IndexRatesStrippedDocument,
+            variables: { input: { updatedSince: new Date('2000-01-01') } },
+        })
+
+        expect(result.errors).toBeUndefined()
+        const edges = result.data?.indexRatesStripped.edges ?? []
+        const found = edges.find((e: RateStrippedEdge) => e.node.id === rateID)
+        expect(found).toBeDefined()
+    })
+
+    it('returns a rate after unlock and resubmit when updatedSince is set between the two submissions', async () => {
+        const stateServer = await constructTestPostgresServer({ ldService })
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: testCMSUser() },
+            ldService,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        const cutoff = new Date()
+
+        await unlockTestContract(cmsServer, contract.id, 'Making a change')
+        await submitTestContract(stateServer, contract.id, 'Resubmission')
+
+        const result = await executeGraphQLOperation(cmsServer, {
+            query: IndexRatesStrippedDocument,
+            variables: { input: { updatedSince: cutoff } },
+        })
+
+        expect(result.errors).toBeUndefined()
+        const edges = result.data?.indexRatesStripped.edges ?? []
+        const found = edges.find((e: RateStrippedEdge) => e.node.id === rateID)
+        expect(found).toBeDefined()
     })
 })

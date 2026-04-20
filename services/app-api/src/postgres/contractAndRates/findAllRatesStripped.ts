@@ -46,30 +46,26 @@ async function findAllRatesStrippedInTransaction(
                       in: rateIDs,
                   }
                 : undefined,
-            AND: updatedSince
+            OR: updatedSince
                 ? [
+                      { updatedAt: { gte: updatedSince } },
                       {
-                          OR: [
-                              { updatedAt: { gte: updatedSince } },
-                              {
-                                  revisions: {
-                                      some: {
-                                          submitInfoID: { not: null },
-                                          updatedAt: { gte: updatedSince },
-                                      },
+                          revisions: {
+                              some: {
+                                  submitInfoID: { not: null },
+                                  updatedAt: { gte: updatedSince },
+                              },
+                          },
+                      },
+                      {
+                          revisions: {
+                              some: {
+                                  submitInfoID: { not: null },
+                                  submitInfo: {
+                                      updatedAt: { gte: updatedSince },
                                   },
                               },
-                              {
-                                  revisions: {
-                                      some: {
-                                          submitInfoID: { not: null },
-                                          submitInfo: {
-                                              updatedAt: { gte: updatedSince },
-                                          },
-                                      },
-                                  },
-                              },
-                          ],
+                          },
                       },
                   ]
                 : undefined,
