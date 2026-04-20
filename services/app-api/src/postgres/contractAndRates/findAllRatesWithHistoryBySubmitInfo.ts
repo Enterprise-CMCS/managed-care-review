@@ -13,6 +13,7 @@ type RateOrErrorArrayType = RateOrErrorType[]
 
 type FindAllRatesWithHistoryBySubmitType = {
     stateCode?: string
+    rateIDs?: string[]
     useZod?: boolean
 }
 
@@ -23,6 +24,7 @@ async function findAllRatesWithHistoryBySubmitInfo(
     try {
         const rates = await client.rateTable.findMany({
             where: {
+                id: args?.rateIDs ? { in: args.rateIDs } : undefined,
                 revisions: {
                     some: {
                         submitInfoID: {

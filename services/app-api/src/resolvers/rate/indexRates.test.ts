@@ -218,6 +218,46 @@ describe('indexRates', () => {
                 expect(testRates).toHaveLength(0)
             })
 
+            it('returns only rates matching the provided rateIDs', async () => {
+                const cmsUser = mockUser()
+                const stateServer = await constructTestPostgresServer({
+                    ldService,
+                    s3Client: mockS3,
+                })
+                const cmsServer = await constructTestPostgresServer({
+                    context: { user: cmsUser },
+                    ldService,
+                    s3Client: mockS3,
+                })
+
+                const contract1 =
+                    await createAndSubmitTestContractWithRate(stateServer)
+                const contract2 =
+                    await createAndSubmitTestContractWithRate(stateServer)
+                const contract3 =
+                    await createAndSubmitTestContractWithRate(stateServer)
+
+                const rate1ID =
+                    contract1.packageSubmissions[0].rateRevisions[0].rateID
+                const rate2ID =
+                    contract2.packageSubmissions[0].rateRevisions[0].rateID
+                const rate3ID =
+                    contract3.packageSubmissions[0].rateRevisions[0].rateID
+
+                const result = await executeGraphQLOperation(cmsServer, {
+                    query: IndexRatesDocument,
+                    variables: { input: { rateIDs: [rate1ID, rate2ID] } },
+                })
+
+                expect(result.errors).toBeUndefined()
+                const returnedIDs = result.data?.indexRates.edges.map(
+                    (edge: RateEdge) => edge.node.id
+                )
+                expect(returnedIDs).toContain(rate1ID)
+                expect(returnedIDs).toContain(rate2ID)
+                expect(returnedIDs).not.toContain(rate3ID)
+            })
+
             it('return a list of submitted rates from multiple states', async () => {
                 const cmsUser = mockUser()
                 const stateServer = await constructTestPostgresServer({
