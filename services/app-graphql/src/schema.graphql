@@ -2281,6 +2281,8 @@ type RateEdge {
 input IndexRatesInput {
     stateCode: String
     rateIDs: [String!]
+    "Return only rates updated at or after this datetime. Useful for incremental pulls — pass your last-run timestamp to get only new or changed rates."
+    updatedSince: DateTime
 }
 
 type IndexRatesPayload {

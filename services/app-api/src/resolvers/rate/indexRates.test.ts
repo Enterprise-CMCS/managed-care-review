@@ -256,6 +256,63 @@ describe('indexRates', () => {
                 )
             })
 
+            it('returns no rates when updatedSince is in the future', async () => {
+                const cmsUser = mockUser()
+                const stateServer = await constructTestPostgresServer({
+                    ldService,
+                    s3Client: mockS3,
+                })
+                const cmsServer = await constructTestPostgresServer({
+                    context: { user: cmsUser },
+                    ldService,
+                    s3Client: mockS3,
+                })
+
+                await createAndSubmitTestContractWithRate(stateServer)
+
+                const result = await executeGraphQLOperation(cmsServer, {
+                    query: IndexRatesDocument,
+                    variables: {
+                        input: { updatedSince: new Date('2099-01-01') },
+                    },
+                })
+
+                expect(result.errors).toBeUndefined()
+                expect(result.data?.indexRates.totalCount).toBe(0)
+                expect(result.data?.indexRates.edges).toHaveLength(0)
+            })
+
+            it('returns submitted rates when updatedSince is in the past', async () => {
+                const cmsUser = mockUser()
+                const stateServer = await constructTestPostgresServer({
+                    ldService,
+                    s3Client: mockS3,
+                })
+                const cmsServer = await constructTestPostgresServer({
+                    context: { user: cmsUser },
+                    ldService,
+                    s3Client: mockS3,
+                })
+
+                const contract =
+                    await createAndSubmitTestContractWithRate(stateServer)
+                const rateID =
+                    contract.packageSubmissions[0].rateRevisions[0].rateID
+
+                const result = await executeGraphQLOperation(cmsServer, {
+                    query: IndexRatesDocument,
+                    variables: {
+                        input: { updatedSince: new Date('2000-01-01') },
+                    },
+                })
+
+                expect(result.errors).toBeUndefined()
+                const returnedIDs = result.data?.indexRates.edges.map(
+                    (edge: RateEdge) => edge.node.id
+                )
+                expect(returnedIDs).toContain(rateID)
+            })
+
             it('return a list of submitted rates from multiple states', async () => {
                 const cmsUser = mockUser()
                 const stateServer = await constructTestPostgresServer({

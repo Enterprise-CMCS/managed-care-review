@@ -66,11 +66,15 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
 
         if (adminPermissions || cmsUser || stateUser) {
             let ratesWithHistory
+            const updatedSince = input?.updatedSince
+                ? new Date(input.updatedSince)
+                : undefined
             if (stateUser) {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo({
                         stateCode: user.stateCode,
                         rateIDs: input?.rateIDs ?? undefined,
+                        updatedSince,
                         useZod: true,
                     })
             } else if (input && input.stateCode) {
@@ -78,12 +82,14 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                     await store.findAllRatesWithHistoryBySubmitInfo({
                         stateCode: input.stateCode,
                         rateIDs: input?.rateIDs ?? undefined,
+                        updatedSince,
                         useZod: true,
                     })
             } else {
                 ratesWithHistory =
                     await store.findAllRatesWithHistoryBySubmitInfo({
                         rateIDs: input?.rateIDs ?? undefined,
+                        updatedSince,
                         useZod: false,
                     })
             }

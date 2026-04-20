@@ -213,6 +213,102 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         )
     })
 
+    it('returns no rates when updatedSince is in the future', async () => {
+        const client = await sharedTestPrismaClient()
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const contractA = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({
+                    submissionDescription: 'one contract',
+                })
+            )
+        )
+        must(
+            await insertDraftRate(
+                client,
+                contractA.id,
+                mockInsertRateArgs({ rateCertificationName: 'a rate' })
+            )
+        )
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Submitting',
+            })
+        )
+
+        const farFuture = new Date('2099-01-01')
+        const rates = must(
+            await findAllRatesWithHistoryBySubmitInfo(client, {
+                updatedSince: farFuture,
+            })
+        )
+
+        expect(rates).toHaveLength(0)
+    })
+
+    it('returns submitted rates when updatedSince is in the past', async () => {
+        const client = await sharedTestPrismaClient()
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const contractA = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({
+                    submissionDescription: 'one contract',
+                })
+            )
+        )
+        const rate = must(
+            await insertDraftRate(
+                client,
+                contractA.id,
+                mockInsertRateArgs({ rateCertificationName: 'a rate' })
+            )
+        )
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Submitting',
+            })
+        )
+
+        const farPast = new Date('2000-01-01')
+        const rates = must(
+            await findAllRatesWithHistoryBySubmitInfo(client, {
+                updatedSince: farPast,
+            })
+        )
+
+        expect(rates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ rateID: rate.id }),
+            ])
+        )
+    })
+
     it('can return rates only for a specific state if stateCode passed in', async () => {
         const client = await sharedTestPrismaClient()
         const stateUser = await client.user.create({

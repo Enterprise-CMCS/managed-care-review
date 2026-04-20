@@ -14,6 +14,7 @@ type RateOrErrorArrayType = RateOrErrorType[]
 type FindAllRatesWithHistoryBySubmitType = {
     stateCode?: string
     rateIDs?: string[]
+    updatedSince?: Date
     useZod?: boolean
 }
 
@@ -39,6 +40,9 @@ async function findAllRatesWithHistoryBySubmitInfo(
                     : {
                           not: 'AS', // exclude test state as per ADR 019
                       },
+                updatedAt: args?.updatedSince
+                    ? { gte: args.updatedSince }
+                    : undefined,
             },
             include: {
                 ...includeFullRate,
