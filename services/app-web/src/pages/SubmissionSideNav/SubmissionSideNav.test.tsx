@@ -198,9 +198,7 @@ describe('SubmissionSideNav', () => {
         // validate correct param renders summary page
         await waitFor(() => {
             expect(
-                screen.getByText(
-                    contract.packageSubmissions[0].contractRevision.contractName
-                )
+                screen.getByRole('heading', { level: 1, name: 'Submission summary' })
             ).toBeInTheDocument()
         })
 
@@ -363,9 +361,7 @@ describe('SubmissionSideNav', () => {
         // validate correct param renders summary page
         await waitFor(() => {
             expect(
-                screen.getByText(
-                    contract.packageSubmissions[0].contractRevision.contractName
-                )
+                screen.getByRole('heading', { level: 1, name: 'Submission summary' })
             ).toBeInTheDocument()
         })
 

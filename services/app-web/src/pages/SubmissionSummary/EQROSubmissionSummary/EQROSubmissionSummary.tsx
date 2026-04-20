@@ -215,7 +215,9 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     notStateUser={!isStateUser}
                 />
 
-                <h1 className={styles.eqroSummaryNameHeader}>{name}</h1>
+                <h1 className={styles.eqroSummaryNameHeader}>
+                    Submission summary
+                </h1>
 
                 {documentError && (
                     <DocumentWarningBanner className={styles.banner} />
@@ -225,7 +227,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
 
                 {hasCMSPermissions && (
                     <SectionCard className={styles.actionsSection}>
-                        <h3>Actions</h3>
+                        <h4 className="mcr-h4-bold">Actions</h4>
                         {showNoActionsMsg ? (
                             <Grid>
                                 No action can be taken on this submission in its

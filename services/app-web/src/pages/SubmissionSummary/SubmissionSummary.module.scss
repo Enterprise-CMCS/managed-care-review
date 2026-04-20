@@ -19,6 +19,10 @@
     a {
         width: 100%;
     }
+    h4 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
 }
 
 .container {
@@ -65,7 +69,6 @@
 }
 
 .eqroSummaryNameHeader {
-    font-size: 40px;
-    margin-bottom: 24px;
-    margin-top: 16px;
+    margin: 0;
+    padding: 16px 0;
 }

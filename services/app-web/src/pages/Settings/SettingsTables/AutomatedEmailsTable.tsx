@@ -24,7 +24,7 @@ const AutomatedEmailsTable = () => {
 
     return (
         <div id={activeMainContentId}>
-            <h2>Automated emails</h2>
+            <h1>Automated emails</h1>
             <p>
                 Shared inboxes receive emails for different submissions, as
                 described below.

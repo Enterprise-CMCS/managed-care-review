@@ -2,14 +2,9 @@
 @use '../../styles/uswdsImports.scss' as uswds;
 
 .undoRateWithdrawContainer {
-    max-width: custom.$mcr-container-standard-width-fixed;
-    background-color: none;
-    @include uswds.at-media('tablet') {
-        min-width: 40rem;
-        margin: 0 auto;
-    }
+    @include custom.mini-form-page-container;
 }
 
 .formContainer {
-    @include custom.form-fields;
+    @include custom.mini-form-fields;
 }

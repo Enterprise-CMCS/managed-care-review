@@ -340,6 +340,9 @@ export const SubmissionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
+                <h1 className={styles.eqroSummaryNameHeader}>
+                    Submission summary
+                </h1>
                 {showIncompleteRateError && (
                     <IncompleteSubmissionBanner message={incompleteMessage} />
                 )}
@@ -352,7 +355,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
                 {hasCMSPermissions && (
                     <SectionCard className={styles.actionsSection}>
-                        <h3>Actions</h3>
+                        <h4 className="mcr-h4-bold">Actions</h4>
                         {showNoActionsMsg ? (
                             <Grid>
                                 No action can be taken on this submission in its

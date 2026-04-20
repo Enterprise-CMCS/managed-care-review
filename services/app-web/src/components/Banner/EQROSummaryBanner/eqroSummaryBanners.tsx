@@ -67,7 +67,7 @@ const eqrpReminderBodyContent = () => (
 
 const StateSubjectToReviewText = (): React.ReactElement => {
     return (
-        <div className={styles.bannerBodyText}>
+        <>
             <p className="usa-alert__text">
                 Based on your responses, this submission is subject to formal
                 review and approval.
@@ -75,13 +75,13 @@ const StateSubjectToReviewText = (): React.ReactElement => {
             <ExpandableText clampedLines={1}>
                 {whatComesNextBodyContent()}
             </ExpandableText>
-        </div>
+        </>
     )
 }
 
 const StateNotSubjectToReviewText = (): React.ReactElement => {
     return (
-        <div className={styles.bannerBodyText}>
+        <>
             <p className="usa-alert__text">
                 Based on the state's responses, this submission is not subject
                 to formal review and approval.
@@ -89,7 +89,7 @@ const StateNotSubjectToReviewText = (): React.ReactElement => {
             <ExpandableText clampedLines={1}>
                 {eqrpReminderBodyContent()}
             </ExpandableText>
-        </div>
+        </>
     )
 }
 

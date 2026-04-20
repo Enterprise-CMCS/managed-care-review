@@ -50,6 +50,10 @@ export const HeadingScale = (): React.ReactElement => (
             </h2>
         </div>
         <div style={sampleStyle}>
+            <span style={labelStyle}>{'<h1>'}</span>
+            <h1>Section 1 heading</h1>
+        </div>
+        <div style={sampleStyle}>
             <span style={labelStyle}>{'<h2>'}</span>
             <h2>Section heading</h2>
         </div>

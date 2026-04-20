@@ -94,6 +94,12 @@ const commonSettingPageTest = async () => {
         name: 'Division assignments',
     })
     expect(tableDivision).toBeInTheDocument()
+    expect(
+        screen.getByRole('heading', {
+            level: 1,
+            name: 'Division assignments',
+        })
+    ).toBeInTheDocument()
     const tableRowsDivision = await within(tableDivision).findAllByRole('row')
     expect(tableRowsDivision).toHaveLength(2)
     // Check the table headers
@@ -125,6 +131,12 @@ const commonSettingPageTest = async () => {
         name: 'Automated emails',
     })
     expect(tableAutomated).toBeInTheDocument()
+    expect(
+        screen.getByRole('heading', {
+            level: 1,
+            name: 'Automated emails',
+        })
+    ).toBeInTheDocument()
 
     const tableRows = await within(tableAutomated).findAllByRole('row')
     expect(tableRows).toHaveLength(6)
@@ -167,6 +179,12 @@ const commonSettingPageTest = async () => {
         name: 'Support emails',
     })
     expect(tableSupport).toBeInTheDocument()
+    expect(
+        screen.getByRole('heading', {
+            level: 1,
+            name: 'Support emails',
+        })
+    ).toBeInTheDocument()
     const tableRowsSupport = await within(tableSupport).findAllByRole('row')
     expect(tableRowsSupport).toHaveLength(4)
     // Check the table headers
@@ -275,6 +293,15 @@ describe.each(combinedAuthorizedUsers)(
                 name: 'State assignments',
             })
             expect(tableAnalysts).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', {
+                    level: 1,
+                    name: 'State assignments',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('heading', { level: 5, name: 'Filters' })
+            ).toBeInTheDocument()
             const tableRowsAnalysts =
                 await within(tableAnalysts).findAllByRole('row')
             expect(tableRowsAnalysts).toHaveLength(4)
@@ -661,7 +688,10 @@ describe('Admin only settings page tests', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByRole('heading', { name: 'Oauth clients' })
+                screen.getByRole('heading', {
+                    level: 1,
+                    name: 'Oauth clients',
+                })
             ).toBeInTheDocument()
             expect(
                 screen.getByText(

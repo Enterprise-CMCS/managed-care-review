@@ -189,13 +189,7 @@ export const SingleRateSummarySection = ({
                 id={`"rate-details-${rate.id}`}
                 className={styles.summarySection}
             >
-                <SectionHeader
-                    header={
-                        rate.revisions[0].formData.rateCertificationName ||
-                        'Unknown rate name'
-                    }
-                    hideBorderTop
-                />
+                <SectionHeader header="Rate details" hideBorderTop />
                 {!documentZipPackage && (
                     <DocumentWarningBanner className={styles.banner} />
                 )}
@@ -369,6 +363,7 @@ export const SingleRateSummarySection = ({
                     documentCount={rateDocumentCount}
                     renderZipLink={isSubmittedOrCMSUser}
                     removeTopBorder
+                    headingLevel="h2"
                 />
                 <UploadedDocumentsTable
                     documents={formData.rateDocuments}

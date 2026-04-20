@@ -32,6 +32,8 @@
     tbody td {
         padding-top: uswds.units(2);
         padding-bottom: uswds.units(2);
+        padding-left: uswds.units(2);
+        padding-right: uswds.units(2);
         vertical-align: top;
     }
 
@@ -56,11 +58,25 @@
 }
 
 .columnID {
-    min-width: 90px;
+    min-width: 5.625rem;
+    max-width: 14rem;
+}
+
+.contractTypeColumn {
+    width: 8.125rem;
+}
+
+.dateColumn {
+    width: 8rem;
+    white-space: nowrap;
+}
+
+.statusColumn {
+    min-width: 11.375rem;
 }
 
 .programsColumn {
-    max-width: 143px;
+    max-width: 16rem;
 }
 
 .programTag {
@@ -93,5 +109,11 @@
 
 .notSubjectToReviewTag {
     display: inline-block;
-    text-align: center;
+    white-space: nowrap;
+}
+
+@media (max-width: 70rem) {
+    .notSubjectToReviewTag {
+        white-space: normal;
+    }
 }

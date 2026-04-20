@@ -137,7 +137,7 @@ export const OauthClients = () => {
 
     return (
         <div id={activeMainContentId}>
-            <h2>Oauth clients</h2>
+            <h1>Oauth clients</h1>
             <Grid row gap>
                 <Grid col="fill">
                     <p>

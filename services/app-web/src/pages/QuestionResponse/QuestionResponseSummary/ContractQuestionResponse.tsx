@@ -84,6 +84,8 @@ export const ContractQuestionResponse = () => {
     return (
         <div className={styles.background} id={activeMainContentId}>
             <GridContainer className={styles.container}>
+                <h1>Contract questions</h1>
+
                 {hasCMSPermissions && !division && <UserAccountWarningBanner />}
 
                 {submitType && (
@@ -100,7 +102,6 @@ export const ContractQuestionResponse = () => {
                     <StateQuestionResponseTable
                         indexQuestions={contract.questions}
                         contractStatus={contract.consolidatedStatus}
-                        header="Contract Q&A"
                     />
                 )}
             </GridContainer>

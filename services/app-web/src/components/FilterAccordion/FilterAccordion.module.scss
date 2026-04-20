@@ -18,6 +18,32 @@
         overflow: visible;
     }
 
+    // The following is to override USWDS header styling with our system wide styles.
+    h1[class*='usa-accordion__heading'] {
+        @include custom.mcr-h1-style;
+        margin: 0;
+    }
+
+    h2[class*='usa-accordion__heading'] {
+        @include custom.mcr-h2-style;
+        margin: 0;
+    }
+
+    h3[class*='usa-accordion__heading'] {
+        @include custom.mcr-h3-style;
+        margin: 0;
+    }
+
+    h4[class*='usa-accordion__heading'] {
+        @include custom.mcr-h4-style;
+        margin: 0;
+    }
+
+    h5[class*='usa-accordion__heading'] {
+        @include custom.mcr-h5-style;
+        margin: 0;
+    }
+
     [class*='grid-row'] {
         margin-top: 0.75rem;
         margin-bottom: 0.75rem;

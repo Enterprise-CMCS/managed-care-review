@@ -19,6 +19,7 @@ import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/HealthPlanSubmission/ReviewSubmit'
 import { generatePath, Location, Route, Routes } from 'react-router-dom'
 import { dayjs } from '@mc-review/dates'
+import { prettyDOM } from '@testing-library/react'
 
 describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -126,9 +127,14 @@ describe('SubmissionSummary', () => {
                     }
                 )
 
-                expect(
-                    await screen.findByText('MCR-MN-0005-SNBC')
-                ).toBeInTheDocument()
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('heading', {
+                            level: 1,
+                            name: 'Submission summary',
+                        })
+                    ).toBeInTheDocument()
+                })
 
                 const description = await screen.findByLabelText(
                     'Submission description'
@@ -951,7 +957,10 @@ describe('SubmissionSummary', () => {
                             screen.getByTestId('submission-side-nav')
                         ).toBeInTheDocument()
                         expect(
-                            screen.getByText('MCR-MN-0005-SNBC')
+                            screen.getByRole('heading', {
+                                level: 1,
+                                name: 'Submission summary',
+                            })
                         ).toBeInTheDocument()
                     })
 
@@ -1012,7 +1021,10 @@ describe('SubmissionSummary', () => {
                             screen.getByTestId('submission-side-nav')
                         ).toBeInTheDocument()
                         expect(
-                            screen.getByText('MCR-MN-0005-SNBC')
+                            screen.getByRole('heading', {
+                                level: 1,
+                                name: 'Submission summary',
+                            })
                         ).toBeInTheDocument()
                     })
 
@@ -1129,6 +1141,7 @@ describe('SubmissionSummary', () => {
                             ],
                         }
                     )
+
                     renderWithProviders(
                         <Routes>
                             <Route element={<SubmissionSideNav />}>
@@ -1167,7 +1180,10 @@ describe('SubmissionSummary', () => {
                             screen.getByTestId('submission-side-nav')
                         ).toBeInTheDocument()
                         expect(
-                            screen.getByText('MCR-MN-0005-SNBC')
+                            screen.getByRole('heading', {
+                                level: 1,
+                                name: 'Submission summary',
+                            })
                         ).toBeInTheDocument()
                         // expect submission approval banner to be on screen
                         expect(
@@ -1218,7 +1234,10 @@ describe('SubmissionSummary', () => {
                             screen.getByTestId('submission-side-nav')
                         ).toBeInTheDocument()
                         expect(
-                            screen.getByText('MCR-MN-0005-SNBC')
+                            screen.getByRole('heading', {
+                                level: 1,
+                                name: 'Submission summary',
+                            })
                         ).toBeInTheDocument()
                     })
 
@@ -1282,7 +1301,10 @@ describe('SubmissionSummary', () => {
                             screen.getByTestId('submission-side-nav')
                         ).toBeInTheDocument()
                         expect(
-                            screen.getByText('MCR-MN-0005-SNBC')
+                            screen.getByRole('heading', {
+                                level: 1,
+                                name: 'Submission summary',
+                            })
                         ).toBeInTheDocument()
                     })
 
@@ -1429,7 +1451,10 @@ describe('SubmissionSummary', () => {
                             screen.getByTestId('submission-side-nav')
                         ).toBeInTheDocument()
                         expect(
-                            screen.getByText('MCR-MN-0005-SNBC')
+                            screen.getByRole('heading', {
+                                level: 1,
+                                name: 'Submission summary',
+                            })
                         ).toBeInTheDocument()
                     })
 
@@ -1601,7 +1626,10 @@ describe('SubmissionSummary', () => {
                         screen.getByTestId('submission-side-nav')
                     ).toBeInTheDocument()
                     expect(
-                        screen.getByText('MCR-MN-0005-SNBC')
+                        screen.getByRole('heading', {
+                            level: 1,
+                            name: 'Submission summary',
+                        })
                     ).toBeInTheDocument()
                     // expect status update banner to be on screen
                     expect(
@@ -1990,7 +2018,12 @@ describe('SubmissionSummary', () => {
                 expect(
                     screen.getByTestId('submission-side-nav')
                 ).toBeInTheDocument()
-                expect(screen.getByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
+                expect(
+                    screen.getByRole('heading', {
+                        level: 1,
+                        name: 'Submission summary',
+                    })
+                ).toBeInTheDocument()
                 expect(
                     screen.getByText('Submission description')
                 ).toBeInTheDocument()
@@ -2061,7 +2094,12 @@ describe('SubmissionSummary', () => {
                 expect(
                     screen.getByTestId('submission-side-nav')
                 ).toBeInTheDocument()
-                expect(screen.getByText('MCR-MN-0005-SNBC')).toBeInTheDocument()
+                expect(
+                    screen.getByRole('heading', {
+                        level: 1,
+                        name: 'Submission summary',
+                    })
+                ).toBeInTheDocument()
             })
 
             // expect submission approval banner to be on screen
@@ -2117,7 +2155,10 @@ describe('SubmissionSummary', () => {
                         screen.getByTestId('submission-side-nav')
                     ).toBeInTheDocument()
                     expect(
-                        screen.getByText('MCR-MN-0005-SNBC')
+                        screen.getByRole('heading', {
+                            level: 1,
+                            name: 'Submission summary',
+                        })
                     ).toBeInTheDocument()
                     expect(
                         screen.getByText('Submission description')
@@ -2190,7 +2231,10 @@ describe('SubmissionSummary', () => {
                         screen.getByTestId('submission-side-nav')
                     ).toBeInTheDocument()
                     expect(
-                        screen.getByText('MCR-MN-0005-SNBC')
+                        screen.getByRole('heading', {
+                            level: 1,
+                            name: 'Submission summary',
+                        })
                     ).toBeInTheDocument()
                 })
 

@@ -10,7 +10,7 @@ import {
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 
 describe('StateDashboard', () => {
-    it('display submission heading', async () => {
+    it('displays dashboard heading', async () => {
         renderWithProviders(<StateDashboard />, {
             apolloProvider: {
                 mocks: [
@@ -22,11 +22,11 @@ describe('StateDashboard', () => {
 
         await waitFor(() =>
             expect(
-                screen.getAllByRole('heading', {
-                    level: 2,
-                    name: 'Submissions',
+                screen.getByRole('heading', {
+                    level: 1,
+                    name: 'Dashboard',
                 })
-            ).toBeDefined()
+            ).toBeInTheDocument()
         )
     })
 

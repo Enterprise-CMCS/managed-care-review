@@ -11,10 +11,13 @@ $details-text-line-height: 1.5;
     .detailsSectionContent {
         max-width: 65rem;
         h2 {
-            line-height: line-height('heading', 3);
+            margin-bottom: uswds.units(2);
+        }
+        h5 {
+            margin-top: 0; // <-- remove any top margin on h5
         }
         .detailsList {
-            margin-top: 0px;
+            margin-top: 0;
             > li {
                 padding: uswds.units(1);
                 line-height: $details-text-line-height;
@@ -69,7 +72,7 @@ $details-text-line-height: 1.5;
             }
             ul > li span:first-child {
                 font-weight: bold;
-                margin-bottom: uswds.units(1);
+                margin-bottom: uswds.units(0.5);
             }
         }
     }

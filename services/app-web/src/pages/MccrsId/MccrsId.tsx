@@ -16,6 +16,7 @@ import {
     ActionButton,
     FieldTextInput,
     Breadcrumbs,
+    PageActionsContainer,
 } from '../../components'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -180,6 +181,23 @@ export const MccrsId = (): React.ReactElement => {
 
     return (
         <div className={styles.mccrsIDForm}>
+            <Breadcrumbs
+                items={[
+                    {
+                        link: RoutesRecord.DASHBOARD_SUBMISSIONS,
+                        text: 'Dashboard',
+                    },
+                    {
+                        link: `/submissions/${contractSubmissionType}/${id}`,
+                        text: contractName || '',
+                    },
+                    {
+                        text: 'MC-CRS record number',
+                        link: `/submissions/${contractSubmissionType}/${id}/mccrs-record-number`,
+                    },
+                ]}
+            />
+            <h1>MC-CRS record number</h1>
             <Formik
                 initialValues={mccrsIDInitialValues}
                 onSubmit={(values) => {
@@ -187,55 +205,38 @@ export const MccrsId = (): React.ReactElement => {
                 }}
                 validationSchema={() => MccrsIdFormSchema()}
             >
-                {({ values, errors, handleSubmit, isSubmitting }) => (
-                    <>
-                        <Breadcrumbs
-                            items={[
-                                {
-                                    link: RoutesRecord.DASHBOARD_SUBMISSIONS,
-                                    text: 'Dashboard',
-                                },
-                                {
-                                    link: `/submissions/${contractSubmissionType}/${id}`,
-                                    text: contractName || '',
-                                },
-                                {
-                                    text: 'MC-CRS record number',
-                                    link: `/submissions/${contractSubmissionType}/${id}/mccrs-record-number`,
-                                },
-                            ]}
-                        />
-                        <UswdsForm
-                            className={styles.formContainer}
-                            id="MCCRSIDForm"
-                            onSubmit={(e) => {
-                                setShouldValidate(true)
-                                handleSubmit(e)
-                            }}
-                        >
-                            {showPageErrorMessage && <GenericApiErrorBanner />}
-                            <fieldset className="usa-fieldset">
-                                <h3>MC-CRS record number</h3>
-                                <legend className="srOnly">
-                                    Add MC-CRS record number
-                                </legend>
-                                <FieldTextInput
-                                    name="mccrsId"
-                                    id="mccrsId"
-                                    label="Enter the Managed Care Contract and Rate Review System (MC-CRS) record number."
-                                    showError={Boolean(
-                                        showFieldErrors(errors.mccrsId)
-                                    )}
-                                    type="text"
-                                    variant="SUBHEAD"
-                                    aria-required
-                                    hint={
-                                        <span>
-                                            (i.e <span>4375</span>)
-                                        </span>
-                                    }
-                                />
-                            </fieldset>
+                {({ errors, handleSubmit, isSubmitting }) => (
+                    <UswdsForm
+                        className={styles.formContainer}
+                        id="MCCRSIDForm"
+                        onSubmit={(e) => {
+                            setShouldValidate(true)
+                            handleSubmit(e)
+                        }}
+                    >
+                        {showPageErrorMessage && <GenericApiErrorBanner />}
+                        <fieldset className="usa-fieldset">
+                            <legend className="srOnly">
+                                Add MC-CRS record number
+                            </legend>
+                            <FieldTextInput
+                                name="mccrsId"
+                                id="mccrsId"
+                                label="Enter the Managed Care Contract and Rate Review System (MC-CRS) record number."
+                                showError={Boolean(
+                                    showFieldErrors(errors.mccrsId)
+                                )}
+                                type="text"
+                                variant="SUBHEAD"
+                                aria-required
+                                hint={
+                                    <span>
+                                        (i.e <span>4375</span>)
+                                    </span>
+                                }
+                            />
+                        </fieldset>
+                        <PageActionsContainer>
                             <ButtonGroup type="default">
                                 <ActionButton
                                     type="submit"
@@ -256,8 +257,8 @@ export const MccrsId = (): React.ReactElement => {
                                     Save MC-CRS number
                                 </ActionButton>
                             </ButtonGroup>
-                        </UswdsForm>
-                    </>
+                        </PageActionsContainer>
+                    </UswdsForm>
                 )}
             </Formik>
         </div>

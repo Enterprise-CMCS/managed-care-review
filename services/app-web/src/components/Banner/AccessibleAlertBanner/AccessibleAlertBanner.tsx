@@ -1,5 +1,6 @@
 import React from 'react'
 import { Alert } from '@trussworks/react-uswds'
+import styles from './AccessibleAlertBanner.module.scss'
 
 type AccessibleAlertProps = React.ComponentProps<typeof Alert>
 
@@ -17,21 +18,26 @@ export const AccessibleAlertBanner = ({
     children,
     ...rest
 }: AccessibleAlertProps): React.ReactElement => {
+    const headingClassName =
+        headingLevel === 'h4' ? 'mcr-h4-bold' : undefined
+
     const headingContent = (
         <>
             <span className="srOnly">{`${role}, `}</span>
-            {heading}
+            <span className={headingClassName}>{heading}</span>
         </>
     )
 
     return (
-        <Alert
-            role={role}
-            heading={heading && headingContent}
-            headingLevel={headingLevel}
-            {...rest}
-        >
-            {children}
-        </Alert>
+        <div className={styles.accessibleAlertBanner}>
+            <Alert
+                role={role}
+                heading={heading && headingContent}
+                headingLevel={headingLevel}
+                {...rest}
+            >
+                {children}
+            </Alert>
+        </div>
     )
 }

@@ -36,7 +36,7 @@ export const ContactsSummarySection = ({
                 header="State contacts"
                 editNavigateTo={editNavigateTo}
                 hideBorderTop
-                fontSize="38px"
+                headingLevel='h2'
             />
 
             <GridContainer>

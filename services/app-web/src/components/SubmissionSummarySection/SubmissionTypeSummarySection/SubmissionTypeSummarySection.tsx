@@ -71,12 +71,12 @@ export const SubmissionTypeSummarySection = ({
             className={styles.summarySection}
         >
             <SectionHeader
-                header={submissionName}
+                header="Submission type"
                 subHeaderComponent={subHeaderComponent}
                 editNavigateTo={editNavigateTo}
                 headerId={'submissionName'}
+                headingLevel="h2"
                 hideBorderTop
-                fontSize="38px"
             >
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>

@@ -18,7 +18,6 @@ const CMSDashboard = (): React.ReactElement => {
     }
 
     const activeMainContentId = 'cmsDashboardMainContent'
-
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
         updateActiveMainContent(activeMainContentId)
@@ -32,7 +31,7 @@ const CMSDashboard = (): React.ReactElement => {
             <GridContainer className={styles.container}>
                 <section className={styles.panel}>
                     <div className={styles.panelHeader}>
-                        <h2>Submissions and rate reviews</h2>
+                        <h1>Dashboard</h1>
                     </div>
                     <Tabs
                         defaultActiveTab={

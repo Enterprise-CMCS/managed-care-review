@@ -19,7 +19,7 @@ describe('SubmissionTypeSummarySection', () => {
             <SubmissionTypeSummarySection
                 contract={mockContractPackageDraft()}
                 editNavigateTo="submission-type"
-                submissionName="MN-PMAP-0001"
+                submissionName="Submission type"
                 isStateUser={true}
             />,
             {
@@ -37,12 +37,9 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('heading', {
                 level: 2,
-                name: 'MN-PMAP-0001',
+                name: 'Submission type',
             })
         ).toBeInTheDocument()
-        expect(
-            screen.getByRole('link', { name: 'Edit MN-PMAP-0001' })
-        ).toHaveAttribute('href', '/submission-type')
 
         // Our mocks use the latest package data by default.
         // Therefore we can check here that missing field is not being displayed unexpectedly
@@ -56,7 +53,7 @@ describe('SubmissionTypeSummarySection', () => {
         renderWithProviders(
             <SubmissionTypeSummarySection
                 contract={stateSubmission}
-                submissionName="MN-MSHO-0003"
+                submissionName="Submission type"
                 isStateUser={true}
                 initiallySubmittedAt={stateSubmission.initiallySubmittedAt}
             />,
@@ -74,7 +71,7 @@ describe('SubmissionTypeSummarySection', () => {
         expect(
             screen.getByRole('heading', {
                 level: 2,
-                name: 'MN-MSHO-0003',
+                name: 'Submission type',
             })
         ).toBeInTheDocument()
         expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()

@@ -30,7 +30,7 @@ describe('login', () => {
 
         cy.findByText('aang@example.com').should('exist')
         cy.findByRole('heading', {
-            name: 'Minnesota Submissions dashboard',
+            name: 'Dashboard',
         }).should('exist')
     })
 })

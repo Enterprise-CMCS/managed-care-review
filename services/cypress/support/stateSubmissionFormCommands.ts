@@ -707,7 +707,7 @@ Cypress.Commands.add(
 
         if (success) {
             cy.findByTestId('state-dashboard-page').should('exist')
-            cy.findByRole('heading', { name: 'Submissions' }).should('exist')
+            cy.findByRole('heading', { name: 'Dashboard' }).should('exist')
         }
     }
 )

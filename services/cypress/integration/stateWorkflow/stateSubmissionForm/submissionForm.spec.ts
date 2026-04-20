@@ -44,7 +44,7 @@ describe('state user in health plan submission form', () => {
 
             //Navigate back to previous page
             cy.findByRole('button', { name: /Cancel/, timeout: 5_000 }).click()
-            cy.findByRole('heading', { level: 1, name: /Submissions/ })
+            cy.findByRole('heading', { level: 1, name: /Dashboard/ })
 
             // Link to type page
             cy.navigateFormByDirectLink(

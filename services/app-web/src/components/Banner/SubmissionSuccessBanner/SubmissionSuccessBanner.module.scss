@@ -1,0 +1,14 @@
+@use '../../../styles/custom.scss' as custom;
+@use '../../../styles/uswdsImports.scss' as uswds;
+
+.alertContainer {
+    padding-top: uswds.units(4);
+    margin: auto;
+    max-width: custom.$mcr-container-max-width-fixed;
+}
+
+.alertText {
+    font-size: 16px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}

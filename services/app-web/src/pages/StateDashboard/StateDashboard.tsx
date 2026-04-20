@@ -8,7 +8,6 @@ import {
 } from '../../gen/gqlClient'
 import { useQuery } from '@apollo/client/react'
 import styles from './StateDashboard.module.scss'
-import { SubmissionSuccessMessage } from './SubmissionSuccessMessage'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import {
     ErrorAlertSignIn,
@@ -21,6 +20,7 @@ import {
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'
+import { SubmissionSuccessBanner } from '../../components/Banner'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -149,7 +149,7 @@ export const StateDashboard = (): React.ReactElement => {
     ) as ContractSubmissionType | null
 
     return (
-        <>
+        <div className={styles.stateDashboard}>
             <div
                 id={DASHBOARD_ATTRIBUTE}
                 data-testid={DASHBOARD_ATTRIBUTE}
@@ -159,7 +159,7 @@ export const StateDashboard = (): React.ReactElement => {
                     {programs.length ? (
                         <section className={styles.panel}>
                             {justSubmittedSubmissionName && (
-                                <SubmissionSuccessMessage
+                                <SubmissionSuccessBanner
                                     submissionName={justSubmittedSubmissionName}
                                     submissionId={submissionId || undefined}
                                     contractType={contractType || undefined}
@@ -167,7 +167,7 @@ export const StateDashboard = (): React.ReactElement => {
                             )}
 
                             <div className={styles.panelHeader}>
-                                <h2>Submissions</h2>
+                                <h1>Dashboard</h1>
                                 <div>
                                     <NavLinkWithLogging
                                         className="usa-button"
@@ -183,6 +183,7 @@ export const StateDashboard = (): React.ReactElement => {
                             <ContractTable
                                 tableData={submissionRows}
                                 user={loggedInUser}
+                                filterCountClassName={styles.filterCount}
                             />
                         </section>
                     ) : (
@@ -190,6 +191,6 @@ export const StateDashboard = (): React.ReactElement => {
                     )}
                 </GridContainer>
             </div>
-        </>
+        </div>
     )
 }

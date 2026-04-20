@@ -1,11 +1,11 @@
+import { ContractSubmissionType } from '../../../gen/gqlClient'
 import React from 'react'
-import { Alert } from '@trussworks/react-uswds'
-import { NavLinkWithLogging } from '../../components'
-import { ContractSubmissionType } from '../../gen/gqlClient'
-import styles from './StateDashboard.module.scss'
-import { getSubmissionPath } from '../../routeHelpers'
+import styles from './SubmissionSuccessBanner.module.scss'
+import { NavLinkWithLogging } from '../../TealiumLogging'
+import { getSubmissionPath } from '../../../routeHelpers'
+import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
-export function SubmissionSuccessMessage({
+export function SubmissionSuccessBanner({
     submissionName,
     submissionId,
     contractType,
@@ -30,7 +30,7 @@ export function SubmissionSuccessMessage({
 
     return (
         <div className={styles.alertContainer}>
-            <Alert
+            <AccessibleAlertBanner
                 type="success"
                 headingLevel="h4"
                 heading={heading}
@@ -50,7 +50,7 @@ export function SubmissionSuccessMessage({
                         </NavLinkWithLogging>
                     </>
                 )}
-            </Alert>
+            </AccessibleAlertBanner>
         </div>
     )
 }
