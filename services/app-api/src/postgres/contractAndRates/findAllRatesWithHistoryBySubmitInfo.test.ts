@@ -309,6 +309,78 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
         )
     })
 
+    it('returns a rate after unlock and resubmit when updatedSince is set between the two submissions', async () => {
+        const client = await sharedTestPrismaClient()
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const contractA = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({
+                    submissionDescription: 'one contract',
+                })
+            )
+        )
+        const rate = must(
+            await insertDraftRate(
+                client,
+                contractA.id,
+                mockInsertRateArgs({ rateCertificationName: 'a rate' })
+            )
+        )
+
+        // First submission
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Initial submission',
+            })
+        )
+
+        // Set cutoff timestamp between the two submissions
+        const cutoff = new Date()
+
+        // Unlock and resubmit — this creates a new revision and submitInfo row,
+        // but does NOT touch RateTable.updatedAt, so the OR filter on revisions
+        // is what catches it
+        must(
+            await unlockContract(client, {
+                contractID: contractA.id,
+                unlockedByUserID: stateUser.id,
+                unlockReason: 'Making a change',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID: contractA.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'Resubmission after unlock',
+            })
+        )
+
+        const rates = must(
+            await findAllRatesWithHistoryBySubmitInfo(client, {
+                updatedSince: cutoff,
+            })
+        )
+
+        expect(rates).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ rateID: rate.id }),
+            ])
+        )
+    })
+
     it('can return rates only for a specific state if stateCode passed in', async () => {
         const client = await sharedTestPrismaClient()
         const stateUser = await client.user.create({
