@@ -83,6 +83,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * This flag toggles availability of resources navigation bar and related pages.
+     */
+    RESOURCES_NAV_PAGES: {
+        flag: 'resources-nav-pages',
+        defaultValue: false,
+    },
+    /**
      The number of minutes before the session expires and countdown modal appears
     */
     MINUTES_UNTIL_SESSION_EXPIRES: {
