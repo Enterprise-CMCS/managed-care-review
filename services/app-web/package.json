@@ -68,7 +68,7 @@
     "dependencies": {
         "@apollo/client": "^4.1.7",
         "rxjs": "^7.8.1",
-        "@apollo/explorer": "^3.7.3",
+        "@apollo/explorer": "^3.7.4",
         "@graphql-typed-document-node/core": "^3.2.0",
         "@cypress/code-coverage": "^3.14.7",
         "@mc-review/common-code": "workspace:*",
