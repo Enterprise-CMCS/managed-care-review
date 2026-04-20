@@ -29,7 +29,7 @@ import {
     UpdateInformation,
     FetchContractWithQuestionsDocument,
 } from '../../gen/gqlClient'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
 import { GenericErrorPage } from '../Errors/GenericErrorPage'
@@ -42,7 +42,7 @@ import {
     getVisibleLatestRateRevisions,
 } from '@mc-review/submissions'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { hasCMSUserPermissions, toGQLError } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import {
@@ -146,11 +146,10 @@ export const SubmissionSummary = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (!data && error) {
-        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
-            return (
-                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
-            )
-        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+        const gqlError = toGQLError(error)
+        if (gqlError?.extensions.code === 'FORBIDDEN') {
+            return <ErrorForbiddenPage errorMsg={gqlError.message} />
+        } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />

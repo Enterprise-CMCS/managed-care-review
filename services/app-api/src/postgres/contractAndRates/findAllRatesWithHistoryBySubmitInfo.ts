@@ -2,6 +2,7 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { parseRateWithHistory } from './parseRateWithHistory'
 import { includeFullRate } from './prismaFullContractRateHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type RateOrErrorType = {
     rateID: string
@@ -51,7 +52,7 @@ async function findAllRatesWithHistoryBySubmitInfo(
         return parsedRatesOrErrors
     } catch (err) {
         console.error('PRISMA ERROR', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

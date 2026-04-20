@@ -8,7 +8,7 @@ import {
     QuestionResponseSubmitBanner,
     UserAccountWarningBanner,
 } from '../../../components/Banner'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
     CmsUser,
     Division,

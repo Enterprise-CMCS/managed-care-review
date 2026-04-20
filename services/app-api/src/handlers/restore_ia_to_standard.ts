@@ -32,6 +32,7 @@ import {
     CopyObjectCommand,
     HeadObjectCommand,
 } from '@aws-sdk/client-s3'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type RestoreIAToStandardEvent = {
     bucket?: string // Optional: specific bucket to process (default: process both buckets)
@@ -142,8 +143,7 @@ export const main: Handler = async (
             summary,
         }
     } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = parseErrorToError(error).message
         console.error('IA to STANDARD restoration failed:', errorMessage)
         throw error
     }
@@ -288,8 +288,7 @@ async function processBucket(
         console.info(`Bucket ${bucket} processing complete:`, result)
         return result
     } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = parseErrorToError(error).message
         console.error(`Failed to process bucket ${bucket}: ${errorMessage}`)
         result.errors.push(`Bucket processing error: ${errorMessage}`)
         return result
@@ -315,8 +314,7 @@ async function isGlacierRestored(
             response.Restore.includes('ongoing-request="false"')
         )
     } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = parseErrorToError(error).message
         console.error(
             `Failed to check restore status for ${key}: ${errorMessage}`
         )
@@ -351,8 +349,7 @@ async function restoreToStandard(
         console.info(`Successfully restored ${key} to STANDARD storage`)
         return true
     } catch (error) {
-        const errorMessage =
-            error instanceof Error ? error.message : String(error)
+        const errorMessage = parseErrorToError(error).message
         console.error(`Failed to restore ${key}: ${errorMessage}`)
         return new Error(errorMessage)
     }

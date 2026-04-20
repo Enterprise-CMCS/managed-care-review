@@ -98,6 +98,10 @@ export const ContractDetailsSummarySection = ({
         featureFlags.DSNP.flag,
         featureFlags.DSNP.defaultValue
     )
+    const chipSubmissionAutomation = ldClient?.variation(
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.flag,
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.defaultValue
+    )
 
     const contractSupportingDocuments = contractFormData?.supportingDocuments
     const contractDocs = contractFormData?.contractDocuments
@@ -161,14 +165,18 @@ export const ContractDetailsSummarySection = ({
                         explainMissingData={explainMissingData}
                     />
                 </MultiColumnGrid>
-                {contractDsnp && (
-                    <MultiColumnGrid columns={1}>
-                        <DsnpSummary
-                            contractFormData={contractFormData}
-                            explainMissingData={explainMissingData}
-                        />
-                    </MultiColumnGrid>
-                )}
+                {contractDsnp &&
+                    !(
+                        chipSubmissionAutomation &&
+                        contractFormData.populationCovered === 'CHIP'
+                    ) && (
+                        <MultiColumnGrid columns={1}>
+                            <DsnpSummary
+                                contractFormData={contractFormData}
+                                explainMissingData={explainMissingData}
+                            />
+                        </MultiColumnGrid>
+                    )}
                 {isContractWithProvisions(contract) && (
                     <MultiColumnGrid columns={2}>
                         <ModifiedProvisionSummary

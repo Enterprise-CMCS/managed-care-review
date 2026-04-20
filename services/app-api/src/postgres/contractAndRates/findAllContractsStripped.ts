@@ -3,6 +3,7 @@ import type { StrippedContractType } from '../../domain-models/contractAndRates/
 import { parseStrippedContractWithHistory } from './parseContractWithHistory'
 import { includeStrippedContractWithoutDraftRates } from './prismaSubmittedContractHelpers'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type StrippedContractOrErrorType = {
     contractID: string
@@ -76,7 +77,7 @@ async function findAllContractsStripped(
             'PRISMA ERROR: Error finding all contracts for dashboard',
             err
         )
-        return err
+        return parseErrorToError(err)
     }
 }
 

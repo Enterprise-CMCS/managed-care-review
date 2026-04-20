@@ -5,6 +5,7 @@ import type { CMSUsersUnionType } from '../../domain-models'
 import { domainUserFromPrismaUser } from './prismaDomainUser'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function updateCmsUserProperties(
     client: ExtendedPrismaClient,
@@ -50,7 +51,7 @@ export async function updateCmsUserProperties(
                 },
             })
         } catch (err) {
-            return err
+            return parseErrorToError(err)
         }
 
         if (!userBeforeUpdate) {
@@ -118,6 +119,6 @@ export async function updateCmsUserProperties(
 
         return domainUser
     } catch (err) {
-        return err
+        return parseErrorToError(err)
     }
 }

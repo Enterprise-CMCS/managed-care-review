@@ -10,6 +10,7 @@ import {
 import { type LDService } from '../launchDarkly/launchDarkly'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 import { trace, SpanStatusCode } from '@opentelemetry/api'
+import { parseErrorToError } from '@mc-review/helpers'
 
 /*
  * configuration.ts
@@ -106,7 +107,7 @@ async function configurePostgres(
 
         return prismaResult
     } catch (error) {
-        const err = error instanceof Error ? error : new Error(String(error))
+        const err = parseErrorToError(error)
         span.recordException(err)
         span.setStatus({
             code: SpanStatusCode.ERROR,

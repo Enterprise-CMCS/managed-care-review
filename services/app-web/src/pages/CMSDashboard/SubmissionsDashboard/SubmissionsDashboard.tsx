@@ -1,7 +1,7 @@
 import React from 'react'
 import { SubmissionTypeRecord } from '@mc-review/submissions'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { IndexContractsStrippedDocument } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'

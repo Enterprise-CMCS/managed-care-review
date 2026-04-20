@@ -4,6 +4,7 @@ import {
     questionInclude,
     rateQuestionPrismaToDomainType,
 } from './questionHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function findAllQuestionsByRate(
     client: ExtendedPrismaClient,
@@ -24,6 +25,6 @@ export async function findAllQuestionsByRate(
             rateQuestionPrismaToDomainType(question)
         )
     } catch (e) {
-        return e
+        return parseErrorToError(e)
     }
 }

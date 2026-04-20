@@ -2,6 +2,7 @@ import { CognitoUser } from 'amazon-cognito-identity-js'
 import { Auth as AmplifyAuth } from 'aws-amplify'
 import { StateUser } from '../../gen/gqlClient'
 import { recordJSException } from '@mc-review/otel'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type newUser = {
     username: string
@@ -76,7 +77,7 @@ async function signUp(user: newUser): Promise<CognitoUser | Error> {
                 )
             }
         }
-        return response
+        return parseErrorToError(response)
     }
 }
 
@@ -88,14 +89,15 @@ async function confirmSignUp(
         await AmplifyAuth.confirmSignUp(email, code)
         return null
     } catch (response) {
+        const parsedError = parseErrorToError(response)
         if (
             isAmplifyError(response) &&
             response.code === 'ExpiredCodeException'
         ) {
             console.info('Your code is expired, amplify will send another one.')
         }
-        recordJSException(response)
-        return response
+        recordJSException(parsedError)
+        return parsedError
     }
 }
 
@@ -104,8 +106,9 @@ async function resendSignUp(email: string): Promise<null | Error> {
         await AmplifyAuth.resendSignUp(email)
         return null
     } catch (response) {
-        recordJSException(response)
-        return response
+        const parsedError = parseErrorToError(response)
+        recordJSException(parsedError)
+        return parsedError
     }
 }
 
@@ -140,7 +143,7 @@ async function signIn(
                 `UNEXPECTED SIGNIN ERROR – 'didnt even get an amplify error back from login`
             )
         }
-        return response
+        return parseErrorToError(response)
     }
 }
 
@@ -149,8 +152,9 @@ async function signOut(): Promise<null | Error> {
         await AmplifyAuth.signOut()
         return null
     } catch (response) {
-        recordJSException(response)
-        return response
+        const parsedError = parseErrorToError(response)
+        recordJSException(parsedError)
+        return parsedError
     }
 }
 
@@ -159,8 +163,9 @@ async function extendSession(): Promise<null | Error> {
         await AmplifyAuth.currentSession()
         return null
     } catch (response) {
-        recordJSException(response)
-        return response
+        const parsedError = parseErrorToError(response)
+        recordJSException(parsedError)
+        return parsedError
     }
 }
 

@@ -5,6 +5,7 @@ import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { parseDomainUsersFromPrismaUsers } from '../user/prismaDomainUser'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function updateStateAssignedUsersInTransaction(
     tx: PrismaTransactionType,
@@ -121,7 +122,7 @@ async function updateStateAssignedUsersInTransaction(
 
         return users
     } catch (err) {
-        return err
+        return parseErrorToError(err)
     }
 }
 
@@ -148,7 +149,7 @@ async function updateStateAssignedUsers(
         })
         return txRes
     } catch (err) {
-        return err
+        return parseErrorToError(err)
     }
 }
 

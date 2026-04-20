@@ -4,12 +4,12 @@ import { GridContainer, Link, Grid, ModalRef } from '@trussworks/react-uswds'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useMemoizedStateHeader, useRouteParams } from '../../../hooks'
-import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { hasCMSUserPermissions, toGQLError } from '@mc-review/helpers'
 import {
     FetchContractWithQuestionsDocument,
     UpdateInformation,
 } from '../../../gen/gqlClient'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import {
     DocumentWarningBanner,
     LinkWithLogging,
@@ -92,11 +92,10 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
             </GridContainer>
         )
     } else if (!data && error) {
-        if (error?.graphQLErrors[0]?.extensions?.code === 'FORBIDDEN') {
-            return (
-                <ErrorForbiddenPage errorMsg={error.graphQLErrors[0].message} />
-            )
-        } else if (error?.graphQLErrors[0]?.extensions?.code === 'NOT_FOUND') {
+        const gqlError = toGQLError(error)
+        if (gqlError?.extensions.code === 'FORBIDDEN') {
+            return <ErrorForbiddenPage errorMsg={gqlError.message} />
+        } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />

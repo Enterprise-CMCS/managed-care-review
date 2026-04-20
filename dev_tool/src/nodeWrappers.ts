@@ -26,7 +26,7 @@ async function httpsRequest(url: string): Promise<string | Error> {
                     resolve(bodyString)
                 } catch (e) {
                     console.error('body Error', e)
-                    resolve(e)
+                    resolve(e instanceof Error ? e : new Error(String(e)))
                 }
             })
         })
@@ -46,10 +46,10 @@ function fileExists(path: string): boolean | Error {
         fs.statSync(path)
         return true
     } catch (err) {
-        if (err.code === 'ENOENT') {
+        if ((err as { code?: string }).code === 'ENOENT') {
             return false
         }
-        return err
+        return err instanceof Error ? err : new Error(String(err))
     }
 }
 

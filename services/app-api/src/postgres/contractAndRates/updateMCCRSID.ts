@@ -4,6 +4,7 @@ import type { NotFoundError } from '../postgresErrors'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import { nullify } from '../prismaDomainAdaptors'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type UpdateMCCRSIDFormArgsType = {
     contractID: string
@@ -33,7 +34,7 @@ async function updateMCCRSID(
         })
     } catch (err) {
         console.error('Prisma error updating contract', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

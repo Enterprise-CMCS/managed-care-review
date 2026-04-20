@@ -5,7 +5,7 @@ import {
     WithdrawRateMutation,
     UndoWithdrawnRateMutation,
 } from '../gen/gqlClient'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql/index'
 import { mockRateSubmittedWithQuestions } from './rateDataMock'
 
@@ -15,7 +15,7 @@ const withdrawRateMockSuccess = (
         rateData?: Partial<Rate>
         updatedReason?: string
     } = {}
-): MockedResponse<WithdrawRateMutation> => {
+): MockLink.MockedResponse<WithdrawRateMutation> => {
     const {
         rateID = 'test-abc-123',
         rateData,
@@ -71,7 +71,7 @@ const undoWithdrawRateMockSuccess = (
         rateData?: Partial<Rate>
         updatedReason?: string
     } = {}
-): MockedResponse<UndoWithdrawnRateMutation> => {
+): MockLink.MockedResponse<UndoWithdrawnRateMutation> => {
     const {
         rateID = 'test-abc-123',
         rateData,
@@ -136,7 +136,7 @@ const undoWithdrawRateMockSuccess = (
 }
 
 const undoWithdrawRateMockFailure =
-    (): MockedResponse<UndoWithdrawnRateMutation> => {
+    (): MockLink.MockedResponse<UndoWithdrawnRateMutation> => {
         const graphQLError = new GraphQLError(
             'Issue undoing a withdrawn rate',
             {
@@ -164,7 +164,7 @@ const undoWithdrawRateMockFailure =
         }
     }
 
-const withdrawRateMockFailure = (): MockedResponse<WithdrawRateMutation> => {
+const withdrawRateMockFailure = (): MockLink.MockedResponse<WithdrawRateMutation> => {
     const graphQLError = new GraphQLError('Issue withdrawing rate', {
         extensions: {
             code: 'NOT_FOUND',

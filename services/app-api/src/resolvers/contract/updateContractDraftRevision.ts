@@ -16,7 +16,10 @@ import {
     validateEQROContractDraftRevisionInput,
 } from '../../domain-models/contractAndRates'
 import { canWrite } from '../../authorization/oauthAuthorization'
-import { parseAndUpdateEqroFields } from '../../domain-models/contractAndRates/dataValidatorHelpers'
+import {
+    parseAndUpdateChipOnlyFields,
+    parseAndUpdateEqroFields,
+} from '../../domain-models/contractAndRates/dataValidatorHelpers'
 import { parseAndValidateDocuments } from '../documentHelpers'
 
 export function updateContractDraftRevision(
@@ -171,7 +174,7 @@ export function updateContractDraftRevision(
                   contractWithHistory.draftRevision.formData,
                   parsedFormData
               )
-            : parsedFormData
+            : parseAndUpdateChipOnlyFields(parsedFormData, featureFlags)
 
         // Update contract draft revision
         const updateResult = await store.updateDraftContract({

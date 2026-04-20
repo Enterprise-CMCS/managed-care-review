@@ -2,6 +2,7 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { findRateWithHistory } from './findRateWithHistory'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type OverrideRateDataArgsType = {
     rateID: string
@@ -116,7 +117,7 @@ const overrideRateData = async (
         )
     } catch (err) {
         console.error('PRISMA ERROR: Error overriding rate data', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

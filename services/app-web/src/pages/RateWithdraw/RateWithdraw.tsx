@@ -10,7 +10,7 @@ import {
 import { RoutesRecord } from '@mc-review/constants'
 import { generatePath, useNavigate, useParams } from 'react-router-dom'
 import { FetchRateDocument, WithdrawRateDocument } from '../../gen/gqlClient'
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { ButtonGroup, Form } from '@trussworks/react-uswds'

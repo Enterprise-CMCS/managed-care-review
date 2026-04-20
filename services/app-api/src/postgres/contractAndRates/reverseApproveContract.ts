@@ -3,6 +3,7 @@ import { NotFoundError } from '../postgresErrors'
 import type { ContractType } from '../../domain-models/contractAndRates'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { parseErrorToError } from '@mc-review/helpers'
 
 async function reverseApproveContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -70,7 +71,7 @@ async function reverseApproveContract(
         })
     } catch (err) {
         console.error('Prisma error reversing contract approval', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

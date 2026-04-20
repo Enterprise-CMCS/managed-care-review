@@ -22,6 +22,10 @@ export const ContractDetailsFormSchema = (
     draftSubmission: UnlockedContract,
     activeFeatureFlags: FeatureFlagSettings = {}
 ) => {
+    const hideDsnpForChipOnly =
+        activeFeatureFlags['chip-submission-automation'] &&
+        isCHIPOnly(draftSubmission)
+
     const yesNoError = (provision: GeneralizedProvisionType) => {
         const noValidation = Yup.string().nullable()
         const provisionValidiation = Yup.string().defined(
@@ -129,7 +133,9 @@ export const ContractDetailsFormSchema = (
                         'WAIVER_1915B',
                         'STATE_PLAN',
                     ].includes(type)
-                ) && activeFeatureFlags['dsnp'],
+                ) &&
+                activeFeatureFlags['dsnp'] &&
+                !hideDsnpForChipOnly,
             then: (schema) => schema.required('You must select yes or no'),
             otherwise: (schema) => schema.notRequired(),
         }),

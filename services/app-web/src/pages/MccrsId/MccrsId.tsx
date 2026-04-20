@@ -7,6 +7,7 @@ import {
 import { Formik, FormikErrors } from 'formik'
 import { MccrsIdFormSchema } from './MccrsIdSchema'
 import { recordJSException } from '@mc-review/otel'
+import { toGQLError } from '@mc-review/helpers'
 import { useNavigate } from 'react-router-dom'
 import { usePage } from '../../contexts/PageContext'
 import {
@@ -30,9 +31,10 @@ import {
     FetchContractDocument,
     Contract,
 } from '../../gen/gqlClient'
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import styles from './MccrsId.module.scss'
 import { useMemoizedStateHeader, useRouteParams } from '../../hooks'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export interface MccrsIdFormValues {
     mccrsId: number | undefined
@@ -102,19 +104,10 @@ export const MccrsId = (): React.ReactElement => {
         )
     } else if (fetchContractError && !fetchContractData) {
         //error handling for a state user that tries to access contracts for a different state
-        if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'FORBIDDEN'
-        ) {
-            return (
-                <ErrorForbiddenPage
-                    errorMsg={fetchContractError.graphQLErrors[0].message}
-                />
-            )
-        } else if (
-            fetchContractError?.graphQLErrors[0]?.extensions?.code ===
-            'NOT_FOUND'
-        ) {
+        const gqlError = toGQLError(fetchContractError)
+        if (gqlError?.extensions.code === 'FORBIDDEN') {
+            return <ErrorForbiddenPage errorMsg={gqlError.message} />
+        } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
             return <GenericErrorPage />
@@ -177,11 +170,12 @@ export const MccrsId = (): React.ReactElement => {
                 `/submissions/${contractSubmissionType}/${updatedSubmission.id}`
             )
         } catch (serverError) {
+            const parsedError = parseErrorToError(serverError)
             setShowPageErrorMessage(true)
             recordJSException(
-                `MCCRSIDForm: Apollo error reported. Error message: ${serverError.message}`
+                `MCCRSIDForm: Apollo error reported. Error message: ${parsedError.message}`
             )
-            return new Error(serverError)
+            return parsedError
         }
     }
 

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect } from 'react'
 import styles from '../QuestionResponse.module.scss'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import {
     CreateRateQuestionInput,
     CreateRateQuestionDocument,

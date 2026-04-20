@@ -12,7 +12,7 @@ import {
     convertGQLRateToRateForm,
 } from '../StateSubmission/HealthPlanSubmission/RateDetails'
 import { useS3 } from '../../contexts/S3Context'
-import { ApolloError } from '@apollo/client'
+import type { ErrorLike } from '@apollo/client'
 
 export type LinkYourRatesProps = {
     fieldNamePrefix: string
@@ -21,7 +21,7 @@ export type LinkYourRatesProps = {
     autofill: (
         rateForm: FormikRateForm,
         autofillLoading?: boolean,
-        autofillError?: ApolloError
+        autofillError?: ErrorLike | undefined
     ) => void // used for multi-rates, when called will FieldArray replace the existing form fields with new data
     disableRadioBtns: boolean
 }

@@ -294,6 +294,47 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             )
         })
 
+        it('clears dsnpContract when a submission is updated to CHIP-only and chip automation is enabled', async () => {
+            const mockLDService = testLDService({
+                dsnp: true,
+                'chip-submission-automation': true,
+            })
+            const server = await constructTestPostgresServer({
+                ldService: mockLDService,
+            })
+            const draftContract = await createTestContract(server)
+            const draftRevision = draftContract.draftRevision
+
+            if (!draftRevision) {
+                throw new Error(
+                    'Unexpected error: Draft contract did not contain a draft revision'
+                )
+            }
+
+            const updateFormData: ContractDraftRevisionFormDataInput = {
+                ...mockGqlContractDraftRevisionFormDataInput(
+                    draftContract.stateCode,
+                    {
+                        populationCovered: 'CHIP',
+                        dsnpContract: true,
+                        federalAuthorities: ['STATE_PLAN'],
+                    }
+                ),
+            }
+
+            const updateResult = await updateTestContractDraftRevision(
+                server,
+                draftContract.id,
+                draftRevision.updatedAt,
+                updateFormData
+            )
+
+            expect(updateResult.draftRevision?.formData.dsnpContract).toBeNull()
+            expect(updateResult.draftRevision?.formData.populationCovered).toBe(
+                'CHIP'
+            )
+        })
+
         it('errors if the Contract is already submitted', async () => {
             const server = await constructTestPostgresServer()
             const draftContract = await createTestContract(server)

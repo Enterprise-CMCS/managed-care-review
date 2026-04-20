@@ -19,7 +19,7 @@ import {
     PoliteErrorMessage,
 } from '../../../components'
 import { FormContainer } from '../../../components'
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import {
     CreateOauthClientDocument,
     IndexUsersDocument,

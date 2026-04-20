@@ -1,6 +1,9 @@
 import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
-import { MockedProvider, MockedProviderProps } from '@apollo/client/testing'
+import {
+    MockedProvider,
+    MockedProviderProps,
+} from '@apollo/client/testing/react'
 import { StoryFn } from '@storybook/react'
 
 import { AuthProvider, AuthProviderProps } from '../src/contexts/AuthContext'

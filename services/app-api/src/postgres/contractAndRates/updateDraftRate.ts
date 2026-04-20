@@ -6,6 +6,7 @@ import type {
 } from '../../domain-models/contractAndRates'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { prismaUpdateRateFormDataFromDomain } from './prismaContractRateAdaptors'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type UpdateRateArgsType = {
     rateID: string
@@ -101,7 +102,7 @@ async function updateDraftRate(
         return findRateWithHistory(client, rateID)
     } catch (err) {
         console.error('Prisma error updating rate', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

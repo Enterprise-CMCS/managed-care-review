@@ -11,6 +11,7 @@ import * as crypto from 'crypto'
 import Archiver from 'archiver'
 import { pipeline } from 'stream/promises'
 import { logError } from '../logger'
+import { parseErrorToError } from '@mc-review/helpers'
 import type { Store } from '../postgres'
 import type {
     ContractRevisionType,
@@ -82,7 +83,9 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
     try {
         tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'document-zip-'))
     } catch (err) {
-        return new Error(`Failed to create temporary directory: ${err.message}`)
+        return new Error(
+            `Failed to create temporary directory: ${parseErrorToError(err).message}`
+        )
     }
 
     const zipPath = path.join(tempDir, 'output.zip')
@@ -185,7 +188,9 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         try {
             await archive.finalize()
         } catch (err) {
-            return new Error(`Failed to create zip archive: ${err.message}`)
+            return new Error(
+                `Failed to create zip archive: ${parseErrorToError(err).message}`
+            )
         }
 
         // Calculate SHA256 hash of zip file
@@ -206,7 +211,9 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
                 })
             )
         } catch (err) {
-            return new Error(`Failed to upload zip to S3: ${err.message}`)
+            return new Error(
+                `Failed to upload zip to S3: ${parseErrorToError(err).message}`
+            )
         }
 
         return {
@@ -216,14 +223,20 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
             s3Key: outputKey,
         }
     } catch (error) {
-        logError('generateDocumentZip', error)
-        return new Error(`Unexpected error generating zip: ${error.message}`)
+        const parsedError = parseErrorToError(error)
+        logError('generateDocumentZip', parsedError)
+        return new Error(
+            `Unexpected error generating zip: ${parsedError.message}`
+        )
     } finally {
         // Clean up temp directory
         try {
             fs.rmSync(tempDir, { recursive: true, force: true })
         } catch (cleanupError) {
-            logError('generateDocumentZip cleanup', cleanupError)
+            logError(
+                'generateDocumentZip cleanup',
+                parseErrorToError(cleanupError)
+            )
         }
     }
 }
@@ -315,15 +328,20 @@ async function downloadFile(
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath)
             }
-            return new Error(`Failed to download file ${key}: ${error.message}`)
+            return new Error(
+                `Failed to download file ${key}: ${parseErrorToError(error).message}`
+            )
         }
     } catch (error) {
         clearTimeout(timeoutId)
 
-        if (error.name === 'AbortError') {
+        const parsedError = parseErrorToError(error)
+        if (parsedError.name === 'AbortError') {
             return new Error(`Download timeout for ${key} after ${timeout}ms`)
         }
-        return new Error(`S3 error downloading file ${key}: ${error.message}`)
+        return new Error(
+            `S3 error downloading file ${key}: ${parsedError.message}`
+        )
     }
 }
 
@@ -346,7 +364,11 @@ function calculateSHA256(filePath: string): Promise<string | Error> {
 
             stream.on('end', () => resolve(hash.digest('hex')))
         } catch (error) {
-            resolve(new Error(`Error calculating hash: ${error.message}`))
+            resolve(
+                new Error(
+                    `Error calculating hash: ${parseErrorToError(error).message}`
+                )
+            )
         }
     })
 }
@@ -557,10 +579,8 @@ export function documentZipService(
                 )
                 return
             } catch (error: unknown) {
-                const errorMessage =
-                    error instanceof Error ? error.message : String(error)
                 const err = new Error(
-                    `Unexpected error in generateRateDocumentsZip: ${errorMessage}`
+                    `Unexpected error in generateRateDocumentsZip: ${parseErrorToError(error).message}`
                 )
                 logError('generateRateDocumentsZip', err)
                 if (span) {
@@ -636,10 +656,8 @@ export function documentZipService(
                 )
                 return
             } catch (error: unknown) {
-                const errorMessage =
-                    error instanceof Error ? error.message : String(error)
                 const err = new Error(
-                    `Unexpected error in generateContractDocumentsZip: ${errorMessage}`
+                    `Unexpected error in generateContractDocumentsZip: ${parseErrorToError(error).message}`
                 )
                 logError('generateContractDocumentsZip', err)
                 if (span) {

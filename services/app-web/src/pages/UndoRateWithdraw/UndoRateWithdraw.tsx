@@ -11,7 +11,7 @@ import {
     FetchRateDocument,
     UndoWithdrawnRateDocument,
 } from '../../gen/gqlClient'
-import { useQuery, useMutation } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { ErrorOrLoadingPage } from '../StateSubmission'
 import { handleAndReturnErrorState } from '../StateSubmission/SharedSubmissionComponents'
 import { RoutesRecord } from '@mc-review/constants'

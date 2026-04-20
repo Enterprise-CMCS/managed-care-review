@@ -16,7 +16,7 @@ import {
 
 import styles from '../Settings.module.scss'
 import { handleApolloError, updateDivisionAssignment } from '@mc-review/helpers'
-import { ApolloError, useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { useTealium } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { hasAdminUserPermissions } from '@mc-review/helpers'
@@ -234,9 +234,7 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
 
             if (res instanceof Error) {
                 console.error('Errored attempting to update user: ', res)
-                if (res instanceof ApolloError) {
-                    handleApolloError(res, true)
-                }
+                handleApolloError(res, true)
                 return res
             }
             return undefined

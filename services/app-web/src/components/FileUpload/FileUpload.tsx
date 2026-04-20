@@ -14,6 +14,7 @@ import { FileItemT } from './FileProcessor/FileProcessor'
 import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize, calculateSHA256 } from '@mc-review/common-code'
 import { recordUserInputException } from '@mc-review/otel'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export type S3FileData = {
     key: string
@@ -222,7 +223,10 @@ export const FileUpload = ({
                             })
                             return
                         } catch (e) {
-                            console.info('SCANNING_ERROR: ', e.message)
+                            console.info(
+                                'SCANNING_ERROR: ',
+                                parseErrorToError(e).message
+                            )
                             setFileItems((prevItems) => {
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {

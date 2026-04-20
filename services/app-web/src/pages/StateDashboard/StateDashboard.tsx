@@ -6,7 +6,7 @@ import {
     ContractSubmissionType,
     IndexContractsStrippedDocument,
 } from '../../gen/gqlClient'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import styles from './StateDashboard.module.scss'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
 import {

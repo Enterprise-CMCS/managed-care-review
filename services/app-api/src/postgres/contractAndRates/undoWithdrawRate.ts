@@ -8,6 +8,7 @@ import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRate
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
 import type { SubmitContractArgsType } from './submitContract'
 import { submitContractInsideTransaction } from './submitContract'
+import { parseErrorToError } from '@mc-review/helpers'
 
 type UndoWithdrawRateArgsType = {
     rateID: string
@@ -239,7 +240,7 @@ const undoWithdrawRate = async (
         )
     } catch (err) {
         console.error('PRISMA ERROR: Error undoing rate withdrawal', err)
-        return err
+        return parseErrorToError(err)
     }
 }
 

@@ -10,7 +10,7 @@ import {
     FetchMcReviewSettingsDocument,
     OauthClient,
 } from '../../gen/gqlClient'
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { StateAnalystsInDashboardType } from './SettingsTables'
 import { RoutesRecord } from '@mc-review/constants'
 import { AssignedStaffUpdateBanner } from '../../components/Banner/AssignedStaffUpdateBanner/AssignedStaffUpdateBanner'
