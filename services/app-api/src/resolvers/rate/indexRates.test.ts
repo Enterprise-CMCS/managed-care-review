@@ -234,15 +234,12 @@ describe('indexRates', () => {
                     await createAndSubmitTestContractWithRate(stateServer)
                 const contract2 =
                     await createAndSubmitTestContractWithRate(stateServer)
-                const contract3 =
-                    await createAndSubmitTestContractWithRate(stateServer)
+                await createAndSubmitTestContractWithRate(stateServer)
 
                 const rate1ID =
                     contract1.packageSubmissions[0].rateRevisions[0].rateID
                 const rate2ID =
                     contract2.packageSubmissions[0].rateRevisions[0].rateID
-                const rate3ID =
-                    contract3.packageSubmissions[0].rateRevisions[0].rateID
 
                 const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexRatesDocument,
@@ -253,9 +250,10 @@ describe('indexRates', () => {
                 const returnedIDs = result.data?.indexRates.edges.map(
                     (edge: RateEdge) => edge.node.id
                 )
-                expect(returnedIDs).toContain(rate1ID)
-                expect(returnedIDs).toContain(rate2ID)
-                expect(returnedIDs).not.toContain(rate3ID)
+                expect(returnedIDs).toHaveLength(2)
+                expect(returnedIDs).toEqual(
+                    expect.arrayContaining([rate1ID, rate2ID])
+                )
             })
 
             it('return a list of submitted rates from multiple states', async () => {

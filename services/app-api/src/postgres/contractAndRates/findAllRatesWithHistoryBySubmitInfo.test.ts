@@ -182,7 +182,7 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
                 mockInsertRateArgs({ rateCertificationName: 'rate two' })
             )
         )
-        const rateThree = must(
+        must(
             await insertDraftRate(
                 client,
                 contractA.id,
@@ -204,15 +204,11 @@ describe('findAllRatesWithHistoryBySubmittedInfo', () => {
             })
         )
 
+        expect(rates).toHaveLength(2)
         expect(rates).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({ rateID: rateOne.id }),
                 expect.objectContaining({ rateID: rateTwo.id }),
-            ])
-        )
-        expect(rates).not.toEqual(
-            expect.arrayContaining([
-                expect.objectContaining({ rateID: rateThree.id }),
             ])
         )
     })
