@@ -215,7 +215,10 @@ describe('AppRoutes and routing configuration', () => {
                         }),
                     ],
                 },
-                featureFlags: { 'session-expiring-modal': false },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': true,
+                },
             })
 
             await waitFor(() => {
@@ -239,7 +242,10 @@ describe('AppRoutes and routing configuration', () => {
                         }),
                     ],
                 },
-                featureFlags: { 'session-expiring-modal': false },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': true,
+                },
             })
 
             await waitFor(() => {
@@ -262,12 +268,39 @@ describe('AppRoutes and routing configuration', () => {
                         }),
                     ],
                 },
+                featureFlags: { 'resources-nav-pages': true },
             })
 
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
                         name: /Contact Us/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('shows 404 page when feature flag is off', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/contact-us' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': false,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Page not found/i,
                         level: 1,
                     })
                 ).toBeInTheDocument()
@@ -286,7 +319,10 @@ describe('AppRoutes and routing configuration', () => {
                         }),
                     ],
                 },
-                featureFlags: { 'session-expiring-modal': false },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': true,
+                },
             })
 
             await waitFor(() => {
@@ -310,7 +346,10 @@ describe('AppRoutes and routing configuration', () => {
                         }),
                     ],
                 },
-                featureFlags: { 'session-expiring-modal': false },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': true,
+                },
             })
 
             await waitFor(() => {
@@ -333,12 +372,39 @@ describe('AppRoutes and routing configuration', () => {
                         }),
                     ],
                 },
+                featureFlags: { 'resources-nav-pages': true },
             })
 
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
                         name: /Resources and Training/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('shows 404 page when feature flag is off', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': false,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('heading', {
+                        name: /Page not found/i,
                         level: 1,
                     })
                 ).toBeInTheDocument()

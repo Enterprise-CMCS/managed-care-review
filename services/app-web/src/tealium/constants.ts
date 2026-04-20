@@ -10,7 +10,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
         HELP: 'glossary',
         CONTACT_US: 'glossary',
         RESOURCES: 'glossary',
-        GRAPHQL_EXPLORER: 'dev',   
+        GRAPHQL_EXPLORER: 'dev',
         SETTINGS: 'table',
         MCR_SETTINGS: 'table',
         STATE_ASSIGNMENTS: 'table',

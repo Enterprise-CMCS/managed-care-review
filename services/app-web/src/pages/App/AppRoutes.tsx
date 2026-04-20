@@ -85,20 +85,33 @@ function componentForAuthMode(
 
 // Routes that are agnostic to user login and authentication
 // Should be available on all defined routes lists
-const UniversalRoutes = (
+// Hide Contact us and Resources pages behind the feature flag
+const renderUniversalRoutes = ({
+    showResourcesNavPages,
+}: {
+    showResourcesNavPages: boolean
+}) => (
     <Fragment>
         <Route path={RoutesRecord.HELP} element={<Help />} />
-        <Route path={RoutesRecord.CONTACT_US} element={<ContactUs />} />
-        <Route path={RoutesRecord.RESOURCES} element={<Resources />} />
+        <Route
+            path={RoutesRecord.CONTACT_US}
+            element={showResourcesNavPages ? <ContactUs /> : <Error404 />}
+        />
+        <Route
+            path={RoutesRecord.RESOURCES}
+            element={showResourcesNavPages ? <Resources /> : <Error404 />}
+        />
     </Fragment>
 )
 
 const StateUserRoutes = ({
     stageName,
+    showResourcesNavPages,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
+    showResourcesNavPages: boolean
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
@@ -202,7 +215,7 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS_REVISION}
                     element={<SubmissionRevisionSummary />}
                 />
-                {UniversalRoutes}
+                {renderUniversalRoutes({ showResourcesNavPages })}
                 {isExplorerAllowed(stageName) && (
                     <Route
                         path={RoutesRecord.GRAPHQL_EXPLORER}
@@ -218,11 +231,13 @@ const StateUserRoutes = ({
 const CMSUserRoutes = ({
     stageName,
     loggedInUser,
+    showResourcesNavPages,
 }: {
     authMode: AuthModeType
     setAlert?: React.Dispatch<React.ReactElement>
     stageName?: string
     loggedInUser: User
+    showResourcesNavPages: boolean
 }): React.ReactElement => {
     // feature flag
     const ldClient = useLDClient()
@@ -406,7 +421,7 @@ const CMSUserRoutes = ({
                     // one and just redirecting.
                     element={<Navigate to="/mc-review-settings" />}
                 />
-                {UniversalRoutes}
+                {renderUniversalRoutes({ showResourcesNavPages })}
                 <Route path="*" element={<Error404 />} />
             </Routes>
         </AuthenticatedRouteWrapper>
@@ -415,15 +430,17 @@ const CMSUserRoutes = ({
 
 const UnauthenticatedRoutes = ({
     authMode,
+    showResourcesNavPages,
 }: {
     authMode: AuthModeType
+    showResourcesNavPages: boolean
 }): React.ReactElement => {
     const authComponent = componentForAuthMode(authMode)
 
     return (
         <Routes>
             <Route path={RoutesRecord.ROOT} element={<Landing />} />
-            {UniversalRoutes}
+            {renderUniversalRoutes({ showResourcesNavPages })}
             {/* no /auth page for IDM auth, we just have the login redirect link */}
             {authComponent && (
                 <Route path={RoutesRecord.AUTH} element={authComponent} />
@@ -453,6 +470,12 @@ export const AppRoutes = ({
         null
     )
     const stageName = import.meta.env.VITE_APP_STAGE_NAME
+    // feature flag to hide Contact us and Resources pages
+    const ldClient = useLDClient()
+    const showResourcesNavPages: boolean = ldClient?.variation(
+        featureFlags.RESOURCES_NAV_PAGES.flag,
+        featureFlags.RESOURCES_NAV_PAGES.defaultValue
+    )
 
     const route = getRouteName(pathname)
     const { updateHeading } = usePage()
@@ -518,13 +541,19 @@ export const AppRoutes = ({
     }, [pathname, updateHeading])
 
     if (!loggedInUser) {
-        return <UnauthenticatedRoutes authMode={authMode} />
+        return (
+            <UnauthenticatedRoutes
+                authMode={authMode}
+                showResourcesNavPages={showResourcesNavPages}
+            />
+        )
     } else if (loggedInUser.__typename === 'StateUser') {
         return (
             <StateUserRoutes
                 authMode={authMode}
                 setAlert={setAlert}
                 stageName={stageName}
+                showResourcesNavPages={showResourcesNavPages}
             />
         )
     } else {
@@ -534,6 +563,7 @@ export const AppRoutes = ({
                 setAlert={setAlert}
                 stageName={stageName}
                 loggedInUser={loggedInUser}
+                showResourcesNavPages={showResourcesNavPages}
             />
         )
     }
