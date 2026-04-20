@@ -204,10 +204,10 @@ describe('AppRoutes and routing configuration', () => {
         })
     })
 
-    describe('/contactus', () => {
+    describe('/contact-us', () => {
         it('can be accessed by state user', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/contactus' },
+                routerProvider: { route: '/contact-us' },
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -230,7 +230,7 @@ describe('AppRoutes and routing configuration', () => {
 
         it('can be accessed by CMS user', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/contactus' },
+                routerProvider: { route: '/contact-us' },
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -254,7 +254,7 @@ describe('AppRoutes and routing configuration', () => {
 
         it('can be accessed by unauthenticated users', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/contactus' },
+                routerProvider: { route: '/contact-us' },
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({

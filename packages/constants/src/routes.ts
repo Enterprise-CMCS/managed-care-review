@@ -69,12 +69,12 @@ type ContractSubmissionTypeParams =
 const RoutesRecord: Record<RouteT, string> = {
     ROOT: '/',
     AUTH: '/auth',
-    CONTACT_US: '/contactus',
     DASHBOARD: '/dashboard',
     DASHBOARD_SUBMISSIONS: '/dashboard/submissions',
     DASHBOARD_RATES: '/dashboard/rate-reviews',
     GRAPHQL_EXPLORER: '/dev/graphql-explorer',
     HELP: '/help',
+    CONTACT_US: '/contact-us',
     RESOURCES: '/resources',
     SETTINGS: '/settings',
     MCR_SETTINGS: '/mc-review-settings',
