@@ -242,10 +242,10 @@ const RATE_PAGE_HEADING_ROUTES: RouteTWithUnknown[] = [
 const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     ROOT: 'Home',
     AUTH: 'Login',
-    CONTACT_US: 'Contact Us',
+    CONTACT_US: 'Contact us',
     GRAPHQL_EXPLORER: 'GraphQL explorer',
     HELP: 'Help',
-    RESOURCES: 'Resources and Training',
+    RESOURCES: 'Resources and training',
     SETTINGS: 'MC-Review settings',
     MCR_SETTINGS: 'MC-Review settings',
     STATE_ASSIGNMENTS: 'State assignments',
