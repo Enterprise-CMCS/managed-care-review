@@ -5,7 +5,6 @@ import {
     AuroraPostgresEngineVersion,
     Credentials,
     ClusterInstance,
-    DatabaseSecret,
 } from 'aws-cdk-lib/aws-rds'
 import type { IVpc, SubnetSelection, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import type { ISecret } from 'aws-cdk-lib/aws-secretsmanager'
@@ -60,21 +59,17 @@ export class AuroraServerlessV2 extends Construct {
             )
         }
 
-        // DatabaseSecret creates a secret in the format the rotation Lambda expects:
-        // { engine, host, port, dbname, username, password }
-        // attach() below populates the connection fields after the cluster is created.
-        const dbSecret = new DatabaseSecret(this, 'Secret', {
-            username: 'mcreviewadmin',
-            secretName: `aurora-postgres-${props.stage}-cdk`, // pragma: allowlist secret
-            excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
-        })
-
-        // Create the Aurora Serverless v2 cluster
+        // Create the Aurora Serverless v2 cluster.
+        // fromGeneratedSecret creates a DatabaseSecret in the format the rotation Lambda expects:
+        // { engine, host, port, dbname, username, password } — auto-attached to the cluster.
         this.cluster = new DatabaseCluster(this, 'Cluster', {
             engine: DatabaseClusterEngine.auroraPostgres({
                 version: AuroraPostgresEngineVersion.VER_16_9,
             }),
-            credentials: Credentials.fromSecret(dbSecret),
+            credentials: Credentials.fromGeneratedSecret('mcreviewadmin', {
+                secretName: `aurora-postgres-${props.stage}-cdk`, // pragma: allowlist secret
+                excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
+            }),
             clusterIdentifier: ResourceNames.resourceName(
                 'postgres',
                 'cluster',
@@ -108,9 +103,8 @@ export class AuroraServerlessV2 extends Construct {
             }),
         })
 
-        // Attach the secret to the cluster so CDK populates host/port/engine/dbname —
-        // these fields are required by the rotation Lambda to connect to Aurora.
-        this.secret = dbSecret.attach(this.cluster)
+        // cluster.secret is the auto-generated DatabaseSecret with all connection fields populated
+        this.secret = this.cluster.secret!
 
         // Rotate the admin password every 30 days via the Secrets Manager hosted rotation Lambda
         this.cluster.addRotationSingleUser({
