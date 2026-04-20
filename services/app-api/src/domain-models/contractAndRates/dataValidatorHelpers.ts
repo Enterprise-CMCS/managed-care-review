@@ -68,6 +68,23 @@ const validatePopulationCovered = (
         }
     })
 
+const parseAndUpdateChipOnlyFields = (
+    updateFormData: UpdateDraftContractFormDataType,
+    featureFlags?: FeatureFlagSettings
+) => {
+    if (
+        featureFlags?.['chip-submission-automation'] &&
+        updateFormData.populationCovered === 'CHIP'
+    ) {
+        return {
+            ...updateFormData,
+            dsnpContract: undefined,
+        }
+    }
+
+    return updateFormData
+}
+
 const validateContractDraftRevisionInput = (
     formData: ContractDraftRevisionFormDataInput,
     stateCode: string,
@@ -203,6 +220,9 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                 }
             }
             if (featureFlags['dsnp']) {
+                const hideDsnpForChipOnly =
+                    featureFlags['chip-submission-automation'] &&
+                    contractFormData.populationCovered === 'CHIP'
                 // when the dnsp flag is on, the dsnpContract field becomes
                 // required IF the submission's federal authorities include
                 // ANY of the following: 'STATE_PLAN','WAIVER_1915B', 'WAIVER_1115', 'VOLUNTARY'
@@ -213,7 +233,7 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                 const dsnpNotAnswered =
                     contractFormData.dsnpContract === null ||
                     contractFormData.dsnpContract === undefined
-                if (dsnpIsRequired && dsnpNotAnswered) {
+                if (dsnpIsRequired && dsnpNotAnswered && !hideDsnpForChipOnly) {
                     ctx.addIssue({
                         code: 'custom',
                         message: `dsnpContract is required when any of the following Federal Authorities are present: ${dsnpTriggers.toString()}`,
@@ -378,5 +398,6 @@ export {
     parseContract,
     parseEQROContract,
     parseAndUpdateEqroFields,
+    parseAndUpdateChipOnlyFields,
     validateEQROContractDraftRevisionInput,
 }

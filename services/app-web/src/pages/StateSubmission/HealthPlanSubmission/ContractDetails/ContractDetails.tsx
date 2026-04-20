@@ -159,6 +159,10 @@ export const ContractDetails = ({
         featureFlags.DSNP.flag,
         featureFlags.DSNP.defaultValue
     )
+    const chipSubmissionAutomation = ldClient?.variation(
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.flag,
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.defaultValue
+    )
 
     // Contract documents state management
     const { getKey, handleUploadFile, handleScanFile } = useS3()
@@ -209,6 +213,8 @@ export const ContractDetails = ({
     const applicableFederalAuthorities = isCHIPOnly(draftSubmission)
         ? federalAuthorityKeysForCHIP
         : federalAuthorityKeys
+    const hideDsnpForChipOnly =
+        chipSubmissionAutomation && isCHIPOnly(draftSubmission)
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractDocuments: formatDocumentsForForm({
@@ -416,7 +422,7 @@ export const ContractDetails = ({
                 federalAuthorities: values.federalAuthorities,
                 // Clear dsnpContract if all dsnp trigger federalAuthorities are removed after a value was previously selected for dsnpContract
                 dsnpContract:
-                    values.dsnpContract && dsnpTrigger
+                    values.dsnpContract && dsnpTrigger && !hideDsnpForChipOnly
                         ? yesNoFormValueAsBoolean(values.dsnpContract)
                         : undefined,
                 submissionType:
@@ -1243,6 +1249,7 @@ export const ContractDetails = ({
                                                 </Fieldset>
                                             </FormGroup>
                                             {enableDSNPs &&
+                                                !hideDsnpForChipOnly &&
                                                 values.federalAuthorities.some(
                                                     (type) =>
                                                         dsnpTriggers.includes(
