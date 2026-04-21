@@ -396,7 +396,3 @@ export const DatePicker = ({
         </div>
     )
 }
-
-DatePicker.defaultProps = {
-    minDate: DEFAULT_MIN_DATE,
-}
