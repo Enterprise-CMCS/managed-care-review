@@ -14,10 +14,7 @@ import { readReusableValidationResult } from './validationCache'
 import { newValidationLlmClient } from '../llm'
 import type { ValidationLlmConfig } from '../llm'
 import { parsePdf } from '../parsing'
-import type {
-  DateValidationFieldInput,
-  DateValidationResult
-} from '../prompts'
+import type { DateValidationFieldInput, DateValidationResult } from '../prompts'
 import { buildDateValidationPrompt } from '../prompts'
 import {
   buildFieldRetrievalQuery,
@@ -53,6 +50,18 @@ export interface ValidationSourceDocument {
   sourceKey: string
 }
 
+export type ValidationPhaseTimingDiagnostic = {
+  phase:
+    | 'fetch'
+    | 'parse'
+    | 'ocr'
+    | 'chunk'
+    | 'embed'
+    | 'retrieval'
+    | 'validation'
+  elapsedMs: number
+}
+
 export interface ValidationHandlerEvent {
   formId: string
   artifactVersion: string
@@ -61,6 +70,12 @@ export interface ValidationHandlerEvent {
   validationLlmConfig?: ValidationLlmConfig
   formFields: DateValidationFieldInput[]
   documents: ValidationSourceDocument[]
+  diagnostics?: {
+    recordPhaseTiming(
+      phase: ValidationPhaseTimingDiagnostic['phase'],
+      elapsedMs: number
+    ): void
+  }
 }
 
 export interface ValidationHandlerResult {
@@ -151,14 +166,19 @@ export async function validationHandler(
 
         // Parse and embed only documents that are new, changed, or missing a
         // reusable per-document artifact for the current embedding model.
-        const fileBuffer = await s3Client.getBuffer(
-          document.sourceBucket,
-          document.sourceKey
+        const fileBuffer = await measureValidationPhase(event, 'fetch', () =>
+          s3Client.getBuffer(document.sourceBucket, document.sourceKey)
         )
-        const parsed = await parsePdf(fileBuffer, document.documentName)
-        const chunks = chunkDocument(parsed.fileName, parsed.rawText, {
-          pageTexts: parsed.pageTexts
-        })
+        const parsed = await parsePdfWithDiagnostics(
+          event,
+          fileBuffer,
+          document.documentName
+        )
+        const chunks = measureValidationPhaseSync(event, 'chunk', () =>
+          chunkDocument(parsed.fileName, parsed.rawText, {
+            pageTexts: parsed.pageTexts
+          })
+        )
 
         if (chunks.length === 0) {
           throw new Error(
@@ -166,8 +186,8 @@ export async function validationHandler(
           )
         }
 
-        const chunkVectors = await embeddingProvider.embedTexts(
-          chunks.map((chunk) => chunk.text)
+        const chunkVectors = await measureValidationPhase(event, 'embed', () =>
+          embeddingProvider.embedTexts(chunks.map((chunk) => chunk.text))
         )
         const indexedDocumentArtifact = buildIndexedDocumentArtifact({
           documentName: document.documentName,
@@ -230,65 +250,74 @@ export async function validationHandler(
       text: string
     }>()
 
-    await vectorStore.add(
-      chunks.map((chunk, index) => ({
-        id: chunk.chunkId,
-        vector: chunkVectors[index],
-        metadata: {
-          chunkId: chunk.chunkId,
-          documentName: chunk.documentName,
-          order: chunk.order,
-          page: chunk.page,
-          startPage: chunk.startPage,
-          endPage: chunk.endPage,
-          text: chunk.text
-        }
-      }))
-    )
-
     const retrievalDiagnostics = new Map<
       DateValidationFieldInput['field'],
       ValidationRetrievalDiagnostic
     >()
-    const retrievedChunksByField = new Map(
-      await Promise.all(
-        event.formFields.map(async (field) => {
-          const queryVector = await embeddingProvider.embedText(
-            buildFieldRetrievalQuery(field.field)
-          )
-          const initiallyRetrievedChunks = orderRetrievedChunks(
-            await vectorStore.search(queryVector, 3)
-          ).map((result) => ({
-            chunkId: result.metadata.chunkId,
-            documentName: result.metadata.documentName,
-            page: result.metadata.page,
-            startPage: result.metadata.startPage,
-            endPage: result.metadata.endPage,
-            order: result.metadata.order,
-            text: result.metadata.text
+    const retrievedChunksByField = await measureValidationPhase(
+      event,
+      'retrieval',
+      async () => {
+        await vectorStore.add(
+          chunks.map((chunk, index) => ({
+            id: chunk.chunkId,
+            vector: chunkVectors[index],
+            metadata: {
+              chunkId: chunk.chunkId,
+              documentName: chunk.documentName,
+              order: chunk.order,
+              page: chunk.page,
+              startPage: chunk.startPage,
+              endPage: chunk.endPage,
+              text: chunk.text
+            }
           }))
-          const expandedRetrieval = expandClauseEvidenceForField({
-            field: field.field,
-            retrievedChunks: initiallyRetrievedChunks,
-            allChunks: chunks
-          })
+        )
 
-          retrievalDiagnostics.set(field.field, expandedRetrieval.diagnostics)
+        return new Map(
+          await Promise.all(
+            event.formFields.map(async (field) => {
+              const queryVector = await embeddingProvider.embedText(
+                buildFieldRetrievalQuery(field.field)
+              )
+              const initiallyRetrievedChunks = orderRetrievedChunks(
+                await vectorStore.search(queryVector, 3)
+              ).map((result) => ({
+                chunkId: result.metadata.chunkId,
+                documentName: result.metadata.documentName,
+                page: result.metadata.page,
+                startPage: result.metadata.startPage,
+                endPage: result.metadata.endPage,
+                order: result.metadata.order,
+                text: result.metadata.text
+              }))
+              const expandedRetrieval = expandClauseEvidenceForField({
+                field: field.field,
+                retrievedChunks: initiallyRetrievedChunks,
+                allChunks: chunks
+              })
 
-          return [
-            field.field,
-            expandedRetrieval.chunks.map((result) => ({
-              chunkId: result.chunkId,
-              documentName: result.documentName,
-              page: result.page,
-              startPage: result.startPage,
-              endPage: result.endPage,
-              order: result.order,
-              text: result.text
-            }))
-          ] as const
-        })
-      )
+              retrievalDiagnostics.set(
+                field.field,
+                expandedRetrieval.diagnostics
+              )
+
+              return [
+                field.field,
+                expandedRetrieval.chunks.map((result) => ({
+                  chunkId: result.chunkId,
+                  documentName: result.documentName,
+                  page: result.page,
+                  startPage: result.startPage,
+                  endPage: result.endPage,
+                  order: result.order,
+                  text: result.text
+                }))
+              ] as const
+            })
+          )
+        )
+      }
     )
 
     await s3Client.putJson(
@@ -314,40 +343,42 @@ export async function validationHandler(
       }>
     }> = []
 
-    for (const field of event.formFields) {
-      const retrievedChunksForField =
-        retrievedChunksByField.get(field.field) ?? []
-      const deterministicValidation = runDeterministicDateValidation({
-        formFields: [field],
-        retrievedChunks: retrievedChunksForField
-      })
-
-      const fallbackToLlmResults = deterministicValidation.resolvedResults.filter(
-        (result) =>
-          shouldFallbackConflictingClauseResolutionToLlm({
-            field: field.field,
-            deterministicResult: result,
-            retrievedChunks: retrievedChunksForField,
-            retrievalDiagnostic: retrievalDiagnostics.get(field.field)
-          })
-      )
-
-      deterministicResults.push(
-        ...deterministicValidation.resolvedResults.filter(
-          (result) => !fallbackToLlmResults.includes(result)
-        )
-      )
-
-      if (
-        deterministicValidation.unresolvedFields.length > 0 ||
-        fallbackToLlmResults.length > 0
-      ) {
-        unresolvedFields.push({
-          field,
+    await measureValidationPhase(event, 'validation', async () => {
+      for (const field of event.formFields) {
+        const retrievedChunksForField =
+          retrievedChunksByField.get(field.field) ?? []
+        const deterministicValidation = runDeterministicDateValidation({
+          formFields: [field],
           retrievedChunks: retrievedChunksForField
         })
+
+        const fallbackToLlmResults =
+          deterministicValidation.resolvedResults.filter((result) =>
+            shouldFallbackConflictingClauseResolutionToLlm({
+              field: field.field,
+              deterministicResult: result,
+              retrievedChunks: retrievedChunksForField,
+              retrievalDiagnostic: retrievalDiagnostics.get(field.field)
+            })
+          )
+
+        deterministicResults.push(
+          ...deterministicValidation.resolvedResults.filter(
+            (result) => !fallbackToLlmResults.includes(result)
+          )
+        )
+
+        if (
+          deterministicValidation.unresolvedFields.length > 0 ||
+          fallbackToLlmResults.length > 0
+        ) {
+          unresolvedFields.push({
+            field,
+            retrievedChunks: retrievedChunksForField
+          })
+        }
       }
-    }
+    })
 
     let reconciledResults = deterministicResults
     // Persist LLM-path diagnostics alongside the artifact so evaluation can
@@ -371,41 +402,45 @@ export async function validationHandler(
 
       // Keep Ollama as the default runtime, but let evaluation code opt into a
       // Bedrock-backed client without reshaping the worker flow itself.
-      const validationClient = newValidationLlmClient(
-        event.validationLlmConfig
-      )
-      const llmResults = await Promise.all(
-        unresolvedFields.map(async ({ field, retrievedChunks }) => {
-          // Convert only the unresolved field plus its own retrieved evidence
-          // into the prompt so start and end dates do not share mixed context.
-          const prompt = buildDateValidationPrompt({
-            formFields: [field],
-            retrievedChunks
+      const validationClient = newValidationLlmClient(event.validationLlmConfig)
+      const llmResults = await measureValidationPhase(event, 'validation', () =>
+        Promise.all(
+          unresolvedFields.map(async ({ field, retrievedChunks }) => {
+            // Convert only the unresolved field plus its own retrieved evidence
+            // into the prompt so start and end dates do not share mixed context.
+            const prompt = buildDateValidationPrompt({
+              formFields: [field],
+              retrievedChunks
+            })
+
+            const validationResponse =
+              await validationClient.generateValidation({
+                prompt
+              })
+            const parsedLlmResponse = parseSingleFieldValidationResponse(
+              validationResponse.rawText,
+              field.field
+            )
+
+            if (parsedLlmResponse.diagnostic != null) {
+              llmDiagnostics.push(parsedLlmResponse.diagnostic)
+            }
+
+            const normalizedResult = normalizeLlmValidationResult({
+              field,
+              result: {
+                ...parsedLlmResponse.result,
+                decisionSource: 'llm'
+              },
+              retrievedChunks
+            })
+
+            return reconcileValidationResults(
+              [normalizedResult],
+              retrievedChunks
+            )
           })
-
-          const validationResponse = await validationClient.generateValidation({
-            prompt
-          })
-          const parsedLlmResponse = parseSingleFieldValidationResponse(
-            validationResponse.rawText,
-            field.field
-          )
-
-          if (parsedLlmResponse.diagnostic != null) {
-            llmDiagnostics.push(parsedLlmResponse.diagnostic)
-          }
-
-          const normalizedResult = normalizeLlmValidationResult({
-            field,
-            result: { ...parsedLlmResponse.result, decisionSource: 'llm' },
-            retrievedChunks
-          })
-
-          return reconcileValidationResults(
-            [normalizedResult],
-            retrievedChunks
-          )
-        })
+        )
       )
 
       reconciledResults = [...reconciledResults, ...llmResults.flat()]
@@ -522,12 +557,72 @@ async function readOptionalArtifact<T>(
   try {
     return await s3Client.getJson<T>(bucket, key)
   } catch (error) {
-    if (error instanceof Error && error.message.includes('S3 object not found')) {
+    if (
+      error instanceof Error &&
+      error.message.includes('S3 object not found')
+    ) {
       return null
     }
 
     throw error
   }
+}
+
+async function measureValidationPhase<T>(
+  event: ValidationHandlerEvent,
+  phase: ValidationPhaseTimingDiagnostic['phase'],
+  run: () => Promise<T>
+): Promise<T> {
+  if (!event.diagnostics) {
+    return run()
+  }
+
+  const startedAt = Date.now()
+
+  try {
+    return await run()
+  } finally {
+    event.diagnostics?.recordPhaseTiming(phase, Date.now() - startedAt)
+  }
+}
+
+function measureValidationPhaseSync<T>(
+  event: ValidationHandlerEvent,
+  phase: ValidationPhaseTimingDiagnostic['phase'],
+  run: () => T
+): T {
+  if (!event.diagnostics) {
+    return run()
+  }
+
+  const startedAt = Date.now()
+
+  try {
+    return run()
+  } finally {
+    event.diagnostics?.recordPhaseTiming(phase, Date.now() - startedAt)
+  }
+}
+
+async function parsePdfWithDiagnostics(
+  event: ValidationHandlerEvent,
+  fileBuffer: Buffer,
+  documentName: string
+): ReturnType<typeof parsePdf> {
+  if (!event.diagnostics) {
+    return parsePdf(fileBuffer, documentName)
+  }
+
+  const startedAt = Date.now()
+  const parsed = await parsePdf(fileBuffer, documentName)
+  const elapsedMs = Date.now() - startedAt
+
+  event.diagnostics.recordPhaseTiming('parse', elapsedMs)
+  if (parsed.extractionMethod === 'ocr') {
+    event.diagnostics.recordPhaseTiming('ocr', elapsedMs)
+  }
+
+  return parsed
 }
 
 function logMissingCitationPages(
@@ -545,7 +640,9 @@ function logMissingCitationPages(
   console.warn('Validation citations missing page metadata', {
     formId,
     count: citationsMissingPage.length,
-    chunkIds: [...new Set(citationsMissingPage.map((citation) => citation.chunkId))]
+    chunkIds: [
+      ...new Set(citationsMissingPage.map((citation) => citation.chunkId))
+    ]
   })
 }
 

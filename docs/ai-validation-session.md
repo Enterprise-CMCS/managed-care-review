@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-039 Add prod-shaped large-submission evaluation fixture`.
+The next implementation ticket is `AIFA-040 Filter unsupported validation documents before worker execution`.
 
 ## Completed
 
@@ -51,6 +51,7 @@ The next implementation ticket is `AIFA-039 Add prod-shaped large-submission eva
 - AIFA-028 ✔ Incremental parsing and selective re-indexing
 - AIFA-037 ✔ Add S3 lifecycle rule safety net for AI validation artifacts
 - AIFA-038 ✔ Confirm document metadata and PDF eligibility rules
+- AIFA-039 ✔ Add prod-shaped large-submission evaluation fixture
 
 ## Current State
 
@@ -159,6 +160,9 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - `AIFA-049` was split into staged work-selection tickets so scoring can be diagnostic-only first, gated second, and promoted only after evaluation
 - trigger-time contract document metadata is now documented; content type, size, ETag, and S3 version ID are not currently available on the draft document shape
 - the PDF eligibility rule is metadata-only and advisory; `artifactVersion` still hashes all persisted contract document keys until filtering is implemented deliberately
+- a synthetic 165-document large-submission evaluation scenario now exists without committing production documents
+- large-submission evaluation is opt-in and reports document counts, phase timings, outcomes, and approximate artifact sizes
+- unsupported and corrupt documents are still simulated diagnostics until filtering and document-level failure isolation are implemented
 
 ## What Is Working
 
@@ -177,6 +181,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - scheduled cleanup of expired AI validation artifacts by `rag-indexes/` prefix
 - selective document-level chunk and embedding reuse for unchanged files
 - prefix-scoped S3 lifecycle expiration for AI validation artifacts
+- opt-in prod-shaped large-submission fixture for measuring later hardening work
 
 ## What Is Still Weak
 
@@ -193,6 +198,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - document-level reuse currently keys off document name plus S3 bucket/key identity, so any future upload flow that overwrites content in place without changing those inputs would need a stronger content fingerprint
 - the lifecycle safety net currently assumes `ai-form-augmentation-artifacts` stays dedicated to AI validation storage because the custom-resource call owns that bucket's lifecycle configuration
 - prod-shaped submissions can include 100+ attached documents; the current worker still needs hardening for unsupported files, per-document failures, bounded concurrency, partial coverage, and safe work selection
+- large-submission unsupported and corrupt inputs are simulated in the fixture; real filtering and per-document failure isolation remain pending
 - FAISS is not the next bottleneck to evaluate until realistic large-submission measurements separate vector search time from parsing, OCR, embedding, and retrieval-quality issues
 
 ## Follow-On Tickets
@@ -233,15 +239,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-039 Add prod-shaped large-submission evaluation fixture
+### AIFA-040 Filter unsupported validation documents before worker execution
 
-Add a synthetic or sanitized high-document-count evaluation scenario for large-submission hardening.
+Apply the AIFA-038 PDF eligibility rule before invoking the worker and preserve diagnostics for ignored documents.
 
 ## Suggested Next Step
 
-- Build or identify a non-proprietary fixture with roughly 100 to 165 documents.
-- Include relevant, irrelevant, unsupported, scanned or weak-text, oddly named, and bad/corrupt cases where feasible.
-- Extend evaluation output to report document counts, skipped/failed/eligible counts, chunk count, outcomes, and phase timings.
+- Apply the AIFA-038 PDF eligibility helper in app-api before worker invocation.
+- Pass only eligible PDFs to the worker while retaining skipped-document diagnostics.
+- Keep renamed `.pdf` parse failures for AIFA-041 document-level failure isolation.
 
 ## Source of Truth Docs
 
@@ -268,6 +274,8 @@ Add a synthetic or sanitized high-document-count evaluation scenario for large-s
 - The rewritten PoC plan lives in `docs/technical-design/ai-validation-poc-plan.md`.
 - The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
 - Review & Submit now stops polling after a bounded timeout window and falls back to non-blocking messaging instead of polling indefinitely.
+- The large-submission fixture is opt-in via `AI_VALIDATION_INCLUDE_LARGE_SUBMISSION=true`; normal evaluation remains small.
+- Parsed text is not a separate artifact yet, so large-run artifact-size output reports parsed text as unavailable until AIFA-046.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.
 - Clause-resolution hardening now passes the current 8-scenario corpus, but OCR-heavy term text still depends on narrow heuristics rather than a broader parsing layer.

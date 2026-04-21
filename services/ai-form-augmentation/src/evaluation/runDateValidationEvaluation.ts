@@ -1,15 +1,19 @@
+import { pathToFileURL } from 'node:url'
 import {
   runDateValidationEvaluation,
   type DateValidationEvaluationSummary
 } from './dateValidationEvaluation'
 
 async function main(): Promise<void> {
-  const summary = await runDateValidationEvaluation()
+  const summary = await runDateValidationEvaluation({
+    includeLargeSubmission:
+      process.env.AI_VALIDATION_INCLUDE_LARGE_SUBMISSION === 'true'
+  })
 
   console.log(formatEvaluationSummary(summary))
 }
 
-function formatEvaluationSummary(
+export function formatEvaluationSummary(
   summary: DateValidationEvaluationSummary
 ): string {
   const lines = [
@@ -46,16 +50,34 @@ function formatEvaluationSummary(
         }
       }
     }
+
+    if (report.largeSubmissionDiagnostics) {
+      const diagnostics = report.largeSubmissionDiagnostics
+      lines.push(
+        `  large submission: total=${diagnostics.totalDocuments}, eligible=${diagnostics.eligibleDocuments}, skipped=${diagnostics.skippedDocuments}, failed=${diagnostics.failedDocuments}, processed=${diagnostics.processedDocuments}, chunks=${diagnostics.chunkCount}`
+      )
+      lines.push(
+        `  outcomes: match=${diagnostics.finalOutcomes.match}, mismatch=${diagnostics.finalOutcomes.mismatch}, notEnoughEvidence=${diagnostics.finalOutcomes.notEnoughEvidence}`
+      )
+      lines.push(
+        `  phase timings ms: fetch=${diagnostics.phaseTimingsMs.fetch}, parse=${diagnostics.phaseTimingsMs.parse}, ocr=${diagnostics.phaseTimingsMs.ocr}, chunk=${diagnostics.phaseTimingsMs.chunk}, embed=${diagnostics.phaseTimingsMs.embed}, retrieval=${diagnostics.phaseTimingsMs.retrieval}, validation=${diagnostics.phaseTimingsMs.validation}`
+      )
+      lines.push(
+        `  artifact sizes bytes: parsedText=${diagnostics.artifactSizesBytes.parsedText ?? 'not-available'}, chunks=${diagnostics.artifactSizesBytes.chunks}, vectors=${diagnostics.artifactSizesBytes.vectors}, status=${diagnostics.artifactSizesBytes.status}, results=${diagnostics.artifactSizesBytes.results}`
+      )
+    }
   }
 
   return lines.join('\n')
 }
 
-void main().catch((error) => {
-  console.error(
-    error instanceof Error
-      ? error.message
-      : 'Unknown date validation evaluation error'
-  )
-  process.exit(1)
-})
+if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
+  void main().catch((error) => {
+    console.error(
+      error instanceof Error
+        ? error.message
+        : 'Unknown date validation evaluation error'
+    )
+    process.exit(1)
+  })
+}

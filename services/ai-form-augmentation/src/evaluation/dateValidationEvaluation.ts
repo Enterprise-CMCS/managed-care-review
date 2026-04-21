@@ -2,6 +2,14 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { validationHandler } from '../handlers'
+import {
+  computeDocumentCacheKey,
+  getChunksArtifactKey,
+  getDocumentIndexArtifactKey,
+  type ChunksArtifact,
+  type IndexedDocumentArtifact
+} from '../artifacts'
+import type { ValidationPhaseTimingDiagnostic } from '../handlers'
 import type { DateValidationResult } from '../prompts'
 import {
   getValidationResultKey,
@@ -9,18 +17,17 @@ import {
   type ValidationRetrievalDiagnostic,
   type ValidationResultArtifact
 } from '../results'
-import {
-  newArtifactS3Client,
-  type ArtifactS3Client
-} from '../s3'
+import { newArtifactS3Client, type ArtifactS3Client } from '../s3'
 import {
   getValidationStatusKey,
   type ValidationStatusArtifact
 } from '../status'
 import { computeArtifactVersion } from '../versioning'
 import {
-  DATE_VALIDATION_CORPUS,
+  DEFAULT_DATE_VALIDATION_EVALUATION_SCENARIOS,
+  LARGE_SUBMISSION_DATE_VALIDATION_SCENARIOS,
   type DateValidationCorpusExpectation,
+  type DateValidationCorpusDocument,
   type DateValidationCorpusScenario
 } from './dateValidationCorpus'
 import {
@@ -68,7 +75,30 @@ export interface DateValidationEvaluationScenarioReport {
   passed: boolean
   statusStage: ValidationStatusArtifact['stage'] | 'failed-before-status'
   error: string | null
+  largeSubmissionDiagnostics?: DateValidationLargeSubmissionDiagnostics
   fieldReports: DateValidationEvaluationFieldReport[]
+}
+
+export interface DateValidationLargeSubmissionDiagnostics {
+  totalDocuments: number
+  eligibleDocuments: number
+  skippedDocuments: number
+  failedDocuments: number
+  processedDocuments: number
+  chunkCount: number
+  finalOutcomes: {
+    match: number
+    mismatch: number
+    notEnoughEvidence: number
+  }
+  phaseTimingsMs: Record<ValidationPhaseTimingDiagnostic['phase'], number>
+  artifactSizesBytes: {
+    parsedText: number | null
+    chunks: number
+    vectors: number
+    status: number
+    results: number
+  }
 }
 
 export interface DateValidationEvaluationSummary {
@@ -83,14 +113,26 @@ export interface DateValidationEvaluationSummary {
   reports: DateValidationEvaluationScenarioReport[]
 }
 
-export async function runDateValidationEvaluation(): Promise<DateValidationEvaluationSummary> {
+export interface DateValidationEvaluationOptions {
+  includeLargeSubmission?: boolean
+}
+
+export async function runDateValidationEvaluation(
+  options: DateValidationEvaluationOptions = {}
+): Promise<DateValidationEvaluationSummary> {
   const evaluationStorage = getEvaluationStorageConfig()
   const evaluationLlmConfig = getEvaluationLlmConfig()
   await assertEvaluationStorageReady(evaluationStorage)
 
+  const scenarios = [
+    ...DEFAULT_DATE_VALIDATION_EVALUATION_SCENARIOS,
+    ...(options.includeLargeSubmission
+      ? LARGE_SUBMISSION_DATE_VALIDATION_SCENARIOS
+      : [])
+  ]
   const s3Client = newArtifactS3Client(evaluationStorage.s3Config)
   const reports = await Promise.all(
-    DATE_VALIDATION_CORPUS.map(async (scenario) =>
+    scenarios.map(async (scenario) =>
       evaluateScenario(
         scenario,
         s3Client,
@@ -112,10 +154,11 @@ export async function runDateValidationEvaluation(): Promise<DateValidationEvalu
     llmResults: allFieldReports.filter(
       (report) => report.decisionSource === 'llm'
     ).length,
-    malformedLlmResults: allFieldReports.filter((report) =>
-      report.llmIssue === 'missing-json-array' ||
-      report.llmIssue === 'invalid-json' ||
-      report.llmIssue === 'invalid-result-shape'
+    malformedLlmResults: allFieldReports.filter(
+      (report) =>
+        report.llmIssue === 'missing-json-array' ||
+        report.llmIssue === 'invalid-json' ||
+        report.llmIssue === 'invalid-result-shape'
     ).length,
     clauseEvidenceMisses: allFieldReports.filter(
       (report) => report.retrievalIssue === 'missing-clause-evidence'
@@ -132,22 +175,39 @@ async function evaluateScenario(
   evaluationLlmConfig: ReturnType<typeof getEvaluationLlmConfig>
 ): Promise<DateValidationEvaluationScenarioReport> {
   try {
-    const fixtureAbsolutePath = path.resolve(
-      EVALUATION_ROOT,
-      scenario.fixturePath
-    )
-    const fixtureBuffer = await readFile(fixtureAbsolutePath)
     const formId = `evaluation-${scenario.id}`
-    const sourceKey = `evaluation-fixtures/${scenario.id}/${scenario.documentName}`
+    const documents = getScenarioDocuments(scenario)
+    const runnableDocuments = documents.filter(
+      (document) => document.disposition === 'eligible'
+    )
+    const sourceDocuments = runnableDocuments.map((document) => ({
+      document,
+      sourceKey: `evaluation-fixtures/${scenario.id}/${document.documentName}`
+    }))
     // Reuse the real artifact-version contract so evaluation runs exercise the
     // same stale/current logic the app relies on in normal validation polling.
-    const artifactVersion = computeArtifactVersion([sourceKey])
+    const artifactVersion = computeArtifactVersion(
+      sourceDocuments.map((document) => document.sourceKey)
+    )
 
-    await s3Client.putBuffer(
-      evaluationStorage.bucket,
-      sourceKey,
-      fixtureBuffer,
-      'application/pdf'
+    const phaseTimings = newPhaseTimings()
+    await measureEvaluationPhase(phaseTimings, 'fetch', async () =>
+      Promise.all(
+        sourceDocuments.map(async ({ document, sourceKey }) => {
+          const fixtureAbsolutePath = path.resolve(
+            EVALUATION_ROOT,
+            document.fixturePath ?? scenario.fixturePath
+          )
+          const fixtureBuffer = await readFile(fixtureAbsolutePath)
+
+          await s3Client.putBuffer(
+            evaluationStorage.bucket,
+            sourceKey,
+            fixtureBuffer,
+            document.contentType
+          )
+        })
+      )
     )
 
     await validationHandler({
@@ -162,15 +222,25 @@ async function evaluateScenario(
         value: expectation.formValue
       })),
       documents: [
-        {
-          documentName: scenario.documentName,
+        ...sourceDocuments.map(({ document, sourceKey }) => ({
+          documentName: document.documentName,
           sourceBucket: evaluationStorage.bucket,
           sourceKey
+        }))
+      ],
+      diagnostics: {
+        recordPhaseTiming: (phase, elapsedMs) => {
+          phaseTimings[phase] += elapsedMs
         }
-      ]
+      }
     })
 
-    const [statusArtifact, resultArtifact] = await Promise.all([
+    const [
+      statusArtifact,
+      resultArtifact,
+      chunksArtifact,
+      documentIndexArtifacts
+    ] = await Promise.all([
       s3Client.getJson<ValidationStatusArtifact>(
         evaluationStorage.bucket,
         getValidationStatusKey(formId)
@@ -178,6 +248,25 @@ async function evaluateScenario(
       s3Client.getJson<ValidationResultArtifact>(
         evaluationStorage.bucket,
         getValidationResultKey(formId)
+      ),
+      s3Client.getJson<ChunksArtifact>(
+        evaluationStorage.bucket,
+        getChunksArtifactKey(formId)
+      ),
+      Promise.all(
+        sourceDocuments.map(({ document, sourceKey }) =>
+          s3Client.getJson<IndexedDocumentArtifact>(
+            evaluationStorage.bucket,
+            getDocumentIndexArtifactKey(
+              formId,
+              computeDocumentCacheKey({
+                documentName: document.documentName,
+                sourceBucket: evaluationStorage.bucket,
+                sourceKey
+              })
+            )
+          )
+        )
       )
     ])
 
@@ -202,6 +291,18 @@ async function evaluateScenario(
       passed,
       statusStage: statusArtifact.stage,
       error: null,
+      ...(scenario.documents
+        ? {
+            largeSubmissionDiagnostics: buildLargeSubmissionDiagnostics({
+              documents,
+              chunksArtifact,
+              documentIndexArtifacts,
+              resultArtifact,
+              statusArtifact,
+              phaseTimings
+            })
+          }
+        : {}),
       fieldReports
     }
   } catch (error) {
@@ -211,7 +312,20 @@ async function evaluateScenario(
       summary: scenario.summary,
       passed: false,
       statusStage: 'failed-before-status',
-      error: error instanceof Error ? error.message : 'Unknown evaluation error',
+      error:
+        error instanceof Error ? error.message : 'Unknown evaluation error',
+      ...(scenario.documents
+        ? {
+            largeSubmissionDiagnostics: buildLargeSubmissionDiagnostics({
+              documents: getScenarioDocuments(scenario),
+              chunksArtifact: null,
+              documentIndexArtifacts: [],
+              resultArtifact: null,
+              statusArtifact: null,
+              phaseTimings: newPhaseTimings()
+            })
+          }
+        : {}),
       fieldReports: scenario.expectations.map((expectation) => ({
         field: expectation.field,
         expectedOutcome: expectation.expectedOutcome,
@@ -222,11 +336,116 @@ async function evaluateScenario(
         retrievalClauseEvidencePresent: false,
         retrievalClauseEvidenceAdded: false,
         passed: false,
-        problems: ['Scenario evaluation failed before a comparable result was stored.'],
+        problems: [
+          'Scenario evaluation failed before a comparable result was stored.'
+        ],
         actualMessage: null,
         actualCitationOrders: []
       }))
     }
+  }
+}
+
+export function getScenarioDocuments(
+  scenario: DateValidationCorpusScenario
+): DateValidationCorpusDocument[] {
+  return (
+    scenario.documents ?? [
+      {
+        documentName: scenario.documentName,
+        fixturePath: scenario.fixturePath,
+        contentType: 'application/pdf',
+        disposition: 'eligible',
+        role: 'relevant-contract',
+        tags: ['eligible-pdf']
+      }
+    ]
+  )
+}
+
+function buildLargeSubmissionDiagnostics(args: {
+  documents: DateValidationCorpusDocument[]
+  chunksArtifact: ChunksArtifact | null
+  documentIndexArtifacts: IndexedDocumentArtifact[]
+  resultArtifact: ValidationResultArtifact | null
+  statusArtifact: ValidationStatusArtifact | null
+  phaseTimings: Record<ValidationPhaseTimingDiagnostic['phase'], number>
+}): DateValidationLargeSubmissionDiagnostics {
+  return {
+    totalDocuments: args.documents.length,
+    eligibleDocuments: args.documents.filter(
+      (document) => document.disposition === 'eligible'
+    ).length,
+    skippedDocuments: args.documents.filter(
+      (document) => document.disposition === 'skipped'
+    ).length,
+    failedDocuments: args.documents.filter(
+      (document) => document.disposition === 'failed'
+    ).length,
+    processedDocuments: args.chunksArtifact?.documents?.length ?? 0,
+    chunkCount: args.chunksArtifact?.chunks.length ?? 0,
+    finalOutcomes: countOutcomes(args.resultArtifact?.results ?? []),
+    phaseTimingsMs: args.phaseTimings,
+    artifactSizesBytes: {
+      parsedText: null,
+      chunks: approximateJsonSize(args.chunksArtifact),
+      vectors: approximateJsonSize(
+        args.documentIndexArtifacts.map((artifact) => artifact.chunkVectors)
+      ),
+      status: approximateJsonSize(args.statusArtifact),
+      results: approximateJsonSize(args.resultArtifact)
+    }
+  }
+}
+
+function countOutcomes(results: DateValidationResult[]): {
+  match: number
+  mismatch: number
+  notEnoughEvidence: number
+} {
+  return {
+    match: results.filter((result) => result.outcome === 'match').length,
+    mismatch: results.filter((result) => result.outcome === 'mismatch').length,
+    notEnoughEvidence: results.filter(
+      (result) => result.outcome === 'not-enough-evidence'
+    ).length
+  }
+}
+
+function approximateJsonSize(value: unknown): number {
+  if (value == null) {
+    return 0
+  }
+
+  return Buffer.byteLength(JSON.stringify(value), 'utf8')
+}
+
+function newPhaseTimings(): Record<
+  ValidationPhaseTimingDiagnostic['phase'],
+  number
+> {
+  return {
+    fetch: 0,
+    parse: 0,
+    ocr: 0,
+    chunk: 0,
+    embed: 0,
+    retrieval: 0,
+    validation: 0
+  }
+}
+
+async function measureEvaluationPhase<T>(
+  phaseTimings: Record<ValidationPhaseTimingDiagnostic['phase'], number>,
+  phase: ValidationPhaseTimingDiagnostic['phase'],
+  run: () => Promise<T>
+): Promise<T> {
+  const startedAt = Date.now()
+
+  try {
+    return await run()
+  } finally {
+    phaseTimings[phase] += Date.now() - startedAt
   }
 }
 
@@ -239,8 +458,9 @@ function compareExpectation(
   const matchingResult =
     actualResults.find((result) => result.field === expectation.field) ?? null
   const matchingDiagnostic =
-    llmDiagnostics.find((diagnostic) => diagnostic.field === expectation.field) ??
-    null
+    llmDiagnostics.find(
+      (diagnostic) => diagnostic.field === expectation.field
+    ) ?? null
   const matchingRetrievalDiagnostic =
     retrievalDiagnostics.find(
       (diagnostic) => diagnostic.field === expectation.field

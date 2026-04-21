@@ -7,12 +7,33 @@ export interface DateValidationCorpusExpectation {
   expectedCitationOrders?: number[]
 }
 
+export type DateValidationCorpusDocumentDisposition =
+  | 'eligible'
+  | 'skipped'
+  | 'failed'
+
+export interface DateValidationCorpusDocument {
+  documentName: string
+  fixturePath?: string
+  contentType: string
+  disposition: DateValidationCorpusDocumentDisposition
+  role:
+    | 'relevant-contract'
+    | 'irrelevant-contract'
+    | 'irrelevant-rate'
+    | 'unsupported-rate'
+    | 'corrupt'
+  tags: string[]
+}
+
 export interface DateValidationCorpusScenario {
   id: string
   documentName: string
   fixturePath: string
   summary: string
   tags: string[]
+  documents?: DateValidationCorpusDocument[]
+  runByDefault?: boolean
   expectations: DateValidationCorpusExpectation[]
   demo: {
     recommended: boolean
@@ -25,8 +46,7 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
     id: 'scan-match-baseline',
     documentName: 'scan-07-65712-a26-213a-final.pdf',
     fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
-    summary:
-      'Baseline contract term match case using the SCAN amendment PDF.',
+    summary: 'Baseline contract term match case using the SCAN amendment PDF.',
     tags: ['match', 'demo'],
     expectations: [
       {
@@ -231,7 +251,115 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
       recommended: false
     }
   },
+  {
+    id: 'prod-shaped-large-submission',
+    documentName: 'zz_buried_oddly_named_contract_evidence.pdf',
+    fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
+    summary:
+      'Synthetic 165-document large-submission fixture shaped from a real production archive listing without committing production documents.',
+    tags: ['large-submission', 'prod-shaped', 'evaluation-only'],
+    documents: buildProdShapedLargeSubmissionDocuments(),
+    // Keep the expensive high-document-count scenario opt-in so the normal
+    // corpus remains useful for tight local validation loops.
+    runByDefault: false,
+    expectations: [
+      {
+        field: 'contractStartDate',
+        formValue: '01/01/2008',
+        expectedOutcome: 'match',
+        expectedMessageIncludes: '01/01/2008'
+      },
+      {
+        field: 'contractEndDate',
+        formValue: '12/31/2021',
+        expectedOutcome: 'match',
+        expectedMessageIncludes: '12/31/2021'
+      }
+    ],
+    demo: {
+      recommended: false
+    }
+  }
 ]
+
+export const DEFAULT_DATE_VALIDATION_EVALUATION_SCENARIOS =
+  DATE_VALIDATION_CORPUS.filter((scenario) => scenario.runByDefault !== false)
+
+export const LARGE_SUBMISSION_DATE_VALIDATION_SCENARIOS =
+  DATE_VALIDATION_CORPUS.filter((scenario) =>
+    scenario.tags.includes('large-submission')
+  )
 
 export const RECOMMENDED_DATE_VALIDATION_DEMO_SCENARIOS =
   DATE_VALIDATION_CORPUS.filter((scenario) => scenario.demo.recommended)
+
+function buildProdShapedLargeSubmissionDocuments(): DateValidationCorpusDocument[] {
+  return [
+    ...buildRepeatedDocuments({
+      count: 65,
+      prefix: 'contract-text',
+      fixturePath:
+        'fixtures/pdf/medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf',
+      role: 'irrelevant-contract',
+      tags: ['eligible-pdf', 'contract-text']
+    }),
+    {
+      documentName: 'zz_buried_oddly_named_contract_evidence.pdf',
+      fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
+      contentType: 'application/pdf',
+      disposition: 'eligible',
+      role: 'relevant-contract',
+      tags: [
+        'eligible-pdf',
+        'relevant-evidence',
+        'oddly-named',
+        'scanned-or-weak-text'
+      ]
+    },
+    ...buildRepeatedDocuments({
+      count: 66,
+      prefix: 'rate-text',
+      fixturePath:
+        'fixtures/pdf/medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf',
+      role: 'irrelevant-rate',
+      tags: ['eligible-pdf', 'rate-text']
+    }),
+    ...buildRepeatedDocuments({
+      count: 32,
+      prefix: 'rate-docx',
+      extension: 'docx',
+      contentType:
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      disposition: 'skipped',
+      role: 'unsupported-rate',
+      tags: ['unsupported-non-pdf', 'simulated-metadata']
+    }),
+    {
+      documentName: 'simulated-corrupt-contract.pdf',
+      contentType: 'application/pdf',
+      disposition: 'failed',
+      role: 'corrupt',
+      tags: ['corrupt', 'simulated-metadata']
+    }
+  ]
+}
+
+function buildRepeatedDocuments(args: {
+  count: number
+  prefix: string
+  fixturePath?: string
+  extension?: string
+  contentType?: string
+  disposition?: DateValidationCorpusDocumentDisposition
+  role: DateValidationCorpusDocument['role']
+  tags: string[]
+}): DateValidationCorpusDocument[] {
+  return Array.from({ length: args.count }, (_, index) => ({
+    documentName: `${args.prefix}-${String(index + 1).padStart(3, '0')}.${args.extension ?? 'pdf'}`,
+    ...(args.fixturePath ? { fixturePath: args.fixturePath } : {}),
+    contentType: args.contentType ?? 'application/pdf',
+    disposition: args.disposition ?? 'eligible',
+    role: args.role,
+    tags: args.tags
+  }))
+}

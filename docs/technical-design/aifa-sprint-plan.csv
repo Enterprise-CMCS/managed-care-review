@@ -715,7 +715,7 @@ Filtering, cache fingerprinting, and work selection should not be built on assum
 - Renamed non-PDF risk is documented with the intended failure behavior
 - artifactVersion impact is decided and documented
 - Any helper logic added is covered by focused unit tests"
-AIFA-039 Add prod-shaped large-submission evaluation fixture,Backlog,7-Large Submission Hardening,High,AIFA-038,"Add a synthetic or sanitized evaluation scenario representing a high-document-count submission of roughly 100 to 165 documents.
+AIFA-039 Add prod-shaped large-submission evaluation fixture,Done,7-Large Submission Hardening,High,AIFA-038,"Add a synthetic or sanitized evaluation scenario representing a high-document-count submission of roughly 100 to 165 documents.
 - Include relevant contract or amendment PDFs
 - Include many irrelevant rate/supporting PDFs
 - Include unsupported non-PDF inputs or simulated metadata
