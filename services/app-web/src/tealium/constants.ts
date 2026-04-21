@@ -8,6 +8,8 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
         DASHBOARD_SUBMISSIONS: 'table',
         DASHBOARD_RATES: 'table',
         HELP: 'glossary',
+        CONTACT_US: 'glossary',
+        RESOURCES: 'glossary',
         GRAPHQL_EXPLORER: 'dev',
         SETTINGS: 'table',
         MCR_SETTINGS: 'table',
