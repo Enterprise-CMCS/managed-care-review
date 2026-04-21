@@ -647,19 +647,21 @@ Local Ollama output is good enough for development, but it is not the final qual
 - Preconditions for AWS evaluation are documented clearly
 - The ticket does not overstate current deployment readiness
 - Local PoC progress does not depend on finishing this work first"
-AIFA-025 Evaluate FAISS implementation behind VectorStore,Backlog,6-Production Prep,Low,AIFA-008,"Evaluate whether FAISS is worth introducing after the PoC.
-- Create a FAISS-backed implementation that conforms to VectorStore, or spike the work enough to estimate it confidently
-- Compare performance and complexity against the brute-force implementation
+AIFA-025 Evaluate FAISS implementation behind VectorStore,Backlog,6-Production Prep,Low,"AIFA-008, AIFA-039, AIFA-044, AIFA-047, AIFA-049C","Evaluate whether FAISS is worth introducing after large-submission hardening instead of keeping brute-force retrieval.
+- Compare brute-force retrieval against the measured prod-shaped chunk counts and timings
+- Separate vector search time from fetch, parse, OCR, chunk, embed, and validation time
 - Consider packaging, native dependency friction, Lambda compatibility, and actual scale needs
 - Do not assume FAISS is required just because it sounds more advanced
-- Make a decision based on real tradeoffs
+- Keep any spike behind the existing VectorStore abstraction
+- Make a keep, defer, or implement recommendation based on measured tradeoffs
 
 Why this matters:
-The PoC intentionally avoided premature complexity. This ticket exists so the team can revisit retrieval scaling intentionally, not accidentally.","- There is a documented comparison between brute-force retrieval and a FAISS-backed path
-- The evaluation includes both performance and operational complexity, not just speed
+The PoC intentionally avoided premature vector-index complexity. After realistic large-submission measurements and safe work-selection validation, the team can decide whether FAISS solves a real bottleneck.","- There is a documented comparison between brute-force retrieval and a FAISS-backed path
+- The evaluation uses realistic chunk counts from the prod-shaped fixture
+- The evaluation separates vector search time from other pipeline costs
+- Operational complexity is considered alongside speed
 - Any FAISS work remains behind the VectorStore abstraction
-- The team can make an informed keep/defer decision based on actual evidence
-- The outcome is documented clearly enough that future work does not re-open the same question from scratch"
+- The team can make an informed keep, defer, or implement decision"
 AIFA-027 Add cleanup and lifecycle rules for pipeline artifacts,Done,6-Production Prep,Medium,"AIFA-006, AIFA-015","Add cleanup behavior for abandoned or deleted draft artifacts.
 - Identify which S3 artifact paths need cleanup
 - Extend existing cleanup flows if the repo already has a cleanup function
@@ -699,3 +701,219 @@ Scheduled cleanup is useful, but it still depends on application code and operat
 - The ticket notes make clear that lifecycle is a safety net, not the primary cleanup path
 - The change does not broaden retention behavior for unrelated bucket contents
 - Any versioned-object limitation or follow-up is documented clearly"
+AIFA-038 Confirm document metadata and PDF eligibility rules,Done,7-Large Submission Hardening,High,,"Confirm which document metadata is available and reliable enough to drive PDF eligibility, diagnostics, cache identity, and later work-selection scoring.
+- Inspect trigger-time document fields such as name, S3 key, bucket, MIME type, size, ETag, and version ID where available
+- Define the minimal PDF eligibility rule for the PoC
+- Treat metadata as advisory unless verified
+- Decide whether artifactVersion should include only eligible validation documents or all contract documents
+- Do not change runtime behavior beyond discovery or small helper validation
+
+Why this matters:
+Filtering, cache fingerprinting, and work selection should not be built on assumptions about metadata quality.","- Available document metadata is documented
+- PDF eligibility rule is explicit and handles missing or inconsistent metadata
+- Extension and MIME mismatch behavior is defined
+- Renamed non-PDF risk is documented with the intended failure behavior
+- artifactVersion impact is decided and documented
+- Any helper logic added is covered by focused unit tests"
+AIFA-039 Add prod-shaped large-submission evaluation fixture,Backlog,7-Large Submission Hardening,High,AIFA-038,"Add a synthetic or sanitized evaluation scenario representing a high-document-count submission of roughly 100 to 165 documents.
+- Include relevant contract or amendment PDFs
+- Include many irrelevant rate/supporting PDFs
+- Include unsupported non-PDF inputs or simulated metadata
+- Include at least one oddly named relevant document
+- Include at least one scanned or weak-text relevant document
+- Include a bad or corrupt document case if feasible
+- Extend evaluation output with large-run diagnostics
+
+Why this matters:
+Large-submission hardening needs a repeatable fixture so performance, retrieval recall, skipped documents, partial coverage, and artifact size are measured instead of guessed.","- Evaluation can run a prod-shaped high-document-count scenario without proprietary prod files
+- Output reports total documents, eligible documents, skipped documents, failed documents, chunk count, and final outcomes
+- Output reports phase timings for fetch, parse, OCR, chunk, embed, retrieval, and validation
+- Output reports approximate artifact sizes for parsed text, chunks, vectors, status, and result artifacts where available
+- Scenario includes buried or oddly named relevant evidence
+- Scenario includes scanned or weak-text relevant evidence"
+AIFA-040 Filter unsupported validation documents before worker execution,Backlog,7-Large Submission Hardening,High,AIFA-038,"Filter unsupported files before invoking the AI worker while preserving diagnostics about ignored documents.
+- Apply the PDF eligibility rule from AIFA-038 in app-api
+- Pass only eligible validation documents to the worker
+- Do not expand support beyond PDFs
+- Keep non-PDF behavior explicit and observable
+- Do not change the existing upload flow
+- Do not treat filename or MIME type as proof that parsing will succeed
+
+Why this matters:
+The current worker is PDF-only. Unsupported files should not reach parsePdf and fail the entire validation run.","- Unsupported documents are excluded before worker invocation
+- Mixed PDF and non-PDF submissions still invoke the worker with eligible PDFs
+- All-unsupported submissions fail clearly using existing GraphQL error patterns
+- Ignored document count and reason are captured in diagnostics
+- Extension and MIME mismatch cases follow the documented eligibility rule
+- Files that pass eligibility but fail PDF parsing are handled later by document-level failure isolation, not by this ticket
+- Local S3 key derivation still works for eligible PDFs"
+AIFA-041 Add document-level failure isolation and processing diagnostics,Backlog,7-Large Submission Hardening,High,AIFA-040,"Isolate per-document fetch, parse, chunk, and embed failures so one bad document does not fail the whole validation run when other usable PDFs remain.
+- Catch per-document processing failures
+- Continue indexing successful documents
+- Persist skipped, failed, and processed document diagnostics
+- Fail only when no eligible documents can be indexed
+- Keep user-facing validation conservative when coverage is partial
+- Do not silently convert processing failures into not-enough-evidence without diagnostics
+
+Why this matters:
+A 165-document submission is likely to contain at least one bad, empty, weak, or malformed file. The worker needs graceful degradation instead of all-or-nothing failure.","- One bad document plus valid documents can still complete validation
+- All eligible documents failing produces a failed status with useful error text
+- Empty-chunk documents are recorded and do not fail the full run when other documents succeed
+- Diagnostics distinguish skipped, failed, processed, and usable documents
+- Partial processing does not claim all documents were reviewed
+- Validation results include or reference coverage diagnostics when not all eligible documents are usable
+- Existing normal corpus outcomes do not regress"
+AIFA-042 Add bounded document indexing concurrency,Backlog,7-Large Submission Hardening,High,AIFA-041,"Bound per-document indexing concurrency for fetch, parse, chunk, and embed work.
+- Replace unbounded per-document Promise.all behavior with a small concurrency limit
+- Keep the limit configurable or clearly centralized
+- Preserve document-level failure isolation
+- Record enough timing and failure information to distinguish slow but healthy work from stuck work
+
+Why this matters:
+Unbounded processing across 100 or more documents can overload CPU, memory, S3, OCR, and embedding runtime.","- Document indexing concurrency is bounded
+- Default concurrency is conservative for local execution
+- Queue continues draining after individual document failures
+- Total indexing duration and per-document failure counts are recorded
+- Existing small-corpus behavior remains stable
+- Focused tests cover concurrency and failure behavior"
+AIFA-043 Add large-batch OCR safety valve,Backlog,7-Large Submission Hardening,Medium,AIFA-042,"Add a conservative OCR policy for large document batches.
+- Preserve existing OCR fallback for small submissions
+- Cap or skip OCR fallback in large batches where unlimited OCR would be too expensive
+- Record OCR attempted, skipped, and capped counts
+- Treat OCR-skipped documents as not fully reviewed
+- Keep validation conservative when OCR may contain relevant evidence
+- Do not allow OCR skipping to produce a confident match or mismatch by itself
+
+Why this matters:
+OCR can dominate first-run cost for large submissions. The PoC needs a safety valve without creating false confidence.","- Small submissions keep existing OCR fallback behavior
+- Large submissions do not OCR unlimited weak-text PDFs
+- OCR-skipped and OCR-capped documents are recorded in diagnostics
+- Result wording or diagnostics do not treat OCR-skipped documents as reviewed evidence
+- If a field lacks strong evidence and relevant documents were OCR-skipped, the result is partial or conservative rather than confidently complete
+- Evaluation includes a case where skipped OCR could contain relevant evidence
+- Existing OCR fixture behavior is preserved where applicable"
+AIFA-044 Increase retrieval breadth with document-diversity guardrails,Backlog,7-Large Submission Hardening,High,"AIFA-039, AIFA-041","Improve retrieval recall for large document sets without flooding the LLM with unbounded context.
+- Retrieve a broader candidate set than the current narrow top-k
+- Diversify final evidence by document where appropriate
+- Keep final prompt context bounded
+- Preserve existing field-specific retrieval behavior
+- Report retrieval candidate and final evidence diagnostics
+- Do not broaden retrieval in a way that mixes unrelated field evidence into a single prompt
+
+Why this matters:
+With 100 or more PDFs, top-3 global chunks can miss controlling start/end date evidence even when the evidence was indexed.","- Retrieval considers a broader candidate pool before final context selection
+- Final LLM context remains bounded per field
+- One noisy date-heavy document cannot dominate all final evidence
+- Diagnostics show candidate count, final chunk count, represented documents, and dropped candidate count
+- Prod-shaped fixture measures evidence recall
+- Broader retrieval does not regress citation reconciliation or field-specific prompting
+- Existing clause and date corpus scenarios do not regress"
+AIFA-049A Add diagnostic-only work-selection scoring,Backlog,7-Large Submission Hardening,High,"AIFA-039, AIFA-041, AIFA-044","Split from the original AIFA-049 work-selection intent. Add explainable document priority scoring and diagnostics without changing which documents are processed.
+- Score eligible PDFs using cheap pre-processing signals such as filename, key, metadata, upload order, and form context
+- Record score reasons for every eligible document
+- Continue processing all eligible PDFs
+- Do not hard-exclude low-priority documents
+- Use diagnostics to evaluate whether work selection would be safe before changing behavior
+- Treat scoring as advisory only and not as evidence
+
+Why this matters:
+Diagnostic-only scoring lets us test candidate selection safely before it can affect validation outcomes.","- Every eligible document receives a priority score and reason list
+- Scoring is explainable and deterministic
+- Low-priority documents are still processed
+- Diagnostics identify which documents would have been first-pass and deferred
+- Prod-shaped fixture reports whether relevant evidence would have been selected early
+- Validation outcomes, artifactVersion semantics, and processed document set do not change because of scoring
+- No result message or confidence is based on the score"
+AIFA-045 Evaluate document prioritization and two-pass retrieval,Backlog,7-Large Submission Hardening,Medium,"AIFA-049A, AIFA-044","Evaluate a conservative two-pass work-selection strategy using diagnostics from AIFA-049A before implementing behavior changes.
+- Define first-pass selection rules
+- Define fallback triggers
+- Define what counts as strong enough first-pass evidence
+- Compare metadata, filename, optional text-light scan, and fallback requirements
+- Do not implement default work reduction in this ticket
+- Require full fallback whenever coverage or evidence quality is uncertain
+
+Why this matters:
+Prioritization can improve performance, but it can also miss controlling evidence. The strategy must be evaluated before it changes runtime behavior.","- First-pass prioritization cannot suppress fallback unless evidence is clear, field-specific, cited, reconciled, non-partial, and not contradicted by diagnostics
+- Oddly named relevant documents are recoverable through fallback rules
+- Low-priority documents are deferred, not excluded
+- Fallback triggers are documented for not-enough-evidence, ambiguity, missing citations, partial coverage, OCR gaps, failed documents, weak evidence, and conflicting date evidence
+- Diagnostics show whether final evidence would come from first pass or fallback
+- Produces a concrete recommendation for gated implementation"
+AIFA-049B Implement gated first-pass selection with conservative fallback,Backlog,7-Large Submission Hardening,High,AIFA-045,"Implement the original AIFA-049 work-selection strategy behind an explicit gate or configuration.
+- Process prioritized first-pass documents before deferred documents
+- Keep low-priority documents deferred, never hard-excluded
+- Expand to fallback documents whenever first-pass evidence is not strong enough
+- Preserve the existing all-doc behavior as the safe default until promotion
+- Record evidence source and fallback reasons
+- Keep cache and artifact behavior distinguishable between all-doc and gated runs
+
+Why this matters:
+This is the first behavior-changing work-selection step, so it must be reversible, observable, and conservative.","- Gated mode can be enabled without changing default behavior
+- First-pass processing uses the scoring and strategy defined by AIFA-049A and AIFA-045
+- Fallback runs for not-enough-evidence, ambiguity, missing citations, partial coverage, OCR gaps, failed documents, weak field-specific evidence, or conflicting date evidence
+- Deferred documents remain eligible for fallback
+- Evidence source is recorded as first-pass, fallback, or partial
+- Validation artifacts indicate whether the run used all-doc processing or gated work selection
+- Existing all-doc processing path remains available"
+AIFA-048 Surface partial validation coverage conservatively,Backlog,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-043, AIFA-049B","Expose a conservative partial-validation state when some eligible documents were skipped, failed, OCR-capped, deferred beyond max-work, or not fully processed.
+- Keep the Review page advisory and non-blocking
+- Avoid implying all documents were reviewed when diagnostics show partial coverage
+- Summarize partial coverage without overwhelming users
+- Preserve existing complete validation UI when coverage is full
+- Do not expose internal scoring details as user-facing confidence
+
+Why this matters:
+A normal-looking result can mislead users if validation did not process all relevant documents.","- API or result layer exposes whether validation coverage is full or partial
+- UI copy does not imply all documents were reviewed when diagnostics say otherwise
+- Failed, skipped, OCR-capped, deferred, and unprocessed document counts are available to the UI or summarized
+- Existing complete validation UI remains unchanged when all eligible documents process successfully
+- Submission remains non-blocking
+- Partial coverage behavior is covered by focused tests
+- User-facing copy remains advisory and does not overstate AI certainty"
+AIFA-049C Validate and promote work selection after evaluation,Backlog,7-Large Submission Hardening,Medium,"AIFA-048, AIFA-049B","Complete the original AIFA-049 work-selection intent by validating gated behavior and deciding whether to promote it to default.
+- Compare gated first-pass plus fallback behavior against all-doc processing
+- Use existing corpus and prod-shaped fixture
+- Promote only if outcomes match or become more conservative
+- Keep an escape hatch to force full processing
+- Document the decision and remaining risks
+- Do not promote if partial coverage would become the common path without clear user-facing handling
+
+Why this matters:
+Work selection should only become default after evidence shows it does not hide controlling contract evidence.","- Existing corpus passes with gated work selection
+- Prod-shaped fixture outcomes match all-doc processing or become more conservative
+- Evaluation reports when evidence came from first pass versus fallback
+- Evaluation reports how often fallback was required and why
+- Default enablement decision is documented
+- Escape hatch for full processing remains available
+- Remaining known failure modes are documented"
+AIFA-046 Split parsed-text artifacts from embedding artifacts,Backlog,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-043","Persist per-document parsed text separately from chunk and embedding artifacts.
+- Store extracted text, page text, extraction method, and extraction notes as reusable per-document artifacts
+- Rebuild chunks and embeddings from parsed text when appropriate
+- Avoid rerunning expensive parse or OCR work when only embedding or chunk artifacts need regeneration
+- Keep artifact paths under existing validation artifact lifecycle assumptions
+- Do not reuse parse artifacts when source document identity is uncertain
+
+Why this matters:
+Parsing and OCR are expensive and have different invalidation behavior than embeddings. Splitting artifacts reduces repeated work without changing validation scope.","- Parsed-text artifact can be reused independently from embeddings
+- Extraction method and notes are preserved
+- Failed or partial parse artifacts are not reused as successful parse artifacts
+- Cleanup and lifecycle assumptions are updated for the new artifact path
+- Existing document-index reuse remains correct
+- Artifact size impact is measured or reported
+- Reuse requires the same document identity inputs used by the current cache logic until AIFA-047 strengthens identity"
+AIFA-047 Strengthen document cache identity with content fingerprints,Backlog,7-Large Submission Hardening,Medium,"AIFA-038, AIFA-046","Strengthen document cache identity so unchanged S3 keys do not accidentally reuse stale parse, chunk, or embedding artifacts after content changes.
+- Prefer cheap reliable metadata such as version ID where available
+- Document ETag and multipart upload limitations
+- Measure overhead of the chosen fingerprint approach
+- Use full content hashing only if cheaper metadata cannot safely identify changes
+- Preserve artifactVersion and per-document cache consistency
+- Do not silently reuse artifacts when fingerprint confidence is insufficient
+
+Why this matters:
+Current document reuse keys off document name plus S3 bucket/key identity. If content is overwritten in place, stale artifacts could be reused.","- Cache identity changes when document content changes at the same key
+- Chosen fingerprint source is documented with limitations
+- Missing fingerprint metadata falls back safely and observably
+- Existing cache reuse still works for unchanged documents
+- artifactVersion and per-document cache behavior remain aligned
+- Fingerprint overhead is measured or documented
+- Low-confidence fingerprint cases are visible in diagnostics"

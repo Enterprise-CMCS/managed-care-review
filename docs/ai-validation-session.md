@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-025 Evaluate FAISS implementation behind VectorStore`.
+The next implementation ticket is `AIFA-039 Add prod-shaped large-submission evaluation fixture`.
 
 ## Completed
 
@@ -50,6 +50,7 @@ The next implementation ticket is `AIFA-025 Evaluate FAISS implementation behind
 - AIFA-027 ✔ Add cleanup and lifecycle rules for pipeline artifacts
 - AIFA-028 ✔ Incremental parsing and selective re-indexing
 - AIFA-037 ✔ Add S3 lifecycle rule safety net for AI validation artifacts
+- AIFA-038 ✔ Confirm document metadata and PDF eligibility rules
 
 ## Current State
 
@@ -150,6 +151,15 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - the lifecycle window matches the current 30-day cleanup setting and expires noncurrent versions too when bucket versioning is enabled
 - scheduled cleanup remains the primary cleanup path; lifecycle is now a storage-level backstop
 
+### Large-submission planning
+
+- a prod-shaped submission with roughly 165 attached contract documents exposed a new hardening concern that is more urgent than FAISS evaluation
+- the sprint plan now includes a large-submission hardening phase before FAISS, starting with document metadata and PDF eligibility discovery
+- the phase is intentionally reliability-first: filter unsupported inputs, isolate per-document failures, bound concurrency, keep OCR conservative, improve retrieval recall, and add safe work-selection diagnostics before changing behavior
+- `AIFA-049` was split into staged work-selection tickets so scoring can be diagnostic-only first, gated second, and promoted only after evaluation
+- trigger-time contract document metadata is now documented; content type, size, ETag, and S3 version ID are not currently available on the draft document shape
+- the PDF eligibility rule is metadata-only and advisory; `artifactVersion` still hashes all persisted contract document keys until filtering is implemented deliberately
+
 ## What Is Working
 
 - local bootstrap with `./dev local`
@@ -182,12 +192,18 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - corpus evaluation now depends on reachable LocalStack S3 plus the repo `nvm` runtime, so local environment drift can still block verification before the worker runs
 - document-level reuse currently keys off document name plus S3 bucket/key identity, so any future upload flow that overwrites content in place without changing those inputs would need a stronger content fingerprint
 - the lifecycle safety net currently assumes `ai-form-augmentation-artifacts` stays dedicated to AI validation storage because the custom-resource call owns that bucket's lifecycle configuration
+- prod-shaped submissions can include 100+ attached documents; the current worker still needs hardening for unsupported files, per-document failures, bounded concurrency, partial coverage, and safe work selection
+- FAISS is not the next bottleneck to evaluate until realistic large-submission measurements separate vector search time from parsing, OCR, embedding, and retrieval-quality issues
 
 ## Follow-On Tickets
 
+### AIFA-039 through AIFA-049C Large-submission hardening
+
+Harden the pipeline for high-document-count submissions by adding a prod-shaped fixture, unsupported-file filtering, document-level failure isolation, bounded concurrency, OCR safety valves, broader retrieval, diagnostic-only work-selection scoring, gated work selection with fallback, partial-coverage UI, and promotion only after evaluation.
+
 ### AIFA-025 Evaluate FAISS implementation behind VectorStore
 
-Evaluate whether FAISS is worth introducing after the PoC instead of keeping brute-force retrieval.
+Evaluate whether FAISS is worth introducing only after large-submission hardening provides realistic chunk counts, retrieval timings, and work-selection behavior.
 
 ## Current PoC Direction
 
@@ -217,15 +233,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-025 Evaluate FAISS implementation behind VectorStore
+### AIFA-039 Add prod-shaped large-submission evaluation fixture
 
-Evaluate whether FAISS earns its complexity for the current retrieval shape and corpus size.
+Add a synthetic or sanitized high-document-count evaluation scenario for large-submission hardening.
 
 ## Suggested Next Step
 
-- Inspect the current `VectorStore` seam and current corpus/runtime sizes before changing the retrieval backend.
-- Compare the current brute-force path against the operational cost and packaging complexity FAISS would add.
-- Keep the seam stable so a decision either way does not disturb the current worker flow.
+- Build or identify a non-proprietary fixture with roughly 100 to 165 documents.
+- Include relevant, irrelevant, unsupported, scanned or weak-text, oddly named, and bad/corrupt cases where feasible.
+- Extend evaluation output to report document counts, skipped/failed/eligible counts, chunk count, outcomes, and phase timings.
 
 ## Source of Truth Docs
 
@@ -262,3 +278,6 @@ Evaluate whether FAISS earns its complexity for the current retrieval shape and 
 - Contract Details is now treated as the preferred point to start background validation because it is the first place in the current workflow where both scoped date fields and supporting documents are usually present.
 - The early trigger now depends on a second `validationStatus` read after the draft save, so future trigger-path changes need to stay aligned with the current stale/current artifact contract.
 - The validation rollout is currently frontend-only, so LaunchDarkly dashboard setup and any future backend trigger paths need to stay aligned with the client-side flag behavior.
+- The sprint plan now treats large-submission hardening as the next phase before FAISS. `AIFA-025` depends on the large-submission fixture, retrieval-breadth work, content-fingerprint work, and promoted work-selection evaluation.
+- Work selection must remain conservative: low-priority documents are deferred, not hard-excluded; fallback must run whenever first-pass evidence is weak, ambiguous, partial, uncited, or contradicted by diagnostics.
+- PDF eligibility metadata is advisory only; renamed non-PDF files can still pass candidate checks and must be handled by later document-level failure isolation.
