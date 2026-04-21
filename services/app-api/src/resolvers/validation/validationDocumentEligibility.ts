@@ -11,10 +11,18 @@ export type ValidationDocumentEligibilityReason =
     | 'missing-pdf-extension'
     | 'content-type-mismatch'
 
-export type ValidationDocumentEligibility = {
-    isEligible: boolean
-    reason: ValidationDocumentEligibilityReason
-}
+export type ValidationDocumentEligibility =
+    | {
+          isEligible: true
+          reason: 'eligible-pdf-extension'
+      }
+    | {
+          isEligible: false
+          reason: Exclude<
+              ValidationDocumentEligibilityReason,
+              'eligible-pdf-extension'
+          >
+      }
 
 const PDF_MIME_TYPE = 'application/pdf'
 

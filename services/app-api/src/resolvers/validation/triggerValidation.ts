@@ -8,7 +8,10 @@ import { logError, logSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import type { ValidationSourceDocument } from '../../../../ai-form-augmentation/src/handlers'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
-import { getEffectiveValidationDocumentKeys } from './validationDocumentKeys'
+import {
+    getEffectiveValidationDocumentKeys,
+    selectEligibleValidationDocuments,
+} from './validationDocumentKeys'
 import { buildValidationFormFields } from './validationFormFields'
 
 export interface ValidationResolverConfig {
@@ -64,14 +67,34 @@ export function triggerValidationResolver(
             })
         }
 
-        // artifactVersion is based only on persisted document keys. If a document
-        // has not been saved to S3 yet, it cannot participate in downstream
-        // retrieval artifacts or cache/version decisions.
+        const { eligibleDocuments, skippedDocuments } =
+            selectEligibleValidationDocuments(
+                revision.formData.contractDocuments
+            )
+
+        if (skippedDocuments.length > 0) {
+            console.info('triggerValidation skipped unsupported documents', {
+                contractID: input.contractID,
+                skippedDocumentCount: skippedDocuments.length,
+                skippedDocuments,
+            })
+        }
+
+        // Keep artifactVersion tied to the persisted document set so adding or
+        // removing unsupported attachments still invalidates earlier diagnostics.
+        const documentKeys = getEffectiveValidationDocumentKeys(
+            revision.formData.contractDocuments,
+            config.useLocalS3
+        )
+
+        // The worker remains PDF-only: unsupported documents stay visible in
+        // trigger diagnostics but are excluded before invocation.
         const sourceDocuments: ValidationSourceDocument[] =
-            revision.formData.contractDocuments.flatMap((document) => {
+            eligibleDocuments.flatMap((document) => {
                 if (!document.s3Key || !document.s3BucketName) {
                     return []
                 }
+
                 const [sourceKey] = getEffectiveValidationDocumentKeys(
                     [document],
                     config.useLocalS3
@@ -79,7 +102,7 @@ export function triggerValidationResolver(
 
                 return [
                     {
-                        documentName: document.name,
+                        documentName: document.name ?? document.s3Key,
                         sourceBucket: document.s3BucketName,
                         // Local uploads still persist the historical raw key in
                         // s3URL while app-api normalizes s3Key to allusers/... .
@@ -90,17 +113,13 @@ export function triggerValidationResolver(
                 ]
             })
 
-        const documentKeys = sourceDocuments.map(
-            (document) => document.sourceKey
-        )
-
-        if (documentKeys.length === 0) {
-            const message = `Contract ${input.contractID} does not have any contract documents with s3Key values`
+        if (sourceDocuments.length === 0) {
+            const message = `Contract ${input.contractID} does not have any eligible PDF contract documents for validation`
             logError('triggerValidation', message)
             throw new GraphQLError(message, {
                 extensions: {
                     code: 'BAD_USER_INPUT',
-                    cause: 'MISSING_DOCUMENT_KEYS',
+                    cause: 'MISSING_ELIGIBLE_DOCUMENTS',
                 },
             })
         }
@@ -226,7 +245,13 @@ function startLocalValidationWorker(
     const repoRoot = resolve(process.cwd(), '../..')
     const childProcess = spawn(
         'pnpm',
-        ['--filter', 'ai-form-augmentation', 'exec', 'tsx', 'src/runValidation.ts'],
+        [
+            '--filter',
+            'ai-form-augmentation',
+            'exec',
+            'tsx',
+            'src/runValidation.ts',
+        ],
         {
             cwd: repoRoot,
             stdio: ['pipe', 'ignore', 'pipe'],

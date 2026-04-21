@@ -1,9 +1,52 @@
 import { parseKey } from '../../s3'
+import {
+    evaluatePdfEligibility,
+    type ValidationDocumentEligibilityReason,
+} from './validationDocumentEligibility'
 
 type ValidationDocument = {
+    name?: string
     s3Key?: string
     s3BucketName?: string
     s3URL?: string
+    contentType?: string | null
+}
+
+export type SkippedValidationDocumentDiagnostic = {
+    documentName: string
+    reason: Exclude<
+        ValidationDocumentEligibilityReason,
+        'eligible-pdf-extension'
+    >
+}
+
+export type ValidationDocumentSelection = {
+    eligibleDocuments: ValidationDocument[]
+    skippedDocuments: SkippedValidationDocumentDiagnostic[]
+}
+
+export function selectEligibleValidationDocuments(
+    documents: ValidationDocument[]
+): ValidationDocumentSelection {
+    const selection: ValidationDocumentSelection = {
+        eligibleDocuments: [],
+        skippedDocuments: [],
+    }
+
+    for (const document of documents) {
+        const eligibility = evaluatePdfEligibility(document)
+
+        if (eligibility.isEligible) {
+            selection.eligibleDocuments.push(document)
+        } else {
+            selection.skippedDocuments.push({
+                documentName: document.name ?? document.s3Key ?? 'unknown',
+                reason: eligibility.reason,
+            })
+        }
+    }
+
+    return selection
 }
 
 export function getEffectiveValidationDocumentKeys(

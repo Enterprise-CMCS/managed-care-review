@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-040 Filter unsupported validation documents before worker execution`.
+The next implementation ticket is `AIFA-041 Add document-level failure isolation and processing diagnostics`.
 
 ## Completed
 
@@ -52,6 +52,7 @@ The next implementation ticket is `AIFA-040 Filter unsupported validation docume
 - AIFA-037 ✔ Add S3 lifecycle rule safety net for AI validation artifacts
 - AIFA-038 ✔ Confirm document metadata and PDF eligibility rules
 - AIFA-039 ✔ Add prod-shaped large-submission evaluation fixture
+- AIFA-040 ✔ Filter unsupported validation documents before worker execution
 
 ## Current State
 
@@ -163,6 +164,8 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - a synthetic 165-document large-submission evaluation scenario now exists without committing production documents
 - large-submission evaluation is opt-in and reports document counts, phase timings, outcomes, and approximate artifact sizes
 - unsupported and corrupt documents are still simulated diagnostics until filtering and document-level failure isolation are implemented
+- app-api now filters clearly unsupported validation documents before invoking the PDF-only worker
+- skipped validation documents are logged with counts and metadata-based skip reasons
 
 ## What Is Working
 
@@ -182,6 +185,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - selective document-level chunk and embedding reuse for unchanged files
 - prefix-scoped S3 lifecycle expiration for AI validation artifacts
 - opt-in prod-shaped large-submission fixture for measuring later hardening work
+- mixed PDF and non-PDF submissions can start validation with only eligible PDF candidates sent to the worker
 
 ## What Is Still Weak
 
@@ -199,6 +203,8 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - the lifecycle safety net currently assumes `ai-form-augmentation-artifacts` stays dedicated to AI validation storage because the custom-resource call owns that bucket's lifecycle configuration
 - prod-shaped submissions can include 100+ attached documents; the current worker still needs hardening for unsupported files, per-document failures, bounded concurrency, partial coverage, and safe work selection
 - large-submission unsupported and corrupt inputs are simulated in the fixture; real filtering and per-document failure isolation remain pending
+- skipped-document diagnostics are currently trigger logs, not persisted status/result artifacts
+- renamed non-PDF files that pass `.pdf` metadata eligibility can still fail the whole worker run until document-level failure isolation is added
 - FAISS is not the next bottleneck to evaluate until realistic large-submission measurements separate vector search time from parsing, OCR, embedding, and retrieval-quality issues
 
 ## Follow-On Tickets
@@ -239,15 +245,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-040 Filter unsupported validation documents before worker execution
+### AIFA-041 Add document-level failure isolation and processing diagnostics
 
-Apply the AIFA-038 PDF eligibility rule before invoking the worker and preserve diagnostics for ignored documents.
+Isolate per-document fetch, parse, chunk, and embed failures so one bad eligible PDF does not fail validation when other usable PDFs remain.
 
 ## Suggested Next Step
 
-- Apply the AIFA-038 PDF eligibility helper in app-api before worker invocation.
-- Pass only eligible PDFs to the worker while retaining skipped-document diagnostics.
-- Keep renamed `.pdf` parse failures for AIFA-041 document-level failure isolation.
+- Catch per-document worker failures and continue indexing successful documents.
+- Persist processed, skipped, failed, and usable document diagnostics.
+- Keep partial-coverage results conservative when not all eligible documents are usable.
 
 ## Source of Truth Docs
 
@@ -276,6 +282,8 @@ Apply the AIFA-038 PDF eligibility rule before invoking the worker and preserve 
 - Review & Submit now stops polling after a bounded timeout window and falls back to non-blocking messaging instead of polling indefinitely.
 - The large-submission fixture is opt-in via `AI_VALIDATION_INCLUDE_LARGE_SUBMISSION=true`; normal evaluation remains small.
 - Parsed text is not a separate artifact yet, so large-run artifact-size output reports parsed text as unavailable until AIFA-046.
+- AIFA-040 keeps `artifactVersion` tied to all persisted contract document keys so unsupported attachment changes still invalidate prior validation artifacts.
+- AIFA-040 skipped-document diagnostics are structured trigger logs only; AIFA-041 should decide the persisted diagnostics shape.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.
 - Clause-resolution hardening now passes the current 8-scenario corpus, but OCR-heavy term text still depends on narrow heuristics rather than a broader parsing layer.

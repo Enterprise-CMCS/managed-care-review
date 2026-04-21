@@ -731,7 +731,7 @@ Large-submission hardening needs a repeatable fixture so performance, retrieval 
 - Output reports approximate artifact sizes for parsed text, chunks, vectors, status, and result artifacts where available
 - Scenario includes buried or oddly named relevant evidence
 - Scenario includes scanned or weak-text relevant evidence"
-AIFA-040 Filter unsupported validation documents before worker execution,Backlog,7-Large Submission Hardening,High,AIFA-038,"Filter unsupported files before invoking the AI worker while preserving diagnostics about ignored documents.
+AIFA-040 Filter unsupported validation documents before worker execution,Done,7-Large Submission Hardening,High,AIFA-038,"Filter unsupported files before invoking the AI worker while preserving diagnostics about ignored documents.
 - Apply the PDF eligibility rule from AIFA-038 in app-api
 - Pass only eligible validation documents to the worker
 - Do not expand support beyond PDFs

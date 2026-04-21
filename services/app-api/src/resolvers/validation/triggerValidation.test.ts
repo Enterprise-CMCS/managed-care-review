@@ -9,17 +9,13 @@ import {
 } from './triggerValidation'
 import type { Store } from '../../postgres'
 
-const {
-    spawnMock,
-    childStdinEndMock,
-    childStderrOnMock,
-    childOnMock,
-} = vi.hoisted(() => ({
-    spawnMock: vi.fn(),
-    childStdinEndMock: vi.fn(),
-    childStderrOnMock: vi.fn(),
-    childOnMock: vi.fn(),
-}))
+const { spawnMock, childStdinEndMock, childStderrOnMock, childOnMock } =
+    vi.hoisted(() => ({
+        spawnMock: vi.fn(),
+        childStdinEndMock: vi.fn(),
+        childStderrOnMock: vi.fn(),
+        childOnMock: vi.fn(),
+    }))
 
 vi.mock('node:child_process', () => ({
     spawn: spawnMock,
@@ -51,6 +47,18 @@ const buildContractWithDraft = (documentKeys: Array<string | undefined>) => ({
                 s3BucketName: 'local-uploads',
                 s3Key,
             })),
+        },
+    },
+})
+
+const buildContractWithDraftDocuments = (
+    contractDocuments: Array<Record<string, unknown>>
+) => ({
+    draftRevision: {
+        formData: {
+            contractDateStart: new Date(Date.UTC(2025, 0, 1)),
+            contractDateEnd: new Date(Date.UTC(2025, 11, 31)),
+            contractDocuments,
         },
     },
 })
@@ -111,7 +119,13 @@ describe('triggerValidationResolver', () => {
         expect(spawnMock).toHaveBeenCalledTimes(1)
         expect(spawnMock).toHaveBeenCalledWith(
             'pnpm',
-            ['--filter', 'ai-form-augmentation', 'exec', 'tsx', 'src/runValidation.ts'],
+            [
+                '--filter',
+                'ai-form-augmentation',
+                'exec',
+                'tsx',
+                'src/runValidation.ts',
+            ],
             expect.objectContaining({
                 cwd: expect.stringMatching(/managed-care-review$/),
                 stdio: ['pipe', 'ignore', 'pipe'],
@@ -193,6 +207,79 @@ describe('triggerValidationResolver', () => {
         expect(sentCommand).toBeInstanceOf(InvokeCommand)
     })
 
+    it('passes only eligible PDF documents to the worker and logs skipped diagnostics', async () => {
+        const consoleInfoSpy = vi
+            .spyOn(console, 'info')
+            .mockImplementation(() => undefined)
+        const store = buildStore(
+            buildContractWithDraftDocuments([
+                {
+                    id: 'doc-0',
+                    name: 'Eligible Contract.PDF',
+                    s3URL: 's3://local-uploads/1776374348125-doc-a.pdf/Eligible Contract.PDF',
+                    s3BucketName: 'local-uploads',
+                    s3Key: 'allusers/1776374348125-doc-a.pdf',
+                },
+                {
+                    id: 'doc-1',
+                    name: 'Supporting Rate.docx',
+                    s3URL: 's3://local-uploads/1776374348126-doc-b.docx',
+                    s3BucketName: 'local-uploads',
+                    s3Key: 'allusers/1776374348126-doc-b.docx',
+                },
+                {
+                    id: 'doc-2',
+                    name: 'Mime Mismatch.pdf',
+                    s3URL: 's3://local-uploads/1776374348127-doc-c.pdf',
+                    s3BucketName: 'local-uploads',
+                    s3Key: 'allusers/1776374348127-doc-c.pdf',
+                    contentType:
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                },
+            ])
+        )
+
+        const resolver = triggerValidationResolver(store, {
+            ...baseConfig,
+            useLocalS3: true,
+        }) as NonNullable<MutationResolvers['triggerValidation']>
+
+        const result = await invokeTriggerValidationResolver(resolver)
+
+        expect(result.ok).toBe(true)
+        expect(childStdinEndMock).toHaveBeenCalledTimes(1)
+
+        const serializedPayload = childStdinEndMock.mock.calls[0][0]
+        expect(JSON.parse(serializedPayload)).toEqual(
+            expect.objectContaining({
+                documents: [
+                    {
+                        documentName: 'Eligible Contract.PDF',
+                        sourceBucket: 'local-uploads',
+                        sourceKey: '1776374348125-doc-a.pdf',
+                    },
+                ],
+            })
+        )
+        expect(consoleInfoSpy).toHaveBeenCalledWith(
+            'triggerValidation skipped unsupported documents',
+            {
+                contractID: 'test-abc-123',
+                skippedDocumentCount: 2,
+                skippedDocuments: [
+                    {
+                        documentName: 'Supporting Rate.docx',
+                        reason: 'missing-pdf-extension',
+                    },
+                    {
+                        documentName: 'Mime Mismatch.pdf',
+                        reason: 'content-type-mismatch',
+                    },
+                ],
+            }
+        )
+    })
+
     it('throws BAD_USER_INPUT when draft revision is missing', async () => {
         const store = buildStore({
             draftRevision: null,
@@ -213,7 +300,7 @@ describe('triggerValidationResolver', () => {
         } satisfies Partial<GraphQLError>)
     })
 
-    it('throws BAD_USER_INPUT when no persisted s3 keys exist', async () => {
+    it('throws BAD_USER_INPUT when no eligible PDF documents exist', async () => {
         const store = buildStore(
             buildContractWithDraft([undefined, undefined, undefined])
         )
@@ -228,9 +315,37 @@ describe('triggerValidationResolver', () => {
         ).rejects.toMatchObject({
             extensions: {
                 code: 'BAD_USER_INPUT',
-                cause: 'MISSING_DOCUMENT_KEYS',
+                cause: 'MISSING_ELIGIBLE_DOCUMENTS',
             },
         } satisfies Partial<GraphQLError>)
+    })
+
+    it('does not invoke the worker when all documents are unsupported', async () => {
+        const store = buildStore(
+            buildContractWithDraftDocuments([
+                {
+                    id: 'doc-0',
+                    name: 'Supporting Rate.docx',
+                    s3BucketName: 'local-uploads',
+                    s3Key: 'allusers/1776374348125-doc-a.docx',
+                },
+            ])
+        )
+
+        const resolver = triggerValidationResolver(
+            store,
+            baseConfig
+        ) as NonNullable<MutationResolvers['triggerValidation']>
+
+        await expect(
+            invokeTriggerValidationResolver(resolver)
+        ).rejects.toMatchObject({
+            extensions: {
+                code: 'BAD_USER_INPUT',
+                cause: 'MISSING_ELIGIBLE_DOCUMENTS',
+            },
+        } satisfies Partial<GraphQLError>)
+        expect(spawnMock).not.toHaveBeenCalled()
     })
 
     it('throws BAD_USER_INPUT when no draft contract dates can be validated', async () => {
