@@ -12,6 +12,7 @@ import {
     approveTestContract,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
+    createAndUpdateTestEQROContract,
     submitTestContract,
     unlockTestContract,
     withdrawTestContract,
@@ -23,6 +24,7 @@ import type { RateFormDataInput, RateStrippedEdge } from '../../gen/gqlClient'
 import {
     SubmitContractDocument,
     UpdateDraftContractRatesDocument,
+    WithdrawContractDocument,
 } from '../../gen/gqlClient'
 import {
     addNewRateToTestContract,
@@ -1219,6 +1221,124 @@ describe('withdrawContract', () => {
                     })
                 )
             )
+        )
+    })
+
+    it('cannot withdraw EQRO contract with NOT_SUBJECT_TO_REVIEW status', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        // All-false EQRO provision fields trigger NOT_SUBJECT_TO_REVIEW on submit
+        const draft = await createAndUpdateTestEQROContract(
+            stateServer,
+            undefined,
+            {
+                eqroNewContractor: false,
+                eqroProvisionMcoNewOptionalActivity: false,
+                eqroProvisionNewMcoEqrRelatedActivities: false,
+                eqroProvisionChipEqrRelatedActivities: false,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
+            }
+        )
+
+        const submittedContract = await submitTestContract(
+            stateServer,
+            draft.id
+        )
+        expect(submittedContract.consolidatedStatus).toBe(
+            'NOT_SUBJECT_TO_REVIEW'
+        )
+
+        const withdrawResult = await executeGraphQLOperation(cmsServer, {
+            query: WithdrawContractDocument,
+            variables: {
+                input: {
+                    contractID: submittedContract.id,
+                    updatedReason: 'withdraw submission',
+                },
+            },
+        })
+
+        expect(withdrawResult.errors).toBeDefined()
+        expect(withdrawResult.errors?.[0].message).toBe(
+            'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
+        )
+    })
+
+    it('can withdraw EQRO contract with SUBMITTED status', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        // At least one EQRO provision field true -> UNDER_REVIEW / SUBMITTED
+        const draft = await createAndUpdateTestEQROContract(
+            stateServer,
+            undefined,
+            {
+                eqroNewContractor: true,
+                eqroProvisionMcoNewOptionalActivity: true,
+                eqroProvisionNewMcoEqrRelatedActivities: true,
+                eqroProvisionChipEqrRelatedActivities: true,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
+            }
+        )
+
+        const submittedContract = await submitTestContract(
+            stateServer,
+            draft.id
+        )
+        expect(submittedContract.consolidatedStatus).toBe('SUBMITTED')
+
+        must(
+            await unlockTestContract(
+                cmsServer,
+                submittedContract.id,
+                'unlock EQRO submission'
+            )
+        )
+        const resubmittedContract = must(
+            await submitTestContract(
+                stateServer,
+                submittedContract.id,
+                'resubmit EQRO'
+            )
+        )
+        expect(resubmittedContract.consolidatedStatus).toBe('RESUBMITTED')
+
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            resubmittedContract.id,
+            'withdraw EQRO submission'
+        )
+
+        expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+
+        const contractHistory = contractHistoryToDescriptions(withdrawnContract)
+        expect(contractHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                'unlock EQRO submission',
+                'resubmit EQRO',
+                'Withdraw submission. withdraw EQRO submission',
+                'CMS withdrew the submission from review. withdraw EQRO submission',
+            ])
         )
     })
 })
