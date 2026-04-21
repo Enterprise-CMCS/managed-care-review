@@ -33,6 +33,7 @@ import {
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -1224,21 +1225,19 @@ describe('withdrawContract', () => {
         )
     })
 
-    it('cannot withdraw EQRO contract with NOT_SUBJECT_TO_REVIEW status', async () => {
+    it('cannot withdraw EQRO or CHIP-only HEALTH_PLAN contract with NOT_SUBJECT_TO_REVIEW status', async () => {
         const stateServer = await constructTestPostgresServer({
-            context: {
-                user: stateUser,
-            },
+            context: { user: stateUser },
+            ldService: testLDService({
+                'chip-submission-automation': true,
+            }),
         })
-
         const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
+            context: { user: cmsUser },
         })
 
-        // All-false EQRO provision fields trigger NOT_SUBJECT_TO_REVIEW on submit
-        const draft = await createAndUpdateTestEQROContract(
+        // EQRO: all-false provision fields trigger NOT_SUBJECT_TO_REVIEW on submit
+        const eqroDraft = await createAndUpdateTestEQROContract(
             stateServer,
             undefined,
             {
@@ -1249,27 +1248,54 @@ describe('withdrawContract', () => {
                 eqroProvisionMcoEqrOrRelatedActivities: null,
             }
         )
-
-        const submittedContract = await submitTestContract(
+        const eqroSubmitted = await submitTestContract(
             stateServer,
-            draft.id
+            eqroDraft.id
         )
-        expect(submittedContract.consolidatedStatus).toBe(
-            'NOT_SUBJECT_TO_REVIEW'
-        )
+        expect(eqroSubmitted.contractSubmissionType).toBe('EQRO')
+        expect(eqroSubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
 
-        const withdrawResult = await executeGraphQLOperation(cmsServer, {
+        const chipDraft = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            {
+                submissionType: 'CONTRACT_ONLY',
+                populationCovered: 'CHIP',
+                federalAuthorities: ['TITLE_XXI'],
+            }
+        )
+        const chipSubmitted = await submitTestContract(
+            stateServer,
+            chipDraft.id
+        )
+        expect(chipSubmitted.contractSubmissionType).toBe('HEALTH_PLAN')
+        expect(chipSubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+
+        const eqroWithdrawResult = await executeGraphQLOperation(cmsServer, {
             query: WithdrawContractDocument,
             variables: {
                 input: {
-                    contractID: submittedContract.id,
+                    contractID: eqroSubmitted.id,
                     updatedReason: 'withdraw submission',
                 },
             },
         })
+        expect(eqroWithdrawResult.errors).toBeDefined()
+        expect(eqroWithdrawResult.errors?.[0].message).toBe(
+            'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
+        )
 
-        expect(withdrawResult.errors).toBeDefined()
-        expect(withdrawResult.errors?.[0].message).toBe(
+        const chipWithdrawResult = await executeGraphQLOperation(cmsServer, {
+            query: WithdrawContractDocument,
+            variables: {
+                input: {
+                    contractID: chipSubmitted.id,
+                    updatedReason: 'withdraw submission',
+                },
+            },
+        })
+        expect(chipWithdrawResult.errors).toBeDefined()
+        expect(chipWithdrawResult.errors?.[0].message).toBe(
             'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
         )
     })
