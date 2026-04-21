@@ -27,8 +27,8 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^16.2.7
-        version: 16.2.7
+        specifier: ^16.4.0
+        version: 16.4.0
       prettier:
         specifier: ^3.8.3
         version: 3.8.3
@@ -91,8 +91,8 @@ importers:
         specifier: ^2.6.1
         version: 2.6.1
       lint-staged:
-        specifier: ^16.2.7
-        version: 16.2.7
+        specifier: ^16.4.0
+        version: 16.4.0
       prettier:
         specifier: ^3.8.3
         version: 3.8.3
@@ -365,8 +365,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
       lint-staged:
-        specifier: ^16.2.7
-        version: 16.2.7
+        specifier: ^16.4.0
+        version: 16.4.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3
@@ -582,8 +582,8 @@ importers:
         specifier: ^2.6.1
         version: 2.6.1
       lint-staged:
-        specifier: ^16.2.7
-        version: 16.2.7
+        specifier: ^16.4.0
+        version: 16.4.0
       nodemon:
         specifier: ^3.1.11
         version: 3.1.11
@@ -920,8 +920,8 @@ importers:
         specifier: ^2.6.1
         version: 2.6.1
       lint-staged:
-        specifier: ^16.2.7
-        version: 16.2.7
+        specifier: ^16.4.0
+        version: 16.4.0
       prettier:
         specifier: ^3.8.3
         version: 3.8.3
@@ -1032,8 +1032,8 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^16.2.7
-        version: 16.2.7
+        specifier: ^16.4.0
+        version: 16.4.0
       prettier:
         specifier: ^3.8.3
         version: 3.8.3
@@ -1113,8 +1113,8 @@ importers:
         specifier: ^2.0.0
         version: 2.6.1
       lint-staged:
-        specifier: ^16.2.7
-        version: 16.2.7
+        specifier: ^16.4.0
+        version: 16.4.0
       prettier:
         specifier: ^3.8.3
         version: 3.8.3
@@ -7714,8 +7714,8 @@ packages:
     resolution: {integrity: sha512-n8fOixwDD6b/ObinzTrp1ZKFzbgvKZvuz/TvejnLn1aQfC6r52XEx85FmuC+3HI+JM7coBRXUvNqEU2PHVrHpg==}
     engines: {node: '>=8'}
 
-  cli-truncate@5.1.1:
-    resolution: {integrity: sha512-SroPvNHxUnk+vIW/dOSfNqdy1sPEFkrTk6TUtqLCnBlo3N7TNYYkzzN7uSD6+jVjrdO4+p8nH7JzH6cIvUem6A==}
+  cli-truncate@5.2.0:
+    resolution: {integrity: sha512-xRwvIOMGrfOAnM1JYtqQImuaNtDEv9v6oIYAs4LIHwTiKee8uwvIi363igssOC0O5U04i4AlENs79LQLu9tEMw==}
     engines: {node: '>=20'}
 
   cli-width@4.1.0:
@@ -10156,8 +10156,8 @@ packages:
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  lint-staged@16.2.7:
-    resolution: {integrity: sha512-lDIj4RnYmK7/kXMya+qJsmkRFkGolciXjrsZ6PC25GdTfWOAWetR0ZbsNXRAj1EHHImRSalc+whZFg56F5DVow==}
+  lint-staged@16.4.0:
+    resolution: {integrity: sha512-lBWt8hujh/Cjysw5GYVmZpFHXDCgZzhrOm8vbcUdobADZNOK/bRshr2kM3DfgrrtR1DQhfupW9gnIXOfiFi+bw==}
     engines: {node: '>=20.17'}
     hasBin: true
 
@@ -10599,10 +10599,6 @@ packages:
   nan@2.23.0:
     resolution: {integrity: sha512-1UxuyYGdoQHcGg87Lkqm3FzefucTa0NAiOcuRsDmysep3c1LVCRK2krrUDafMWtjSG04htvAmvg96+SDknOmgQ==}
 
-  nano-spawn@2.0.0:
-    resolution: {integrity: sha512-tacvGzUY5o2D8CBh2rrwxyNojUsZNU2zjNTzKQrkgGJQTbGAfArVWXSKMBokBeeg6C7OLRGUEyoFlYbfeWQIqw==}
-    engines: {node: '>=20.17'}
-
   nanoclone@0.2.1:
     resolution: {integrity: sha512-wynEP02LmIbLpcYw8uBKpcfF6dmg2vcpKqxeH5UcoKEYdExslsdUA4ugFauuaeYdTB76ez6gJW8XAZ6CgkXYxA==}
 
@@ -11032,10 +11028,6 @@ packages:
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
-  picomatch@2.3.1:
-    resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
-    engines: {node: '>=8.6'}
-
   picomatch@2.3.2:
     resolution: {integrity: sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA==}
     engines: {node: '>=8.6'}
@@ -11047,11 +11039,6 @@ packages:
   picomatch@4.0.4:
     resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
-
-  pidtree@0.6.0:
-    resolution: {integrity: sha512-eG2dWTVw5bzqGRztnHExczNxt5VGsE6OwTeCG3fdUf9KBsZzO3R5OIIIzWR+iZA0NtZ+RDVdaoE2dK1cn6jH4g==}
-    engines: {node: '>=0.10'}
-    hasBin: true
 
   pify@2.3.0:
     resolution: {integrity: sha512-udgsAY+fTnvv7kI7aaxbqwWNb0AHiB0qBO89PZKPkoTmGOgdbrHDKD+0B2X4uTfJ/FT1R09r9gTsjUjNJotuog==}
@@ -11879,6 +11866,10 @@ packages:
     resolution: {integrity: sha512-iOBWFgUX7caIZiuutICxVgX1SdxwAVFFKwt1EvMYYec/NWO5meOJ6K5uQxhrYBdQJne4KxiqZc+KptFOWFSI9w==}
     engines: {node: '>=18'}
 
+  slice-ansi@8.0.0:
+    resolution: {integrity: sha512-stxByr12oeeOyY2BlviTNQlYV5xOj47GirPr4yA1hE9JCtxfQN0+tVbkxwCtYDQWhEKWFHsEK48ORg5jrouCAg==}
+    engines: {node: '>=20'}
+
   snake-case@3.0.4:
     resolution: {integrity: sha512-LAOh4z89bGQvl9pFfNF8V146i7o7/CqFPbqzYgP+yYzDIDeS9HaNFtXABamRW+AQzEVODcvE79ljJ+8a9YSdMg==}
 
@@ -12283,8 +12274,8 @@ packages:
   tinyexec@0.3.2:
     resolution: {integrity: sha512-KQQR9yN7R5+OSwaK0XQoj22pwHoTlgYqmUscPYoknOoWCWfj/5/ABTMRi69FrKU5ffPVh5QcFikpWJI/P1ocHA==}
 
-  tinyexec@1.0.2:
-    resolution: {integrity: sha512-W/KYk+NFhkmsYpuHq5JykngiOCnxeVL8v8dFnqxSD8qEEdRfXk1SDM6JzNqcERbcGYj9tMrDQBYV9cjgnunFIg==}
+  tinyexec@1.1.1:
+    resolution: {integrity: sha512-VKS/ZaQhhkKFMANmAOhhXVoIfBXblQxGX1myCQ2faQrfmobMftXeJPcZGp0gS07ocvGJWDLZGyOZDadDBqYIJg==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.15:
@@ -13131,8 +13122,8 @@ packages:
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
 
-  yaml@1.10.2:
-    resolution: {integrity: sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==}
+  yaml@1.10.3:
+    resolution: {integrity: sha512-vIYeF1u3CjlhAFekPPAk2h/Kv4T3mAkMox5OymRiJQB0spDP10LHvt+K7G9Ny6NuuMAb25/6n1qyUjAcGNf/AA==}
     engines: {node: '>= 6'}
 
   yaml@2.8.2:
@@ -22193,9 +22184,9 @@ snapshots:
       slice-ansi: 3.0.0
       string-width: 4.2.3
 
-  cli-truncate@5.1.1:
+  cli-truncate@5.2.0:
     dependencies:
-      slice-ansi: 7.1.2
+      slice-ansi: 8.0.0
       string-width: 8.2.0
 
   cli-width@4.1.0: {}
@@ -22359,7 +22350,7 @@ snapshots:
       import-fresh: 3.3.1
       parse-json: 5.2.0
       path-type: 4.0.0
-      yaml: 1.10.2
+      yaml: 1.10.3
 
   cosmiconfig@8.3.6(typescript@5.9.3):
     dependencies:
@@ -23667,10 +23658,6 @@ snapshots:
   fd-slicer@1.1.0:
     dependencies:
       pend: 1.2.0
-
-  fdir@6.5.0(picomatch@4.0.3):
-    optionalDependencies:
-      picomatch: 4.0.3
 
   fdir@6.5.0(picomatch@4.0.4):
     optionalDependencies:
@@ -25383,15 +25370,14 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  lint-staged@16.2.7:
+  lint-staged@16.4.0:
     dependencies:
       commander: 14.0.3
       listr2: 9.0.5
-      micromatch: 4.0.8
-      nano-spawn: 2.0.0
-      pidtree: 0.6.0
+      picomatch: 4.0.4
       string-argv: 0.3.2
-      yaml: 2.8.2
+      tinyexec: 1.1.1
+      yaml: 2.8.3
 
   listr2@3.14.0(enquirer@2.4.1):
     dependencies:
@@ -25408,7 +25394,7 @@ snapshots:
 
   listr2@9.0.5:
     dependencies:
-      cli-truncate: 5.1.1
+      cli-truncate: 5.2.0
       colorette: 2.0.20
       eventemitter3: 5.0.4
       log-update: 6.1.0
@@ -25501,7 +25487,7 @@ snapshots:
       ansi-escapes: 7.3.0
       cli-cursor: 5.0.0
       slice-ansi: 7.1.2
-      strip-ansi: 7.1.2
+      strip-ansi: 7.2.0
       wrap-ansi: 9.0.2
 
   logkitty@0.7.1:
@@ -25806,7 +25792,7 @@ snapshots:
   micromatch@4.0.8:
     dependencies:
       braces: 3.0.3
-      picomatch: 2.3.1
+      picomatch: 2.3.2
 
   mime-db@1.52.0: {}
 
@@ -25894,8 +25880,6 @@ snapshots:
 
   nan@2.23.0:
     optional: true
-
-  nano-spawn@2.0.0: {}
 
   nanoclone@0.2.1: {}
 
@@ -26032,7 +26016,7 @@ snapshots:
     dependencies:
       citty: 0.2.1
       pathe: 2.0.3
-      tinyexec: 1.0.2
+      tinyexec: 1.1.1
 
   ob1@0.80.12:
     dependencies:
@@ -26353,15 +26337,11 @@ snapshots:
 
   picocolors@1.1.1: {}
 
-  picomatch@2.3.1: {}
-
   picomatch@2.3.2: {}
 
   picomatch@4.0.3: {}
 
   picomatch@4.0.4: {}
-
-  pidtree@0.6.0: {}
 
   pify@2.3.0: {}
 
@@ -27360,6 +27340,11 @@ snapshots:
       ansi-styles: 6.2.3
       is-fullwidth-code-point: 5.1.0
 
+  slice-ansi@8.0.0:
+    dependencies:
+      ansi-styles: 6.2.3
+      is-fullwidth-code-point: 5.1.0
+
   snake-case@3.0.4:
     dependencies:
       dot-case: 3.0.4
@@ -27845,12 +27830,12 @@ snapshots:
 
   tinyexec@0.3.2: {}
 
-  tinyexec@1.0.2: {}
+  tinyexec@1.1.1: {}
 
   tinyglobby@0.2.15:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
 
   tinyglobby@0.2.16:
     dependencies:
@@ -28370,8 +28355,8 @@ snapshots:
   vite@7.2.7(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3):
     dependencies:
       esbuild: 0.25.12
-      fdir: 6.5.0(picomatch@4.0.3)
-      picomatch: 4.0.3
+      fdir: 6.5.0(picomatch@4.0.4)
+      picomatch: 4.0.4
       postcss: 8.5.6
       rollup: 4.53.3
       tinyglobby: 0.2.15
@@ -28690,7 +28675,7 @@ snapshots:
     dependencies:
       ansi-styles: 6.2.3
       string-width: 7.2.0
-      strip-ansi: 7.1.2
+      strip-ansi: 7.2.0
 
   wrappy@1.0.2: {}
 
@@ -28746,7 +28731,7 @@ snapshots:
 
   yallist@4.0.0: {}
 
-  yaml@1.10.2: {}
+  yaml@1.10.3: {}
 
   yaml@2.8.2: {}
 
