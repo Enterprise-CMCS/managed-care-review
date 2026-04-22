@@ -2,11 +2,22 @@ import { Crypto } from '@peculiar/webcrypto'
 import { TextEncoder, TextDecoder } from 'util'
 import { cleanup } from '@testing-library/react'
 import { MockLink } from '@apollo/client/testing'
+import { setVerbosity } from '@apollo/client/utilities/invariant'
 
 // Apollo Client v4 MockedProvider introduced a 20-50ms default response
 // delay. Override globally to 0 so unit tests stay fast. Individual mocks
 // can still opt in by setting their own `delay`.
 MockLink.defaultOptions = { delay: 0 }
+
+// Apollo's "Missing field ... while writing result %o" log dumps the entire
+// result object via util.inspect({showHidden: true}), expanding every Date
+// prototype method — one entry is thousands of lines and our CI logs balloon
+// to 200MB+. Apollo emits this via invariant.error (code 110), so 'silent'
+// is the only level that suppresses it. Restricted to CI (dev/val/prod
+// stages); locally we stay verbose so devs see the signal and fix mocks.
+if (import.meta.env.VITE_APP_STAGE_NAME !== 'local') {
+    setVerbosity('silent')
+}
 
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 // allows you to do things like:
