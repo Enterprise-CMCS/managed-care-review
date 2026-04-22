@@ -9,7 +9,10 @@ import {
   type ChunksArtifact,
   type IndexedDocumentArtifact
 } from '../artifacts'
-import type { ValidationPhaseTimingDiagnostic } from '../handlers'
+import type {
+  ValidationIndexingSummaryDiagnostic,
+  ValidationPhaseTimingDiagnostic
+} from '../handlers'
 import type { DateValidationResult } from '../prompts'
 import {
   getValidationResultKey,
@@ -91,6 +94,7 @@ export interface DateValidationLargeSubmissionDiagnostics {
     mismatch: number
     notEnoughEvidence: number
   }
+  indexing: ValidationIndexingSummaryDiagnostic
   phaseTimingsMs: Record<ValidationPhaseTimingDiagnostic['phase'], number>
   artifactSizesBytes: {
     parsedText: number | null
@@ -191,6 +195,12 @@ async function evaluateScenario(
     )
 
     const phaseTimings = newPhaseTimings()
+    let indexingSummary: ValidationIndexingSummaryDiagnostic = {
+      concurrencyLimit: 0,
+      totalElapsedMs: 0,
+      processedDocuments: 0,
+      failedDocuments: 0
+    }
     await measureEvaluationPhase(phaseTimings, 'fetch', async () =>
       Promise.all(
         sourceDocuments.map(async ({ document, sourceKey }) => {
@@ -231,6 +241,9 @@ async function evaluateScenario(
       diagnostics: {
         recordPhaseTiming: (phase, elapsedMs) => {
           phaseTimings[phase] += elapsedMs
+        },
+        recordIndexingSummary: (summary) => {
+          indexingSummary = summary
         }
       }
     })
@@ -299,7 +312,8 @@ async function evaluateScenario(
               documentIndexArtifacts,
               resultArtifact,
               statusArtifact,
-              phaseTimings
+              phaseTimings,
+              indexingSummary
             })
           }
         : {}),
@@ -322,7 +336,13 @@ async function evaluateScenario(
               documentIndexArtifacts: [],
               resultArtifact: null,
               statusArtifact: null,
-              phaseTimings: newPhaseTimings()
+              phaseTimings: newPhaseTimings(),
+              indexingSummary: {
+                concurrencyLimit: 0,
+                totalElapsedMs: 0,
+                processedDocuments: 0,
+                failedDocuments: 0
+              }
             })
           }
         : {}),
@@ -370,6 +390,7 @@ function buildLargeSubmissionDiagnostics(args: {
   resultArtifact: ValidationResultArtifact | null
   statusArtifact: ValidationStatusArtifact | null
   phaseTimings: Record<ValidationPhaseTimingDiagnostic['phase'], number>
+  indexingSummary: ValidationIndexingSummaryDiagnostic
 }): DateValidationLargeSubmissionDiagnostics {
   return {
     totalDocuments: args.documents.length,
@@ -385,6 +406,7 @@ function buildLargeSubmissionDiagnostics(args: {
     processedDocuments: args.chunksArtifact?.documents?.length ?? 0,
     chunkCount: args.chunksArtifact?.chunks.length ?? 0,
     finalOutcomes: countOutcomes(args.resultArtifact?.results ?? []),
+    indexing: args.indexingSummary,
     phaseTimingsMs: args.phaseTimings,
     artifactSizesBytes: {
       parsedText: null,

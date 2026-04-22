@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-042 Add bounded document indexing concurrency`.
+The next implementation ticket is `AIFA-043 Add large-batch OCR safety valve`.
 
 ## Completed
 
@@ -54,6 +54,7 @@ The next implementation ticket is `AIFA-042 Add bounded document indexing concur
 - AIFA-039 ✔ Add prod-shaped large-submission evaluation fixture
 - AIFA-040 ✔ Filter unsupported validation documents before worker execution
 - AIFA-041 ✔ Add document-level failure isolation and processing diagnostics
+- AIFA-042 ✔ Add bounded document indexing concurrency
 
 ## Current State
 
@@ -246,15 +247,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-042 Add bounded document indexing concurrency
+### AIFA-043 Add large-batch OCR safety valve
 
-Bound per-document fetch, parse, chunk, and embed work so large submissions do not fan out unbounded indexing load.
+Preserve normal OCR fallback for small runs, but cap or skip expensive OCR work when large batches would overwhelm local execution.
 
 ## Suggested Next Step
 
-- Add a small concurrency cap around per-document indexing work.
-- Keep document diagnostics and failure isolation behavior unchanged.
-- Re-run the large-submission fixture to measure indexing timings under the cap.
+- Add a conservative OCR cap or skip rule for large batches only.
+- Record OCR attempted, skipped, and capped diagnostics.
+- Keep partial coverage conservative when OCR-heavy documents are not fully reviewed.
 
 ## Source of Truth Docs
 
@@ -285,6 +286,8 @@ Bound per-document fetch, parse, chunk, and embed work so large submissions do n
 - Parsed text is not a separate artifact yet, so large-run artifact-size output reports parsed text as unavailable until AIFA-046.
 - AIFA-040 keeps `artifactVersion` tied to all persisted contract document keys so unsupported attachment changes still invalidate prior validation artifacts.
 - AIFA-041 now persists skipped, failed, and processed document diagnostics on terminal status and result artifacts.
+- AIFA-042 records indexing concurrency and wall-clock indexing duration through evaluation diagnostics, but not yet as persisted product artifacts.
+- The default concurrency cap is intentionally conservative for local runs and may need tuning after OCR safety limits are in place.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.

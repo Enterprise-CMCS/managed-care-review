@@ -60,6 +60,9 @@ export function formatEvaluationSummary(
         `  outcomes: match=${diagnostics.finalOutcomes.match}, mismatch=${diagnostics.finalOutcomes.mismatch}, notEnoughEvidence=${diagnostics.finalOutcomes.notEnoughEvidence}`
       )
       lines.push(
+        `  indexing: concurrency=${diagnostics.indexing.concurrencyLimit}, elapsedMs=${diagnostics.indexing.totalElapsedMs}, processed=${diagnostics.indexing.processedDocuments}, failed=${diagnostics.indexing.failedDocuments}`
+      )
+      lines.push(
         `  phase timings ms: fetch=${diagnostics.phaseTimingsMs.fetch}, parse=${diagnostics.phaseTimingsMs.parse}, ocr=${diagnostics.phaseTimingsMs.ocr}, chunk=${diagnostics.phaseTimingsMs.chunk}, embed=${diagnostics.phaseTimingsMs.embed}, retrieval=${diagnostics.phaseTimingsMs.retrieval}, validation=${diagnostics.phaseTimingsMs.validation}`
       )
       lines.push(

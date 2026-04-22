@@ -1,4 +1,5 @@
 export type {
+  ValidationIndexingSummaryDiagnostic,
   ValidationSourceDocument,
   ValidationPhaseTimingDiagnostic,
   ValidationHandlerEvent,

@@ -33,6 +33,12 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
             mismatch: 0,
             notEnoughEvidence: 0
           },
+          indexing: {
+            concurrencyLimit: 2,
+            totalElapsedMs: 99,
+            processedDocuments: 132,
+            failedDocuments: 1
+          },
           phaseTimingsMs: {
             fetch: 1,
             parse: 2,
@@ -60,6 +66,10 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
   assert.match(
     formatted,
     /large submission: total=165, eligible=132, skipped=32, failed=1, processed=132, chunks=264/
+  )
+  assert.match(
+    formatted,
+    /indexing: concurrency=2, elapsedMs=99, processed=132, failed=1/
   )
   assert.match(
     formatted,

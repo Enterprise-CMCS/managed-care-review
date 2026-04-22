@@ -63,6 +63,13 @@ export type ValidationPhaseTimingDiagnostic = {
   elapsedMs: number
 }
 
+export interface ValidationIndexingSummaryDiagnostic {
+  concurrencyLimit: number
+  totalElapsedMs: number
+  processedDocuments: number
+  failedDocuments: number
+}
+
 export interface ValidationHandlerEvent {
   formId: string
   artifactVersion: string
@@ -77,6 +84,9 @@ export interface ValidationHandlerEvent {
       phase: ValidationPhaseTimingDiagnostic['phase'],
       elapsedMs: number
     ): void
+    recordIndexingSummary?(
+      summary: ValidationIndexingSummaryDiagnostic
+    ): void
   }
 }
 
@@ -85,6 +95,8 @@ export interface ValidationHandlerResult {
   artifactVersion: string
   status: 'completed'
 }
+
+export const DEFAULT_DOCUMENT_INDEXING_CONCURRENCY = 2
 
 export async function validationHandler(
   event: ValidationHandlerEvent
@@ -147,8 +159,11 @@ export async function validationHandler(
 
     // Document-level failures stay isolated so one renamed or corrupt PDF does
     // not throw away usable evidence from the rest of the submission.
-    const documentIndexingResults = await Promise.all(
-      event.documents.map((document) =>
+    const documentIndexingStartedAt = Date.now()
+    const documentIndexingResults = await mapWithConcurrencyLimit(
+      event.documents,
+      DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
+      (document) =>
         indexValidationDocument({
           event,
           s3Client,
@@ -157,7 +172,6 @@ export async function validationHandler(
           unchangedDocumentCacheKeys,
           document
         })
-      )
     )
     const indexedDocuments = documentIndexingResults.flatMap((result) =>
       result.indexedDocument ? [result.indexedDocument] : []
@@ -166,6 +180,15 @@ export async function validationHandler(
       ...documentDiagnostics,
       ...documentIndexingResults.map((result) => result.diagnostic)
     ]
+    // Keep large-run indexing metrics on the optional diagnostics hook so
+    // evaluation can measure queue behavior without widening the persisted
+    // product artifact contract in this ticket.
+    event.diagnostics?.recordIndexingSummary?.({
+      concurrencyLimit: DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
+      totalElapsedMs: Date.now() - documentIndexingStartedAt,
+      processedDocuments: indexedDocuments.length,
+      failedDocuments: documentIndexingResults.length - indexedDocuments.length
+    })
 
     if (indexedDocuments.length === 0) {
       throw new Error(
@@ -466,6 +489,40 @@ export async function validationHandler(
 
     throw error
   }
+}
+
+export async function mapWithConcurrencyLimit<T, R>(
+  items: T[],
+  limit: number,
+  run: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  if (limit < 1) {
+    throw new Error('Concurrency limit must be at least 1')
+  }
+
+  const results = new Array<R>(items.length)
+  let nextIndex = 0
+
+  async function runNext(): Promise<void> {
+    const currentIndex = nextIndex
+    nextIndex += 1
+
+    if (currentIndex >= items.length) {
+      return
+    }
+
+    results[currentIndex] = await run(items[currentIndex], currentIndex)
+    await runNext()
+  }
+
+  await Promise.all(
+    Array.from(
+      { length: Math.min(limit, items.length) },
+      () => runNext()
+    )
+  )
+
+  return results
 }
 
 async function indexValidationDocument(args: {

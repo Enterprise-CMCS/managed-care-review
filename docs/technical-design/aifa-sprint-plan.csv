@@ -763,7 +763,7 @@ A 165-document submission is likely to contain at least one bad, empty, weak, or
 - Partial processing does not claim all documents were reviewed
 - Validation results include or reference coverage diagnostics when not all eligible documents are usable
 - Existing normal corpus outcomes do not regress"
-AIFA-042 Add bounded document indexing concurrency,Backlog,7-Large Submission Hardening,High,AIFA-041,"Bound per-document indexing concurrency for fetch, parse, chunk, and embed work.
+AIFA-042 Add bounded document indexing concurrency,Done,7-Large Submission Hardening,High,AIFA-041,"Bound per-document indexing concurrency for fetch, parse, chunk, and embed work.
 - Replace unbounded per-document Promise.all behavior with a small concurrency limit
 - Keep the limit configurable or clearly centralized
 - Preserve document-level failure isolation
