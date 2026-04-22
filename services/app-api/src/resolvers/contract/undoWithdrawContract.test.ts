@@ -16,6 +16,7 @@ import {
     unlockTestContract,
     errorUndoWithdrawTestContract,
     createAndSubmitTestContractWithRate,
+    createAndUpdateTestEQROContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { fetchTestRateById, must } from '../../testHelpers'
 import {
@@ -690,6 +691,105 @@ describe('undoWithdrawContract', () => {
             expect.objectContaining({
                 bodyHTML: expect.stringContaining(contractName),
             })
+        )
+    })
+
+    it('can undo withdraw EQRO contract', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        // At least one EQRO provision field true -> UNDER_REVIEW / SUBMITTED
+        const draft = await createAndUpdateTestEQROContract(
+            stateServer,
+            undefined,
+            {
+                eqroNewContractor: true,
+                eqroProvisionMcoNewOptionalActivity: true,
+                eqroProvisionNewMcoEqrRelatedActivities: true,
+                eqroProvisionChipEqrRelatedActivities: true,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
+            }
+        )
+
+        const submittedContract = await submitTestContract(
+            stateServer,
+            draft.id
+        )
+        expect(submittedContract.consolidatedStatus).toBe('SUBMITTED')
+
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            submittedContract.id,
+            'withdraw EQRO submission'
+        )
+
+        expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+
+        const contractHistory = contractHistoryToDescriptions(withdrawnContract)
+        expect(contractHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                'Withdraw submission. withdraw EQRO submission',
+                'CMS withdrew the submission from review. withdraw EQRO submission',
+            ])
+        )
+
+        const undoneContract = await undoWithdrawTestContract(
+            cmsServer,
+            withdrawnContract.id,
+            'undo withdraw EQRO submission'
+        )
+
+        expect(undoneContract.consolidatedStatus).toBe('RESUBMITTED')
+
+        const undoneHistory = contractHistoryToDescriptions(undoneContract)
+        expect(undoneHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                'Withdraw submission. withdraw EQRO submission',
+                'CMS withdrew the submission from review. withdraw EQRO submission',
+                'CMS undoing submission withdrawal. undo withdraw EQRO submission',
+                'CMS undid submission withdrawal. undo withdraw EQRO submission',
+            ])
+        )
+
+        must(
+            await unlockTestContract(
+                cmsServer,
+                undoneContract.id,
+                'unlock EQRO after undo'
+            )
+        )
+        const resubmittedAfterUndo = must(
+            await submitTestContract(
+                stateServer,
+                undoneContract.id,
+                'resubmit EQRO after undo'
+            )
+        )
+        expect(resubmittedAfterUndo.consolidatedStatus).toBe('RESUBMITTED')
+
+        const afterUndoHistory =
+            contractHistoryToDescriptions(resubmittedAfterUndo)
+        expect(afterUndoHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                'Withdraw submission. withdraw EQRO submission',
+                'CMS withdrew the submission from review. withdraw EQRO submission',
+                'CMS undoing submission withdrawal. undo withdraw EQRO submission',
+                'CMS undid submission withdrawal. undo withdraw EQRO submission',
+                'unlock EQRO after undo',
+                'resubmit EQRO after undo',
+            ])
         )
     })
 })

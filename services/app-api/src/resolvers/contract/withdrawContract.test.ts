@@ -12,6 +12,7 @@ import {
     approveTestContract,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
+    createAndUpdateTestEQROContract,
     submitTestContract,
     unlockTestContract,
     withdrawTestContract,
@@ -23,6 +24,7 @@ import type { RateFormDataInput, RateStrippedEdge } from '../../gen/gqlClient'
 import {
     SubmitContractDocument,
     UpdateDraftContractRatesDocument,
+    WithdrawContractDocument,
 } from '../../gen/gqlClient'
 import {
     addNewRateToTestContract,
@@ -31,6 +33,7 @@ import {
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -1219,6 +1222,149 @@ describe('withdrawContract', () => {
                     })
                 )
             )
+        )
+    })
+
+    it('cannot withdraw EQRO or CHIP-only HEALTH_PLAN contract with NOT_SUBJECT_TO_REVIEW status', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: { user: stateUser },
+            ldService: testLDService({
+                'chip-submission-automation': true,
+            }),
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: cmsUser },
+        })
+
+        // EQRO: all-false provision fields trigger NOT_SUBJECT_TO_REVIEW on submit
+        const eqroDraft = await createAndUpdateTestEQROContract(
+            stateServer,
+            undefined,
+            {
+                eqroNewContractor: false,
+                eqroProvisionMcoNewOptionalActivity: false,
+                eqroProvisionNewMcoEqrRelatedActivities: false,
+                eqroProvisionChipEqrRelatedActivities: false,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
+            }
+        )
+        const eqroSubmitted = await submitTestContract(
+            stateServer,
+            eqroDraft.id
+        )
+        expect(eqroSubmitted.contractSubmissionType).toBe('EQRO')
+        expect(eqroSubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+
+        const chipDraft = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            {
+                submissionType: 'CONTRACT_ONLY',
+                populationCovered: 'CHIP',
+                federalAuthorities: ['TITLE_XXI'],
+            }
+        )
+        const chipSubmitted = await submitTestContract(
+            stateServer,
+            chipDraft.id
+        )
+        expect(chipSubmitted.contractSubmissionType).toBe('HEALTH_PLAN')
+        expect(chipSubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+
+        const eqroWithdrawResult = await executeGraphQLOperation(cmsServer, {
+            query: WithdrawContractDocument,
+            variables: {
+                input: {
+                    contractID: eqroSubmitted.id,
+                    updatedReason: 'withdraw submission',
+                },
+            },
+        })
+        expect(eqroWithdrawResult.errors).toBeDefined()
+        expect(eqroWithdrawResult.errors?.[0].message).toBe(
+            'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
+        )
+
+        const chipWithdrawResult = await executeGraphQLOperation(cmsServer, {
+            query: WithdrawContractDocument,
+            variables: {
+                input: {
+                    contractID: chipSubmitted.id,
+                    updatedReason: 'withdraw submission',
+                },
+            },
+        })
+        expect(chipWithdrawResult.errors).toBeDefined()
+        expect(chipWithdrawResult.errors?.[0].message).toBe(
+            'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
+        )
+    })
+
+    it('can withdraw EQRO contract with SUBMITTED status', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        // At least one EQRO provision field true -> UNDER_REVIEW / SUBMITTED
+        const draft = await createAndUpdateTestEQROContract(
+            stateServer,
+            undefined,
+            {
+                eqroNewContractor: true,
+                eqroProvisionMcoNewOptionalActivity: true,
+                eqroProvisionNewMcoEqrRelatedActivities: true,
+                eqroProvisionChipEqrRelatedActivities: true,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
+            }
+        )
+
+        const submittedContract = await submitTestContract(
+            stateServer,
+            draft.id
+        )
+        expect(submittedContract.consolidatedStatus).toBe('SUBMITTED')
+
+        must(
+            await unlockTestContract(
+                cmsServer,
+                submittedContract.id,
+                'unlock EQRO submission'
+            )
+        )
+        const resubmittedContract = must(
+            await submitTestContract(
+                stateServer,
+                submittedContract.id,
+                'resubmit EQRO'
+            )
+        )
+        expect(resubmittedContract.consolidatedStatus).toBe('RESUBMITTED')
+
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            resubmittedContract.id,
+            'withdraw EQRO submission'
+        )
+
+        expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+
+        const contractHistory = contractHistoryToDescriptions(withdrawnContract)
+        expect(contractHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                'unlock EQRO submission',
+                'resubmit EQRO',
+                'Withdraw submission. withdraw EQRO submission',
+                'CMS withdrew the submission from review. withdraw EQRO submission',
+            ])
         )
     })
 })

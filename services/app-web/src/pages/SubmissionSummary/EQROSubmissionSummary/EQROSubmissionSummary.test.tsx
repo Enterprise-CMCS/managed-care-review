@@ -562,6 +562,390 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
         })
     })
 
+    describe('CMS User withdraw submission button', () => {
+        it('renders the withdraw button when EQRO submission is Submitted', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'SUBMITTED',
+                consolidatedStatus: 'SUBMITTED',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                        [featureFlags.WITHDRAW_SUBMISSION.flag]: true,
+                        [featureFlags.UNDO_WITHDRAW_SUBMISSION.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            expect(
+                screen.getByRole('button', {
+                    name: 'Withdraw submission',
+                })
+            ).toHaveClass('usa-button')
+
+            // Undo withdraw should NOT be present on a submitted package
+            expect(
+                screen.queryByRole('button', {
+                    name: 'Undo submission withdraw',
+                })
+            ).not.toBeInTheDocument()
+        })
+
+        it('does not render the withdraw button when EQRO submission is not subject to review', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'SUBMITTED',
+                consolidatedStatus: 'NOT_SUBJECT_TO_REVIEW',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                        [featureFlags.WITHDRAW_SUBMISSION.flag]: true,
+                        [featureFlags.UNDO_WITHDRAW_SUBMISSION.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            // Withdraw button is gated on SUBMITTED/RESUBMITTED consolidatedStatus
+            expect(
+                screen.queryByRole('button', {
+                    name: 'Withdraw submission',
+                })
+            ).not.toBeInTheDocument()
+
+            // Unlock is still allowed for NOT_SUBJECT_TO_REVIEW
+            expect(
+                screen.getByRole('button', {
+                    name: 'Unlock submission',
+                })
+            ).toBeInTheDocument()
+        })
+
+        it('does not render the withdraw button when EQRO submission is already withdrawn', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'SUBMITTED',
+            })
+            contract.reviewStatus = 'WITHDRAWN'
+            contract.consolidatedStatus = 'WITHDRAWN'
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                        [featureFlags.WITHDRAW_SUBMISSION.flag]: true,
+                        [featureFlags.UNDO_WITHDRAW_SUBMISSION.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryByRole('button', {
+                    name: 'Withdraw submission',
+                })
+            ).not.toBeInTheDocument()
+
+            // Unlock is not allowed on a withdrawn submission either
+            expect(
+                screen.queryByRole('button', {
+                    name: 'Unlock submission',
+                })
+            ).not.toBeInTheDocument()
+        })
+    })
+
+    describe('CMS User undo withdraw submission button', () => {
+        it('renders the undo withdraw button when EQRO submission is Withdrawn', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'SUBMITTED',
+            })
+            contract.reviewStatus = 'WITHDRAWN'
+            contract.consolidatedStatus = 'WITHDRAWN'
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                        [featureFlags.WITHDRAW_SUBMISSION.flag]: true,
+                        [featureFlags.UNDO_WITHDRAW_SUBMISSION.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            expect(
+                screen.getByRole('button', {
+                    name: 'Undo submission withdraw',
+                })
+            ).toHaveClass('usa-button')
+
+            // "No action" message should not render when the undo button is available
+            expect(
+                screen.queryByText(
+                    'No action can be taken on this submission in its current status.'
+                )
+            ).not.toBeInTheDocument()
+        })
+
+        it('does not render the undo withdraw button when EQRO submission is Submitted', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'SUBMITTED',
+                consolidatedStatus: 'SUBMITTED',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                        [featureFlags.WITHDRAW_SUBMISSION.flag]: true,
+                        [featureFlags.UNDO_WITHDRAW_SUBMISSION.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryByRole('button', {
+                    name: 'Undo submission withdraw',
+                })
+            ).not.toBeInTheDocument()
+        })
+
+        it('renders withdraw and unlock but not undo withdraw after the withdraw has been undone', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'RESUBMITTED',
+            })
+            contract.reviewStatus = 'UNDER_REVIEW'
+            contract.consolidatedStatus = 'RESUBMITTED'
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                        [featureFlags.WITHDRAW_SUBMISSION.flag]: true,
+                        [featureFlags.UNDO_WITHDRAW_SUBMISSION.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            expect(
+                screen.getByRole('button', {
+                    name: 'Withdraw submission',
+                })
+            ).toHaveClass('usa-button')
+
+            expect(
+                screen.getByRole('button', {
+                    name: 'Unlock submission',
+                })
+            ).toHaveClass('usa-button')
+
+            expect(
+                screen.queryByRole('button', {
+                    name: 'Undo submission withdraw',
+                })
+            ).not.toBeInTheDocument()
+        })
+    })
+
     describe('NEW tag on review determination change', () => {
         it('shows NEW tag when review determination changes on resubmission', async () => {
             const contract = mockContractPackageSubmitted({
