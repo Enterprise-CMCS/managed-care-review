@@ -1,8 +1,7 @@
 import React, { type JSX } from 'react'
 import { dayjs } from '@mc-review/dates'
 import { SectionHeader } from '../SectionHeader'
-import { Accordion } from '@trussworks/react-uswds'
-import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
+import { Accordion, type AccordionProps } from '@trussworks/react-uswds'
 import {
     UpdateInformation,
     Contract,
@@ -344,7 +343,7 @@ export const ChangeHistory = ({
     }
 
     const revisionHistory = flattenedRevisions()
-    const revisedItems: AccordionItemProps[] = revisionHistory.map((r) => {
+    const revisedItems: AccordionProps['items'] = revisionHistory.map((r) => {
         const { content, title } = buildChangeHistoryInfo(
             r,
             contract.contractSubmissionType,
