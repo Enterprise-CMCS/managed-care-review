@@ -3,6 +3,7 @@ import { getValidationResultKey } from '../results'
 import type { ArtifactS3Client } from '../s3'
 import type { ValidationStatusArtifact } from '../status'
 import { getValidationStatusKey } from '../status'
+import type { ValidationWorkSelectionMode } from '../results'
 
 export async function readReusableValidationResult(input: {
   s3Client: ArtifactS3Client
@@ -10,6 +11,10 @@ export async function readReusableValidationResult(input: {
   formId: string
   artifactVersion: string
   formSnapshotHash: string
+  workSelectionMode?: Extract<
+    ValidationWorkSelectionMode,
+    'all-doc' | 'gated-first-pass'
+  >
 }): Promise<ValidationResultArtifact | null> {
   const [statusArtifact, resultArtifact] = await Promise.all([
     readOptionalArtifact<ValidationStatusArtifact>(
@@ -30,7 +35,11 @@ export async function readReusableValidationResult(input: {
   if (
     statusArtifact == null ||
     statusArtifact.stage !== 'complete' ||
-    statusArtifact.artifactVersion !== input.artifactVersion
+    statusArtifact.artifactVersion !== input.artifactVersion ||
+    !isCompatibleWorkSelectionMode(
+      input.workSelectionMode ?? 'all-doc',
+      statusArtifact.workSelectionMode
+    )
   ) {
     return null
   }
@@ -38,12 +47,32 @@ export async function readReusableValidationResult(input: {
   if (
     resultArtifact == null ||
     resultArtifact.artifactVersion !== input.artifactVersion ||
-    resultArtifact.formSnapshotHash !== input.formSnapshotHash
+    resultArtifact.formSnapshotHash !== input.formSnapshotHash ||
+    !isCompatibleWorkSelectionMode(
+      input.workSelectionMode ?? 'all-doc',
+      resultArtifact.workSelectionMode
+    )
   ) {
     return null
   }
 
   return resultArtifact
+}
+
+function isCompatibleWorkSelectionMode(
+  requestedMode: Extract<ValidationWorkSelectionMode, 'all-doc' | 'gated-first-pass'>,
+  cachedMode?: ValidationWorkSelectionMode
+): boolean {
+  const normalizedCachedMode = cachedMode ?? 'all-doc'
+
+  if (requestedMode === 'all-doc') {
+    return normalizedCachedMode === 'all-doc'
+  }
+
+  return (
+    normalizedCachedMode === 'gated-first-pass' ||
+    normalizedCachedMode === 'gated-fallback'
+  )
 }
 
 async function readOptionalArtifact<T>(

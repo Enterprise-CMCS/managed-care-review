@@ -5,6 +5,12 @@ import {
   buildFailedValidationStatusArtifact
 } from './statusArtifact'
 
+test('buildCompletedValidationStatusArtifact keeps all-doc mode implicit by default', () => {
+  const artifact = buildCompletedValidationStatusArtifact('artifact-v1')
+
+  assert.equal('workSelectionMode' in artifact, false)
+})
+
 test('buildFailedValidationStatusArtifact can include document failure diagnostics', () => {
   const artifact = buildFailedValidationStatusArtifact(
     'artifact-v1',
@@ -20,7 +26,8 @@ test('buildFailedValidationStatusArtifact can include document failure diagnosti
         stage: 'parse',
         error: 'Invalid PDF'
       }
-    ]
+    ],
+    'gated-fallback'
   )
 
   assert.equal(artifact.stage, 'failed')
@@ -40,20 +47,25 @@ test('buildFailedValidationStatusArtifact can include document failure diagnosti
       error: 'Invalid PDF'
     }
   ])
+  assert.equal(artifact.workSelectionMode, 'gated-fallback')
 })
 
 test('buildCompletedValidationStatusArtifact preserves document coverage diagnostics when present', () => {
-  const artifact = buildCompletedValidationStatusArtifact('artifact-v1', [
-    {
-      documentName: 'valid-contract.pdf',
-      sourceBucket: 'uploads',
-      sourceKey: 'contracts/valid-contract.pdf',
-      status: 'processed',
-      usable: true,
-      chunkCount: 4,
-      stage: 'cache'
-    }
-  ])
+  const artifact = buildCompletedValidationStatusArtifact(
+    'artifact-v1',
+    [
+      {
+        documentName: 'valid-contract.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/valid-contract.pdf',
+        status: 'processed',
+        usable: true,
+        chunkCount: 4,
+        stage: 'cache'
+      }
+    ],
+    'gated-first-pass'
+  )
 
   assert.equal(artifact.stage, 'complete')
   assert.equal(artifact.error, null)
@@ -68,4 +80,5 @@ test('buildCompletedValidationStatusArtifact preserves document coverage diagnos
       stage: 'cache'
     }
   ])
+  assert.equal(artifact.workSelectionMode, 'gated-first-pass')
 })

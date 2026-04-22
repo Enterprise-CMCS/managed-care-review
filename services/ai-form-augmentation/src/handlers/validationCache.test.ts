@@ -37,6 +37,33 @@ test('readReusableValidationResult returns a cached result when status and resul
   assert.equal(cachedResult?.results.length, 1)
 })
 
+test('readReusableValidationResult keeps all-doc and gated runs separate', async () => {
+  const cachedResult = await readReusableValidationResult({
+    s3Client: createArtifactS3Client({
+      'rag-indexes/form-123/status.json': {
+        stage: 'complete',
+        artifactVersion: 'artifact-v1',
+        updatedAt: '2026-04-18T00:00:00.000Z',
+        error: null,
+        workSelectionMode: 'all-doc'
+      },
+      'rag-indexes/form-123/validation-result.json': {
+        artifactVersion: 'artifact-v1',
+        formSnapshotHash: 'form-hash-v1',
+        workSelectionMode: 'all-doc',
+        results: []
+      }
+    }),
+    bucket: 'fixture-bucket',
+    formId: 'form-123',
+    artifactVersion: 'artifact-v1',
+    formSnapshotHash: 'form-hash-v1',
+    workSelectionMode: 'gated-first-pass'
+  })
+
+  assert.equal(cachedResult, null)
+})
+
 test('readReusableValidationResult rejects cached results when the stored form snapshot hash is stale', async () => {
   const cachedResult = await readReusableValidationResult({
     s3Client: createArtifactS3Client({

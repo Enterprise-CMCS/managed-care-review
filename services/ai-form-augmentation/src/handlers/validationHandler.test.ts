@@ -1,12 +1,14 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
+  buildFieldWorkSelectionDiagnostics,
   createOcrFallbackPolicy,
   DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
   DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT,
   LARGE_BATCH_OCR_FALLBACK_LIMIT,
   LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT,
   mapWithConcurrencyLimit,
+  selectFirstPassDocuments,
   scoreValidationDocuments
 } from './validationHandler'
 
@@ -146,4 +148,152 @@ test('scoreValidationDocuments marks only the top ranked documents as first-pass
     ).length,
     2
   )
+})
+
+test('selectFirstPassDocuments preserves all-doc parity by returning scored first-pass documents in input order', () => {
+  const diagnostics = scoreValidationDocuments(
+    [
+      {
+        documentName: 'provider-agreement.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/provider-agreement.pdf'
+      },
+      {
+        documentName: 'contract-amendment-effective-dates.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/contract-amendment-effective-dates.pdf'
+      },
+      {
+        documentName: 'contract-term-expiration.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/contract-term-expiration.pdf'
+      }
+    ],
+    [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2024'
+      },
+      {
+        field: 'contractEndDate',
+        label: 'Contract End Date',
+        value: '12/31/2024'
+      }
+    ]
+  )
+
+  assert.deepEqual(
+    selectFirstPassDocuments(diagnostics).map((document) => document.documentName),
+    [
+      'contract-amendment-effective-dates.pdf',
+      'contract-term-expiration.pdf'
+    ]
+  )
+})
+
+test('buildFieldWorkSelectionDiagnostics triggers conservative fallback reasons for weak ambiguous partial evidence', () => {
+  const diagnostics = buildFieldWorkSelectionDiagnostics({
+    formFields: [
+      {
+        field: 'contractEndDate',
+        label: 'Contract End Date',
+        value: '12/31/2024'
+      }
+    ],
+    results: [
+      {
+        field: 'contractEndDate',
+        outcome: 'not-enough-evidence',
+        confidence: 'low',
+        message: 'The evidence is ambiguous because conflicting dates are present.',
+        citations: []
+      }
+    ],
+    retrievalDiagnostics: new Map([
+      [
+        'contractEndDate',
+        {
+          field: 'contractEndDate',
+          candidateChunkCount: 8,
+          initialChunkCount: 4,
+          finalChunkCount: 2,
+          representedDocumentCount: 1,
+          droppedCandidateCount: 6,
+          competingDateCount: 2,
+          clauseEvidencePresentInitially: false,
+          clauseEvidencePresentFinally: true,
+          clauseEvidenceAdded: true
+        }
+      ]
+    ]),
+    documentDiagnostics: [
+      {
+        documentName: 'bad-scan.pdf',
+        status: 'failed',
+        usable: false,
+        chunkCount: 0,
+        reason: 'ocr-capped-large-batch',
+        ocrDisposition: 'skipped'
+      }
+    ],
+    workSelectionMode: 'gated-first-pass',
+    deferredDocumentNames: new Set()
+  })
+
+  assert.deepEqual(diagnostics, [
+    {
+      field: 'contractEndDate',
+      evidenceSource: 'partial',
+      fallbackReasons: [
+        'not-enough-evidence',
+        'ambiguity',
+        'missing-citations',
+        'partial-coverage',
+        'ocr-gaps',
+        'failed-documents',
+        'weak-field-evidence',
+        'conflicting-date-evidence'
+      ]
+    }
+  ])
+})
+
+test('buildFieldWorkSelectionDiagnostics marks deferred-document citations as fallback recovery', () => {
+  const diagnostics = buildFieldWorkSelectionDiagnostics({
+    formFields: [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2024'
+      }
+    ],
+    results: [
+      {
+        field: 'contractStartDate',
+        outcome: 'match',
+        confidence: 'high',
+        message: 'Document text supports Contract Start Date as 01/01/2024.',
+        citations: [
+          {
+            chunkId: 'chunk-1',
+            documentName: 'buried-amendment.pdf',
+            page: 1,
+            order: 0
+          }
+        ]
+      }
+    ],
+    retrievalDiagnostics: new Map(),
+    documentDiagnostics: [],
+    workSelectionMode: 'gated-fallback',
+    deferredDocumentNames: new Set(['buried-amendment.pdf'])
+  })
+
+  assert.deepEqual(diagnostics, [
+    {
+      field: 'contractStartDate',
+      evidenceSource: 'fallback'
+    }
+  ])
 })

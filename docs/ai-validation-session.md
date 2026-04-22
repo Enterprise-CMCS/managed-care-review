@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-049B Implement gated first-pass selection with conservative fallback`.
+The next implementation ticket is `AIFA-048 Surface partial validation coverage conservatively`.
 
 ## Completed
 
@@ -59,6 +59,7 @@ The next implementation ticket is `AIFA-049B Implement gated first-pass selectio
 - AIFA-044 ✔ Increase retrieval breadth with document-diversity guardrails
 - AIFA-049A ✔ Add diagnostic-only work-selection scoring
 - AIFA-045 ✔ Evaluate document prioritization and two-pass retrieval
+- AIFA-049B ✔ Implement gated first-pass selection with conservative fallback
 
 ## Current State
 
@@ -251,15 +252,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-049B Implement gated first-pass selection with conservative fallback
+### AIFA-048 Surface partial validation coverage conservatively
 
-Implement the evaluated first-pass strategy behind an explicit gate while keeping the all-document path as the default.
+Expose when validation coverage is partial so gated and degraded runs do not look fully reviewed.
 
 ## Suggested Next Step
 
-- Add a gated first-pass processing mode that preserves the current all-doc path as default.
-- Record whether final field evidence came from first pass, fallback, or partial coverage.
-- Reuse the prod-shaped fixture to verify fallback still recovers deferred relevant evidence conservatively.
+- Expose partial-versus-full coverage from the stored validation artifacts.
+- Keep the Review page advisory while avoiding “fully reviewed” implications on partial runs.
+- Reuse existing skipped, failed, OCR-capped, and deferred diagnostics instead of inventing new scoring UI.
 
 ## Source of Truth Docs
 
@@ -300,6 +301,8 @@ Implement the evaluated first-pass strategy behind an explicit gate while keepin
 - The current first-pass bucket is a heuristic cutoff intended for evaluation, not a promoted runtime strategy.
 - AIFA-045 now recommends full fallback conservatively, but the simulated first-pass rule is still heuristic and narrower than the broader AIFA-049A scoring bucket.
 - The AIFA-045 field-strategy analysis only covers fields with stored final results; failed-before-result runs still fall back to scenario-level diagnostics only.
+- AIFA-049B now keeps gated and all-doc runs distinct in cache and artifacts, but a `gated-first-pass` request can still reuse a prior `gated-fallback` result.
+- AIFA-049B records field evidence source and partial states in artifacts, but user-facing partial coverage handling still belongs to AIFA-048.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.

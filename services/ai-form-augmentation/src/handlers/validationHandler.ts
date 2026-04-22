@@ -28,6 +28,7 @@ import {
   getValidationResultKey,
   type ValidationDocumentDiagnostic,
   type ValidationDocumentWorkSelectionDiagnostic,
+  type ValidationFieldWorkSelectionDiagnostic,
   type ValidationRetrievalDiagnostic
 } from '../results'
 import { newArtifactS3Client } from '../s3'
@@ -81,6 +82,7 @@ export interface ValidationHandlerEvent {
   validationLlmConfig?: ValidationLlmConfig
   formFields: DateValidationFieldInput[]
   documents: ValidationSourceDocument[]
+  workSelectionMode?: 'all-doc' | 'gated-first-pass'
   documentDiagnostics?: ValidationDocumentDiagnostic[]
   diagnostics?: {
     recordPhaseTiming(
@@ -129,6 +131,7 @@ export async function validationHandler(
   // worker phase updates the same key rather than scattering progress across
   // multiple artifacts.
   const statusKey = getValidationStatusKey(event.formId)
+  const requestedWorkSelectionMode = event.workSelectionMode ?? 'all-doc'
   let documentDiagnostics: ValidationDocumentDiagnostic[] = [
     ...(event.documentDiagnostics ?? [])
   ]
@@ -142,7 +145,8 @@ export async function validationHandler(
       bucket: event.bucket,
       formId: event.formId,
       artifactVersion: event.artifactVersion,
-      formSnapshotHash
+      formSnapshotHash,
+      workSelectionMode: requestedWorkSelectionMode
     })
 
     if (reusableResult) {
@@ -156,7 +160,13 @@ export async function validationHandler(
     await s3Client.putJson(
       event.bucket,
       statusKey,
-      buildValidationStatusArtifact('parsing', event.artifactVersion)
+      buildValidationStatusArtifact(
+        'parsing',
+        event.artifactVersion,
+        null,
+        [],
+        requestedWorkSelectionMode
+      )
     )
 
     const previousChunksArtifact = await readOptionalArtifact<ChunksArtifact>(
@@ -186,35 +196,39 @@ export async function validationHandler(
     const shouldAttemptOcrFallback = createOcrFallbackPolicy(
       event.documents.length
     )
+    const selectedDocuments =
+      requestedWorkSelectionMode === 'all-doc'
+        ? event.documents
+        : selectFirstPassDocuments(workSelectionDiagnostics)
+    const deferredDocuments =
+      requestedWorkSelectionMode === 'all-doc'
+        ? []
+        : event.documents.filter(
+            (document) =>
+              !selectedDocuments.some(
+                (selectedDocument) =>
+                  computeDocumentCacheKey(selectedDocument) ===
+                  computeDocumentCacheKey(document)
+              )
+          )
 
     // Document-level failures stay isolated so one renamed or corrupt PDF does
     // not throw away usable evidence from the rest of the submission.
     const documentIndexingStartedAt = Date.now()
-    const documentIndexingResults = await mapWithConcurrencyLimit(
-      event.documents,
-      DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
-      (document) =>
-        indexValidationDocument({
-          event,
-          s3Client,
-          embeddingProvider,
-          embeddingModel,
-          unchangedDocumentCacheKeys,
-          shouldAttemptOcrFallback,
-          document
-        })
-    )
-    const indexedDocuments = documentIndexingResults.flatMap((result) =>
-      result.indexedDocument ? [result.indexedDocument] : []
-    )
+    const firstPassIndexing = await indexValidationDocuments({
+      event,
+      s3Client,
+      embeddingProvider,
+      embeddingModel,
+      unchangedDocumentCacheKeys,
+      shouldAttemptOcrFallback,
+      documents: selectedDocuments,
+      workSelectionByCacheKey
+    })
+    let indexedDocuments = firstPassIndexing.indexedDocuments
     documentDiagnostics = [
       ...documentDiagnostics,
-      ...documentIndexingResults.map((result) =>
-        attachWorkSelectionDiagnostic(
-          result.diagnostic,
-          workSelectionByCacheKey.get(computeDocumentCacheKey(result.document))
-        )
-      )
+      ...firstPassIndexing.documentDiagnostics
     ]
     // Keep large-run indexing metrics on the optional diagnostics hook so
     // evaluation can measure queue behavior without widening the persisted
@@ -223,7 +237,9 @@ export async function validationHandler(
       concurrencyLimit: DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
       totalElapsedMs: Date.now() - documentIndexingStartedAt,
       processedDocuments: indexedDocuments.length,
-      failedDocuments: documentIndexingResults.length - indexedDocuments.length
+      failedDocuments:
+        documentDiagnostics.filter((diagnostic) => diagnostic.status === 'failed')
+          .length
     })
 
     if (indexedDocuments.length === 0) {
@@ -232,259 +248,87 @@ export async function validationHandler(
       )
     }
 
-    // Rebuild the current form-level chunk snapshot from the active document
-    // set so retrieval still sees one combined evidence pool for the form.
-    const chunks = indexedDocuments.flatMap((document) => document.chunks)
-    const chunkVectors = indexedDocuments.flatMap(
-      (document) => document.chunkVectors
-    )
-
-    if (chunks.length === 0) {
-      throw new Error(
-        `Validation could not create chunks for form ${event.formId}`
-      )
-    }
-
-    await s3Client.putJson(
-      event.bucket,
-      getChunksArtifactKey(event.formId),
-      buildChunksArtifact(
-        event.artifactVersion,
-        chunks,
-        indexedDocuments.map((document) => document.document)
-      )
-    )
-
-    await s3Client.putJson(
-      event.bucket,
-      statusKey,
-      buildValidationStatusArtifact('retrieving', event.artifactVersion)
-    )
-
-    // Build the in-memory retrieval index from the current chunk artifact. This
-    // keeps the PoC simple while still exercising the same search contract a
-    // production vector backend would eventually replace.
-    const vectorStore = new BruteForceVectorStore<{
-      chunkId: string
-      documentName: string
-      order: number
-      page: number | null
-      startPage: number | null
-      endPage: number | null
-      text: string
-    }>()
-
-    const retrievalDiagnostics = new Map<
-      DateValidationFieldInput['field'],
-      ValidationRetrievalDiagnostic
-    >()
-    const retrievedChunksByField = await measureValidationPhase(
+    let validationPass = await executeValidationPass({
       event,
-      'retrieval',
-      async () => {
-        await vectorStore.add(
-          chunks.map((chunk, index) => ({
-            id: chunk.chunkId,
-            vector: chunkVectors[index],
-            metadata: {
-              chunkId: chunk.chunkId,
-              documentName: chunk.documentName,
-              order: chunk.order,
-              page: chunk.page,
-              startPage: chunk.startPage,
-              endPage: chunk.endPage,
-              text: chunk.text
-            }
-          }))
-        )
-
-        return new Map(
-          await Promise.all(
-            event.formFields.map(async (field) => {
-              const queryVector = await embeddingProvider.embedText(
-                buildFieldRetrievalQuery(field.field)
-              )
-              const candidateResults = await vectorStore.search(
-                queryVector,
-                FIELD_RETRIEVAL_CANDIDATE_COUNT
-              )
-              const initiallyRetrievedChunks = orderRetrievedChunks(
-                selectDiverseRetrievedChunks(
-                  candidateResults,
-                  FIELD_RETRIEVAL_FINAL_CHUNK_LIMIT,
-                  FIELD_RETRIEVAL_MAX_CHUNKS_PER_DOCUMENT
-                )
-              ).map((result) => ({
-                chunkId: result.metadata.chunkId,
-                documentName: result.metadata.documentName,
-                page: result.metadata.page,
-                startPage: result.metadata.startPage,
-                endPage: result.metadata.endPage,
-                order: result.metadata.order,
-                text: result.metadata.text
-              }))
-              const expandedRetrieval = expandClauseEvidenceForField({
-                field: field.field,
-                candidateChunkCount: candidateResults.length,
-                retrievedChunks: initiallyRetrievedChunks,
-                allChunks: chunks
-              })
-
-              retrievalDiagnostics.set(
-                field.field,
-                expandedRetrieval.diagnostics
-              )
-
-              return [
-                field.field,
-                expandedRetrieval.chunks.map((result) => ({
-                  chunkId: result.chunkId,
-                  documentName: result.documentName,
-                  page: result.page,
-                  startPage: result.startPage,
-                  endPage: result.endPage,
-                  order: result.order,
-                  text: result.text
-                }))
-              ] as const
-            })
-          )
-        )
-      }
-    )
-
-    await s3Client.putJson(
-      event.bucket,
+      s3Client,
       statusKey,
-      buildValidationStatusArtifact(
-        'deterministic-validation',
-        event.artifactVersion
-      )
-    )
-
-    const deterministicResults: DateValidationResult[] = []
-    const unresolvedFields: Array<{
-      field: DateValidationFieldInput
-      retrievedChunks: Array<{
-        chunkId: string
-        documentName: string
-        page: number | null
-        startPage: number | null
-        endPage: number | null
-        order: number
-        text: string
-      }>
-    }> = []
-
-    await measureValidationPhase(event, 'validation', async () => {
-      for (const field of event.formFields) {
-        const retrievedChunksForField =
-          retrievedChunksByField.get(field.field) ?? []
-        const deterministicValidation = runDeterministicDateValidation({
-          formFields: [field],
-          retrievedChunks: retrievedChunksForField
-        })
-
-        const fallbackToLlmResults =
-          deterministicValidation.resolvedResults.filter((result) =>
-            shouldFallbackConflictingClauseResolutionToLlm({
-              field: field.field,
-              deterministicResult: result,
-              retrievedChunks: retrievedChunksForField,
-              retrievalDiagnostic: retrievalDiagnostics.get(field.field)
-            })
-          )
-
-        deterministicResults.push(
-          ...deterministicValidation.resolvedResults.filter(
-            (result) => !fallbackToLlmResults.includes(result)
-          )
-        )
-
-        if (
-          deterministicValidation.unresolvedFields.length > 0 ||
-          fallbackToLlmResults.length > 0
-        ) {
-          unresolvedFields.push({
-            field,
-            retrievedChunks: retrievedChunksForField
-          })
-        }
-      }
+      embeddingProvider,
+      workSelectionMode: requestedWorkSelectionMode,
+      indexedDocuments
     })
+    let finalWorkSelectionMode:
+      | 'all-doc'
+      | 'gated-first-pass'
+      | 'gated-fallback' = requestedWorkSelectionMode
+    let fieldWorkSelectionDiagnostics =
+      buildFieldWorkSelectionDiagnostics({
+        formFields: event.formFields,
+        results: validationPass.reconciledResults,
+        retrievalDiagnostics: validationPass.retrievalDiagnostics,
+        documentDiagnostics,
+        workSelectionMode: requestedWorkSelectionMode,
+        deferredDocumentNames: new Set(
+          deferredDocuments.map((document) => document.documentName)
+        )
+      })
 
-    let reconciledResults = deterministicResults
-    // Persist LLM-path diagnostics alongside the artifact so evaluation can
-    // distinguish malformed model output from a legitimate evidence miss
-    // without changing the user-facing finding contract.
-    const llmDiagnostics: Array<{
-      field: string
-      issue:
-        | ValidationResponseIssue
-        | 'missing-field-result'
-        | 'multiple-field-results'
-      message: string
-    }> = []
-
-    if (unresolvedFields.length > 0) {
-      await s3Client.putJson(
-        event.bucket,
-        statusKey,
-        buildValidationStatusArtifact('llm-validation', event.artifactVersion)
+    if (
+      requestedWorkSelectionMode === 'gated-first-pass' &&
+      deferredDocuments.length > 0 &&
+      fieldWorkSelectionDiagnostics.some(
+        (diagnostic) => diagnostic.evidenceSource !== 'first-pass'
       )
-
-      // Keep Ollama as the default runtime, but let evaluation code opt into a
-      // Bedrock-backed client without reshaping the worker flow itself.
-      const validationClient = newValidationLlmClient(event.validationLlmConfig)
-      const llmResults = await measureValidationPhase(event, 'validation', () =>
-        Promise.all(
-          unresolvedFields.map(async ({ field, retrievedChunks }) => {
-            // Convert only the unresolved field plus its own retrieved evidence
-            // into the prompt so start and end dates do not share mixed context.
-            const prompt = buildDateValidationPrompt({
-              formFields: [field],
-              retrievedChunks
-            })
-
-            const validationResponse =
-              await validationClient.generateValidation({
-                prompt
-              })
-            const parsedLlmResponse = parseSingleFieldValidationResponse(
-              validationResponse.rawText,
-              field.field
-            )
-
-            if (parsedLlmResponse.diagnostic != null) {
-              llmDiagnostics.push(parsedLlmResponse.diagnostic)
-            }
-
-            const normalizedResult = normalizeLlmValidationResult({
-              field,
-              result: {
-                ...parsedLlmResponse.result,
-                decisionSource: 'llm'
-              },
-              retrievedChunks
-            })
-
-            return reconcileValidationResults(
-              [normalizedResult],
-              retrievedChunks
-            )
-          })
+    ) {
+      const fallbackIndexing = await indexValidationDocuments({
+        event,
+        s3Client,
+        embeddingProvider,
+        embeddingModel,
+        unchangedDocumentCacheKeys,
+        shouldAttemptOcrFallback,
+        documents: deferredDocuments,
+        workSelectionByCacheKey
+      })
+      indexedDocuments = [
+        ...indexedDocuments,
+        ...fallbackIndexing.indexedDocuments
+      ]
+      documentDiagnostics = mergeDocumentDiagnostics(
+        documentDiagnostics,
+        fallbackIndexing.documentDiagnostics
+      )
+      validationPass = await executeValidationPass({
+        event,
+        s3Client,
+        statusKey,
+        embeddingProvider,
+        workSelectionMode: 'gated-fallback',
+        indexedDocuments
+      })
+      finalWorkSelectionMode = 'gated-fallback'
+      fieldWorkSelectionDiagnostics = buildFieldWorkSelectionDiagnostics({
+        formFields: event.formFields,
+        results: validationPass.reconciledResults,
+        retrievalDiagnostics: validationPass.retrievalDiagnostics,
+        documentDiagnostics,
+        workSelectionMode: finalWorkSelectionMode,
+        deferredDocumentNames: new Set(
+          deferredDocuments.map((document) => document.documentName)
+        )
+      })
+    } else if (requestedWorkSelectionMode === 'gated-first-pass') {
+      documentDiagnostics = mergeDocumentDiagnostics(
+        documentDiagnostics,
+        deferredDocuments.map((document) =>
+          buildDeferredDocumentDiagnostic(
+            document,
+            workSelectionByCacheKey.get(computeDocumentCacheKey(document))
+          )
         )
       )
-
-      reconciledResults = [...reconciledResults, ...llmResults.flat()]
     }
 
-    // Preserve input order so the frontend renders findings predictably.
-    reconciledResults = event.formFields.flatMap((field) =>
-      reconciledResults.filter((result) => result.field === field.field)
-    )
-
-    logMissingCitationPages(event.formId, reconciledResults)
+    logMissingCitationPages(event.formId, validationPass.reconciledResults)
 
     await s3Client.putJson(
       event.bucket,
@@ -494,14 +338,16 @@ export async function validationHandler(
         // Persist the form-value hash alongside the results so later cache logic
         // can distinguish document changes from form-only edits.
         formSnapshotHash,
-        reconciledResults,
-        llmDiagnostics,
+        validationPass.reconciledResults,
+        validationPass.llmDiagnostics,
         event.formFields.flatMap((field) => {
-          const diagnostic = retrievalDiagnostics.get(field.field)
+          const diagnostic = validationPass.retrievalDiagnostics.get(field.field)
 
           return diagnostic ? [diagnostic] : []
         }),
-        documentDiagnostics
+        documentDiagnostics,
+        finalWorkSelectionMode,
+        fieldWorkSelectionDiagnostics
       )
     )
 
@@ -510,7 +356,8 @@ export async function validationHandler(
       statusKey,
       buildCompletedValidationStatusArtifact(
         event.artifactVersion,
-        documentDiagnostics
+        documentDiagnostics,
+        finalWorkSelectionMode
       )
     )
 
@@ -528,7 +375,8 @@ export async function validationHandler(
       buildFailedValidationStatusArtifact(
         event.artifactVersion,
         message,
-        documentDiagnostics
+        documentDiagnostics,
+        requestedWorkSelectionMode
       )
     )
 
@@ -568,6 +416,325 @@ export async function mapWithConcurrencyLimit<T, R>(
   )
 
   return results
+}
+
+async function indexValidationDocuments(args: {
+  event: ValidationHandlerEvent
+  s3Client: ArtifactS3Client
+  embeddingProvider: XenovaEmbeddingProvider
+  embeddingModel: string
+  unchangedDocumentCacheKeys: Set<string>
+  shouldAttemptOcrFallback: () => boolean
+  documents: ValidationSourceDocument[]
+  workSelectionByCacheKey: Map<string, ValidationDocumentWorkSelectionDiagnostic>
+}): Promise<{
+  indexedDocuments: IndexedDocumentArtifact[]
+  documentDiagnostics: ValidationDocumentDiagnostic[]
+}> {
+  const documentIndexingResults = await mapWithConcurrencyLimit(
+    args.documents,
+    DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
+    (document) =>
+      indexValidationDocument({
+        event: args.event,
+        s3Client: args.s3Client,
+        embeddingProvider: args.embeddingProvider,
+        embeddingModel: args.embeddingModel,
+        unchangedDocumentCacheKeys: args.unchangedDocumentCacheKeys,
+        shouldAttemptOcrFallback: args.shouldAttemptOcrFallback,
+        document
+      })
+  )
+
+  return {
+    indexedDocuments: documentIndexingResults.flatMap((result) =>
+      result.indexedDocument ? [result.indexedDocument] : []
+    ),
+    documentDiagnostics: documentIndexingResults.map((result) =>
+      attachWorkSelectionDiagnostic(
+        result.diagnostic,
+        args.workSelectionByCacheKey.get(computeDocumentCacheKey(result.document))
+      )
+    )
+  }
+}
+
+async function executeValidationPass(args: {
+  event: ValidationHandlerEvent
+  s3Client: ArtifactS3Client
+  statusKey: string
+  embeddingProvider: XenovaEmbeddingProvider
+  workSelectionMode: 'all-doc' | 'gated-first-pass' | 'gated-fallback'
+  indexedDocuments: IndexedDocumentArtifact[]
+}): Promise<{
+  reconciledResults: DateValidationResult[]
+  llmDiagnostics: Array<{
+    field: string
+    issue:
+      | ValidationResponseIssue
+      | 'missing-field-result'
+      | 'multiple-field-results'
+    message: string
+  }>
+  retrievalDiagnostics: Map<
+    DateValidationFieldInput['field'],
+    ValidationRetrievalDiagnostic
+  >
+}> {
+  const chunks = args.indexedDocuments.flatMap((document) => document.chunks)
+  const chunkVectors = args.indexedDocuments.flatMap(
+    (document) => document.chunkVectors
+  )
+
+  if (chunks.length === 0) {
+    throw new Error(
+      `Validation could not create chunks for form ${args.event.formId}`
+    )
+  }
+
+  await args.s3Client.putJson(
+    args.event.bucket,
+    getChunksArtifactKey(args.event.formId),
+    buildChunksArtifact(
+      args.event.artifactVersion,
+      chunks,
+      args.indexedDocuments.map((document) => document.document)
+    )
+  )
+
+  await args.s3Client.putJson(
+    args.event.bucket,
+    args.statusKey,
+    buildValidationStatusArtifact(
+      'retrieving',
+      args.event.artifactVersion,
+      null,
+      [],
+      args.workSelectionMode
+    )
+  )
+
+  const vectorStore = new BruteForceVectorStore<{
+    chunkId: string
+    documentName: string
+    order: number
+    page: number | null
+    startPage: number | null
+    endPage: number | null
+    text: string
+  }>()
+
+  const retrievalDiagnostics = new Map<
+    DateValidationFieldInput['field'],
+    ValidationRetrievalDiagnostic
+  >()
+  const retrievedChunksByField = await measureValidationPhase(
+    args.event,
+    'retrieval',
+    async () => {
+      await vectorStore.add(
+        chunks.map((chunk, index) => ({
+          id: chunk.chunkId,
+          vector: chunkVectors[index],
+          metadata: {
+            chunkId: chunk.chunkId,
+            documentName: chunk.documentName,
+            order: chunk.order,
+            page: chunk.page,
+            startPage: chunk.startPage,
+            endPage: chunk.endPage,
+            text: chunk.text
+          }
+        }))
+      )
+
+      return new Map(
+        await Promise.all(
+          args.event.formFields.map(async (field) => {
+            const queryVector = await args.embeddingProvider.embedText(
+              buildFieldRetrievalQuery(field.field)
+            )
+            const candidateResults = await vectorStore.search(
+              queryVector,
+              FIELD_RETRIEVAL_CANDIDATE_COUNT
+            )
+            const initiallyRetrievedChunks = orderRetrievedChunks(
+              selectDiverseRetrievedChunks(
+                candidateResults,
+                FIELD_RETRIEVAL_FINAL_CHUNK_LIMIT,
+                FIELD_RETRIEVAL_MAX_CHUNKS_PER_DOCUMENT
+              )
+            ).map((result) => ({
+              chunkId: result.metadata.chunkId,
+              documentName: result.metadata.documentName,
+              page: result.metadata.page,
+              startPage: result.metadata.startPage,
+              endPage: result.metadata.endPage,
+              order: result.metadata.order,
+              text: result.metadata.text
+            }))
+            const expandedRetrieval = expandClauseEvidenceForField({
+              field: field.field,
+              candidateChunkCount: candidateResults.length,
+              retrievedChunks: initiallyRetrievedChunks,
+              allChunks: chunks
+            })
+
+            retrievalDiagnostics.set(
+              field.field,
+              expandedRetrieval.diagnostics
+            )
+
+            return [
+              field.field,
+              expandedRetrieval.chunks.map((result) => ({
+                chunkId: result.chunkId,
+                documentName: result.documentName,
+                page: result.page,
+                startPage: result.startPage,
+                endPage: result.endPage,
+                order: result.order,
+                text: result.text
+              }))
+            ] as const
+          })
+        )
+      )
+    }
+  )
+
+  await args.s3Client.putJson(
+    args.event.bucket,
+    args.statusKey,
+    buildValidationStatusArtifact(
+      'deterministic-validation',
+      args.event.artifactVersion,
+      null,
+      [],
+      args.workSelectionMode
+    )
+  )
+
+  const deterministicResults: DateValidationResult[] = []
+  const unresolvedFields: Array<{
+    field: DateValidationFieldInput
+    retrievedChunks: Array<{
+      chunkId: string
+      documentName: string
+      page: number | null
+      startPage: number | null
+      endPage: number | null
+      order: number
+      text: string
+    }>
+  }> = []
+
+  await measureValidationPhase(args.event, 'validation', async () => {
+    for (const field of args.event.formFields) {
+      const retrievedChunksForField = retrievedChunksByField.get(field.field) ?? []
+      const deterministicValidation = runDeterministicDateValidation({
+        formFields: [field],
+        retrievedChunks: retrievedChunksForField
+      })
+
+      const fallbackToLlmResults =
+        deterministicValidation.resolvedResults.filter((result) =>
+          shouldFallbackConflictingClauseResolutionToLlm({
+            field: field.field,
+            deterministicResult: result,
+            retrievedChunks: retrievedChunksForField,
+            retrievalDiagnostic: retrievalDiagnostics.get(field.field)
+          })
+        )
+
+      deterministicResults.push(
+        ...deterministicValidation.resolvedResults.filter(
+          (result) => !fallbackToLlmResults.includes(result)
+        )
+      )
+
+      if (
+        deterministicValidation.unresolvedFields.length > 0 ||
+        fallbackToLlmResults.length > 0
+      ) {
+        unresolvedFields.push({
+          field,
+          retrievedChunks: retrievedChunksForField
+        })
+      }
+    }
+  })
+
+  let reconciledResults = deterministicResults
+  const llmDiagnostics: Array<{
+    field: string
+    issue:
+      | ValidationResponseIssue
+      | 'missing-field-result'
+      | 'multiple-field-results'
+    message: string
+  }> = []
+
+  if (unresolvedFields.length > 0) {
+    await args.s3Client.putJson(
+      args.event.bucket,
+      args.statusKey,
+      buildValidationStatusArtifact(
+        'llm-validation',
+        args.event.artifactVersion,
+        null,
+        [],
+        args.workSelectionMode
+      )
+    )
+
+    const validationClient = newValidationLlmClient(args.event.validationLlmConfig)
+    const llmResults = await measureValidationPhase(args.event, 'validation', () =>
+      Promise.all(
+        unresolvedFields.map(async ({ field, retrievedChunks }) => {
+          const prompt = buildDateValidationPrompt({
+            formFields: [field],
+            retrievedChunks
+          })
+
+          const validationResponse = await validationClient.generateValidation({
+            prompt
+          })
+          const parsedLlmResponse = parseSingleFieldValidationResponse(
+            validationResponse.rawText,
+            field.field
+          )
+
+          if (parsedLlmResponse.diagnostic != null) {
+            llmDiagnostics.push(parsedLlmResponse.diagnostic)
+          }
+
+          const normalizedResult = normalizeLlmValidationResult({
+            field,
+            result: {
+              ...parsedLlmResponse.result,
+              decisionSource: 'llm'
+            },
+            retrievedChunks
+          })
+
+          return reconcileValidationResults([normalizedResult], retrievedChunks)
+        })
+      )
+    )
+
+    reconciledResults = [...reconciledResults, ...llmResults.flat()]
+  }
+
+  reconciledResults = args.event.formFields.flatMap((field) =>
+    reconciledResults.filter((result) => result.field === field.field)
+  )
+
+  return {
+    reconciledResults,
+    llmDiagnostics,
+    retrievalDiagnostics
+  }
 }
 
 async function indexValidationDocument(args: {
@@ -814,6 +981,180 @@ function attachWorkSelectionDiagnostic(
 
 function containsAny(value: string, substrings: string[]): boolean {
   return substrings.some((substring) => value.includes(substring))
+}
+
+export function selectFirstPassDocuments(
+  scoredDocuments: ScoredValidationDocumentDiagnostic[]
+): ValidationSourceDocument[] {
+  const explicitlyDateGoverning = scoredDocuments
+    .filter((diagnostic) => isRecommendedFirstPassWorkSelection(diagnostic))
+    .map((diagnostic) => diagnostic.document)
+
+  if (explicitlyDateGoverning.length > 0) {
+    return explicitlyDateGoverning
+  }
+
+  return scoredDocuments
+    .filter((diagnostic) => diagnostic.workSelection.bucket === 'first-pass')
+    .map((diagnostic) => diagnostic.document)
+}
+
+export function buildFieldWorkSelectionDiagnostics(args: {
+  formFields: DateValidationFieldInput[]
+  results: DateValidationResult[]
+  retrievalDiagnostics: Map<
+    DateValidationFieldInput['field'],
+    ValidationRetrievalDiagnostic
+  >
+  documentDiagnostics: ValidationDocumentDiagnostic[]
+  workSelectionMode: 'all-doc' | 'gated-first-pass' | 'gated-fallback'
+  deferredDocumentNames: Set<string>
+}): ValidationFieldWorkSelectionDiagnostic[] {
+  return args.formFields.map((field) => {
+    const result = args.results.find((candidate) => candidate.field === field.field)
+
+    if (args.workSelectionMode === 'all-doc' || result == null) {
+      return {
+        field: field.field,
+        evidenceSource: 'all-doc'
+      }
+    }
+
+    const fallbackReasons = buildFallbackReasons({
+      result,
+      retrievalDiagnostic: args.retrievalDiagnostics.get(field.field),
+      documentDiagnostics: args.documentDiagnostics
+    })
+    const citedDeferredDocument = result.citations.some((citation) =>
+      args.deferredDocumentNames.has(citation.documentName)
+    )
+
+    return {
+      field: field.field,
+      evidenceSource:
+        citedDeferredDocument
+          ? 'fallback'
+          : fallbackReasons.length > 0
+            ? 'partial'
+            : 'first-pass',
+      ...(fallbackReasons.length > 0 ? { fallbackReasons } : {})
+    }
+  })
+}
+
+function buildFallbackReasons(args: {
+  result: DateValidationResult
+  retrievalDiagnostic?: ValidationRetrievalDiagnostic
+  documentDiagnostics: ValidationDocumentDiagnostic[]
+}): string[] {
+  const fallbackReasons = new Set<string>()
+
+  if (args.result.outcome === 'not-enough-evidence') {
+    fallbackReasons.add('not-enough-evidence')
+  }
+
+  if (
+    args.result.message.toLowerCase().includes('ambiguous') ||
+    args.result.message.toLowerCase().includes('conflicting')
+  ) {
+    fallbackReasons.add('ambiguity')
+  }
+
+  if (args.result.citations.length === 0) {
+    fallbackReasons.add('missing-citations')
+  }
+
+  if (
+    args.documentDiagnostics.some(
+      (diagnostic) =>
+        diagnostic.status === 'failed' ||
+        diagnostic.reason === 'ocr-capped-large-batch'
+    )
+  ) {
+    fallbackReasons.add('partial-coverage')
+  }
+
+  if (
+    args.documentDiagnostics.some(
+      (diagnostic) =>
+        diagnostic.ocrDisposition === 'skipped' ||
+        diagnostic.reason === 'ocr-capped-large-batch'
+    )
+  ) {
+    fallbackReasons.add('ocr-gaps')
+  }
+
+  if (
+    args.documentDiagnostics.some((diagnostic) => diagnostic.status === 'failed')
+  ) {
+    fallbackReasons.add('failed-documents')
+  }
+
+  if (args.result.confidence !== 'high') {
+    fallbackReasons.add('weak-field-evidence')
+  }
+
+  if ((args.retrievalDiagnostic?.competingDateCount ?? 0) > 1) {
+    fallbackReasons.add('conflicting-date-evidence')
+  }
+
+  return [...fallbackReasons]
+}
+
+function isRecommendedFirstPassWorkSelection(
+  diagnostic: ScoredValidationDocumentDiagnostic
+): boolean {
+  return diagnostic.workSelection.priorityReasons.some(
+    (reason) =>
+      reason.includes('Amendment-style naming') ||
+      reason.includes('start-date or effective-date') ||
+      reason.includes('term or expiration')
+  )
+}
+
+function mergeDocumentDiagnostics(
+  existingDiagnostics: ValidationDocumentDiagnostic[],
+  nextDiagnostics: ValidationDocumentDiagnostic[]
+): ValidationDocumentDiagnostic[] {
+  const diagnosticsByCacheKey = new Map(
+    existingDiagnostics.map((diagnostic) => [
+      computeDocumentCacheKey({
+        documentName: diagnostic.documentName,
+        sourceBucket: diagnostic.sourceBucket ?? '',
+        sourceKey: diagnostic.sourceKey ?? diagnostic.documentName
+      }),
+      diagnostic
+    ])
+  )
+
+  for (const diagnostic of nextDiagnostics) {
+    diagnosticsByCacheKey.set(
+      computeDocumentCacheKey({
+        documentName: diagnostic.documentName,
+        sourceBucket: diagnostic.sourceBucket ?? '',
+        sourceKey: diagnostic.sourceKey ?? diagnostic.documentName
+      }),
+      diagnostic
+    )
+  }
+
+  return [...diagnosticsByCacheKey.values()]
+}
+
+function buildDeferredDocumentDiagnostic(
+  document: ValidationSourceDocument,
+  workSelection?: ValidationDocumentWorkSelectionDiagnostic
+): ValidationDocumentDiagnostic {
+  return {
+    documentName: document.documentName,
+    sourceBucket: document.sourceBucket,
+    sourceKey: document.sourceKey,
+    status: 'skipped',
+    usable: false,
+    chunkCount: 0,
+    ...(workSelection ? { workSelection } : {}),
+    reason: 'deferred-first-pass'
+  }
 }
 
 function buildProcessedDocumentDiagnostic(

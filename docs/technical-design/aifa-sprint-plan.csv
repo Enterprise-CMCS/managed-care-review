@@ -839,7 +839,7 @@ Prioritization can improve performance, but it can also miss controlling evidenc
 - Fallback triggers are documented for not-enough-evidence, ambiguity, missing citations, partial coverage, OCR gaps, failed documents, weak evidence, and conflicting date evidence
 - Diagnostics show whether final evidence would come from first pass or fallback
 - Produces a concrete recommendation for gated implementation"
-AIFA-049B Implement gated first-pass selection with conservative fallback,Backlog,7-Large Submission Hardening,High,AIFA-045,"Implement the original AIFA-049 work-selection strategy behind an explicit gate or configuration.
+AIFA-049B Implement gated first-pass selection with conservative fallback,Done,7-Large Submission Hardening,High,AIFA-045,"Implement the original AIFA-049 work-selection strategy behind an explicit gate or configuration.
 - Process prioritized first-pass documents before deferred documents
 - Keep low-priority documents deferred, never hard-excluded
 - Expand to fallback documents whenever first-pass evidence is not strong enough

@@ -2,6 +2,13 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { buildValidationResultArtifact } from './validationResultArtifact'
 
+test('buildValidationResultArtifact keeps all-doc mode implicit by default', () => {
+  const artifact = buildValidationResultArtifact('artifact-v1', 'form-hash-v1', [])
+
+  assert.equal('workSelectionMode' in artifact, false)
+  assert.equal('fieldWorkSelectionDiagnostics' in artifact, false)
+})
+
 test('buildValidationResultArtifact preserves document coverage diagnostics when present', () => {
   const artifact = buildValidationResultArtifact(
     'artifact-v1',
@@ -41,6 +48,14 @@ test('buildValidationResultArtifact preserves document coverage diagnostics when
         chunkCount: 0,
         reason: 'missing-pdf-extension'
       }
+    ],
+    'gated-fallback',
+    [
+      {
+        field: 'contractStartDate',
+        evidenceSource: 'fallback',
+        fallbackReasons: ['weak-field-evidence']
+      }
     ]
   )
 
@@ -75,6 +90,14 @@ test('buildValidationResultArtifact preserves document coverage diagnostics when
       usable: false,
       chunkCount: 0,
       reason: 'missing-pdf-extension'
+    }
+  ])
+  assert.equal(artifact.workSelectionMode, 'gated-fallback')
+  assert.deepEqual(artifact.fieldWorkSelectionDiagnostics, [
+    {
+      field: 'contractStartDate',
+      evidenceSource: 'fallback',
+      fallbackReasons: ['weak-field-evidence']
     }
   ])
 })

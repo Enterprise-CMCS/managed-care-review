@@ -1,4 +1,7 @@
-import type { ValidationDocumentDiagnostic } from '../results'
+import type {
+  ValidationDocumentDiagnostic,
+  ValidationWorkSelectionMode
+} from '../results'
 
 export type ValidationPipelineStage =
   | 'parsing'
@@ -14,6 +17,7 @@ export interface ValidationStatusArtifact {
   updatedAt: string
   error: string | null
   documentDiagnostics?: ValidationDocumentDiagnostic[]
+  workSelectionMode?: ValidationWorkSelectionMode
 }
 
 export function getValidationStatusKey(formId: string): string {
@@ -24,7 +28,8 @@ export function buildValidationStatusArtifact(
   stage: ValidationPipelineStage,
   artifactVersion: string,
   error: string | null = null,
-  documentDiagnostics: ValidationDocumentDiagnostic[] = []
+  documentDiagnostics: ValidationDocumentDiagnostic[] = [],
+  workSelectionMode: ValidationWorkSelectionMode = 'all-doc'
 ): ValidationStatusArtifact {
   return {
     stage,
@@ -33,31 +38,36 @@ export function buildValidationStatusArtifact(
     artifactVersion,
     updatedAt: new Date().toISOString(),
     error,
-    ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {})
+    ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {}),
+    ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {})
   }
 }
 
 export function buildFailedValidationStatusArtifact(
   artifactVersion: string,
   error: string,
-  documentDiagnostics: ValidationDocumentDiagnostic[] = []
+  documentDiagnostics: ValidationDocumentDiagnostic[] = [],
+  workSelectionMode: ValidationWorkSelectionMode = 'all-doc'
 ): ValidationStatusArtifact {
   return buildValidationStatusArtifact(
     'failed',
     artifactVersion,
     error,
-    documentDiagnostics
+    documentDiagnostics,
+    workSelectionMode
   )
 }
 
 export function buildCompletedValidationStatusArtifact(
   artifactVersion: string,
-  documentDiagnostics: ValidationDocumentDiagnostic[] = []
+  documentDiagnostics: ValidationDocumentDiagnostic[] = [],
+  workSelectionMode: ValidationWorkSelectionMode = 'all-doc'
 ): ValidationStatusArtifact {
   return buildValidationStatusArtifact(
     'complete',
     artifactVersion,
     null,
-    documentDiagnostics
+    documentDiagnostics,
+    workSelectionMode
   )
 }

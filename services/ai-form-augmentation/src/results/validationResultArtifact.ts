@@ -2,6 +2,11 @@ import type { DateValidationResult } from '../prompts'
 import type { PdfOcrDisposition } from '../parsing'
 import type { ValidationResponseIssue } from '../validation-output'
 
+export type ValidationWorkSelectionMode =
+  | 'all-doc'
+  | 'gated-first-pass'
+  | 'gated-fallback'
+
 export interface ValidationResultArtifact {
   artifactVersion: string
   formSnapshotHash: string
@@ -13,6 +18,8 @@ export interface ValidationResultArtifact {
   // Retrieval diagnostics stay optional for the same reason: evaluation needs
   // them, but the product flow should not depend on this PoC-only detail.
   retrievalDiagnostics?: ValidationRetrievalDiagnostic[]
+  workSelectionMode?: ValidationWorkSelectionMode
+  fieldWorkSelectionDiagnostics?: ValidationFieldWorkSelectionDiagnostic[]
 }
 
 export interface ValidationDocumentWorkSelectionDiagnostic {
@@ -57,6 +64,12 @@ export interface ValidationRetrievalDiagnostic {
   clauseEvidenceAdded: boolean
 }
 
+export interface ValidationFieldWorkSelectionDiagnostic {
+  field: string
+  evidenceSource: 'all-doc' | 'first-pass' | 'fallback' | 'partial'
+  fallbackReasons?: string[]
+}
+
 export function getValidationResultKey(formId: string): string {
   return `rag-indexes/${formId}/validation-result.json`
 }
@@ -67,7 +80,9 @@ export function buildValidationResultArtifact (
   results: DateValidationResult[],
   llmDiagnostics: ValidationLlmDiagnostic[] = [],
   retrievalDiagnostics: ValidationRetrievalDiagnostic[] = [],
-  documentDiagnostics: ValidationDocumentDiagnostic[] = []
+  documentDiagnostics: ValidationDocumentDiagnostic[] = [],
+  workSelectionMode: ValidationWorkSelectionMode = 'all-doc',
+  fieldWorkSelectionDiagnostics: ValidationFieldWorkSelectionDiagnostic[] = []
 ): ValidationResultArtifact {
   return {
     artifactVersion,
@@ -77,6 +92,10 @@ export function buildValidationResultArtifact (
     results,
     ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {}),
     ...(llmDiagnostics.length > 0 ? { llmDiagnostics } : {}),
-    ...(retrievalDiagnostics.length > 0 ? { retrievalDiagnostics } : {})
+    ...(retrievalDiagnostics.length > 0 ? { retrievalDiagnostics } : {}),
+    ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {}),
+    ...(fieldWorkSelectionDiagnostics.length > 0
+      ? { fieldWorkSelectionDiagnostics }
+      : {})
   }
 }
