@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, act } from '@testing-library/react'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AuthenticatedRouteWrapper } from './AuthenticatedRouteWrapper'
 import { createMocks } from 'react-idle-timer'
@@ -147,13 +147,15 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             }
         )
         await screen.findByRole('dialog', { name: 'Session Expiring' })
-        // Advance by a full second so the polling interval (500ms) fires
-        // and the countdown state settles at a whole-second boundary.
-        // This avoids flakiness from findByRole's internal waitFor
-        // advancing the fake clock by an unpredictable amount.
-        await vi.advanceTimersByTimeAsync(1000)
+
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(1000)
+        })
         const timeElapsedBefore = screen.getByTestId('remaining').textContent
-        await vi.advanceTimersByTimeAsync(1000)
+
+        await act(async () => {
+            await vi.advanceTimersByTimeAsync(1000)
+        })
         const timeElapsedAfter = screen.getByTestId('remaining').textContent
 
         const diff = dayjs(timeElapsedBefore, 'mm:ss').diff(
