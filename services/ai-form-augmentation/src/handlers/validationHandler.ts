@@ -14,6 +14,7 @@ import { readReusableValidationResult } from './validationCache'
 import { newValidationLlmClient } from '../llm'
 import type { ValidationLlmConfig } from '../llm'
 import { parsePdf } from '../parsing'
+import type { PdfOcrDisposition } from '../parsing'
 import type { DateValidationFieldInput, DateValidationResult } from '../prompts'
 import { buildDateValidationPrompt } from '../prompts'
 import {
@@ -97,6 +98,8 @@ export interface ValidationHandlerResult {
 }
 
 export const DEFAULT_DOCUMENT_INDEXING_CONCURRENCY = 2
+export const LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT = 25
+export const LARGE_BATCH_OCR_FALLBACK_LIMIT = 3
 
 export async function validationHandler(
   event: ValidationHandlerEvent
@@ -156,6 +159,9 @@ export async function validationHandler(
     )
     const embeddingProvider = new XenovaEmbeddingProvider()
     const embeddingModel = embeddingProvider.getModelInfo()
+    const shouldAttemptOcrFallback = createOcrFallbackPolicy(
+      event.documents.length
+    )
 
     // Document-level failures stay isolated so one renamed or corrupt PDF does
     // not throw away usable evidence from the rest of the submission.
@@ -170,6 +176,7 @@ export async function validationHandler(
           embeddingProvider,
           embeddingModel,
           unchangedDocumentCacheKeys,
+          shouldAttemptOcrFallback,
           document
         })
     )
@@ -531,6 +538,7 @@ async function indexValidationDocument(args: {
   embeddingProvider: XenovaEmbeddingProvider
   embeddingModel: string
   unchangedDocumentCacheKeys: Set<string>
+  shouldAttemptOcrFallback: () => boolean
   document: ValidationSourceDocument
 }): Promise<{
   indexedDocument: IndexedDocumentArtifact | null
@@ -543,6 +551,7 @@ async function indexValidationDocument(args: {
     documentCacheKey
   )
   let stage: NonNullable<ValidationDocumentDiagnostic['stage']> = 'cache'
+  let ocrDisposition: PdfOcrDisposition = 'not-needed'
 
   try {
     if (args.unchangedDocumentCacheKeys.has(documentCacheKey)) {
@@ -576,8 +585,31 @@ async function indexValidationDocument(args: {
     const parsed = await parsePdfWithDiagnostics(
       event,
       fileBuffer,
-      document.documentName
+      document.documentName,
+      args.shouldAttemptOcrFallback
     )
+    ocrDisposition = parsed.ocrDisposition
+
+    if (parsed.ocrDisposition === 'skipped') {
+      // When weak text would have needed OCR but the large-batch cap says no,
+      // drop the document from indexed evidence rather than trusting partial
+      // text and risking a false match or mismatch.
+      return {
+        indexedDocument: null,
+        diagnostic: {
+          documentName: document.documentName,
+          sourceBucket: document.sourceBucket,
+          sourceKey: document.sourceKey,
+          status: 'skipped',
+          usable: false,
+          chunkCount: 0,
+          ocrDisposition: 'skipped',
+          stage,
+          reason: 'ocr-capped-large-batch'
+        }
+      }
+    }
+
     stage = 'chunk'
     const chunks = measureValidationPhaseSync(event, 'chunk', () =>
       chunkDocument(parsed.fileName, parsed.rawText, {
@@ -615,7 +647,8 @@ async function indexValidationDocument(args: {
       diagnostic: buildProcessedDocumentDiagnostic(
         document,
         indexedDocumentArtifact.chunks.length,
-        'embed'
+        'embed',
+        parsed.ocrDisposition
       )
     }
   } catch (error) {
@@ -628,6 +661,7 @@ async function indexValidationDocument(args: {
         status: 'failed',
         usable: false,
         chunkCount: 0,
+        ocrDisposition,
         stage,
         error: error instanceof Error ? error.message : String(error)
       }
@@ -638,7 +672,8 @@ async function indexValidationDocument(args: {
 function buildProcessedDocumentDiagnostic(
   document: ValidationSourceDocument,
   chunkCount: number,
-  stage: NonNullable<ValidationDocumentDiagnostic['stage']>
+  stage: NonNullable<ValidationDocumentDiagnostic['stage']>,
+  ocrDisposition: PdfOcrDisposition = 'not-needed'
 ): ValidationDocumentDiagnostic {
   return {
     documentName: document.documentName,
@@ -647,7 +682,25 @@ function buildProcessedDocumentDiagnostic(
     status: 'processed',
     usable: true,
     chunkCount,
+    ocrDisposition,
     stage
+  }
+}
+
+export function createOcrFallbackPolicy(documentCount: number): () => boolean {
+  if (documentCount < LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT) {
+    return () => true
+  }
+
+  let attemptedFallbacks = 0
+
+  return () => {
+    if (attemptedFallbacks >= LARGE_BATCH_OCR_FALLBACK_LIMIT) {
+      return false
+    }
+
+    attemptedFallbacks += 1
+    return true
   }
 }
 
@@ -763,14 +816,19 @@ function measureValidationPhaseSync<T>(
 async function parsePdfWithDiagnostics(
   event: ValidationHandlerEvent,
   fileBuffer: Buffer,
-  documentName: string
+  documentName: string,
+  shouldAttemptOcrFallback: () => boolean
 ): ReturnType<typeof parsePdf> {
   if (!event.diagnostics) {
-    return parsePdf(fileBuffer, documentName)
+    return parsePdf(fileBuffer, documentName, {
+      shouldAttemptOcrFallback
+    })
   }
 
   const startedAt = Date.now()
-  const parsed = await parsePdf(fileBuffer, documentName)
+  const parsed = await parsePdf(fileBuffer, documentName, {
+    shouldAttemptOcrFallback
+  })
   const elapsedMs = Date.now() - startedAt
 
   event.diagnostics.recordPhaseTiming('parse', elapsedMs)

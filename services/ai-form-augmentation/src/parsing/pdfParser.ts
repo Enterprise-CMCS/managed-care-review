@@ -1,6 +1,6 @@
 import { LocalOcrPdfExtractor } from './localOcrPdfExtractor'
 import { PdfParseTextExtractor } from './pdfTextExtractor'
-import type { PdfParseResult } from './types'
+import type { ParsePdfOptions, PdfParseResult } from './types'
 
 function shouldFallbackToOcr(result: PdfParseResult): boolean {
   const text = result.rawText.trim()
@@ -15,13 +15,25 @@ function shouldFallbackToOcr(result: PdfParseResult): boolean {
 
 export async function parsePdf (
   fileBuffer: Buffer,
-  fileName: string
+  fileName: string,
+  options: ParsePdfOptions = {}
 ): Promise<PdfParseResult> {
   const pdfTextExtractor = new PdfParseTextExtractor()
   const pdfTextResult = await pdfTextExtractor.extract(fileBuffer, fileName)
 
   if (!shouldFallbackToOcr(pdfTextResult)) {
     return pdfTextResult
+  }
+
+  if (options.shouldAttemptOcrFallback?.(pdfTextResult) === false) {
+    return {
+      ...pdfTextResult,
+      extractionNotes: [
+        ...pdfTextResult.extractionNotes,
+        `Skipped local OCR fallback because the large-batch OCR cap was reached (length=${pdfTextResult.rawText.length})`
+      ],
+      ocrDisposition: 'skipped'
+    }
   }
 
   // OCR is the fallback path because native PDF text extraction is usually

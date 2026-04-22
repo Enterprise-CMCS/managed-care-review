@@ -1,4 +1,5 @@
 import type { DateValidationResult } from '../prompts'
+import type { PdfOcrDisposition } from '../parsing'
 import type { ValidationResponseIssue } from '../validation-output'
 
 export interface ValidationResultArtifact {
@@ -21,6 +22,7 @@ export interface ValidationDocumentDiagnostic {
   status: 'skipped' | 'failed' | 'processed'
   usable: boolean
   chunkCount: number
+  ocrDisposition?: PdfOcrDisposition
   reason?: string
   error?: string
   stage?: 'cache' | 'fetch' | 'parse' | 'chunk' | 'embed'

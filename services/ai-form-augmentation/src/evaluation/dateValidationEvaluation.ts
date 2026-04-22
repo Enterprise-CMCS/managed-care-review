@@ -94,6 +94,11 @@ export interface DateValidationLargeSubmissionDiagnostics {
     mismatch: number
     notEnoughEvidence: number
   }
+  ocr: {
+    attemptedDocuments: number
+    skippedDocuments: number
+    cappedDocuments: number
+  }
   indexing: ValidationIndexingSummaryDiagnostic
   phaseTimingsMs: Record<ValidationPhaseTimingDiagnostic['phase'], number>
   artifactSizesBytes: {
@@ -392,6 +397,9 @@ function buildLargeSubmissionDiagnostics(args: {
   phaseTimings: Record<ValidationPhaseTimingDiagnostic['phase'], number>
   indexingSummary: ValidationIndexingSummaryDiagnostic
 }): DateValidationLargeSubmissionDiagnostics {
+  const documentDiagnostics =
+    args.resultArtifact?.documentDiagnostics ?? args.statusArtifact?.documentDiagnostics ?? []
+
   return {
     totalDocuments: args.documents.length,
     eligibleDocuments: args.documents.filter(
@@ -406,6 +414,17 @@ function buildLargeSubmissionDiagnostics(args: {
     processedDocuments: args.chunksArtifact?.documents?.length ?? 0,
     chunkCount: args.chunksArtifact?.chunks.length ?? 0,
     finalOutcomes: countOutcomes(args.resultArtifact?.results ?? []),
+    ocr: {
+      attemptedDocuments: documentDiagnostics.filter(
+        (diagnostic) => diagnostic.ocrDisposition === 'attempted'
+      ).length,
+      skippedDocuments: documentDiagnostics.filter(
+        (diagnostic) => diagnostic.ocrDisposition === 'skipped'
+      ).length,
+      cappedDocuments: documentDiagnostics.filter(
+        (diagnostic) => diagnostic.reason === 'ocr-capped-large-batch'
+      ).length
+    },
     indexing: args.indexingSummary,
     phaseTimingsMs: args.phaseTimings,
     artifactSizesBytes: {

@@ -776,7 +776,7 @@ Unbounded processing across 100 or more documents can overload CPU, memory, S3, 
 - Total indexing duration and per-document failure counts are recorded
 - Existing small-corpus behavior remains stable
 - Focused tests cover concurrency and failure behavior"
-AIFA-043 Add large-batch OCR safety valve,Backlog,7-Large Submission Hardening,Medium,AIFA-042,"Add a conservative OCR policy for large document batches.
+AIFA-043 Add large-batch OCR safety valve,Done,7-Large Submission Hardening,Medium,AIFA-042,"Add a conservative OCR policy for large document batches.
 - Preserve existing OCR fallback for small submissions
 - Cap or skip OCR fallback in large batches where unlimited OCR would be too expensive
 - Record OCR attempted, skipped, and capped counts

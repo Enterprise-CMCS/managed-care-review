@@ -46,7 +46,8 @@ export class PdfParseTextExtractor implements PdfTextExtractor {
       pageTexts,
       pageCount: result.numpages,
       extractionMethod: 'pdf-text',
-      extractionNotes: []
+      extractionNotes: [],
+      ocrDisposition: 'not-needed'
     }
   }
 }

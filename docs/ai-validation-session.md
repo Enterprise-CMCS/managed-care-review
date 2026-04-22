@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-043 Add large-batch OCR safety valve`.
+The next implementation ticket is `AIFA-044 Increase retrieval breadth with document-diversity guardrails`.
 
 ## Completed
 
@@ -55,6 +55,7 @@ The next implementation ticket is `AIFA-043 Add large-batch OCR safety valve`.
 - AIFA-040 ✔ Filter unsupported validation documents before worker execution
 - AIFA-041 ✔ Add document-level failure isolation and processing diagnostics
 - AIFA-042 ✔ Add bounded document indexing concurrency
+- AIFA-043 ✔ Add large-batch OCR safety valve
 
 ## Current State
 
@@ -247,15 +248,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-043 Add large-batch OCR safety valve
+### AIFA-044 Increase retrieval breadth with document-diversity guardrails
 
-Preserve normal OCR fallback for small runs, but cap or skip expensive OCR work when large batches would overwhelm local execution.
+Broaden retrieval for large document sets without letting one noisy document dominate all final evidence.
 
 ## Suggested Next Step
 
-- Add a conservative OCR cap or skip rule for large batches only.
-- Record OCR attempted, skipped, and capped diagnostics.
-- Keep partial coverage conservative when OCR-heavy documents are not fully reviewed.
+- Broaden the retrieval candidate pool while keeping final per-field prompt context bounded.
+- Add document-diversity guardrails so one document cannot monopolize final evidence.
+- Preserve field-specific retrieval and citation reconciliation behavior.
 
 ## Source of Truth Docs
 
@@ -288,6 +289,8 @@ Preserve normal OCR fallback for small runs, but cap or skip expensive OCR work 
 - AIFA-041 now persists skipped, failed, and processed document diagnostics on terminal status and result artifacts.
 - AIFA-042 records indexing concurrency and wall-clock indexing duration through evaluation diagnostics, but not yet as persisted product artifacts.
 - The default concurrency cap is intentionally conservative for local runs and may need tuning after OCR safety limits are in place.
+- AIFA-043 records OCR attempted/skipped/capped diagnostics, but cached document-reuse artifacts still do not preserve historical OCR disposition.
+- OCR-capped weak PDFs now stay off the indexed evidence path entirely; richer product-facing partial-coverage handling remains for AIFA-048.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.

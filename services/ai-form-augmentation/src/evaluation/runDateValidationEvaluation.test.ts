@@ -33,6 +33,11 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
             mismatch: 0,
             notEnoughEvidence: 0
           },
+          ocr: {
+            attemptedDocuments: 3,
+            skippedDocuments: 5,
+            cappedDocuments: 5
+          },
           indexing: {
             concurrencyLimit: 2,
             totalElapsedMs: 99,
@@ -66,6 +71,10 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
   assert.match(
     formatted,
     /large submission: total=165, eligible=132, skipped=32, failed=1, processed=132, chunks=264/
+  )
+  assert.match(
+    formatted,
+    /ocr: attempted=3, skipped=5, capped=5/
   )
   assert.match(
     formatted,

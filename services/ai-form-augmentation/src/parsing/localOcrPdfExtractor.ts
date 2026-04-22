@@ -35,7 +35,8 @@ export class LocalOcrPdfExtractor implements PdfTextExtractor {
       pageTexts,
       pageCount,
       extractionMethod: 'ocr',
-      extractionNotes: ['Used local OCR fallback because default PDF text extraction looked weak']
+      extractionNotes: ['Used local OCR fallback because default PDF text extraction looked weak'],
+      ocrDisposition: 'attempted'
     }
   }
 }

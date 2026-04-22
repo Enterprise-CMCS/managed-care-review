@@ -1,5 +1,7 @@
 export type {
   PdfExtractionMethod,
+  PdfOcrDisposition,
+  ParsePdfOptions,
   PdfParseResult,
   PdfTextExtractor
 } from './types'
