@@ -10,7 +10,7 @@ export default {
     decorators: [ProvidersDecorator],
 }
 
-const Template: StoryFn<ModalProps> = (args) => {
+const Template: StoryFn<ModalProps> = (args: ModalProps) => {
     const modalRef = useRef<ModalRef>(null)
     return (
         <>

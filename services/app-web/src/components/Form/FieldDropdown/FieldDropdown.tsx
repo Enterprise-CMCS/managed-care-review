@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type JSX } from 'react'
 import { useField } from 'formik'
 import { Label, Dropdown, FormGroup } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../../'

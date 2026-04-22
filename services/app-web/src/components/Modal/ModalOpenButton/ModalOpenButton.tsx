@@ -9,7 +9,7 @@ import { extractText } from '../../TealiumLogging/tealiamLoggingHelpers'
 
 export type ModalOpenButtonProps = {
     id: string
-    modalRef: React.RefObject<ModalRef>
+    modalRef: React.RefObject<ModalRef | null>
     children: React.ReactNode
 } & ComponentProps<typeof UswdsModalToggleButton>
 

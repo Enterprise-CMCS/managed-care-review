@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type JSX } from 'react'
 import { dayjs } from '@mc-review/dates'
 import { SectionHeader } from '../SectionHeader'
 import { Accordion } from '@trussworks/react-uswds'

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, type JSX } from 'react'
 import { usePrevious } from '../../hooks'
 import { v4 as uuidv4 } from 'uuid'
 import {

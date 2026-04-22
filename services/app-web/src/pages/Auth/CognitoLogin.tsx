@@ -12,7 +12,7 @@ export const CognitoLogin = (): React.ReactElement => {
     const [enteredEmail, setEnteredEmail] = useState('')
     const showForms = !showConfirmation
 
-    const toggleConfirmationForm = (event: React.FormEvent) => {
+    const toggleConfirmationForm = (event: React.SyntheticEvent) => {
         event.preventDefault()
         setShowConfirmation((prev) => !prev)
     }
@@ -53,7 +53,9 @@ export const CognitoLogin = (): React.ReactElement => {
                         <ButtonWithLogging
                             type="button"
                             parent_component_heading="page body"
-                            onClick={(e) => toggleConfirmationForm(e)}
+                            onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                                toggleConfirmationForm(e)
+                            }
                         >
                             Enter confirmation code
                         </ButtonWithLogging>
@@ -84,7 +86,9 @@ export const CognitoLogin = (): React.ReactElement => {
                 <ButtonWithLogging
                     type="button"
                     parent_component_heading="page body"
-                    onClick={(e) => toggleConfirmationForm(e)}
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) =>
+                        toggleConfirmationForm(e)
+                    }
                 >
                     Show Signup/ Login
                 </ButtonWithLogging>

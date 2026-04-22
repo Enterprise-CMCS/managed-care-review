@@ -166,7 +166,7 @@ export const UndoSubmissionWithdraw = (): React.ReactElement => {
                     <Form
                         id="undoSubmissionWithdrawForm"
                         className={styles.formContainer}
-                        onSubmit={(e) => {
+                        onSubmit={(e: React.SubmitEvent<HTMLFormElement>) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
                         }}

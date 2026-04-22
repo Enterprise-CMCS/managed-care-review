@@ -85,7 +85,10 @@ export const ActionButton = ({
     return (
         <ButtonWithLogging
             onClick={
-                isDisabled || isLoading ? (e) => e.preventDefault() : onClick
+                isDisabled || isLoading
+                    ? (e: React.MouseEvent<HTMLButtonElement>) =>
+                          e.preventDefault()
+                    : onClick
             }
             {...inheritedProps}
             {...variantProps}

@@ -25,7 +25,7 @@ interface ModalComponentProps {
     onSubmitText?: string
     onCancelText?: string
     className?: string
-    modalRef: React.RefObject<ModalRef>
+    modalRef: React.RefObject<ModalRef | null>
     submitButtonProps?: Partial<ActionButtonProps>
     isSubmitting?: boolean
     modalAlert?: GenericApiErrorProps

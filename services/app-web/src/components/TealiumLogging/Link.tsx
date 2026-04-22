@@ -21,7 +21,7 @@ const LinkWithLogging = (props: LinkWithLoggingType) => {
     const { href, onClick, children, ...rest } = props
     return (
         <Link
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 logInternalLinkEvent({
                     text: extractText(children),
                     link_url: href,

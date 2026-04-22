@@ -404,7 +404,9 @@ export const EQROContractDetails = ({
                             <>
                                 <UswdsForm
                                     className={styles.formContainer}
-                                    onSubmit={(e) => {
+                                    onSubmit={(
+                                        e: React.SubmitEvent<HTMLFormElement>
+                                    ) => {
                                         setShouldValidate(true)
                                         setFocusErrorSummaryHeading(true)
                                         handleSubmit(e)
