@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-041 Add document-level failure isolation and processing diagnostics`.
+The next implementation ticket is `AIFA-042 Add bounded document indexing concurrency`.
 
 ## Completed
 
@@ -53,6 +53,7 @@ The next implementation ticket is `AIFA-041 Add document-level failure isolation
 - AIFA-038 ✔ Confirm document metadata and PDF eligibility rules
 - AIFA-039 ✔ Add prod-shaped large-submission evaluation fixture
 - AIFA-040 ✔ Filter unsupported validation documents before worker execution
+- AIFA-041 ✔ Add document-level failure isolation and processing diagnostics
 
 ## Current State
 
@@ -245,15 +246,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-041 Add document-level failure isolation and processing diagnostics
+### AIFA-042 Add bounded document indexing concurrency
 
-Isolate per-document fetch, parse, chunk, and embed failures so one bad eligible PDF does not fail validation when other usable PDFs remain.
+Bound per-document fetch, parse, chunk, and embed work so large submissions do not fan out unbounded indexing load.
 
 ## Suggested Next Step
 
-- Catch per-document worker failures and continue indexing successful documents.
-- Persist processed, skipped, failed, and usable document diagnostics.
-- Keep partial-coverage results conservative when not all eligible documents are usable.
+- Add a small concurrency cap around per-document indexing work.
+- Keep document diagnostics and failure isolation behavior unchanged.
+- Re-run the large-submission fixture to measure indexing timings under the cap.
 
 ## Source of Truth Docs
 
@@ -283,7 +284,8 @@ Isolate per-document fetch, parse, chunk, and embed failures so one bad eligible
 - The large-submission fixture is opt-in via `AI_VALIDATION_INCLUDE_LARGE_SUBMISSION=true`; normal evaluation remains small.
 - Parsed text is not a separate artifact yet, so large-run artifact-size output reports parsed text as unavailable until AIFA-046.
 - AIFA-040 keeps `artifactVersion` tied to all persisted contract document keys so unsupported attachment changes still invalidate prior validation artifacts.
-- AIFA-040 skipped-document diagnostics are structured trigger logs only; AIFA-041 should decide the persisted diagnostics shape.
+- AIFA-041 now persists skipped, failed, and processed document diagnostics on terminal status and result artifacts.
+- `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.
 - Clause-resolution hardening now passes the current 8-scenario corpus, but OCR-heavy term text still depends on narrow heuristics rather than a broader parsing layer.

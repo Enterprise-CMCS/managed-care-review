@@ -96,6 +96,7 @@ export {
 
 // Results
 export type {
+  ValidationDocumentDiagnostic,
   ValidationLlmDiagnostic,
   ValidationRetrievalDiagnostic,
   ValidationResultArtifact

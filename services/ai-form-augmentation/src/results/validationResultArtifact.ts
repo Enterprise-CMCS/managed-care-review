@@ -5,12 +5,25 @@ export interface ValidationResultArtifact {
   artifactVersion: string
   formSnapshotHash: string
   results: DateValidationResult[]
+  documentDiagnostics?: ValidationDocumentDiagnostic[]
   // Keep LLM-path diagnostics off the user-facing result contract while still
   // making malformed or incomplete model output measurable in evaluation runs.
   llmDiagnostics?: ValidationLlmDiagnostic[]
   // Retrieval diagnostics stay optional for the same reason: evaluation needs
   // them, but the product flow should not depend on this PoC-only detail.
   retrievalDiagnostics?: ValidationRetrievalDiagnostic[]
+}
+
+export interface ValidationDocumentDiagnostic {
+  documentName: string
+  sourceBucket?: string
+  sourceKey?: string
+  status: 'skipped' | 'failed' | 'processed'
+  usable: boolean
+  chunkCount: number
+  reason?: string
+  error?: string
+  stage?: 'cache' | 'fetch' | 'parse' | 'chunk' | 'embed'
 }
 
 export interface ValidationLlmDiagnostic {
@@ -41,7 +54,8 @@ export function buildValidationResultArtifact (
   formSnapshotHash: string,
   results: DateValidationResult[],
   llmDiagnostics: ValidationLlmDiagnostic[] = [],
-  retrievalDiagnostics: ValidationRetrievalDiagnostic[] = []
+  retrievalDiagnostics: ValidationRetrievalDiagnostic[] = [],
+  documentDiagnostics: ValidationDocumentDiagnostic[] = []
 ): ValidationResultArtifact {
   return {
     artifactVersion,
@@ -49,6 +63,7 @@ export function buildValidationResultArtifact (
     // the difference between a document change and a form-data-only change.
     formSnapshotHash,
     results,
+    ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {}),
     ...(llmDiagnostics.length > 0 ? { llmDiagnostics } : {}),
     ...(retrievalDiagnostics.length > 0 ? { retrievalDiagnostics } : {})
   }

@@ -24,6 +24,7 @@ import {
 import {
   buildValidationResultArtifact,
   getValidationResultKey,
+  type ValidationDocumentDiagnostic,
   type ValidationRetrievalDiagnostic
 } from '../results'
 import { newArtifactS3Client } from '../s3'
@@ -70,6 +71,7 @@ export interface ValidationHandlerEvent {
   validationLlmConfig?: ValidationLlmConfig
   formFields: DateValidationFieldInput[]
   documents: ValidationSourceDocument[]
+  documentDiagnostics?: ValidationDocumentDiagnostic[]
   diagnostics?: {
     recordPhaseTiming(
       phase: ValidationPhaseTimingDiagnostic['phase'],
@@ -98,6 +100,9 @@ export async function validationHandler(
   // worker phase updates the same key rather than scattering progress across
   // multiple artifacts.
   const statusKey = getValidationStatusKey(event.formId)
+  let documentDiagnostics: ValidationDocumentDiagnostic[] = [
+    ...(event.documentDiagnostics ?? [])
+  ]
 
   try {
     // Keep cache reuse inside the worker so app-api continues to fire the same
@@ -140,73 +145,33 @@ export async function validationHandler(
     const embeddingProvider = new XenovaEmbeddingProvider()
     const embeddingModel = embeddingProvider.getModelInfo()
 
-    const indexedDocuments = await Promise.all(
-      event.documents.map(async (document) => {
-        const documentCacheKey = computeDocumentCacheKey(document)
-        const documentArtifactKey = getDocumentIndexArtifactKey(
-          event.formId,
-          documentCacheKey
-        )
-
-        if (unchangedDocumentCacheKeys.has(documentCacheKey)) {
-          const cachedDocumentArtifact =
-            await readOptionalArtifact<IndexedDocumentArtifact>(
-              s3Client,
-              event.bucket,
-              documentArtifactKey
-            )
-
-          if (
-            cachedDocumentArtifact != null &&
-            cachedDocumentArtifact.embeddingModel === embeddingModel
-          ) {
-            return cachedDocumentArtifact
-          }
-        }
-
-        // Parse and embed only documents that are new, changed, or missing a
-        // reusable per-document artifact for the current embedding model.
-        const fileBuffer = await measureValidationPhase(event, 'fetch', () =>
-          s3Client.getBuffer(document.sourceBucket, document.sourceKey)
-        )
-        const parsed = await parsePdfWithDiagnostics(
+    // Document-level failures stay isolated so one renamed or corrupt PDF does
+    // not throw away usable evidence from the rest of the submission.
+    const documentIndexingResults = await Promise.all(
+      event.documents.map((document) =>
+        indexValidationDocument({
           event,
-          fileBuffer,
-          document.documentName
-        )
-        const chunks = measureValidationPhaseSync(event, 'chunk', () =>
-          chunkDocument(parsed.fileName, parsed.rawText, {
-            pageTexts: parsed.pageTexts
-          })
-        )
-
-        if (chunks.length === 0) {
-          throw new Error(
-            `Validation could not create chunks for document ${document.documentName}`
-          )
-        }
-
-        const chunkVectors = await measureValidationPhase(event, 'embed', () =>
-          embeddingProvider.embedTexts(chunks.map((chunk) => chunk.text))
-        )
-        const indexedDocumentArtifact = buildIndexedDocumentArtifact({
-          documentName: document.documentName,
-          sourceBucket: document.sourceBucket,
-          sourceKey: document.sourceKey,
-          chunks,
-          chunkVectors,
-          embeddingModel
+          s3Client,
+          embeddingProvider,
+          embeddingModel,
+          unchangedDocumentCacheKeys,
+          document
         })
-
-        await s3Client.putJson(
-          event.bucket,
-          documentArtifactKey,
-          indexedDocumentArtifact
-        )
-
-        return indexedDocumentArtifact
-      })
+      )
     )
+    const indexedDocuments = documentIndexingResults.flatMap((result) =>
+      result.indexedDocument ? [result.indexedDocument] : []
+    )
+    documentDiagnostics = [
+      ...documentDiagnostics,
+      ...documentIndexingResults.map((result) => result.diagnostic)
+    ]
+
+    if (indexedDocuments.length === 0) {
+      throw new Error(
+        `Validation could not index any usable documents for form ${event.formId}`
+      )
+    }
 
     // Rebuild the current form-level chunk snapshot from the active document
     // set so retrieval still sees one combined evidence pool for the form.
@@ -467,14 +432,18 @@ export async function validationHandler(
           const diagnostic = retrievalDiagnostics.get(field.field)
 
           return diagnostic ? [diagnostic] : []
-        })
+        }),
+        documentDiagnostics
       )
     )
 
     await s3Client.putJson(
       event.bucket,
       statusKey,
-      buildCompletedValidationStatusArtifact(event.artifactVersion)
+      buildCompletedValidationStatusArtifact(
+        event.artifactVersion,
+        documentDiagnostics
+      )
     )
 
     return {
@@ -488,10 +457,140 @@ export async function validationHandler(
     await s3Client.putJson(
       event.bucket,
       statusKey,
-      buildFailedValidationStatusArtifact(event.artifactVersion, message)
+      buildFailedValidationStatusArtifact(
+        event.artifactVersion,
+        message,
+        documentDiagnostics
+      )
     )
 
     throw error
+  }
+}
+
+async function indexValidationDocument(args: {
+  event: ValidationHandlerEvent
+  s3Client: ArtifactS3Client
+  embeddingProvider: XenovaEmbeddingProvider
+  embeddingModel: string
+  unchangedDocumentCacheKeys: Set<string>
+  document: ValidationSourceDocument
+}): Promise<{
+  indexedDocument: IndexedDocumentArtifact | null
+  diagnostic: ValidationDocumentDiagnostic
+}> {
+  const { event, s3Client, embeddingProvider, embeddingModel, document } = args
+  const documentCacheKey = computeDocumentCacheKey(document)
+  const documentArtifactKey = getDocumentIndexArtifactKey(
+    event.formId,
+    documentCacheKey
+  )
+  let stage: NonNullable<ValidationDocumentDiagnostic['stage']> = 'cache'
+
+  try {
+    if (args.unchangedDocumentCacheKeys.has(documentCacheKey)) {
+      const cachedDocumentArtifact =
+        await readOptionalArtifact<IndexedDocumentArtifact>(
+          s3Client,
+          event.bucket,
+          documentArtifactKey
+        )
+
+      if (
+        cachedDocumentArtifact != null &&
+        cachedDocumentArtifact.embeddingModel === embeddingModel
+      ) {
+        return {
+          indexedDocument: cachedDocumentArtifact,
+          diagnostic: buildProcessedDocumentDiagnostic(
+            document,
+            cachedDocumentArtifact.chunks.length,
+            'cache'
+          )
+        }
+      }
+    }
+
+    stage = 'fetch'
+    const fileBuffer = await measureValidationPhase(event, 'fetch', () =>
+      s3Client.getBuffer(document.sourceBucket, document.sourceKey)
+    )
+    stage = 'parse'
+    const parsed = await parsePdfWithDiagnostics(
+      event,
+      fileBuffer,
+      document.documentName
+    )
+    stage = 'chunk'
+    const chunks = measureValidationPhaseSync(event, 'chunk', () =>
+      chunkDocument(parsed.fileName, parsed.rawText, {
+        pageTexts: parsed.pageTexts
+      })
+    )
+
+    if (chunks.length === 0) {
+      throw new Error(
+        `Validation could not create chunks for document ${document.documentName}`
+      )
+    }
+
+    stage = 'embed'
+    const chunkVectors = await measureValidationPhase(event, 'embed', () =>
+      embeddingProvider.embedTexts(chunks.map((chunk) => chunk.text))
+    )
+    const indexedDocumentArtifact = buildIndexedDocumentArtifact({
+      documentName: document.documentName,
+      sourceBucket: document.sourceBucket,
+      sourceKey: document.sourceKey,
+      chunks,
+      chunkVectors,
+      embeddingModel
+    })
+
+    await s3Client.putJson(
+      event.bucket,
+      documentArtifactKey,
+      indexedDocumentArtifact
+    )
+
+    return {
+      indexedDocument: indexedDocumentArtifact,
+      diagnostic: buildProcessedDocumentDiagnostic(
+        document,
+        indexedDocumentArtifact.chunks.length,
+        'embed'
+      )
+    }
+  } catch (error) {
+    return {
+      indexedDocument: null,
+      diagnostic: {
+        documentName: document.documentName,
+        sourceBucket: document.sourceBucket,
+        sourceKey: document.sourceKey,
+        status: 'failed',
+        usable: false,
+        chunkCount: 0,
+        stage,
+        error: error instanceof Error ? error.message : String(error)
+      }
+    }
+  }
+}
+
+function buildProcessedDocumentDiagnostic(
+  document: ValidationSourceDocument,
+  chunkCount: number,
+  stage: NonNullable<ValidationDocumentDiagnostic['stage']>
+): ValidationDocumentDiagnostic {
+  return {
+    documentName: document.documentName,
+    sourceBucket: document.sourceBucket,
+    sourceKey: document.sourceKey,
+    status: 'processed',
+    usable: true,
+    chunkCount,
+    stage
   }
 }
 

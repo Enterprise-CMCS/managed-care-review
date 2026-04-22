@@ -1,4 +1,5 @@
 export type {
+  ValidationDocumentDiagnostic,
   ValidationLlmDiagnostic,
   ValidationRetrievalDiagnostic,
   ValidationResultArtifact

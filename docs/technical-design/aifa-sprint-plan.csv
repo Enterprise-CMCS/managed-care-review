@@ -747,7 +747,7 @@ The current worker is PDF-only. Unsupported files should not reach parsePdf and 
 - Extension and MIME mismatch cases follow the documented eligibility rule
 - Files that pass eligibility but fail PDF parsing are handled later by document-level failure isolation, not by this ticket
 - Local S3 key derivation still works for eligible PDFs"
-AIFA-041 Add document-level failure isolation and processing diagnostics,Backlog,7-Large Submission Hardening,High,AIFA-040,"Isolate per-document fetch, parse, chunk, and embed failures so one bad document does not fail the whole validation run when other usable PDFs remain.
+AIFA-041 Add document-level failure isolation and processing diagnostics,Done,7-Large Submission Hardening,High,AIFA-040,"Isolate per-document fetch, parse, chunk, and embed failures so one bad document does not fail the whole validation run when other usable PDFs remain.
 - Catch per-document processing failures
 - Continue indexing successful documents
 - Persist skipped, failed, and processed document diagnostics

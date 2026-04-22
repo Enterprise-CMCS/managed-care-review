@@ -259,6 +259,22 @@ describe('triggerValidationResolver', () => {
                         sourceKey: '1776374348125-doc-a.pdf',
                     },
                 ],
+                documentDiagnostics: [
+                    {
+                        documentName: 'Supporting Rate.docx',
+                        status: 'skipped',
+                        usable: false,
+                        chunkCount: 0,
+                        reason: 'missing-pdf-extension',
+                    },
+                    {
+                        documentName: 'Mime Mismatch.pdf',
+                        status: 'skipped',
+                        usable: false,
+                        chunkCount: 0,
+                        reason: 'content-type-mismatch',
+                    },
+                ],
             })
         )
         expect(consoleInfoSpy).toHaveBeenCalledWith(

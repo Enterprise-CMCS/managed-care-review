@@ -7,6 +7,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import type { ValidationSourceDocument } from '../../../../ai-form-augmentation/src/handlers'
+import type { ValidationDocumentDiagnostic } from '../../../../ai-form-augmentation/src/results'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
 import {
     getEffectiveValidationDocumentKeys,
@@ -124,6 +125,15 @@ export function triggerValidationResolver(
             })
         }
 
+        const documentDiagnostics: ValidationDocumentDiagnostic[] =
+            skippedDocuments.map((document) => ({
+                documentName: document.documentName,
+                status: 'skipped',
+                usable: false,
+                chunkCount: 0,
+                reason: document.reason,
+            }))
+
         // artifactVersion fingerprints the current uploaded contract document set
         // so downstream status/results can be tied to the exact files under review
         // and invalidated cleanly when the document set changes.
@@ -158,6 +168,7 @@ export function triggerValidationResolver(
             bucket: config.artifactBucket,
             formFields,
             documents: sourceDocuments,
+            documentDiagnostics,
             s3Config: config.useLocalS3
                 ? {
                       region: config.region,

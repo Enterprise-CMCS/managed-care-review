@@ -1,3 +1,5 @@
+import type { ValidationDocumentDiagnostic } from '../results'
+
 export type ValidationPipelineStage =
   | 'parsing'
   | 'retrieving'
@@ -11,6 +13,7 @@ export interface ValidationStatusArtifact {
   artifactVersion: string
   updatedAt: string
   error: string | null
+  documentDiagnostics?: ValidationDocumentDiagnostic[]
 }
 
 export function getValidationStatusKey(formId: string): string {
@@ -20,7 +23,8 @@ export function getValidationStatusKey(formId: string): string {
 export function buildValidationStatusArtifact(
   stage: ValidationPipelineStage,
   artifactVersion: string,
-  error: string | null = null
+  error: string | null = null,
+  documentDiagnostics: ValidationDocumentDiagnostic[] = []
 ): ValidationStatusArtifact {
   return {
     stage,
@@ -28,19 +32,32 @@ export function buildValidationStatusArtifact(
     // code can detect stale pipeline state after document changes.
     artifactVersion,
     updatedAt: new Date().toISOString(),
-    error
+    error,
+    ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {})
   }
 }
 
 export function buildFailedValidationStatusArtifact(
   artifactVersion: string,
-  error: string
+  error: string,
+  documentDiagnostics: ValidationDocumentDiagnostic[] = []
 ): ValidationStatusArtifact {
-  return buildValidationStatusArtifact('failed', artifactVersion, error)
+  return buildValidationStatusArtifact(
+    'failed',
+    artifactVersion,
+    error,
+    documentDiagnostics
+  )
 }
 
 export function buildCompletedValidationStatusArtifact(
-  artifactVersion: string
+  artifactVersion: string,
+  documentDiagnostics: ValidationDocumentDiagnostic[] = []
 ): ValidationStatusArtifact {
-  return buildValidationStatusArtifact('complete', artifactVersion)
+  return buildValidationStatusArtifact(
+    'complete',
+    artifactVersion,
+    null,
+    documentDiagnostics
+  )
 }
