@@ -598,7 +598,7 @@ export const ContractDetails = ({
                                 className={styles.formContainer}
                                 id="ContractDetailsForm"
                                 onSubmit={(
-                                    e: React.SubmitEvent<HTMLFormElement>
+                                    e: React.FormEvent<HTMLFormElement>
                                 ) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)

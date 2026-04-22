@@ -142,7 +142,7 @@ export const UndoRateWithdraw = () => {
                     <Form
                         id="UndoRateWithdrawForm"
                         className={styles.formContainer}
-                        onSubmit={(e: React.SubmitEvent<HTMLFormElement>) => {
+                        onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
                         }}

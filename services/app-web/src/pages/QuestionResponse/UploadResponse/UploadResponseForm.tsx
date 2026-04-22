@@ -73,7 +73,7 @@ const UploadResponseForm = ({
             ? `/submissions/${contractSubmissionType}/${id}/question-and-answers?submit=response`
             : `/submissions/${contractSubmissionType}/${id}/rates/${rateID}/question-and-answers?submit=response`
 
-    const onSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
+    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         // Currently documents validation happens (outside of the yup schema, which only handles the formik form data)
         // if there are any errors present in the documents list and we are in a validation state (relevant for Save as Draft) force user to clear validations to continue

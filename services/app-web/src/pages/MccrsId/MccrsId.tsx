@@ -209,7 +209,7 @@ export const MccrsId = (): React.ReactElement => {
                     <UswdsForm
                         className={styles.formContainer}
                         id="MCCRSIDForm"
-                        onSubmit={(e: React.SubmitEvent<HTMLFormElement>) => {
+                        onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                             setShouldValidate(true)
                             handleSubmit(e)
                         }}

@@ -521,7 +521,7 @@ const RateDetails = ({
                                 className={styles.formContainer}
                                 id="RateDetailsForm"
                                 onSubmit={(
-                                    e: React.SubmitEvent<HTMLFormElement>
+                                    e: React.FormEvent<HTMLFormElement>
                                 ) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)

@@ -88,7 +88,7 @@ export const NewSubmission = () => {
                         className={styles.formContainer}
                         aria-label="New Submission Form"
                         data-testid="new-submission-form"
-                        onSubmit={(e: React.SubmitEvent<HTMLFormElement>) => {
+                        onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
                         }}

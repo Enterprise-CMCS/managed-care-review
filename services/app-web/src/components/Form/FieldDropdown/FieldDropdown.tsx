@@ -1,6 +1,6 @@
 import React, { type JSX } from 'react'
 import { useField } from 'formik'
-import { Label, Dropdown, FormGroup } from '@trussworks/react-uswds'
+import { Label, Select, FormGroup } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../../'
 
 /**
@@ -59,7 +59,7 @@ export const FieldDropdown = ({
                     {hint}
                 </div>
             )}
-            <Dropdown id={id} {...field} {...inputProps}>
+            <Select id={id} {...field} {...inputProps}>
                 {showDropdownPlaceholderText && (
                     <option value="">- Select -</option>
                 )}
@@ -69,7 +69,7 @@ export const FieldDropdown = ({
                             {label}
                         </option>
                     ))}
-            </Dropdown>
+            </Select>
         </FormGroup>
     )
 }

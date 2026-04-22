@@ -170,9 +170,7 @@ export const CreateOauthClient = (): React.ReactElement => {
                         <UswdsForm
                             data-testid="createOAuthClientForm"
                             id="createOauthForm"
-                            onSubmit={(
-                                e: React.SubmitEvent<HTMLFormElement>
-                            ) => {
+                            onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                                 setShouldValidate(true)
                                 return handleSubmit(e)
                             }}

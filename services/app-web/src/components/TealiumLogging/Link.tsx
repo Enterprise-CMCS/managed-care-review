@@ -1,11 +1,8 @@
 import React from 'react'
 import { Link } from '@trussworks/react-uswds'
+import type { CustomLinkProps, DefaultLinkProps } from '@trussworks/react-uswds'
 import { NavLink, Link as ReactRouterLink } from 'react-router-dom'
 import { NavLinkProps, LinkProps } from 'react-router-dom'
-import {
-    CustomLinkProps,
-    DefaultLinkProps,
-} from '@trussworks/react-uswds/lib/components/Link/Link'
 import type { TealiumLinkEventObject } from '../../tealium'
 import { useTealium } from '../../hooks'
 import { extractText } from './tealiamLoggingHelpers'

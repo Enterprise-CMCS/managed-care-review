@@ -13,8 +13,10 @@ export const FieldCharacterCount = ({
     showError,
     name,
     onBlur,
+    value,
     ...inputProps
 }: TextAreaProps): React.ReactElement => {
+    const stringValue = value === undefined ? undefined : String(value)
     const [field, meta] = useField({ name })
     const isRequired = inputProps['aria-required']
     const isOverLimit = (field.value?.length ?? 0) > 1500
@@ -63,6 +65,7 @@ export const FieldCharacterCount = ({
                 rows={2}
                 error={showErrorBorder}
                 {...inputProps}
+                value={stringValue}
             />
         </FormGroup>
     )

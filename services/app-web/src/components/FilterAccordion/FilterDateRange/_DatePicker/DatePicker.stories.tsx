@@ -48,7 +48,7 @@ We may find that we want to expose props for custom event handlers or even a ref
 }
 
 type StorybookArguments = {
-    onSubmit: React.SubmitEventHandler<HTMLFormElement>
+    onSubmit: React.FormEventHandler<HTMLFormElement>
     disabled?: boolean
     validationStatus?: ValidationStatus
 }
