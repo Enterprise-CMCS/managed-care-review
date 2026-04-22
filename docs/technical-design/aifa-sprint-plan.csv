@@ -824,7 +824,7 @@ Diagnostic-only scoring lets us test candidate selection safely before it can af
 - Prod-shaped fixture reports whether relevant evidence would have been selected early
 - Validation outcomes, artifactVersion semantics, and processed document set do not change because of scoring
 - No result message or confidence is based on the score"
-AIFA-045 Evaluate document prioritization and two-pass retrieval,Backlog,7-Large Submission Hardening,Medium,"AIFA-049A, AIFA-044","Evaluate a conservative two-pass work-selection strategy using diagnostics from AIFA-049A before implementing behavior changes.
+AIFA-045 Evaluate document prioritization and two-pass retrieval,Done,7-Large Submission Hardening,Medium,"AIFA-049A, AIFA-044","Evaluate a conservative two-pass work-selection strategy using diagnostics from AIFA-049A before implementing behavior changes.
 - Define first-pass selection rules
 - Define fallback triggers
 - Define what counts as strong enough first-pass evidence

@@ -44,7 +44,24 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
             relevantDocuments: 1,
             relevantDocumentsSelectedEarly: 1,
             citedEvidenceDocuments: 1,
-            citedEvidenceDocumentsSelectedEarly: 1
+            citedEvidenceDocumentsSelectedEarly: 1,
+            oddlyNamedRelevantDeferred: 1,
+            oddlyNamedRelevantRecoveredByFallback: 1,
+            fieldAnalyses: [
+              {
+                field: 'contractStartDate',
+                evidenceSource: 'fallback',
+                fallbackTriggers: ['deferred-document-evidence', 'partial-coverage']
+              }
+            ],
+            recommendation: {
+              recommendedMode: 'require-full-fallback',
+              firstPassRules: [
+                'Use metadata-only first pass only for documents with explicit amendment or date-governing filename/key cues.'
+              ],
+              fallbackTriggers: ['not-enough-evidence'],
+              summary: 'Do not suppress fallback.'
+            }
           },
           indexing: {
             concurrencyLimit: 2,
@@ -87,6 +104,18 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
   assert.match(
     formatted,
     /work selection: firstPass=12, deferred=120, relevantEarly=1\/1, citedEarly=1\/1/
+  )
+  assert.match(
+    formatted,
+    /work selection recovery: oddlyNamedDeferred=1, oddlyNamedRecoveredByFallback=1/
+  )
+  assert.match(
+    formatted,
+    /field strategy: field=contractStartDate, source=fallback, fallbackTriggers=deferred-document-evidence\|partial-coverage/
+  )
+  assert.match(
+    formatted,
+    /recommendation: mode=require-full-fallback, summary=Do not suppress fallback\./
   )
   assert.match(
     formatted,

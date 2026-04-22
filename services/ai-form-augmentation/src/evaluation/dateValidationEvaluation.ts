@@ -16,6 +16,7 @@ import type {
 import type { DateValidationResult } from '../prompts'
 import {
   getValidationResultKey,
+  type ValidationDocumentDiagnostic,
   type ValidationLlmDiagnostic,
   type ValidationRetrievalDiagnostic,
   type ValidationResultArtifact
@@ -106,6 +107,10 @@ export interface DateValidationLargeSubmissionDiagnostics {
     relevantDocumentsSelectedEarly: number
     citedEvidenceDocuments: number
     citedEvidenceDocumentsSelectedEarly: number
+    oddlyNamedRelevantDeferred: number
+    oddlyNamedRelevantRecoveredByFallback: number
+    fieldAnalyses: DateValidationWorkSelectionFieldAnalysis[]
+    recommendation: DateValidationWorkSelectionRecommendation
   }
   indexing: ValidationIndexingSummaryDiagnostic
   phaseTimingsMs: Record<ValidationPhaseTimingDiagnostic['phase'], number>
@@ -116,6 +121,19 @@ export interface DateValidationLargeSubmissionDiagnostics {
     status: number
     results: number
   }
+}
+
+export interface DateValidationWorkSelectionFieldAnalysis {
+  field: DateValidationCorpusExpectation['field']
+  evidenceSource: 'first-pass' | 'fallback'
+  fallbackTriggers: string[]
+}
+
+export interface DateValidationWorkSelectionRecommendation {
+  recommendedMode: 'require-full-fallback'
+  firstPassRules: string[]
+  fallbackTriggers: string[]
+  summary: string
 }
 
 export interface DateValidationEvaluationSummary {
@@ -426,6 +444,12 @@ function buildLargeSubmissionDiagnostics(args: {
       )
       .map((document) => document.documentName)
   )
+  const workSelectionEvaluation = evaluateWorkSelectionStrategy({
+    documents: args.documents,
+    documentDiagnostics,
+    results: args.resultArtifact?.results ?? [],
+    retrievalDiagnostics: args.resultArtifact?.retrievalDiagnostics ?? []
+  })
 
   return {
     totalDocuments: args.documents.length,
@@ -466,7 +490,13 @@ function buildLargeSubmissionDiagnostics(args: {
       citedEvidenceDocuments: citedEvidenceDocumentNames.size,
       citedEvidenceDocumentsSelectedEarly: [...citedEvidenceDocumentNames].filter(
         (documentName) => firstPassDocumentNames.has(documentName)
-      ).length
+      ).length,
+      oddlyNamedRelevantDeferred:
+        workSelectionEvaluation.oddlyNamedRelevantDeferred,
+      oddlyNamedRelevantRecoveredByFallback:
+        workSelectionEvaluation.oddlyNamedRelevantRecoveredByFallback,
+      fieldAnalyses: workSelectionEvaluation.fieldAnalyses,
+      recommendation: workSelectionEvaluation.recommendation
     },
     indexing: args.indexingSummary,
     phaseTimingsMs: args.phaseTimings,
@@ -480,6 +510,176 @@ function buildLargeSubmissionDiagnostics(args: {
       results: approximateJsonSize(args.resultArtifact)
     }
   }
+}
+
+export function evaluateWorkSelectionStrategy(args: {
+  documents: DateValidationCorpusDocument[]
+  documentDiagnostics: ValidationResultArtifact['documentDiagnostics']
+  results: DateValidationResult[]
+  retrievalDiagnostics: ValidationRetrievalDiagnostic[]
+}): {
+  oddlyNamedRelevantDeferred: number
+  oddlyNamedRelevantRecoveredByFallback: number
+  fieldAnalyses: DateValidationWorkSelectionFieldAnalysis[]
+  recommendation: DateValidationWorkSelectionRecommendation
+} {
+  const documentDiagnostics = args.documentDiagnostics ?? []
+  // AIFA-045 is evaluating whether a stricter metadata-only first pass would be
+  // safe, so this intentionally narrows the broader AIFA-049A scoring bucket.
+  const recommendedFirstPassDocumentNames = new Set(
+    documentDiagnostics
+      .filter((diagnostic) => isRecommendedFirstPassDocument(diagnostic))
+      .map((diagnostic) => diagnostic.documentName)
+  )
+  const retrievalDiagnosticsByField = new Map(
+    args.retrievalDiagnostics.map((diagnostic) => [diagnostic.field, diagnostic])
+  )
+  const deferredOddlyNamedRelevantDocuments = args.documents.filter(
+    (document) =>
+      document.role === 'relevant-contract' &&
+      document.disposition === 'eligible' &&
+      document.tags.includes('oddly-named') &&
+      !recommendedFirstPassDocumentNames.has(document.documentName)
+  )
+  const fieldAnalyses = args.results.map((result) => {
+    const retrievalDiagnostic = retrievalDiagnosticsByField.get(result.field)
+    const fallbackTriggers = buildFallbackTriggers({
+      result,
+      retrievalDiagnostic,
+      documentDiagnostics,
+      recommendedFirstPassDocumentNames
+    })
+
+    return {
+      field: result.field as DateValidationCorpusExpectation['field'],
+      evidenceSource:
+        fallbackTriggers.length === 0 &&
+        result.citations.every((citation) =>
+          recommendedFirstPassDocumentNames.has(citation.documentName)
+        )
+          ? 'first-pass'
+          : 'fallback',
+      fallbackTriggers
+    } satisfies DateValidationWorkSelectionFieldAnalysis
+  })
+  const oddlyNamedRelevantRecoveredByFallback =
+    deferredOddlyNamedRelevantDocuments.filter((document) =>
+      fieldAnalyses.some(
+        (analysis) =>
+          analysis.evidenceSource === 'fallback' &&
+          args.results
+            .find((result) => result.field === analysis.field)
+            ?.citations.some(
+              (citation) => citation.documentName === document.documentName
+            ) === true
+      )
+    ).length
+
+  return {
+    oddlyNamedRelevantDeferred: deferredOddlyNamedRelevantDocuments.length,
+    oddlyNamedRelevantRecoveredByFallback,
+    fieldAnalyses,
+    recommendation: {
+      recommendedMode: 'require-full-fallback',
+      firstPassRules: [
+        'Use metadata-only first pass only for documents with explicit amendment or date-governing filename/key cues.',
+        'Keep generic contract naming alone insufficient for first-pass inclusion.'
+      ],
+      fallbackTriggers: [
+        'not-enough-evidence',
+        'ambiguity',
+        'missing-citations',
+        'partial-coverage',
+        'ocr-gaps',
+        'failed-documents',
+        'weak-evidence',
+        'conflicting-date-evidence'
+      ],
+      summary:
+        'Do not suppress fallback. A gated first pass is only defensible when deferred documents remain eligible for full fallback whenever evidence is weak, ambiguous, uncited, partial, OCR-gapped, or contradicted by diagnostics.'
+    }
+  }
+}
+
+function buildFallbackTriggers(args: {
+  result: DateValidationResult
+  retrievalDiagnostic?: ValidationRetrievalDiagnostic
+  documentDiagnostics: ValidationDocumentDiagnostic[]
+  recommendedFirstPassDocumentNames: Set<string>
+}): string[] {
+  const triggers = new Set<string>()
+
+  if (args.result.outcome === 'not-enough-evidence') {
+    triggers.add('not-enough-evidence')
+  }
+
+  if (
+    args.result.message.toLowerCase().includes('ambiguous') ||
+    args.result.message.toLowerCase().includes('conflicting')
+  ) {
+    triggers.add('ambiguity')
+  }
+
+  if (args.result.citations.length === 0) {
+    triggers.add('missing-citations')
+  }
+
+  if (
+    args.documentDiagnostics.some(
+      (diagnostic) => diagnostic.status !== 'processed' || !diagnostic.usable
+    )
+  ) {
+    triggers.add('partial-coverage')
+  }
+
+  if (
+    args.documentDiagnostics.some(
+      (diagnostic) =>
+        diagnostic.ocrDisposition === 'skipped' ||
+        diagnostic.reason === 'ocr-capped-large-batch'
+    )
+  ) {
+    triggers.add('ocr-gaps')
+  }
+
+  if (
+    args.documentDiagnostics.some((diagnostic) => diagnostic.status === 'failed')
+  ) {
+    triggers.add('failed-documents')
+  }
+
+  if (args.result.confidence !== 'high') {
+    triggers.add('weak-evidence')
+  }
+
+  if ((args.retrievalDiagnostic?.competingDateCount ?? 0) > 1) {
+    triggers.add('conflicting-date-evidence')
+  }
+
+  if (
+    args.result.citations.some(
+      (citation) =>
+        !args.recommendedFirstPassDocumentNames.has(citation.documentName)
+    )
+  ) {
+    triggers.add('deferred-document-evidence')
+  }
+
+  return [...triggers]
+}
+
+function isRecommendedFirstPassDocument(
+  diagnostic: ValidationDocumentDiagnostic
+): boolean {
+  return (
+    diagnostic.workSelection?.bucket === 'first-pass' &&
+    diagnostic.workSelection.priorityReasons.some(
+      (reason) =>
+        reason.includes('Amendment-style naming') ||
+        reason.includes('start-date or effective-date') ||
+        reason.includes('term or expiration')
+    )
+  )
 }
 
 function countOutcomes(results: DateValidationResult[]): {

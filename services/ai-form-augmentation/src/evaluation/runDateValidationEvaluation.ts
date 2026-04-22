@@ -66,6 +66,17 @@ export function formatEvaluationSummary(
         `  work selection: firstPass=${diagnostics.workSelection.firstPassDocuments}, deferred=${diagnostics.workSelection.deferredDocuments}, relevantEarly=${diagnostics.workSelection.relevantDocumentsSelectedEarly}/${diagnostics.workSelection.relevantDocuments}, citedEarly=${diagnostics.workSelection.citedEvidenceDocumentsSelectedEarly}/${diagnostics.workSelection.citedEvidenceDocuments}`
       )
       lines.push(
+        `  work selection recovery: oddlyNamedDeferred=${diagnostics.workSelection.oddlyNamedRelevantDeferred}, oddlyNamedRecoveredByFallback=${diagnostics.workSelection.oddlyNamedRelevantRecoveredByFallback}`
+      )
+      for (const fieldAnalysis of diagnostics.workSelection.fieldAnalyses) {
+        lines.push(
+          `  field strategy: field=${fieldAnalysis.field}, source=${fieldAnalysis.evidenceSource}, fallbackTriggers=${fieldAnalysis.fallbackTriggers.join('|') || 'none'}`
+        )
+      }
+      lines.push(
+        `  recommendation: mode=${diagnostics.workSelection.recommendation.recommendedMode}, summary=${diagnostics.workSelection.recommendation.summary}`
+      )
+      lines.push(
         `  indexing: concurrency=${diagnostics.indexing.concurrencyLimit}, elapsedMs=${diagnostics.indexing.totalElapsedMs}, processed=${diagnostics.indexing.processedDocuments}, failed=${diagnostics.indexing.failedDocuments}`
       )
       lines.push(

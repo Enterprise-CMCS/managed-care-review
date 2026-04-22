@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-045 Evaluate document prioritization and two-pass retrieval`.
+The next implementation ticket is `AIFA-049B Implement gated first-pass selection with conservative fallback`.
 
 ## Completed
 
@@ -58,6 +58,7 @@ The next implementation ticket is `AIFA-045 Evaluate document prioritization and
 - AIFA-043 ✔ Add large-batch OCR safety valve
 - AIFA-044 ✔ Increase retrieval breadth with document-diversity guardrails
 - AIFA-049A ✔ Add diagnostic-only work-selection scoring
+- AIFA-045 ✔ Evaluate document prioritization and two-pass retrieval
 
 ## Current State
 
@@ -250,15 +251,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-045 Evaluate document prioritization and two-pass retrieval
+### AIFA-049B Implement gated first-pass selection with conservative fallback
 
-Use the new diagnostic-only scoring to define a conservative first-pass and fallback strategy before changing runtime behavior.
+Implement the evaluated first-pass strategy behind an explicit gate while keeping the all-document path as the default.
 
 ## Suggested Next Step
 
-- Define first-pass selection rules using the stored scoring diagnostics.
-- Specify fallback triggers for weak, ambiguous, partial, or contradictory evidence.
-- Reuse the prod-shaped fixture to compare first-pass-only versus fallback-needed outcomes.
+- Add a gated first-pass processing mode that preserves the current all-doc path as default.
+- Record whether final field evidence came from first pass, fallback, or partial coverage.
+- Reuse the prod-shaped fixture to verify fallback still recovers deferred relevant evidence conservatively.
 
 ## Source of Truth Docs
 
@@ -297,6 +298,8 @@ Use the new diagnostic-only scoring to define a conservative first-pass and fall
 - Retrieval diagnostics are richer now, but evaluation output still does not surface every new retrieval metric explicitly.
 - AIFA-049A adds diagnostic-only work-selection scoring, but fully reused cached validation results do not yet backfill scoring diagnostics.
 - The current first-pass bucket is a heuristic cutoff intended for evaluation, not a promoted runtime strategy.
+- AIFA-045 now recommends full fallback conservatively, but the simulated first-pass rule is still heuristic and narrower than the broader AIFA-049A scoring bucket.
+- The AIFA-045 field-strategy analysis only covers fields with stored final results; failed-before-result runs still fall back to scenario-level diagnostics only.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.
