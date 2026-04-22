@@ -1,8 +1,24 @@
-/* USWDS settings */
-@import 'styles/uswdsSettings';
+/* USWDS v3 settings — must be the first @use of uswds-core in this compilation */
+@use 'uswds-core' with (
+    $theme-show-notifications: false,
+    $theme-show-compile-warnings: false,
+    $theme-font-path: '/uswds/fonts',
+    $theme-image-path: '/uswds/img',
+    $theme-font-type-mono: 'roboto-mono',
+    $theme-font-type-sans: 'open-sans',
+    $theme-font-type-serif: 'merriweather',
+    $theme-font-role-heading: 'sans',
+    $theme-header-max-width: 'desktop-lg',
+    $theme-grid-container-max-width: 'desktop-lg',
+    $theme-banner-max-width: 'desktop-lg',
+    $theme-footer-max-width: 'desktop-lg',
+    $theme-modal-border-radius: 0
+);
 
-/* Vendor styles (direct source) */
-@import 'uswds/scss/uswds';
+/* Emit full USWDS v3 stylesheet */
+@forward 'uswds';
+
+/* Trussworks component styles */
 @import '@trussworks/react-uswds/lib/index.css';
 
 /* Project styles */

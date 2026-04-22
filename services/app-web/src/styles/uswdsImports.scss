@@ -1,13 +1,18 @@
-/* Order matters in this file. This file can be deleted when we complete v3 USWDS upgrade. */
+/*
+USWDS v3 core re-export.
 
-// stylelint-disable scss/load-no-partial-leading-underscore
-@import 'uswds/scss/theme/_uswds-theme-general';
-@import 'uswds/scss/theme/_uswds-theme-typography';
-@import 'uswds/scss/theme/_uswds-theme-spacing';
-@import 'uswds/scss/theme/_uswds-theme-color';
-@import 'uswds/scss/theme/_uswds-theme-utilities';
-@import 'uswds/scss/theme/_uswds-theme-components';
+Consumers `@use '.../uswdsImports' as uswds;` and call uswds.units(...),
+uswds.color(...), uswds.u-radius(...), uswds.at-media(...), uswds.u-text(...).
 
-@import './uswdsSettings';
+Note: each .module.scss is a separate Sass compilation unit, so loading
+uswds-core here picks up its defaults — the overrides configured in
+src/index.scss via `@use 'uswds-core' with(...)` apply only to the
+stylesheet bundle emitted from index.scss. The helper functions consumed
+through this shim (units, at-media, color, etc.) don't depend on the
+settings we override, so defaults are fine here.
 
-@import 'uswds/scss/packages/_required';
+Sass loadPaths is configured in vite.config.ts to resolve "uswds-core" from
+node_modules/@uswds/uswds/packages.
+*/
+
+@forward 'uswds-core';
