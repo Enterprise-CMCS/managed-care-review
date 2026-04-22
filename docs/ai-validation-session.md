@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-049A Add diagnostic-only work-selection scoring`.
+The next implementation ticket is `AIFA-045 Evaluate document prioritization and two-pass retrieval`.
 
 ## Completed
 
@@ -57,6 +57,7 @@ The next implementation ticket is `AIFA-049A Add diagnostic-only work-selection 
 - AIFA-042 ✔ Add bounded document indexing concurrency
 - AIFA-043 ✔ Add large-batch OCR safety valve
 - AIFA-044 ✔ Increase retrieval breadth with document-diversity guardrails
+- AIFA-049A ✔ Add diagnostic-only work-selection scoring
 
 ## Current State
 
@@ -249,15 +250,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-049A Add diagnostic-only work-selection scoring
+### AIFA-045 Evaluate document prioritization and two-pass retrieval
 
-Score eligible PDFs and record explainable reasons without changing which documents are processed.
+Use the new diagnostic-only scoring to define a conservative first-pass and fallback strategy before changing runtime behavior.
 
 ## Suggested Next Step
 
-- Add deterministic per-document priority scores and reason lists for all eligible PDFs.
-- Keep processing all eligible PDFs while recording which documents would have been first-pass versus deferred.
-- Reuse the prod-shaped fixture to measure whether relevant evidence would still be surfaced early.
+- Define first-pass selection rules using the stored scoring diagnostics.
+- Specify fallback triggers for weak, ambiguous, partial, or contradictory evidence.
+- Reuse the prod-shaped fixture to compare first-pass-only versus fallback-needed outcomes.
 
 ## Source of Truth Docs
 
@@ -294,6 +295,8 @@ Score eligible PDFs and record explainable reasons without changing which docume
 - OCR-capped weak PDFs now stay off the indexed evidence path entirely; richer product-facing partial-coverage handling remains for AIFA-048.
 - AIFA-044 broadens retrieval with document-diversity guardrails, but the candidate and per-document limits are still heuristic tuning constants.
 - Retrieval diagnostics are richer now, but evaluation output still does not surface every new retrieval metric explicitly.
+- AIFA-049A adds diagnostic-only work-selection scoring, but fully reused cached validation results do not yet backfill scoring diagnostics.
+- The current first-pass bucket is a heuristic cutoff intended for evaluation, not a promoted runtime strategy.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.

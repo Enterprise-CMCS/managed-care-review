@@ -63,6 +63,9 @@ export function formatEvaluationSummary(
         `  ocr: attempted=${diagnostics.ocr.attemptedDocuments}, skipped=${diagnostics.ocr.skippedDocuments}, capped=${diagnostics.ocr.cappedDocuments}`
       )
       lines.push(
+        `  work selection: firstPass=${diagnostics.workSelection.firstPassDocuments}, deferred=${diagnostics.workSelection.deferredDocuments}, relevantEarly=${diagnostics.workSelection.relevantDocumentsSelectedEarly}/${diagnostics.workSelection.relevantDocuments}, citedEarly=${diagnostics.workSelection.citedEvidenceDocumentsSelectedEarly}/${diagnostics.workSelection.citedEvidenceDocuments}`
+      )
+      lines.push(
         `  indexing: concurrency=${diagnostics.indexing.concurrencyLimit}, elapsedMs=${diagnostics.indexing.totalElapsedMs}, processed=${diagnostics.indexing.processedDocuments}, failed=${diagnostics.indexing.failedDocuments}`
       )
       lines.push(

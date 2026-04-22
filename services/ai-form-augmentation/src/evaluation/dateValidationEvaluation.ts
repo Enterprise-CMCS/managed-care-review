@@ -99,6 +99,14 @@ export interface DateValidationLargeSubmissionDiagnostics {
     skippedDocuments: number
     cappedDocuments: number
   }
+  workSelection: {
+    firstPassDocuments: number
+    deferredDocuments: number
+    relevantDocuments: number
+    relevantDocumentsSelectedEarly: number
+    citedEvidenceDocuments: number
+    citedEvidenceDocumentsSelectedEarly: number
+  }
   indexing: ValidationIndexingSummaryDiagnostic
   phaseTimingsMs: Record<ValidationPhaseTimingDiagnostic['phase'], number>
   artifactSizesBytes: {
@@ -399,6 +407,25 @@ function buildLargeSubmissionDiagnostics(args: {
 }): DateValidationLargeSubmissionDiagnostics {
   const documentDiagnostics =
     args.resultArtifact?.documentDiagnostics ?? args.statusArtifact?.documentDiagnostics ?? []
+  const firstPassDocumentNames = new Set(
+    documentDiagnostics
+      .filter((diagnostic) => diagnostic.workSelection?.bucket === 'first-pass')
+      .map((diagnostic) => diagnostic.documentName)
+  )
+  const citedEvidenceDocumentNames = new Set(
+    (args.resultArtifact?.results ?? []).flatMap((result) =>
+      result.citations.map((citation) => citation.documentName)
+    )
+  )
+  const relevantDocumentNames = new Set(
+    args.documents
+      .filter(
+        (document) =>
+          document.role === 'relevant-contract' &&
+          document.disposition === 'eligible'
+      )
+      .map((document) => document.documentName)
+  )
 
   return {
     totalDocuments: args.documents.length,
@@ -423,6 +450,22 @@ function buildLargeSubmissionDiagnostics(args: {
       ).length,
       cappedDocuments: documentDiagnostics.filter(
         (diagnostic) => diagnostic.reason === 'ocr-capped-large-batch'
+      ).length
+    },
+    workSelection: {
+      firstPassDocuments: documentDiagnostics.filter(
+        (diagnostic) => diagnostic.workSelection?.bucket === 'first-pass'
+      ).length,
+      deferredDocuments: documentDiagnostics.filter(
+        (diagnostic) => diagnostic.workSelection?.bucket === 'deferred'
+      ).length,
+      relevantDocuments: relevantDocumentNames.size,
+      relevantDocumentsSelectedEarly: [...relevantDocumentNames].filter(
+        (documentName) => firstPassDocumentNames.has(documentName)
+      ).length,
+      citedEvidenceDocuments: citedEvidenceDocumentNames.size,
+      citedEvidenceDocumentsSelectedEarly: [...citedEvidenceDocumentNames].filter(
+        (documentName) => firstPassDocumentNames.has(documentName)
       ).length
     },
     indexing: args.indexingSummary,

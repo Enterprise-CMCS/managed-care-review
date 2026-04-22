@@ -38,6 +38,14 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
             skippedDocuments: 5,
             cappedDocuments: 5
           },
+          workSelection: {
+            firstPassDocuments: 12,
+            deferredDocuments: 120,
+            relevantDocuments: 1,
+            relevantDocumentsSelectedEarly: 1,
+            citedEvidenceDocuments: 1,
+            citedEvidenceDocumentsSelectedEarly: 1
+          },
           indexing: {
             concurrencyLimit: 2,
             totalElapsedMs: 99,
@@ -75,6 +83,10 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
   assert.match(
     formatted,
     /ocr: attempted=3, skipped=5, capped=5/
+  )
+  assert.match(
+    formatted,
+    /work selection: firstPass=12, deferred=120, relevantEarly=1\/1, citedEarly=1\/1/
   )
   assert.match(
     formatted,

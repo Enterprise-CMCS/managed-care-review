@@ -808,7 +808,7 @@ With 100 or more PDFs, top-3 global chunks can miss controlling start/end date e
 - Prod-shaped fixture measures evidence recall
 - Broader retrieval does not regress citation reconciliation or field-specific prompting
 - Existing clause and date corpus scenarios do not regress"
-AIFA-049A Add diagnostic-only work-selection scoring,Backlog,7-Large Submission Hardening,High,"AIFA-039, AIFA-041, AIFA-044","Split from the original AIFA-049 work-selection intent. Add explainable document priority scoring and diagnostics without changing which documents are processed.
+AIFA-049A Add diagnostic-only work-selection scoring,Done,7-Large Submission Hardening,High,"AIFA-039, AIFA-041, AIFA-044","Split from the original AIFA-049 work-selection intent. Add explainable document priority scoring and diagnostics without changing which documents are processed.
 - Score eligible PDFs using cheap pre-processing signals such as filename, key, metadata, upload order, and form context
 - Record score reasons for every eligible document
 - Continue processing all eligible PDFs

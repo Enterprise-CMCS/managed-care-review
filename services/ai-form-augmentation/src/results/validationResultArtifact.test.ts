@@ -17,6 +17,11 @@ test('buildValidationResultArtifact preserves document coverage diagnostics when
         status: 'processed',
         usable: true,
         chunkCount: 3,
+        workSelection: {
+          priorityScore: 18,
+          priorityReasons: ['Filename/key looks contract-oriented.'],
+          bucket: 'first-pass'
+        },
         stage: 'embed'
       },
       {
@@ -47,6 +52,11 @@ test('buildValidationResultArtifact preserves document coverage diagnostics when
       status: 'processed',
       usable: true,
       chunkCount: 3,
+      workSelection: {
+        priorityScore: 18,
+        priorityReasons: ['Filename/key looks contract-oriented.'],
+        bucket: 'first-pass'
+      },
       stage: 'embed'
     },
     {

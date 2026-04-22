@@ -3,9 +3,11 @@ import test from 'node:test'
 import {
   createOcrFallbackPolicy,
   DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
+  DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT,
   LARGE_BATCH_OCR_FALLBACK_LIMIT,
   LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT,
-  mapWithConcurrencyLimit
+  mapWithConcurrencyLimit,
+  scoreValidationDocuments
 } from './validationHandler'
 
 test('mapWithConcurrencyLimit preserves order while bounding active work', async () => {
@@ -65,4 +67,83 @@ test('createOcrFallbackPolicy caps OCR fallback for large submissions', () => {
   }
 
   assert.equal(shouldAttemptOcrFallback(), false)
+})
+
+test('scoreValidationDocuments is deterministic and does not reorder processing input', () => {
+  const diagnostics = scoreValidationDocuments(
+    [
+      {
+        documentName: 'rate-sheet-001.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/rate-sheet-001.pdf'
+      },
+      {
+        documentName: 'provider-contract-amendment-effective-dates.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/provider-contract-amendment-effective-dates.pdf'
+      }
+    ],
+    [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2024'
+      },
+      {
+        field: 'contractEndDate',
+        label: 'Contract End Date',
+        value: '12/31/2024'
+      }
+    ]
+  )
+
+  assert.deepEqual(
+    diagnostics.map((diagnostic) => diagnostic.document.documentName),
+    [
+      'rate-sheet-001.pdf',
+      'provider-contract-amendment-effective-dates.pdf'
+    ]
+  )
+  assert.equal(
+    diagnostics[1].workSelection.priorityScore >
+      diagnostics[0].workSelection.priorityScore,
+    true
+  )
+  assert.match(
+    diagnostics[1].workSelection.priorityReasons.join(' '),
+    /contract-oriented/
+  )
+})
+
+test('scoreValidationDocuments marks only the top ranked documents as first-pass', () => {
+  const diagnostics = scoreValidationDocuments(
+    Array.from(
+      { length: DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT + 2 },
+      (_, index) => ({
+        documentName: `contract-${String(index + 1).padStart(3, '0')}.pdf`,
+        sourceBucket: 'uploads',
+        sourceKey: `contracts/contract-${String(index + 1).padStart(3, '0')}.pdf`
+      })
+    ),
+    [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2024'
+      }
+    ]
+  )
+
+  assert.equal(
+    diagnostics.filter(
+      (diagnostic) => diagnostic.workSelection.bucket === 'first-pass'
+    ).length,
+    DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT
+  )
+  assert.equal(
+    diagnostics.filter(
+      (diagnostic) => diagnostic.workSelection.bucket === 'deferred'
+    ).length,
+    2
+  )
 })

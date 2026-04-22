@@ -27,6 +27,7 @@ import {
   buildValidationResultArtifact,
   getValidationResultKey,
   type ValidationDocumentDiagnostic,
+  type ValidationDocumentWorkSelectionDiagnostic,
   type ValidationRetrievalDiagnostic
 } from '../results'
 import { newArtifactS3Client } from '../s3'
@@ -101,6 +102,9 @@ export interface ValidationHandlerResult {
 export const DEFAULT_DOCUMENT_INDEXING_CONCURRENCY = 2
 export const LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT = 25
 export const LARGE_BATCH_OCR_FALLBACK_LIMIT = 3
+// Keep the diagnostic first-pass set intentionally small enough to stress
+// whether cheap document ranking would surface useful evidence early.
+export const DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT = 12
 // Pull a broader pool than the final prompt can hold so large submissions have
 // a chance to surface evidence from more than one noisy top-ranked document.
 export const FIELD_RETRIEVAL_CANDIDATE_COUNT = 8
@@ -160,6 +164,16 @@ export async function validationHandler(
       event.bucket,
       getChunksArtifactKey(event.formId)
     )
+    const workSelectionDiagnostics = scoreValidationDocuments(
+      event.documents,
+      event.formFields
+    )
+    const workSelectionByCacheKey = new Map(
+      workSelectionDiagnostics.map((diagnostic) => [
+        computeDocumentCacheKey(diagnostic.document),
+        diagnostic.workSelection
+      ])
+    )
     const documentChanges = classifyDocumentSetChanges(
       previousChunksArtifact?.documents ?? [],
       event.documents
@@ -195,7 +209,12 @@ export async function validationHandler(
     )
     documentDiagnostics = [
       ...documentDiagnostics,
-      ...documentIndexingResults.map((result) => result.diagnostic)
+      ...documentIndexingResults.map((result) =>
+        attachWorkSelectionDiagnostic(
+          result.diagnostic,
+          workSelectionByCacheKey.get(computeDocumentCacheKey(result.document))
+        )
+      )
     ]
     // Keep large-run indexing metrics on the optional diagnostics hook so
     // evaluation can measure queue behavior without widening the persisted
@@ -560,6 +579,7 @@ async function indexValidationDocument(args: {
   shouldAttemptOcrFallback: () => boolean
   document: ValidationSourceDocument
 }): Promise<{
+  document: ValidationSourceDocument
   indexedDocument: IndexedDocumentArtifact | null
   diagnostic: ValidationDocumentDiagnostic
 }> {
@@ -586,6 +606,7 @@ async function indexValidationDocument(args: {
         cachedDocumentArtifact.embeddingModel === embeddingModel
       ) {
         return {
+          document,
           indexedDocument: cachedDocumentArtifact,
           diagnostic: buildProcessedDocumentDiagnostic(
             document,
@@ -614,6 +635,7 @@ async function indexValidationDocument(args: {
       // drop the document from indexed evidence rather than trusting partial
       // text and risking a false match or mismatch.
       return {
+        document,
         indexedDocument: null,
         diagnostic: {
           documentName: document.documentName,
@@ -662,6 +684,7 @@ async function indexValidationDocument(args: {
     )
 
     return {
+      document,
       indexedDocument: indexedDocumentArtifact,
       diagnostic: buildProcessedDocumentDiagnostic(
         document,
@@ -672,6 +695,7 @@ async function indexValidationDocument(args: {
     }
   } catch (error) {
     return {
+      document,
       indexedDocument: null,
       diagnostic: {
         documentName: document.documentName,
@@ -686,6 +710,110 @@ async function indexValidationDocument(args: {
       }
     }
   }
+}
+
+type ScoredValidationDocumentDiagnostic = {
+  document: ValidationSourceDocument
+  workSelection: ValidationDocumentWorkSelectionDiagnostic
+}
+
+export function scoreValidationDocuments(
+  documents: ValidationSourceDocument[],
+  formFields: DateValidationFieldInput[]
+): ScoredValidationDocumentDiagnostic[] {
+  const scoredDocuments = documents.map((document, index) => {
+    const normalizedName =
+      `${document.documentName} ${document.sourceKey}`.toLowerCase()
+    const reasons = ['Eligible PDF remains in the all-document processing set.']
+    let priorityScore = 10
+
+    if (containsAny(normalizedName, ['contract', 'agreement'])) {
+      priorityScore += 6
+      reasons.push('Filename/key looks contract-oriented.')
+    }
+
+    if (containsAny(normalizedName, ['amend', 'amendment'])) {
+      priorityScore += 4
+      reasons.push(
+        'Amendment-style naming can contain controlling date changes.'
+      )
+    }
+
+    if (
+      formFields.some((field) => field.field === 'contractStartDate') &&
+      containsAny(normalizedName, ['effective', 'start', 'begin'])
+    ) {
+      priorityScore += 3
+      reasons.push('Filename/key hints at start-date or effective-date content.')
+    }
+
+    if (
+      formFields.some((field) => field.field === 'contractEndDate') &&
+      containsAny(normalizedName, ['term', 'end', 'expire', 'expiration'])
+    ) {
+      priorityScore += 3
+      reasons.push('Filename/key hints at term or expiration content.')
+    }
+
+    if (containsAny(normalizedName, ['rate', 'pricing', 'fee'])) {
+      priorityScore -= 4
+      reasons.push(
+        'Filename/key looks rate-oriented rather than date-governing.'
+      )
+    }
+
+    if (index >= Math.floor(documents.length / 2)) {
+      priorityScore += 2
+      reasons.push('Later upload order may indicate newer controlling documents.')
+    }
+
+    return {
+      document,
+      originalIndex: index,
+      priorityScore,
+      reasons
+    }
+  })
+
+  const firstPassCacheKeys = new Set(
+    [...scoredDocuments]
+      .sort(
+        (left, right) =>
+          right.priorityScore - left.priorityScore ||
+          left.originalIndex - right.originalIndex
+      )
+      .slice(0, DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT)
+      .map((document) => computeDocumentCacheKey(document.document))
+  )
+
+  return scoredDocuments.map(({ document, priorityScore, reasons }) => ({
+    document,
+    workSelection: {
+      priorityScore,
+      priorityReasons: reasons,
+      bucket: firstPassCacheKeys.has(computeDocumentCacheKey(document))
+        ? 'first-pass'
+        : 'deferred'
+    }
+  }))
+}
+
+function attachWorkSelectionDiagnostic(
+  diagnostic: ValidationDocumentDiagnostic,
+  workSelection?: ValidationDocumentWorkSelectionDiagnostic
+): ValidationDocumentDiagnostic {
+  if (workSelection == null) {
+    return diagnostic
+  }
+
+  return {
+    ...diagnostic,
+    workSelection
+  }
+}
+
+function containsAny(value: string, substrings: string[]): boolean {
+  return substrings.some((substring) => value.includes(substring))
 }
 
 function buildProcessedDocumentDiagnostic(

@@ -15,6 +15,12 @@ export interface ValidationResultArtifact {
   retrievalDiagnostics?: ValidationRetrievalDiagnostic[]
 }
 
+export interface ValidationDocumentWorkSelectionDiagnostic {
+  priorityScore: number
+  priorityReasons: string[]
+  bucket: 'first-pass' | 'deferred'
+}
+
 export interface ValidationDocumentDiagnostic {
   documentName: string
   sourceBucket?: string
@@ -23,6 +29,7 @@ export interface ValidationDocumentDiagnostic {
   usable: boolean
   chunkCount: number
   ocrDisposition?: PdfOcrDisposition
+  workSelection?: ValidationDocumentWorkSelectionDiagnostic
   reason?: string
   error?: string
   stage?: 'cache' | 'fetch' | 'parse' | 'chunk' | 'embed'
