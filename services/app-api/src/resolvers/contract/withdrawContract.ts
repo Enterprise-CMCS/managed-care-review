@@ -2,8 +2,9 @@ import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
+    withResolverSpan,
+    setResolverDetails,
+    recordResolverError,
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
 import { logError } from '../../logger'
@@ -20,179 +21,178 @@ export function withdrawContract(
     documentZip: DocumentZipService
 ): MutationResolvers['withdrawContract'] {
     return async (_parent, { input }, context) => {
-        const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('withdrawContract', {}, ctx)
-        setResolverDetailsOnActiveSpan('withdrawContract', user, span)
-
-        // Check OAuth client read permissions
-        if (!canOauthWrite(context)) {
-            const errMessage = `OAuth client does not have write permissions`
-            logError('withdrawContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'FORBIDDEN',
-                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
-                },
-            })
-        }
-
+        const { user } = context
         const { contractID, updatedReason } = input
-        span?.setAttribute('mcreview.package_id', contractID)
 
-        if (!hasCMSPermissions(user)) {
-            const message = 'user not authorized to withdraw a contract'
-            logError('withdrawContract', message)
-            setErrorAttributesOnActiveSpan(message, span)
-            throw createForbiddenError(message)
-        }
+        return withResolverSpan(
+            context,
+            'withdrawContract',
+            { 'mcreview.contract_id': contractID },
+            async (span) => {
+                setResolverDetails(span, user)
 
-        const contractWithHistory =
-            await store.findContractWithHistory(contractID)
+                // Check OAuth client read permissions
+                if (!canOauthWrite(context)) {
+                    const errMessage = `OAuth client does not have write permissions`
+                    logError('withdrawContract', errMessage)
 
-        if (contractWithHistory instanceof Error) {
-            if (contractWithHistory instanceof NotFoundError) {
-                const errMessage = `A contract must exist to be withdrawn: ${contractID}`
-                logError('withdrawContract', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw createUserInputError(errMessage, 'contractID')
-            }
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'FORBIDDEN',
+                            cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                        },
+                    })
+                }
 
-            const errMessage = `Issue finding a contract. Message: ${contractWithHistory.message}`
-            logError('withdrawContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+                if (!hasCMSPermissions(user)) {
+                    const message = 'user not authorized to withdraw a contract'
+                    logError('withdrawContract', message)
+                    throw createForbiddenError(message)
+                }
 
-        if (
-            !['SUBMITTED', 'RESUBMITTED'].includes(
-                contractWithHistory.consolidatedStatus
-            )
-        ) {
-            const errMessage = `Attempted to withdraw submission with invalid contract status of ${contractWithHistory.consolidatedStatus}`
-            logError('withdrawContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createUserInputError(errMessage, 'contractID')
-        }
+                const contractWithHistory =
+                    await store.findContractWithHistory(contractID)
 
-        const withdrawResult = await store.withdrawContract({
-            contract: contractWithHistory,
-            updatedByID: user.id,
-            updatedReason,
-        })
+                if (contractWithHistory instanceof Error) {
+                    if (contractWithHistory instanceof NotFoundError) {
+                        const errMessage = `A contract must exist to be withdrawn: ${contractID}`
+                        logError('withdrawContract', errMessage)
+                        throw createUserInputError(errMessage, 'contractID')
+                    }
 
-        if (withdrawResult instanceof Error) {
-            const errMessage = `Failed to withdraw contract. ${withdrawResult.message}`
-            logError('withdrawSubmission', errMessage)
+                    const errMessage = `Issue finding a contract. Message: ${contractWithHistory.message}`
+                    logError('withdrawContract', errMessage)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
 
-            if (withdrawResult instanceof NotFoundError) {
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'NOT_FOUND',
-                        cause: 'DB_ERROR',
-                    },
+                if (
+                    !['SUBMITTED', 'RESUBMITTED'].includes(
+                        contractWithHistory.consolidatedStatus
+                    )
+                ) {
+                    const errMessage = `Attempted to withdraw submission with invalid contract status of ${contractWithHistory.consolidatedStatus}`
+                    logError('withdrawContract', errMessage)
+                    throw createUserInputError(errMessage, 'contractID')
+                }
+
+                const withdrawResult = await store.withdrawContract({
+                    contract: contractWithHistory,
+                    updatedByID: user.id,
+                    updatedReason,
                 })
-            }
 
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+                if (withdrawResult instanceof Error) {
+                    const errMessage = `Failed to withdraw contract. ${withdrawResult.message}`
+                    logError('withdrawContract', errMessage)
 
-        const { withdrawnContract, ratesForDisplay } = withdrawResult
+                    if (withdrawResult instanceof NotFoundError) {
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'NOT_FOUND',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
 
-        // Generate zips!
-        const contractZipRes = await documentZip.createContractZips(
-            withdrawnContract,
-            span
-        )
-        if (contractZipRes instanceof Error) {
-            const errMessage = `Failed to zip files for contract revision with ID: ${withdrawnContract.id}: ${contractZipRes.message}`
-            logError('submitContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-        }
-        const rateZipRes = await documentZip.createRateZips(
-            withdrawnContract,
-            span
-        )
-        if (rateZipRes instanceof Array) {
-            const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${withdrawnContract.id}`
-            logError('submitContract', errorMessage)
-            setErrorAttributesOnActiveSpan(errorMessage, span)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
 
-            rateZipRes.forEach((error, index) => {
-                logError(
-                    'submitContract',
-                    `Rate zip error ${index + 1}: ${error.message}`
+                const { withdrawnContract, ratesForDisplay } = withdrawResult
+
+                // Generate zips!
+                const contractZipRes = await documentZip.createContractZips(
+                    withdrawnContract,
+                    span
                 )
-            })
-        }
-        let stateAnalystsEmails: string[] = []
-        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
-            withdrawnContract.stateCode as StateCodeType
+                if (contractZipRes instanceof Error) {
+                    const errMessage = `Failed to zip files for contract revision with ID: ${withdrawnContract.id}: ${contractZipRes.message}`
+                    logError('withdrawContract', errMessage)
+                    recordResolverError(span, errMessage)
+                }
+                const rateZipRes = await documentZip.createRateZips(
+                    withdrawnContract,
+                    span
+                )
+                if (rateZipRes instanceof Array) {
+                    const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${withdrawnContract.id}`
+                    logError('withdrawContract', errorMessage)
+                    recordResolverError(span, errorMessage)
+
+                    rateZipRes.forEach((error, index) => {
+                        logError(
+                            'withdrawContract',
+                            `Rate zip error ${index + 1}: ${error.message}`
+                        )
+                    })
+                }
+                let stateAnalystsEmails: string[] = []
+                const stateAnalystsEmailsResult =
+                    await store.findStateAssignedUsers(
+                        withdrawnContract.stateCode as StateCodeType
+                    )
+
+                if (stateAnalystsEmailsResult instanceof Error) {
+                    logError(
+                        'getStateAnalystsEmails',
+                        stateAnalystsEmailsResult.message
+                    )
+                    recordResolverError(span, stateAnalystsEmailsResult)
+                } else {
+                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
+                        (u) => u.email
+                    )
+                }
+
+                const sendWithdrawCMSEmail =
+                    await emailer.sendWithdrawnSubmissionCMSEmail(
+                        withdrawnContract,
+                        ratesForDisplay,
+                        stateAnalystsEmails
+                    )
+
+                const sendWithdrawStateEmail =
+                    await emailer.sendWithdrawnSubmissionStateEmail(
+                        withdrawnContract,
+                        ratesForDisplay
+                    )
+
+                if (
+                    sendWithdrawCMSEmail instanceof Error ||
+                    sendWithdrawStateEmail instanceof Error
+                ) {
+                    let errMessage = ''
+
+                    if (sendWithdrawCMSEmail instanceof Error) {
+                        errMessage = `CMS Email failed: ${sendWithdrawCMSEmail.message}`
+                    }
+
+                    if (sendWithdrawStateEmail instanceof Error) {
+                        errMessage = `State Email failed: ${sendWithdrawStateEmail.message}`
+                    }
+
+                    logError('withdrawContract', errMessage)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'EMAIL_ERROR',
+                        },
+                    })
+                }
+
+                return {
+                    contract: withdrawnContract,
+                }
+            }
         )
-
-        if (stateAnalystsEmailsResult instanceof Error) {
-            logError(
-                'getStateAnalystsEmails',
-                stateAnalystsEmailsResult.message
-            )
-            setErrorAttributesOnActiveSpan(
-                stateAnalystsEmailsResult.message,
-                span
-            )
-        } else {
-            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
-        }
-
-        const sendWithdrawCMSEmail =
-            await emailer.sendWithdrawnSubmissionCMSEmail(
-                withdrawnContract,
-                ratesForDisplay,
-                stateAnalystsEmails
-            )
-
-        const sendWithdrawStateEmail =
-            await emailer.sendWithdrawnSubmissionStateEmail(
-                withdrawnContract,
-                ratesForDisplay
-            )
-
-        if (
-            sendWithdrawCMSEmail instanceof Error ||
-            sendWithdrawStateEmail instanceof Error
-        ) {
-            let errMessage = ''
-
-            if (sendWithdrawCMSEmail instanceof Error) {
-                errMessage = `CMS Email failed: ${sendWithdrawCMSEmail.message}`
-            }
-
-            if (sendWithdrawStateEmail instanceof Error) {
-                errMessage = `State Email failed: ${sendWithdrawStateEmail.message}`
-            }
-
-            logError('withdrawContract', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
-                },
-            })
-        }
-
-        return {
-            contract: withdrawnContract,
-        }
     }
 }
