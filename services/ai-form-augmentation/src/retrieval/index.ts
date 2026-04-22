@@ -11,4 +11,7 @@ export type {
   OrderedChunkMetadata,
   RetrievedChunk
 } from './opRagOrdering'
-export { orderRetrievedChunks } from './opRagOrdering'
+export {
+  orderRetrievedChunks,
+  selectDiverseRetrievedChunks
+} from './opRagOrdering'

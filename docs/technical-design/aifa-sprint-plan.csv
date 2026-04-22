@@ -792,7 +792,7 @@ OCR can dominate first-run cost for large submissions. The PoC needs a safety va
 - If a field lacks strong evidence and relevant documents were OCR-skipped, the result is partial or conservative rather than confidently complete
 - Evaluation includes a case where skipped OCR could contain relevant evidence
 - Existing OCR fixture behavior is preserved where applicable"
-AIFA-044 Increase retrieval breadth with document-diversity guardrails,Backlog,7-Large Submission Hardening,High,"AIFA-039, AIFA-041","Improve retrieval recall for large document sets without flooding the LLM with unbounded context.
+AIFA-044 Increase retrieval breadth with document-diversity guardrails,Done,7-Large Submission Hardening,High,"AIFA-039, AIFA-041","Improve retrieval recall for large document sets without flooding the LLM with unbounded context.
 - Retrieve a broader candidate set than the current narrow top-k
 - Diversify final evidence by document where appropriate
 - Keep final prompt context bounded

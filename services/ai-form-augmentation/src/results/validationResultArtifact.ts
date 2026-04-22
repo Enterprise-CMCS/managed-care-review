@@ -39,8 +39,11 @@ export interface ValidationLlmDiagnostic {
 
 export interface ValidationRetrievalDiagnostic {
   field: string
+  candidateChunkCount: number
   initialChunkCount: number
   finalChunkCount: number
+  representedDocumentCount: number
+  droppedCandidateCount: number
   competingDateCount: number
   clauseEvidencePresentInitially: boolean
   clauseEvidencePresentFinally: boolean

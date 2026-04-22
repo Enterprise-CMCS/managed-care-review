@@ -14,8 +14,11 @@ export interface RetrievalEvidenceChunk {
 
 export interface FieldRetrievalDiagnostics {
   field: DateValidationFieldInput['field']
+  candidateChunkCount: number
   initialChunkCount: number
   finalChunkCount: number
+  representedDocumentCount: number
+  droppedCandidateCount: number
   competingDateCount: number
   clauseEvidencePresentInitially: boolean
   clauseEvidencePresentFinally: boolean
@@ -58,6 +61,7 @@ export function buildFieldRetrievalQuery(
 
 export function expandClauseEvidenceForField(input: {
   field: DateValidationFieldInput['field']
+  candidateChunkCount: number
   retrievedChunks: RetrievalEvidenceChunk[]
   allChunks: DocumentChunk[]
 }): {
@@ -80,8 +84,14 @@ export function expandClauseEvidenceForField(input: {
       chunks: input.retrievedChunks,
       diagnostics: {
         field: input.field,
+        candidateChunkCount: input.candidateChunkCount,
         initialChunkCount: input.retrievedChunks.length,
         finalChunkCount: input.retrievedChunks.length,
+        representedDocumentCount: new Set(
+          input.retrievedChunks.map((chunk) => chunk.documentName)
+        ).size,
+        droppedCandidateCount:
+          input.candidateChunkCount - input.retrievedChunks.length,
         competingDateCount,
         clauseEvidencePresentInitially,
         clauseEvidencePresentFinally: clauseEvidencePresentInitially,
@@ -140,8 +150,14 @@ export function expandClauseEvidenceForField(input: {
     chunks,
     diagnostics: {
       field: input.field,
+      candidateChunkCount: input.candidateChunkCount,
       initialChunkCount: input.retrievedChunks.length,
       finalChunkCount: chunks.length,
+      representedDocumentCount: new Set(
+        chunks.map((chunk) => chunk.documentName)
+      ).size,
+      droppedCandidateCount:
+        input.candidateChunkCount - input.retrievedChunks.length,
       competingDateCount,
       clauseEvidencePresentInitially,
       clauseEvidencePresentFinally,

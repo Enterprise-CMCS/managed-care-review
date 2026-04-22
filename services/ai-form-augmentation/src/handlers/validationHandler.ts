@@ -20,7 +20,8 @@ import { buildDateValidationPrompt } from '../prompts'
 import {
   buildFieldRetrievalQuery,
   expandClauseEvidenceForField,
-  orderRetrievedChunks
+  orderRetrievedChunks,
+  selectDiverseRetrievedChunks
 } from '../retrieval'
 import {
   buildValidationResultArtifact,
@@ -100,6 +101,15 @@ export interface ValidationHandlerResult {
 export const DEFAULT_DOCUMENT_INDEXING_CONCURRENCY = 2
 export const LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT = 25
 export const LARGE_BATCH_OCR_FALLBACK_LIMIT = 3
+// Pull a broader pool than the final prompt can hold so large submissions have
+// a chance to surface evidence from more than one noisy top-ranked document.
+export const FIELD_RETRIEVAL_CANDIDATE_COUNT = 8
+// Keep the final pre-expansion evidence set small enough for the existing
+// prompt shape while still allowing a couple of documents to contribute.
+export const FIELD_RETRIEVAL_FINAL_CHUNK_LIMIT = 4
+// Allow at most two chunks per document so one contract cannot crowd out all
+// other candidates, but still preserve some same-document continuity.
+export const FIELD_RETRIEVAL_MAX_CHUNKS_PER_DOCUMENT = 2
 
 export async function validationHandler(
   event: ValidationHandlerEvent
@@ -275,8 +285,16 @@ export async function validationHandler(
               const queryVector = await embeddingProvider.embedText(
                 buildFieldRetrievalQuery(field.field)
               )
+              const candidateResults = await vectorStore.search(
+                queryVector,
+                FIELD_RETRIEVAL_CANDIDATE_COUNT
+              )
               const initiallyRetrievedChunks = orderRetrievedChunks(
-                await vectorStore.search(queryVector, 3)
+                selectDiverseRetrievedChunks(
+                  candidateResults,
+                  FIELD_RETRIEVAL_FINAL_CHUNK_LIMIT,
+                  FIELD_RETRIEVAL_MAX_CHUNKS_PER_DOCUMENT
+                )
               ).map((result) => ({
                 chunkId: result.metadata.chunkId,
                 documentName: result.metadata.documentName,
@@ -288,6 +306,7 @@ export async function validationHandler(
               }))
               const expandedRetrieval = expandClauseEvidenceForField({
                 field: field.field,
+                candidateChunkCount: candidateResults.length,
                 retrievedChunks: initiallyRetrievedChunks,
                 allChunks: chunks
               })

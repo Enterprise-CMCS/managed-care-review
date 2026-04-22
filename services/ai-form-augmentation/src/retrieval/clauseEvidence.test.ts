@@ -5,6 +5,7 @@ import { expandClauseEvidenceForField } from './clauseEvidence'
 test('expandClauseEvidenceForField adds clause-heavy evidence when competing end-date labels are retrieved first', () => {
   const result = expandClauseEvidenceForField({
     field: 'contractEndDate',
+    candidateChunkCount: 1,
     retrievedChunks: [
       {
         chunkId: 'chunk-0',
@@ -49,7 +50,10 @@ test('expandClauseEvidenceForField adds clause-heavy evidence when competing end
     result.chunks.map((chunk) => chunk.chunkId),
     ['chunk-0', 'chunk-1']
   )
+  assert.equal(result.diagnostics.candidateChunkCount, 1)
   assert.equal(result.diagnostics.competingDateCount, 2)
+  assert.equal(result.diagnostics.representedDocumentCount, 1)
+  assert.equal(result.diagnostics.droppedCandidateCount, 0)
   assert.equal(result.diagnostics.clauseEvidencePresentInitially, false)
   assert.equal(result.diagnostics.clauseEvidencePresentFinally, true)
   assert.equal(result.diagnostics.clauseEvidenceAdded, true)
@@ -58,6 +62,7 @@ test('expandClauseEvidenceForField adds clause-heavy evidence when competing end
 test('expandClauseEvidenceForField keeps existing clause evidence without adding more noise', () => {
   const result = expandClauseEvidenceForField({
     field: 'contractStartDate',
+    candidateChunkCount: 1,
     retrievedChunks: [
       {
         chunkId: 'chunk-1',
@@ -101,6 +106,9 @@ test('expandClauseEvidenceForField keeps existing clause evidence without adding
     result.chunks.map((chunk) => chunk.chunkId),
     ['chunk-1']
   )
+  assert.equal(result.diagnostics.candidateChunkCount, 1)
+  assert.equal(result.diagnostics.representedDocumentCount, 1)
+  assert.equal(result.diagnostics.droppedCandidateCount, 0)
   assert.equal(result.diagnostics.clauseEvidencePresentInitially, true)
   assert.equal(result.diagnostics.clauseEvidenceAdded, false)
 })

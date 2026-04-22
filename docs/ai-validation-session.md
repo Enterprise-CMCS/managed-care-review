@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-044 Increase retrieval breadth with document-diversity guardrails`.
+The next implementation ticket is `AIFA-049A Add diagnostic-only work-selection scoring`.
 
 ## Completed
 
@@ -56,6 +56,7 @@ The next implementation ticket is `AIFA-044 Increase retrieval breadth with docu
 - AIFA-041 ✔ Add document-level failure isolation and processing diagnostics
 - AIFA-042 ✔ Add bounded document indexing concurrency
 - AIFA-043 ✔ Add large-batch OCR safety valve
+- AIFA-044 ✔ Increase retrieval breadth with document-diversity guardrails
 
 ## Current State
 
@@ -248,15 +249,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-044 Increase retrieval breadth with document-diversity guardrails
+### AIFA-049A Add diagnostic-only work-selection scoring
 
-Broaden retrieval for large document sets without letting one noisy document dominate all final evidence.
+Score eligible PDFs and record explainable reasons without changing which documents are processed.
 
 ## Suggested Next Step
 
-- Broaden the retrieval candidate pool while keeping final per-field prompt context bounded.
-- Add document-diversity guardrails so one document cannot monopolize final evidence.
-- Preserve field-specific retrieval and citation reconciliation behavior.
+- Add deterministic per-document priority scores and reason lists for all eligible PDFs.
+- Keep processing all eligible PDFs while recording which documents would have been first-pass versus deferred.
+- Reuse the prod-shaped fixture to measure whether relevant evidence would still be surfaced early.
 
 ## Source of Truth Docs
 
@@ -291,6 +292,8 @@ Broaden retrieval for large document sets without letting one noisy document dom
 - The default concurrency cap is intentionally conservative for local runs and may need tuning after OCR safety limits are in place.
 - AIFA-043 records OCR attempted/skipped/capped diagnostics, but cached document-reuse artifacts still do not preserve historical OCR disposition.
 - OCR-capped weak PDFs now stay off the indexed evidence path entirely; richer product-facing partial-coverage handling remains for AIFA-048.
+- AIFA-044 broadens retrieval with document-diversity guardrails, but the candidate and per-document limits are still heuristic tuning constants.
+- Retrieval diagnostics are richer now, but evaluation output still does not surface every new retrieval metric explicitly.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.
