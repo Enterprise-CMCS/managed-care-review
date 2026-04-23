@@ -18,13 +18,18 @@ export const sendWithdrawnSubmissionCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails,
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
-    const toAddresses = pruneDuplicateEmails([
-        ...stateAnalystsEmails,
-        ...config.dmcpSubmissionEmails,
-        ...config.oactEmails,
-        ...config.dmcoEmails,
-        ...config.devReviewTeamEmails,
-    ])
+    const receiverEmails = [...config.dmcoEmails, ...config.devReviewTeamEmails]
+
+    // Non-EQRO contracts also notify state analysts, DMCP, and OACT
+    if (withdrawnContract.contractSubmissionType !== 'EQRO') {
+        receiverEmails.push(
+            ...stateAnalystsEmails,
+            ...config.dmcpSubmissionEmails,
+            ...config.oactEmails
+        )
+    }
+
+    const toAddresses = pruneDuplicateEmails(receiverEmails)
 
     const etaData = parseEmailDataWithdrawSubmission(
         withdrawnContract,
