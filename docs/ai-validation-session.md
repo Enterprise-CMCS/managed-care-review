@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-050 Apply work-selection promotion decision to runtime default`.
+The next implementation ticket is `AIFA-051 Persist indexing-phase progress during long validation runs`.
 
 ## Completed
 
@@ -62,6 +62,7 @@ The next implementation ticket is `AIFA-050 Apply work-selection promotion decis
 - AIFA-049B ✔ Implement gated first-pass selection with conservative fallback
 - AIFA-048 ✔ Surface partial validation coverage conservatively
 - AIFA-049C ✔ Validate and promote work selection after evaluation
+- AIFA-050 ✔ Apply work-selection promotion decision to runtime default
 
 ## Current State
 
@@ -274,15 +275,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-050 Apply work-selection promotion decision to runtime default
+### AIFA-051 Persist indexing-phase progress during long validation runs
 
-Use the evaluated work-selection promotion decision to make runtime default selection explicit while preserving the safe `all-doc` escape hatch.
+Persist bounded indexing progress during long-running validation so status artifacts show forward movement before retrieval begins.
 
 ## Suggested Next Step
 
-- Wire the evaluated promotion decision into runtime default selection conservatively.
-- Preserve explicit `all-doc` override behavior for local debugging and safety.
-- Keep fallback and partial-coverage behavior unchanged while improving large-submission throughput.
+- Update `status.json` during document indexing instead of only at phase boundaries.
+- Persist enough progress information to distinguish active work from a stalled run conservatively.
+- Keep validation outputs, fallback behavior, and work selection unchanged.
 
 ## Source of Truth Docs
 
@@ -327,8 +328,10 @@ Use the evaluated work-selection promotion decision to make runtime default sele
 - AIFA-048 now surfaces conservative partial-coverage status on Review & Submit using persisted diagnostics without changing validation execution.
 - `coverageSummary.skippedDocuments` includes unsupported pre-worker skips as well as deferred/OCR-capped worker skips; user-facing partial messaging should continue relying on `isPartial` and `unprocessedDocuments`.
 - AIFA-049C now compares `all-doc` and `gated-first-pass` evaluation runs on separate artifact keys and records a promotion recommendation without changing runtime defaults.
+- AIFA-050 now makes `gated-first-pass` the explicit runtime default while preserving `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` as the escape hatch.
 - Promotion remains environment-sensitive: end-to-end validation of the decision still depends on reachable LocalStack evaluation storage and the large-submission fixture run.
 - The current promotion comparison treats only `match`/`mismatch` to `not-enough-evidence` as a conservative downgrade; broader message/citation parity is still a separate judgment.
+- The runtime override is currently config/env-based rather than surfaced through GraphQL or UI controls, so local debugging and future rollout work need to stay aligned with that single control path.
 - A 165-file local test run continued indexing documents after the Review-page timeout banner appeared, which confirms the worker can keep progressing even when the UI is no longer actively polling.
 - The same 165-file run also showed that persisted status is too coarse during indexing: document artifacts advanced in LocalStack while `status.json` remained frozen at `parsing` from the initial worker write.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.

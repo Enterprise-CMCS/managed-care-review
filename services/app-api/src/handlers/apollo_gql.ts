@@ -26,6 +26,7 @@ import {
 } from '../authn'
 import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
+import type { RuntimeValidationWorkSelectionMode } from '../resolvers/validation/triggerValidation'
 import { configurePostgres, configureEmailer } from './configuration'
 import {
     newAWSEmailParameterStore,
@@ -53,6 +54,30 @@ import { logError } from '../logger'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
+
+function resolveValidationWorkSelectionMode(
+    value: string | undefined
+): RuntimeValidationWorkSelectionMode {
+    // AIFA-050 promotes the evaluated gated-first-pass strategy into the
+    // product runtime by default. The all-doc path remains available as an
+    // explicit escape hatch through config instead of a dynamic artifact read.
+    if (value == null || value.trim() === '') {
+        return 'gated-first-pass'
+    }
+
+    const normalizedValue = value.trim().toLowerCase()
+
+    if (
+        normalizedValue === 'all-doc' ||
+        normalizedValue === 'gated-first-pass'
+    ) {
+        return normalizedValue
+    }
+
+    throw new Error(
+        `Configuration Error: AI_VALIDATION_WORK_SELECTION_MODE must be "all-doc" or "gated-first-pass". Current value: ${value}`
+    )
+}
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
@@ -287,6 +312,8 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     const validationFunctionName = process.env.VALIDATION_FUNCTION_NAME
     const aiValidationArtifactBucket = process.env.AI_VALIDATION_ARTIFACT_BUCKET
+    const aiValidationWorkSelectionMode =
+        process.env.AI_VALIDATION_WORK_SELECTION_MODE
 
     // START Assert configuration is valid
     if (emailerMode !== 'LOCAL' && emailerMode !== 'SES')
@@ -347,6 +374,9 @@ async function initializeGQLHandler(): Promise<Handler> {
             'Configuration Error: AI_VALIDATION_ARTIFACT_BUCKET is required'
         )
     }
+
+    const defaultValidationWorkSelectionMode =
+        resolveValidationWorkSelectionMode(aiValidationWorkSelectionMode)
 
     // END
 
@@ -487,6 +517,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         parameterStoreMode,
         validationFunctionName,
         aiValidationArtifactBucket,
+        defaultValidationWorkSelectionMode,
     }
 
     if (authMode === 'LOCAL') {
@@ -504,6 +535,7 @@ async function initializeGQLHandler(): Promise<Handler> {
         artifactBucket: aiValidationArtifactBucket,
         region,
         useLocalS3: authMode === 'LOCAL',
+        defaultWorkSelectionMode: defaultValidationWorkSelectionMode,
     }
 
     // Resolvers are defined and tested in the resolvers package

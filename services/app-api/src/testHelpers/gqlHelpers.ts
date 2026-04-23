@@ -130,6 +130,7 @@ const constructTestPostgresServer = async (opts?: {
             artifactBucket: 'test-ai-validation-artifacts',
             region: 'us-east-1',
             useLocalS3: true,
+            defaultWorkSelectionMode: 'gated-first-pass',
         }
     )
 

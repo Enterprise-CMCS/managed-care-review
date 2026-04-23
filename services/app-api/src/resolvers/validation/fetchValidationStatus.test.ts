@@ -20,6 +20,7 @@ const baseConfig = {
     artifactBucket: 'ai-form-augmentation-artifacts',
     region: 'us-east-1',
     useLocalS3: false,
+    defaultWorkSelectionMode: 'gated-first-pass' as const,
 }
 
 const currentArtifactVersion =

@@ -7,7 +7,10 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import type { ValidationSourceDocument } from '../../../../ai-form-augmentation/src/handlers'
-import type { ValidationDocumentDiagnostic } from '../../../../ai-form-augmentation/src/results'
+import type {
+    ValidationDocumentDiagnostic,
+    ValidationWorkSelectionMode,
+} from '../../../../ai-form-augmentation/src/results'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
 import {
     getEffectiveValidationDocumentKeys,
@@ -15,11 +18,17 @@ import {
 } from './validationDocumentKeys'
 import { buildValidationFormFields } from './validationFormFields'
 
+export type RuntimeValidationWorkSelectionMode = Extract<
+    ValidationWorkSelectionMode,
+    'all-doc' | 'gated-first-pass'
+>
+
 export interface ValidationResolverConfig {
     validationFunctionName: string
     artifactBucket: string
     region: string
     useLocalS3: boolean
+    defaultWorkSelectionMode: RuntimeValidationWorkSelectionMode
 }
 
 export function triggerValidationResolver(
@@ -169,6 +178,9 @@ export function triggerValidationResolver(
             formFields,
             documents: sourceDocuments,
             documentDiagnostics,
+            ...(config.defaultWorkSelectionMode === 'gated-first-pass'
+                ? { workSelectionMode: 'gated-first-pass' as const }
+                : {}),
             s3Config: config.useLocalS3
                 ? {
                       region: config.region,

@@ -26,6 +26,7 @@ const baseConfig: ValidationResolverConfig = {
     artifactBucket: 'ai-form-augmentation-artifacts',
     region: 'us-east-1',
     useLocalS3: false,
+    defaultWorkSelectionMode: 'gated-first-pass',
 }
 
 const buildStore = (result: unknown): Store =>
@@ -163,6 +164,7 @@ describe('triggerValidationResolver', () => {
                         sourceKey: '1776374348126-doc-b.pdf',
                     },
                 ],
+                workSelectionMode: 'gated-first-pass',
                 s3Config: expect.objectContaining({
                     region: 'us-east-1',
                     endpoint: 'http://localhost:4566',
@@ -205,6 +207,31 @@ describe('triggerValidationResolver', () => {
 
         const sentCommand = sendSpy.mock.calls[0][0]
         expect(sentCommand).toBeInstanceOf(InvokeCommand)
+    })
+
+    it('keeps the all-doc escape hatch when runtime default is overridden', async () => {
+        const store = buildStore(
+            buildContractWithDraft([
+                'allusers/1776374348125-doc-a.pdf',
+                'allusers/1776374348126-doc-b.pdf',
+            ])
+        )
+
+        const resolver = triggerValidationResolver(store, {
+            ...baseConfig,
+            useLocalS3: true,
+            defaultWorkSelectionMode: 'all-doc',
+        }) as NonNullable<MutationResolvers['triggerValidation']>
+
+        const result = await invokeTriggerValidationResolver(resolver)
+
+        expect(result.ok).toBe(true)
+        expect(childStdinEndMock).toHaveBeenCalledTimes(1)
+
+        const serializedPayload = childStdinEndMock.mock.calls[0][0]
+        expect(JSON.parse(serializedPayload)).not.toHaveProperty(
+            'workSelectionMode'
+        )
     })
 
     it('passes only eligible PDF documents to the worker and logs skipped diagnostics', async () => {

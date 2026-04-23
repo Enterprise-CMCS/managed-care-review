@@ -917,7 +917,7 @@ Current document reuse keys off document name plus S3 bucket/key identity. If co
 - artifactVersion and per-document cache behavior remain aligned
 - Fingerprint overhead is measured or documented
 - Low-confidence fingerprint cases are visible in diagnostics"
-AIFA-050 Apply work-selection promotion decision to runtime default,Backlog,7-Large Submission Hardening,High,AIFA-049C,"Apply the evaluated work-selection promotion decision to runtime configuration without weakening the current conservative safeguards.
+AIFA-050 Apply work-selection promotion decision to runtime default,Done,7-Large Submission Hardening,High,AIFA-049C,"Apply the evaluated work-selection promotion decision to runtime configuration without weakening the current conservative safeguards.
 - Make runtime work-selection default explicit instead of implicitly remaining `all-doc`
 - Allow promoted `gated-first-pass` default only when the evaluated decision supports it
 - Preserve an explicit `all-doc` override for debugging and safety
