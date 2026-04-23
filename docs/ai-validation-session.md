@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-046 Split parsed-text artifacts from embedding artifacts`.
+The next implementation ticket is `AIFA-050 Apply work-selection promotion decision to runtime default`.
 
 ## Completed
 
@@ -215,8 +215,28 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - skipped-document diagnostics are currently trigger logs, not persisted status/result artifacts
 - renamed non-PDF files that pass `.pdf` metadata eligibility can still fail the whole worker run until document-level failure isolation is added
 - FAISS is not the next bottleneck to evaluate until realistic large-submission measurements separate vector search time from parsing, OCR, embedding, and retrieval-quality issues
+- the current local 165-file run still spends a long time inside document indexing on the default `all-doc` path, so end-to-end completion time remains poor for large submissions
+- `status.json` currently stays at `parsing` until all selected documents finish indexing, which makes active progress hard to distinguish from a stalled run during long local tests
 
 ## Follow-On Tickets
+
+### AIFA-050 Apply work-selection promotion decision to runtime default
+
+Use the `AIFA-049C` promotion decision to choose the runtime work-selection default explicitly while preserving a safe escape hatch.
+
+- Make runtime default selection explicit rather than implicitly staying on `all-doc`.
+- Allow promoted `gated-first-pass` default only when the evaluated decision supports it.
+- Preserve an explicit `all-doc` override for local debugging and safety.
+- Keep conservative fallback behavior unchanged.
+
+### AIFA-051 Persist indexing-phase progress during long validation runs
+
+Improve long-run progress visibility without changing validation semantics.
+
+- Update `status.json` during document indexing rather than only at phase boundaries.
+- Persist enough bounded progress to distinguish forward movement from a stalled run.
+- Keep Review & Submit advisory and non-blocking.
+- Avoid changing validation results, work selection, or fallback behavior.
 
 ### AIFA-039 through AIFA-049C Large-submission hardening
 
@@ -254,15 +274,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-046 Split parsed-text artifacts from embedding artifacts
+### AIFA-050 Apply work-selection promotion decision to runtime default
 
-Persist reusable parsed-text artifacts separately so OCR and parse work do not need to be repeated just to rebuild chunks or embeddings.
+Use the evaluated work-selection promotion decision to make runtime default selection explicit while preserving the safe `all-doc` escape hatch.
 
 ## Suggested Next Step
 
-- Persist parsed text, page text, extraction method, and extraction notes as separate per-document artifacts.
-- Rebuild chunk and embedding artifacts from parsed text when reuse is safe.
-- Keep reuse aligned with the current document-identity contract until AIFA-047 strengthens it.
+- Wire the evaluated promotion decision into runtime default selection conservatively.
+- Preserve explicit `all-doc` override behavior for local debugging and safety.
+- Keep fallback and partial-coverage behavior unchanged while improving large-submission throughput.
 
 ## Source of Truth Docs
 
@@ -309,6 +329,8 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 - AIFA-049C now compares `all-doc` and `gated-first-pass` evaluation runs on separate artifact keys and records a promotion recommendation without changing runtime defaults.
 - Promotion remains environment-sensitive: end-to-end validation of the decision still depends on reachable LocalStack evaluation storage and the large-submission fixture run.
 - The current promotion comparison treats only `match`/`mismatch` to `not-enough-evidence` as a conservative downgrade; broader message/citation parity is still a separate judgment.
+- A 165-file local test run continued indexing documents after the Review-page timeout banner appeared, which confirms the worker can keep progressing even when the UI is no longer actively polling.
+- The same 165-file run also showed that persisted status is too coarse during indexing: document artifacts advanced in LocalStack while `status.json` remained frozen at `parsing` from the initial worker write.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.

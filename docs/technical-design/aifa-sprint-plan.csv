@@ -917,3 +917,30 @@ Current document reuse keys off document name plus S3 bucket/key identity. If co
 - artifactVersion and per-document cache behavior remain aligned
 - Fingerprint overhead is measured or documented
 - Low-confidence fingerprint cases are visible in diagnostics"
+AIFA-050 Apply work-selection promotion decision to runtime default,Backlog,7-Large Submission Hardening,High,AIFA-049C,"Apply the evaluated work-selection promotion decision to runtime configuration without weakening the current conservative safeguards.
+- Make runtime work-selection default explicit instead of implicitly remaining `all-doc`
+- Allow promoted `gated-first-pass` default only when the evaluated decision supports it
+- Preserve an explicit `all-doc` override for debugging and safety
+- Keep conservative fallback behavior from AIFA-049B unchanged
+- Keep partial-coverage handling from AIFA-048 accurate under the runtime default
+
+Why this matters:
+The evaluation harness now records when gated work selection is safe enough to promote, but the product runtime still pays the full `all-doc` cost on large submissions unless that decision is applied deliberately.","- Runtime default work-selection mode is explicit
+- Promoted `gated-first-pass` default is only enabled when the evaluated decision supports it
+- An explicit `all-doc` override remains available
+- Conservative fallback behavior is unchanged
+- Partial-coverage messaging remains accurate under the selected runtime default
+- Focused tests cover default selection and override behavior"
+AIFA-051 Persist indexing-phase progress during long validation runs,Backlog,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-042","Persist bounded indexing progress during long-running validation so status artifacts show forward movement before retrieval begins.
+- Update `status.json` during document indexing instead of only at phase boundaries
+- Persist enough progress information to distinguish active work from a stalled run
+- Keep stage semantics compatible with existing UI polling and stale/current artifact handling
+- Keep the change diagnostic-only and avoid changing validation outputs or fallback behavior
+- Avoid writing progress so frequently that artifact churn becomes noisy
+
+Why this matters:
+Large local submissions can spend many minutes indexing documents while `status.json` stays frozen at `parsing`, which makes active progress hard to distinguish from a wedged worker.","- `status.json` updates during long indexing runs
+- Persisted progress includes enough information to show forward movement conservatively
+- Existing Review-page polling remains compatible with the updated status artifact shape
+- Validation results, fallback behavior, and work selection remain unchanged
+- Focused tests cover indexing-progress writes and terminal status behavior"
