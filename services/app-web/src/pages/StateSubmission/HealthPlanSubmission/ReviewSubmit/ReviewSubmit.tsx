@@ -40,6 +40,7 @@ import { activeFormPages } from '../../submissionUtils'
 import { featureFlags } from '@mc-review/common-code'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { AIValidationStatusCard } from './AIvalidationStatusCard'
+import type { AIValidationCoverageSummary } from './aiValidationCoverage'
 import { getAIValidationDisplayState } from './aiValidationStatus'
 import { mapAIValidationFindings } from './aiValidationFindings'
 import { shouldTriggerAIValidation } from '../aiValidation/shouldTriggerAIValidation'
@@ -104,6 +105,12 @@ export const ReviewSubmit = (): React.ReactElement => {
     })
 
     const validationStatus = validationData?.validationStatus
+    const validationCoverageSummary = validationStatus?.coverageSummary
+    const validationDisplayCoverageSummary: AIValidationCoverageSummary | null =
+        validationStatus?.stage === 'complete' ||
+        validationStatus?.stage === 'failed'
+            ? (validationCoverageSummary ?? null)
+            : null
     const showInitialValidationLoading =
         validationLoading && !validationStatus && !validationError
     const validationFindings = validationStatus?.results ?? []
@@ -147,6 +154,7 @@ export const ReviewSubmit = (): React.ReactElement => {
         stage: validationStatus?.stage,
         isStale: validationStatus?.isStale,
         error: validationStatus?.error,
+        isPartialCoverage: validationDisplayCoverageSummary?.isPartial,
         hasTimedOut:
             validationTimedOut &&
             !showValidationFindings &&
@@ -305,6 +313,7 @@ export const ReviewSubmit = (): React.ReactElement => {
                                         }
                                       : validationDisplayState
                             }
+                            coverageSummary={validationDisplayCoverageSummary}
                         />
                     </section>
                 )}

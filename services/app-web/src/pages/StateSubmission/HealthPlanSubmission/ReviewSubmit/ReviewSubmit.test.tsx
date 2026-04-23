@@ -26,6 +26,14 @@ const validationStatusMock = (overrides?: {
     stage?: string
     isStale?: boolean
     error?: string | null
+    coverageSummary?: {
+        isPartial: boolean
+        skippedDocuments: number
+        failedDocuments: number
+        ocrCappedDocuments: number
+        deferredDocuments: number
+        unprocessedDocuments: number
+    } | null
     results?: {
         field: string
         outcome: string
@@ -55,6 +63,7 @@ const validationStatusMock = (overrides?: {
                 artifactVersion: 'test-artifact-version',
                 isStale: overrides?.isStale ?? false,
                 error: overrides?.error ?? null,
+                coverageSummary: overrides?.coverageSummary ?? null,
                 results: overrides?.results ?? [],
             },
         },
@@ -567,6 +576,62 @@ describe('ReviewSubmit', () => {
             ).toBeInTheDocument()
         })
 
+        it('shows limited-coverage wording when completion is partial', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                coverageSummary: {
+                                    isPartial: true,
+                                    skippedDocuments: 2,
+                                    failedDocuments: 1,
+                                    ocrCappedDocuments: 0,
+                                    deferredDocuments: 1,
+                                    unprocessedDocuments: 2,
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: aiValidationFeatureFlags,
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Document review complete with limited coverage',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'We finished comparing the submission dates with the uploaded documents we could review. Some uploaded documents could not be fully reviewed.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Limited coverage: 2 eligible uploaded documents were not fully reviewed (1 failed, 1 deferred).'
+                )
+            ).toBeInTheDocument()
+        })
+
         it('shows a non-blocking unavailable message when validation status fails', async () => {
             renderWithProviders(
                 <Routes>
@@ -712,6 +777,72 @@ describe('ReviewSubmit', () => {
             expect(screen.getByText('Page 2')).toBeInTheDocument()
             expect(screen.getByText('scan-b.pdf')).toBeInTheDocument()
             expect(screen.getByText('Page 4')).toBeInTheDocument()
+        })
+
+        it('uses conservative findings copy when document coverage is partial', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                coverageSummary: {
+                                    isPartial: true,
+                                    skippedDocuments: 2,
+                                    failedDocuments: 1,
+                                    ocrCappedDocuments: 1,
+                                    deferredDocuments: 0,
+                                    unprocessedDocuments: 2,
+                                },
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'match',
+                                        confidence: 'high',
+                                        message:
+                                            'Start date matches document text.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: aiValidationFeatureFlags,
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Document review results',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'We compared the dates in this submission with the uploaded documents we could review. These results are advisory and do not block submission.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Limited coverage: 2 eligible uploaded documents were not fully reviewed (1 failed, 1 OCR-capped).'
+                )
+            ).toBeInTheDocument()
         })
 
         it('renders findings expanded first and allows the user to collapse them', async () => {

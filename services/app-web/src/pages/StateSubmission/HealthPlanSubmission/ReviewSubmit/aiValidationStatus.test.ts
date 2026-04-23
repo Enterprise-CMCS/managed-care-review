@@ -30,4 +30,19 @@ describe('getAIValidationDisplayState', () => {
             isPolling: false,
         })
     })
+
+    it('uses limited-coverage wording when completed results are partial', () => {
+        expect(
+            getAIValidationDisplayState({
+                stage: 'complete',
+                isPartialCoverage: true,
+            })
+        ).toEqual({
+            title: 'Document review complete with limited coverage',
+            message:
+                'We finished comparing the submission dates with the uploaded documents we could review. Some uploaded documents could not be fully reviewed.',
+            alertType: 'success',
+            isPolling: false,
+        })
+    })
 })

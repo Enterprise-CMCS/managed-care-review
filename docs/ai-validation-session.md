@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-048 Surface partial validation coverage conservatively`.
+The next implementation ticket is `AIFA-049C Validate and promote work selection after evaluation`.
 
 ## Completed
 
@@ -60,6 +60,7 @@ The next implementation ticket is `AIFA-048 Surface partial validation coverage 
 - AIFA-049A ✔ Add diagnostic-only work-selection scoring
 - AIFA-045 ✔ Evaluate document prioritization and two-pass retrieval
 - AIFA-049B ✔ Implement gated first-pass selection with conservative fallback
+- AIFA-048 ✔ Surface partial validation coverage conservatively
 
 ## Current State
 
@@ -252,15 +253,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-048 Surface partial validation coverage conservatively
+### AIFA-049C Validate and promote work selection after evaluation
 
-Expose when validation coverage is partial so gated and degraded runs do not look fully reviewed.
+Compare gated behavior against all-document processing and decide whether promotion is safe.
 
 ## Suggested Next Step
 
-- Expose partial-versus-full coverage from the stored validation artifacts.
-- Keep the Review page advisory while avoiding “fully reviewed” implications on partial runs.
-- Reuse existing skipped, failed, OCR-capped, and deferred diagnostics instead of inventing new scoring UI.
+- Compare gated-first-pass plus fallback artifacts against all-doc results on the corpus and large fixture.
+- Confirm promoted behavior is equal or more conservative before changing defaults.
+- Keep the all-doc escape hatch available if promotion is not justified.
 
 ## Source of Truth Docs
 
@@ -302,7 +303,8 @@ Expose when validation coverage is partial so gated and degraded runs do not loo
 - AIFA-045 now recommends full fallback conservatively, but the simulated first-pass rule is still heuristic and narrower than the broader AIFA-049A scoring bucket.
 - The AIFA-045 field-strategy analysis only covers fields with stored final results; failed-before-result runs still fall back to scenario-level diagnostics only.
 - AIFA-049B now keeps gated and all-doc runs distinct in cache and artifacts, but a `gated-first-pass` request can still reuse a prior `gated-fallback` result.
-- AIFA-049B records field evidence source and partial states in artifacts, but user-facing partial coverage handling still belongs to AIFA-048.
+- AIFA-048 now surfaces conservative partial-coverage status on Review & Submit using persisted diagnostics without changing validation execution.
+- `coverageSummary.skippedDocuments` includes unsupported pre-worker skips as well as deferred/OCR-capped worker skips; user-facing partial messaging should continue relying on `isPartial` and `unprocessedDocuments`.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.

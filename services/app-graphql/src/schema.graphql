@@ -560,7 +560,17 @@ type ValidationStatusPayload {
     artifactVersion: String!
     isStale: Boolean!
     error: String
+    coverageSummary: ValidationCoverageSummary
     results: [ValidationFinding!]!
+}
+
+type ValidationCoverageSummary {
+    isPartial: Boolean!
+    skippedDocuments: Int!
+    failedDocuments: Int!
+    ocrCappedDocuments: Int!
+    deferredDocuments: Int!
+    unprocessedDocuments: Int!
 }
 
 input CreateContractInput {

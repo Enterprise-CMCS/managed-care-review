@@ -10,8 +10,9 @@ export function getAIValidationDisplayState(args: {
     isStale?: boolean
     error?: string | null
     hasTimedOut?: boolean
+    isPartialCoverage?: boolean
 }): AIValidationDisplayState {
-    const { stage, isStale, error, hasTimedOut } = args
+    const { stage, isStale, error, hasTimedOut, isPartialCoverage } = args
 
     if (hasTimedOut) {
         return {
@@ -45,9 +46,12 @@ export function getAIValidationDisplayState(args: {
             }
         case 'complete':
             return {
-                title: 'Document review complete',
-                message:
-                    'We finished comparing the submission dates with the uploaded documents.',
+                title: isPartialCoverage
+                    ? 'Document review complete with limited coverage'
+                    : 'Document review complete',
+                message: isPartialCoverage
+                    ? 'We finished comparing the submission dates with the uploaded documents we could review. Some uploaded documents could not be fully reviewed.'
+                    : 'We finished comparing the submission dates with the uploaded documents.',
                 alertType: 'success',
                 isPolling: false,
             }

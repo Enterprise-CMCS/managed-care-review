@@ -855,7 +855,7 @@ This is the first behavior-changing work-selection step, so it must be reversibl
 - Evidence source is recorded as first-pass, fallback, or partial
 - Validation artifacts indicate whether the run used all-doc processing or gated work selection
 - Existing all-doc processing path remains available"
-AIFA-048 Surface partial validation coverage conservatively,Backlog,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-043, AIFA-049B","Expose a conservative partial-validation state when some eligible documents were skipped, failed, OCR-capped, deferred beyond max-work, or not fully processed.
+AIFA-048 Surface partial validation coverage conservatively,Done,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-043, AIFA-049B","Expose a conservative partial-validation state when some eligible documents were skipped, failed, OCR-capped, deferred beyond max-work, or not fully processed.
 - Keep the Review page advisory and non-blocking
 - Avoid implying all documents were reviewed when diagnostics show partial coverage
 - Summarize partial coverage without overwhelming users

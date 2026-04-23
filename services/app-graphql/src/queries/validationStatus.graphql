@@ -4,6 +4,14 @@ query ValidationStatus($input: ValidationStatusInput!) {
         artifactVersion
         isStale
         error
+        coverageSummary {
+            isPartial
+            skippedDocuments
+            failedDocuments
+            ocrCappedDocuments
+            deferredDocuments
+            unprocessedDocuments
+        }
         results {
             field
             outcome

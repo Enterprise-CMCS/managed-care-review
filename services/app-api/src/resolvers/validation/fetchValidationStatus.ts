@@ -10,12 +10,52 @@ import {
 import {
     getValidationResultKey,
     type ValidationResultArtifact,
+    type ValidationDocumentDiagnostic,
 } from '../../../../ai-form-augmentation/src/results'
 import { computeFormSnapshotHash } from '../../../../ai-form-augmentation/src/versioning'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
 import type { ValidationResolverConfig } from './triggerValidation'
 import { getEffectiveValidationDocumentKeys } from './validationDocumentKeys'
 import { buildValidationFormFields } from './validationFormFields'
+
+function buildValidationCoverageSummary(
+    documentDiagnostics: ValidationDocumentDiagnostic[] | undefined
+) {
+    if (!documentDiagnostics || documentDiagnostics.length === 0) {
+        return null
+    }
+
+    const skippedDocuments = documentDiagnostics.filter(
+        (diagnostic) => diagnostic.status === 'skipped'
+    ).length
+    const failedDocuments = documentDiagnostics.filter(
+        (diagnostic) => diagnostic.status === 'failed'
+    ).length
+    const ocrCappedDocuments = documentDiagnostics.filter(
+        (diagnostic) => diagnostic.reason === 'ocr-capped-large-batch'
+    ).length
+    const deferredDocuments = documentDiagnostics.filter(
+        (diagnostic) => diagnostic.reason === 'deferred-first-pass'
+    ).length
+    // Partial coverage should only reflect reviewable worker inputs that were
+    // not fully processed. Trigger-time unsupported-file skips still appear in
+    // the raw counts, but they do not mean the PDF worker had partial coverage.
+    const unprocessedDocuments = documentDiagnostics.filter(
+        (diagnostic) =>
+            diagnostic.status !== 'processed' &&
+            Boolean(diagnostic.sourceBucket) &&
+            Boolean(diagnostic.sourceKey)
+    ).length
+
+    return {
+        isPartial: unprocessedDocuments > 0,
+        skippedDocuments,
+        failedDocuments,
+        ocrCappedDocuments,
+        deferredDocuments,
+        unprocessedDocuments,
+    }
+}
 
 export function fetchValidationStatusResolver(
     store: Store,
@@ -57,6 +97,7 @@ export function fetchValidationStatusResolver(
                 artifactVersion: '',
                 isStale: false,
                 error: null,
+                coverageSummary: null,
                 results: [],
             }
         }
@@ -76,6 +117,7 @@ export function fetchValidationStatusResolver(
                 artifactVersion: '',
                 isStale: false,
                 error: null,
+                coverageSummary: null,
                 results: [],
             }
         }
@@ -189,6 +231,7 @@ export function fetchValidationStatusResolver(
                 artifactVersion,
                 isStale: false,
                 error: null,
+                coverageSummary: null,
                 results: [],
             }
         }
@@ -206,6 +249,7 @@ export function fetchValidationStatusResolver(
                 artifactVersion,
                 isStale: true,
                 error: null,
+                coverageSummary: null,
                 results: [],
             }
         }
@@ -223,6 +267,7 @@ export function fetchValidationStatusResolver(
                 artifactVersion,
                 isStale: true,
                 error: null,
+                coverageSummary: null,
                 results: [],
             }
         }
@@ -238,9 +283,15 @@ export function fetchValidationStatusResolver(
                 artifactVersion,
                 isStale: true,
                 error: null,
+                coverageSummary: null,
                 results: [],
             }
         }
+
+        const coverageSummary = buildValidationCoverageSummary(
+            resultArtifact?.documentDiagnostics ??
+                statusArtifact?.documentDiagnostics
+        )
 
         if (statusArtifact?.stage === 'failed') {
             logSuccess('validationStatus')
@@ -250,6 +301,7 @@ export function fetchValidationStatusResolver(
                 artifactVersion,
                 isStale: false,
                 error: statusArtifact.error,
+                coverageSummary,
                 results: [],
             }
         }
@@ -262,6 +314,7 @@ export function fetchValidationStatusResolver(
                 artifactVersion,
                 isStale: false,
                 error: null,
+                coverageSummary,
                 results: resultArtifact.results,
             }
         }
@@ -275,6 +328,7 @@ export function fetchValidationStatusResolver(
             artifactVersion,
             isStale: false,
             error: null,
+            coverageSummary,
             results: [],
         }
     }
