@@ -79,7 +79,7 @@ function toLambdaEvent(req: Request): APIGatewayProxyEvent {
         multiValueHeaders: {},
         queryStringParameters: req.query as Record<string, string>,
         multiValueQueryStringParameters: null,
-        pathParameters: req.params || null,
+        pathParameters: (req.params as Record<string, string>) || null,
         stageVariables: null,
         body,
         isBase64Encoded: false,

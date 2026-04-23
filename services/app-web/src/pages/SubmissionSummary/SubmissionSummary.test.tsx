@@ -19,7 +19,6 @@ import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/HealthPlanSubmission/ReviewSubmit'
 import { generatePath, Location, Route, Routes } from 'react-router-dom'
 import { dayjs } from '@mc-review/dates'
-import { prettyDOM } from '@testing-library/react'
 
 describe('SubmissionSummary', () => {
     describe.each(iterableCmsUsersMockData)(
