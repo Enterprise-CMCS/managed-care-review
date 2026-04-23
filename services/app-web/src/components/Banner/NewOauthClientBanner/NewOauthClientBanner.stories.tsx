@@ -15,7 +15,7 @@ const Template: StoryFn<React.ComponentProps<typeof NewOauthClientBanner>> = (
 export const Default = Template.bind({})
 Default.args = {
     clientId: 'abc-123-def-456',
-    clientSecret: 'secret-789-xyz',
+    clientSecret: 'secret-789-xyz', // pragma: allowlist secret
     description:
         'OAuth client for automated API access to MC-Review submissions.',
     grants: ['client_credentials', 'authorization_code'],
