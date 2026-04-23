@@ -14,7 +14,7 @@
         "dayjs": "^1.11.19",
         "graphql": "^16.13.2",
         "typescript": "5.9.3",
-        "uuid": "^13.0.0"
+        "uuid": "^14.0.0"
     },
     "devDependencies": {
         "@types/jest": "^30.0.0",
