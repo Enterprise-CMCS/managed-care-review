@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   buildCompletedValidationStatusArtifact,
+  buildValidationStatusArtifact,
   buildFailedValidationStatusArtifact
 } from './statusArtifact'
 
@@ -80,5 +81,26 @@ test('buildCompletedValidationStatusArtifact preserves document coverage diagnos
       stage: 'cache'
     }
   ])
+  assert.equal(artifact.workSelectionMode, 'gated-first-pass')
+})
+
+test('buildValidationStatusArtifact can include bounded indexing progress during parsing', () => {
+  const artifact = buildValidationStatusArtifact(
+    'parsing',
+    'artifact-v1',
+    null,
+    [],
+    'gated-first-pass',
+    {
+      completedDocuments: 3,
+      totalDocuments: 12
+    }
+  )
+
+  assert.equal(artifact.stage, 'parsing')
+  assert.deepEqual(artifact.indexingProgress, {
+    completedDocuments: 3,
+    totalDocuments: 12
+  })
   assert.equal(artifact.workSelectionMode, 'gated-first-pass')
 })

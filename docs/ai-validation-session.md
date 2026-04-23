@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-051 Persist indexing-phase progress during long validation runs`.
+The next implementation ticket is `AIFA-046 Split parsed-text artifacts from embedding artifacts`.
 
 ## Completed
 
@@ -63,6 +63,7 @@ The next implementation ticket is `AIFA-051 Persist indexing-phase progress duri
 - AIFA-048 ✔ Surface partial validation coverage conservatively
 - AIFA-049C ✔ Validate and promote work selection after evaluation
 - AIFA-050 ✔ Apply work-selection promotion decision to runtime default
+- AIFA-051 ✔ Persist indexing-phase progress during long validation runs
 
 ## Current State
 
@@ -275,15 +276,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-051 Persist indexing-phase progress during long validation runs
+### AIFA-046 Split parsed-text artifacts from embedding artifacts
 
-Persist bounded indexing progress during long-running validation so status artifacts show forward movement before retrieval begins.
+Persist reusable parsed-text artifacts separately so OCR and parse work do not need to be repeated just to rebuild chunks or embeddings.
 
 ## Suggested Next Step
 
-- Update `status.json` during document indexing instead of only at phase boundaries.
-- Persist enough progress information to distinguish active work from a stalled run conservatively.
-- Keep validation outputs, fallback behavior, and work selection unchanged.
+- Persist parsed text, page text, extraction method, and extraction notes as separate per-document artifacts.
+- Rebuild chunk and embedding artifacts from parsed text when reuse is safe.
+- Keep reuse aligned with the current document-identity contract until AIFA-047 strengthens it.
 
 ## Source of Truth Docs
 
@@ -329,9 +330,11 @@ Persist bounded indexing progress during long-running validation so status artif
 - `coverageSummary.skippedDocuments` includes unsupported pre-worker skips as well as deferred/OCR-capped worker skips; user-facing partial messaging should continue relying on `isPartial` and `unprocessedDocuments`.
 - AIFA-049C now compares `all-doc` and `gated-first-pass` evaluation runs on separate artifact keys and records a promotion recommendation without changing runtime defaults.
 - AIFA-050 now makes `gated-first-pass` the explicit runtime default while preserving `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` as the escape hatch.
+- AIFA-051 now writes bounded indexing progress to `status.json` during long parsing runs without changing validation outcomes or stage semantics.
 - Promotion remains environment-sensitive: end-to-end validation of the decision still depends on reachable LocalStack evaluation storage and the large-submission fixture run.
 - The current promotion comparison treats only `match`/`mismatch` to `not-enough-evidence` as a conservative downgrade; broader message/citation parity is still a separate judgment.
 - The runtime override is currently config/env-based rather than surfaced through GraphQL or UI controls, so local debugging and future rollout work need to stay aligned with that single control path.
+- `indexingProgress.totalDocuments` is currently scoped to the active indexing pass, so a later gated-fallback pass may report against a larger total instead of retroactively rewriting first-pass progress.
 - A 165-file local test run continued indexing documents after the Review-page timeout banner appeared, which confirms the worker can keep progressing even when the UI is no longer actively polling.
 - The same 165-file run also showed that persisted status is too coarse during indexing: document artifacts advanced in LocalStack while `status.json` remained frozen at `parsing` from the initial worker write.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.

@@ -85,6 +85,7 @@ export { validationHandler } from './handlers'
 // Status
 export type {
   ValidationPipelineStage,
+  ValidationIndexingProgressArtifact,
   ValidationStatusArtifact
 } from './status'
 export {

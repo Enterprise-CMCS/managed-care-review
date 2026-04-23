@@ -3,6 +3,7 @@ import type { DateValidationFieldInput } from '../../../../ai-form-augmentation/
 
 const {
     getBufferMock,
+    getJsonMock,
     putJsonMock,
     parsePdfMock,
     chunkDocumentMock,
@@ -15,6 +16,7 @@ const {
     consoleWarnMock,
 } = vi.hoisted(() => ({
     getBufferMock: vi.fn(),
+    getJsonMock: vi.fn(),
     putJsonMock: vi.fn(),
     parsePdfMock: vi.fn(),
     chunkDocumentMock: vi.fn(),
@@ -55,6 +57,7 @@ const {
 vi.mock('../../../../ai-form-augmentation/src/s3', () => ({
     newArtifactS3Client: vi.fn(() => ({
         getBuffer: getBufferMock,
+        getJson: getJsonMock,
         putJson: putJsonMock,
     })),
 }))
@@ -71,35 +74,60 @@ vi.mock('../../../../ai-form-augmentation/src/embeddings', () => ({
     XenovaEmbeddingProvider: vi.fn().mockImplementation(() => ({
         embedTexts: embedTextsMock,
         embedText: embedTextMock,
+        getModelInfo: vi.fn(() => 'test-embedding-model'),
     })),
 }))
 
-vi.mock('../../../../ai-form-augmentation/src/llm', () => ({
-    OllamaValidationClient: vi.fn().mockImplementation(() => ({
-        generateValidation: generateValidationMock,
-    })),
-}))
+vi.mock('../../../../ai-form-augmentation/src/llm', async (importOriginal) => {
+    const actual = (await importOriginal()) as Record<string, unknown>
+
+    return {
+        ...actual,
+        OllamaValidationClient: vi.fn().mockImplementation(() => ({
+            generateValidation: generateValidationMock,
+        })),
+        newValidationLlmClient: vi.fn().mockImplementation(() => ({
+            generateValidation: generateValidationMock,
+        })),
+    }
+})
 
 vi.mock('../../../../ai-form-augmentation/src/prompts', () => ({
     buildDateValidationPrompt: buildDateValidationPromptMock,
 }))
 
-vi.mock('../../../../ai-form-augmentation/src/retrieval', () => ({
-    orderRetrievedChunks: vi.fn(
-        (
-            results: Array<{
-                id: string
-                score: number
-                metadata: unknown
-            }>
-        ) => results
-    ),
-}))
+vi.mock(
+    '../../../../ai-form-augmentation/src/retrieval',
+    async (importOriginal) => {
+        const actual = (await importOriginal()) as Record<string, unknown>
 
-vi.mock('../../../../ai-form-augmentation/src/validation-output', () => ({
-    runDeterministicDateValidation: runDeterministicDateValidationMock,
-    parseValidationResponse: parseValidationResponseMock,
-}))
+        return {
+            ...actual,
+            orderRetrievedChunks: vi.fn(
+                (
+                    results: Array<{
+                        id: string
+                        score: number
+                        metadata: unknown
+                    }>
+                ) => results
+            ),
+        }
+    }
+)
+
+vi.mock(
+    '../../../../ai-form-augmentation/src/validation-output',
+    async (importOriginal) => {
+        const actual = (await importOriginal()) as Record<string, unknown>
+
+        return {
+            ...actual,
+            runDeterministicDateValidation: runDeterministicDateValidationMock,
+            parseValidationResponse: parseValidationResponseMock,
+        }
+    }
+)
 
 import { getChunksArtifactKey } from '../../../../ai-form-augmentation/src/artifacts'
 import { getValidationResultKey } from '../../../../ai-form-augmentation/src/results'
@@ -140,20 +168,24 @@ describe('validationHandler', () => {
         vi.spyOn(console, 'warn').mockImplementation(consoleWarnMock)
 
         getBufferMock.mockResolvedValue(Buffer.from('fake-pdf'))
-        parsePdfMock.mockResolvedValue({
-            fileName: 'contract-a.pdf',
-            rawText: 'START DATE January 1, 2025 END DATE December 31, 2025',
-            pageTexts: [
-                'START DATE January 1, 2025 END DATE December 31, 2025',
-            ],
-            pageCount: 1,
-            extractionMethod: 'pdf-text',
-            extractionNotes: [],
-        })
-        chunkDocumentMock.mockReturnValue([
+        getJsonMock.mockRejectedValue(new Error('S3 object not found'))
+        parsePdfMock.mockImplementation(
+            async (_fileBuffer: Buffer, fileName: string) => ({
+                fileName,
+                rawText:
+                    'START DATE January 1, 2025 END DATE December 31, 2025',
+                pageTexts: [
+                    'START DATE January 1, 2025 END DATE December 31, 2025',
+                ],
+                pageCount: 1,
+                extractionMethod: 'pdf-text',
+                extractionNotes: [],
+            })
+        )
+        chunkDocumentMock.mockImplementation((fileName: string) => [
             {
-                chunkId: 'contract-a.pdf::chunk-0',
-                documentName: 'contract-a.pdf',
+                chunkId: `${fileName}::chunk-0`,
+                documentName: fileName,
                 order: 0,
                 page: null,
                 text: 'START DATE January 1, 2025 END DATE December 31, 2025',
@@ -206,11 +238,11 @@ describe('validationHandler', () => {
 
         expect(embedTextMock).toHaveBeenNthCalledWith(
             1,
-            'START DATE CONTRACT START DATE the contract will become effective term begins on'
+            'START DATE CONTRACT START DATE the contract will become effective term begins on term of this contract term of this agreement amended to read deemed to read superseding replacement'
         )
         expect(embedTextMock).toHaveBeenNthCalledWith(
             2,
-            'contract end date through end date current contract expiration date requested contract expiration date original contract expiration date continue in full force and effect through term ends expiration date'
+            'contract end date through end date current contract expiration date requested contract expiration date original contract expiration date continue in full force and effect through term ends expiration date term of this contract term of this agreement amended to read deemed to read superseding replacement notwithstanding'
         )
         expect(consoleWarnMock).toHaveBeenCalledWith(
             'Validation citations missing page metadata',
@@ -292,7 +324,7 @@ describe('validationHandler', () => {
         parsePdfMock.mockRejectedValueOnce(new Error('parse failure'))
 
         await expect(validationHandler(baseEvent)).rejects.toThrow(
-            'parse failure'
+            'Validation could not index any usable documents for form test-form'
         )
 
         expect(putJsonMock).toHaveBeenNthCalledWith(
@@ -311,9 +343,48 @@ describe('validationHandler', () => {
             expect.objectContaining({
                 stage: 'failed',
                 artifactVersion: 'artifact-v1',
-                error: 'parse failure',
+                error: 'Validation could not index any usable documents for form test-form',
+                documentDiagnostics: [
+                    expect.objectContaining({
+                        documentName: 'contract-a.pdf',
+                        status: 'failed',
+                        error: 'parse failure',
+                    }),
+                ],
             })
         )
+    })
+
+    it('persists bounded parsing progress during multi-document indexing', async () => {
+        const multiDocumentEvent = {
+            ...baseEvent,
+            documents: Array.from({ length: 6 }, (_value, index) => ({
+                documentName: `contract-${index}.pdf`,
+                sourceBucket: 'local-uploads',
+                sourceKey: `uploads/contracts/contract-${index}.pdf`,
+            })),
+        }
+
+        await validationHandler(multiDocumentEvent)
+
+        const parsingProgressWrites = putJsonMock.mock.calls
+            .filter(
+                (call) =>
+                    call[1] === getValidationStatusKey('test-form') &&
+                    call[2]?.stage === 'parsing' &&
+                    call[2]?.indexingProgress != null
+            )
+            .map((call) => call[2].indexingProgress.completedDocuments)
+
+        expect(parsingProgressWrites).toEqual([1, 2, 3, 5, 6])
+        expect(
+            putJsonMock.mock.calls.some(
+                (call) =>
+                    call[1] === getValidationStatusKey('test-form') &&
+                    call[2]?.stage === 'parsing' &&
+                    call[2]?.indexingProgress?.completedDocuments === 4
+            )
+        ).toBe(false)
     })
 
     it('routes unresolved fields to the llm with field-specific retrieval context', async () => {
@@ -390,7 +461,8 @@ describe('validationHandler', () => {
                         field: 'contractStartDate',
                         outcome: 'match',
                         confidence: 'medium',
-                        message: 'Start date matches.',
+                        message:
+                            'Document text supports start date as 01/01/2025.',
                         decisionSource: 'llm',
                         citations: [
                             {

@@ -116,6 +116,7 @@ export const FIELD_RETRIEVAL_FINAL_CHUNK_LIMIT = 4
 // Allow at most two chunks per document so one contract cannot crowd out all
 // other candidates, but still preserve some same-document continuity.
 export const FIELD_RETRIEVAL_MAX_CHUNKS_PER_DOCUMENT = 2
+const INDEXING_PROGRESS_INTERVAL = 5
 
 export async function validationHandler(
   event: ValidationHandlerEvent
@@ -218,12 +219,16 @@ export async function validationHandler(
     const firstPassIndexing = await indexValidationDocuments({
       event,
       s3Client,
+      statusKey,
       embeddingProvider,
       embeddingModel,
       unchangedDocumentCacheKeys,
       shouldAttemptOcrFallback,
       documents: selectedDocuments,
-      workSelectionByCacheKey
+      workSelectionByCacheKey,
+      completedDocumentOffset: 0,
+      totalDocumentsToIndex: selectedDocuments.length,
+      workSelectionMode: requestedWorkSelectionMode
     })
     let indexedDocuments = firstPassIndexing.indexedDocuments
     documentDiagnostics = [
@@ -282,12 +287,17 @@ export async function validationHandler(
       const fallbackIndexing = await indexValidationDocuments({
         event,
         s3Client,
+        statusKey,
         embeddingProvider,
         embeddingModel,
         unchangedDocumentCacheKeys,
         shouldAttemptOcrFallback,
         documents: deferredDocuments,
-        workSelectionByCacheKey
+        workSelectionByCacheKey,
+        completedDocumentOffset: selectedDocuments.length,
+        totalDocumentsToIndex:
+          selectedDocuments.length + deferredDocuments.length,
+        workSelectionMode: 'gated-fallback'
       })
       indexedDocuments = [
         ...indexedDocuments,
@@ -421,21 +431,26 @@ export async function mapWithConcurrencyLimit<T, R>(
 async function indexValidationDocuments(args: {
   event: ValidationHandlerEvent
   s3Client: ArtifactS3Client
+  statusKey: string
   embeddingProvider: XenovaEmbeddingProvider
   embeddingModel: string
   unchangedDocumentCacheKeys: Set<string>
   shouldAttemptOcrFallback: () => boolean
   documents: ValidationSourceDocument[]
   workSelectionByCacheKey: Map<string, ValidationDocumentWorkSelectionDiagnostic>
+  completedDocumentOffset: number
+  totalDocumentsToIndex: number
+  workSelectionMode: 'all-doc' | 'gated-first-pass' | 'gated-fallback'
 }): Promise<{
   indexedDocuments: IndexedDocumentArtifact[]
   documentDiagnostics: ValidationDocumentDiagnostic[]
 }> {
+  let completedDocuments = args.completedDocumentOffset
   const documentIndexingResults = await mapWithConcurrencyLimit(
     args.documents,
     DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
-    (document) =>
-      indexValidationDocument({
+    async (document) => {
+      const result = await indexValidationDocument({
         event: args.event,
         s3Client: args.s3Client,
         embeddingProvider: args.embeddingProvider,
@@ -444,6 +459,37 @@ async function indexValidationDocuments(args: {
         shouldAttemptOcrFallback: args.shouldAttemptOcrFallback,
         document
       })
+      completedDocuments += 1
+
+      if (
+        shouldPersistIndexingProgress(
+          completedDocuments,
+          args.totalDocumentsToIndex
+        )
+      ) {
+        // Progress is scoped to the current indexing pass. A later
+        // gated-fallback pass may expand the document set and start reporting
+        // against that larger total instead of rewriting prior first-pass
+        // progress as if the broader set had always been in scope.
+        await args.s3Client.putJson(
+          args.event.bucket,
+          args.statusKey,
+          buildValidationStatusArtifact(
+            'parsing',
+            args.event.artifactVersion,
+            null,
+            [],
+            args.workSelectionMode,
+            {
+              completedDocuments,
+              totalDocuments: args.totalDocumentsToIndex
+            }
+          )
+        )
+      }
+
+      return result
+    }
   )
 
   return {
@@ -457,6 +503,19 @@ async function indexValidationDocuments(args: {
       )
     )
   }
+}
+
+function shouldPersistIndexingProgress(
+  completedDocuments: number,
+  totalDocuments: number
+): boolean {
+  // Keep long runs visibly alive without turning status.json into a per-file
+  // heartbeat. Early writes help small runs, then the cadence widens.
+  return (
+    completedDocuments <= 3 ||
+    completedDocuments === totalDocuments ||
+    completedDocuments % INDEXING_PROGRESS_INTERVAL === 0
+  )
 }
 
 async function executeValidationPass(args: {

@@ -931,7 +931,7 @@ The evaluation harness now records when gated work selection is safe enough to p
 - Conservative fallback behavior is unchanged
 - Partial-coverage messaging remains accurate under the selected runtime default
 - Focused tests cover default selection and override behavior"
-AIFA-051 Persist indexing-phase progress during long validation runs,Backlog,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-042","Persist bounded indexing progress during long-running validation so status artifacts show forward movement before retrieval begins.
+AIFA-051 Persist indexing-phase progress during long validation runs,Done,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-042","Persist bounded indexing progress during long-running validation so status artifacts show forward movement before retrieval begins.
 - Update `status.json` during document indexing instead of only at phase boundaries
 - Persist enough progress information to distinguish active work from a stalled run
 - Keep stage semantics compatible with existing UI polling and stale/current artifact handling

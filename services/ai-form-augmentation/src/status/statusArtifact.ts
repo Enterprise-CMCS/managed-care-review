@@ -11,12 +11,18 @@ export type ValidationPipelineStage =
   | 'complete'
   | 'failed'
 
+export interface ValidationIndexingProgressArtifact {
+  completedDocuments: number
+  totalDocuments: number
+}
+
 export interface ValidationStatusArtifact {
   stage: ValidationPipelineStage
   artifactVersion: string
   updatedAt: string
   error: string | null
   documentDiagnostics?: ValidationDocumentDiagnostic[]
+  indexingProgress?: ValidationIndexingProgressArtifact
   workSelectionMode?: ValidationWorkSelectionMode
 }
 
@@ -29,7 +35,8 @@ export function buildValidationStatusArtifact(
   artifactVersion: string,
   error: string | null = null,
   documentDiagnostics: ValidationDocumentDiagnostic[] = [],
-  workSelectionMode: ValidationWorkSelectionMode = 'all-doc'
+  workSelectionMode: ValidationWorkSelectionMode = 'all-doc',
+  indexingProgress?: ValidationIndexingProgressArtifact
 ): ValidationStatusArtifact {
   return {
     stage,
@@ -39,6 +46,7 @@ export function buildValidationStatusArtifact(
     updatedAt: new Date().toISOString(),
     error,
     ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {}),
+    ...(indexingProgress ? { indexingProgress } : {}),
     ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {})
   }
 }
