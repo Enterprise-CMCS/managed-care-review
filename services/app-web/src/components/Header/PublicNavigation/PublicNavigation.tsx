@@ -1,5 +1,5 @@
 import React from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
+import { GridContainer, PrimaryNav } from '@trussworks/react-uswds'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { ReactRouterLinkWithLogging } from '../../TealiumLogging'
 import styles from './PublicNavigation.module.scss'
@@ -41,34 +41,32 @@ export const PublicNavigation = ({
     route,
     pathname,
 }: PublicNavigationProps): React.ReactElement => {
-    return (
-        <nav aria-label="Public page navigation" className={styles.navigation}>
-            <GridContainer className={styles.navigationContainer}>
-                <ul className={styles.navigationList}>
-                    {publicNavItems.map((item) => {
-                        const isActive = item.isActive(route, pathname)
+    const items = publicNavItems.map((item) => {
+        const isActive = item.isActive(route, pathname)
 
-                        return (
-                            <li
-                                key={item.label}
-                                className={styles.navigationItem}
-                            >
-                                <ReactRouterLinkWithLogging
-                                    to={item.to}
-                                    className={`${styles.navigationLink} ${
-                                        isActive
-                                            ? styles.navigationLinkActive
-                                            : ''
-                                    }`}
-                                    aria-current={isActive ? 'page' : undefined}
-                                >
-                                    {item.label}
-                                </ReactRouterLinkWithLogging>
-                            </li>
-                        )
-                    })}
-                </ul>
+        return (
+            <ReactRouterLinkWithLogging
+                key={item.label}
+                to={item.to}
+                className={`${styles.navigationLink} ${
+                    isActive ? styles.navigationLinkActive : ''
+                }`}
+                aria-current={isActive ? 'page' : undefined}
+            >
+                <span className={styles.navigationLabel}>{item.label}</span>
+            </ReactRouterLinkWithLogging>
+        )
+    })
+
+    return (
+        <div className={styles.navigation}>
+            <GridContainer className={styles.navigationContainer}>
+                <PrimaryNav
+                    items={items}
+                    aria-label="Public page navigation"
+                    className={styles.primaryNav}
+                />
             </GridContainer>
-        </nav>
+        </div>
     )
 }
