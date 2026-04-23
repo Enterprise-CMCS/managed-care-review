@@ -13,6 +13,14 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
     malformedLlmResults: 0,
     clauseEvidenceMisses: 0,
     llmProvider: 'ollama',
+    workSelectionPromotionDecision: {
+      recommendedDefaultMode: 'gated-first-pass',
+      gatedPassedScenarios: 1,
+      matchedScenarios: 1,
+      moreConservativeScenarios: 0,
+      riskyScenarios: 0,
+      reason: 'Promote gated-first-pass with the all-doc escape hatch.'
+    },
     reports: [
       {
         scenarioId: 'prod-shaped-large-submission',
@@ -21,6 +29,24 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
         passed: true,
         statusStage: 'complete',
         error: null,
+        workSelectionComparison: {
+          gatedPassed: true,
+          comparison: 'match',
+          fallbackRequiredFieldCount: 0,
+          fieldComparisons: [
+            {
+              field: 'contractStartDate',
+              allDocOutcome: 'match',
+              gatedOutcome: 'match',
+              gatedEvidenceSource: 'fallback',
+              gatedFallbackTriggers: [
+                'deferred-document-evidence',
+                'partial-coverage'
+              ],
+              comparison: 'match'
+            }
+          ]
+        },
         largeSubmissionDiagnostics: {
           totalDocuments: 165,
           eligibleDocuments: 132,
@@ -93,6 +119,22 @@ test('formatEvaluationSummary includes large-submission diagnostics when present
 
   const formatted = formatEvaluationSummary(summary)
 
+  assert.match(
+    formatted,
+    /Work selection decision: default=gated-first-pass, gatedPassed=1\/1, matched=1, moreConservative=0, risky=0/
+  )
+  assert.match(
+    formatted,
+    /Work selection reason: Promote gated-first-pass with the all-doc escape hatch\./
+  )
+  assert.match(
+    formatted,
+    /gated comparison: passed=true, comparison=match, fallbackFields=0/
+  )
+  assert.match(
+    formatted,
+    /gated field: field=contractStartDate, allDoc=match, gated=match, comparison=match, source=fallback, fallbackTriggers=deferred-document-evidence\|partial-coverage/
+  )
   assert.match(
     formatted,
     /large submission: total=165, eligible=132, skipped=32, failed=1, processed=132, chunks=264/

@@ -17,8 +17,10 @@ import type { DateValidationResult } from '../prompts'
 import {
   getValidationResultKey,
   type ValidationDocumentDiagnostic,
+  type ValidationFieldWorkSelectionDiagnostic,
   type ValidationLlmDiagnostic,
   type ValidationRetrievalDiagnostic,
+  type ValidationWorkSelectionMode,
   type ValidationResultArtifact
 } from '../results'
 import { newArtifactS3Client, type ArtifactS3Client } from '../s3'
@@ -80,7 +82,35 @@ export interface DateValidationEvaluationScenarioReport {
   statusStage: ValidationStatusArtifact['stage'] | 'failed-before-status'
   error: string | null
   largeSubmissionDiagnostics?: DateValidationLargeSubmissionDiagnostics
+  workSelectionComparison?: DateValidationWorkSelectionComparison
   fieldReports: DateValidationEvaluationFieldReport[]
+}
+
+export interface DateValidationWorkSelectionFieldComparison {
+  field: DateValidationCorpusExpectation['field']
+  allDocOutcome: DateValidationResult['outcome'] | 'missing'
+  gatedOutcome: DateValidationResult['outcome'] | 'missing'
+  gatedEvidenceSource:
+    | ValidationFieldWorkSelectionDiagnostic['evidenceSource']
+    | 'missing'
+  gatedFallbackTriggers: string[]
+  comparison: 'match' | 'more-conservative' | 'risk'
+}
+
+export interface DateValidationWorkSelectionComparison {
+  gatedPassed: boolean
+  comparison: 'match' | 'more-conservative' | 'risk'
+  fallbackRequiredFieldCount: number
+  fieldComparisons: DateValidationWorkSelectionFieldComparison[]
+}
+
+export interface DateValidationWorkSelectionPromotionDecision {
+  recommendedDefaultMode: Extract<ValidationWorkSelectionMode, 'all-doc' | 'gated-first-pass'>
+  gatedPassedScenarios: number
+  matchedScenarios: number
+  moreConservativeScenarios: number
+  riskyScenarios: number
+  reason: string
 }
 
 export interface DateValidationLargeSubmissionDiagnostics {
@@ -145,6 +175,7 @@ export interface DateValidationEvaluationSummary {
   malformedLlmResults: number
   clauseEvidenceMisses: number
   llmProvider: string
+  workSelectionPromotionDecision: DateValidationWorkSelectionPromotionDecision
   reports: DateValidationEvaluationScenarioReport[]
 }
 
@@ -199,6 +230,7 @@ export async function runDateValidationEvaluation(
       (report) => report.retrievalIssue === 'missing-clause-evidence'
     ).length,
     llmProvider: describeEvaluationLlmConfig(evaluationLlmConfig),
+    workSelectionPromotionDecision: buildWorkSelectionPromotionDecision(reports),
     reports
   }
 }
@@ -210,7 +242,6 @@ async function evaluateScenario(
   evaluationLlmConfig: ReturnType<typeof getEvaluationLlmConfig>
 ): Promise<DateValidationEvaluationScenarioReport> {
   try {
-    const formId = `evaluation-${scenario.id}`
     const documents = getScenarioDocuments(scenario)
     const runnableDocuments = documents.filter(
       (document) => document.disposition === 'eligible'
@@ -251,104 +282,70 @@ async function evaluateScenario(
       )
     )
 
-    await validationHandler({
-      formId,
+    const allDocRun = await runScenarioMode({
+      scenario,
+      mode: 'all-doc',
+      s3Client,
+      evaluationStorage,
+      evaluationLlmConfig,
       artifactVersion,
-      bucket: evaluationStorage.bucket,
-      s3Config: evaluationStorage.s3Config,
-      validationLlmConfig: evaluationLlmConfig,
-      formFields: scenario.expectations.map((expectation) => ({
-        field: expectation.field,
-        label: FIELD_LABELS[expectation.field],
-        value: expectation.formValue
-      })),
-      documents: [
-        ...sourceDocuments.map(({ document, sourceKey }) => ({
-          documentName: document.documentName,
-          sourceBucket: evaluationStorage.bucket,
-          sourceKey
-        }))
-      ],
-      diagnostics: {
-        recordPhaseTiming: (phase, elapsedMs) => {
-          phaseTimings[phase] += elapsedMs
-        },
-        recordIndexingSummary: (summary) => {
-          indexingSummary = summary
-        }
+      sourceDocuments,
+      phaseTimings,
+      indexingSummary
+    })
+    const gatedRun = await runScenarioMode({
+      scenario,
+      mode: 'gated-first-pass',
+      s3Client,
+      evaluationStorage,
+      evaluationLlmConfig,
+      artifactVersion,
+      sourceDocuments,
+      phaseTimings: newPhaseTimings(),
+      indexingSummary: {
+        concurrencyLimit: 0,
+        totalElapsedMs: 0,
+        processedDocuments: 0,
+        failedDocuments: 0
       }
     })
-
-    const [
-      statusArtifact,
-      resultArtifact,
-      chunksArtifact,
-      documentIndexArtifacts
-    ] = await Promise.all([
-      s3Client.getJson<ValidationStatusArtifact>(
-        evaluationStorage.bucket,
-        getValidationStatusKey(formId)
-      ),
-      s3Client.getJson<ValidationResultArtifact>(
-        evaluationStorage.bucket,
-        getValidationResultKey(formId)
-      ),
-      s3Client.getJson<ChunksArtifact>(
-        evaluationStorage.bucket,
-        getChunksArtifactKey(formId)
-      ),
-      Promise.all(
-        sourceDocuments.map(({ document, sourceKey }) =>
-          s3Client.getJson<IndexedDocumentArtifact>(
-            evaluationStorage.bucket,
-            getDocumentIndexArtifactKey(
-              formId,
-              computeDocumentCacheKey({
-                documentName: document.documentName,
-                sourceBucket: evaluationStorage.bucket,
-                sourceKey
-              })
-            )
-          )
-        )
-      )
-    ])
-
-    const fieldReports = scenario.expectations.map((expectation) =>
-      compareExpectation(
-        expectation,
-        resultArtifact.results,
-        resultArtifact.llmDiagnostics ?? [],
-        resultArtifact.retrievalDiagnostics ?? []
-      )
-    )
     // A scenario only counts as passing when the worker completes normally and
     // every expected field-level comparison matches the stored result.
     const passed =
-      statusArtifact.stage === 'complete' &&
-      fieldReports.every((report) => report.passed)
+      allDocRun.statusArtifact.stage === 'complete' &&
+      allDocRun.fieldReports.every((report) => report.passed)
 
     return {
       scenarioId: scenario.id,
       documentName: scenario.documentName,
       summary: scenario.summary,
       passed,
-      statusStage: statusArtifact.stage,
+      statusStage: allDocRun.statusArtifact.stage,
       error: null,
       ...(scenario.documents
         ? {
             largeSubmissionDiagnostics: buildLargeSubmissionDiagnostics({
               documents,
-              chunksArtifact,
-              documentIndexArtifacts,
-              resultArtifact,
-              statusArtifact,
-              phaseTimings,
-              indexingSummary
+              chunksArtifact: gatedRun.chunksArtifact,
+              documentIndexArtifacts: gatedRun.documentIndexArtifacts,
+              resultArtifact: gatedRun.resultArtifact,
+              statusArtifact: gatedRun.statusArtifact,
+              phaseTimings: gatedRun.phaseTimings,
+              indexingSummary: gatedRun.indexingSummary
             })
           }
         : {}),
-      fieldReports
+      workSelectionComparison: compareWorkSelectionOutcomes({
+        expectations: scenario.expectations,
+        allDocResults: allDocRun.resultArtifact.results,
+        gatedResults: gatedRun.resultArtifact.results,
+        gatedFieldDiagnostics:
+          gatedRun.resultArtifact.fieldWorkSelectionDiagnostics ?? [],
+        gatedPassed:
+          gatedRun.statusArtifact.stage === 'complete' &&
+          gatedRun.fieldReports.every((report) => report.passed)
+      }),
+      fieldReports: allDocRun.fieldReports
     }
   } catch (error) {
     return {
@@ -394,6 +391,130 @@ async function evaluateScenario(
         actualCitationOrders: []
       }))
     }
+  }
+}
+
+async function runScenarioMode(args: {
+  scenario: DateValidationCorpusScenario
+  mode: Extract<ValidationWorkSelectionMode, 'all-doc' | 'gated-first-pass'>
+  s3Client: ArtifactS3Client
+  evaluationStorage: EvaluationStorageConfig
+  evaluationLlmConfig: ReturnType<typeof getEvaluationLlmConfig>
+  artifactVersion: string
+  sourceDocuments: Array<{
+    document: DateValidationCorpusDocument
+    sourceKey: string
+  }>
+  phaseTimings: Record<ValidationPhaseTimingDiagnostic['phase'], number>
+  indexingSummary: ValidationIndexingSummaryDiagnostic
+}): Promise<{
+  statusArtifact: ValidationStatusArtifact
+  resultArtifact: ValidationResultArtifact
+  chunksArtifact: ChunksArtifact
+  documentIndexArtifacts: IndexedDocumentArtifact[]
+  phaseTimings: Record<ValidationPhaseTimingDiagnostic['phase'], number>
+  indexingSummary: ValidationIndexingSummaryDiagnostic
+  fieldReports: DateValidationEvaluationFieldReport[]
+}> {
+  const modeSuffix = args.mode === 'all-doc' ? 'all-doc' : 'gated-first-pass'
+  // Keep each mode on its own artifact key so cache reuse and stored outputs
+  // stay comparable instead of one mode reusing the other's terminal result.
+  const formId = `evaluation-${args.scenario.id}-${modeSuffix}`
+  let indexingSummary = args.indexingSummary
+
+  await validationHandler({
+    formId,
+    artifactVersion: args.artifactVersion,
+    bucket: args.evaluationStorage.bucket,
+    s3Config: args.evaluationStorage.s3Config,
+    validationLlmConfig: args.evaluationLlmConfig,
+    workSelectionMode:
+      args.mode === 'all-doc' ? undefined : 'gated-first-pass',
+    formFields: args.scenario.expectations.map((expectation) => ({
+      field: expectation.field,
+      label: FIELD_LABELS[expectation.field],
+      value: expectation.formValue
+    })),
+    documents: args.sourceDocuments.map(({ document, sourceKey }) => ({
+      documentName: document.documentName,
+      sourceBucket: args.evaluationStorage.bucket,
+      sourceKey
+    })),
+    diagnostics: {
+      recordPhaseTiming: (phase, elapsedMs) => {
+        args.phaseTimings[phase] += elapsedMs
+      },
+      recordIndexingSummary: (summary) => {
+        indexingSummary = summary
+      }
+    }
+  })
+
+  const [statusArtifact, resultArtifact, chunksArtifact, documentIndexArtifacts] =
+    await Promise.all([
+      args.s3Client.getJson<ValidationStatusArtifact>(
+        args.evaluationStorage.bucket,
+        getValidationStatusKey(formId)
+      ),
+      args.s3Client.getJson<ValidationResultArtifact>(
+        args.evaluationStorage.bucket,
+        getValidationResultKey(formId)
+      ),
+      args.s3Client.getJson<ChunksArtifact>(
+        args.evaluationStorage.bucket,
+        getChunksArtifactKey(formId)
+      ),
+      Promise.all(
+        args.sourceDocuments.map(({ document, sourceKey }) =>
+          readOptionalArtifact<IndexedDocumentArtifact>(
+            args.s3Client,
+            args.evaluationStorage.bucket,
+            getDocumentIndexArtifactKey(
+              formId,
+              computeDocumentCacheKey({
+                documentName: document.documentName,
+                sourceBucket: args.evaluationStorage.bucket,
+                sourceKey
+              })
+            )
+          )
+        )
+      )
+    ])
+
+  return {
+    statusArtifact,
+    resultArtifact,
+    chunksArtifact,
+    documentIndexArtifacts: documentIndexArtifacts.filter(
+      (artifact): artifact is IndexedDocumentArtifact => artifact != null
+    ),
+    phaseTimings: args.phaseTimings,
+    indexingSummary,
+    fieldReports: args.scenario.expectations.map((expectation) =>
+      compareExpectation(
+        expectation,
+        resultArtifact.results,
+        resultArtifact.llmDiagnostics ?? [],
+        resultArtifact.retrievalDiagnostics ?? []
+      )
+    )
+  }
+}
+
+async function readOptionalArtifact<T>(
+  s3Client: ArtifactS3Client,
+  bucket: string,
+  key: string
+): Promise<T | null> {
+  try {
+    return await s3Client.getJson<T>(bucket, key)
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('S3 object not found')) {
+      return null
+    }
+
+    throw error
   }
 }
 
@@ -598,6 +719,136 @@ export function evaluateWorkSelectionStrategy(args: {
       summary:
         'Do not suppress fallback. A gated first pass is only defensible when deferred documents remain eligible for full fallback whenever evidence is weak, ambiguous, uncited, partial, OCR-gapped, or contradicted by diagnostics.'
     }
+  }
+}
+
+export function compareWorkSelectionOutcomes(args: {
+  expectations: DateValidationCorpusExpectation[]
+  allDocResults: DateValidationResult[]
+  gatedResults: DateValidationResult[]
+  gatedFieldDiagnostics: ValidationFieldWorkSelectionDiagnostic[]
+  gatedPassed: boolean
+}): DateValidationWorkSelectionComparison {
+  const gatedFieldDiagnosticsByField = new Map(
+    args.gatedFieldDiagnostics.map((diagnostic) => [diagnostic.field, diagnostic])
+  )
+  const fieldComparisons = args.expectations.map((expectation) => {
+    const allDocResult =
+      args.allDocResults.find((result) => result.field === expectation.field) ??
+      null
+    const gatedResult =
+      args.gatedResults.find((result) => result.field === expectation.field) ??
+      null
+    const gatedFieldDiagnostic =
+      gatedFieldDiagnosticsByField.get(expectation.field) ?? null
+
+    return {
+      field: expectation.field,
+      allDocOutcome: allDocResult?.outcome ?? 'missing',
+      gatedOutcome: gatedResult?.outcome ?? 'missing',
+      gatedEvidenceSource: gatedFieldDiagnostic?.evidenceSource ?? 'missing',
+      gatedFallbackTriggers: gatedFieldDiagnostic?.fallbackReasons ?? [],
+      comparison: compareWorkSelectionFieldOutcome(
+        allDocResult?.outcome ?? 'missing',
+        gatedResult?.outcome ?? 'missing'
+      )
+    } satisfies DateValidationWorkSelectionFieldComparison
+  })
+
+  return {
+    gatedPassed: args.gatedPassed,
+    comparison: fieldComparisons.some(
+      (comparison) => comparison.comparison === 'risk'
+    )
+      ? 'risk'
+      : fieldComparisons.some(
+            (comparison) => comparison.comparison === 'more-conservative'
+          )
+        ? 'more-conservative'
+        : 'match',
+    fallbackRequiredFieldCount: fieldComparisons.filter(
+      (comparison) =>
+        comparison.gatedEvidenceSource === 'fallback' ||
+        comparison.gatedEvidenceSource === 'partial'
+    ).length,
+    fieldComparisons
+  }
+}
+
+function compareWorkSelectionFieldOutcome(
+  allDocOutcome: DateValidationResult['outcome'] | 'missing',
+  gatedOutcome: DateValidationResult['outcome'] | 'missing'
+): 'match' | 'more-conservative' | 'risk' {
+  if (allDocOutcome === gatedOutcome) {
+    return 'match'
+  }
+
+  if (
+    (allDocOutcome === 'match' || allDocOutcome === 'mismatch') &&
+    gatedOutcome === 'not-enough-evidence'
+  ) {
+    // Treat an earlier "not enough evidence" as conservative, but any other
+    // divergence risks hiding controlling evidence compared with all-doc.
+    return 'more-conservative'
+  }
+
+  return 'risk'
+}
+
+export function buildWorkSelectionPromotionDecision(
+  reports: DateValidationEvaluationScenarioReport[]
+): DateValidationWorkSelectionPromotionDecision {
+  const workSelectionComparisons = reports.flatMap((report) =>
+    report.workSelectionComparison ? [report.workSelectionComparison] : []
+  )
+  const hasProdShapedComparison = reports.some(
+    (report) => report.largeSubmissionDiagnostics != null
+  )
+  const gatedPassedScenarios = workSelectionComparisons.filter(
+    (comparison) => comparison.gatedPassed
+  ).length
+  const matchedScenarios = workSelectionComparisons.filter(
+    (comparison) => comparison.comparison === 'match'
+  ).length
+  const moreConservativeScenarios = workSelectionComparisons.filter(
+    (comparison) => comparison.comparison === 'more-conservative'
+  ).length
+  const riskyScenarios = workSelectionComparisons.filter(
+    (comparison) => comparison.comparison === 'risk'
+  ).length
+
+  if (!hasProdShapedComparison) {
+    return {
+      recommendedDefaultMode: 'all-doc',
+      gatedPassedScenarios,
+      matchedScenarios,
+      moreConservativeScenarios,
+      riskyScenarios,
+      reason:
+        'Keep all-doc as the default until the prod-shaped large-submission fixture is included in the comparison run.'
+    }
+  }
+
+  if (gatedPassedScenarios !== reports.length || riskyScenarios > 0) {
+    return {
+      recommendedDefaultMode: 'all-doc',
+      gatedPassedScenarios,
+      matchedScenarios,
+      moreConservativeScenarios,
+      riskyScenarios,
+      reason:
+        'Keep all-doc as the default. Gated work selection should not be promoted while any corpus scenario fails or any gated outcome is less conservative than all-doc.'
+    }
+  }
+
+  return {
+    recommendedDefaultMode: 'gated-first-pass',
+    gatedPassedScenarios,
+    matchedScenarios,
+    moreConservativeScenarios,
+    riskyScenarios,
+    reason:
+      'Promote gated-first-pass only with the existing all-doc escape hatch still available, because the compared scenarios match all-doc or become more conservative.'
   }
 }
 

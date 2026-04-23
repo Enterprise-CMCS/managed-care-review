@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-049C Validate and promote work selection after evaluation`.
+The next implementation ticket is `AIFA-046 Split parsed-text artifacts from embedding artifacts`.
 
 ## Completed
 
@@ -61,6 +61,7 @@ The next implementation ticket is `AIFA-049C Validate and promote work selection
 - AIFA-045 ✔ Evaluate document prioritization and two-pass retrieval
 - AIFA-049B ✔ Implement gated first-pass selection with conservative fallback
 - AIFA-048 ✔ Surface partial validation coverage conservatively
+- AIFA-049C ✔ Validate and promote work selection after evaluation
 
 ## Current State
 
@@ -253,15 +254,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-049C Validate and promote work selection after evaluation
+### AIFA-046 Split parsed-text artifacts from embedding artifacts
 
-Compare gated behavior against all-document processing and decide whether promotion is safe.
+Persist reusable parsed-text artifacts separately so OCR and parse work do not need to be repeated just to rebuild chunks or embeddings.
 
 ## Suggested Next Step
 
-- Compare gated-first-pass plus fallback artifacts against all-doc results on the corpus and large fixture.
-- Confirm promoted behavior is equal or more conservative before changing defaults.
-- Keep the all-doc escape hatch available if promotion is not justified.
+- Persist parsed text, page text, extraction method, and extraction notes as separate per-document artifacts.
+- Rebuild chunk and embedding artifacts from parsed text when reuse is safe.
+- Keep reuse aligned with the current document-identity contract until AIFA-047 strengthens it.
 
 ## Source of Truth Docs
 
@@ -305,6 +306,9 @@ Compare gated behavior against all-document processing and decide whether promot
 - AIFA-049B now keeps gated and all-doc runs distinct in cache and artifacts, but a `gated-first-pass` request can still reuse a prior `gated-fallback` result.
 - AIFA-048 now surfaces conservative partial-coverage status on Review & Submit using persisted diagnostics without changing validation execution.
 - `coverageSummary.skippedDocuments` includes unsupported pre-worker skips as well as deferred/OCR-capped worker skips; user-facing partial messaging should continue relying on `isPartial` and `unprocessedDocuments`.
+- AIFA-049C now compares `all-doc` and `gated-first-pass` evaluation runs on separate artifact keys and records a promotion recommendation without changing runtime defaults.
+- Promotion remains environment-sensitive: end-to-end validation of the decision still depends on reachable LocalStack evaluation storage and the large-submission fixture run.
+- The current promotion comparison treats only `match`/`mismatch` to `not-enough-evidence` as a conservative downgrade; broader message/citation parity is still a separate judgment.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.

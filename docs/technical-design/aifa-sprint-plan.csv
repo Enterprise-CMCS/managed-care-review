@@ -870,7 +870,7 @@ A normal-looking result can mislead users if validation did not process all rele
 - Submission remains non-blocking
 - Partial coverage behavior is covered by focused tests
 - User-facing copy remains advisory and does not overstate AI certainty"
-AIFA-049C Validate and promote work selection after evaluation,Backlog,7-Large Submission Hardening,Medium,"AIFA-048, AIFA-049B","Complete the original AIFA-049 work-selection intent by validating gated behavior and deciding whether to promote it to default.
+AIFA-049C Validate and promote work selection after evaluation,Done,7-Large Submission Hardening,Medium,"AIFA-048, AIFA-049B","Complete the original AIFA-049 work-selection intent by validating gated behavior and deciding whether to promote it to default.
 - Compare gated first-pass plus fallback behavior against all-doc processing
 - Use existing corpus and prod-shaped fixture
 - Promote only if outcomes match or become more conservative

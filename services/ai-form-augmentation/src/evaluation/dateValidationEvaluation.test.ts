@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { evaluateWorkSelectionStrategy } from './dateValidationEvaluation'
+import {
+  buildWorkSelectionPromotionDecision,
+  compareWorkSelectionOutcomes,
+  evaluateWorkSelectionStrategy
+} from './dateValidationEvaluation'
 
 test('evaluateWorkSelectionStrategy requires fallback when cited evidence comes from deferred oddly named documents', () => {
   const strategy = evaluateWorkSelectionStrategy({
@@ -156,4 +160,173 @@ test('evaluateWorkSelectionStrategy documents conservative fallback triggers fro
       ]
     }
   ])
+})
+
+test('compareWorkSelectionOutcomes treats gated not-enough-evidence as more conservative than all-doc match', () => {
+  const comparison = compareWorkSelectionOutcomes({
+    expectations: [
+      {
+        field: 'contractStartDate',
+        formValue: '01/01/2008',
+        expectedOutcome: 'match'
+      }
+    ],
+    allDocResults: [
+      {
+        field: 'contractStartDate',
+        outcome: 'match',
+        confidence: 'high',
+        message: 'Matched.',
+        citations: []
+      }
+    ],
+    gatedResults: [
+      {
+        field: 'contractStartDate',
+        outcome: 'not-enough-evidence',
+        confidence: 'low',
+        message: 'Not enough evidence.',
+        citations: []
+      }
+    ],
+    gatedFieldDiagnostics: [
+      {
+        field: 'contractStartDate',
+        evidenceSource: 'fallback',
+        fallbackReasons: ['weak-evidence']
+      }
+    ],
+    gatedPassed: true
+  })
+
+  assert.equal(comparison.gatedPassed, true)
+  assert.equal(comparison.comparison, 'more-conservative')
+  assert.equal(comparison.fallbackRequiredFieldCount, 1)
+  assert.deepEqual(comparison.fieldComparisons, [
+    {
+      field: 'contractStartDate',
+      allDocOutcome: 'match',
+      gatedOutcome: 'not-enough-evidence',
+      gatedEvidenceSource: 'fallback',
+      gatedFallbackTriggers: ['weak-evidence'],
+      comparison: 'more-conservative'
+    }
+  ])
+})
+
+test('buildWorkSelectionPromotionDecision keeps all-doc default when the prod-shaped comparison is missing', () => {
+  const decision = buildWorkSelectionPromotionDecision([
+    {
+      scenarioId: 'scan-match-baseline',
+      documentName: 'scan.pdf',
+      summary: 'fixture',
+      passed: true,
+      statusStage: 'complete',
+      error: null,
+      workSelectionComparison: {
+        gatedPassed: true,
+        comparison: 'match',
+        fallbackRequiredFieldCount: 0,
+        fieldComparisons: []
+      },
+      fieldReports: []
+    }
+  ])
+
+  assert.deepEqual(decision, {
+    recommendedDefaultMode: 'all-doc',
+    gatedPassedScenarios: 1,
+    matchedScenarios: 1,
+    moreConservativeScenarios: 0,
+    riskyScenarios: 0,
+    reason:
+      'Keep all-doc as the default until the prod-shaped large-submission fixture is included in the comparison run.'
+  })
+})
+
+test('buildWorkSelectionPromotionDecision recommends gated-first-pass only when the prod-shaped comparison is present and non-risky', () => {
+  const decision = buildWorkSelectionPromotionDecision([
+    {
+      scenarioId: 'prod-shaped-large-submission',
+      documentName: 'prod-shaped.pdf',
+      summary: 'fixture',
+      passed: true,
+      statusStage: 'complete',
+      error: null,
+      largeSubmissionDiagnostics: {
+        totalDocuments: 165,
+        eligibleDocuments: 132,
+        skippedDocuments: 32,
+        failedDocuments: 1,
+        processedDocuments: 132,
+        chunkCount: 264,
+        finalOutcomes: {
+          match: 2,
+          mismatch: 0,
+          notEnoughEvidence: 0
+        },
+        ocr: {
+          attemptedDocuments: 3,
+          skippedDocuments: 5,
+          cappedDocuments: 5
+        },
+        workSelection: {
+          firstPassDocuments: 12,
+          deferredDocuments: 120,
+          relevantDocuments: 1,
+          relevantDocumentsSelectedEarly: 1,
+          citedEvidenceDocuments: 1,
+          citedEvidenceDocumentsSelectedEarly: 1,
+          oddlyNamedRelevantDeferred: 1,
+          oddlyNamedRelevantRecoveredByFallback: 1,
+          fieldAnalyses: [],
+          recommendation: {
+            recommendedMode: 'require-full-fallback',
+            firstPassRules: [],
+            fallbackTriggers: [],
+            summary: 'Do not suppress fallback.'
+          }
+        },
+        indexing: {
+          concurrencyLimit: 2,
+          totalElapsedMs: 99,
+          processedDocuments: 132,
+          failedDocuments: 1
+        },
+        phaseTimingsMs: {
+          fetch: 1,
+          parse: 2,
+          ocr: 3,
+          chunk: 4,
+          embed: 5,
+          retrieval: 6,
+          validation: 7
+        },
+        artifactSizesBytes: {
+          parsedText: null,
+          chunks: 100,
+          vectors: 200,
+          status: 20,
+          results: 40
+        }
+      },
+      workSelectionComparison: {
+        gatedPassed: true,
+        comparison: 'match',
+        fallbackRequiredFieldCount: 1,
+        fieldComparisons: []
+      },
+      fieldReports: []
+    }
+  ])
+
+  assert.deepEqual(decision, {
+    recommendedDefaultMode: 'gated-first-pass',
+    gatedPassedScenarios: 1,
+    matchedScenarios: 1,
+    moreConservativeScenarios: 0,
+    riskyScenarios: 0,
+    reason:
+      'Promote gated-first-pass only with the existing all-doc escape hatch still available, because the compared scenarios match all-doc or become more conservative.'
+  })
 })

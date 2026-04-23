@@ -22,7 +22,9 @@ export function formatEvaluationSummary(
     `Scenarios: ${summary.passedScenarios}/${summary.totalScenarios} passed`,
     `Decision sources: deterministic=${summary.deterministicResults}, llm=${summary.llmResults}`,
     `Malformed LLM results: ${summary.malformedLlmResults}`,
-    `Clause-evidence retrieval misses: ${summary.clauseEvidenceMisses}`
+    `Clause-evidence retrieval misses: ${summary.clauseEvidenceMisses}`,
+    `Work selection decision: default=${summary.workSelectionPromotionDecision.recommendedDefaultMode}, gatedPassed=${summary.workSelectionPromotionDecision.gatedPassedScenarios}/${summary.totalScenarios}, matched=${summary.workSelectionPromotionDecision.matchedScenarios}, moreConservative=${summary.workSelectionPromotionDecision.moreConservativeScenarios}, risky=${summary.workSelectionPromotionDecision.riskyScenarios}`,
+    `Work selection reason: ${summary.workSelectionPromotionDecision.reason}`
   ]
 
   for (const report of summary.reports) {
@@ -48,6 +50,17 @@ export function formatEvaluationSummary(
         for (const problem of fieldReport.problems) {
           lines.push(`    problem: ${problem}`)
         }
+      }
+    }
+
+    if (report.workSelectionComparison) {
+      lines.push(
+        `  gated comparison: passed=${report.workSelectionComparison.gatedPassed}, comparison=${report.workSelectionComparison.comparison}, fallbackFields=${report.workSelectionComparison.fallbackRequiredFieldCount}`
+      )
+      for (const fieldComparison of report.workSelectionComparison.fieldComparisons) {
+        lines.push(
+          `  gated field: field=${fieldComparison.field}, allDoc=${fieldComparison.allDocOutcome}, gated=${fieldComparison.gatedOutcome}, comparison=${fieldComparison.comparison}, source=${fieldComparison.gatedEvidenceSource}, fallbackTriggers=${fieldComparison.gatedFallbackTriggers.join('|') || 'none'}`
+        )
       }
     }
 
