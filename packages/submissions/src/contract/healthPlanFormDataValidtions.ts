@@ -1,4 +1,9 @@
-import { Contract, ContractRevision, UnlockedContract } from '../gen/gqlClient'
+import {
+    Contract,
+    ContractFormData,
+    ContractRevision,
+    UnlockedContract,
+} from '../gen/gqlClient'
 import { getLastContractSubmission } from './contractHelpers'
 import {
     CHIPProvisionType,
@@ -220,6 +225,18 @@ const isMissingProvisions = (
     )
 }
 
+/**
+ * Returns a review determination for a HEALTH_PLAN submission based on form data.
+ *
+ * @param formData - formData of the HEALTH_PLAN submission
+ * @returns {true} - HEALTH_PLAN submission is subject to review
+ * @returns {false} - HEALTH_PLAN submission is not subject to review (CHIP-only)
+ */
+const healthPlanReviewDetermination = (formData: ContractFormData): boolean => {
+    const isChipOnly = formData.populationCovered === 'CHIP'
+    return !isChipOnly
+}
+
 /*
     Returns lang string dictionary for variant
 */
@@ -254,4 +271,5 @@ export {
     generateApplicableProvisionsList,
     generateProvisionLabel,
     isMissingProvisions,
+    healthPlanReviewDetermination,
 }
