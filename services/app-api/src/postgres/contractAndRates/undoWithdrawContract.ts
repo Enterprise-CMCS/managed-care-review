@@ -208,7 +208,10 @@ const undoWithdrawContract = async (
 ): Promise<UndoWithdrawContractReturnType | Error> => {
     try {
         return await client.$transaction(
-            async (tx) => await undoWithdrawContractInsideTransaction(tx, args)
+            async (tx) => await undoWithdrawContractInsideTransaction(tx, args),
+            {
+                timeout: 30000,
+            }
         )
     } catch (err) {
         const parsedError = parseErrorToError(err)
