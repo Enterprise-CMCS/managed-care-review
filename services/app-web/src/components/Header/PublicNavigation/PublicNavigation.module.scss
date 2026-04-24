@@ -17,23 +17,13 @@
 .primaryNav {
     float: none !important;
     display: flex !important;
-    justify-content: flex-start;
-    align-items: stretch;
-    position: relative;
     width: 100%;
-    right: auto;
-    top: auto;
-    bottom: auto;
-    overflow: visible;
     padding: 0;
     background: transparent !important;
     border-right: 0;
-    z-index: auto;
-    flex: 1 1 auto;
 
     :global(.usa-nav__primary) {
         display: flex !important;
-        align-items: stretch;
         justify-content: flex-start;
         width: 100%;
         list-style: none;
@@ -67,10 +57,7 @@
     line-height: 150%;
     text-decoration: none !important;
     white-space: nowrap;
-    transition:
-        background-color 0.15s ease,
-        color 0.15s ease,
-        box-shadow 0.15s ease;
+    transition: box-shadow 0.15s ease;
     
     &:hover {
         .navigationLabel::after {
@@ -94,8 +81,7 @@
 
 .navigationLabel {
     position: relative;
-    display: inline-flex;
-    align-items: center;
+    display: inline-block;
 
     &::after {
         content: '';
