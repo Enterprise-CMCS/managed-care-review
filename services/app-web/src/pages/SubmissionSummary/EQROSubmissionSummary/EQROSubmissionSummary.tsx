@@ -177,7 +177,9 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const showWithdrawBtn =
         hasCMSPermissions &&
         withdrawSubmissionFlag &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+        ['SUBMITTED', 'RESUBMITTED', 'NOT_SUBJECT_TO_REVIEW'].includes(
+            consolidatedStatus
+        )
     const showUndoWithdrawBtn =
         hasCMSPermissions &&
         undoWithdrawSubmissionFlag &&
