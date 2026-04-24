@@ -404,7 +404,7 @@ const parseEmailDataWithdrawSubmission = (
 
     if (!validConsolidatedStatus.includes(contract.consolidatedStatus)) {
         return new Error(
-            `Contract consolidated status should be ${validConsolidatedStatus}`
+            `Contract consolidated status is incorrect for ${type} email. Consolidated status: ${contract.consolidatedStatus}`
         )
     }
 
@@ -418,7 +418,7 @@ const parseEmailDataWithdrawSubmission = (
         !validReviewAction.includes(latestStatusAction.actionType)
     ) {
         return new Error(
-            `Latest contract review action is not ${validReviewAction}`
+            `Latest contract review action is incorrect for ${type} email. Contract action: ${latestStatusAction?.actionType}`
         )
     }
 
