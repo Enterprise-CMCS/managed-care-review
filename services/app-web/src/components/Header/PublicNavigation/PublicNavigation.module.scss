@@ -97,7 +97,7 @@
     background-color: custom.$mcr-cyan-vivid;
 }
 
-@include uswds.at-media-max('tablet') {
+@include uswds.at-media-max('desktop') {
     .primaryNav {
         position: static !important;
         right: auto !important;
@@ -121,6 +121,37 @@
 
         :global(.usa-nav__primary-item) {
             flex: 1 1 0;
+        }
+
+        :global(.usa-nav__primary a:not(.usa-button):hover) {
+            background-color: transparent !important;
+            color: custom.$mcr-foundation-white !important;
+        }
+
+        :global(.usa-nav__primary .usa-nav__link:not(.usa-current):hover::after) {
+            right: 0.75rem;
+            bottom: 0;
+            left: 0.75rem;
+            top: auto;
+            width: auto;
+            height: 0.25rem;
+            border-radius: 0;
+            background-color: custom.$mcr-blue-cool-light !important;
+        }
+
+        :global(.usa-nav__primary .usa-current) {
+            color: custom.$mcr-foundation-white !important;
+        }
+
+        :global(.usa-nav__primary .usa-current::after) {
+            right: 0.75rem;
+            bottom: 0;
+            left: 0.75rem;
+            top: auto;
+            width: auto;
+            height: 0.25rem;
+            border-radius: 0;
+            background-color: custom.$mcr-cyan-vivid !important;
         }
     }
 
