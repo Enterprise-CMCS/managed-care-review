@@ -48,12 +48,12 @@ export const PublicNavigation = ({
             <ReactRouterLinkWithLogging
                 key={item.label}
                 to={item.to}
-                className={`${styles.navigationLink} ${
-                    isActive ? styles.navigationLinkActive : ''
+                className={`usa-nav__link ${styles.navigationLink} ${
+                    isActive ? `usa-current ${styles.navigationLinkActive}` : ''
                 }`}
                 aria-current={isActive ? 'page' : undefined}
             >
-                <span className={styles.navigationLabel}>{item.label}</span>
+                {item.label}
             </ReactRouterLinkWithLogging>
         )
     })
