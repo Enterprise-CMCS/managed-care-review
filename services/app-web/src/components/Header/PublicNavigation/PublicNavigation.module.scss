@@ -99,6 +99,22 @@
 
 @include uswds.at-media-max('tablet') {
     .primaryNav {
+        position: static !important;
+        right: auto !important;
+        bottom: auto !important;
+        top: auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        overflow: visible !important;
+        width: 100%;
+        padding: 0;
+        background: transparent !important;
+        z-index: auto;
+
+        :global(.usa-nav__inner) {
+            width: 100%;
+        }
+
         :global(.usa-nav__primary) {
             justify-content: space-between;
         }
