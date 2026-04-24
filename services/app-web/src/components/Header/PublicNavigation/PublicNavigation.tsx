@@ -33,7 +33,7 @@ const publicNavItems: PublicNavItem[] = [
     {
         label: 'Contact us',
         to: RoutesRecord.CONTACT_US,
-        isActive: (_, pathname) => pathname.startsWith(RoutesRecord.CONTACT_US),
+        isActive: (route) => route === 'CONTACT_US',
     },
 ]
 
