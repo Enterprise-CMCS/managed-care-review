@@ -120,7 +120,7 @@ const LoggedInUserInfo = (
 const LoggedOutUserInfo = (authMode: AuthModeType): React.ReactElement => {
     return authMode === 'IDM' ? (
         <LinkWithLogging
-            className="usa-button usa-button--outline usa-button--inverse"
+            className={`usa-button usa-button--outline usa-button--inverse ${styles.loggedOutSignInButton}`}
             variant="unstyled"
             href={idmRedirectURL()}
         >
@@ -128,7 +128,7 @@ const LoggedOutUserInfo = (authMode: AuthModeType): React.ReactElement => {
         </LinkWithLogging>
     ) : (
         <NavLinkWithLogging
-            className="usa-button usa-button--outline usa-button--inverse"
+            className={`usa-button usa-button--outline usa-button--inverse ${styles.loggedOutSignInButton}`}
             variant="unstyled"
             to="/auth"
         >
