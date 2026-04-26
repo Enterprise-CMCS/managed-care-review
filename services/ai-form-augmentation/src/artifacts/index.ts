@@ -11,3 +11,9 @@ export {
   getDocumentIndexArtifactKey,
   summarizeIndexedDocument
 } from './documentIndexArtifact'
+export type { ParsedDocumentArtifact } from './parsedDocumentArtifact'
+export {
+  buildParsedDocumentArtifact,
+  getParsedDocumentArtifactKey,
+  getParsedDocumentArtifactKeyForDocument
+} from './parsedDocumentArtifact'

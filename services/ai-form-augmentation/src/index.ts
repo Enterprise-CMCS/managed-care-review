@@ -19,8 +19,14 @@ export type { ChunkDocumentOptions, DocumentChunk } from './chunking'
 export { chunkDocument } from './chunking'
 
 // Artifacts
-export type { ChunksArtifact } from './artifacts'
-export { buildChunksArtifact, getChunksArtifactKey } from './artifacts'
+export type { ChunksArtifact, ParsedDocumentArtifact } from './artifacts'
+export {
+  buildChunksArtifact,
+  buildParsedDocumentArtifact,
+  getChunksArtifactKey,
+  getParsedDocumentArtifactKey,
+  getParsedDocumentArtifactKeyForDocument
+} from './artifacts'
 
 // Embeddings
 export type { EmbeddingProvider } from './embeddings'

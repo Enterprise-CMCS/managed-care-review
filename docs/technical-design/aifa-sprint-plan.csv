@@ -886,7 +886,7 @@ Work selection should only become default after evidence shows it does not hide 
 - Default enablement decision is documented
 - Escape hatch for full processing remains available
 - Remaining known failure modes are documented"
-AIFA-046 Split parsed-text artifacts from embedding artifacts,Backlog,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-043","Persist per-document parsed text separately from chunk and embedding artifacts.
+AIFA-046 Split parsed-text artifacts from embedding artifacts,Done,7-Large Submission Hardening,Medium,"AIFA-041, AIFA-043","Persist per-document parsed text separately from chunk and embedding artifacts.
 - Store extracted text, page text, extraction method, and extraction notes as reusable per-document artifacts
 - Rebuild chunks and embeddings from parsed text when appropriate
 - Avoid rerunning expensive parse or OCR work when only embedding or chunk artifacts need regeneration
@@ -944,3 +944,18 @@ Large local submissions can spend many minutes indexing documents while `status.
 - Existing Review-page polling remains compatible with the updated status artifact shape
 - Validation results, fallback behavior, and work selection remain unchanged
 - Focused tests cover indexing-progress writes and terminal status behavior"
+AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents,Backlog,7-Large Submission Hardening,Medium,"AIFA-045, AIFA-049B, AIFA-050","Add an optional LLM-assisted reranking step ahead of first-pass indexing so very large low-yield documents can be deprioritized more intelligently without being excluded from conservative fallback.
+- Keep the existing heuristic scoring as the baseline and layer the LLM signal on top of it rather than replacing it
+- Require a small extracted sample from the first 1-2 pages as part of the reranking input, alongside filename and basic size/page-count metadata
+- Use the LLM only to boost or penalize first-pass ranking; do not let it permanently exclude documents from the run
+- Bias against giant generic contract bodies such as `Text Final` / `Rates Text` documents when the sampled text does not look relevant to contract date validation
+- Keep the feature behind an explicit config gate until evaluation shows equal-or-more-conservative outcomes than the current first-pass strategy
+
+Why this matters:
+Large submissions now bottleneck on a few 630+ page contract PDFs that appear structurally unrelated to date validation but still enter first pass and dominate chunk/embed cost. Heuristics alone are likely too blunt here; a cheap sampled-text LLM assist can improve first-pass ranking without weakening fallback safety.","- Reranking input always includes a small extracted sample from the first 1-2 pages
+- LLM output only changes ranking or bucket priority, not permanent inclusion/exclusion
+- Giant low-yield documents are deprioritized more often on the prod-shaped fixture
+- Conservative fallback behavior remains unchanged
+- All-doc override remains available
+- Evaluation shows equal-or-more-conservative outcomes versus the current gated first pass
+- Focused tests cover config gating and reranking behavior"

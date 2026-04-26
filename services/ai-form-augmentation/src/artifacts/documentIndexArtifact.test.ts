@@ -5,6 +5,10 @@ import {
   computeDocumentCacheKey,
   summarizeIndexedDocument
 } from './documentIndexArtifact'
+import {
+  buildParsedDocumentArtifact,
+  getParsedDocumentArtifactKeyForDocument
+} from './parsedDocumentArtifact'
 
 test('computeDocumentCacheKey is stable for the same document identity', () => {
   const cacheKey = computeDocumentCacheKey({
@@ -58,4 +62,43 @@ test('classifyDocumentSetChanges distinguishes unchanged added and removed docum
   assert.equal(changeSet.added[0]?.documentName, 'add.pdf')
   assert.equal(changeSet.removed.length, 1)
   assert.equal(changeSet.removed[0]?.documentName, 'remove.pdf')
+})
+
+test('buildParsedDocumentArtifact preserves reusable parse metadata', () => {
+  const artifact = buildParsedDocumentArtifact({
+    documentName: 'contract.pdf',
+    sourceBucket: 'documents-bucket',
+    sourceKey: 'uploads/form-123/contract.pdf',
+    pageCount: 2,
+    rawText: 'Contract text',
+    pageTexts: ['Page 1', 'Page 2'],
+    extractionMethod: 'ocr',
+    extractionNotes: ['OCR fallback used'],
+    ocrDisposition: 'attempted'
+  })
+
+  assert.equal(artifact.document.documentName, 'contract.pdf')
+  assert.equal(artifact.document.chunkCount, 0)
+  assert.equal(artifact.pageCount, 2)
+  assert.equal(artifact.rawText, 'Contract text')
+  assert.deepEqual(artifact.pageTexts, ['Page 1', 'Page 2'])
+  assert.equal(artifact.extractionMethod, 'ocr')
+  assert.equal(artifact.ocrDisposition, 'attempted')
+})
+
+test('getParsedDocumentArtifactKeyForDocument stays aligned to document cache identity', () => {
+  const key = getParsedDocumentArtifactKeyForDocument('form-123', {
+    documentName: 'contract.pdf',
+    sourceBucket: 'documents-bucket',
+    sourceKey: 'uploads/form-123/contract.pdf'
+  })
+
+  assert.equal(
+    key,
+    `rag-indexes/form-123/parsed-documents/${computeDocumentCacheKey({
+      documentName: 'contract.pdf',
+      sourceBucket: 'documents-bucket',
+      sourceKey: 'uploads/form-123/contract.pdf'
+    })}.json`
+  )
 })

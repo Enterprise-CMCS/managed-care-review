@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-046 Split parsed-text artifacts from embedding artifacts`.
+The next implementation ticket is `AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents`.
 
 ## Completed
 
@@ -64,6 +64,7 @@ The next implementation ticket is `AIFA-046 Split parsed-text artifacts from emb
 - AIFA-049C ✔ Validate and promote work selection after evaluation
 - AIFA-050 ✔ Apply work-selection promotion decision to runtime default
 - AIFA-051 ✔ Persist indexing-phase progress during long validation runs
+- AIFA-046 ✔ Split parsed-text artifacts from embedding artifacts
 
 ## Current State
 
@@ -282,9 +283,19 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Persist parsed text, page text, extraction method, and extraction notes as separate per-document artifacts.
-- Rebuild chunk and embedding artifacts from parsed text when reuse is safe.
-- Keep reuse aligned with the current document-identity contract until AIFA-047 strengthens it.
+- Add a cheap first-pass reranking signal that always includes a small extracted sample from the first 1-2 pages.
+- Keep the LLM output advisory-only so giant low-yield documents are deferred rather than permanently excluded.
+- Validate that reranking improves the 165-document fixture without weakening conservative fallback behavior.
+
+### AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents
+
+Add a cheap LLM-assisted reranking step ahead of first-pass indexing so very large low-yield contract PDFs can be deprioritized without being permanently excluded.
+
+- Use existing heuristic scoring as the baseline and add an advisory LLM reranking signal on top of it.
+- Require a small extracted sample from the first 1-2 pages as part of the reranking input, along with filename and basic document size/page-count metadata.
+- Keep the LLM output ranking-only: documents may be deferred from first pass, but must remain eligible for conservative fallback.
+- Bias against giant generic `Text Final` / `Rates Text` style documents when the sampled text looks structurally unrelated to contract date validation.
+- Keep the feature behind an explicit config gate until the large-submission fixture and corpus show equal-or-more-conservative behavior.
 
 ## Source of Truth Docs
 
@@ -337,6 +348,10 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 - `indexingProgress.totalDocuments` is currently scoped to the active indexing pass, so a later gated-fallback pass may report against a larger total instead of retroactively rewriting first-pass progress.
 - A 165-file local test run continued indexing documents after the Review-page timeout banner appeared, which confirms the worker can keep progressing even when the UI is no longer actively polling.
 - The same 165-file run also showed that persisted status is too coarse during indexing: document artifacts advanced in LocalStack while `status.json` remained frozen at `parsing` from the initial worker write.
+- A later 165-file rerun confirmed parsed-text reuse is working, but the first-pass set is still dominated by several 630+ page `A03 Text Final` contracts whose sampled content appears unrelated to date validation and whose downstream chunk/embed cost remains high.
+- The next work-selection improvement should not rely on filename heuristics alone; it should require a cheap first 1-2 page text sample so the LLM can deprioritize giant low-yield documents more intelligently while leaving fallback behavior unchanged.
+- AIFA-046 now persists reusable parsed text separately from indexed-document artifacts, so unchanged successful documents can rebuild chunks and embeddings without rerunning parse/OCR work.
+- Parsed-text reuse still depends on the current document identity contract of document name plus S3 bucket/key; stronger overwrite safety remains for AIFA-047.
 - `services/app-api` `test:once` still uses Vitest flags that are rejected by the current Vitest CLI, so direct `vitest run` invocation is currently needed for focused resolver checks.
 - Local corpus evaluation now has storage bootstrap, but it still requires reachable LocalStack S3 and the repo `nvm` runtime to verify end to end.
 - Frontend test verification is currently blocked by a repo-level `vitest`/`jsdom` `ERR_REQUIRE_ESM` failure in `html-encoding-sniffer`, so timeout behavior still needs normal test-run confirmation once that environment issue is resolved.

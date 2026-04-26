@@ -129,7 +129,11 @@ vi.mock(
     }
 )
 
-import { getChunksArtifactKey } from '../../../../ai-form-augmentation/src/artifacts'
+import {
+    computeDocumentCacheKey,
+    getChunksArtifactKey,
+    getParsedDocumentArtifactKeyForDocument,
+} from '../../../../ai-form-augmentation/src/artifacts'
 import { getValidationResultKey } from '../../../../ai-form-augmentation/src/results'
 import { getValidationStatusKey } from '../../../../ai-form-augmentation/src/status'
 import { validationHandler } from '../../../../ai-form-augmentation/src/handlers'
@@ -180,6 +184,7 @@ describe('validationHandler', () => {
                 pageCount: 1,
                 extractionMethod: 'pdf-text',
                 extractionNotes: [],
+                ocrDisposition: 'not-needed',
             })
         )
         chunkDocumentMock.mockImplementation((fileName: string) => [
@@ -383,6 +388,106 @@ describe('validationHandler', () => {
                     call[1] === getValidationStatusKey('test-form') &&
                     call[2]?.stage === 'parsing' &&
                     call[2]?.indexingProgress?.completedDocuments === 4
+            )
+        ).toBe(false)
+    })
+
+    it('rebuilds chunks and embeddings from cached parsed text without reparsing unchanged documents', async () => {
+        const cacheKey = computeDocumentCacheKey({
+            documentName: 'contract-a.pdf',
+            sourceBucket: 'local-uploads',
+            sourceKey: 'uploads/contracts/contract-a.pdf',
+        })
+
+        getJsonMock.mockImplementation(async (_bucket: string, key: string) => {
+            if (key === getChunksArtifactKey('test-form')) {
+                return {
+                    artifactVersion: 'artifact-v0',
+                    generatedAt: '2026-04-23T00:00:00.000Z',
+                    documents: [
+                        {
+                            documentName: 'contract-a.pdf',
+                            sourceBucket: 'local-uploads',
+                            sourceKey: 'uploads/contracts/contract-a.pdf',
+                            cacheKey,
+                            chunkCount: 1,
+                        },
+                    ],
+                    chunks: [],
+                }
+            }
+
+            if (
+                key ===
+                getParsedDocumentArtifactKeyForDocument('test-form', {
+                    documentName: 'contract-a.pdf',
+                    sourceBucket: 'local-uploads',
+                    sourceKey: 'uploads/contracts/contract-a.pdf',
+                })
+            ) {
+                return {
+                    generatedAt: '2026-04-23T00:00:00.000Z',
+                    document: {
+                        documentName: 'contract-a.pdf',
+                        sourceBucket: 'local-uploads',
+                        sourceKey: 'uploads/contracts/contract-a.pdf',
+                        cacheKey,
+                        chunkCount: 0,
+                    },
+                    pageCount: 1,
+                    rawText:
+                        'START DATE January 1, 2025 END DATE December 31, 2025',
+                    pageTexts: [
+                        'START DATE January 1, 2025 END DATE December 31, 2025',
+                    ],
+                    extractionMethod: 'pdf-text',
+                    extractionNotes: ['cached parse'],
+                    ocrDisposition: 'not-needed',
+                }
+            }
+
+            throw new Error('S3 object not found')
+        })
+
+        await validationHandler(baseEvent)
+
+        expect(parsePdfMock).not.toHaveBeenCalled()
+        expect(chunkDocumentMock).toHaveBeenCalledWith(
+            'contract-a.pdf',
+            'START DATE January 1, 2025 END DATE December 31, 2025',
+            {
+                pageTexts: [
+                    'START DATE January 1, 2025 END DATE December 31, 2025',
+                ],
+            }
+        )
+        expect(embedTextsMock).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not persist parsed-text artifacts for OCR-capped skipped parses', async () => {
+        parsePdfMock.mockResolvedValueOnce({
+            fileName: 'contract-a.pdf',
+            rawText: 'too little text',
+            pageTexts: ['too little text'],
+            pageCount: 1,
+            extractionMethod: 'pdf-text',
+            extractionNotes: ['weak text'],
+            ocrDisposition: 'skipped',
+        })
+
+        await expect(validationHandler(baseEvent)).rejects.toThrow(
+            'Validation could not index any usable documents for form test-form'
+        )
+
+        expect(
+            putJsonMock.mock.calls.some(
+                (call) =>
+                    call[1] ===
+                    getParsedDocumentArtifactKeyForDocument('test-form', {
+                        documentName: 'contract-a.pdf',
+                        sourceBucket: 'local-uploads',
+                        sourceKey: 'uploads/contracts/contract-a.pdf',
+                    })
             )
         ).toBe(false)
     })

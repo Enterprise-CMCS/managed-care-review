@@ -1,12 +1,15 @@
 import {
   buildChunksArtifact,
   buildIndexedDocumentArtifact,
+  buildParsedDocumentArtifact,
   classifyDocumentSetChanges,
   computeDocumentCacheKey,
   getChunksArtifactKey,
   getDocumentIndexArtifactKey,
+  getParsedDocumentArtifactKey,
   type ChunksArtifact,
-  type IndexedDocumentArtifact
+  type IndexedDocumentArtifact,
+  type ParsedDocumentArtifact
 } from '../artifacts'
 import { chunkDocument } from '../chunking'
 import { XenovaEmbeddingProvider } from '../embeddings'
@@ -815,6 +818,10 @@ async function indexValidationDocument(args: {
     event.formId,
     documentCacheKey
   )
+  const parsedDocumentArtifactKey = getParsedDocumentArtifactKey(
+    event.formId,
+    documentCacheKey
+  )
   let stage: NonNullable<ValidationDocumentDiagnostic['stage']> = 'cache'
   let ocrDisposition: PdfOcrDisposition = 'not-needed'
 
@@ -843,17 +850,45 @@ async function indexValidationDocument(args: {
       }
     }
 
-    stage = 'fetch'
-    const fileBuffer = await measureValidationPhase(event, 'fetch', () =>
-      s3Client.getBuffer(document.sourceBucket, document.sourceKey)
-    )
-    stage = 'parse'
-    const parsed = await parsePdfWithDiagnostics(
-      event,
-      fileBuffer,
-      document.documentName,
-      args.shouldAttemptOcrFallback
-    )
+    const reusableParsedArtifact =
+      args.unchangedDocumentCacheKeys.has(documentCacheKey)
+        ? await readOptionalArtifact<ParsedDocumentArtifact>(
+            s3Client,
+            event.bucket,
+            parsedDocumentArtifactKey
+          )
+        : null
+    // Keep parse/OCR reuse narrower than full document-index reuse. Parsed text
+    // is safe to rebuild chunks and embeddings from for unchanged documents, but
+    // failed or OCR-capped parses never get persisted in the first place.
+    const parsed =
+      reusableParsedArtifact != null
+        ? buildParseResultFromArtifact(reusableParsedArtifact)
+        : await (async () => {
+            stage = 'fetch'
+            const fileBuffer = await measureValidationPhase(event, 'fetch', () =>
+              s3Client.getBuffer(document.sourceBucket, document.sourceKey)
+            )
+            stage = 'parse'
+            const nextParsed = await parsePdfWithDiagnostics(
+              event,
+              fileBuffer,
+              document.documentName,
+              args.shouldAttemptOcrFallback
+            )
+
+            if (nextParsed.ocrDisposition !== 'skipped') {
+              await persistParsedDocumentArtifact({
+                event,
+                s3Client,
+                parsedDocumentArtifactKey,
+                document,
+                parsed: nextParsed
+              })
+            }
+
+            return nextParsed
+          })()
     ocrDisposition = parsed.ocrDisposition
 
     if (parsed.ocrDisposition === 'skipped') {
@@ -1384,6 +1419,42 @@ async function parsePdfWithDiagnostics(
   }
 
   return parsed
+}
+
+async function persistParsedDocumentArtifact(args: {
+  event: ValidationHandlerEvent
+  s3Client: ArtifactS3Client
+  parsedDocumentArtifactKey: string
+  document: ValidationSourceDocument
+  parsed: Awaited<ReturnType<typeof parsePdf>>
+}) {
+  await args.s3Client.putJson(
+    args.event.bucket,
+    args.parsedDocumentArtifactKey,
+    buildParsedDocumentArtifact({
+      documentName: args.document.documentName,
+      sourceBucket: args.document.sourceBucket,
+      sourceKey: args.document.sourceKey,
+      pageCount: args.parsed.pageCount,
+      rawText: args.parsed.rawText,
+      pageTexts: args.parsed.pageTexts,
+      extractionMethod: args.parsed.extractionMethod,
+      extractionNotes: args.parsed.extractionNotes,
+      ocrDisposition: args.parsed.ocrDisposition
+    })
+  )
+}
+
+function buildParseResultFromArtifact(artifact: ParsedDocumentArtifact) {
+  return {
+    fileName: artifact.document.documentName,
+    rawText: artifact.rawText,
+    pageTexts: artifact.pageTexts,
+    pageCount: artifact.pageCount,
+    extractionMethod: artifact.extractionMethod,
+    extractionNotes: artifact.extractionNotes,
+    ocrDisposition: artifact.ocrDisposition
+  }
 }
 
 function logMissingCitationPages(
