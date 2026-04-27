@@ -67,7 +67,7 @@ export class AuroraServerlessV2 extends Construct {
                 version: AuroraPostgresEngineVersion.VER_16_9,
             }),
             credentials: Credentials.fromGeneratedSecret('mcreviewadmin', {
-                secretName: `aurora-postgres-${props.stage}-cdk`, // pragma: allowlist secret
+                secretName: `aurora-postgres-${props.stage}-cdk-rotating`, // pragma: allowlist secret
                 excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
             }),
             clusterIdentifier: ResourceNames.resourceName(
