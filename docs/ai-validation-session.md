@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-057 Add fast revalidation path for form-only edits`.
+The next implementation ticket is `AIFA-058 Reduce first-pass latency for large submissions`.
 
 ## Completed
 
@@ -68,6 +68,7 @@ The next implementation ticket is `AIFA-057 Add fast revalidation path for form-
 - AIFA-052 ✔ Add LLM-assisted first-pass reranking for large low-yield documents
 - AIFA-053 ✔ Stop fallback expansion once both date fields are sufficiently evidenced
 - AIFA-055 ✔ Fix stale in-progress banner after completed validation
+- AIFA-057 ✔ Add fast revalidation path for form-only edits
 
 ## Current State
 
@@ -286,9 +287,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Add a fast revalidation path for date-only form edits when the document set is unchanged.
-- Reuse existing first-pass document artifacts more aggressively while preserving correct rerun semantics.
-- After that, reduce overall first-pass wall-clock time on large submissions before returning to copy/UX refinement.
+- Reduce the remaining first-pass re-embed cost on large submissions without changing validation outcomes.
+- Measure why a small number of first-pass documents can still miss cache on same-artifact reruns.
+- Keep rerun correctness, retrieval behavior, and conservative fallback semantics unchanged.
 
 ## Follow-on UX Tickets
 
@@ -296,15 +297,17 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Follow-on Performance Tickets
 
-- `AIFA-057 Add fast revalidation path for form-only edits`
 - `AIFA-058 Reduce first-pass latency for large submissions`
+
+## Follow-on Maintenance Ticket
+
+- `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
 
 ## Recommended Upcoming Order
 
-1. `AIFA-057 Add fast revalidation path for form-only edits`
-2. `AIFA-058 Reduce first-pass latency for large submissions`
-3. `AIFA-054 Clarify multi-document evidence messaging on Review page`
-4. `AIFA-056 Clarify AI validation rollout and local-default configuration`
+1. `AIFA-058 Reduce first-pass latency for large submissions`
+2. `AIFA-054 Clarify multi-document evidence messaging on Review page`
+3. `AIFA-056 Clarify AI validation rollout and local-default configuration`
 
 ## Follow-on Config Ticket
 
@@ -410,3 +413,6 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - so we now need two separate speed follow-ons:
 - one for fast revalidation when form values change but the document set is unchanged
 - one for reducing first-pass execution cost even when selection and fallback behavior are already correct
+- `AIFA-057` is now complete: form-only reruns recompute final results correctly and real LocalStack artifacts show previously repeated OCR-capped first-pass docs can short-circuit to cached skipped diagnostics instead of re-entering parse
+- one remaining performance uncertainty after `AIFA-057` is that a small number of first-pass documents can still miss cache and re-enter `embed` on same-artifact reruns, which should be measured under `AIFA-058` without reopening validation semantics
+- the `AIFA-057` closeout left two low-priority maintenance follow-ons captured under `AIFA-059`: duplicated reuse-compatibility checks in the worker path and regression coverage that is still more helper-level than artifact-backed

@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { computeDocumentCacheKey } from '../artifacts'
 import {
+  buildReusableDocumentCacheKeys,
+  buildReusableOcrCappedDocumentCacheKeys,
+  hasReusableDocumentArtifactInputs,
   buildFieldWorkSelectionDiagnostics,
   createOcrFallbackPolicy,
   DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
@@ -33,6 +37,166 @@ test('mapWithConcurrencyLimit preserves order while bounding active work', async
 
   assert.deepEqual(results, [0, 10, 20, 30, 40])
   assert.equal(maxActive, DEFAULT_DOCUMENT_INDEXING_CONCURRENCY)
+})
+
+test('buildReusableDocumentCacheKeys keeps reuse limited to known unchanged documents by default', () => {
+  const keepDocument = {
+    documentName: 'keep.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/keep.pdf'
+  }
+  const cacheKeys = buildReusableDocumentCacheKeys({
+    previousDocuments: [
+      {
+        ...keepDocument,
+        cacheKey: computeDocumentCacheKey(keepDocument),
+        chunkCount: 3
+      }
+    ],
+    currentDocuments: [
+      keepDocument,
+      {
+        documentName: 'new.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/new.pdf'
+      }
+    ],
+    allowAllCurrentDocumentsReuse: false
+  })
+
+  assert.deepEqual([...cacheKeys], [computeDocumentCacheKey(keepDocument)])
+})
+
+test('buildReusableDocumentCacheKeys reuses all current documents for form-only reruns', () => {
+  const firstPassDocument = {
+    documentName: 'first-pass.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/first-pass.pdf'
+  }
+  const deferredDocument = {
+    documentName: 'deferred.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/deferred.pdf'
+  }
+  const cacheKeys = buildReusableDocumentCacheKeys({
+    previousDocuments: [
+      {
+        ...firstPassDocument,
+        cacheKey: computeDocumentCacheKey(firstPassDocument),
+        chunkCount: 2
+      }
+    ],
+    currentDocuments: [firstPassDocument, deferredDocument],
+    allowAllCurrentDocumentsReuse: true
+  })
+
+  assert.equal(cacheKeys.has(computeDocumentCacheKey(firstPassDocument)), true)
+  assert.equal(cacheKeys.has(computeDocumentCacheKey(deferredDocument)), true)
+  assert.equal(cacheKeys.size, 2)
+})
+
+test('buildReusableOcrCappedDocumentCacheKeys reuses prior OCR-capped skips on form-only reruns', () => {
+  const cappedDocument = {
+    documentName: 'slow-scan.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/slow-scan.pdf'
+  }
+
+  const cacheKeys = buildReusableOcrCappedDocumentCacheKeys({
+    previousDocumentDiagnostics: [
+      {
+        documentName: cappedDocument.documentName,
+        sourceBucket: cappedDocument.sourceBucket,
+        sourceKey: cappedDocument.sourceKey,
+        status: 'skipped',
+        usable: false,
+        chunkCount: 0,
+        ocrDisposition: 'skipped',
+        stage: 'parse',
+        reason: 'ocr-capped-large-batch'
+      }
+    ],
+    currentDocuments: [cappedDocument],
+    allowReuse: true
+  })
+
+  assert.deepEqual([...cacheKeys], [computeDocumentCacheKey(cappedDocument)])
+})
+
+test('buildReusableOcrCappedDocumentCacheKeys ignores non-current or non-capped diagnostics', () => {
+  const currentDocument = {
+    documentName: 'current.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/current.pdf'
+  }
+
+  const cacheKeys = buildReusableOcrCappedDocumentCacheKeys({
+    previousDocumentDiagnostics: [
+      {
+        documentName: 'old.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/old.pdf',
+        status: 'skipped',
+        usable: false,
+        chunkCount: 0,
+        ocrDisposition: 'skipped',
+        stage: 'parse',
+        reason: 'ocr-capped-large-batch'
+      },
+      {
+        documentName: currentDocument.documentName,
+        sourceBucket: currentDocument.sourceBucket,
+        sourceKey: currentDocument.sourceKey,
+        status: 'skipped',
+        usable: false,
+        chunkCount: 0,
+        reason: 'missing-pdf-extension'
+      }
+    ],
+    currentDocuments: [currentDocument],
+    allowReuse: true
+  })
+
+  assert.equal(cacheKeys.size, 0)
+})
+
+test('hasReusableDocumentArtifactInputs falls back to the previous completed result artifact when status is no longer reusable', () => {
+  assert.equal(
+    hasReusableDocumentArtifactInputs({
+      artifactVersion: 'artifact-v1',
+      workSelectionMode: 'gated-first-pass',
+      statusArtifact: {
+        stage: 'parsing',
+        artifactVersion: 'artifact-v1',
+        updatedAt: '2026-04-27T23:00:00.000Z',
+        error: null
+      },
+      resultArtifact: {
+        artifactVersion: 'artifact-v1',
+        formSnapshotHash: 'stale-form-hash',
+        workSelectionMode: 'gated-fallback',
+        results: []
+      }
+    }),
+    true
+  )
+})
+
+test('hasReusableDocumentArtifactInputs rejects changed artifact identity even when a prior result artifact exists', () => {
+  assert.equal(
+    hasReusableDocumentArtifactInputs({
+      artifactVersion: 'artifact-v2',
+      workSelectionMode: 'gated-first-pass',
+      statusArtifact: null,
+      resultArtifact: {
+        artifactVersion: 'artifact-v1',
+        formSnapshotHash: 'stale-form-hash',
+        workSelectionMode: 'gated-fallback',
+        results: []
+      }
+    }),
+    false
+  )
 })
 
 test('mapWithConcurrencyLimit keeps draining remaining work after earlier items resolve', async () => {

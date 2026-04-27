@@ -8,6 +8,7 @@ import {
   getDocumentIndexArtifactKey,
   getParsedDocumentArtifactKey,
   type ChunksArtifact,
+  type IndexedDocumentSummary,
   type IndexedDocumentArtifact,
   type ParsedDocumentArtifact
 } from '../artifacts'
@@ -32,7 +33,9 @@ import {
   type ValidationDocumentDiagnostic,
   type ValidationDocumentWorkSelectionDiagnostic,
   type ValidationFieldWorkSelectionDiagnostic,
-  type ValidationRetrievalDiagnostic
+  type ValidationRetrievalDiagnostic,
+  type ValidationResultArtifact,
+  type ValidationWorkSelectionMode
 } from '../results'
 import { newArtifactS3Client } from '../s3'
 import type { ArtifactS3Client, ArtifactS3ClientConfig } from '../s3'
@@ -40,7 +43,8 @@ import {
   buildCompletedValidationStatusArtifact,
   buildFailedValidationStatusArtifact,
   buildValidationStatusArtifact,
-  getValidationStatusKey
+  getValidationStatusKey,
+  type ValidationStatusArtifact
 } from '../status'
 import {
   normalizeLlmValidationResult,
@@ -135,6 +139,133 @@ const LARGE_DOCUMENT_NON_HIGH_PRIORITY_PENALTY = 14
 const HIGH_YIELD_LLM_PRIORITY_BOOST = 10
 const FIRST_PASS_DIVERSITY_SCORE_BAND = 4
 
+export function buildReusableDocumentCacheKeys(args: {
+  previousDocuments: IndexedDocumentSummary[]
+  currentDocuments: ValidationSourceDocument[]
+  allowAllCurrentDocumentsReuse: boolean
+}): Set<string> {
+  const documentChanges = classifyDocumentSetChanges(
+    args.previousDocuments,
+    args.currentDocuments
+  )
+  const reusableCacheKeys = new Set(
+    documentChanges.unchanged.map((document) => document.cacheKey)
+  )
+
+  if (args.allowAllCurrentDocumentsReuse) {
+    for (const document of args.currentDocuments) {
+      reusableCacheKeys.add(computeDocumentCacheKey(document))
+    }
+  }
+
+  return reusableCacheKeys
+}
+
+export function buildReusableOcrCappedDocumentCacheKeys(args: {
+  previousDocumentDiagnostics: ValidationDocumentDiagnostic[]
+  currentDocuments: ValidationSourceDocument[]
+  allowReuse: boolean
+}): Set<string> {
+  if (!args.allowReuse) {
+    return new Set()
+  }
+
+  const currentDocumentCacheKeys = new Set(
+    args.currentDocuments.map((document) => computeDocumentCacheKey(document))
+  )
+
+  return new Set(
+    args.previousDocumentDiagnostics.flatMap((diagnostic) => {
+      if (
+        diagnostic.reason !== 'ocr-capped-large-batch' ||
+        diagnostic.sourceBucket == null ||
+        diagnostic.sourceKey == null
+      ) {
+        return []
+      }
+
+      const cacheKey = computeDocumentCacheKey({
+        documentName: diagnostic.documentName,
+        sourceBucket: diagnostic.sourceBucket,
+        sourceKey: diagnostic.sourceKey
+      })
+
+      return currentDocumentCacheKeys.has(cacheKey) ? [cacheKey] : []
+    })
+  )
+}
+
+export function hasReusableDocumentArtifactInputs(args: {
+  artifactVersion: string
+  workSelectionMode: Extract<
+    ValidationWorkSelectionMode,
+    'all-doc' | 'gated-first-pass'
+  >
+  statusArtifact: ValidationStatusArtifact | null
+  resultArtifact: ValidationResultArtifact | null
+}): boolean {
+  const hasReusableStatusArtifact =
+    args.statusArtifact != null &&
+    args.statusArtifact.stage === 'complete' &&
+    args.statusArtifact.artifactVersion === args.artifactVersion &&
+    isCompatibleDocumentArtifactWorkSelectionMode(
+      args.workSelectionMode,
+      args.statusArtifact.workSelectionMode
+    )
+
+  if (hasReusableStatusArtifact) {
+    return true
+  }
+
+  return (
+    args.resultArtifact != null &&
+    args.resultArtifact.artifactVersion === args.artifactVersion &&
+    isCompatibleDocumentArtifactWorkSelectionMode(
+      args.workSelectionMode,
+      args.resultArtifact.workSelectionMode
+    )
+  )
+}
+
+export function selectReusableDocumentDiagnostics(args: {
+  artifactVersion: string
+  workSelectionMode: Extract<
+    ValidationWorkSelectionMode,
+    'all-doc' | 'gated-first-pass'
+  >
+  statusArtifact: ValidationStatusArtifact | null
+  resultArtifact: ValidationResultArtifact | null
+}): ValidationDocumentDiagnostic[] {
+  if (
+    args.statusArtifact != null &&
+    args.statusArtifact.stage === 'complete' &&
+    args.statusArtifact.artifactVersion === args.artifactVersion &&
+    isCompatibleDocumentArtifactWorkSelectionMode(
+      args.workSelectionMode,
+      args.statusArtifact.workSelectionMode
+    )
+  ) {
+    return args.statusArtifact.documentDiagnostics ?? []
+  }
+
+  // status.json is the mutable coordination artifact for an active run, so a
+  // fresh trigger may advance it out of `complete` before the worker seeds
+  // reuse. Fall back to the last completed result artifact so form-only reruns
+  // can still recover terminal document diagnostics for the same artifactVersion.
+  if (
+    args.resultArtifact != null &&
+    args.resultArtifact.artifactVersion === args.artifactVersion &&
+    isCompatibleDocumentArtifactWorkSelectionMode(
+      args.workSelectionMode,
+      args.resultArtifact.workSelectionMode
+    )
+  ) {
+    return args.resultArtifact.documentDiagnostics ?? []
+  }
+
+  return []
+}
+
 export async function validationHandler(
   event: ValidationHandlerEvent
 ): Promise<ValidationHandlerResult> {
@@ -175,6 +306,25 @@ export async function validationHandler(
       }
     }
 
+    const previousStatusArtifact =
+      await readOptionalArtifact<ValidationStatusArtifact>(
+        s3Client,
+        event.bucket,
+        statusKey
+      )
+    const previousResultArtifact =
+      await readOptionalArtifact<ValidationResultArtifact>(
+        s3Client,
+        event.bucket,
+        getValidationResultKey(event.formId)
+      )
+    const canReuseCurrentDocumentArtifacts = hasReusableDocumentArtifactInputs({
+      artifactVersion: event.artifactVersion,
+      workSelectionMode: requestedWorkSelectionMode,
+      statusArtifact: previousStatusArtifact,
+      resultArtifact: previousResultArtifact
+    })
+
     await s3Client.putJson(
       event.bucket,
       statusKey,
@@ -196,13 +346,22 @@ export async function validationHandler(
       event.documents,
       event.formFields
     )
-    const documentChanges = classifyDocumentSetChanges(
-      previousChunksArtifact?.documents ?? [],
-      event.documents
-    )
-    const unchangedDocumentCacheKeys = new Set(
-      documentChanges.unchanged.map((document) => document.cacheKey)
-    )
+    const unchangedDocumentCacheKeys = buildReusableDocumentCacheKeys({
+      previousDocuments: previousChunksArtifact?.documents ?? [],
+      currentDocuments: event.documents,
+      allowAllCurrentDocumentsReuse: canReuseCurrentDocumentArtifacts
+    })
+    const reusableOcrCappedDocumentCacheKeys =
+      buildReusableOcrCappedDocumentCacheKeys({
+        previousDocumentDiagnostics: selectReusableDocumentDiagnostics({
+          artifactVersion: event.artifactVersion,
+          workSelectionMode: requestedWorkSelectionMode,
+          statusArtifact: previousStatusArtifact,
+          resultArtifact: previousResultArtifact
+        }),
+        currentDocuments: event.documents,
+        allowReuse: canReuseCurrentDocumentArtifacts
+      })
     if (
       requestedWorkSelectionMode === 'gated-first-pass' &&
       isLlmFirstPassRerankingEnabled()
@@ -251,6 +410,7 @@ export async function validationHandler(
       embeddingProvider,
       embeddingModel,
       unchangedDocumentCacheKeys,
+      reusableOcrCappedDocumentCacheKeys,
       shouldAttemptOcrFallback,
       documents: selectedDocuments,
       workSelectionByCacheKey,
@@ -334,6 +494,7 @@ export async function validationHandler(
         embeddingProvider,
         embeddingModel,
         unchangedDocumentCacheKeys,
+        reusableOcrCappedDocumentCacheKeys,
         shouldAttemptOcrFallback,
         documents: deferredDocuments,
         workSelectionByCacheKey,
@@ -478,6 +639,7 @@ async function indexValidationDocuments(args: {
   embeddingProvider: XenovaEmbeddingProvider
   embeddingModel: string
   unchangedDocumentCacheKeys: Set<string>
+  reusableOcrCappedDocumentCacheKeys: Set<string>
   shouldAttemptOcrFallback: () => boolean
   documents: ValidationSourceDocument[]
   workSelectionByCacheKey: Map<string, ValidationDocumentWorkSelectionDiagnostic>
@@ -499,6 +661,8 @@ async function indexValidationDocuments(args: {
         embeddingProvider: args.embeddingProvider,
         embeddingModel: args.embeddingModel,
         unchangedDocumentCacheKeys: args.unchangedDocumentCacheKeys,
+        reusableOcrCappedDocumentCacheKeys:
+          args.reusableOcrCappedDocumentCacheKeys,
         shouldAttemptOcrFallback: args.shouldAttemptOcrFallback,
         document
       })
@@ -845,6 +1009,7 @@ async function indexValidationDocument(args: {
   embeddingProvider: XenovaEmbeddingProvider
   embeddingModel: string
   unchangedDocumentCacheKeys: Set<string>
+  reusableOcrCappedDocumentCacheKeys: Set<string>
   shouldAttemptOcrFallback: () => boolean
   document: ValidationSourceDocument
 }): Promise<{
@@ -866,6 +1031,24 @@ async function indexValidationDocument(args: {
   let ocrDisposition: PdfOcrDisposition = 'not-needed'
 
   try {
+    if (args.reusableOcrCappedDocumentCacheKeys.has(documentCacheKey)) {
+      return {
+        document,
+        indexedDocument: null,
+        diagnostic: {
+          documentName: document.documentName,
+          sourceBucket: document.sourceBucket,
+          sourceKey: document.sourceKey,
+          status: 'skipped',
+          usable: false,
+          chunkCount: 0,
+          ocrDisposition: 'skipped',
+          stage: 'cache',
+          reason: 'ocr-capped-large-batch'
+        }
+      }
+    }
+
     if (args.unchangedDocumentCacheKeys.has(documentCacheKey)) {
       const cachedDocumentArtifact =
         await readOptionalArtifact<IndexedDocumentArtifact>(
@@ -1332,6 +1515,22 @@ function attachWorkSelectionDiagnostic(
 
 function containsAny(value: string, substrings: string[]): boolean {
   return substrings.some((substring) => value.includes(substring))
+}
+
+function isCompatibleDocumentArtifactWorkSelectionMode(
+  requestedMode: Extract<ValidationWorkSelectionMode, 'all-doc' | 'gated-first-pass'>,
+  cachedMode?: ValidationWorkSelectionMode
+): boolean {
+  const normalizedCachedMode = cachedMode ?? 'all-doc'
+
+  if (requestedMode === 'all-doc') {
+    return normalizedCachedMode === 'all-doc'
+  }
+
+  return (
+    normalizedCachedMode === 'gated-first-pass' ||
+    normalizedCachedMode === 'gated-fallback'
+  )
 }
 
 function isLlmFirstPassRerankingEnabled(): boolean {

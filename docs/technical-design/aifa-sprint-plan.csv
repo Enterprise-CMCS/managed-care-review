@@ -1004,7 +1004,7 @@ Large-submission validation behavior now depends on a small set of rollout/confi
 - Any local default promotion of `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING` is explicit and documented
 - Current runtime overrides remain available for debugging
 - The ticket does not change validation correctness logic or frontend behavior"
-AIFA-057 Add fast revalidation path for form-only edits,Backlog,7-Large Submission Hardening,High,"AIFA-046, AIFA-053","Speed up reruns when form values change but the uploaded document set is unchanged.
+AIFA-057 Add fast revalidation path for form-only edits,Done,7-Large Submission Hardening,High,"AIFA-046, AIFA-053","Speed up reruns when form values change but the uploaded document set is unchanged.
 - Preserve exact result-cache invalidation when form fields change
 - Reuse existing parsed/chunked/indexed document work aggressively when `artifactVersion` is unchanged
 - Limit rerun work to the minimum retrieval/validation steps needed for the new form values
@@ -1026,3 +1026,13 @@ The latest large-submission runs now complete correctly from `gated-first-pass`,
 - First-pass still surfaces the same decisive evidence documents and preserves conservative sufficiency behavior
 - Performance measurements identify and reduce the dominant first-pass cost centers
 - No regression reintroduces broad fallback or stale result behavior"
+AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage,Backlog,7-Large Submission Hardening,Low,"AIFA-057","Tighten the new form-only rerun reuse path after `AIFA-057` without changing validation behavior.
+- Remove or consolidate duplicated compatibility logic around reusable document-artifact inputs if a smaller shared path is available
+- Add regression coverage that is closer to artifact-backed rerun behavior than today's helper-level unit tests
+- Keep the work scoped to cleanup and coverage; do not change validation truth rules, retrieval behavior, or cache identity semantics in this ticket
+
+Why this matters:
+`AIFA-057` now behaves correctly on real reruns, but the implementation still carries some duplicated compatibility logic and most regression coverage lives at helper level. Capturing that cleanup separately keeps the runtime fix small while still recording the maintainability and test-depth follow-up.","- Reuse-compatibility logic is no more duplicated than necessary for this area
+- Regression coverage proves form-only reruns reuse prior document artifacts and OCR-capped skip diagnostics through artifact-backed scenarios
+- The ticket does not change validation outcomes, retrieval ordering, or final result-cache invalidation behavior
+- Any remaining helper-level tests still map clearly to runtime behavior rather than replacing it"

@@ -33,12 +33,10 @@ export async function readReusableValidationResult(input: {
   // prior run should fall back to the normal validation path instead of being
   // treated as a cache hit.
   if (
-    statusArtifact == null ||
-    statusArtifact.stage !== 'complete' ||
-    statusArtifact.artifactVersion !== input.artifactVersion ||
-    !isCompatibleWorkSelectionMode(
-      input.workSelectionMode ?? 'all-doc',
-      statusArtifact.workSelectionMode
+    !hasCompatibleReusableStatusArtifact(
+      statusArtifact,
+      input.artifactVersion,
+      input.workSelectionMode
     )
   ) {
     return null
@@ -72,6 +70,25 @@ function isCompatibleWorkSelectionMode(
   return (
     normalizedCachedMode === 'gated-first-pass' ||
     normalizedCachedMode === 'gated-fallback'
+  )
+}
+
+function hasCompatibleReusableStatusArtifact(
+  statusArtifact: ValidationStatusArtifact | null,
+  artifactVersion: string,
+  workSelectionMode?: Extract<
+    ValidationWorkSelectionMode,
+    'all-doc' | 'gated-first-pass'
+  >
+): boolean {
+  return (
+    statusArtifact != null &&
+    statusArtifact.stage === 'complete' &&
+    statusArtifact.artifactVersion === artifactVersion &&
+    isCompatibleWorkSelectionMode(
+      workSelectionMode ?? 'all-doc',
+      statusArtifact.workSelectionMode
+    )
   )
 }
 
