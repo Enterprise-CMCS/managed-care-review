@@ -944,7 +944,7 @@ Large local submissions can spend many minutes indexing documents while `status.
 - Existing Review-page polling remains compatible with the updated status artifact shape
 - Validation results, fallback behavior, and work selection remain unchanged
 - Focused tests cover indexing-progress writes and terminal status behavior"
-AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents,Backlog,7-Large Submission Hardening,Medium,"AIFA-045, AIFA-049B, AIFA-050","Add an optional LLM-assisted reranking step ahead of first-pass indexing so very large low-yield documents can be deprioritized more intelligently without being excluded from conservative fallback.
+AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents,Done,7-Large Submission Hardening,Medium,"AIFA-045, AIFA-049B, AIFA-050","Add an optional LLM-assisted reranking step ahead of first-pass indexing so very large low-yield documents can be deprioritized more intelligently without being excluded from conservative fallback.
 - Keep the existing heuristic scoring as the baseline and layer the LLM signal on top of it rather than replacing it
 - Require a small extracted sample from the first 1-2 pages as part of the reranking input, alongside filename and basic size/page-count metadata
 - Use the LLM only to boost or penalize first-pass ranking; do not let it permanently exclude documents from the run
@@ -959,3 +959,15 @@ Large submissions now bottleneck on a few 630+ page contract PDFs that appear st
 - All-doc override remains available
 - Evaluation shows equal-or-more-conservative outcomes versus the current gated first pass
 - Focused tests cover config gating and reranking behavior"
+AIFA-053 Stop fallback expansion once both date fields are sufficiently evidenced,Backlog,7-Large Submission Hardening,High,"AIFA-049B, AIFA-050, AIFA-052","Prevent broad fallback from continuing to index expensive deferred documents once `contractStartDate` and `contractEndDate` already have strong enough cited evidence from first pass.
+- Inspect the field-level sufficiency and fallback-trigger logic against real first-pass evidence such as `AAH 23-30212 A03 213A Final.pdf`
+- Stop deferred-document expansion only when both date fields are clearly evidenced, cited, non-conflicting, and not partial
+- Preserve current conservative fallback behavior whenever evidence is weak, partial, ambiguous, uncited, or contradicted
+- Keep the work scoped to expansion control and validation-stage sufficiency rather than reopening first-pass reranking
+
+Why this matters:
+The latest large-submission runs show first-pass selection has improved enough to surface the right amendment-style documents, but the pipeline still broadens into expensive fallback indexing even after strong cited date evidence is present. Controlling that expansion is now the highest-leverage path for both reliability and timely completion.","- Strong first-pass evidence for both date fields can terminate fallback expansion before broad deferred-document indexing begins
+- Weak, partial, conflicting, ambiguous, or uncited evidence still triggers conservative fallback
+- Deferred documents remain eligible whenever sufficiency is not met
+- Validation truth remains evidence-driven; this ticket only changes when expensive expansion stops
+- Focused tests cover sufficiency-driven no-expand behavior and unchanged fallback behavior for ambiguous cases"

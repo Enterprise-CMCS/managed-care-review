@@ -6,5 +6,5 @@ export type {
   PdfTextExtractor
 } from './types'
 export { parsePdf } from './pdfParser'
-export { PdfParseTextExtractor } from './pdfTextExtractor'
+export { extractPdfTextSample, PdfParseTextExtractor } from './pdfTextExtractor'
 export { LocalOcrPdfExtractor } from './localOcrPdfExtractor'

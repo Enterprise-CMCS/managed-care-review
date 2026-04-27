@@ -10,6 +10,7 @@ export type {
 } from './parsing'
 export {
   LocalOcrPdfExtractor,
+  extractPdfTextSample,
   parsePdf,
   PdfParseTextExtractor
 } from './parsing'

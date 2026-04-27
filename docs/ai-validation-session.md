@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents`.
+The next implementation ticket is `AIFA-053 Stop fallback expansion once both date fields are sufficiently evidenced`.
 
 ## Completed
 
@@ -65,6 +65,7 @@ The next implementation ticket is `AIFA-052 Add LLM-assisted first-pass rerankin
 - AIFA-050 ✔ Apply work-selection promotion decision to runtime default
 - AIFA-051 ✔ Persist indexing-phase progress during long validation runs
 - AIFA-046 ✔ Split parsed-text artifacts from embedding artifacts
+- AIFA-052 ✔ Add LLM-assisted first-pass reranking for large low-yield documents
 
 ## Current State
 
@@ -283,9 +284,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Add a cheap first-pass reranking signal that always includes a small extracted sample from the first 1-2 pages.
-- Keep the LLM output advisory-only so giant low-yield documents are deferred rather than permanently excluded.
-- Validate that reranking improves the 165-document fixture without weakening conservative fallback behavior.
+- Inspect why first-pass evidence from `AAH 23-30212 A03 213A Final.pdf` still did not satisfy the current fallback gate.
+- Stop deferred-document expansion only when both date fields are clearly evidenced, cited, non-conflicting, and not partial.
+- Keep fallback conservative for weak, partial, conflicting, ambiguous, or uncited evidence.
 
 ### AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents
 
@@ -296,6 +297,15 @@ Add a cheap LLM-assisted reranking step ahead of first-pass indexing so very lar
 - Keep the LLM output ranking-only: documents may be deferred from first pass, but must remain eligible for conservative fallback.
 - Bias against giant generic `Text Final` / `Rates Text` style documents when the sampled text looks structurally unrelated to contract date validation.
 - Keep the feature behind an explicit config gate until the large-submission fixture and corpus show equal-or-more-conservative behavior.
+
+### AIFA-053 Stop fallback expansion once both date fields are sufficiently evidenced
+
+Prevent broad fallback from continuing to index expensive deferred documents once `contractStartDate` and `contractEndDate` already have strong enough cited evidence from first pass.
+
+- Inspect the field-level sufficiency and fallback-trigger logic against real first-pass evidence such as `AAH 23-30212 A03 213A Final.pdf`.
+- Stop deferred-document expansion only when both date fields are clearly evidenced, cited, non-conflicting, and not partial.
+- Preserve current conservative fallback behavior whenever evidence is weak, partial, ambiguous, uncited, or contradicted.
+- Keep this scoped to expansion control and validation-stage sufficiency; do not re-open first-pass reranking or hard-exclude any document from later processing.
 
 ## Source of Truth Docs
 
@@ -366,3 +376,5 @@ Add a cheap LLM-assisted reranking step ahead of first-pass indexing so very lar
 - The sprint plan now treats large-submission hardening as the next phase before FAISS. `AIFA-025` depends on the large-submission fixture, retrieval-breadth work, content-fingerprint work, and promoted work-selection evaluation.
 - Work selection must remain conservative: low-priority documents are deferred, not hard-excluded; fallback must run whenever first-pass evidence is weak, ambiguous, partial, uncited, or contradicted by diagnostics.
 - PDF eligibility metadata is advisory only; renamed non-PDF files can still pass candidate checks and must be handled by later document-level failure isolation.
+- A newer 165-document run showed `AIFA-052` is now pulling `AAH 23-30212 A03 213A Final.pdf` into first pass and keeping giant `Text Final` / `Rates Text` bodies out, but the run still broadened into `gated-fallback` afterward.
+- That means the next bottleneck is no longer first-pass selection quality alone; it is fallback expansion continuing even after strong amendment-style evidence is already present for the date fields.

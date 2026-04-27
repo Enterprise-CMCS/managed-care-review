@@ -16,7 +16,7 @@ import { XenovaEmbeddingProvider } from '../embeddings'
 import { readReusableValidationResult } from './validationCache'
 import { newValidationLlmClient } from '../llm'
 import type { ValidationLlmConfig } from '../llm'
-import { parsePdf } from '../parsing'
+import { extractPdfTextSample, parsePdf } from '../parsing'
 import type { PdfOcrDisposition } from '../parsing'
 import type { DateValidationFieldInput, DateValidationResult } from '../prompts'
 import { buildDateValidationPrompt } from '../prompts'
@@ -120,6 +120,20 @@ export const FIELD_RETRIEVAL_FINAL_CHUNK_LIMIT = 4
 // other candidates, but still preserve some same-document continuity.
 export const FIELD_RETRIEVAL_MAX_CHUNKS_PER_DOCUMENT = 2
 const INDEXING_PROGRESS_INTERVAL = 5
+const LLM_FIRST_PASS_RERANKING_ENV =
+  'AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING'
+const FIRST_PASS_RERANKING_CONCURRENCY = 2
+const FIRST_PASS_RERANKING_PRIORITY_CANDIDATE_LIMIT =
+  DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT
+const FIRST_PASS_RERANKING_CANDIDATE_LIMIT = 36
+const FIRST_PASS_RERANKING_SAMPLE_PAGE_LIMIT = 2
+const FIRST_PASS_RERANKING_SAMPLE_CHAR_LIMIT = 2000
+const LARGE_DOCUMENT_PAGE_THRESHOLD = 200
+const LARGE_DOCUMENT_SIZE_BYTES_THRESHOLD = 1_000_000
+const LOW_YIELD_LLM_PRIORITY_PENALTY = 18
+const LARGE_DOCUMENT_NON_HIGH_PRIORITY_PENALTY = 14
+const HIGH_YIELD_LLM_PRIORITY_BOOST = 10
+const FIRST_PASS_DIVERSITY_SCORE_BAND = 4
 
 export async function validationHandler(
   event: ValidationHandlerEvent
@@ -178,15 +192,9 @@ export async function validationHandler(
       event.bucket,
       getChunksArtifactKey(event.formId)
     )
-    const workSelectionDiagnostics = scoreValidationDocuments(
+    let workSelectionDiagnostics = scoreValidationDocuments(
       event.documents,
       event.formFields
-    )
-    const workSelectionByCacheKey = new Map(
-      workSelectionDiagnostics.map((diagnostic) => [
-        computeDocumentCacheKey(diagnostic.document),
-        diagnostic.workSelection
-      ])
     )
     const documentChanges = classifyDocumentSetChanges(
       previousChunksArtifact?.documents ?? [],
@@ -194,6 +202,23 @@ export async function validationHandler(
     )
     const unchangedDocumentCacheKeys = new Set(
       documentChanges.unchanged.map((document) => document.cacheKey)
+    )
+    if (
+      requestedWorkSelectionMode === 'gated-first-pass' &&
+      isLlmFirstPassRerankingEnabled()
+    ) {
+      workSelectionDiagnostics = await rerankValidationDocuments({
+        event,
+        s3Client,
+        unchangedDocumentCacheKeys,
+        scoredDocuments: workSelectionDiagnostics
+      })
+    }
+    const workSelectionByCacheKey = new Map(
+      workSelectionDiagnostics.map((diagnostic) => [
+        computeDocumentCacheKey(diagnostic.document),
+        diagnostic.workSelection
+      ])
     )
     const embeddingProvider = new XenovaEmbeddingProvider()
     const embeddingModel = embeddingProvider.getModelInfo()
@@ -978,6 +1003,12 @@ type ScoredValidationDocumentDiagnostic = {
   workSelection: ValidationDocumentWorkSelectionDiagnostic
 }
 
+type FirstPassRerankingSignal = 'high' | 'medium' | 'low'
+type HeuristicGroupKeyDiagnostic = {
+  heuristicGroupKey?: string
+  heuristicGroupKeySource?: 'filename-prefix'
+}
+
 export function scoreValidationDocuments(
   documents: ValidationSourceDocument[],
   formFields: DateValidationFieldInput[]
@@ -1023,11 +1054,6 @@ export function scoreValidationDocuments(
       )
     }
 
-    if (index >= Math.floor(documents.length / 2)) {
-      priorityScore += 2
-      reasons.push('Later upload order may indicate newer controlling documents.')
-    }
-
     return {
       document,
       originalIndex: index,
@@ -1059,6 +1085,222 @@ export function scoreValidationDocuments(
   }))
 }
 
+async function rerankValidationDocuments(args: {
+  event: ValidationHandlerEvent
+  s3Client: ArtifactS3Client
+  unchangedDocumentCacheKeys: Set<string>
+  scoredDocuments: ScoredValidationDocumentDiagnostic[]
+}): Promise<ScoredValidationDocumentDiagnostic[]> {
+  const rerankingCandidates = selectFirstPassRerankingCandidates(
+    args.scoredDocuments
+  )
+
+  if (rerankingCandidates.length === 0) {
+    return args.scoredDocuments
+  }
+
+  const validationClient = newValidationLlmClient(args.event.validationLlmConfig)
+  const rerankedAdjustments = await mapWithConcurrencyLimit(
+    rerankingCandidates,
+    FIRST_PASS_RERANKING_CONCURRENCY,
+    async (diagnostic) => {
+      try {
+        const sample = await readFirstPassRerankingSample({
+          event: args.event,
+          s3Client: args.s3Client,
+          unchangedDocumentCacheKeys: args.unchangedDocumentCacheKeys,
+          document: diagnostic.document
+        })
+
+        if (sample == null) {
+          return [
+            computeDocumentCacheKey(diagnostic.document),
+            {
+              scoreDelta: 0,
+              reason: 'Sample unavailable; kept heuristic first-pass ranking.'
+            }
+          ] as const
+        }
+
+        const signal = parseFirstPassRerankingSignal(
+          (
+            await validationClient.generateValidation({
+              prompt: buildFirstPassRerankingPrompt({
+                document: diagnostic.document,
+                formFields: args.event.formFields,
+                pageCount: sample.pageCount,
+                fileSizeBytes: sample.fileSizeBytes,
+                sampleText: sample.sampleText
+              })
+            })
+          ).rawText
+        )
+
+        if (signal == null) {
+          return [
+            computeDocumentCacheKey(diagnostic.document),
+            {
+              scoreDelta: 0,
+              reason:
+                'LLM reranking response was unusable; kept heuristic score.'
+            }
+          ] as const
+        }
+
+        return [
+          computeDocumentCacheKey(diagnostic.document),
+          buildFirstPassRerankingAdjustment(signal, sample)
+        ] as const
+      } catch {
+        return [
+          computeDocumentCacheKey(diagnostic.document),
+          {
+            scoreDelta: 0,
+            reason: 'LLM reranking failed; kept heuristic first-pass ranking.'
+          }
+        ] as const
+      }
+    }
+  )
+
+  const adjustmentByCacheKey = new Map(rerankedAdjustments)
+  const rescoredDocuments = args.scoredDocuments.map((diagnostic, index) => {
+    const cacheKey = computeDocumentCacheKey(diagnostic.document)
+    const adjustment = adjustmentByCacheKey.get(cacheKey)
+    const heuristicGroupDiagnostic = buildHeuristicGroupKeyDiagnostic(
+      diagnostic.document
+    )
+    const priorityScore =
+      diagnostic.workSelection.priorityScore + (adjustment?.scoreDelta ?? 0)
+    const priorityReasons = [
+      ...diagnostic.workSelection.priorityReasons,
+      ...(adjustment ? [adjustment.reason] : []),
+      ...(heuristicGroupDiagnostic.heuristicGroupKey != null
+        ? [
+            `Heuristic grouping only: treated this document as part of advisory group "${heuristicGroupDiagnostic.heuristicGroupKey}".`
+          ]
+        : [])
+    ]
+
+    return {
+      diagnostic,
+      cacheKey,
+      originalIndex: index,
+      priorityScore,
+      priorityReasons,
+      ...heuristicGroupDiagnostic
+    }
+  })
+
+  const { rerankedFirstPassCacheKeys, diversityReasonsByCacheKey } =
+    selectCoverageAwareFirstPassCacheKeys(rescoredDocuments)
+
+  return rescoredDocuments.map(
+    ({
+      diagnostic,
+      cacheKey,
+      priorityScore,
+      priorityReasons,
+      heuristicGroupKey,
+      heuristicGroupKeySource
+    }) => ({
+      document: diagnostic.document,
+      workSelection: {
+        priorityScore,
+        priorityReasons: [
+          ...priorityReasons,
+          ...(diversityReasonsByCacheKey.get(cacheKey) ?? [])
+        ],
+        bucket: rerankedFirstPassCacheKeys.has(cacheKey)
+          ? 'first-pass'
+          : 'deferred',
+        ...(heuristicGroupKey != null
+          ? {
+              heuristicGroupKey,
+              heuristicGroupKeySource
+            }
+          : {})
+      }
+    })
+  )
+}
+
+function selectFirstPassRerankingCandidates(
+  scoredDocuments: ScoredValidationDocumentDiagnostic[]
+): ScoredValidationDocumentDiagnostic[] {
+  const orderedDocuments = scoredDocuments
+    .map((document, originalIndex) => ({
+      document,
+      originalIndex
+    }))
+    .sort(
+      (left, right) =>
+        right.document.workSelection.priorityScore -
+          left.document.workSelection.priorityScore ||
+        // Keep original submission order as a weak tie-breaker so one late
+        // sibling cluster does not crowd out earlier amendment candidates
+        // before the advisory coverage step can widen the reranking pool.
+        left.originalIndex - right.originalIndex
+    )
+    .map((entry) => entry.document)
+  const priorityCandidates = orderedDocuments.slice(
+    0,
+    Math.min(
+      FIRST_PASS_RERANKING_PRIORITY_CANDIDATE_LIMIT,
+      FIRST_PASS_RERANKING_CANDIDATE_LIMIT
+    )
+  )
+  const remainingCandidates = orderedDocuments.slice(priorityCandidates.length)
+  const candidatePool = [...priorityCandidates]
+  const representedGroups = new Set(
+    priorityCandidates.flatMap((document) => {
+      const heuristicGroupKey = buildHeuristicGroupKeyDiagnostic(
+        document.document
+      ).heuristicGroupKey
+
+      return heuristicGroupKey != null ? [heuristicGroupKey] : []
+    })
+  )
+
+  for (const candidate of remainingCandidates) {
+    if (candidatePool.length >= FIRST_PASS_RERANKING_CANDIDATE_LIMIT) {
+      break
+    }
+
+    const heuristicGroupKey = buildHeuristicGroupKeyDiagnostic(
+      candidate.document
+    ).heuristicGroupKey
+
+    if (
+      heuristicGroupKey != null &&
+      !representedGroups.has(heuristicGroupKey)
+    ) {
+      candidatePool.push(candidate)
+      representedGroups.add(heuristicGroupKey)
+    }
+  }
+
+  for (const candidate of remainingCandidates) {
+    if (candidatePool.length >= FIRST_PASS_RERANKING_CANDIDATE_LIMIT) {
+      break
+    }
+
+    if (
+      candidatePool.some(
+        (selectedCandidate) =>
+          computeDocumentCacheKey(selectedCandidate.document) ===
+          computeDocumentCacheKey(candidate.document)
+      )
+    ) {
+      continue
+    }
+
+    candidatePool.push(candidate)
+  }
+
+  return candidatePool
+}
+
 function attachWorkSelectionDiagnostic(
   diagnostic: ValidationDocumentDiagnostic,
   workSelection?: ValidationDocumentWorkSelectionDiagnostic
@@ -1077,20 +1319,264 @@ function containsAny(value: string, substrings: string[]): boolean {
   return substrings.some((substring) => value.includes(substring))
 }
 
+function isLlmFirstPassRerankingEnabled(): boolean {
+  return process.env[LLM_FIRST_PASS_RERANKING_ENV] === 'true'
+}
+
+async function readFirstPassRerankingSample(args: {
+  event: ValidationHandlerEvent
+  s3Client: ArtifactS3Client
+  unchangedDocumentCacheKeys: Set<string>
+  document: ValidationSourceDocument
+}): Promise<{
+  pageCount: number
+  fileSizeBytes: number | null
+  sampleText: string
+} | null> {
+  const cacheKey = computeDocumentCacheKey(args.document)
+  const parsedDocumentArtifactKey = getParsedDocumentArtifactKey(
+    args.event.formId,
+    cacheKey
+  )
+
+  if (args.unchangedDocumentCacheKeys.has(cacheKey)) {
+    const parsedArtifact = await readOptionalArtifact<ParsedDocumentArtifact>(
+      args.s3Client,
+      args.event.bucket,
+      parsedDocumentArtifactKey
+    )
+
+    if (parsedArtifact != null) {
+      return {
+        pageCount: parsedArtifact.pageCount,
+        // Reuse the cached first pages when we have them so reranking does not
+        // re-download unchanged PDFs just to recover advisory metadata.
+        fileSizeBytes: null,
+        sampleText: clipFirstPassSampleText(
+          parsedArtifact.pageTexts
+            .slice(0, FIRST_PASS_RERANKING_SAMPLE_PAGE_LIMIT)
+            .join('\n\n')
+        )
+      }
+    }
+  }
+
+  const fileBuffer = await args.s3Client.getBuffer(
+    args.document.sourceBucket,
+    args.document.sourceKey
+  )
+  const sample = await extractPdfTextSample(
+    fileBuffer,
+    args.document.documentName,
+    FIRST_PASS_RERANKING_SAMPLE_PAGE_LIMIT
+  )
+
+  return {
+    pageCount: sample.pageCount,
+    fileSizeBytes: fileBuffer.byteLength,
+    sampleText: clipFirstPassSampleText(sample.pageTexts.join('\n\n'))
+  }
+}
+
+function clipFirstPassSampleText(value: string): string {
+  return value.slice(0, FIRST_PASS_RERANKING_SAMPLE_CHAR_LIMIT).trim()
+}
+
+function buildFirstPassRerankingPrompt(args: {
+  document: ValidationSourceDocument
+  formFields: DateValidationFieldInput[]
+  pageCount: number
+  fileSizeBytes: number | null
+  sampleText: string
+}): string {
+  return [
+    'You are reranking PDFs for a first-pass contract date validation workflow.',
+    'Return exactly one token: HIGH, MEDIUM, or LOW.',
+    'HIGH means the document likely contains operative contract start date, end date, term, effective date, expiration date, or amendment language that should be processed early.',
+    'LOW means the document looks like generic scope, rates, operational, or boilerplate text that is unlikely to help contract date validation early.',
+    'For large documents, only return HIGH when the first 1-2 pages already contain clear operative date-governing language such as START DATE, THROUGH END DATE, effective date, term amendment, or an explicit statement extending or changing the contract term.',
+    'For large documents, generic date mentions, signature dates, page headers, service-overview text, scope-of-work text, definitions, or rates language are not enough for HIGH.',
+    'If the first 1-2 pages mostly contain scope-of-work, service overview, definitions, rates, or other generic boilerplate without clear date-governing language, return LOW.',
+    'Do not infer HIGH from filename or page count alone.',
+    'Prefer HIGH when the sample already shows one or both target contract dates or an explicit amendment/term statement that directly governs them.',
+    `Document name: ${args.document.documentName}`,
+    `Source key: ${args.document.sourceKey}`,
+    `Page count: ${args.pageCount}`,
+    `File size bytes: ${args.fileSizeBytes ?? 'unknown'}`,
+    'Target form fields:',
+    ...args.formFields.map(
+      (field) => `- ${field.label} (${field.field}): ${field.value}`
+    ),
+    'Sample text from the first 1-2 pages:',
+    args.sampleText || '[no sample text available]'
+  ].join('\n')
+}
+
+function parseFirstPassRerankingSignal(
+  rawText: string
+): FirstPassRerankingSignal | null {
+  const match = rawText.toUpperCase().match(/\b(HIGH|MEDIUM|LOW)\b/)
+
+  if (match == null) {
+    return null
+  }
+
+  return match[1].toLowerCase() as FirstPassRerankingSignal
+}
+
+function buildFirstPassRerankingAdjustment(
+  signal: FirstPassRerankingSignal,
+  sample: { pageCount: number; fileSizeBytes: number | null }
+): { scoreDelta: number; reason: string } {
+  const isLargeDocument =
+    sample.pageCount >= LARGE_DOCUMENT_PAGE_THRESHOLD ||
+    (sample.fileSizeBytes != null &&
+      sample.fileSizeBytes >= LARGE_DOCUMENT_SIZE_BYTES_THRESHOLD)
+
+  if (signal === 'high') {
+    return {
+      scoreDelta: HIGH_YIELD_LLM_PRIORITY_BOOST,
+      reason:
+        'LLM reranking kept this document earlier because the first 1-2 page sample looks date-governing.'
+    }
+  }
+
+  if (signal === 'low' && isLargeDocument) {
+    return {
+      scoreDelta: -LOW_YIELD_LLM_PRIORITY_PENALTY,
+      reason:
+        'LLM reranking deprioritized this large document because the first 1-2 page sample looks low-yield for contract date validation.'
+    }
+  }
+
+  if (isLargeDocument) {
+    return {
+      scoreDelta: -LARGE_DOCUMENT_NON_HIGH_PRIORITY_PENALTY,
+      reason:
+        'LLM reranking did not find clear date-governing language in the first 1-2 pages, so this large document was deferred from the first pass.'
+    }
+  }
+
+  if (signal === 'low') {
+    return {
+      scoreDelta: -2,
+      reason:
+        'LLM reranking slightly lowered this document because the sampled text looks weak for contract date validation.'
+    }
+  }
+
+  return {
+    scoreDelta: 0,
+    reason: 'LLM reranking kept the heuristic score unchanged.'
+  }
+}
+
 export function selectFirstPassDocuments(
   scoredDocuments: ScoredValidationDocumentDiagnostic[]
 ): ValidationSourceDocument[] {
-  const explicitlyDateGoverning = scoredDocuments
-    .filter((diagnostic) => isRecommendedFirstPassWorkSelection(diagnostic))
-    .map((diagnostic) => diagnostic.document)
-
-  if (explicitlyDateGoverning.length > 0) {
-    return explicitlyDateGoverning
-  }
-
   return scoredDocuments
     .filter((diagnostic) => diagnostic.workSelection.bucket === 'first-pass')
+    .sort(
+      (left, right) =>
+        Number(isRecommendedFirstPassWorkSelection(right)) -
+          Number(isRecommendedFirstPassWorkSelection(left)) ||
+        right.workSelection.priorityScore - left.workSelection.priorityScore
+    )
     .map((diagnostic) => diagnostic.document)
+}
+
+function buildHeuristicGroupKeyDiagnostic(
+  document: ValidationSourceDocument
+): HeuristicGroupKeyDiagnostic {
+  const baseName = document.documentName
+    .replace(/\.[^.]+$/, '')
+    .toLowerCase()
+    .replace(/^\d+\s+plan\s+cp\s+/i, '')
+    .trim()
+  const agreementNumberMatch = baseName.match(/\b\d{2}-\d{5}\b/)
+
+  if (agreementNumberMatch == null || agreementNumberMatch.index == null) {
+    return {}
+  }
+
+  const groupKey = baseName
+    .slice(0, agreementNumberMatch.index)
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+
+  if (groupKey.length === 0) {
+    return {}
+  }
+
+  return {
+    heuristicGroupKey: groupKey,
+    heuristicGroupKeySource: 'filename-prefix'
+  }
+}
+
+function selectCoverageAwareFirstPassCacheKeys(
+  rescoredDocuments: Array<{
+    cacheKey: string
+    originalIndex: number
+    priorityScore: number
+    priorityReasons: string[]
+    heuristicGroupKey?: string
+  }>
+): {
+  rerankedFirstPassCacheKeys: Set<string>
+  diversityReasonsByCacheKey: Map<string, string[]>
+} {
+  const remainingDocuments = [...rescoredDocuments].sort(
+    (left, right) =>
+      right.priorityScore - left.priorityScore ||
+      left.originalIndex - right.originalIndex
+  )
+  const selectedCacheKeys = new Set<string>()
+  const selectedHeuristicGroups = new Set<string>()
+  const diversityReasonsByCacheKey = new Map<string, string[]>()
+
+  while (
+    selectedCacheKeys.size < DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT &&
+    remainingDocuments.length > 0
+  ) {
+    const baselineDocument = remainingDocuments[0]
+    const baselinePriorityScore = baselineDocument.priorityScore
+    const nearPeerDocuments = remainingDocuments.filter(
+      (document) =>
+        baselinePriorityScore - document.priorityScore <=
+        FIRST_PASS_DIVERSITY_SCORE_BAND
+    )
+    const diversifiedDocument =
+      baselineDocument.heuristicGroupKey != null &&
+      selectedHeuristicGroups.has(baselineDocument.heuristicGroupKey)
+        ? nearPeerDocuments.find(
+            (document) =>
+              document.heuristicGroupKey != null &&
+              !selectedHeuristicGroups.has(document.heuristicGroupKey)
+          )
+        : undefined
+    const selectedDocument = diversifiedDocument ?? baselineDocument
+
+    selectedCacheKeys.add(selectedDocument.cacheKey)
+    if (selectedDocument.heuristicGroupKey != null) {
+      selectedHeuristicGroups.add(selectedDocument.heuristicGroupKey)
+    }
+    if (diversifiedDocument != null) {
+      diversityReasonsByCacheKey.set(selectedDocument.cacheKey, [
+        `Heuristic diversity tie-break only: selected this near-peer from advisory group "${selectedDocument.heuristicGroupKey}" to avoid over-clustering the first pass.`
+      ])
+    }
+
+    const selectedIndex = remainingDocuments.findIndex(
+      (document) => document.cacheKey === selectedDocument.cacheKey
+    )
+    remainingDocuments.splice(selectedIndex, 1)
+  }
+
+  return {
+    rerankedFirstPassCacheKeys: selectedCacheKeys,
+    diversityReasonsByCacheKey
+  }
 }
 
 export function buildFieldWorkSelectionDiagnostics(args: {

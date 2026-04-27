@@ -2,12 +2,15 @@ import pdfParse from 'pdf-parse'
 import type { PdfParseResult, PdfTextExtractor } from './types'
 
 export class PdfParseTextExtractor implements PdfTextExtractor {
+  constructor(private readonly maxPages?: number) {}
+
   async extract (
     fileBuffer: Buffer,
     fileName: string
   ): Promise<PdfParseResult> {
     const pageTexts: string[] = []
     const result = await pdfParse(fileBuffer, {
+      ...(this.maxPages ? { max: this.maxPages } : {}),
       pagerender: async (pageData) => {
         const textContent = await pageData.getTextContent({
           normalizeWhitespace: false,
@@ -50,4 +53,12 @@ export class PdfParseTextExtractor implements PdfTextExtractor {
       ocrDisposition: 'not-needed'
     }
   }
+}
+
+export async function extractPdfTextSample(
+  fileBuffer: Buffer,
+  fileName: string,
+  maxPages: number
+): Promise<PdfParseResult> {
+  return new PdfParseTextExtractor(maxPages).extract(fileBuffer, fileName)
 }

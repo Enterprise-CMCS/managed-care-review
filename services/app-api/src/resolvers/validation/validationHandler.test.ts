@@ -6,6 +6,7 @@ const {
     getJsonMock,
     putJsonMock,
     parsePdfMock,
+    extractPdfTextSampleMock,
     chunkDocumentMock,
     embedTextsMock,
     embedTextMock,
@@ -19,6 +20,7 @@ const {
     getJsonMock: vi.fn(),
     putJsonMock: vi.fn(),
     parsePdfMock: vi.fn(),
+    extractPdfTextSampleMock: vi.fn(),
     chunkDocumentMock: vi.fn(),
     embedTextsMock: vi.fn(),
     embedTextMock: vi.fn(),
@@ -64,6 +66,7 @@ vi.mock('../../../../ai-form-augmentation/src/s3', () => ({
 
 vi.mock('../../../../ai-form-augmentation/src/parsing', () => ({
     parsePdf: parsePdfMock,
+    extractPdfTextSample: extractPdfTextSampleMock,
 }))
 
 vi.mock('../../../../ai-form-augmentation/src/chunking', () => ({
@@ -170,6 +173,7 @@ describe('validationHandler', () => {
     beforeEach(() => {
         vi.clearAllMocks()
         vi.spyOn(console, 'warn').mockImplementation(consoleWarnMock)
+        delete process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING
 
         getBufferMock.mockResolvedValue(Buffer.from('fake-pdf'))
         getJsonMock.mockRejectedValue(new Error('S3 object not found'))
@@ -181,6 +185,17 @@ describe('validationHandler', () => {
                 pageTexts: [
                     'START DATE January 1, 2025 END DATE December 31, 2025',
                 ],
+                pageCount: 1,
+                extractionMethod: 'pdf-text',
+                extractionNotes: [],
+                ocrDisposition: 'not-needed',
+            })
+        )
+        extractPdfTextSampleMock.mockImplementation(
+            async (_fileBuffer: Buffer, fileName: string) => ({
+                fileName,
+                rawText: 'generic contract summary boilerplate',
+                pageTexts: ['generic contract summary boilerplate'],
                 pageCount: 1,
                 extractionMethod: 'pdf-text',
                 extractionNotes: [],
@@ -490,6 +505,364 @@ describe('validationHandler', () => {
                     })
             )
         ).toBe(false)
+    })
+
+    it('keeps llm first-pass reranking disabled by default', async () => {
+        const rerankingEvent = {
+            ...baseEvent,
+            workSelectionMode: 'gated-first-pass' as const,
+            documents: [
+                ...Array.from({ length: 12 }, (_value, index) => ({
+                    documentName: `contract-${index}.pdf`,
+                    sourceBucket: 'local-uploads',
+                    sourceKey: `uploads/contracts/contract-${index}.pdf`,
+                })),
+                {
+                    documentName: 'contract-text-final.pdf',
+                    sourceBucket: 'local-uploads',
+                    sourceKey: 'uploads/contracts/contract-text-final.pdf',
+                },
+            ],
+        }
+
+        await validationHandler(rerankingEvent)
+
+        expect(extractPdfTextSampleMock).not.toHaveBeenCalled()
+        expect(generateValidationMock).not.toHaveBeenCalled()
+        expect(putJsonMock).toHaveBeenCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationResultKey('test-form'),
+            expect.objectContaining({
+                documentDiagnostics: expect.arrayContaining([
+                    expect.objectContaining({
+                        documentName: 'contract-text-final.pdf',
+                        status: 'processed',
+                        workSelection: expect.objectContaining({
+                            bucket: 'deferred',
+                        }),
+                    }),
+                ]),
+            })
+        )
+    })
+
+    it('can defer a large low-yield document from the first pass even when its filename is generic', async () => {
+        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING = 'true'
+        extractPdfTextSampleMock.mockImplementation(
+            async (_fileBuffer: Buffer, fileName: string) => ({
+                fileName,
+                rawText:
+                    fileName === 'genericlowyieldexcessivelylargefile.pdf'
+                        ? 'generic scope of work boilerplate'
+                        : 'amendment effective date term language',
+                pageTexts: [
+                    fileName === 'genericlowyieldexcessivelylargefile.pdf'
+                        ? 'generic scope of work boilerplate'
+                        : 'amendment effective date term language',
+                ],
+                pageCount:
+                    fileName === 'genericlowyieldexcessivelylargefile.pdf'
+                        ? 630
+                        : 1,
+                extractionMethod: 'pdf-text',
+                extractionNotes: [],
+                ocrDisposition: 'not-needed',
+            })
+        )
+        generateValidationMock.mockImplementation(async ({ prompt }) => ({
+            rawText: prompt.includes(
+                'Document name: genericlowyieldexcessivelylargefile.pdf'
+            )
+                ? 'MEDIUM'
+                : 'HIGH',
+            model: 'llama3.1:8b',
+        }))
+
+        const rerankingEvent = {
+            ...baseEvent,
+            workSelectionMode: 'gated-first-pass' as const,
+            documents: [
+                ...Array.from({ length: 12 }, (_value, index) => ({
+                    documentName: `contract-${index}.pdf`,
+                    sourceBucket: 'local-uploads',
+                    sourceKey: `uploads/contracts/contract-${index}.pdf`,
+                })),
+                {
+                    documentName: 'genericlowyieldexcessivelylargefile.pdf',
+                    sourceBucket: 'local-uploads',
+                    sourceKey:
+                        'uploads/contracts/genericlowyieldexcessivelylargefile.pdf',
+                },
+            ],
+        }
+
+        await validationHandler(rerankingEvent)
+
+        expect(extractPdfTextSampleMock).toHaveBeenCalledWith(
+            expect.any(Buffer),
+            'genericlowyieldexcessivelylargefile.pdf',
+            2
+        )
+        expect(generateValidationMock).toHaveBeenCalledTimes(13)
+        const validationResultCall = putJsonMock.mock.calls.find(
+            ([bucket, key]) =>
+                bucket === 'ai-form-augmentation-artifacts' &&
+                key === getValidationResultKey('test-form')
+        )
+
+        expect(validationResultCall).toBeDefined()
+        expect(validationResultCall?.[2]).toEqual(
+            expect.objectContaining({
+                documentDiagnostics: expect.arrayContaining([
+                    expect.objectContaining({
+                        documentName: 'genericlowyieldexcessivelylargefile.pdf',
+                        status: 'processed',
+                        workSelection: expect.objectContaining({
+                            bucket: 'deferred',
+                        }),
+                    }),
+                ]),
+            })
+        )
+    })
+
+    it('can promote a poorly named amendment sample into the first pass when it clearly shows the target dates', async () => {
+        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING = 'true'
+        extractPdfTextSampleMock.mockImplementation(
+            async (_fileBuffer: Buffer, fileName: string) => ({
+                fileName,
+                rawText:
+                    fileName === 'zzz-amendment-cover.pdf'
+                        ? 'STANDARD AGREEMENT - AMENDMENT START DATE January 1, 2025 THROUGH END DATE December 31, 2025'
+                        : 'generic contract summary boilerplate',
+                pageTexts: [
+                    fileName === 'zzz-amendment-cover.pdf'
+                        ? 'STANDARD AGREEMENT - AMENDMENT START DATE January 1, 2025 THROUGH END DATE December 31, 2025'
+                        : 'generic contract summary boilerplate',
+                ],
+                pageCount: 2,
+                extractionMethod: 'pdf-text',
+                extractionNotes: [],
+                ocrDisposition: 'not-needed',
+            })
+        )
+        generateValidationMock.mockImplementation(async ({ prompt }) => ({
+            rawText: prompt.includes('Document name: zzz-amendment-cover.pdf')
+                ? 'HIGH'
+                : 'MEDIUM',
+            model: 'llama3.1:8b',
+        }))
+
+        const rerankingEvent = {
+            ...baseEvent,
+            workSelectionMode: 'gated-first-pass' as const,
+            documents: [
+                ...Array.from({ length: 12 }, (_value, index) => ({
+                    documentName: `contract-${index}.pdf`,
+                    sourceBucket: 'local-uploads',
+                    sourceKey: `uploads/contracts/contract-${index}.pdf`,
+                })),
+                {
+                    documentName: 'zzz-amendment-cover.pdf',
+                    sourceBucket: 'local-uploads',
+                    sourceKey: 'uploads/contracts/zzz-amendment-cover.pdf',
+                },
+            ],
+        }
+
+        await validationHandler(rerankingEvent)
+
+        expect(generateValidationMock).toHaveBeenCalledTimes(13)
+        const validationResultCall = putJsonMock.mock.calls.find(
+            ([bucket, key]) =>
+                bucket === 'ai-form-augmentation-artifacts' &&
+                key === getValidationResultKey('test-form')
+        )
+
+        expect(validationResultCall).toBeDefined()
+        expect(validationResultCall?.[2]).toEqual(
+            expect.objectContaining({
+                documentDiagnostics: expect.arrayContaining([
+                    expect.objectContaining({
+                        documentName: 'zzz-amendment-cover.pdf',
+                        status: 'processed',
+                        workSelection: expect.objectContaining({
+                            bucket: 'first-pass',
+                        }),
+                    }),
+                    expect.objectContaining({
+                        documentName: 'contract-11.pdf',
+                        status: 'processed',
+                        workSelection: expect.objectContaining({
+                            bucket: 'deferred',
+                        }),
+                    }),
+                ]),
+            })
+        )
+    })
+
+    it('keeps an early decisive amendment candidate in the reranking pool when later sibling amendments cluster around it', async () => {
+        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING = 'true'
+        extractPdfTextSampleMock.mockImplementation(
+            async (_fileBuffer: Buffer, fileName: string) => ({
+                fileName,
+                rawText: fileName.includes('Text Final')
+                    ? 'generic scope of work boilerplate'
+                    : 'STANDARD AGREEMENT - AMENDMENT START DATE January 1, 2025 THROUGH END DATE December 31, 2025',
+                pageTexts: [
+                    fileName.includes('Text Final')
+                        ? 'generic scope of work boilerplate'
+                        : 'STANDARD AGREEMENT - AMENDMENT START DATE January 1, 2025 THROUGH END DATE December 31, 2025',
+                ],
+                pageCount: fileName.includes('Text Final') ? 630 : 2,
+                extractionMethod: 'pdf-text',
+                extractionNotes: [],
+                ocrDisposition: 'not-needed',
+            })
+        )
+        generateValidationMock.mockImplementation(async ({ prompt }) => ({
+            rawText: prompt.includes('KP Cal 23-30230 A03 Text Final.pdf')
+                ? 'LOW'
+                : 'HIGH',
+            model: 'llama3.1:8b',
+        }))
+
+        const rerankingEvent = {
+            ...baseEvent,
+            workSelectionMode: 'gated-first-pass' as const,
+            documents: [
+                {
+                    documentName: 'AAH 23-30212 A03 213A Final.pdf',
+                    sourceBucket: 'local-uploads',
+                    sourceKey:
+                        'uploads/contracts/AAH 23-30212 A03 213A Final.pdf',
+                },
+                ...Array.from({ length: 40 }, (_value, index) => ({
+                    documentName: `HN 23-302${String(10 + index).padStart(
+                        2,
+                        '0'
+                    )} A03 213A Final.pdf`,
+                    sourceBucket: 'local-uploads',
+                    sourceKey: `uploads/contracts/HN 23-302${String(
+                        10 + index
+                    ).padStart(2, '0')} A03 213A Final.pdf`,
+                })),
+                {
+                    documentName: 'KP Cal 23-30230 A03 Text Final.pdf',
+                    sourceBucket: 'local-uploads',
+                    sourceKey:
+                        'uploads/contracts/KP Cal 23-30230 A03 Text Final.pdf',
+                },
+            ],
+        }
+
+        await validationHandler(rerankingEvent)
+
+        expect(generateValidationMock).toHaveBeenCalledTimes(36)
+        const validationResultCall = putJsonMock.mock.calls.find(
+            ([bucket, key]) =>
+                bucket === 'ai-form-augmentation-artifacts' &&
+                key === getValidationResultKey('test-form')
+        )
+
+        expect(validationResultCall).toBeDefined()
+        expect(validationResultCall?.[2]).toEqual(
+            expect.objectContaining({
+                documentDiagnostics: expect.arrayContaining([
+                    expect.objectContaining({
+                        documentName: 'AAH 23-30212 A03 213A Final.pdf',
+                        status: 'processed',
+                        workSelection: expect.objectContaining({
+                            bucket: 'first-pass',
+                            heuristicGroupKey: 'aah',
+                            heuristicGroupKeySource: 'filename-prefix',
+                        }),
+                    }),
+                    expect.objectContaining({
+                        documentName: 'KP Cal 23-30230 A03 Text Final.pdf',
+                        status: 'processed',
+                        workSelection: expect.objectContaining({
+                            bucket: 'deferred',
+                        }),
+                    }),
+                    expect.objectContaining({
+                        documentName: 'HN 23-30221 A03 213A Final.pdf',
+                        status: 'processed',
+                        workSelection: expect.objectContaining({
+                            bucket: 'deferred',
+                        }),
+                    }),
+                ]),
+            })
+        )
+    })
+
+    it('falls back to heuristic ranking when sampled reranking fails', async () => {
+        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING = 'true'
+        extractPdfTextSampleMock.mockImplementation(
+            async (_fileBuffer: Buffer, fileName: string) => {
+                if (fileName === 'genericlowyieldexcessivelylargefile.pdf') {
+                    throw new Error('sample failure')
+                }
+
+                return {
+                    fileName,
+                    rawText: 'amendment effective date term language',
+                    pageTexts: ['amendment effective date term language'],
+                    pageCount: 1,
+                    extractionMethod: 'pdf-text',
+                    extractionNotes: [],
+                    ocrDisposition: 'not-needed',
+                }
+            }
+        )
+        generateValidationMock.mockResolvedValue({
+            rawText: 'HIGH',
+            model: 'llama3.1:8b',
+        })
+
+        const rerankingEvent = {
+            ...baseEvent,
+            workSelectionMode: 'gated-first-pass' as const,
+            documents: [
+                ...Array.from({ length: 12 }, (_value, index) => ({
+                    documentName: `contract-${index}.pdf`,
+                    sourceBucket: 'local-uploads',
+                    sourceKey: `uploads/contracts/contract-${index}.pdf`,
+                })),
+                {
+                    documentName: 'genericlowyieldexcessivelylargefile.pdf',
+                    sourceBucket: 'local-uploads',
+                    sourceKey:
+                        'uploads/contracts/genericlowyieldexcessivelylargefile.pdf',
+                },
+            ],
+        }
+
+        await validationHandler(rerankingEvent)
+
+        expect(generateValidationMock).toHaveBeenCalledTimes(12)
+        const validationResultCall = putJsonMock.mock.calls.find(
+            ([bucket, key]) =>
+                bucket === 'ai-form-augmentation-artifacts' &&
+                key === getValidationResultKey('test-form')
+        )
+
+        expect(validationResultCall).toBeDefined()
+        expect(validationResultCall?.[2]).toEqual(
+            expect.objectContaining({
+                documentDiagnostics: expect.arrayContaining([
+                    expect.objectContaining({
+                        documentName: 'genericlowyieldexcessivelylargefile.pdf',
+                        status: 'processed',
+                        workSelection: expect.objectContaining({
+                            bucket: 'deferred',
+                        }),
+                    }),
+                ]),
+            })
+        )
     })
 
     it('routes unresolved fields to the llm with field-specific retrieval context', async () => {

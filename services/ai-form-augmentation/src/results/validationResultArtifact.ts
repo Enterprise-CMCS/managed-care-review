@@ -26,6 +26,8 @@ export interface ValidationDocumentWorkSelectionDiagnostic {
   priorityScore: number
   priorityReasons: string[]
   bucket: 'first-pass' | 'deferred'
+  heuristicGroupKey?: string
+  heuristicGroupKeySource?: 'filename-prefix'
 }
 
 export interface ValidationDocumentDiagnostic {
