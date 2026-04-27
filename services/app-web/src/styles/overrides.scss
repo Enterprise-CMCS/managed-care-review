@@ -35,7 +35,7 @@ html {
     background-color: #f0fafd;
 }
 
-.usa-hint:not(.usa-character-count__message--invalid) {
+.usa-hint:not(.usa-character-count__status--invalid) {
     color: $mcr-foundation-hint;
 }
 

@@ -1,4 +1,5 @@
 import { StoryFn } from '@storybook/react'
+import { Formik } from 'formik'
 import { PackageSelect, PackageSelectPropType } from '../index'
 import { mockContractPackageDraft, mockMNState } from '@mc-review/mocks'
 import React from 'react'
@@ -23,7 +24,14 @@ export default {
 }
 
 const Template: StoryFn<PackageSelectPropType> = (args) => (
-    <PackageSelect {...args} />
+    <Formik
+        initialValues={{ [args.name]: args.initialValues }}
+        onSubmit={() => undefined}
+    >
+        <form>
+            <PackageSelect {...args} />
+        </form>
+    </Formik>
 )
 
 export const Default = Template.bind({})
