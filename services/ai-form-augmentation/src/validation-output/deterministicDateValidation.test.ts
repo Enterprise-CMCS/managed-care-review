@@ -2,6 +2,91 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { runDeterministicDateValidation } from './deterministicDateValidation'
 
+test('runDeterministicDateValidation treats amendment effective date as the operative start date when the amendment extends the contract term', () => {
+  const result = runDeterministicDateValidation({
+    formFields: [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2025'
+      }
+    ],
+    retrievedChunks: [
+      {
+        chunkId: 'chunk-0',
+        documentName: 'fixture.pdf',
+        page: 1,
+        startPage: 1,
+        endPage: 1,
+        order: 0,
+        text: [
+          'STANDARD AGREEMENT - AMENDMENT',
+          'START DATE',
+          'January 1, 2024',
+          'THROUGH END DATE',
+          'December 31, 2025',
+          'Amendment effective date: January 1, 2025.',
+          'Purpose of amendment: It extends the contract to December 31, 2025.',
+          'Paragraph 2 (term) on the face of the original STD 213 is amended to read: January 1, 2024 through December 31, 2025.'
+        ].join('\n')
+      }
+    ]
+  })
+
+  assert.equal(result.resolvedResults.length, 1)
+  assert.equal(result.unresolvedFields.length, 0)
+  assert.equal(result.resolvedResults[0]?.outcome, 'match')
+  assert.equal(
+    result.resolvedResults[0]?.message,
+    'Document text supports start date as 01/01/2025.'
+  )
+  assert.deepEqual(
+    result.resolvedResults[0]?.citations.map((citation) => citation.chunkId),
+    ['chunk-0']
+  )
+})
+
+test('runDeterministicDateValidation does not treat amendment effective date as the start date without operative term-amendment context', () => {
+  const result = runDeterministicDateValidation({
+    formFields: [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2025'
+      }
+    ],
+    retrievedChunks: [
+      {
+        chunkId: 'chunk-0',
+        documentName: 'fixture.pdf',
+        page: 1,
+        startPage: 1,
+        endPage: 1,
+        order: 0,
+        text: [
+          'STANDARD AGREEMENT - AMENDMENT',
+          'START DATE',
+          'January 1, 2024',
+          'Amendment effective date: January 1, 2025.',
+          'This amendment updates signature authorities only.'
+        ].join('\n')
+      }
+    ]
+  })
+
+  assert.equal(result.resolvedResults.length, 1)
+  assert.equal(result.unresolvedFields.length, 0)
+  assert.equal(result.resolvedResults[0]?.outcome, 'mismatch')
+  assert.equal(
+    result.resolvedResults[0]?.message,
+    'Document start date (01/01/2024) does not match form start date (01/01/2025).'
+  )
+  assert.deepEqual(
+    result.resolvedResults[0]?.citations.map((citation) => citation.chunkId),
+    ['chunk-0']
+  )
+})
+
 test('runDeterministicDateValidation resolves competing end-date labels with a unique term clause', () => {
   const result = runDeterministicDateValidation({
     formFields: [

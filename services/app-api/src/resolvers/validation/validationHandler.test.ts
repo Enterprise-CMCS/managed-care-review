@@ -172,8 +172,49 @@ const baseEvent = {
 describe('validationHandler', () => {
     beforeEach(() => {
         vi.clearAllMocks()
+        getBufferMock.mockReset()
+        getJsonMock.mockReset()
+        putJsonMock.mockReset()
+        parsePdfMock.mockReset()
+        extractPdfTextSampleMock.mockReset()
+        chunkDocumentMock.mockReset()
+        embedTextsMock.mockReset()
+        embedTextMock.mockReset()
+        generateValidationMock.mockReset()
+        parseValidationResponseMock.mockReset()
+        buildDateValidationPromptMock.mockReset()
+        consoleWarnMock.mockReset()
+        runDeterministicDateValidationMock.mockReset()
         vi.spyOn(console, 'warn').mockImplementation(consoleWarnMock)
         delete process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING
+
+        buildDateValidationPromptMock.mockReturnValue('test-prompt')
+        runDeterministicDateValidationMock.mockImplementation(
+            (input: { formFields: DateValidationFieldInput[] }) => ({
+                resolvedResults: input.formFields.map(
+                    (field: DateValidationFieldInput) => ({
+                        field: field.field,
+                        outcome: 'match',
+                        confidence: 'high',
+                        message: `Document text includes ${
+                            field.field === 'contractStartDate'
+                                ? 'start date'
+                                : 'end date'
+                        } ${field.value}.`,
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-a.pdf::chunk-0',
+                                documentName: 'contract-a.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    })
+                ),
+                unresolvedFields: [] as DateValidationFieldInput[],
+            })
+        )
 
         getBufferMock.mockResolvedValue(Buffer.from('fake-pdf'))
         getJsonMock.mockRejectedValue(new Error('S3 object not found'))
@@ -529,14 +570,19 @@ describe('validationHandler', () => {
 
         expect(extractPdfTextSampleMock).not.toHaveBeenCalled()
         expect(generateValidationMock).not.toHaveBeenCalled()
-        expect(putJsonMock).toHaveBeenCalledWith(
-            'ai-form-augmentation-artifacts',
-            getValidationResultKey('test-form'),
+        const validationResultCall = putJsonMock.mock.calls.find(
+            ([bucket, key]) =>
+                bucket === 'ai-form-augmentation-artifacts' &&
+                key === getValidationResultKey('test-form')
+        )
+
+        expect(validationResultCall).toBeDefined()
+        expect(validationResultCall?.[2]).toEqual(
             expect.objectContaining({
                 documentDiagnostics: expect.arrayContaining([
                     expect.objectContaining({
                         documentName: 'contract-text-final.pdf',
-                        status: 'processed',
+                        status: 'skipped',
                         workSelection: expect.objectContaining({
                             bucket: 'deferred',
                         }),
@@ -616,7 +662,7 @@ describe('validationHandler', () => {
                 documentDiagnostics: expect.arrayContaining([
                     expect.objectContaining({
                         documentName: 'genericlowyieldexcessivelylargefile.pdf',
-                        status: 'processed',
+                        status: 'skipped',
                         workSelection: expect.objectContaining({
                             bucket: 'deferred',
                         }),
@@ -692,7 +738,7 @@ describe('validationHandler', () => {
                     }),
                     expect.objectContaining({
                         documentName: 'contract-11.pdf',
-                        status: 'processed',
+                        status: 'skipped',
                         workSelection: expect.objectContaining({
                             bucket: 'deferred',
                         }),
@@ -781,14 +827,14 @@ describe('validationHandler', () => {
                     }),
                     expect.objectContaining({
                         documentName: 'KP Cal 23-30230 A03 Text Final.pdf',
-                        status: 'processed',
+                        status: 'skipped',
                         workSelection: expect.objectContaining({
                             bucket: 'deferred',
                         }),
                     }),
                     expect.objectContaining({
                         documentName: 'HN 23-30221 A03 213A Final.pdf',
-                        status: 'processed',
+                        status: 'skipped',
                         workSelection: expect.objectContaining({
                             bucket: 'deferred',
                         }),
@@ -855,7 +901,7 @@ describe('validationHandler', () => {
                 documentDiagnostics: expect.arrayContaining([
                     expect.objectContaining({
                         documentName: 'genericlowyieldexcessivelylargefile.pdf',
-                        status: 'processed',
+                        status: 'skipped',
                         workSelection: expect.objectContaining({
                             bucket: 'deferred',
                         }),
@@ -863,6 +909,286 @@ describe('validationHandler', () => {
                 ]),
             })
         )
+    })
+
+    it('does not expand to gated-fallback when first-pass results are strong and cited despite competing labeled dates', async () => {
+        chunkDocumentMock.mockImplementation((fileName: string) => [
+            {
+                chunkId: `${fileName}::chunk-0`,
+                documentName: fileName,
+                order: 0,
+                page: null,
+                text: [
+                    'STANDARD AGREEMENT - AMENDMENT',
+                    'START DATE',
+                    'January 1, 2024',
+                    'THROUGH END DATE',
+                    'December 31, 2025',
+                    'Amendment effective date: January 1, 2025.',
+                    'Purpose of amendment: It extends the contract to December 31, 2025.',
+                    'Paragraph 2 (term) on the face of the original STD 213 is amended to read: January 1, 2024 through December 31, 2025.',
+                ].join('\n'),
+                startChar: 0,
+                endChar: 320,
+            },
+        ])
+
+        const firstPassEvent = {
+            ...baseEvent,
+            workSelectionMode: 'gated-first-pass' as const,
+            documents: Array.from({ length: 13 }, (_value, index) => ({
+                documentName: `contract-${index}.pdf`,
+                sourceBucket: 'local-uploads',
+                sourceKey: `uploads/contracts/contract-${index}.pdf`,
+            })),
+        }
+
+        await validationHandler(firstPassEvent)
+
+        const validationResultCall = putJsonMock.mock.calls.find(
+            ([bucket, key]) =>
+                bucket === 'ai-form-augmentation-artifacts' &&
+                key === getValidationResultKey('test-form')
+        )
+
+        expect(validationResultCall).toBeDefined()
+        expect(validationResultCall?.[2]).toEqual(
+            expect.objectContaining({
+                workSelectionMode: 'gated-first-pass',
+                fieldWorkSelectionDiagnostics: expect.arrayContaining([
+                    {
+                        field: 'contractStartDate',
+                        evidenceSource: 'first-pass',
+                    },
+                    {
+                        field: 'contractEndDate',
+                        evidenceSource: 'first-pass',
+                    },
+                ]),
+                documentDiagnostics: expect.arrayContaining([
+                    expect.objectContaining({
+                        documentName: 'contract-12.pdf',
+                        status: 'skipped',
+                        reason: 'deferred-first-pass',
+                    }),
+                ]),
+            })
+        )
+        expect(putJsonMock).toHaveBeenLastCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationStatusKey('test-form'),
+            expect.objectContaining({
+                stage: 'complete',
+                workSelectionMode: 'gated-first-pass',
+            })
+        )
+    })
+
+    it('does not expand to gated-fallback when unrelated first-pass documents are OCR-capped but both fields already have strong cited evidence', async () => {
+        parsePdfMock.mockImplementation(
+            async (_fileBuffer: Buffer, fileName: string) => {
+                if (
+                    fileName === 'contract-0.pdf' ||
+                    fileName === 'contract-1.pdf'
+                ) {
+                    return {
+                        fileName,
+                        rawText: 'too little text',
+                        pageTexts: ['too little text'],
+                        pageCount: 1,
+                        extractionMethod: 'pdf-text',
+                        extractionNotes: ['weak text'],
+                        ocrDisposition: 'skipped',
+                    }
+                }
+
+                return {
+                    fileName,
+                    rawText:
+                        'START DATE January 1, 2025 END DATE December 31, 2025',
+                    pageTexts: [
+                        'START DATE January 1, 2025 END DATE December 31, 2025',
+                    ],
+                    pageCount: 1,
+                    extractionMethod: 'pdf-text',
+                    extractionNotes: [],
+                    ocrDisposition: 'not-needed',
+                }
+            }
+        )
+        runDeterministicDateValidationMock.mockImplementation(
+            (input: { formFields: DateValidationFieldInput[] }) => ({
+                resolvedResults: input.formFields.map(
+                    (field: DateValidationFieldInput) => ({
+                        field: field.field,
+                        outcome: 'match',
+                        confidence: 'high',
+                        message: `Document text includes ${
+                            field.field === 'contractStartDate'
+                                ? 'start date'
+                                : 'end date'
+                        } ${field.value}.`,
+                        decisionSource: 'deterministic',
+                        citations: [
+                            {
+                                chunkId: 'contract-2.pdf::chunk-0',
+                                documentName: 'contract-2.pdf',
+                                page: null,
+                                order: 0,
+                            },
+                        ],
+                    })
+                ),
+                unresolvedFields: [] as DateValidationFieldInput[],
+            })
+        )
+
+        const firstPassEvent = {
+            ...baseEvent,
+            workSelectionMode: 'gated-first-pass' as const,
+            documents: Array.from({ length: 13 }, (_value, index) => ({
+                documentName: `contract-${index}.pdf`,
+                sourceBucket: 'local-uploads',
+                sourceKey: `uploads/contracts/contract-${index}.pdf`,
+            })),
+        }
+
+        await validationHandler(firstPassEvent)
+
+        const validationResultCall = putJsonMock.mock.calls.find(
+            ([bucket, key]) =>
+                bucket === 'ai-form-augmentation-artifacts' &&
+                key === getValidationResultKey('test-form')
+        )
+
+        expect(validationResultCall).toBeDefined()
+        expect(validationResultCall?.[2]).toEqual(
+            expect.objectContaining({
+                workSelectionMode: 'gated-first-pass',
+                fieldWorkSelectionDiagnostics: expect.arrayContaining([
+                    {
+                        field: 'contractStartDate',
+                        evidenceSource: 'first-pass',
+                    },
+                    {
+                        field: 'contractEndDate',
+                        evidenceSource: 'first-pass',
+                    },
+                ]),
+                documentDiagnostics: expect.arrayContaining([
+                    expect.objectContaining({
+                        documentName: 'contract-0.pdf',
+                        status: 'skipped',
+                        reason: 'ocr-capped-large-batch',
+                    }),
+                    expect.objectContaining({
+                        documentName: 'contract-1.pdf',
+                        status: 'skipped',
+                        reason: 'ocr-capped-large-batch',
+                    }),
+                    expect.objectContaining({
+                        documentName: 'contract-12.pdf',
+                        status: 'skipped',
+                        reason: 'deferred-first-pass',
+                    }),
+                ]),
+            })
+        )
+        expect(putJsonMock).toHaveBeenLastCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationStatusKey('test-form'),
+            expect.objectContaining({
+                stage: 'complete',
+                workSelectionMode: 'gated-first-pass',
+            })
+        )
+    })
+
+    it('still expands to gated-fallback when first-pass evidence is partial', async () => {
+        runDeterministicDateValidationMock.mockImplementation(
+            (input: { formFields: DateValidationFieldInput[] }) => ({
+                resolvedResults: input.formFields.map(
+                    (field: DateValidationFieldInput) =>
+                        field.field === 'contractStartDate'
+                            ? {
+                                  field: field.field,
+                                  outcome: 'not-enough-evidence',
+                                  confidence: 'medium',
+                                  message:
+                                      'The cited evidence is ambiguous for the start date.',
+                                  decisionSource: 'deterministic',
+                                  citations: [],
+                              }
+                            : {
+                                  field: field.field,
+                                  outcome: 'match',
+                                  confidence: 'high',
+                                  message: `Document text includes end date ${field.value}.`,
+                                  decisionSource: 'deterministic',
+                                  citations: [
+                                      {
+                                          chunkId: 'contract-a.pdf::chunk-0',
+                                          documentName: 'contract-a.pdf',
+                                          page: null,
+                                          order: 0,
+                                      },
+                                  ],
+                              }
+                ),
+                unresolvedFields: [],
+            })
+        )
+
+        const firstPassEvent = {
+            ...baseEvent,
+            workSelectionMode: 'gated-first-pass' as const,
+            documents: Array.from({ length: 13 }, (_value, index) => ({
+                documentName: `contract-${index}.pdf`,
+                sourceBucket: 'local-uploads',
+                sourceKey: `uploads/contracts/contract-${index}.pdf`,
+            })),
+        }
+
+        await validationHandler(firstPassEvent)
+
+        const validationResultCall = putJsonMock.mock.calls.find(
+            ([bucket, key]) =>
+                bucket === 'ai-form-augmentation-artifacts' &&
+                key === getValidationResultKey('test-form')
+        )
+
+        expect(validationResultCall).toBeDefined()
+        expect(validationResultCall?.[2]).toEqual(
+            expect.objectContaining({
+                workSelectionMode: 'gated-fallback',
+                documentDiagnostics: expect.arrayContaining([
+                    expect.objectContaining({
+                        documentName: 'contract-12.pdf',
+                        status: 'processed',
+                    }),
+                ]),
+            })
+        )
+        expect(putJsonMock).toHaveBeenLastCalledWith(
+            'ai-form-augmentation-artifacts',
+            getValidationStatusKey('test-form'),
+            expect.objectContaining({
+                stage: 'complete',
+                workSelectionMode: 'gated-fallback',
+            })
+        )
+        expect(
+            putJsonMock.mock.calls.some(
+                ([bucket, key, artifact]) =>
+                    bucket === 'ai-form-augmentation-artifacts' &&
+                    key === getValidationStatusKey('test-form') &&
+                    artifact?.workSelectionMode === 'gated-fallback' &&
+                    (artifact?.stage === 'parsing' ||
+                        artifact?.stage === 'retrieving' ||
+                        artifact?.stage === 'deterministic-validation' ||
+                        artifact?.stage === 'llm-validation')
+            )
+        ).toBe(true)
     })
 
     it('routes unresolved fields to the llm with field-specific retrieval context', async () => {

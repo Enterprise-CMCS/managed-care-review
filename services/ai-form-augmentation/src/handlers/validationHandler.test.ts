@@ -150,7 +150,7 @@ test('scoreValidationDocuments marks only the top ranked documents as first-pass
   )
 })
 
-test('selectFirstPassDocuments preserves all-doc parity by returning scored first-pass documents in input order', () => {
+test('selectFirstPassDocuments returns scored first-pass documents in current ranking order', () => {
   const diagnostics = scoreValidationDocuments(
     [
       {
@@ -187,7 +187,8 @@ test('selectFirstPassDocuments preserves all-doc parity by returning scored firs
     selectFirstPassDocuments(diagnostics).map((document) => document.documentName),
     [
       'contract-amendment-effective-dates.pdf',
-      'contract-term-expiration.pdf'
+      'contract-term-expiration.pdf',
+      'provider-agreement.pdf'
     ]
   )
 })
@@ -294,6 +295,116 @@ test('buildFieldWorkSelectionDiagnostics marks deferred-document citations as fa
     {
       field: 'contractStartDate',
       evidenceSource: 'fallback'
+    }
+  ])
+})
+
+test('buildFieldWorkSelectionDiagnostics keeps strong cited first-pass evidence despite unrelated OCR-capped documents', () => {
+  const diagnostics = buildFieldWorkSelectionDiagnostics({
+    formFields: [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2025'
+      },
+      {
+        field: 'contractEndDate',
+        label: 'Contract End Date',
+        value: '12/31/2025'
+      }
+    ],
+    results: [
+      {
+        field: 'contractStartDate',
+        outcome: 'mismatch',
+        confidence: 'high',
+        message:
+          'Document start date (01/01/2024) does not match form start date (01/01/2025).',
+        citations: [
+          {
+            chunkId: 'chunk-0',
+            documentName: 'ABX 23-30213 A03 213A Final.pdf',
+            page: 1,
+            order: 0
+          }
+        ]
+      },
+      {
+        field: 'contractEndDate',
+        outcome: 'match',
+        confidence: 'high',
+        message: 'Document text labels end date as 12/31/2025.',
+        citations: [
+          {
+            chunkId: 'chunk-0',
+            documentName: 'ABX 23-30213 A03 213A Final.pdf',
+            page: 1,
+            order: 0
+          }
+        ]
+      }
+    ],
+    retrievalDiagnostics: new Map([
+      [
+        'contractStartDate',
+        {
+          field: 'contractStartDate',
+          candidateChunkCount: 8,
+          initialChunkCount: 4,
+          finalChunkCount: 4,
+          representedDocumentCount: 3,
+          droppedCandidateCount: 4,
+          competingDateCount: 1,
+          clauseEvidencePresentInitially: true,
+          clauseEvidencePresentFinally: true,
+          clauseEvidenceAdded: false
+        }
+      ],
+      [
+        'contractEndDate',
+        {
+          field: 'contractEndDate',
+          candidateChunkCount: 8,
+          initialChunkCount: 4,
+          finalChunkCount: 4,
+          representedDocumentCount: 3,
+          droppedCandidateCount: 4,
+          competingDateCount: 1,
+          clauseEvidencePresentInitially: true,
+          clauseEvidencePresentFinally: true,
+          clauseEvidenceAdded: false
+        }
+      ]
+    ]),
+    documentDiagnostics: [
+      {
+        documentName: 'ABX 23-30213 A03 213A Final.pdf',
+        status: 'processed',
+        usable: true,
+        chunkCount: 4,
+        ocrDisposition: 'not-needed'
+      },
+      {
+        documentName: 'missing-first-pass.pdf',
+        status: 'skipped',
+        usable: false,
+        chunkCount: 0,
+        ocrDisposition: 'skipped',
+        reason: 'ocr-capped-large-batch'
+      }
+    ],
+    workSelectionMode: 'gated-first-pass',
+    deferredDocumentNames: new Set()
+  })
+
+  assert.deepEqual(diagnostics, [
+    {
+      field: 'contractStartDate',
+      evidenceSource: 'first-pass'
+    },
+    {
+      field: 'contractEndDate',
+      evidenceSource: 'first-pass'
     }
   ])
 })

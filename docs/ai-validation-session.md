@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-053 Stop fallback expansion once both date fields are sufficiently evidenced`.
+The next implementation ticket is `AIFA-055 Fix stale in-progress banner after completed validation`.
 
 ## Completed
 
@@ -66,6 +66,7 @@ The next implementation ticket is `AIFA-053 Stop fallback expansion once both da
 - AIFA-051 ✔ Persist indexing-phase progress during long validation runs
 - AIFA-046 ✔ Split parsed-text artifacts from embedding artifacts
 - AIFA-052 ✔ Add LLM-assisted first-pass reranking for large low-yield documents
+- AIFA-053 ✔ Stop fallback expansion once both date fields are sufficiently evidenced
 
 ## Current State
 
@@ -284,9 +285,14 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Inspect why first-pass evidence from `AAH 23-30212 A03 213A Final.pdf` still did not satisfy the current fallback gate.
-- Stop deferred-document expansion only when both date fields are clearly evidenced, cited, non-conflicting, and not partial.
-- Keep fallback conservative for weak, partial, conflicting, ambiguous, or uncited evidence.
+- Fix the client-side polling/state path so a completed backend run clears the `still in progress` banner without a hard refresh.
+- Preserve current background-trigger and status-polling behavior while removing stale in-memory UI state.
+- After the stale-banner fix, refine Review-page copy so multi-document corroboration is clearer when one example citation is shown per field.
+
+## Follow-on UX Tickets
+
+- `AIFA-054 Clarify multi-document evidence messaging on Review page`
+- `AIFA-055 Fix stale in-progress banner after completed validation`
 
 ### AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents
 
@@ -378,3 +384,7 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - PDF eligibility metadata is advisory only; renamed non-PDF files can still pass candidate checks and must be handled by later document-level failure isolation.
 - A newer 165-document run showed `AIFA-052` is now pulling `AAH 23-30212 A03 213A Final.pdf` into first pass and keeping giant `Text Final` / `Rates Text` bodies out, but the run still broadened into `gated-fallback` afterward.
 - That means the next bottleneck is no longer first-pass selection quality alone; it is fallback expansion continuing even after strong amendment-style evidence is already present for the date fields.
+- A later `AIFA-053` run completed in `gated-first-pass` without broad fallback, which validates the field-aware sufficiency fix, but it also exposed two product follow-ons:
+- the Review-page copy should explain that one shown citation can represent a conclusion corroborated by multiple reviewed documents
+- the client can still display a stale `still in progress` banner until a hard refresh even after backend completion
+- `hasStrongResolvedFieldEvidenceForFallback()` was sufficient for the successful large-submission run, but it is still a pragmatic proxy rather than a richer evidence model and should remain a watched risk rather than a new ticket for now

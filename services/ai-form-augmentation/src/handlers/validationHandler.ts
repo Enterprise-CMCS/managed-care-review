@@ -312,6 +312,21 @@ export async function validationHandler(
         (diagnostic) => diagnostic.evidenceSource !== 'first-pass'
       )
     ) {
+      await s3Client.putJson(
+        event.bucket,
+        statusKey,
+        buildValidationStatusArtifact(
+          'parsing',
+          event.artifactVersion,
+          null,
+          [],
+          'gated-fallback',
+          {
+            completedDocuments: selectedDocuments.length,
+            totalDocuments: selectedDocuments.length + deferredDocuments.length
+          }
+        )
+      )
       const fallbackIndexing = await indexValidationDocuments({
         event,
         s3Client,
@@ -1628,15 +1643,16 @@ function buildFallbackReasons(args: {
   documentDiagnostics: ValidationDocumentDiagnostic[]
 }): string[] {
   const fallbackReasons = new Set<string>()
+  const hasAmbiguousMessage = hasAmbiguousOrConflictingResultMessage(args.result)
+  const hasStrongResolvedFieldEvidence = hasStrongResolvedFieldEvidenceForFallback(
+    args.result
+  )
 
   if (args.result.outcome === 'not-enough-evidence') {
     fallbackReasons.add('not-enough-evidence')
   }
 
-  if (
-    args.result.message.toLowerCase().includes('ambiguous') ||
-    args.result.message.toLowerCase().includes('conflicting')
-  ) {
+  if (hasAmbiguousMessage) {
     fallbackReasons.add('ambiguity')
   }
 
@@ -1644,41 +1660,70 @@ function buildFallbackReasons(args: {
     fallbackReasons.add('missing-citations')
   }
 
-  if (
-    args.documentDiagnostics.some(
-      (diagnostic) =>
-        diagnostic.status === 'failed' ||
-        diagnostic.reason === 'ocr-capped-large-batch'
-    )
-  ) {
-    fallbackReasons.add('partial-coverage')
-  }
+  if (!hasStrongResolvedFieldEvidence) {
+    // Keep coverage gaps conservative for unresolved fields, but do not let
+    // unrelated OCR-capped/failed first-pass documents force fallback when the
+    // field already has strong cited evidence from successfully processed docs.
+    if (
+      args.documentDiagnostics.some(
+        (diagnostic) =>
+          diagnostic.status === 'failed' ||
+          diagnostic.reason === 'ocr-capped-large-batch'
+      )
+    ) {
+      fallbackReasons.add('partial-coverage')
+    }
 
-  if (
-    args.documentDiagnostics.some(
-      (diagnostic) =>
-        diagnostic.ocrDisposition === 'skipped' ||
-        diagnostic.reason === 'ocr-capped-large-batch'
-    )
-  ) {
-    fallbackReasons.add('ocr-gaps')
-  }
+    if (
+      args.documentDiagnostics.some(
+        (diagnostic) =>
+          diagnostic.ocrDisposition === 'skipped' ||
+          diagnostic.reason === 'ocr-capped-large-batch'
+      )
+    ) {
+      fallbackReasons.add('ocr-gaps')
+    }
 
-  if (
-    args.documentDiagnostics.some((diagnostic) => diagnostic.status === 'failed')
-  ) {
-    fallbackReasons.add('failed-documents')
+    if (
+      args.documentDiagnostics.some(
+        (diagnostic) => diagnostic.status === 'failed'
+      )
+    ) {
+      fallbackReasons.add('failed-documents')
+    }
   }
 
   if (args.result.confidence !== 'high') {
     fallbackReasons.add('weak-field-evidence')
   }
 
-  if ((args.retrievalDiagnostic?.competingDateCount ?? 0) > 1) {
+  if (
+    !hasStrongResolvedFieldEvidence &&
+    (args.retrievalDiagnostic?.competingDateCount ?? 0) > 1
+  ) {
     fallbackReasons.add('conflicting-date-evidence')
   }
 
   return [...fallbackReasons]
+}
+
+function hasStrongResolvedFieldEvidenceForFallback(
+  result: DateValidationResult
+): boolean {
+  return (
+    result.outcome !== 'not-enough-evidence' &&
+    result.confidence === 'high' &&
+    result.citations.length > 0 &&
+    !hasAmbiguousOrConflictingResultMessage(result)
+  )
+}
+
+function hasAmbiguousOrConflictingResultMessage(
+  result: DateValidationResult
+): boolean {
+  const message = result.message.toLowerCase()
+
+  return message.includes('ambiguous') || message.includes('conflicting')
 }
 
 function isRecommendedFirstPassWorkSelection(

@@ -1,5 +1,6 @@
 import type { DateValidationCitationInput, DateValidationFieldInput } from '../prompts'
 import { canonicalizeDateToken } from './dateToken'
+import { extractOperativeAmendmentEffectiveDates } from './amendmentEffectiveDateSignal'
 
 const MONTH_PATTERN =
   '(?:January|February|March|April|May|June|July|August|September|October|November|December|Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)'
@@ -131,6 +132,36 @@ export function resolveSingleTermRangeDateFromChunks(
   >()
 
   for (const chunk of chunks) {
+    if (field === 'contractStartDate') {
+      for (const amendmentEffectiveDate of extractOperativeAmendmentEffectiveDates(
+        chunk.text
+      )) {
+        const canonicalDate = canonicalizeDateToken(amendmentEffectiveDate)
+
+        if (!canonicalDate) {
+          continue
+        }
+
+        const existing = resolvedDates.get(canonicalDate)
+
+        if (existing) {
+          existing.precedence = Math.max(existing.precedence, 5)
+          if (
+            !existing.chunks.some((candidate) => candidate.chunkId === chunk.chunkId)
+          ) {
+            existing.chunks.push(chunk)
+          }
+          continue
+        }
+
+        resolvedDates.set(canonicalDate, {
+          date: canonicalDate,
+          chunks: [chunk],
+          precedence: 5
+        })
+      }
+    }
+
     for (const pattern of TERM_RANGE_PATTERNS) {
       const match = chunk.text.match(pattern.pattern)
 

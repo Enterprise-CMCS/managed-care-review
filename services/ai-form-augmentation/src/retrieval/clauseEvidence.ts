@@ -1,6 +1,7 @@
 import type { DocumentChunk } from '../chunking'
 import type { DateValidationFieldInput } from '../prompts'
 import { VALIDATION_FIELD_CONFIG } from '../validationFields'
+import { extractOperativeAmendmentEffectiveDates } from '../validation-output/amendmentEffectiveDateSignal'
 
 export interface RetrievalEvidenceChunk {
   chunkId: string
@@ -266,6 +267,14 @@ function extractLabeledDates(
           labeledDates.add(dateMatch[0])
         }
       }
+    }
+  }
+
+  if (field === 'contractStartDate') {
+    for (const amendmentEffectiveDate of extractOperativeAmendmentEffectiveDates(
+      text
+    )) {
+      labeledDates.add(amendmentEffectiveDate)
     }
   }
 

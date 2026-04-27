@@ -112,3 +112,59 @@ test('expandClauseEvidenceForField keeps existing clause evidence without adding
   assert.equal(result.diagnostics.clauseEvidencePresentInitially, true)
   assert.equal(result.diagnostics.clauseEvidenceAdded, false)
 })
+
+test('expandClauseEvidenceForField counts operative amendment effective date as a competing start-date candidate in amendment term context', () => {
+  const result = expandClauseEvidenceForField({
+    field: 'contractStartDate',
+    candidateChunkCount: 1,
+    retrievedChunks: [
+      {
+        chunkId: 'chunk-0',
+        documentName: 'fixture.pdf',
+        page: 1,
+        startPage: 1,
+        endPage: 1,
+        order: 0,
+        text: [
+          'STANDARD AGREEMENT - AMENDMENT',
+          'START DATE',
+          'January 1, 2024',
+          'THROUGH END DATE',
+          'December 31, 2025',
+          'Amendment effective date: January 1, 2025.',
+          'Purpose of amendment: It extends the contract to December 31, 2025.',
+          'Paragraph 2 (term) on the face of the original STD 213 is amended to read: January 1, 2024 through December 31, 2025.'
+        ].join('\n')
+      }
+    ],
+    allChunks: [
+      {
+        chunkId: 'chunk-0',
+        documentName: 'fixture.pdf',
+        page: 1,
+        startPage: 1,
+        endPage: 1,
+        order: 0,
+        startChar: 0,
+        endChar: 320,
+        text: [
+          'STANDARD AGREEMENT - AMENDMENT',
+          'START DATE',
+          'January 1, 2024',
+          'THROUGH END DATE',
+          'December 31, 2025',
+          'Amendment effective date: January 1, 2025.',
+          'Purpose of amendment: It extends the contract to December 31, 2025.',
+          'Paragraph 2 (term) on the face of the original STD 213 is amended to read: January 1, 2024 through December 31, 2025.'
+        ].join('\n')
+      }
+    ]
+  })
+
+  assert.equal(result.diagnostics.competingDateCount, 2)
+  assert.equal(result.diagnostics.clauseEvidencePresentInitially, true)
+  assert.deepEqual(
+    result.chunks.map((chunk) => chunk.chunkId),
+    ['chunk-0']
+  )
+})

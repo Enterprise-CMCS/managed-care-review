@@ -959,7 +959,7 @@ Large submissions now bottleneck on a few 630+ page contract PDFs that appear st
 - All-doc override remains available
 - Evaluation shows equal-or-more-conservative outcomes versus the current gated first pass
 - Focused tests cover config gating and reranking behavior"
-AIFA-053 Stop fallback expansion once both date fields are sufficiently evidenced,Backlog,7-Large Submission Hardening,High,"AIFA-049B, AIFA-050, AIFA-052","Prevent broad fallback from continuing to index expensive deferred documents once `contractStartDate` and `contractEndDate` already have strong enough cited evidence from first pass.
+AIFA-053 Stop fallback expansion once both date fields are sufficiently evidenced,Done,7-Large Submission Hardening,High,"AIFA-049B, AIFA-050, AIFA-052","Prevent broad fallback from continuing to index expensive deferred documents once `contractStartDate` and `contractEndDate` already have strong enough cited evidence from first pass.
 - Inspect the field-level sufficiency and fallback-trigger logic against real first-pass evidence such as `AAH 23-30212 A03 213A Final.pdf`
 - Stop deferred-document expansion only when both date fields are clearly evidenced, cited, non-conflicting, and not partial
 - Preserve current conservative fallback behavior whenever evidence is weak, partial, ambiguous, uncited, or contradicted
@@ -971,3 +971,25 @@ The latest large-submission runs show first-pass selection has improved enough t
 - Deferred documents remain eligible whenever sufficiency is not met
 - Validation truth remains evidence-driven; this ticket only changes when expensive expansion stops
 - Focused tests cover sufficiency-driven no-expand behavior and unchanged fallback behavior for ambiguous cases"
+AIFA-054 Clarify multi-document evidence messaging on Review page,Backlog,4-Frontend Integration,Medium,"AIFA-020D, AIFA-053","Refine the Review-page copy so users understand that a field result can be supported by multiple reviewed documents even when the UI shows one example citation.
+- Update the limited-coverage/result copy to distinguish reviewed evidence from the single displayed citation
+- Rename or clarify `Supporting document reference` so it reads as an example reference rather than the exclusive basis
+- Preserve the existing advisory/non-blocking framing
+- Keep the work to wording and presentational UX only; do not change backend validation logic or citation selection in this ticket
+
+Why this matters:
+The latest successful large-submission run completed correctly from first pass, but the UI can make a corroborated result look like it came from only one document per field. That is confusing even when the backend result is accurate.","- Review-page copy clearly states that multiple reviewed documents may support the same conclusion
+- Field-level evidence labels make it clear the shown citation is an example or referenced chunk, not necessarily the only supporting document
+- Existing advisory/non-blocking language remains intact
+- No backend validation behavior or citation-selection logic changes in this ticket"
+AIFA-055 Fix stale in-progress banner after completed validation,Backlog,4-Frontend Integration,High,"AIFA-017, AIFA-018, AIFA-053","Fix the client-side status/polling behavior so the Review/Contract Details UI transitions out of `still in progress` as soon as the backend artifacts show completion, without requiring a hard refresh.
+- Inspect the frontend polling/cache path for `validationStatus` after background completion
+- Ensure completed status replaces stale in-memory loading state promptly
+- Preserve existing polling semantics and avoid duplicate trigger behavior
+- Keep the work scoped to frontend state synchronization and status display
+
+Why this matters:
+The latest successful large-submission run completed in `gated-first-pass`, but the page continued to show `still in progress` until a hard refresh. That undermines trust even when the backend has already finished correctly.","- A completed backend run is reflected in the UI without manual refresh
+- The `still in progress` banner clears promptly once `validationStatus` returns complete
+- No duplicate validation trigger is introduced by the fix
+- Existing pending/in-progress/complete state transitions remain correct for normal runs"

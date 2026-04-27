@@ -7,6 +7,7 @@ import { hasClauseEvidenceForField } from '../retrieval'
 import { VALIDATION_FIELD_CONFIG } from '../validationFields'
 import { canonicalizeDateToken } from './dateToken'
 import { buildFieldSpecificMismatchMessage } from './mismatchMessage'
+import { extractOperativeAmendmentEffectiveDates } from './amendmentEffectiveDateSignal'
 import { resolveSingleTermRangeDateFromChunks } from './termRangeDateResolution'
 
 type SupportedField = DateValidationFieldInput['field']
@@ -130,6 +131,14 @@ function extractLabeledDates(
           labeledDates.add(normalizeWhitespace(dateMatch[0]))
         }
       }
+    }
+  }
+
+  if (field === 'contractStartDate') {
+    for (const amendmentEffectiveDate of extractOperativeAmendmentEffectiveDates(
+      chunk.text
+    )) {
+      labeledDates.add(amendmentEffectiveDate)
     }
   }
 
@@ -386,11 +395,42 @@ export function runDeterministicDateValidation(input: {
 
     const normalizedExpected = normalizeDateToken(field.value)
     const [resolvedCandidate] = uniqueCandidates.values()
+    const resolvedTermRange = resolveSingleTermRangeDateFromChunks(
+      field.field,
+      input.retrievedChunks
+    )
+    const resolvedLabelDate = normalizeDateToken(resolvedCandidate.labeledDate)
+
+    if (
+      resolvedTermRange != null &&
+      normalizeDateToken(resolvedTermRange.date) !== resolvedLabelDate
+    ) {
+      const normalizedResolvedDate = normalizeDateToken(resolvedTermRange.date)
+
+      resolvedResults.push({
+        field: field.field,
+        outcome:
+          normalizedResolvedDate === normalizedExpected ? 'match' : 'mismatch',
+        confidence: 'high',
+        message:
+          normalizedResolvedDate === normalizedExpected
+            ? `Document text supports ${VALIDATION_FIELD_CONFIG[field.field].messageLabel} as ${field.value}.`
+            : buildFieldSpecificMismatchMessage({
+                field,
+                documentDate: resolvedTermRange.date,
+                formDate: field.value
+              }),
+        decisionSource: 'deterministic',
+        citations: resolvedTermRange.chunks.map(buildCitation)
+      })
+      continue
+    }
+
     const displayedLabeledDate =
       canonicalizeDateToken(resolvedCandidate.labeledDate) ??
       resolvedCandidate.labeledDate
 
-    if (normalizeDateToken(resolvedCandidate.labeledDate) === normalizedExpected) {
+    if (resolvedLabelDate === normalizedExpected) {
       resolvedResults.push({
         field: field.field,
         outcome: 'match',
