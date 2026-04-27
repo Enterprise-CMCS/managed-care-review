@@ -3,7 +3,10 @@ import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertB
 
 export const StatusUpdatedBanner = ({
     className,
-}: React.HTMLAttributes<HTMLDivElement>) => {
+    message = 'Submission status updated to "Submitted".',
+}: {
+    message?: string
+} & React.HTMLAttributes<HTMLDivElement>) => {
     return (
         <AccessibleAlertBanner
             role="status"
@@ -13,7 +16,7 @@ export const StatusUpdatedBanner = ({
             data-testid="statusUpdatedBanner"
             className={className}
         >
-            Submission status updated to "Submitted".
+            {message}
         </AccessibleAlertBanner>
     )
 }

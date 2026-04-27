@@ -230,7 +230,14 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
 
     const renderStatusAlerts = () => {
         if (showTempUndoWithdrawBanner) {
-            return <StatusUpdatedBanner className={styles.banner} />
+            return (
+                <StatusUpdatedBanner
+                    className={styles.banner}
+                    message={
+                        'Submission status updated to "Not subject to review".'
+                    }
+                />
+            )
         }
 
         if (showWithdrawnBanner && latestContractAction.updatedBy) {
