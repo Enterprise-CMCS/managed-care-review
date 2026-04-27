@@ -227,7 +227,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const renderStatusAlerts = () => {
         if (showTempUndoWithdrawBanner) {
             const status = isSubjectToReview
-                ? ReviewDecisionRecord['UNDER_REVIEW']
+                ? 'Submitted'
                 : ReviewDecisionRecord['NOT_SUBJECT_TO_REVIEW']
             return (
                 <StatusUpdatedBanner
