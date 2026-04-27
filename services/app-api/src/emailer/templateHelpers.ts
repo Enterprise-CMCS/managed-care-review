@@ -18,6 +18,8 @@ import { findStatePrograms, packageName } from '@mc-review/submissions'
 import { rateSummaryURL, submissionSummaryURL } from './generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
 import type { SubmissionType } from '../gen/gqlServer'
+import type { ConsolidatedContractStatusType } from '../domain-models/contractAndRates'
+import type { ReviewActionTypes } from '../domain-models/contractAndRates/contractReviewActionType'
 
 // ETA SETUP
 Eta.configure({
@@ -390,24 +392,33 @@ const parseEmailDataWithdrawSubmission = (
     config: EmailConfiguration,
     type: 'WITHDRAW' | 'UNDO_WITHDRAW'
 ): WithdrawContractEtaDataType | Error => {
-    const validConsolidatedStatus =
-        type === 'WITHDRAW' ? 'WITHDRAWN' : 'RESUBMITTED'
-    const validReviewAction = type === 'WITHDRAW' ? type : 'UNDER_REVIEW'
+    const validConsolidatedStatus: ConsolidatedContractStatusType[] =
+        type === 'WITHDRAW'
+            ? ['WITHDRAWN'] //If withdrawing, expect only this status
+            : ['RESUBMITTED', 'NOT_SUBJECT_TO_REVIEW']
 
-    if (contract.consolidatedStatus !== validConsolidatedStatus) {
+    const validReviewAction: ReviewActionTypes[] =
+        type === 'WITHDRAW'
+            ? ['WITHDRAW'] //If withdrawing, expect only this status
+            : ['UNDER_REVIEW', 'NOT_SUBJECT_TO_REVIEW']
+
+    if (!validConsolidatedStatus.includes(contract.consolidatedStatus)) {
         return new Error(
-            `Contract consolidated status should be ${validConsolidatedStatus}`
+            `Contract consolidated status is incorrect for ${type} email. Consolidated status: ${contract.consolidatedStatus}`
         )
     }
 
-    // Latest review action should be UNDER_REVIEW
     const latestStatusAction = contract.reviewStatusActions?.sort(
         (a, b) =>
             new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     )[0]
-    if (latestStatusAction?.actionType !== validReviewAction) {
+
+    if (
+        !latestStatusAction?.actionType ||
+        !validReviewAction.includes(latestStatusAction.actionType)
+    ) {
         return new Error(
-            `Latest contract review action is not ${validReviewAction}`
+            `Latest contract review action is incorrect for ${type} email. Contract action: ${latestStatusAction?.actionType}`
         )
     }
 

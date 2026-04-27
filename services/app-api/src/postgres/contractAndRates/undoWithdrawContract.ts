@@ -6,6 +6,10 @@ import { unlockContractInsideTransaction } from './unlockContract'
 import { submitContractInsideTransaction } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { parseErrorToError } from '@mc-review/helpers'
+import {
+    eqroValidationAndReviewDetermination,
+    healthPlanReviewDetermination,
+} from '@mc-review/submissions'
 
 export type UndoWithdrawContractArgsType = {
     contract: ContractType
@@ -97,7 +101,7 @@ const undoWithdrawContractInsideTransaction = async (
         }
     })
 
-    // Resubmit contact and child rates
+    // Resubmit contract and child rates
     const resubmitContract = await submitContractInsideTransaction(tx, {
         contractID: contract.id,
         submittedByUserID: updatedByID,
@@ -110,7 +114,39 @@ const undoWithdrawContractInsideTransaction = async (
         )
     }
 
-    // Add UNDER_REVIEW action to contract
+    // Determine restored review status — mirrors submitContract logic so that
+    // NOT_SUBJECT_TO_REVIEW submissions (EQRO with no review-triggering
+    // provisions, CHIP-only HEALTH_PLAN) return to NOT_SUBJECT_TO_REVIEW
+    // rather than flipping to UNDER_REVIEW.
+    let restoredActionType: 'UNDER_REVIEW' | 'NOT_SUBJECT_TO_REVIEW' =
+        'UNDER_REVIEW'
+    const latestSubmission = resubmitContract.packageSubmissions[0]
+    if (!latestSubmission) {
+        throw new Error(
+            'Cannot determine review on undo-withdraw: contract has no submitted revision'
+        )
+    }
+
+    if (resubmitContract.contractSubmissionType === 'EQRO') {
+        const reviewDetermination = eqroValidationAndReviewDetermination(
+            resubmitContract.id,
+            latestSubmission.contractRevision.formData
+        )
+        if (reviewDetermination instanceof Error) {
+            throw reviewDetermination
+        }
+        restoredActionType = reviewDetermination
+            ? 'UNDER_REVIEW'
+            : 'NOT_SUBJECT_TO_REVIEW'
+    } else if (resubmitContract.contractSubmissionType === 'HEALTH_PLAN') {
+        const subjectToReview = healthPlanReviewDetermination(
+            latestSubmission.contractRevision.formData
+        )
+        restoredActionType = subjectToReview
+            ? 'UNDER_REVIEW'
+            : 'NOT_SUBJECT_TO_REVIEW'
+    }
+
     await tx.contractTable.update({
         where: {
             id: contract.id,
@@ -120,7 +156,7 @@ const undoWithdrawContractInsideTransaction = async (
                 create: {
                     updatedByID,
                     updatedReason,
-                    actionType: 'UNDER_REVIEW',
+                    actionType: restoredActionType,
                 },
             },
         },
@@ -152,7 +188,11 @@ const undoWithdrawContractInsideTransaction = async (
         throw new Error(undoWithdrawnContract.message)
     }
 
-    if (undoWithdrawnContract.consolidatedStatus !== 'RESUBMITTED') {
+    if (
+        !['RESUBMITTED', 'NOT_SUBJECT_TO_REVIEW'].includes(
+            undoWithdrawnContract.consolidatedStatus
+        )
+    ) {
         throw new Error('Contract failed to withdraw')
     }
 
@@ -168,7 +208,10 @@ const undoWithdrawContract = async (
 ): Promise<UndoWithdrawContractReturnType | Error> => {
     try {
         return await client.$transaction(
-            async (tx) => await undoWithdrawContractInsideTransaction(tx, args)
+            async (tx) => await undoWithdrawContractInsideTransaction(tx, args),
+            {
+                timeout: 30000,
+            }
         )
     } catch (err) {
         const parsedError = parseErrorToError(err)

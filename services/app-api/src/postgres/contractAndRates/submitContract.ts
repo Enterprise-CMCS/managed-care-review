@@ -4,7 +4,10 @@ import type { UpdateInfoType, ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
+import {
+    eqroValidationAndReviewDetermination,
+    healthPlanReviewDetermination,
+} from '@mc-review/submissions'
 import { parseErrorToError } from '@mc-review/helpers'
 
 async function submitContractInsideTransaction(
@@ -165,13 +168,16 @@ async function healthPlanContractReviewDeterminationAction(
         )
     }
 
-    const isChipOnly =
-        latestSubmission.contractRevision.formData.populationCovered === 'CHIP'
+    const subjectToReview = healthPlanReviewDetermination(
+        latestSubmission.contractRevision.formData
+    )
 
     await tx.contractActionTable.create({
         data: {
             updatedByID: undefined,
-            actionType: isChipOnly ? 'NOT_SUBJECT_TO_REVIEW' : 'UNDER_REVIEW',
+            actionType: subjectToReview
+                ? 'UNDER_REVIEW'
+                : 'NOT_SUBJECT_TO_REVIEW',
             contractID: contract.id,
         },
     })

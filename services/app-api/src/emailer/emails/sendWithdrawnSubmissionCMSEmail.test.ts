@@ -155,7 +155,7 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Contract consolidated status should be WITHDRAWN'
+            'Contract consolidated status is incorrect for WITHDRAW email. Consolidated status: RESUBMITTED'
         )
     })
 
@@ -174,7 +174,7 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Latest contract review action is not WITHDRAW'
+            'Latest contract review action is incorrect for WITHDRAW email. Contract action: undefined'
         )
     })
 
@@ -207,7 +207,7 @@ describe('sendWithdrawnSubmissionCMSEmail error handling', () => {
 
         expect(template).toBeInstanceOf(Error)
         expect((template as Error).message).toBe(
-            'Latest contract review action is not WITHDRAW'
+            'Latest contract review action is incorrect for WITHDRAW email. Contract action: UNDER_REVIEW'
         )
     })
 })
