@@ -146,7 +146,6 @@ export const ReviewSubmit = (): React.ReactElement => {
     const validationShouldPoll =
         aiValidationEnabled &&
         hasContractId &&
-        !validationTimedOut &&
         (!validationStatus ||
             shouldTriggerValidation ||
             validationBaseDisplayState.isPolling)
@@ -190,8 +189,9 @@ export const ReviewSubmit = (): React.ReactElement => {
 
         startPolling(VALIDATION_POLL_INTERVAL_MS)
         const timeoutId = window.setTimeout(() => {
+            // Keep polling after the non-blocking timeout so the page can still
+            // reconcile a completed backend run without requiring a refresh.
             setValidationTimedOut(true)
-            stopPolling()
         }, VALIDATION_TIMEOUT_MS)
 
         return () => {

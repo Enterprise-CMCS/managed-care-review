@@ -22,6 +22,9 @@ const aiValidationFeatureFlags = {
     'ai-validation': true,
 }
 
+const VALIDATION_POLL_INTERVAL_MS = 5000
+const VALIDATION_TIMEOUT_MS = 90_000
+
 const validationStatusMock = (overrides?: {
     stage?: string
     isStale?: boolean
@@ -89,6 +92,11 @@ const triggerValidationMock = () => ({
         },
     },
 })
+
+const repeatedValidationStatusMocks = (
+    count: number,
+    overrides?: Parameters<typeof validationStatusMock>[0]
+) => Array.from({ length: count }, () => validationStatusMock(overrides))
 
 describe('ReviewSubmit', () => {
     it('renders without errors', async () => {
@@ -576,6 +584,78 @@ describe('ReviewSubmit', () => {
             ).toBeInTheDocument()
         })
 
+        it('replaces the timed-out banner when polling later reports complete', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            ...repeatedValidationStatusMocks(19, {
+                                stage: 'retrieving',
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'match',
+                                        confidence: 'high',
+                                        message:
+                                            'Start date matches document text.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: aiValidationFeatureFlags,
+                }
+            )
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Reviewing submission dates',
+                })
+            ).toBeInTheDocument()
+
+            await vi.advanceTimersByTimeAsync(VALIDATION_TIMEOUT_MS)
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Document review still in progress',
+                })
+            ).toBeInTheDocument()
+
+            await vi.advanceTimersByTimeAsync(VALIDATION_POLL_INTERVAL_MS)
+
+            expect(
+                await screen.findByRole('heading', {
+                    name: 'Document review results',
+                })
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByRole('heading', {
+                    name: 'Document review still in progress',
+                })
+            ).not.toBeInTheDocument()
+        })
+
         it('shows limited-coverage wording when completion is partial', async () => {
             renderWithProviders(
                 <Routes>
@@ -771,12 +851,27 @@ describe('ReviewSubmit', () => {
             expect(
                 screen.getAllByText('Supporting document reference')
             ).toHaveLength(2)
-            expect(screen.getByText('scan-a.pdf')).toBeInTheDocument()
-            expect(screen.getByText('Page unknown')).toBeInTheDocument()
-            expect(screen.getByText('Chunk order 0')).toBeInTheDocument()
-            expect(screen.getByText('Page 2')).toBeInTheDocument()
-            expect(screen.getByText('scan-b.pdf')).toBeInTheDocument()
-            expect(screen.getByText('Page 4')).toBeInTheDocument()
+            const validationStatusRegion = within(
+                screen.getByLabelText('Document review status')
+            )
+            expect(
+                validationStatusRegion.getAllByText('scan-a.pdf')
+            ).toHaveLength(2)
+            expect(
+                validationStatusRegion.getByText('Page unknown')
+            ).toBeInTheDocument()
+            expect(
+                validationStatusRegion.getByText('Page 2')
+            ).toBeInTheDocument()
+            expect(
+                validationStatusRegion.getByText('scan-b.pdf')
+            ).toBeInTheDocument()
+            expect(
+                validationStatusRegion.getByText('Page 4')
+            ).toBeInTheDocument()
+            expect(
+                validationStatusRegion.getAllByText('Chunk order 0').length
+            ).toBeGreaterThan(0)
         })
 
         it('uses conservative findings copy when document coverage is partial', async () => {
@@ -891,7 +986,11 @@ describe('ReviewSubmit', () => {
                     name: 'Document review results',
                 })
             ).toBeInTheDocument()
-            expect(screen.getByRole('table')).toBeInTheDocument()
+            expect(
+                within(
+                    screen.getByLabelText('Document review status')
+                ).getByRole('table')
+            ).toBeInTheDocument()
 
             await userEvent.click(
                 screen.getByRole('button', { name: 'Show less' })
@@ -1179,7 +1278,7 @@ describe('ReviewSubmit', () => {
 
             expect(
                 await screen.findByRole('heading', {
-                    name: 'Document review complete',
+                    name: 'Document review results',
                 })
             ).toBeInTheDocument()
         })

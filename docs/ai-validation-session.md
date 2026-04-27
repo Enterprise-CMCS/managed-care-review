@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-055 Fix stale in-progress banner after completed validation`.
+The next implementation ticket is `AIFA-057 Add fast revalidation path for form-only edits`.
 
 ## Completed
 
@@ -67,6 +67,7 @@ The next implementation ticket is `AIFA-055 Fix stale in-progress banner after c
 - AIFA-046 ✔ Split parsed-text artifacts from embedding artifacts
 - AIFA-052 ✔ Add LLM-assisted first-pass reranking for large low-yield documents
 - AIFA-053 ✔ Stop fallback expansion once both date fields are sufficiently evidenced
+- AIFA-055 ✔ Fix stale in-progress banner after completed validation
 
 ## Current State
 
@@ -285,14 +286,29 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Fix the client-side polling/state path so a completed backend run clears the `still in progress` banner without a hard refresh.
-- Preserve current background-trigger and status-polling behavior while removing stale in-memory UI state.
-- After the stale-banner fix, refine Review-page copy so multi-document corroboration is clearer when one example citation is shown per field.
+- Add a fast revalidation path for date-only form edits when the document set is unchanged.
+- Reuse existing first-pass document artifacts more aggressively while preserving correct rerun semantics.
+- After that, reduce overall first-pass wall-clock time on large submissions before returning to copy/UX refinement.
 
 ## Follow-on UX Tickets
 
 - `AIFA-054 Clarify multi-document evidence messaging on Review page`
-- `AIFA-055 Fix stale in-progress banner after completed validation`
+
+## Follow-on Performance Tickets
+
+- `AIFA-057 Add fast revalidation path for form-only edits`
+- `AIFA-058 Reduce first-pass latency for large submissions`
+
+## Recommended Upcoming Order
+
+1. `AIFA-057 Add fast revalidation path for form-only edits`
+2. `AIFA-058 Reduce first-pass latency for large submissions`
+3. `AIFA-054 Clarify multi-document evidence messaging on Review page`
+4. `AIFA-056 Clarify AI validation rollout and local-default configuration`
+
+## Follow-on Config Ticket
+
+- `AIFA-056 Clarify AI validation rollout and local-default configuration`
 
 ### AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents
 
@@ -337,7 +353,7 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 
 - The rewritten PoC plan lives in `docs/technical-design/ai-validation-poc-plan.md`.
 - The broader `rag-llm-document-validation.md` document is still useful as long-term architecture context, but it should not be treated as the current PoC scope.
-- Review & Submit now stops polling after a bounded timeout window and falls back to non-blocking messaging instead of polling indefinitely.
+- Review & Submit now shows a non-blocking timeout warning but continues polling until backend status reaches a terminal state.
 - The large-submission fixture is opt-in via `AI_VALIDATION_INCLUDE_LARGE_SUBMISSION=true`; normal evaluation remains small.
 - Parsed text is not a separate artifact yet, so large-run artifact-size output reports parsed text as unavailable until AIFA-046.
 - AIFA-040 keeps `artifactVersion` tied to all persisted contract document keys so unsupported attachment changes still invalidate prior validation artifacts.
@@ -362,7 +378,7 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - The current promotion comparison treats only `match`/`mismatch` to `not-enough-evidence` as a conservative downgrade; broader message/citation parity is still a separate judgment.
 - The runtime override is currently config/env-based rather than surfaced through GraphQL or UI controls, so local debugging and future rollout work need to stay aligned with that single control path.
 - `indexingProgress.totalDocuments` is currently scoped to the active indexing pass, so a later gated-fallback pass may report against a larger total instead of retroactively rewriting first-pass progress.
-- A 165-file local test run continued indexing documents after the Review-page timeout banner appeared, which confirms the worker can keep progressing even when the UI is no longer actively polling.
+- A 165-file local test run continued indexing documents after the Review-page timeout warning appeared, which confirms the worker can keep progressing while the UI remains non-blocking.
 - The same 165-file run also showed that persisted status is too coarse during indexing: document artifacts advanced in LocalStack while `status.json` remained frozen at `parsing` from the initial worker write.
 - A later 165-file rerun confirmed parsed-text reuse is working, but the first-pass set is still dominated by several 630+ page `A03 Text Final` contracts whose sampled content appears unrelated to date validation and whose downstream chunk/embed cost remains high.
 - The next work-selection improvement should not rely on filename heuristics alone; it should require a cheap first 1-2 page text sample so the LLM can deprioritize giant low-yield documents more intelligently while leaving fallback behavior unchanged.
@@ -386,5 +402,11 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - That means the next bottleneck is no longer first-pass selection quality alone; it is fallback expansion continuing even after strong amendment-style evidence is already present for the date fields.
 - A later `AIFA-053` run completed in `gated-first-pass` without broad fallback, which validates the field-aware sufficiency fix, but it also exposed two product follow-ons:
 - the Review-page copy should explain that one shown citation can represent a conclusion corroborated by multiple reviewed documents
-- the client can still display a stale `still in progress` banner until a hard refresh even after backend completion
+- `AIFA-055` fixed the stale `still in progress` banner path: completed backend runs now reconcile in the UI without a hard refresh
 - `hasStrongResolvedFieldEvidenceForFallback()` was sufficient for the successful large-submission run, but it is still a pragmatic proxy rather than a richer evidence model and should remain a watched risk rather than a new ticket for now
+- local large-submission behavior is still partly controlled by explicit env configuration such as `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING`, so rollout/default expectations should be documented and made deliberate
+- artifact inspection for contract `4f1599ce-8cbf-4ea8-a76d-931c9bf0b0f6` showed the banner fix is working and the run completed cleanly in `gated-first-pass`, but total completion time was still longer than ideal
+- that same artifact set showed partial reuse on rerun after form edits: some first-pass documents were served from `stage: cache`, while others still re-entered fresh `embed` work
+- so we now need two separate speed follow-ons:
+- one for fast revalidation when form values change but the document set is unchanged
+- one for reducing first-pass execution cost even when selection and fallback behavior are already correct

@@ -982,7 +982,7 @@ The latest successful large-submission run completed correctly from first pass, 
 - Field-level evidence labels make it clear the shown citation is an example or referenced chunk, not necessarily the only supporting document
 - Existing advisory/non-blocking language remains intact
 - No backend validation behavior or citation-selection logic changes in this ticket"
-AIFA-055 Fix stale in-progress banner after completed validation,Backlog,4-Frontend Integration,High,"AIFA-017, AIFA-018, AIFA-053","Fix the client-side status/polling behavior so the Review/Contract Details UI transitions out of `still in progress` as soon as the backend artifacts show completion, without requiring a hard refresh.
+AIFA-055 Fix stale in-progress banner after completed validation,Done,4-Frontend Integration,High,"AIFA-017, AIFA-018, AIFA-053","Fix the client-side status/polling behavior so the Review/Contract Details UI transitions out of `still in progress` as soon as the backend artifacts show completion, without requiring a hard refresh.
 - Inspect the frontend polling/cache path for `validationStatus` after background completion
 - Ensure completed status replaces stale in-memory loading state promptly
 - Preserve existing polling semantics and avoid duplicate trigger behavior
@@ -993,3 +993,36 @@ The latest successful large-submission run completed in `gated-first-pass`, but 
 - The `still in progress` banner clears promptly once `validationStatus` returns complete
 - No duplicate validation trigger is introduced by the fix
 - Existing pending/in-progress/complete state transitions remain correct for normal runs"
+AIFA-056 Clarify AI validation rollout and local-default configuration,Backlog,7-Large Submission Hardening,Medium,"AIFA-050, AIFA-052, AIFA-053","Make AI validation runtime modes and local defaults explicit so engineers do not need to remember ad hoc env vars for large-submission behavior.
+- Decide whether `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING` should be seeded by `./dev local` or remain an explicit opt-in
+- Document the intended defaults for local dev, evaluation runs, and production-like rollout modes
+- Keep the work to configuration ergonomics and documentation; do not change validation logic in this ticket
+- Ensure any promoted local defaults remain easy to override for debugging
+
+Why this matters:
+Large-submission validation behavior now depends on a small set of rollout/config flags. Without a deliberate configuration ticket, local behavior becomes hard to reproduce and debugging turns into environment archaeology.","- Local developers can tell which AI validation mode they are running without rediscovering env vars
+- Any local default promotion of `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING` is explicit and documented
+- Current runtime overrides remain available for debugging
+- The ticket does not change validation correctness logic or frontend behavior"
+AIFA-057 Add fast revalidation path for form-only edits,Backlog,7-Large Submission Hardening,High,"AIFA-046, AIFA-053","Speed up reruns when form values change but the uploaded document set is unchanged.
+- Preserve exact result-cache invalidation when form fields change
+- Reuse existing parsed/chunked/indexed document work aggressively when `artifactVersion` is unchanged
+- Limit rerun work to the minimum retrieval/validation steps needed for the new form values
+- Keep the work scoped to revalidation speed and observability; do not change mismatch semantics or validation truth rules
+
+Why this matters:
+Recent large-submission artifact inspection shows form-only reruns correctly miss the final result cache, but still spend too long reprocessing first-pass document work. Date-only edits should remain correct while completing materially faster than a cold run.","- Changing only form dates does not trigger near-cold document processing again
+- Revalidation still recomputes correctness for the new form values
+- Unchanged-document runs reuse prior document artifacts conservatively and observably
+- Focused validation proves date-only reruns complete materially faster than the initial run"
+AIFA-058 Reduce first-pass latency for large submissions,Backlog,7-Large Submission Hardening,High,"AIFA-050, AIFA-052, AIFA-053","Reduce first-pass wall-clock time on large submissions without weakening conservative behavior.
+- Measure where first-pass time is still being spent after gated-first-pass selection succeeds
+- Reduce expensive per-document work inside first pass, especially for OCR/embedding-heavy amendment PDFs
+- Prefer reuse and bounded expensive work before broadening scope
+- Keep fallback behavior, evidence requirements, and selection correctness unchanged in this ticket
+
+Why this matters:
+The latest large-submission runs now complete correctly from `gated-first-pass`, but actual artifact timings still show multi-minute processing windows. The next performance bottleneck is first-pass execution cost, not stale UI or fallback explosion.","- Large-submission first-pass runs complete faster without changing final validation outcomes
+- First-pass still surfaces the same decisive evidence documents and preserves conservative sufficiency behavior
+- Performance measurements identify and reduce the dominant first-pass cost centers
+- No regression reintroduces broad fallback or stale result behavior"
