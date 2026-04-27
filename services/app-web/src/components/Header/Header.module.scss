@@ -80,6 +80,18 @@
     color: custom.$mcr-foundation-white;
 }
 
+@include uswds.at-media-max('tablet') {
+    .loggedOutSignInButton {
+        display: inline-flex !important;
+        width: auto !important;
+        margin-top: 0.125rem;
+        margin-bottom: 0.5rem;
+        margin-right: 1rem;
+        margin-left: auto;
+        align-self: flex-end;
+    }
+}
+
 @media (min-width: 63px) and (max-width: 1280px) {
     .divider {
         position: absolute;
@@ -120,6 +132,7 @@
             }
         }
     }
+
 }
 
 .landingPageHeading {
@@ -131,7 +144,7 @@
         display: flex;
         flex-flow: column;
         text-align: center;
-        margin: 0;       
+        margin: 0;
     }
     & h1 {
         margin-bottom: 10px;

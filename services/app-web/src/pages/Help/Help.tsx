@@ -21,6 +21,7 @@ export const Help = (): React.ReactElement => {
 
     return (
         <GridContainer
+            className={styles.pageContainer}
             data-testid={
                 loggedInUser ? 'help-authenticated' : 'help-unauthenticated'
             }

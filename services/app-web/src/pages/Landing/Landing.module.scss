@@ -9,7 +9,7 @@ $details-text-line-height: 1.5;
     color: custom.$mcr-foundation-ink;
     padding: uswds.units(4) 0;
     .detailsSectionContent {
-        max-width: 65rem;
+        max-width: custom.$mcr-container-max-width-fixed;
         h2 {
             margin-bottom: uswds.units(2);
         }

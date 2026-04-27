@@ -81,9 +81,7 @@ const LandingRow = ({ isLoading }: { isLoading: boolean }) => {
             <GridContainer>
                 {!isLoading && (
                     <>
-                        <h1>
-                            Managed Care Review&nbsp;
-                        </h1>
+                        <h1>Managed Care Review&nbsp;</h1>
                         <h2 className="mcr-homepage-h2">
                             Medicaid and CHIP Managed Care Reporting and Review
                             System
@@ -109,7 +107,11 @@ export const PageHeadingRow = ({
     loggedInUser,
 }: PageHeadingProps): React.ReactElement | null => {
     if (!loggedInUser) {
-        if (route === 'HELP') {
+        if (
+            route === 'HELP' ||
+            route === 'CONTACT_US' ||
+            route === 'RESOURCES'
+        ) {
             return null
         } else {
             return <LandingRow isLoading={isLoading} />

@@ -1,6 +1,12 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
+.pageContainer {
+    max-width: custom.$mcr-container-max-width-fixed;
+    padding-top: uswds.units(4);
+    padding-bottom: uswds.units(4);
+}
+
 .helpSection {
     margin: uswds.units(4) 0;
 

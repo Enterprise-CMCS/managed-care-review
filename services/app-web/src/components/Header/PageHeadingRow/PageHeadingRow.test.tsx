@@ -90,6 +90,28 @@ describe('Page Heading Row', () => {
         })
     })
 
+    it('renders without errors and without the managed care header on the resources page', async () => {
+        renderWithProviders(<PageHeadingRow route="RESOURCES" />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+        await waitFor(() => {
+            expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+        })
+    })
+
+    it('renders without errors and without the managed care header on the contact us page', async () => {
+        renderWithProviders(<PageHeadingRow route="CONTACT_US" />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+        })
+        await waitFor(() => {
+            expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+        })
+    })
+
     it('does not display heading text when isLoading', async () => {
         renderWithProviders(<PageHeadingRow isLoading route="ROOT" />, {
             apolloProvider: {
