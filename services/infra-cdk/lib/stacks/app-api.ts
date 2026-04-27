@@ -587,7 +587,7 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
-     * Get OTEL-specific bundling commands (collector.yml copy and license key replacement)
+     * Get OTEL-specific bundling commands (collector.yml copy and API key replacement)
      * Matches behavior from serverless esbuild configuration
      */
     private getOtelBundlingCommands(): (
@@ -597,9 +597,9 @@ export class AppApiStack extends BaseStack {
         return (outputDir: string, appApiPath: string) => [
             // Copy collector.yml for OTEL configuration
             `cp "${appApiPath}/collector.yml" "${outputDir}/collector.yml" || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
-            // Replace license key placeholder with actual value (matches esbuild behavior)
+            // Replace Datadog API key placeholder with actual value (matches esbuild behavior)
             // Use sed that works on both macOS and Linux
-            `sed -i.bak 's/\\$NR_LICENSE_KEY/${process.env.NR_LICENSE_KEY || ''}/g' "${outputDir}/collector.yml" && rm -f "${outputDir}/collector.yml.bak"`,
+            `sed -i.bak 's/\\$DD_API_KEY/${process.env.DD_API_KEY || ''}/g' "${outputDir}/collector.yml" && rm -f "${outputDir}/collector.yml.bak"`,
         ]
     }
 

@@ -5,13 +5,15 @@ receivers:
       http:
 
 exporters:
-  otlp:
-    endpoint: https://gov-otlp.nr-data.net:4317
+  otlphttp:
+    endpoint: https://otlp.ddog-gov.com
     headers:
-      api-key: $NR_LICENSE_KEY
+      dd-api-key: $DD_API_KEY
+      dd-otlp-source: datadog
+      dd-otel-span-mapping: '{"span_name_as_resource_name": true}'
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp]
+      exporters: [otlphttp]

@@ -6,7 +6,7 @@ on:
       - "main"
   workflow_dispatch:
 
-# Prevent concurrent dev deployments
+    # Prevent concurrent dev deployments
 concurrency:
   group: deploy-cdk-dev
   cancel-in-progress: false
@@ -108,9 +108,7 @@ jobs:
           VITE_APP_AUTH_MODE: IDM
           POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
         ports:
           - 5432:5432
@@ -183,7 +181,7 @@ jobs:
           exit $?
 
   deploy-github-oidc-dev:
-    needs: [begin-deployment]
+    needs: [ begin-deployment ]
     name: deploy - GitHub OIDC service (dev)
     runs-on: ubuntu-24.04
     environment:
@@ -231,7 +229,7 @@ jobs:
           echo "=== CDK OIDC deployment completed ==="
 
   deploy-cdk-infrastructure-dev:
-    needs: [begin-deployment, deploy-github-oidc-dev]
+    needs: [ begin-deployment, deploy-github-oidc-dev ]
     name: deploy - CDK infrastructure stacks (dev)
     runs-on: ubuntu-24.04
     environment: dev
@@ -476,6 +474,7 @@ jobs:
           STAGE_NAME: dev
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-dev-cdk \
@@ -501,7 +500,7 @@ jobs:
           ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
 
   end-deployment-dev:
-    needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
+    needs: [ begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Dev Deployment
     runs-on: ubuntu-24.04
@@ -519,7 +518,8 @@ jobs:
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success'
+        if: needs.deploy-cdk-app-dev.result == 'success' &&
+          needs.deploy-frontend-app-dev.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
@@ -531,7 +531,7 @@ jobs:
   # ============================================
 
   deploy-github-oidc-val:
-    needs: [begin-deployment, end-deployment-dev]
+    needs: [ begin-deployment, end-deployment-dev ]
     name: deploy - GitHub OIDC service (val)
     runs-on: ubuntu-24.04
     environment:
@@ -578,7 +578,7 @@ jobs:
           echo "=== CDK OIDC deployment completed ==="
 
   deploy-cdk-infrastructure-val:
-    needs: [begin-deployment, deploy-github-oidc-val]
+    needs: [ begin-deployment, deploy-github-oidc-val ]
     name: deploy - CDK infrastructure stacks (val)
     runs-on: ubuntu-24.04
     environment: val
@@ -736,7 +736,7 @@ jobs:
           STAGE_NAME: val
           VPC_ID: ${{ secrets.VAL_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.VAL_INTERNAL_ALLOWED_ORIGINS }}
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-val-cdk \
@@ -840,7 +840,7 @@ jobs:
             --require-approval never
 
   end-deployment-val:
-    needs: [begin-deployment, deploy-cdk-app-val, deploy-frontend-app-val]
+    needs: [ begin-deployment, deploy-cdk-app-val, deploy-frontend-app-val ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Val Deployment
     runs-on: ubuntu-24.04
@@ -858,7 +858,8 @@ jobs:
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-val.result == 'success' && needs.deploy-frontend-app-val.result == 'success'
+        if: needs.deploy-cdk-app-val.result == 'success' &&
+          needs.deploy-frontend-app-val.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
@@ -870,7 +871,7 @@ jobs:
   # ============================================
 
   deploy-github-oidc-prod:
-    needs: [begin-deployment, end-deployment-val]
+    needs: [ begin-deployment, end-deployment-val ]
     name: deploy - GitHub OIDC service (prod)
     runs-on: ubuntu-24.04
     environment:
@@ -917,7 +918,7 @@ jobs:
           echo "=== CDK OIDC deployment completed ==="
 
   deploy-cdk-infrastructure-prod:
-    needs: [begin-deployment, deploy-github-oidc-prod]
+    needs: [ begin-deployment, deploy-github-oidc-prod ]
     name: deploy - CDK infrastructure stacks (prod)
     runs-on: ubuntu-24.04
     environment: prod
@@ -1075,7 +1076,7 @@ jobs:
           STAGE_NAME: prod
           VPC_ID: ${{ secrets.PROD_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.PROD_INTERNAL_ALLOWED_ORIGINS }}
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-prod-cdk \
@@ -1179,7 +1180,7 @@ jobs:
             --require-approval never
 
   extract-endpoints-prod:
-    needs: [begin-deployment, deploy-cdk-app-prod, deploy-frontend-app-prod]
+    needs: [ begin-deployment, deploy-cdk-app-prod, deploy-frontend-app-prod ]
     if: |
       always() &&
       needs.deploy-cdk-app-prod.result == 'success' &&
@@ -1219,7 +1220,7 @@ jobs:
 
   cypress-prod:
     name: cypress-prod-smoke-test
-    needs: [begin-deployment, extract-endpoints-prod]
+    needs: [ begin-deployment, extract-endpoints-prod ]
     environment: prod
     if: always() && needs.extract-endpoints-prod.result == 'success'
     runs-on: ubuntu-24.04
@@ -1318,7 +1319,9 @@ jobs:
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-prod.result == 'success' && needs.deploy-frontend-app-prod.result == 'success' && needs.cypress-prod.result == 'success'
+        if: needs.deploy-cdk-app-prod.result == 'success' &&
+          needs.deploy-frontend-app-prod.result == 'success' &&
+          needs.cypress-prod.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: "${{ github.token }}"
@@ -1328,7 +1331,7 @@ jobs:
   slack:
     name: Slack notification on failure
     runs-on: ubuntu-24.04
-    needs: [end-deployment-dev, end-deployment-val, end-deployment-prod]
+    needs: [ end-deployment-dev, end-deployment-val, end-deployment-prod ]
     if: always()
     steps:
       # This action sets env.WORKFLOW_CONCLUSION so we can call a

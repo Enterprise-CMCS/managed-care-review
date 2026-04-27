@@ -28,7 +28,7 @@ export default () => {
                         )
                     })
 
-                    // replace the license key
+                    // replace the api key placeholder
                     build.onEnd(() => {
                         const filePath = path.join(
                             __dirname,
@@ -36,8 +36,8 @@ export default () => {
                         )
                         let contents = fs.readFileSync(filePath, 'utf8')
                         contents = contents.replace(
-                            '$NR_LICENSE_KEY',
-                            process.env.NR_LICENSE_KEY ?? 'undefined'
+                            '$DD_API_KEY',
+                            process.env.DD_API_KEY ?? 'undefined'
                         )
                         fs.writeFileSync(filePath, contents)
                     })
