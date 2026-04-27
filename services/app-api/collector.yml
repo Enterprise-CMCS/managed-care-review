@@ -11,9 +11,14 @@ exporters:
       dd-api-key: $DD_API_KEY
       dd-otlp-source: datadog
       dd-otel-span-mapping: '{"span_name_as_resource_name": true}'
+  debug:
+    verbosity: detailed
 
 service:
+  telemetry:
+    logs:
+      level: debug
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlphttp]
+      exporters: [otlphttp, debug]
