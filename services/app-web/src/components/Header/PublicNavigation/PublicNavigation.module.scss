@@ -1,3 +1,4 @@
+//stylelint-disable selector-pseudo-class-no-unknown
 @use '../../../styles/custom.scss' as custom;
 @use '../../../styles/uswdsImports.scss' as uswds;
 
@@ -135,12 +136,16 @@
             color: custom.$mcr-foundation-white !important;
         }
 
-        :global(.usa-nav__primary .usa-nav__link:not(.usa-current):hover::after),
+        :global(
+            .usa-nav__primary .usa-nav__link:not(.usa-current):hover::after
+        ),
         :global(.usa-nav__primary .usa-current::after) {
             @include mobile-underline-bar(0.75rem);
         }
 
-        :global(.usa-nav__primary .usa-nav__link:not(.usa-current):hover::after) {
+        :global(
+            .usa-nav__primary .usa-nav__link:not(.usa-current):hover::after
+        ) {
             background-color: custom.$mcr-blue-cool-light !important;
         }
 
