@@ -626,7 +626,7 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
             ).not.toBeInTheDocument()
         })
 
-        it('does not render the withdraw button when EQRO submission is not subject to review', async () => {
+        it('render the withdraw button when EQRO submission is not subject to review', async () => {
             const contract = mockContractPackageSubmitted({
                 id: 'test-abc-123',
                 contractSubmissionType: 'EQRO',
@@ -675,12 +675,11 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                 ).toBeInTheDocument()
             })
 
-            // Withdraw button is gated on SUBMITTED/RESUBMITTED consolidatedStatus
             expect(
-                screen.queryByRole('button', {
+                screen.getByRole('button', {
                     name: 'Withdraw submission',
                 })
-            ).not.toBeInTheDocument()
+            ).toBeInTheDocument()
 
             // Unlock is still allowed for NOT_SUBJECT_TO_REVIEW
             expect(

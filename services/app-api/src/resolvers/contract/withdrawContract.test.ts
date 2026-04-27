@@ -24,7 +24,6 @@ import type { RateFormDataInput, RateStrippedEdge } from '../../gen/gqlClient'
 import {
     SubmitContractDocument,
     UpdateDraftContractRatesDocument,
-    WithdrawContractDocument,
 } from '../../gen/gqlClient'
 import {
     addNewRateToTestContract,
@@ -1059,6 +1058,102 @@ describe('withdrawContract', () => {
         )
     })
 
+    it('sends emails only to DMCO and dev review team when an EQRO submission is withdrawn', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer()
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const draft = await createAndUpdateTestEQROContract(
+            stateServer,
+            undefined,
+            {
+                eqroNewContractor: true,
+                eqroProvisionMcoNewOptionalActivity: true,
+                eqroProvisionNewMcoEqrRelatedActivities: true,
+                eqroProvisionChipEqrRelatedActivities: true,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
+            }
+        )
+
+        const submittedContract = await submitTestContract(
+            stateServer,
+            draft.id
+        )
+        expect(submittedContract.contractSubmissionType).toBe('EQRO')
+        expect(submittedContract.consolidatedStatus).toBe('SUBMITTED')
+
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            submittedContract.id,
+            'withdraw EQRO submission'
+        )
+
+        const contractName =
+            withdrawnContract.packageSubmissions[0].contractRevision
+                .contractName
+
+        // CMS email (first call): only DMCO + dev review team
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${contractName} was withdrawn by CMS`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining([
+                    ...emailConfig.dmcoEmails,
+                    ...emailConfig.devReviewTeamEmails,
+                ]),
+                bodyHTML: expect.stringContaining(contractName),
+            })
+        )
+
+        // Confirm EQRO-excluded recipients are not included
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                toAddresses: expect.not.arrayContaining([
+                    ...emailConfig.dmcpSubmissionEmails,
+                    ...emailConfig.oactEmails,
+                ]),
+            })
+        )
+
+        // State email (second call): includes state contacts + dev review team
+        const stateReceiverEmails =
+            withdrawnContract.packageSubmissions[0].contractRevision.formData.stateContacts.map(
+                (contact) => contact.email
+            )
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            2,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `${contractName} was withdrawn by CMS`
+                ),
+                sourceEmail: emailConfig.emailSource,
+                toAddresses: expect.arrayContaining([
+                    ...stateReceiverEmails,
+                    ...emailConfig.devReviewTeamEmails,
+                ]),
+                bodyHTML: expect.stringContaining(contractName),
+            })
+        )
+    })
+
     it('can withdraw and undo withdraw contract and rate submission with rate overrides', async () => {
         const prismaClient = await sharedTestPrismaClient()
         const store = NewPostgresStore(prismaClient)
@@ -1225,7 +1320,7 @@ describe('withdrawContract', () => {
         )
     })
 
-    it('cannot withdraw EQRO or CHIP-only HEALTH_PLAN contract with NOT_SUBJECT_TO_REVIEW status', async () => {
+    it('can withdraw EQRO or CHIP-only HEALTH_PLAN contract with NOT_SUBJECT_TO_REVIEW status', async () => {
         const stateServer = await constructTestPostgresServer({
             context: { user: stateUser },
             ldService: testLDService({
@@ -1271,33 +1366,19 @@ describe('withdrawContract', () => {
         expect(chipSubmitted.contractSubmissionType).toBe('HEALTH_PLAN')
         expect(chipSubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
 
-        const eqroWithdrawResult = await executeGraphQLOperation(cmsServer, {
-            query: WithdrawContractDocument,
-            variables: {
-                input: {
-                    contractID: eqroSubmitted.id,
-                    updatedReason: 'withdraw submission',
-                },
-            },
-        })
-        expect(eqroWithdrawResult.errors).toBeDefined()
-        expect(eqroWithdrawResult.errors?.[0].message).toBe(
-            'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
+        const eqroWithdrawn = await withdrawTestContract(
+            cmsServer,
+            eqroSubmitted.id,
+            'withdraw EQRO submission'
         )
+        expect(eqroWithdrawn.consolidatedStatus).toBe('WITHDRAWN')
 
-        const chipWithdrawResult = await executeGraphQLOperation(cmsServer, {
-            query: WithdrawContractDocument,
-            variables: {
-                input: {
-                    contractID: chipSubmitted.id,
-                    updatedReason: 'withdraw submission',
-                },
-            },
-        })
-        expect(chipWithdrawResult.errors).toBeDefined()
-        expect(chipWithdrawResult.errors?.[0].message).toBe(
-            'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
+        const chipWithdrawn = await withdrawTestContract(
+            cmsServer,
+            chipSubmitted.id,
+            'withdraw CHIP submission'
         )
+        expect(chipWithdrawn.consolidatedStatus).toBe('WITHDRAWN')
     })
 
     it('can withdraw EQRO contract with SUBMITTED status', async () => {

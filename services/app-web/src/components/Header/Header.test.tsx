@@ -49,7 +49,9 @@ describe('Header', () => {
             })
 
             await waitFor(() => {
-                expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
+                expect(
+                    screen.getByRole('heading', { level: 2 })
+                ).toHaveTextContent(
                     'Medicaid and CHIP Managed Care Reporting and Review System'
                 )
             })
@@ -85,6 +87,70 @@ describe('Header', () => {
                 })
                 void user.click(signInButton)
                 expect(signInButton).toHaveAttribute('href', '/auth')
+            })
+        })
+
+        it('shows public navigation on the homepage when feature flag is enabled', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/' },
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
+                },
+                featureFlags: { 'resources-nav-pages': true },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('navigation', {
+                        name: 'Public page navigation',
+                    })
+                ).toBeInTheDocument()
+            })
+
+            expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute(
+                'aria-current',
+                'page'
+            )
+            expect(
+                screen.getByRole('link', { name: 'Resources' })
+            ).not.toHaveAttribute('aria-current')
+
+            expect(
+                screen.getByRole('link', { name: 'Contact us' })
+            ).not.toHaveAttribute('aria-current')
+        })
+
+        it('highlights Resources navigation for the help page when feature flag is enabled', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/help' },
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
+                },
+                featureFlags: { 'resources-nav-pages': true },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('link', { name: 'Resources' })
+                ).toHaveAttribute('aria-current', 'page')
+            })
+        })
+
+        it('does not show public navigation when feature flag is disabled', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/' },
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
+                },
+                featureFlags: { 'resources-nav-pages': false },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByRole('navigation', {
+                        name: 'Public page navigation',
+                    })
+                ).not.toBeInTheDocument()
             })
         })
     })

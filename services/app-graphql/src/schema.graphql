@@ -478,14 +478,13 @@ type Mutation {
     undoWithdrawRate(input: UndoWithdrawRateInput!): UndoWithdrawRatePayload
 
     """
-    withdrawSubmission is a CMS user only action to withdraw an entire submission package, which includes contract and child rates
+    withdrawSubmission is a CMS user only action to withdraw an entire submission package, which includes contract and child rates.
 
     Errors:
     - ForbiddenError:
     - A non CMS/CMS Approver user called this
     - UserInputError:
-    - A contract is not in the correct submission status: SUBMITTED or RESUBMITTED
-    - A contract is not in the correct review status: UNDER_REVIEW
+    - A contract is not in the correct consolidated status: SUBMITTED, RESUBMITTED, or NOT_SUBJECT_TO_REVIEW
     - INTERNAL_SERVER_ERROR
     - DB_ERROR
     - A contract cannot be found by id
@@ -493,7 +492,8 @@ type Mutation {
     withdrawContract(input: WithdrawContractInput!): WithdrawContractPayload!
 
     """
-    unoWithdrawSubmission is a CMS user only action to undo a submission widthdrawal, which includes contract and and child rates withdrawn together.
+    undoWithdrawSubmission is a CMS user only action to undo a submission withdrawal, which includes contract and child rates withdrawn together.
+    Review determination is re-run on undo, so the restored review status reflects current rules rather than the pre-withdrawal status.
     """
     undoWithdrawContract(
         input: UndoWithdrawContractInput!

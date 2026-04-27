@@ -28,6 +28,7 @@ import {
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -791,6 +792,81 @@ describe('undoWithdrawContract', () => {
                 'resubmit EQRO after undo',
             ])
         )
+    })
+
+    it('can undo withdraw EQRO or CHIP-only HEALTH_PLAN contract with NOT_SUBJECT_TO_REVIEW status', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: { user: stateUser },
+            ldService: testLDService({
+                'chip-submission-automation': true,
+            }),
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: cmsUser },
+        })
+
+        // EQRO: all-false provision fields trigger NOT_SUBJECT_TO_REVIEW on submit
+        const eqroDraft = await createAndUpdateTestEQROContract(
+            stateServer,
+            undefined,
+            {
+                eqroNewContractor: false,
+                eqroProvisionMcoNewOptionalActivity: false,
+                eqroProvisionNewMcoEqrRelatedActivities: false,
+                eqroProvisionChipEqrRelatedActivities: false,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
+            }
+        )
+        const eqroSubmitted = await submitTestContract(
+            stateServer,
+            eqroDraft.id
+        )
+        expect(eqroSubmitted.contractSubmissionType).toBe('EQRO')
+        expect(eqroSubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+
+        const chipDraft = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            undefined,
+            {
+                submissionType: 'CONTRACT_ONLY',
+                populationCovered: 'CHIP',
+                federalAuthorities: ['TITLE_XXI'],
+            }
+        )
+        const chipSubmitted = await submitTestContract(
+            stateServer,
+            chipDraft.id
+        )
+        expect(chipSubmitted.contractSubmissionType).toBe('HEALTH_PLAN')
+        expect(chipSubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+
+        const eqroWithdrawn = await withdrawTestContract(
+            cmsServer,
+            eqroSubmitted.id,
+            'withdraw EQRO submission'
+        )
+        expect(eqroWithdrawn.consolidatedStatus).toBe('WITHDRAWN')
+
+        const chipWithdrawn = await withdrawTestContract(
+            cmsServer,
+            chipSubmitted.id,
+            'withdraw CHIP submission'
+        )
+        expect(chipWithdrawn.consolidatedStatus).toBe('WITHDRAWN')
+
+        const eqroUndone = await undoWithdrawTestContract(
+            cmsServer,
+            eqroWithdrawn.id,
+            'undo withdraw EQRO submission'
+        )
+        expect(eqroUndone.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+
+        const chipUndone = await undoWithdrawTestContract(
+            cmsServer,
+            chipWithdrawn.id,
+            'undo withdraw CHIP submission'
+        )
+        expect(chipUndone.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
     })
 })
 

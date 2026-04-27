@@ -8,7 +8,10 @@ import { usePage } from '../../contexts/PageContext'
 import { Logo } from '../Logo'
 import styles from './Header.module.scss'
 import { PageHeadingRow } from './PageHeadingRow/PageHeadingRow'
+import { PublicNavigation } from './PublicNavigation/PublicNavigation'
 import { UserLoginInfo } from './UserLoginInfo/UserLoginInfo'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 export type HeaderProps = {
     authMode: AuthModeType
@@ -30,7 +33,16 @@ export const Header = ({
     ).href
     const { logout, loggedInUser, loginStatus } = useAuth()
     const { heading } = usePage()
-    const { currentRoute: route } = useCurrentRoute()
+    const { currentRoute: route, pathname } = useCurrentRoute()
+    const ldClient = useLDClient()
+    const showResourcesNavPages: boolean = ldClient?.variation(
+        featureFlags.RESOURCES_NAV_PAGES.flag,
+        featureFlags.RESOURCES_NAV_PAGES.defaultValue
+    )
+    const shouldShowPublicNavigation =
+        !loggedInUser &&
+        showResourcesNavPages &&
+        ['ROOT', 'HELP', 'CONTACT_US', 'RESOURCES'].includes(route)
 
     const handleLogout = async () => {
         await logout({ type: 'DEFAULT' })
@@ -60,6 +72,9 @@ export const Header = ({
                     </Grid>
                 </GridContainer>
             </div>
+            {shouldShowPublicNavigation && (
+                <PublicNavigation route={route} pathname={pathname} />
+            )}
             <PageHeadingRow
                 heading={route !== 'UNKNOWN_ROUTE' ? heading : undefined}
                 route={route}
