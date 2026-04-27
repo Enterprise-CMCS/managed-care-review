@@ -52,7 +52,7 @@
     padding: 1rem 1rem 1.25rem;
     color: custom.$mcr-foundation-white !important;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 700 !important;
     line-height: 150%;
     text-decoration: none !important;
     white-space: nowrap;
@@ -116,11 +116,11 @@
         }
 
         :global(.usa-nav__primary) {
-            justify-content: space-between;
+            justify-content: flex-start;
         }
 
         :global(.usa-nav__primary-item) {
-            flex: 1 1 0;
+            flex: 0 0 auto;
         }
 
         :global(.usa-nav__primary a:not(.usa-button):hover) {
@@ -156,14 +156,14 @@
     }
 
     .navigationLink {
-        width: 100%;
-        padding-right: 0.75rem;
-        padding-left: 0.75rem;
-        text-align: center;
+        width: auto;
+        padding-right: 1rem;
+        padding-left: 1rem;
+        text-align: left;
 
         &::after {
-            right: 0.75rem;
-            left: 0.75rem;
+            right: 1rem;
+            left: 1rem;
         }
     }
 }
