@@ -47,6 +47,19 @@ type Query {
     """
     indexRates(input: IndexRatesInput): IndexRatesPayload!
     """
+    indexRatesConnection returns full submitted rates using a paginated connection shape
+    indexRatesConnection can be called by CMS and admin users
+
+    Errors:
+    - ForbiddenError: User must be a CMS or Admin type user
+    - NotFoundError:  No submitted rates found
+    """
+    indexRatesConnection(
+        input: IndexRatesInput
+        first: Int
+        after: String
+    ): RateConnection!
+    """
     indexRatesStripped returns abbreviated rate data
     Intended for use with CMS dashboards, initially minimal rate query
 
@@ -623,6 +636,11 @@ input UndoWithdrawContractInput {
 
 type ContractEdge {
     node: Contract!
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
 }
 
 type IndexContractsPayload {
@@ -2292,6 +2310,21 @@ type IndexRatesPayload {
     edges: [RateEdge!]!
 }
 
+type RateConnectionEdge {
+    cursor: String!
+    node: Rate!
+}
+
+type RateConnection {
+    "Total number of submitted rates returned on request"
+    totalCount: Int
+    """
+    Rates that include rate and contract revisions
+    """
+    edges: [RateConnectionEdge!]!
+    pageInfo: PageInfo!
+}
+
 type RateStrippedEdge {
     node: RateStripped!
 }
@@ -2784,6 +2817,6 @@ enum OAuthScope {
 }
 
 enum UploadBucketName {
-    HEALTH_PLAN_DOCS,
+    HEALTH_PLAN_DOCS
     QUESTION_ANSWER_DOCS
 }

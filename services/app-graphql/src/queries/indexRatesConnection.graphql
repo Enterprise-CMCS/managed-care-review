@@ -1,0 +1,31 @@
+query indexRatesConnection(
+    $input: IndexRatesInput
+    $first: Int
+    $after: String
+) {
+    indexRatesConnection(input: $input, first: $first, after: $after) {
+        totalCount
+        edges {
+            cursor
+            node {
+                ...rateFieldsFragment
+
+                draftRevision {
+                    ...rateRevisionFragment
+                }
+
+                revisions {
+                    ...rateRevisionFragment
+                }
+
+                packageSubmissions {
+                    ...ratePackageSubmissionsFragment
+                }
+            }
+        }
+        pageInfo {
+            hasNextPage
+            endCursor
+        }
+    }
+}
