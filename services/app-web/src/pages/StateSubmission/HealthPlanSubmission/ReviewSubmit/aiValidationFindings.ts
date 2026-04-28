@@ -108,6 +108,68 @@ function getPageLabel(args: {
     return singlePage == null ? 'Page unknown' : `Page ${singlePage}`
 }
 
+function mergeOverlappingPageLabels(args: {
+    existingPageLabels: string[]
+    nextPageLabel: string
+}): string[] {
+    const nextRangeMatch = args.nextPageLabel.match(/^Pages (\d+)-(\d+)$/)
+
+    if (!nextRangeMatch) {
+        const nextSinglePageMatch = args.nextPageLabel.match(/^Page (\d+)$/)
+
+        if (!nextSinglePageMatch) {
+            return args.existingPageLabels.includes(args.nextPageLabel)
+                ? args.existingPageLabels
+                : [...args.existingPageLabels, args.nextPageLabel]
+        }
+
+        const nextPage = Number(nextSinglePageMatch[1])
+        const coveredByExistingRange = args.existingPageLabels.some(
+            (pageLabel) => {
+                const existingRangeMatch = pageLabel.match(/^Pages (\d+)-(\d+)$/)
+
+                if (!existingRangeMatch) {
+                    return false
+                }
+
+                return (
+                    Number(existingRangeMatch[1]) <= nextPage &&
+                    Number(existingRangeMatch[2]) >= nextPage
+                )
+            }
+        )
+
+        if (coveredByExistingRange) {
+            return args.existingPageLabels
+        }
+
+        return args.existingPageLabels.includes(args.nextPageLabel)
+            ? args.existingPageLabels
+            : [...args.existingPageLabels, args.nextPageLabel]
+    }
+
+    if (args.existingPageLabels.includes(args.nextPageLabel)) {
+        return args.existingPageLabels
+    }
+
+    const rangeStart = Number(nextRangeMatch[1])
+    const rangeEnd = Number(nextRangeMatch[2])
+
+    return [
+        ...args.existingPageLabels.filter((pageLabel) => {
+            const existingSinglePageMatch = pageLabel.match(/^Page (\d+)$/)
+
+            if (!existingSinglePageMatch) {
+                return true
+            }
+
+            const existingPage = Number(existingSinglePageMatch[1])
+            return existingPage < rangeStart || existingPage > rangeEnd
+        }),
+        args.nextPageLabel,
+    ]
+}
+
 export function mapAIValidationFindings(
     findings: ValidationFinding[]
 ): AIValidationDisplayItem[] {
@@ -134,9 +196,10 @@ export function mapAIValidationFindings(
                 const existing = grouped.get(citation.documentName)
 
                 if (existing) {
-                    if (!existing.pageLabels.includes(pageLabel)) {
-                        existing.pageLabels.push(pageLabel)
-                    }
+                    existing.pageLabels = mergeOverlappingPageLabels({
+                        existingPageLabels: existing.pageLabels,
+                        nextPageLabel: pageLabel,
+                    })
                 } else {
                     grouped.set(citation.documentName, {
                         documentName: citation.documentName,
