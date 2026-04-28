@@ -2,6 +2,17 @@ import type { DateValidationResult } from '../prompts'
 import type { PdfOcrDisposition } from '../parsing'
 import type { ValidationResponseIssue } from '../validation-output'
 
+export type ValidationPhase =
+  | 'fetch'
+  | 'parse'
+  | 'ocr'
+  | 'chunk'
+  | 'embed'
+  | 'retrieval'
+  | 'validation'
+
+export type ValidationPhaseTimingSummary = Record<ValidationPhase, number>
+
 export type ValidationWorkSelectionMode =
   | 'all-doc'
   | 'gated-first-pass'
@@ -18,6 +29,7 @@ export interface ValidationResultArtifact {
   // Retrieval diagnostics stay optional for the same reason: evaluation needs
   // them, but the product flow should not depend on this PoC-only detail.
   retrievalDiagnostics?: ValidationRetrievalDiagnostic[]
+  phaseTimingsMs?: ValidationPhaseTimingSummary
   workSelectionMode?: ValidationWorkSelectionMode
   fieldWorkSelectionDiagnostics?: ValidationFieldWorkSelectionDiagnostic[]
 }
@@ -84,7 +96,8 @@ export function buildValidationResultArtifact (
   retrievalDiagnostics: ValidationRetrievalDiagnostic[] = [],
   documentDiagnostics: ValidationDocumentDiagnostic[] = [],
   workSelectionMode: ValidationWorkSelectionMode = 'all-doc',
-  fieldWorkSelectionDiagnostics: ValidationFieldWorkSelectionDiagnostic[] = []
+  fieldWorkSelectionDiagnostics: ValidationFieldWorkSelectionDiagnostic[] = [],
+  phaseTimingsMs?: ValidationPhaseTimingSummary
 ): ValidationResultArtifact {
   return {
     artifactVersion,
@@ -95,6 +108,7 @@ export function buildValidationResultArtifact (
     ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {}),
     ...(llmDiagnostics.length > 0 ? { llmDiagnostics } : {}),
     ...(retrievalDiagnostics.length > 0 ? { retrievalDiagnostics } : {}),
+    ...(phaseTimingsMs ? { phaseTimingsMs } : {}),
     ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {}),
     ...(fieldWorkSelectionDiagnostics.length > 0
       ? { fieldWorkSelectionDiagnostics }

@@ -489,7 +489,7 @@ async function runScenarioMode(args: {
     documentIndexArtifacts: documentIndexArtifacts.filter(
       (artifact): artifact is IndexedDocumentArtifact => artifact != null
     ),
-    phaseTimings: args.phaseTimings,
+    phaseTimings: resultArtifact.phaseTimingsMs ?? args.phaseTimings,
     indexingSummary,
     fieldReports: args.scenario.expectations.map((expectation) =>
       compareExpectation(
@@ -620,7 +620,7 @@ function buildLargeSubmissionDiagnostics(args: {
       recommendation: workSelectionEvaluation.recommendation
     },
     indexing: args.indexingSummary,
-    phaseTimingsMs: args.phaseTimings,
+    phaseTimingsMs: args.resultArtifact?.phaseTimingsMs ?? args.phaseTimings,
     artifactSizesBytes: {
       parsedText: null,
       chunks: approximateJsonSize(args.chunksArtifact),

@@ -1036,7 +1036,7 @@ Why this matters:
 - Regression coverage proves form-only reruns reuse prior document artifacts and OCR-capped skip diagnostics through artifact-backed scenarios
 - The ticket does not change validation outcomes, retrieval ordering, or final result-cache invalidation behavior
 - Any remaining helper-level tests still map clearly to runtime behavior rather than replacing it"
-AIFA-060 Persist AI validation phase timing diagnostics in artifacts,Backlog,7-Large Submission Hardening,Medium,"AIFA-058","Persist explicit AI validation phase timings so future performance work can optimize against real run data instead of LocalStack artifact timestamp proxies.
+AIFA-060 Persist AI validation phase timing diagnostics in artifacts,Done,7-Large Submission Hardening,Medium,"AIFA-058","Persist explicit AI validation phase timings so future performance work can optimize against real run data instead of LocalStack artifact timestamp proxies.
 - Reuse the existing diagnostics hook for `fetch`, `parse`, `ocr`, `chunk`, `embed`, `retrieval`, and `validation`; do not create a parallel timing path
 - Persist additive timing data in AI validation artifacts or another existing diagnostic artifact path without changing validation semantics
 - Keep the work scoped to measurement and observability; do not change document selection, fallback behavior, retrieval logic, or final result cache invalidation

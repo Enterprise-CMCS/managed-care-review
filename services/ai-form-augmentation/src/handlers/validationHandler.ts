@@ -33,6 +33,8 @@ import {
   type ValidationDocumentDiagnostic,
   type ValidationDocumentWorkSelectionDiagnostic,
   type ValidationFieldWorkSelectionDiagnostic,
+  type ValidationPhase,
+  type ValidationPhaseTimingSummary,
   type ValidationRetrievalDiagnostic,
   type ValidationResultArtifact,
   type ValidationWorkSelectionMode
@@ -63,14 +65,7 @@ export interface ValidationSourceDocument {
 }
 
 export type ValidationPhaseTimingDiagnostic = {
-  phase:
-    | 'fetch'
-    | 'parse'
-    | 'ocr'
-    | 'chunk'
-    | 'embed'
-    | 'retrieval'
-    | 'validation'
+  phase: ValidationPhase
   elapsedMs: number
 }
 
@@ -270,6 +265,20 @@ export function selectReusableDocumentDiagnostics(args: {
 export async function validationHandler(
   event: ValidationHandlerEvent
 ): Promise<ValidationHandlerResult> {
+  const phaseTimings = buildEmptyValidationPhaseTimingSummary()
+  const upstreamDiagnostics = event.diagnostics
+  // Always collect worker timings locally so completed result artifacts can
+  // persist them, then forward the same measurements to any caller-provided
+  // diagnostics sink used by evaluation/reporting code.
+  event.diagnostics = {
+    recordPhaseTiming: (phase, elapsedMs) => {
+      phaseTimings[phase] += elapsedMs
+      upstreamDiagnostics?.recordPhaseTiming(phase, elapsedMs)
+    },
+    recordIndexingSummary: (summary) => {
+      upstreamDiagnostics?.recordIndexingSummary?.(summary)
+    }
+  }
   const s3Client = newArtifactS3Client(event.s3Config)
   const formSnapshotHash = computeFormSnapshotHash(
     event.formFields.map((field) => ({
@@ -594,7 +603,8 @@ export async function validationHandler(
         }),
         documentDiagnostics,
         finalWorkSelectionMode,
-        fieldWorkSelectionDiagnostics
+        fieldWorkSelectionDiagnostics,
+        phaseTimings
       )
     )
 
@@ -2223,6 +2233,18 @@ function reconcileValidationResults(
       ]
     })
   }))
+}
+
+function buildEmptyValidationPhaseTimingSummary(): ValidationPhaseTimingSummary {
+  return {
+    fetch: 0,
+    parse: 0,
+    ocr: 0,
+    chunk: 0,
+    embed: 0,
+    retrieval: 0,
+    validation: 0
+  }
 }
 
 async function readOptionalArtifact<T>(

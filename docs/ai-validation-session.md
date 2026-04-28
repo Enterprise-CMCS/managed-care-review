@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`.
+The next implementation ticket is `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`.
 
 ## Completed
 
@@ -72,6 +72,7 @@ The next implementation ticket is `AIFA-060 Persist AI validation phase timing d
 - AIFA-058 ✔ Reduce first-pass latency for large submissions
 - AIFA-054 ✔ Clarify multi-document evidence messaging on Review page
 - AIFA-056 ✔ Clarify AI validation rollout and local-default configuration
+- AIFA-060 ✔ Persist AI validation phase timing diagnostics in artifacts
 
 ## Current State
 
@@ -290,9 +291,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Persist explicit phase timings for `fetch`, `parse`, `ocr`, `chunk`, `embed`, `retrieval`, and `validation`.
-- Keep the timing path additive so validation semantics and rollout behavior stay unchanged.
-- Leave config cleanup and reuse-maintenance follow-ons to `AIFA-061`, `AIFA-062`, and `AIFA-059`.
+- Tighten the form-only rerun reuse path by consolidating compatibility checks only where it keeps the runtime behavior unchanged.
+- Add regression coverage that is closer to artifact-backed rerun behavior than the current helper-level checks.
+- Leave config cleanup follow-ons to `AIFA-061` and `AIFA-062`.
 
 ## Follow-on Performance Tickets
 
@@ -304,9 +305,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Recommended Upcoming Order
 
-1. `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`
-2. `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
-3. `AIFA-061 Retire obsolete AI validation config branches after rollout stabilization`
+1. `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
+2. `AIFA-061 Retire obsolete AI validation config branches after rollout stabilization`
+3. `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`
 
 ## Follow-on Config Ticket
 
@@ -318,6 +319,12 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 - `./dev local` now makes the current AI validation runtime easier to reason about by logging the effective work-selection mode and reranking state at app-api startup.
 - Local large-submission runs now promote LLM-assisted first-pass reranking by default while keeping `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` and `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING=false` available as explicit debugging overrides.
 - The next cleanup decision is no longer whether local defaults are documented; it is when to retire internal config branches like the reranking toggle and eventually the broader `all-doc` escape hatch without losing the simpler baseline comparison path too early.
+
+## AIFA-060 Closeout Notes
+
+- Completed validation results now persist additive `phaseTimingsMs` for `fetch`, `parse`, `ocr`, `chunk`, `embed`, `retrieval`, and `validation` in `validation-result.json`.
+- The worker reuses the existing diagnostics hook instead of creating a second timing path, and evaluation/reporting now prefers persisted timings when they are present.
+- Status/polling semantics remain unchanged; timing data currently lives on completed result artifacts rather than `status.json`, so in-progress timing visibility is still out of scope.
 
 ## AIFA-054 Closeout Notes
 

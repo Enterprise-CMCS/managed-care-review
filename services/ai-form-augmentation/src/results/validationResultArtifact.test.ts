@@ -101,3 +101,35 @@ test('buildValidationResultArtifact preserves document coverage diagnostics when
     }
   ])
 })
+
+test('buildValidationResultArtifact preserves phase timings when present', () => {
+  const artifact = buildValidationResultArtifact(
+    'artifact-v1',
+    'form-hash-v1',
+    [],
+    [],
+    [],
+    [],
+    'gated-first-pass',
+    [],
+    {
+      fetch: 1,
+      parse: 2,
+      ocr: 3,
+      chunk: 4,
+      embed: 5,
+      retrieval: 6,
+      validation: 7
+    }
+  )
+
+  assert.deepEqual(artifact.phaseTimingsMs, {
+    fetch: 1,
+    parse: 2,
+    ocr: 3,
+    chunk: 4,
+    embed: 5,
+    retrieval: 6,
+    validation: 7
+  })
+})
