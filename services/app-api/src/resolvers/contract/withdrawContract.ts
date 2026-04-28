@@ -71,9 +71,11 @@ export function withdrawContract(
                 }
 
                 if (
-                    !['SUBMITTED', 'RESUBMITTED'].includes(
-                        contractWithHistory.consolidatedStatus
-                    )
+                    ![
+                        'SUBMITTED',
+                        'RESUBMITTED',
+                        'NOT_SUBJECT_TO_REVIEW',
+                    ].includes(contractWithHistory.consolidatedStatus)
                 ) {
                     const errMessage = `Attempted to withdraw submission with invalid contract status of ${contractWithHistory.consolidatedStatus}`
                     logError('withdrawContract', errMessage)

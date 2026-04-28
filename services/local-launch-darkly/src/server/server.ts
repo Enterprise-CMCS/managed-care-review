@@ -163,7 +163,7 @@ const indexRateLimiter = rateLimit({
     limit: 100, // limit each IP to 100 index requests per windowMs
 })
 
-app.get('*', indexRateLimiter as unknown as express.RequestHandler, (_req, res) => {
+app.get('/*splat', indexRateLimiter as unknown as express.RequestHandler, (_req, res) => {
     res.sendFile(join(distDir, 'index.html'))
 })
 

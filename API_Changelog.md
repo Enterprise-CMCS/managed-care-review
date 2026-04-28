@@ -1,6 +1,11 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### April 24, 2026
+#### Updated
+- **`withdrawContract`** endpoint now accepts contracts with a consolidated status of `NOT_SUBJECT_TO_REVIEW` in addition to `SUBMITTED` and `RESUBMITTED`. Applies to EQRO submissions with no review-triggering provisions and CHIP-only `HEALTH_PLAN` submissions.
+- **`undoWithdrawContract`** endpoint re-runs review determination after undoing a withdrawal. Submissions that qualify as `NOT_SUBJECT_TO_REVIEW` (EQRO with no review-triggering provisions, CHIP-only `HEALTH_PLAN`) are restored to `NOT_SUBJECT_TO_REVIEW` rather than `UNDER_REVIEW`.
+
 ### April 20, 2026
 #### Updated
 - **`indexRates`** endpoint updated to accept an optional `rateIDs` parameter (via `IndexRatesInput`):
