@@ -186,7 +186,6 @@ describe('validationHandler', () => {
         consoleWarnMock.mockReset()
         runDeterministicDateValidationMock.mockReset()
         vi.spyOn(console, 'warn').mockImplementation(consoleWarnMock)
-        delete process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING
 
         buildDateValidationPromptMock.mockReturnValue('test-prompt')
         runDeterministicDateValidationMock.mockImplementation(
@@ -548,7 +547,7 @@ describe('validationHandler', () => {
         ).toBe(false)
     })
 
-    it('keeps llm first-pass reranking disabled by default', async () => {
+    it('reranks gated first-pass candidates by default', async () => {
         const rerankingEvent = {
             ...baseEvent,
             workSelectionMode: 'gated-first-pass' as const,
@@ -568,8 +567,8 @@ describe('validationHandler', () => {
 
         await validationHandler(rerankingEvent)
 
-        expect(extractPdfTextSampleMock).not.toHaveBeenCalled()
-        expect(generateValidationMock).not.toHaveBeenCalled()
+        expect(extractPdfTextSampleMock).toHaveBeenCalled()
+        expect(generateValidationMock).toHaveBeenCalledTimes(13)
         const validationResultCall = putJsonMock.mock.calls.find(
             ([bucket, key]) =>
                 bucket === 'ai-form-augmentation-artifacts' &&
@@ -593,7 +592,6 @@ describe('validationHandler', () => {
     })
 
     it('can defer a large low-yield document from the first pass even when its filename is generic', async () => {
-        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING = 'true'
         extractPdfTextSampleMock.mockImplementation(
             async (_fileBuffer: Buffer, fileName: string) => ({
                 fileName,
@@ -673,7 +671,6 @@ describe('validationHandler', () => {
     })
 
     it('can promote a poorly named amendment sample into the first pass when it clearly shows the target dates', async () => {
-        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING = 'true'
         extractPdfTextSampleMock.mockImplementation(
             async (_fileBuffer: Buffer, fileName: string) => ({
                 fileName,
@@ -749,7 +746,6 @@ describe('validationHandler', () => {
     })
 
     it('keeps an early decisive amendment candidate in the reranking pool when later sibling amendments cluster around it', async () => {
-        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING = 'true'
         extractPdfTextSampleMock.mockImplementation(
             async (_fileBuffer: Buffer, fileName: string) => ({
                 fileName,
@@ -845,7 +841,6 @@ describe('validationHandler', () => {
     })
 
     it('falls back to heuristic ranking when sampled reranking fails', async () => {
-        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING = 'true'
         extractPdfTextSampleMock.mockImplementation(
             async (_fileBuffer: Buffer, fileName: string) => {
                 if (fileName === 'genericlowyieldexcessivelylargefile.pdf') {

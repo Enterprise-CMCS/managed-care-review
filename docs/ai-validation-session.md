@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-061 Retire obsolete AI validation config branches after rollout stabilization`.
+The next implementation ticket is `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`.
 
 ## Completed
 
@@ -74,6 +74,7 @@ The next implementation ticket is `AIFA-061 Retire obsolete AI validation config
 - AIFA-056 ✔ Clarify AI validation rollout and local-default configuration
 - AIFA-060 ✔ Persist AI validation phase timing diagnostics in artifacts
 - AIFA-059 ✔ Clean up reuse compatibility checks and add artifact-backed rerun regression coverage
+- AIFA-061 ✔ Retire obsolete AI validation config branches after rollout stabilization
 
 ## Current State
 
@@ -292,9 +293,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Retire the reranking-specific local config branch once the current rollout path is considered stable enough to keep as the normal first-pass behavior.
-- Keep the broader `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` escape hatch for now as the simpler debugging and baseline-comparison path.
-- Leave the later all-doc escape-hatch reevaluation to `AIFA-062`.
+- Decide whether the broader `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` escape hatch still earns its maintenance cost now that reranking is part of the normal gated path.
+- Use the current timing diagnostics and recent large-submission behavior as the basis for that decision, not just config cleanliness.
+- Leave the LocalStack-backed rerun replay harness as a separate safety follow-on under `AIFA-063`.
 
 ## Follow-on Performance Tickets
 
@@ -306,12 +307,11 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Recommended Upcoming Order
 
-1. `AIFA-061 Retire obsolete AI validation config branches after rollout stabilization`
-2. `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`
+1. `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`
+2. `AIFA-063 Add LocalStack-backed rerun replay harness`
 
 ## Follow-on Config Ticket
 
-- `AIFA-061 Retire obsolete AI validation config branches after rollout stabilization`
 - `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`
 
 ## AIFA-056 Closeout Notes
@@ -331,6 +331,13 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 - The rerun reuse path now relies on one shared work-selection compatibility rule instead of keeping a duplicate copy in the handler.
 - Regression coverage is closer to runtime artifact behavior: tests now use built result/status artifacts when proving form-only reruns can recover prior OCR-capped skip diagnostics.
 - The cleanup stays intentionally short of a full LocalStack replay harness; helper-level coverage still exists, but it no longer carries the rerun-path proof alone.
+- If more engineers are expected to modify reuse behavior before wider handoff, add a dedicated LocalStack-backed rerun replay harness (`AIFA-063`) rather than quietly growing another cleanup ticket.
+
+## AIFA-061 Closeout Notes
+
+- `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING` is now retired; reranking is part of the normal `gated-first-pass` path instead of a separate internal toggle.
+- Local bootstrap and README guidance now reflect the stable path directly, while `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` remains the only broader debugging and baseline-comparison override.
+- The remaining config cleanup decision is now narrower: whether keeping `all-doc` still provides enough operational value to justify its extra branch and docs surface.
 
 ## AIFA-054 Closeout Notes
 

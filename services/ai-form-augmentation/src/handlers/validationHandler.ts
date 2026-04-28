@@ -123,8 +123,6 @@ export const FIELD_RETRIEVAL_FINAL_CHUNK_LIMIT = 4
 // other candidates, but still preserve some same-document continuity.
 export const FIELD_RETRIEVAL_MAX_CHUNKS_PER_DOCUMENT = 2
 const INDEXING_PROGRESS_INTERVAL = 5
-const LLM_FIRST_PASS_RERANKING_ENV =
-  'AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING'
 const FIRST_PASS_RERANKING_CONCURRENCY = 2
 const FIRST_PASS_RERANKING_PRIORITY_CANDIDATE_LIMIT =
   DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT
@@ -375,10 +373,7 @@ export async function validationHandler(
         currentDocuments: event.documents,
         allowReuse: canReuseCurrentDocumentArtifacts
       })
-    if (
-      requestedWorkSelectionMode === 'gated-first-pass' &&
-      isLlmFirstPassRerankingEnabled()
-    ) {
+    if (requestedWorkSelectionMode === 'gated-first-pass') {
       workSelectionDiagnostics = await rerankValidationDocuments({
         event,
         s3Client,
@@ -1674,10 +1669,6 @@ function attachWorkSelectionDiagnostic(
 
 function containsAny(value: string, substrings: string[]): boolean {
   return substrings.some((substring) => value.includes(substring))
-}
-
-function isLlmFirstPassRerankingEnabled(): boolean {
-  return process.env[LLM_FIRST_PASS_RERANKING_ENV] === 'true'
 }
 
 async function readFirstPassRerankingSample(args: {

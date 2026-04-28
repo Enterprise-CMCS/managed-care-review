@@ -314,9 +314,8 @@ Both `app-web` (via Vite proxy) and `app-api` (via `LOCAL_LD_SERVICE_URL`) conne
 
 - Work selection defaults to `gated-first-pass`.
 - The `all-doc` escape hatch remains available with `AI_VALIDATION_WORK_SELECTION_MODE=all-doc`.
-- LLM-assisted first-pass reranking is enabled by default for `./dev local`.
-- You can still disable it for debugging with `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING=false`.
-- The local app-api startup log prints the effective work-selection mode and whether reranking is enabled so you do not need to rediscover env vars mid-debugging.
+- LLM-assisted first-pass reranking is part of the normal `gated-first-pass` path.
+- The local app-api startup log prints the effective work-selection mode so you do not need to rediscover env vars mid-debugging.
 
 For reproducible local runs, add any overrides you want to `.envrc.local` before starting `./dev local`.
 

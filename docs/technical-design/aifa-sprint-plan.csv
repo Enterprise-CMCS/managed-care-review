@@ -1047,7 +1047,7 @@ Why this matters:
 - Evaluation/reporting paths can read and surface the persisted timing data
 - The timing persistence is additive and does not alter status transitions, retrieval behavior, fallback behavior, or result-cache semantics
 - Future performance tickets can identify whether residual time is dominated by fetch/parse/ocr/embed or retrieval/validation using persisted data instead of object timestamps"
-AIFA-061 Retire obsolete AI validation config branches after rollout stabilization,Backlog,7-Large Submission Hardening,Low,"AIFA-056, AIFA-060","Remove internal AI validation config branches that are no longer needed once the current rollout path is stable, while preserving the one escape hatch that still matters for debugging and baseline comparison.
+AIFA-061 Retire obsolete AI validation config branches after rollout stabilization,Done,7-Large Submission Hardening,Low,"AIFA-056, AIFA-060","Remove internal AI validation config branches that are no longer needed once the current rollout path is stable, while preserving the one escape hatch that still matters for debugging and baseline comparison.
 - Remove `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING` once reranking is considered part of the normal first-pass path
 - Simplify local bootstrap and docs so `./dev local` reflects the intended default runtime behavior without a separate reranking toggle
 - Keep `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` available as the main debugging and safety override so engineers can still compare the gated path against the simpler all-document baseline unless later evidence shows that comparison is no longer needed
