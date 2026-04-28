@@ -8,7 +8,6 @@ export const ContactUs = (): React.ReactElement => {
         <div className={styles.pageWrapper}>
             <GridContainer className={styles.pageContainer}>
                 <h1>Contact us</h1>
-
                 <p className={styles.contactIntro}>
                     Have a question? Visit the{' '}
                     <a
@@ -20,11 +19,9 @@ export const ContactUs = (): React.ReactElement => {
                     </a>{' '}
                     for answers to common questions about MC-Review.
                 </p>
-
                 <p className={styles.contactLead}>
                     If you don&apos;t find an answer:
                 </p>
-
                 <ul className={styles.contactList}>
                     <li>
                         <p className={styles.contactListItem}>
