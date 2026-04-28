@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { readReusableValidationResult } from './validationCache'
+import {
+  isCompatibleReusableWorkSelectionMode,
+  readReusableValidationResult
+} from './validationCache'
 import type { ArtifactS3Client } from '../s3'
+import { buildValidationResultArtifact } from '../results'
+import { buildCompletedValidationStatusArtifact } from '../status'
 
 function createArtifactS3Client(
   artifacts: Record<string, unknown>
@@ -64,6 +69,21 @@ test('readReusableValidationResult keeps all-doc and gated runs separate', async
   assert.equal(cachedResult, null)
 })
 
+test('isCompatibleReusableWorkSelectionMode keeps all-doc strict and lets gated reuse gated-fallback', () => {
+  assert.equal(isCompatibleReusableWorkSelectionMode('all-doc', 'all-doc'), true)
+  assert.equal(
+    isCompatibleReusableWorkSelectionMode('all-doc', 'gated-first-pass'),
+    false
+  )
+  assert.equal(
+    isCompatibleReusableWorkSelectionMode(
+      'gated-first-pass',
+      'gated-fallback'
+    ),
+    true
+  )
+})
+
 test('readReusableValidationResult rejects cached results when the stored form snapshot hash is stale', async () => {
   const cachedResult = await readReusableValidationResult({
     s3Client: createArtifactS3Client({
@@ -114,16 +134,13 @@ test('readReusableValidationResult rejects cached results when the prior run did
 
 function createArtifactS3ClientWithCompleteResult(): ArtifactS3Client {
   return createArtifactS3Client({
-    'rag-indexes/form-123/status.json': {
-      stage: 'complete',
-      artifactVersion: 'artifact-v1',
-      updatedAt: '2026-04-18T00:00:00.000Z',
-      error: null
-    },
-    'rag-indexes/form-123/validation-result.json': {
-      artifactVersion: 'artifact-v1',
-      formSnapshotHash: 'form-hash-v1',
-      results: [
+    'rag-indexes/form-123/status.json': buildCompletedValidationStatusArtifact(
+      'artifact-v1'
+    ),
+    'rag-indexes/form-123/validation-result.json': buildValidationResultArtifact(
+      'artifact-v1',
+      'form-hash-v1',
+      [
         {
           field: 'contractStartDate',
           outcome: 'match',
@@ -133,6 +150,6 @@ function createArtifactS3ClientWithCompleteResult(): ArtifactS3Client {
           citations: []
         }
       ]
-    }
+    )
   })
 }

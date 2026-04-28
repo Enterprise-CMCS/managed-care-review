@@ -1026,7 +1026,7 @@ The latest large-submission runs now complete correctly from `gated-first-pass`,
 - First-pass still surfaces the same decisive evidence documents and preserves conservative sufficiency behavior
 - Performance measurements identify and reduce the dominant first-pass cost centers
 - No regression reintroduces broad fallback or stale result behavior"
-AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage,Backlog,7-Large Submission Hardening,Low,"AIFA-057","Tighten the new form-only rerun reuse path after `AIFA-057` without changing validation behavior.
+AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage,Done,7-Large Submission Hardening,Low,"AIFA-057","Tighten the new form-only rerun reuse path after `AIFA-057` without changing validation behavior.
 - Remove or consolidate duplicated compatibility logic around reusable document-artifact inputs if a smaller shared path is available
 - Add regression coverage that is closer to artifact-backed rerun behavior than today's helper-level unit tests
 - Keep the work scoped to cleanup and coverage; do not change validation truth rules, retrieval behavior, or cache identity semantics in this ticket

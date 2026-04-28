@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { computeDocumentCacheKey } from '../artifacts'
+import { buildValidationResultArtifact } from '../results'
 import {
   buildReusableDocumentCacheKeys,
   buildReusableOcrCappedDocumentCacheKeys,
   hasReusableDocumentArtifactInputs,
   buildFieldWorkSelectionDiagnostics,
+  selectReusableDocumentDiagnostics,
   createOcrFallbackPolicy,
   DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
   DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT,
@@ -160,6 +162,55 @@ test('buildReusableOcrCappedDocumentCacheKeys ignores non-current or non-capped 
   assert.equal(cacheKeys.size, 0)
 })
 
+test('artifact-backed rerun helpers reuse prior OCR-capped diagnostics from the last completed result artifact', () => {
+  const currentDocument = {
+    documentName: 'slow-scan.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/slow-scan.pdf'
+  }
+  const previousCompletedResult = buildValidationResultArtifact(
+    'artifact-v1',
+    'older-form-hash',
+    [],
+    [],
+    [],
+    [
+      {
+        documentName: currentDocument.documentName,
+        sourceBucket: currentDocument.sourceBucket,
+        sourceKey: currentDocument.sourceKey,
+        status: 'skipped',
+        usable: false,
+        chunkCount: 0,
+        ocrDisposition: 'skipped',
+        stage: 'parse',
+        reason: 'ocr-capped-large-batch'
+      }
+    ],
+    'gated-fallback'
+  )
+
+  const diagnostics = selectReusableDocumentDiagnostics({
+    artifactVersion: 'artifact-v1',
+    workSelectionMode: 'gated-first-pass',
+    statusArtifact: {
+      stage: 'parsing',
+      artifactVersion: 'artifact-v1',
+      updatedAt: '2026-04-27T23:00:00.000Z',
+      error: null
+    },
+    resultArtifact: previousCompletedResult
+  })
+
+  const cacheKeys = buildReusableOcrCappedDocumentCacheKeys({
+    previousDocumentDiagnostics: diagnostics,
+    currentDocuments: [currentDocument],
+    allowReuse: true
+  })
+
+  assert.deepEqual([...cacheKeys], [computeDocumentCacheKey(currentDocument)])
+})
+
 test('hasReusableDocumentArtifactInputs falls back to the previous completed result artifact when status is no longer reusable', () => {
   assert.equal(
     hasReusableDocumentArtifactInputs({
@@ -171,12 +222,15 @@ test('hasReusableDocumentArtifactInputs falls back to the previous completed res
         updatedAt: '2026-04-27T23:00:00.000Z',
         error: null
       },
-      resultArtifact: {
-        artifactVersion: 'artifact-v1',
-        formSnapshotHash: 'stale-form-hash',
-        workSelectionMode: 'gated-fallback',
-        results: []
-      }
+      resultArtifact: buildValidationResultArtifact(
+        'artifact-v1',
+        'stale-form-hash',
+        [],
+        [],
+        [],
+        [],
+        'gated-fallback'
+      )
     }),
     true
   )
@@ -188,12 +242,15 @@ test('hasReusableDocumentArtifactInputs rejects changed artifact identity even w
       artifactVersion: 'artifact-v2',
       workSelectionMode: 'gated-first-pass',
       statusArtifact: null,
-      resultArtifact: {
-        artifactVersion: 'artifact-v1',
-        formSnapshotHash: 'stale-form-hash',
-        workSelectionMode: 'gated-fallback',
-        results: []
-      }
+      resultArtifact: buildValidationResultArtifact(
+        'artifact-v1',
+        'stale-form-hash',
+        [],
+        [],
+        [],
+        [],
+        'gated-fallback'
+      )
     }),
     false
   )

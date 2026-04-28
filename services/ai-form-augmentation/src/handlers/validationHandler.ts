@@ -14,7 +14,10 @@ import {
 } from '../artifacts'
 import { chunkDocument } from '../chunking'
 import { XenovaEmbeddingProvider } from '../embeddings'
-import { readReusableValidationResult } from './validationCache'
+import {
+  isCompatibleReusableWorkSelectionMode,
+  readReusableValidationResult
+} from './validationCache'
 import { newValidationLlmClient } from '../llm'
 import type { ValidationLlmConfig } from '../llm'
 import { extractPdfTextSample, parsePdf } from '../parsing'
@@ -204,7 +207,7 @@ export function hasReusableDocumentArtifactInputs(args: {
     args.statusArtifact != null &&
     args.statusArtifact.stage === 'complete' &&
     args.statusArtifact.artifactVersion === args.artifactVersion &&
-    isCompatibleDocumentArtifactWorkSelectionMode(
+    isCompatibleReusableWorkSelectionMode(
       args.workSelectionMode,
       args.statusArtifact.workSelectionMode
     )
@@ -216,7 +219,7 @@ export function hasReusableDocumentArtifactInputs(args: {
   return (
     args.resultArtifact != null &&
     args.resultArtifact.artifactVersion === args.artifactVersion &&
-    isCompatibleDocumentArtifactWorkSelectionMode(
+    isCompatibleReusableWorkSelectionMode(
       args.workSelectionMode,
       args.resultArtifact.workSelectionMode
     )
@@ -236,7 +239,7 @@ export function selectReusableDocumentDiagnostics(args: {
     args.statusArtifact != null &&
     args.statusArtifact.stage === 'complete' &&
     args.statusArtifact.artifactVersion === args.artifactVersion &&
-    isCompatibleDocumentArtifactWorkSelectionMode(
+    isCompatibleReusableWorkSelectionMode(
       args.workSelectionMode,
       args.statusArtifact.workSelectionMode
     )
@@ -251,7 +254,7 @@ export function selectReusableDocumentDiagnostics(args: {
   if (
     args.resultArtifact != null &&
     args.resultArtifact.artifactVersion === args.artifactVersion &&
-    isCompatibleDocumentArtifactWorkSelectionMode(
+    isCompatibleReusableWorkSelectionMode(
       args.workSelectionMode,
       args.resultArtifact.workSelectionMode
     )
@@ -1671,22 +1674,6 @@ function attachWorkSelectionDiagnostic(
 
 function containsAny(value: string, substrings: string[]): boolean {
   return substrings.some((substring) => value.includes(substring))
-}
-
-function isCompatibleDocumentArtifactWorkSelectionMode(
-  requestedMode: Extract<ValidationWorkSelectionMode, 'all-doc' | 'gated-first-pass'>,
-  cachedMode?: ValidationWorkSelectionMode
-): boolean {
-  const normalizedCachedMode = cachedMode ?? 'all-doc'
-
-  if (requestedMode === 'all-doc') {
-    return normalizedCachedMode === 'all-doc'
-  }
-
-  return (
-    normalizedCachedMode === 'gated-first-pass' ||
-    normalizedCachedMode === 'gated-fallback'
-  )
 }
 
 function isLlmFirstPassRerankingEnabled(): boolean {

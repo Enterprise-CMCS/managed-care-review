@@ -46,7 +46,7 @@ export async function readReusableValidationResult(input: {
     resultArtifact == null ||
     resultArtifact.artifactVersion !== input.artifactVersion ||
     resultArtifact.formSnapshotHash !== input.formSnapshotHash ||
-    !isCompatibleWorkSelectionMode(
+    !isCompatibleReusableWorkSelectionMode(
       input.workSelectionMode ?? 'all-doc',
       resultArtifact.workSelectionMode
     )
@@ -57,7 +57,7 @@ export async function readReusableValidationResult(input: {
   return resultArtifact
 }
 
-function isCompatibleWorkSelectionMode(
+export function isCompatibleReusableWorkSelectionMode(
   requestedMode: Extract<ValidationWorkSelectionMode, 'all-doc' | 'gated-first-pass'>,
   cachedMode?: ValidationWorkSelectionMode
 ): boolean {
@@ -85,7 +85,7 @@ function hasCompatibleReusableStatusArtifact(
     statusArtifact != null &&
     statusArtifact.stage === 'complete' &&
     statusArtifact.artifactVersion === artifactVersion &&
-    isCompatibleWorkSelectionMode(
+    isCompatibleReusableWorkSelectionMode(
       workSelectionMode ?? 'all-doc',
       statusArtifact.workSelectionMode
     )
