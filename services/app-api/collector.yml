@@ -7,6 +7,9 @@ receivers:
 exporters:
   otlphttp:
     endpoint: https://otlp.ddog-gov.com
+    timeout: 10s
+    sending_queue:
+      enabled: false
     headers:
       dd-api-key: $DD_API_KEY
       dd-otlp-source: datadog

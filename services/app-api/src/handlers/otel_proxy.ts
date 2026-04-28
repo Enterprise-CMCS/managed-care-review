@@ -2,22 +2,31 @@ import type { APIGatewayProxyHandler } from 'aws-lambda'
 import axios from 'axios'
 import { parseErrorToError } from '@mc-review/helpers'
 
-const COLLECTOR_URL = 'http://localhost:4318/v1/traces'
+const DD_TRACES_URL = 'https://otlp.ddog-gov.com/v1/traces'
 
 const main: APIGatewayProxyHandler = async (event) => {
     const bodyBytes = event.body?.length ?? 0
+    const contentType =
+        event.headers?.['content-type'] ||
+        event.headers?.['Content-Type'] ||
+        'application/json'
+
     console.info(
-        `otel_proxy: received trace payload, body=${bodyBytes} bytes, isBase64=${event.isBase64Encoded}`
+        `otel_proxy: received trace payload, body=${bodyBytes} bytes, content-type=${contentType}`
     )
 
     const options = {
-        headers: { 'content-type': 'application/json' },
+        headers: {
+            'content-type': contentType,
+            'dd-api-key': process.env.DD_API_KEY ?? '',
+            'dd-otlp-source': 'datadog',
+        },
     }
 
     try {
-        const response = await axios.post(COLLECTOR_URL, event.body, options)
+        const response = await axios.post(DD_TRACES_URL, event.body, options)
         console.info(
-            `otel_proxy: forwarded to collector, status=${response.status}`
+            `otel_proxy: forwarded to datadog, status=${response.status}`
         )
     } catch (err) {
         const parsed = parseErrorToError(err)
@@ -25,9 +34,9 @@ const main: APIGatewayProxyHandler = async (event) => {
             response?: { status: number; data: unknown }
             code?: string
         }
-        console.error('otel_proxy: failed to forward to collector', {
+        console.error('otel_proxy: failed to forward to datadog', {
             message: parsed.message,
-            collectorUrl: COLLECTOR_URL,
+            url: DD_TRACES_URL,
             httpStatus: axiosErr.response?.status,
             responseData: axiosErr.response?.data,
             code: axiosErr.code,

@@ -992,6 +992,7 @@ export class AppApiStack extends BaseStack {
             PARAMETER_STORE_MODE: parameterStoreMode,
             APPLICATION_ENDPOINT: applicationEndpoint,
             OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
+            DD_API_KEY: process.env.DD_API_KEY || '',
             LD_SDK_KEY: ldSdkKey,
             JWT_SECRET: jwtSecret,
             MCREVIEW_OAUTH_ISSUER: mcreviewOauthIssuer,
