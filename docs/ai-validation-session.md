@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-058 Reduce first-pass latency for large submissions`.
+The next implementation ticket is `AIFA-054 Clarify multi-document evidence messaging on Review page`.
 
 ## Completed
 
@@ -69,6 +69,7 @@ The next implementation ticket is `AIFA-058 Reduce first-pass latency for large 
 - AIFA-053 ✔ Stop fallback expansion once both date fields are sufficiently evidenced
 - AIFA-055 ✔ Fix stale in-progress banner after completed validation
 - AIFA-057 ✔ Add fast revalidation path for form-only edits
+- AIFA-058 ✔ Reduce first-pass latency for large submissions
 
 ## Current State
 
@@ -287,9 +288,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Reduce the remaining first-pass re-embed cost on large submissions without changing validation outcomes.
-- Measure why a small number of first-pass documents can still miss cache on same-artifact reruns.
-- Keep rerun correctness, retrieval behavior, and conservative fallback semantics unchanged.
+- Clarify how multi-document evidence should be described on the Review page without changing validation outcomes.
+- Keep wording aligned with the current conservative evidence model and citations already returned by the worker.
+- Leave performance measurement and runtime optimization follow-ups to `AIFA-060`.
 
 ## Follow-on UX Tickets
 
@@ -297,7 +298,7 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Follow-on Performance Tickets
 
-- `AIFA-058 Reduce first-pass latency for large submissions`
+- `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`
 
 ## Follow-on Maintenance Ticket
 
@@ -305,9 +306,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Recommended Upcoming Order
 
-1. `AIFA-058 Reduce first-pass latency for large submissions`
-2. `AIFA-054 Clarify multi-document evidence messaging on Review page`
-3. `AIFA-056 Clarify AI validation rollout and local-default configuration`
+1. `AIFA-054 Clarify multi-document evidence messaging on Review page`
+2. `AIFA-056 Clarify AI validation rollout and local-default configuration`
+3. `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`
 
 ## Follow-on Config Ticket
 
@@ -415,4 +416,9 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - one for reducing first-pass execution cost even when selection and fallback behavior are already correct
 - `AIFA-057` is now complete: form-only reruns recompute final results correctly and real LocalStack artifacts show previously repeated OCR-capped first-pass docs can short-circuit to cached skipped diagnostics instead of re-entering parse
 - one remaining performance uncertainty after `AIFA-057` is that a small number of first-pass documents can still miss cache and re-enter `embed` on same-artifact reruns, which should be measured under `AIFA-058` without reopening validation semantics
+- fresh `AIFA-058` artifact comparison now shows a much shorter lower-bound worker-active window on a new large-submission run: contract `e1550d95-f770-48d9-b982-7e50bd4c1268` wrote its first per-document artifact at `2026-04-27T23:10:41Z` and completed at `2026-04-27T23:14:49Z` (~248s), while contract `6731eb91-080c-4b3b-b428-4ed28f301177` wrote its first per-document artifact at `2026-04-28T00:19:19Z` and completed at `2026-04-28T00:19:23Z` (~4s)
+- that fresh run also shows the new bounded first-pass behavior working on real artifacts: only three PDFs reached `stage: embed`, five hit `ocr-capped-large-batch`, and the late first-pass tail (`CHG`, `CHP-IV`, `GCHP`, `HN`) was cut off with `reason: sufficient-first-pass-evidence` instead of continuing into more expensive work
+- follow-up fresh runs on the same large document set stayed in the same lower-bound runtime band after the later execution-priority ordering tweak: contract `76c740d8-9dc3-4959-83a3-61560da19eb7` also completed in ~4s with `3 embed / 5 ocr-capped / 4 sufficient-first-pass-evidence`, while contracts `f29e305f-c152-4ea0-bc59-8ec1d4ac1bc8` and `0dd5084a-3dfc-4acb-ab53-bb080dd81454` both completed in ~4s with `4 embed / 4 ocr-capped / 4 sufficient-first-pass-evidence`
+- those later runs changed which first-pass PDFs were processed (`IEHP` entered `embed` while one OCR-capped parse dropped out), but did not show a measurable wall-clock improvement beyond the earlier bounded first-pass stop; treat the execution-priority tweak as safe so far but still unproven for latency reduction
+- a follow-on ticket is now needed for persisted phase timing diagnostics (`AIFA-060`) so future optimization work can target real `fetch/parse/ocr/chunk/embed/retrieval/validation` costs instead of relying on LocalStack object timestamps; keep that measurement work separate from `AIFA-058` so the proven first-pass latency win can close on its own scope
 - the `AIFA-057` closeout left two low-priority maintenance follow-ons captured under `AIFA-059`: duplicated reuse-compatibility checks in the worker path and regression coverage that is still more helper-level than artifact-backed

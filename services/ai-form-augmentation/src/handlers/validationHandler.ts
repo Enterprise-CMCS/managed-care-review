@@ -114,6 +114,7 @@ export const LARGE_BATCH_OCR_FALLBACK_LIMIT = 3
 // Keep the diagnostic first-pass set intentionally small enough to stress
 // whether cheap document ranking would surface useful evidence early.
 export const DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT = 12
+const FIRST_PASS_INDEXING_BATCH_SIZE = 8
 // Pull a broader pool than the final prompt can hold so large submissions have
 // a chance to surface evidence from more than one noisy top-ranked document.
 export const FIELD_RETRIEVAL_CANDIDATE_COUNT = 8
@@ -388,7 +389,7 @@ export async function validationHandler(
       requestedWorkSelectionMode === 'all-doc'
         ? event.documents
         : selectFirstPassDocuments(workSelectionDiagnostics)
-    const deferredDocuments =
+    const baselineDeferredDocuments =
       requestedWorkSelectionMode === 'all-doc'
         ? []
         : event.documents.filter(
@@ -403,25 +404,57 @@ export async function validationHandler(
     // Document-level failures stay isolated so one renamed or corrupt PDF does
     // not throw away usable evidence from the rest of the submission.
     const documentIndexingStartedAt = Date.now()
-    const firstPassIndexing = await indexValidationDocuments({
-      event,
-      s3Client,
-      statusKey,
-      embeddingProvider,
-      embeddingModel,
-      unchangedDocumentCacheKeys,
-      reusableOcrCappedDocumentCacheKeys,
-      shouldAttemptOcrFallback,
-      documents: selectedDocuments,
-      workSelectionByCacheKey,
-      completedDocumentOffset: 0,
-      totalDocumentsToIndex: selectedDocuments.length,
-      workSelectionMode: requestedWorkSelectionMode
-    })
-    let indexedDocuments = firstPassIndexing.indexedDocuments
+    const firstPassIndexing:
+      | {
+          indexedDocuments: IndexedDocumentArtifact[]
+          documentDiagnostics: ValidationDocumentDiagnostic[]
+          deferredDocuments: ValidationSourceDocument[]
+        }
+      | undefined =
+      requestedWorkSelectionMode === 'gated-first-pass'
+        ? await indexFirstPassDocumentsUntilSufficient({
+            event,
+            s3Client,
+            statusKey,
+            embeddingProvider,
+            embeddingModel,
+            unchangedDocumentCacheKeys,
+            reusableOcrCappedDocumentCacheKeys,
+            shouldAttemptOcrFallback,
+            selectedDocuments,
+            workSelectionByCacheKey
+          })
+        : undefined
+    const allDocumentIndexing =
+      firstPassIndexing ??
+      {
+        ...(await indexValidationDocuments({
+            event,
+            s3Client,
+            statusKey,
+            embeddingProvider,
+            embeddingModel,
+            unchangedDocumentCacheKeys,
+            reusableOcrCappedDocumentCacheKeys,
+            shouldAttemptOcrFallback,
+            documents: selectedDocuments,
+            workSelectionByCacheKey,
+            completedDocumentOffset: 0,
+            totalDocumentsToIndex: selectedDocuments.length,
+            workSelectionMode: requestedWorkSelectionMode
+          })),
+        deferredDocuments: [] as ValidationSourceDocument[]
+      }
+    let indexedDocuments = allDocumentIndexing.indexedDocuments
     documentDiagnostics = [
       ...documentDiagnostics,
-      ...firstPassIndexing.documentDiagnostics
+      ...allDocumentIndexing.documentDiagnostics
+    ]
+    const completedFirstPassDocuments =
+      selectedDocuments.length - allDocumentIndexing.deferredDocuments.length
+    const deferredDocuments = [
+      ...allDocumentIndexing.deferredDocuments,
+      ...baselineDeferredDocuments
     ]
     // Keep large-run indexing metrics on the optional diagnostics hook so
     // evaluation can measure queue behavior without widening the persisted
@@ -482,8 +515,8 @@ export async function validationHandler(
           [],
           'gated-fallback',
           {
-            completedDocuments: selectedDocuments.length,
-            totalDocuments: selectedDocuments.length + deferredDocuments.length
+            completedDocuments: completedFirstPassDocuments,
+            totalDocuments: completedFirstPassDocuments + deferredDocuments.length
           }
         )
       )
@@ -498,9 +531,9 @@ export async function validationHandler(
         shouldAttemptOcrFallback,
         documents: deferredDocuments,
         workSelectionByCacheKey,
-        completedDocumentOffset: selectedDocuments.length,
+        completedDocumentOffset: completedFirstPassDocuments,
         totalDocumentsToIndex:
-          selectedDocuments.length + deferredDocuments.length,
+          completedFirstPassDocuments + deferredDocuments.length,
         workSelectionMode: 'gated-fallback'
       })
       indexedDocuments = [
@@ -533,7 +566,7 @@ export async function validationHandler(
     } else if (requestedWorkSelectionMode === 'gated-first-pass') {
       documentDiagnostics = mergeDocumentDiagnostics(
         documentDiagnostics,
-        deferredDocuments.map((document) =>
+        baselineDeferredDocuments.map((document) =>
           buildDeferredDocumentDiagnostic(
             document,
             workSelectionByCacheKey.get(computeDocumentCacheKey(document))
@@ -709,6 +742,115 @@ async function indexValidationDocuments(args: {
         args.workSelectionByCacheKey.get(computeDocumentCacheKey(result.document))
       )
     )
+  }
+}
+
+async function indexFirstPassDocumentsUntilSufficient(args: {
+  event: ValidationHandlerEvent
+  s3Client: ArtifactS3Client
+  statusKey: string
+  embeddingProvider: XenovaEmbeddingProvider
+  embeddingModel: string
+  unchangedDocumentCacheKeys: Set<string>
+  reusableOcrCappedDocumentCacheKeys: Set<string>
+  shouldAttemptOcrFallback: () => boolean
+  selectedDocuments: ValidationSourceDocument[]
+  workSelectionByCacheKey: Map<string, ValidationDocumentWorkSelectionDiagnostic>
+}): Promise<{
+  indexedDocuments: IndexedDocumentArtifact[]
+  documentDiagnostics: ValidationDocumentDiagnostic[]
+  deferredDocuments: ValidationSourceDocument[]
+}> {
+  let indexedDocuments: IndexedDocumentArtifact[] = []
+  let documentDiagnostics: ValidationDocumentDiagnostic[] = []
+  let completedDocumentOffset = 0
+
+  for (
+    let batchStart = 0;
+    batchStart < args.selectedDocuments.length;
+    batchStart += FIRST_PASS_INDEXING_BATCH_SIZE
+  ) {
+    const batchDocuments = args.selectedDocuments.slice(
+      batchStart,
+      batchStart + FIRST_PASS_INDEXING_BATCH_SIZE
+    )
+    const batchIndexing = await indexValidationDocuments({
+      event: args.event,
+      s3Client: args.s3Client,
+      statusKey: args.statusKey,
+      embeddingProvider: args.embeddingProvider,
+      embeddingModel: args.embeddingModel,
+      unchangedDocumentCacheKeys: args.unchangedDocumentCacheKeys,
+      reusableOcrCappedDocumentCacheKeys:
+        args.reusableOcrCappedDocumentCacheKeys,
+      shouldAttemptOcrFallback: args.shouldAttemptOcrFallback,
+      documents: batchDocuments,
+      workSelectionByCacheKey: args.workSelectionByCacheKey,
+      completedDocumentOffset,
+      totalDocumentsToIndex: args.selectedDocuments.length,
+      workSelectionMode: 'gated-first-pass'
+    })
+    indexedDocuments = [...indexedDocuments, ...batchIndexing.indexedDocuments]
+    documentDiagnostics = [
+      ...documentDiagnostics,
+      ...batchIndexing.documentDiagnostics
+    ]
+    completedDocumentOffset += batchDocuments.length
+
+    const remainingDocuments = args.selectedDocuments.slice(completedDocumentOffset)
+
+    // A batch that only produced skipped diagnostics cannot improve first-pass
+    // evidence, so probing retrieval/validation there just adds latency.
+    if (
+      remainingDocuments.length === 0 ||
+      indexedDocuments.length === 0 ||
+      batchIndexing.indexedDocuments.length === 0
+    ) {
+      continue
+    }
+
+    // Re-run retrieval/validation only after a bounded slice of the ranked
+    // first-pass set so we can stop before late expensive PDFs when the same
+    // conservative field diagnostics already say first-pass evidence is enough.
+    const validationPass = await executeValidationPass({
+      event: args.event,
+      s3Client: args.s3Client,
+      statusKey: args.statusKey,
+      embeddingProvider: args.embeddingProvider,
+      workSelectionMode: 'gated-first-pass',
+      indexedDocuments
+    })
+    const fieldWorkSelectionDiagnostics = buildFieldWorkSelectionDiagnostics({
+      formFields: args.event.formFields,
+      results: validationPass.reconciledResults,
+      retrievalDiagnostics: validationPass.retrievalDiagnostics,
+      documentDiagnostics,
+      workSelectionMode: 'gated-first-pass',
+      deferredDocumentNames: new Set()
+    })
+
+    if (hasSufficientFirstPassEvidence(fieldWorkSelectionDiagnostics)) {
+      return {
+        indexedDocuments,
+        documentDiagnostics: mergeDocumentDiagnostics(
+          documentDiagnostics,
+          remainingDocuments.map((document) =>
+            buildDeferredDocumentDiagnostic(
+              document,
+              args.workSelectionByCacheKey.get(computeDocumentCacheKey(document)),
+              'sufficient-first-pass-evidence'
+            )
+          )
+        ),
+        deferredDocuments: remainingDocuments
+      }
+    }
+  }
+
+  return {
+    indexedDocuments,
+    documentDiagnostics,
+    deferredDocuments: []
   }
 }
 
@@ -1205,6 +1347,10 @@ type FirstPassRerankingSignal = 'high' | 'medium' | 'low'
 type HeuristicGroupKeyDiagnostic = {
   heuristicGroupKey?: string
   heuristicGroupKeySource?: 'filename-prefix'
+}
+type FirstPassRerankingAdjustmentDiagnostic = {
+  scoreDelta: number
+  reason: string
 }
 
 export function scoreValidationDocuments(
@@ -1836,6 +1982,14 @@ export function buildFieldWorkSelectionDiagnostics(args: {
   })
 }
 
+function hasSufficientFirstPassEvidence(
+  fieldWorkSelectionDiagnostics: ValidationFieldWorkSelectionDiagnostic[]
+): boolean {
+  return fieldWorkSelectionDiagnostics.every(
+    (diagnostic) => diagnostic.evidenceSource === 'first-pass'
+  )
+}
+
 function buildFallbackReasons(args: {
   result: DateValidationResult
   retrievalDiagnostic?: ValidationRetrievalDiagnostic
@@ -1967,7 +2121,8 @@ function mergeDocumentDiagnostics(
 
 function buildDeferredDocumentDiagnostic(
   document: ValidationSourceDocument,
-  workSelection?: ValidationDocumentWorkSelectionDiagnostic
+  workSelection?: ValidationDocumentWorkSelectionDiagnostic,
+  reason = 'deferred-first-pass'
 ): ValidationDocumentDiagnostic {
   return {
     documentName: document.documentName,
@@ -1977,7 +2132,7 @@ function buildDeferredDocumentDiagnostic(
     usable: false,
     chunkCount: 0,
     ...(workSelection ? { workSelection } : {}),
-    reason: 'deferred-first-pass'
+    reason
   }
 }
 

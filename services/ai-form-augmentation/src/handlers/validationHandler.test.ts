@@ -572,3 +572,117 @@ test('buildFieldWorkSelectionDiagnostics keeps strong cited first-pass evidence 
     }
   ])
 })
+
+test('buildFieldWorkSelectionDiagnostics reports both fields as first-pass when strong cited evidence stays inside the processed set', () => {
+  const diagnostics = buildFieldWorkSelectionDiagnostics({
+    formFields: [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2025'
+      },
+      {
+        field: 'contractEndDate',
+        label: 'Contract End Date',
+        value: '12/31/2025'
+      }
+    ],
+    results: [
+      {
+        field: 'contractStartDate',
+        outcome: 'match',
+        confidence: 'high',
+        message: 'Document text labels start date as 01/01/2025.',
+        decisionSource: 'deterministic',
+        citations: [
+          {
+            chunkId: 'doc-a::chunk-1',
+            documentName: 'doc-a.pdf',
+            page: 1,
+            order: 1
+          }
+        ]
+      },
+      {
+        field: 'contractEndDate',
+        outcome: 'match',
+        confidence: 'high',
+        message: 'Document text supports end date as 12/31/2025.',
+        decisionSource: 'deterministic',
+        citations: [
+          {
+            chunkId: 'doc-b::chunk-1',
+            documentName: 'doc-b.pdf',
+            page: 1,
+            order: 1
+          }
+        ]
+      }
+    ],
+    retrievalDiagnostics: new Map([
+      [
+        'contractStartDate',
+        {
+          field: 'contractStartDate',
+          candidateChunkCount: 8,
+          initialChunkCount: 4,
+          finalChunkCount: 4,
+          representedDocumentCount: 4,
+          droppedCandidateCount: 4,
+          competingDateCount: 1,
+          clauseEvidencePresentInitially: true,
+          clauseEvidencePresentFinally: true,
+          clauseEvidenceAdded: false
+        }
+      ],
+      [
+        'contractEndDate',
+        {
+          field: 'contractEndDate',
+          candidateChunkCount: 8,
+          initialChunkCount: 4,
+          finalChunkCount: 4,
+          representedDocumentCount: 4,
+          droppedCandidateCount: 4,
+          competingDateCount: 0,
+          clauseEvidencePresentInitially: true,
+          clauseEvidencePresentFinally: true,
+          clauseEvidenceAdded: false
+        }
+      ]
+    ]),
+    documentDiagnostics: [
+      {
+        documentName: 'doc-a.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/doc-a.pdf',
+        status: 'processed',
+        usable: true,
+        chunkCount: 4,
+        stage: 'cache'
+      },
+      {
+        documentName: 'doc-b.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/doc-b.pdf',
+        status: 'processed',
+        usable: true,
+        chunkCount: 4,
+        stage: 'cache'
+      }
+    ],
+    workSelectionMode: 'gated-first-pass',
+    deferredDocumentNames: new Set(['late-expensive.pdf'])
+  })
+
+  assert.deepEqual(diagnostics, [
+    {
+      field: 'contractStartDate',
+      evidenceSource: 'first-pass'
+    },
+    {
+      field: 'contractEndDate',
+      evidenceSource: 'first-pass'
+    }
+  ])
+})

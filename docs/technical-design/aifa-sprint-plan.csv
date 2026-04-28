@@ -1015,7 +1015,7 @@ Recent large-submission artifact inspection shows form-only reruns correctly mis
 - Revalidation still recomputes correctness for the new form values
 - Unchanged-document runs reuse prior document artifacts conservatively and observably
 - Focused validation proves date-only reruns complete materially faster than the initial run"
-AIFA-058 Reduce first-pass latency for large submissions,Backlog,7-Large Submission Hardening,High,"AIFA-050, AIFA-052, AIFA-053","Reduce first-pass wall-clock time on large submissions without weakening conservative behavior.
+AIFA-058 Reduce first-pass latency for large submissions,Done,7-Large Submission Hardening,High,"AIFA-050, AIFA-052, AIFA-053","Reduce first-pass wall-clock time on large submissions without weakening conservative behavior.
 - Measure where first-pass time is still being spent after gated-first-pass selection succeeds
 - Reduce expensive per-document work inside first pass, especially for OCR/embedding-heavy amendment PDFs
 - Prefer reuse and bounded expensive work before broadening scope
@@ -1036,3 +1036,14 @@ Why this matters:
 - Regression coverage proves form-only reruns reuse prior document artifacts and OCR-capped skip diagnostics through artifact-backed scenarios
 - The ticket does not change validation outcomes, retrieval ordering, or final result-cache invalidation behavior
 - Any remaining helper-level tests still map clearly to runtime behavior rather than replacing it"
+AIFA-060 Persist AI validation phase timing diagnostics in artifacts,Backlog,7-Large Submission Hardening,Medium,"AIFA-058","Persist explicit AI validation phase timings so future performance work can optimize against real run data instead of LocalStack artifact timestamp proxies.
+- Reuse the existing diagnostics hook for `fetch`, `parse`, `ocr`, `chunk`, `embed`, `retrieval`, and `validation`; do not create a parallel timing path
+- Persist additive timing data in AI validation artifacts or another existing diagnostic artifact path without changing validation semantics
+- Keep the work scoped to measurement and observability; do not change document selection, fallback behavior, retrieval logic, or final result cache invalidation
+- Ensure the timing output is available to evaluation/reporting flows so future tickets can compare residual bottlenecks directly
+
+Why this matters:
+`AIFA-058` delivered a large proven runtime win by bounding first-pass work, but follow-on optimizations are now limited by coarse LocalStack timestamp proxies. Capturing phase timings separately keeps measurement work reviewable and prevents the current ticket from expanding into speculative micro-optimizations.","- Completed runs expose explicit timings for the existing validation phases without changing validation outcomes
+- Evaluation/reporting paths can read and surface the persisted timing data
+- The timing persistence is additive and does not alter status transitions, retrieval behavior, fallback behavior, or result-cache semantics
+- Future performance tickets can identify whether residual time is dominated by fetch/parse/ocr/embed or retrieval/validation using persisted data instead of object timestamps"
