@@ -42,6 +42,7 @@ export type ContractDetailsSummarySectionProps = {
     isStateUser: boolean
     onDocumentError?: (error: true) => void
     explainMissingData?: boolean
+    headerDetailComponent?: React.ReactElement
 }
 
 // Get the zip download URL from the pre-generated zip packages
@@ -69,6 +70,7 @@ export const ContractDetailsSummarySection = ({
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     onDocumentError,
     explainMissingData,
+    headerDetailComponent,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
@@ -136,6 +138,7 @@ export const ContractDetailsSummarySection = ({
                 hideBorderTop
                 fontSize="38px"
             />
+            {headerDetailComponent && headerDetailComponent}
             <dl>
                 {contract438Attestation && (
                     <StatutoryRegulatoryAttestationSummary

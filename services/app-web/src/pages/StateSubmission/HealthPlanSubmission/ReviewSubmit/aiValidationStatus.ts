@@ -18,7 +18,7 @@ export function getAIValidationDisplayState(args: {
         return {
             title: 'Document review still in progress',
             message:
-                'Document review is still in progress. You can continue reviewing your submission and submit without waiting for these results.',
+                'You can continue reviewing and submit without waiting for these results.',
             alertType: 'warning',
             isPolling: false,
         }
@@ -28,7 +28,7 @@ export function getAIValidationDisplayState(args: {
         return {
             title: 'Refreshing document review',
             message:
-                'Your uploaded documents or submission dates changed, so these review results are refreshing.',
+                'Your uploaded documents or submission dates changed, so the document review is refreshing.',
             alertType: 'info',
             isPolling: true,
         }
@@ -40,7 +40,7 @@ export function getAIValidationDisplayState(args: {
                 title: 'Document review unavailable',
                 message:
                     error ??
-                    'We could not load document review results right now, but you can still continue reviewing your submission.',
+                    'We could not load document review results right now. You can continue reviewing and submit without these results.',
                 alertType: 'warning',
                 isPolling: false,
             }
@@ -50,19 +50,33 @@ export function getAIValidationDisplayState(args: {
                     ? 'Document review complete with limited coverage'
                     : 'Document review complete',
                 message: isPartialCoverage
-                    ? 'We finished comparing the submission dates with the uploaded documents we could review. Some uploaded documents could not be fully reviewed.'
-                    : 'We finished comparing the submission dates with the uploaded documents.',
+                    ? 'We finished reviewing the documents we could process.'
+                    : 'We finished reviewing the uploaded documents.',
                 alertType: 'success',
                 isPolling: false,
             }
         case 'parsing':
+            return {
+                title: 'Document review in progress',
+                message:
+                    'We are preparing the uploaded documents for review.',
+                alertType: 'info',
+                isPolling: true,
+            }
         case 'retrieving':
+            return {
+                title: 'Document review in progress',
+                message:
+                    'We are reviewing the uploaded documents and comparing them with the submission dates.',
+                alertType: 'info',
+                isPolling: true,
+            }
         case 'deterministic-validation':
         case 'llm-validation':
             return {
-                title: 'Reviewing submission dates',
+                title: 'Document review in progress',
                 message:
-                    'We are comparing the contract dates in this submission with the uploaded documents.',
+                    'We are checking the submission dates against the reviewed documents.',
                 alertType: 'info',
                 isPolling: true,
             }
@@ -70,7 +84,7 @@ export function getAIValidationDisplayState(args: {
             return {
                 title: 'Document review pending',
                 message:
-                    'We have not started reviewing the uploaded documents yet. Results will appear here when they are ready.',
+                    'We have not started reviewing the uploaded documents yet. You can continue reviewing and submit at any time.',
                 alertType: 'info',
                 isPolling: false,
             }

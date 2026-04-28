@@ -971,7 +971,7 @@ The latest large-submission runs show first-pass selection has improved enough t
 - Deferred documents remain eligible whenever sufficiency is not met
 - Validation truth remains evidence-driven; this ticket only changes when expensive expansion stops
 - Focused tests cover sufficiency-driven no-expand behavior and unchanged fallback behavior for ambiguous cases"
-AIFA-054 Clarify multi-document evidence messaging on Review page,Backlog,4-Frontend Integration,Medium,"AIFA-020D, AIFA-053","Refine the Review-page copy so users understand that a field result can be supported by multiple reviewed documents even when the UI shows one example citation.
+AIFA-054 Clarify multi-document evidence messaging on Review page,Done,4-Frontend Integration,Medium,"AIFA-020D, AIFA-053","Refine the Review-page copy so users understand that a field result can be supported by multiple reviewed documents even when the UI shows one example citation.
 - Update the limited-coverage/result copy to distinguish reviewed evidence from the single displayed citation
 - Rename or clarify `Supporting document reference` so it reads as an example reference rather than the exclusive basis
 - Preserve the existing advisory/non-blocking framing

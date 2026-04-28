@@ -1,5 +1,5 @@
 import React from 'react'
-import { Table } from '@trussworks/react-uswds'
+import { InfoTag } from '../../../../components'
 import type { AIValidationDisplayItem } from './aiValidationFindings'
 import styles from './ReviewSubmit.module.scss'
 
@@ -7,40 +7,201 @@ interface Props {
     findings: AIValidationDisplayItem[]
 }
 
+const outcomeTagColor = (
+    outcome: AIValidationDisplayItem['outcome']
+): Parameters<typeof InfoTag>[0]['color'] => {
+    if (outcome === 'match') {
+        return 'green'
+    }
+
+    if (outcome === 'mismatch') {
+        return 'gold'
+    }
+
+    return 'gray-medium'
+}
+
+const confidenceTagColor = (
+    confidence: AIValidationDisplayItem['confidence']
+): Parameters<typeof InfoTag>[0]['color'] => {
+    if (confidence === 'high') {
+        return 'green'
+    }
+
+    if (confidence === 'medium') {
+        return 'gold'
+    }
+
+    return 'gray'
+}
+
+function buildFindingsSummary(findings: AIValidationDisplayItem[]): string {
+    const mismatchCount = findings.filter(
+        (finding) => finding.outcome === 'mismatch'
+    ).length
+    const matchCount = findings.filter(
+        (finding) => finding.outcome === 'match'
+    ).length
+    const unverifiableCount = findings.filter(
+        (finding) => finding.outcome === 'not-enough-evidence'
+    ).length
+
+    const parts = [
+        mismatchCount > 0
+            ? `${mismatchCount} date${mismatchCount === 1 ? '' : 's'} need${mismatchCount === 1 ? 's' : ''} review`
+            : null,
+        matchCount > 0
+            ? `${matchCount} date${matchCount === 1 ? '' : 's'} match${matchCount === 1 ? 'es' : ''} the reviewed documents`
+            : null,
+        unverifiableCount > 0
+            ? `${unverifiableCount} date${unverifiableCount === 1 ? '' : 's'} could not be verified`
+            : null,
+    ].filter((part): part is string => part != null)
+
+    return parts.map((part) => `${part}.`).join(' ')
+}
+
 export const AIValidationFindingsCard = ({
     findings,
 }: Props): React.ReactElement => {
     return (
-        <Table fullWidth bordered={false}>
-            <thead>
-                <tr>
-                    <th scope="col">Submission field</th>
-                    <th scope="col">Result</th>
-                    <th scope="col">Confidence</th>
-                    <th scope="col">What we found</th>
-                </tr>
-            </thead>
-            <tbody>
-                {findings.map((finding) => (
-                    <tr
-                        key={`${finding.fieldLabel}-${finding.outcomeLabel}-${finding.message}`}
-                    >
-                        <th scope="row">{finding.fieldLabel}</th>
-                        <td>{finding.outcomeLabel}</td>
-                        <td>{finding.confidenceLabel}</td>
-                        <td>
+        <>
+            <p className={styles.validationFindingsSummary}>
+                {buildFindingsSummary(findings)}
+            </p>
+            <div className={styles.validationFindingsCards}>
+                {findings.map((finding) => {
+                    const uniqueDocumentCount = new Set(
+                        finding.citations.map(
+                            (citation) => citation.documentName
+                        )
+                    ).size
+                    const evidenceLabel =
+                        uniqueDocumentCount > 1
+                            ? `Reviewed references from ${uniqueDocumentCount} documents:`
+                            : 'Reviewed reference:'
+
+                    return (
+                        <article
+                            key={`${finding.fieldLabel}-${finding.outcomeLabel}-${finding.message}`}
+                            className={styles.validationFindingCard}
+                        >
+                            <div className={styles.validationFindingCardHeader}>
+                                <h3
+                                    className={
+                                        styles.validationFindingFieldLabel
+                                    }
+                                >
+                                    {finding.fieldLabel}
+                                </h3>
+                                <div
+                                    className={
+                                        styles.validationFindingMetaList
+                                    }
+                                >
+                                    <div
+                                        className={
+                                            styles.validationFindingMetaItem
+                                        }
+                                    >
+                                        <span
+                                            className={
+                                                styles.validationFindingMetaLabel
+                                            }
+                                        >
+                                            Result:
+                                        </span>
+                                        <InfoTag
+                                            color={outcomeTagColor(
+                                                finding.outcome
+                                            )}
+                                            className={styles.findingOutcomeTag}
+                                        >
+                                            {finding.outcomeLabel}
+                                        </InfoTag>
+                                    </div>
+                                    <div
+                                        className={
+                                            styles.validationFindingMetaItem
+                                        }
+                                    >
+                                        <span
+                                            className={
+                                                styles.validationFindingMetaLabel
+                                            }
+                                        >
+                                            Confidence:
+                                        </span>
+                                        <InfoTag
+                                            color={confidenceTagColor(
+                                                finding.confidence
+                                            )}
+                                            className={
+                                                styles.findingConfidenceTag
+                                            }
+                                        >
+                                            {finding.confidenceLabel}
+                                        </InfoTag>
+                                    </div>
+                                </div>
+                            </div>
                             <div className={styles.findingDetails}>
                                 <p className={styles.findingMessage}>
                                     {finding.message}
                                 </p>
+                                {finding.comparedValues && (
+                                    <dl
+                                        className={
+                                            styles.findingValueComparison
+                                        }
+                                    >
+                                        <div>
+                                            <dt>Submitted:</dt>
+                                            <dd>
+                                                {
+                                                    finding.comparedValues
+                                                        .submittedValue
+                                                }
+                                            </dd>
+                                        </div>
+                                        <div>
+                                            <dt>Reviewed documents:</dt>
+                                            <dd>
+                                                {
+                                                    finding.comparedValues
+                                                        .reviewedValue
+                                                }
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                )}
+                                {finding.reasonLabel && (
+                                    <p className={styles.findingReason}>
+                                        <span
+                                            className={
+                                                styles.findingReasonLabel
+                                            }
+                                        >
+                                            Reason:
+                                        </span>{' '}
+                                        {finding.reasonLabel}
+                                    </p>
+                                )}
+                                {finding.advisoryNote && (
+                                    <p className={styles.findingAdvisory}>
+                                        {finding.advisoryNote}
+                                    </p>
+                                )}
                                 {finding.citations.length > 0 ? (
-                                    <div className={styles.findingEvidence}>
+                                    <div
+                                        className={styles.findingEvidence}
+                                    >
                                         <p
                                             className={
                                                 styles.findingEvidenceLabel
                                             }
                                         >
-                                            Supporting document reference
+                                            {evidenceLabel}
                                         </p>
                                         <ul
                                             className={
@@ -50,7 +211,7 @@ export const AIValidationFindingsCard = ({
                                             {finding.citations.map(
                                                 (citation) => (
                                                     <li
-                                                        key={`${finding.fieldLabel}-${citation.documentName}-${citation.orderLabel}`}
+                                                        key={`${finding.fieldLabel}-${citation.documentName}`}
                                                         className={
                                                             styles.findingEvidenceItem
                                                         }
@@ -61,12 +222,9 @@ export const AIValidationFindingsCard = ({
                                                             }
                                                         </span>
                                                         <span>
-                                                            {citation.pageLabel}
-                                                        </span>
-                                                        <span>
-                                                            {
-                                                                citation.orderLabel
-                                                            }
+                                                            {citation.pageLabels.join(
+                                                                ', '
+                                                            )}
                                                         </span>
                                                     </li>
                                                 )
@@ -79,15 +237,15 @@ export const AIValidationFindingsCard = ({
                                             styles.findingEvidenceFallback
                                         }
                                     >
-                                        No supporting document reference
+                                        No reviewed document reference
                                         available.
                                     </p>
                                 )}
                             </div>
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </Table>
+                        </article>
+                    )
+                })}
+            </div>
+        </>
     )
 }

@@ -5,13 +5,20 @@ type ValidationFinding =
 
 export interface AIValidationDisplayItem {
     fieldLabel: string
+    outcome: string
     outcomeLabel: string
+    confidence: string
     confidenceLabel: string
     message: string
+    comparedValues?: {
+        submittedValue: string
+        reviewedValue: string
+    }
+    reasonLabel?: string
+    advisoryNote?: string
     citations: Array<{
         documentName: string
-        pageLabel: string
-        orderLabel: string
+        pageLabels: string[]
     }>
 }
 
@@ -47,6 +54,44 @@ function getConfidenceLabel(confidence: string): string {
     return CONFIDENCE_LABELS[confidence] ?? confidence
 }
 
+function extractComparedValues(args: {
+    outcome: string
+    message: string
+}): AIValidationDisplayItem['comparedValues'] | undefined {
+    if (args.outcome !== 'match' && args.outcome !== 'mismatch') {
+        return undefined
+    }
+
+    const match = args.message.match(
+        /^Document .+? \((.+?)\) (?:does not match|matches) form .+? \((.+?)\)\.$/
+    )
+
+    if (!match) {
+        return undefined
+    }
+
+    return {
+        reviewedValue: match[1],
+        submittedValue: match[2],
+    }
+}
+
+function getReasonLabel(outcome: string): string | undefined {
+    if (outcome === 'mismatch') {
+        return 'Submitted date differs from reviewed document date.'
+    }
+
+    return undefined
+}
+
+function getAdvisoryNote(outcome: string): string | undefined {
+    if (outcome === 'not-enough-evidence') {
+        return 'Reviewed documents did not provide enough clear date evidence for this field.'
+    }
+
+    return undefined
+}
+
 function getPageLabel(args: {
     page: number | null | undefined
     startPage?: number | null
@@ -63,26 +108,44 @@ function getPageLabel(args: {
     return singlePage == null ? 'Page unknown' : `Page ${singlePage}`
 }
 
-function getOrderLabel(order: number): string {
-    return `Chunk order ${order}`
-}
-
 export function mapAIValidationFindings(
     findings: ValidationFinding[]
 ): AIValidationDisplayItem[] {
     return findings.map((finding) => ({
         fieldLabel: getFieldLabel(finding.field),
+        outcome: finding.outcome,
         outcomeLabel: getOutcomeLabel(finding.outcome),
+        confidence: finding.confidence,
         confidenceLabel: getConfidenceLabel(finding.confidence),
         message: finding.message,
-        citations: finding.citations.map((citation) => ({
-            documentName: citation.documentName,
-            pageLabel: getPageLabel({
-                page: citation.page,
-                startPage: citation.startPage,
-                endPage: citation.endPage,
-            }),
-            orderLabel: getOrderLabel(citation.order),
-        })),
+        comparedValues: extractComparedValues({
+            outcome: finding.outcome,
+            message: finding.message,
+        }),
+        reasonLabel: getReasonLabel(finding.outcome),
+        advisoryNote: getAdvisoryNote(finding.outcome),
+        citations: Array.from(
+            finding.citations.reduce((grouped, citation) => {
+                const pageLabel = getPageLabel({
+                    page: citation.page,
+                    startPage: citation.startPage,
+                    endPage: citation.endPage,
+                })
+                const existing = grouped.get(citation.documentName)
+
+                if (existing) {
+                    if (!existing.pageLabels.includes(pageLabel)) {
+                        existing.pageLabels.push(pageLabel)
+                    }
+                } else {
+                    grouped.set(citation.documentName, {
+                        documentName: citation.documentName,
+                        pageLabels: [pageLabel],
+                    })
+                }
+
+                return grouped
+            }, new Map<string, { documentName: string; pageLabels: string[] }>())
+        ).map(([, citationGroup]) => citationGroup),
     }))
 }

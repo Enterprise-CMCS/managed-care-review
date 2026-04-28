@@ -496,16 +496,21 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review pending',
-                })
+                await screen.findByText('Document review pending')
             ).toBeInTheDocument()
 
             expect(
                 screen.getByText(
-                    'We have not started reviewing the uploaded documents yet. Results will appear here when they are ready.'
+                    'We have not started reviewing the uploaded documents yet. You can continue reviewing and submit at any time.'
                 )
             ).toBeInTheDocument()
+
+            const contractDetailsSection = screen
+                .getByRole('heading', { name: 'Contract details' })
+                .closest('section')
+            expect(contractDetailsSection).toHaveTextContent(
+                'Document review pending'
+            )
         })
 
         it('shows an in-progress validation message while backend work is running', async () => {
@@ -540,9 +545,12 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Reviewing submission dates',
-                })
+                await screen.findByText('Document review in progress')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'We are reviewing the uploaded documents and comparing them with the submission dates.'
+                )
             ).toBeInTheDocument()
         })
 
@@ -578,9 +586,7 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review complete',
-                })
+                await screen.findByText('Document review complete')
             ).toBeInTheDocument()
         })
 
@@ -629,30 +635,22 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Reviewing submission dates',
-                })
+                await screen.findByText('Document review in progress')
             ).toBeInTheDocument()
 
             await vi.advanceTimersByTimeAsync(VALIDATION_TIMEOUT_MS)
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review still in progress',
-                })
+                await screen.findByText('Document review still in progress')
             ).toBeInTheDocument()
 
             await vi.advanceTimersByTimeAsync(VALIDATION_POLL_INTERVAL_MS)
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review results',
-                })
+                await screen.findByText('Document review complete')
             ).toBeInTheDocument()
             expect(
-                screen.queryByRole('heading', {
-                    name: 'Document review still in progress',
-                })
+                screen.queryByText('Document review still in progress')
             ).not.toBeInTheDocument()
         })
 
@@ -696,20 +694,23 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review complete with limited coverage',
-                })
-            ).toBeInTheDocument()
-            expect(
-                screen.getByText(
-                    'We finished comparing the submission dates with the uploaded documents we could review. Some uploaded documents could not be fully reviewed.'
+                await screen.findByText(
+                    'Document review complete with limited coverage'
                 )
             ).toBeInTheDocument()
             expect(
                 screen.getByText(
-                    'Limited coverage: 2 eligible uploaded documents were not fully reviewed (1 failed, 1 deferred).'
+                    'No date mismatches were found in the reviewed documents.'
                 )
             ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'No date mismatches were found in the reviewed documents.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByText(/Some uploaded documents could not be fully reviewed\./)
+            ).not.toBeInTheDocument()
         })
 
         it('shows a non-blocking unavailable message when validation status fails', async () => {
@@ -745,9 +746,7 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review unavailable',
-                })
+                await screen.findByText('Document review unavailable')
             ).toBeInTheDocument()
         })
     })
@@ -780,7 +779,7 @@ describe('ReviewSubmit', () => {
                                         outcome: 'match',
                                         confidence: 'high',
                                         message:
-                                            'Start date matches document text.',
+                                            'Document start date (01/01/2021) matches form start date (01/01/2021).',
                                         citations: [
                                             {
                                                 chunkId: 'scan-a.pdf::chunk-0',
@@ -795,7 +794,7 @@ describe('ReviewSubmit', () => {
                                         outcome: 'mismatch',
                                         confidence: 'medium',
                                         message:
-                                            'Document text indicates amendment effective date is January 1, 2021.',
+                                            'Document amendment effective date (01/01/2021) does not match form amendment effective date (02/01/2021).',
                                         citations: [
                                             {
                                                 chunkId: 'scan-a.pdf::chunk-1',
@@ -823,16 +822,43 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review results',
+                await screen.findByText('Document review complete')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'A date mismatch was found in the reviewed documents.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', {
+                    name: 'View document review',
+                })
+            ).toBeInTheDocument()
+
+            await userEvent.click(
+                screen.getByRole('button', { name: 'View document review' })
+            )
+
+            expect(
+                screen.getByRole('heading', {
+                    name: 'Document review details',
                 })
             ).toBeInTheDocument()
             expect(
                 screen.getByText(
-                    'We compared the dates in this submission with the uploaded documents. These results are advisory and do not block submission.'
+                    'These results are advisory and do not block submission.'
                 )
             ).toBeInTheDocument()
-            expect(screen.getByText('Show less')).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    '1 date needs review. 1 date matches the reviewed documents.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('button', {
+                    name: 'Hide document review',
+                })
+            ).toBeInTheDocument()
 
             expect(screen.getByText('Contract start date')).toBeInTheDocument()
             expect(
@@ -841,18 +867,34 @@ describe('ReviewSubmit', () => {
             expect(screen.getByText('Matches documents')).toBeInTheDocument()
             expect(screen.getByText('Needs review')).toBeInTheDocument()
             expect(
-                screen.getByText('Start date matches document text.')
-            ).toBeInTheDocument()
-            expect(
                 screen.getByText(
-                    'Document text indicates amendment effective date is January 1, 2021.'
+                    'Document start date (01/01/2021) matches form start date (01/01/2021).'
                 )
             ).toBeInTheDocument()
             expect(
-                screen.getAllByText('Supporting document reference')
-            ).toHaveLength(2)
+                screen.getByText(
+                    'Document amendment effective date (01/01/2021) does not match form amendment effective date (02/01/2021).'
+                )
+            ).toBeInTheDocument()
+            expect(screen.getAllByText('Submitted:')).toHaveLength(2)
+            expect(screen.getAllByText('Reviewed documents:')).toHaveLength(2)
+            expect(screen.getByText('02/01/2021')).toBeInTheDocument()
+            expect(screen.getAllByText('01/01/2021').length).toBeGreaterThan(1)
+            expect(
+                screen.getByText(
+                    'Submitted date differs from reviewed document date.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText('Reviewed reference:')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Reviewed references from 2 documents:'
+                )
+            ).toBeInTheDocument()
             const validationStatusRegion = within(
-                screen.getByLabelText('Document review status')
+                screen.getByLabelText('Document review details')
             )
             expect(
                 validationStatusRegion.getAllByText('scan-a.pdf')
@@ -869,9 +911,73 @@ describe('ReviewSubmit', () => {
             expect(
                 validationStatusRegion.getByText('Page 4')
             ).toBeInTheDocument()
+        })
+
+        it('shows a compact advisory note when a field could not be verified', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'mismatch',
+                                        confidence: 'high',
+                                        message:
+                                            'Document start date (01/01/2021) does not match form start date (02/01/2021).',
+                                        citations: [],
+                                    },
+                                    {
+                                        field: 'contractEndDate',
+                                        outcome: 'not-enough-evidence',
+                                        confidence: 'low',
+                                        message:
+                                            'Could not verify contract end date from the reviewed documents.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: aiValidationFeatureFlags,
+                }
+            )
+
+            await userEvent.click(
+                await screen.findByRole('button', {
+                    name: 'View document review',
+                })
+            )
+
             expect(
-                validationStatusRegion.getAllByText('Chunk order 0').length
-            ).toBeGreaterThan(0)
+                screen.getByText(
+                    'Reviewed documents did not provide enough clear date evidence for this field.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    '1 date needs review. 1 date could not be verified.'
+                )
+            ).toBeInTheDocument()
         })
 
         it('uses conservative findings copy when document coverage is partial', async () => {
@@ -924,23 +1030,199 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review results',
+                await screen.findByText(
+                    'Document review complete with limited coverage'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'No date mismatches were found in the reviewed documents.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByRole('button', { name: 'View document review' })
+            ).not.toBeInTheDocument()
+        })
+
+        it('renders mismatch findings on demand and allows the user to collapse them', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'mismatch',
+                                        confidence: 'high',
+                                        message:
+                                            'Start date does not match document text.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: aiValidationFeatureFlags,
+                }
+            )
+
+            expect(
+                await screen.findByRole('button', {
+                    name: 'View document review',
                 })
             ).toBeInTheDocument()
+
+            await userEvent.click(
+                screen.getByRole('button', { name: 'View document review' })
+            )
+
             expect(
-                screen.getByText(
-                    'We compared the dates in this submission with the uploaded documents we could review. These results are advisory and do not block submission.'
-                )
+                within(
+                    screen.getByLabelText('Document review details')
+                ).getByText('Result:')
             ).toBeInTheDocument()
             expect(
-                screen.getByText(
-                    'Limited coverage: 2 eligible uploaded documents were not fully reviewed (1 failed, 1 OCR-capped).'
-                )
+                within(
+                    screen.getByLabelText('Document review details')
+                ).getByText('Confidence:')
+            ).toBeInTheDocument()
+
+            await userEvent.click(
+                screen.getByRole('button', { name: 'Hide document review' })
+            )
+
+            expect(
+                screen.queryByText('Contract start date')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.getByRole('button', { name: 'View document review' })
             ).toBeInTheDocument()
         })
 
-        it('renders findings expanded first and allows the user to collapse them', async () => {
+        it('renders a neutral fallback when a mismatch finding has no citation details', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [
+                                    {
+                                        field: 'contractStartDate',
+                                        outcome: 'mismatch',
+                                        confidence: 'low',
+                                        message:
+                                            'The document text does not match the submission date.',
+                                        citations: [],
+                                    },
+                                ],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: aiValidationFeatureFlags,
+                }
+            )
+
+            expect(
+                await screen.findByRole('button', {
+                    name: 'View document review',
+                })
+            ).toBeInTheDocument()
+
+            await userEvent.click(
+                screen.getByRole('button', { name: 'View document review' })
+            )
+
+            expect(
+                screen.getByText('No reviewed document reference available.')
+            ).toBeInTheDocument()
+        })
+
+        it('does not render findings when validation is complete but results are empty', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                        element={<ReviewSubmit />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                            validationStatusMock({
+                                stage: 'complete',
+                                results: [],
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                    },
+                    featureFlags: aiValidationFeatureFlags,
+                }
+            )
+
+            expect(
+                await screen.findByText('Document review complete')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'No date mismatches were found in the reviewed documents.'
+                )
+            ).toBeInTheDocument()
+
+            expect(
+                screen.queryByRole('heading', {
+                    name: 'Document review details',
+                })
+            ).not.toBeInTheDocument()
+        })
+
+        it('does not offer expandable details when complete findings contain no mismatch', async () => {
             renderWithProviders(
                 <Routes>
                     <Route
@@ -982,122 +1264,15 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review results',
-                })
+                await screen.findByText('Document review complete')
             ).toBeInTheDocument()
             expect(
-                within(
-                    screen.getByLabelText('Document review status')
-                ).getByRole('table')
+                screen.getByText(
+                    'No date mismatches were found in the reviewed documents.'
+                )
             ).toBeInTheDocument()
-
-            await userEvent.click(
-                screen.getByRole('button', { name: 'Show less' })
-            )
-
             expect(
-                screen.queryByText('Contract start date')
-            ).not.toBeInTheDocument()
-            expect(
-                screen.getByRole('button', { name: 'Show more' })
-            ).toBeInTheDocument()
-        })
-
-        it('renders a neutral fallback when a finding has no citation details', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
-                        element={<ReviewSubmit />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageDraft(),
-                                    id: 'test-abc-123',
-                                    contractSubmissionType: 'HEALTH_PLAN',
-                                },
-                            }),
-                            validationStatusMock({
-                                stage: 'complete',
-                                results: [
-                                    {
-                                        field: 'contractStartDate',
-                                        outcome: 'not-enough-evidence',
-                                        confidence: 'low',
-                                        message:
-                                            'The document text does not provide enough evidence to verify this field.',
-                                        citations: [],
-                                    },
-                                ],
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
-                    },
-                    featureFlags: aiValidationFeatureFlags,
-                }
-            )
-
-            expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review results',
-                })
-            ).toBeInTheDocument()
-
-            expect(
-                screen.getByText('No supporting document reference available.')
-            ).toBeInTheDocument()
-        })
-
-        it('does not render findings when validation is complete but results are empty', async () => {
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
-                        element={<ReviewSubmit />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...mockContractPackageDraft(),
-                                    id: 'test-abc-123',
-                                    contractSubmissionType: 'HEALTH_PLAN',
-                                },
-                            }),
-                            validationStatusMock({
-                                stage: 'complete',
-                                results: [],
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
-                    },
-                    featureFlags: aiValidationFeatureFlags,
-                }
-            )
-
-            expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review complete',
-                })
-            ).toBeInTheDocument()
-
-            expect(
-                screen.queryByRole('heading', {
-                    name: 'Document review results',
-                })
+                screen.queryByRole('button', { name: 'View document review' })
             ).not.toBeInTheDocument()
         })
 
@@ -1144,14 +1319,12 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Refreshing document review',
-                })
+                await screen.findByText('Refreshing document review')
             ).toBeInTheDocument()
 
             expect(
                 screen.queryByRole('heading', {
-                    name: 'Document review results',
+                    name: 'Document review details',
                 })
             ).not.toBeInTheDocument()
         })
@@ -1191,9 +1364,7 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review pending',
-                })
+                await screen.findByText('Document review pending')
             ).toBeInTheDocument()
         })
 
@@ -1229,9 +1400,7 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Reviewing submission dates',
-                })
+                await screen.findByText('Document review in progress')
             ).toBeInTheDocument()
         })
 
@@ -1277,9 +1446,7 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Document review results',
-                })
+                await screen.findByText('Document review complete')
             ).toBeInTheDocument()
         })
 
@@ -1327,9 +1494,7 @@ describe('ReviewSubmit', () => {
             )
 
             expect(
-                await screen.findByRole('heading', {
-                    name: 'Refreshing document review',
-                })
+                await screen.findByText('Refreshing document review')
             ).toBeInTheDocument()
         })
 
@@ -1365,7 +1530,7 @@ describe('ReviewSubmit', () => {
                 await screen.findByRole('heading', { name: 'Contract details' })
             ).toBeInTheDocument()
             expect(
-                screen.queryByLabelText('Document review status')
+                screen.queryByLabelText('Document review summary')
             ).not.toBeInTheDocument()
             expect(
                 screen.queryByRole('heading', {

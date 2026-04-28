@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-054 Clarify multi-document evidence messaging on Review page`.
+The next implementation ticket is `AIFA-056 Clarify AI validation rollout and local-default configuration`.
 
 ## Completed
 
@@ -70,6 +70,7 @@ The next implementation ticket is `AIFA-054 Clarify multi-document evidence mess
 - AIFA-055 ✔ Fix stale in-progress banner after completed validation
 - AIFA-057 ✔ Add fast revalidation path for form-only edits
 - AIFA-058 ✔ Reduce first-pass latency for large submissions
+- AIFA-054 ✔ Clarify multi-document evidence messaging on Review page
 
 ## Current State
 
@@ -79,7 +80,7 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 - `validationStatus` returns staged status plus stored findings/results for the current `artifactVersion`.
 - locally triggered validation runs through the AI worker from the real app flow.
 - the worker reads uploaded PDFs, parses text, chunks text, retrieves evidence, validates against form values, and persists `status.json`, `chunks.json`, and `validation-result.json`.
-- the Review page renders findings and citations in a single expandable validation banner.
+- the Review page renders AI validation status inline in Contract details and shows expandable findings when review attention is needed.
 - the repo now includes a fixed corpus of local PDF scenarios for start/end-date evaluation and demo use.
 - the AI workspace now includes an evaluation runner that executes corpus scenarios through the real worker path and summarizes expected versus actual outcomes.
 
@@ -288,13 +289,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Clarify how multi-document evidence should be described on the Review page without changing validation outcomes.
-- Keep wording aligned with the current conservative evidence model and citations already returned by the worker.
-- Leave performance measurement and runtime optimization follow-ups to `AIFA-060`.
-
-## Follow-on UX Tickets
-
-- `AIFA-054 Clarify multi-document evidence messaging on Review page`
+- Clarify local AI validation defaults and rollout ergonomics so large-submission behavior does not depend on remembered env vars.
+- Keep runtime behavior unchanged while documenting or wiring the intended local defaults.
+- Leave timing instrumentation and maintenance follow-ons to `AIFA-060` and `AIFA-059`.
 
 ## Follow-on Performance Tickets
 
@@ -306,13 +303,19 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Recommended Upcoming Order
 
-1. `AIFA-054 Clarify multi-document evidence messaging on Review page`
-2. `AIFA-056 Clarify AI validation rollout and local-default configuration`
-3. `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`
+1. `AIFA-056 Clarify AI validation rollout and local-default configuration`
+2. `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`
+3. `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
 
 ## Follow-on Config Ticket
 
 - `AIFA-056 Clarify AI validation rollout and local-default configuration`
+
+## AIFA-054 Closeout Notes
+
+- The Review & Submit AI validation UI now uses inline contract-details status plus expandable stacked finding cards instead of a standalone banner/table treatment.
+- Multi-document support is only implied when actual returned citations span multiple documents; the UI now shows all returned citations for each finding and labels confidence explicitly.
+- The expanded findings layout is materially more readable and avoids the prior horizontal-scroll and badge-collision issues, but future UX changes in this area should still get real browser review because the focused tests here are behavior-level, not visual-regression coverage.
 
 ### AIFA-052 Add LLM-assisted first-pass reranking for large low-yield documents
 

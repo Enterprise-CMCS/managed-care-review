@@ -39,7 +39,10 @@ import { usePage } from '../../../../contexts/PageContext'
 import { activeFormPages } from '../../submissionUtils'
 import { featureFlags } from '@mc-review/common-code'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
-import { AIValidationStatusCard } from './AIvalidationStatusCard'
+import {
+    AIValidationStatusDetails,
+    AIValidationStatusHeader,
+} from './AIvalidationStatusCard'
 import type { AIValidationCoverageSummary } from './aiValidationCoverage'
 import { getAIValidationDisplayState } from './aiValidationStatus'
 import { mapAIValidationFindings } from './aiValidationFindings'
@@ -116,6 +119,9 @@ export const ReviewSubmit = (): React.ReactElement => {
     const validationFindings = validationStatus?.results ?? []
     const validationFindingDisplayItems =
         mapAIValidationFindings(validationFindings)
+    const hasMismatchFindings = validationFindings.some(
+        (finding) => finding.outcome === 'mismatch'
+    )
     // Findings should only render for the current completed artifact set. If
     // the artifact is stale, we keep showing status-only messaging until the
     // refreshed validation run catches up.
@@ -123,7 +129,6 @@ export const ReviewSubmit = (): React.ReactElement => {
         validationStatus?.stage === 'complete' &&
         !validationStatus.isStale &&
         validationFindingDisplayItems.length > 0
-    const validationBannerMode = showValidationFindings ? 'findings' : 'status'
 
     const contractReady = !loading && !error
     const validationReady = !validationLoading && !validationError
@@ -161,6 +166,8 @@ export const ReviewSubmit = (): React.ReactElement => {
             validationStatus?.stage !== 'complete' &&
             validationStatus?.stage !== 'failed',
     })
+    const [validationFindingsExpanded, setValidationFindingsExpanded] =
+        useState(false)
 
     const contract = data?.fetchContract.contract
     const activeMainContentId = 'reviewSubmitMainContent'
@@ -175,6 +182,12 @@ export const ReviewSubmit = (): React.ReactElement => {
         // validation attempt gets its own polling window.
         setValidationTimedOut(false)
     }, [validationTriggerKey])
+
+    useEffect(() => {
+        if (!showValidationFindings) {
+            setValidationFindingsExpanded(false)
+        }
+    }, [showValidationFindings])
 
     useEffect(() => {
         if (!hasContractId) {
@@ -282,41 +295,6 @@ export const ReviewSubmit = (): React.ReactElement => {
                 />
             </FormNotificationContainer>
             <GridContainer className={styles.reviewSectionWrapper}>
-                {aiValidationEnabled && (
-                    <section
-                        className={styles.validationStatusSection}
-                        aria-label="Document review status"
-                    >
-                        <AIValidationStatusCard
-                            mode={validationBannerMode}
-                            findings={
-                                showValidationFindings
-                                    ? validationFindingDisplayItems
-                                    : []
-                            }
-                            state={
-                                showInitialValidationLoading
-                                    ? {
-                                          title: 'Loading document review',
-                                          message:
-                                              'We are loading the latest document review results for this submission.',
-                                          alertType: 'info',
-                                          isPolling: true,
-                                      }
-                                    : validationError
-                                      ? {
-                                            title: 'Document review unavailable',
-                                            message:
-                                                'We could not load document review results right now, but you can still continue reviewing your submission.',
-                                            alertType: 'warning',
-                                            isPolling: false,
-                                        }
-                                      : validationDisplayState
-                            }
-                            coverageSummary={validationDisplayCoverageSummary}
-                        />
-                    </section>
-                )}
                 <SubmissionTypeSummarySection
                     contract={contract}
                     submissionName={submissionName}
@@ -329,6 +307,67 @@ export const ReviewSubmit = (): React.ReactElement => {
                     isStateUser={isStateUser}
                     editNavigateTo={getPath('SUBMISSIONS_CONTRACT_DETAILS')}
                     explainMissingData
+                    headerDetailComponent={
+                        aiValidationEnabled ? (
+                            <>
+                                <AIValidationStatusHeader
+                                    summaryMessage={
+                                        showInitialValidationLoading
+                                            ? 'Loading the latest document review results.'
+                                            : validationError
+                                              ? 'We could not load document review results right now. You can continue reviewing and submit without these results.'
+                                              : validationStatus?.stage ===
+                                                      'complete' &&
+                                                    !validationStatus.isStale
+                                                ? hasMismatchFindings
+                                                    ? 'A date mismatch was found in the reviewed documents.'
+                                                    : 'No date mismatches were found in the reviewed documents.'
+                                                : validationDisplayState.message
+                                    }
+                                    showDetailsToggle={
+                                        showValidationFindings &&
+                                        hasMismatchFindings
+                                    }
+                                    findingsExpanded={
+                                        validationFindingsExpanded
+                                    }
+                                    onToggleFindings={() =>
+                                        setValidationFindingsExpanded(
+                                            (expanded) => !expanded
+                                        )
+                                    }
+                                    state={
+                                        showInitialValidationLoading
+                                            ? {
+                                                  title: 'Loading document review',
+                                                  message:
+                                                      'Loading the latest document review results.',
+                                                  alertType: 'info',
+                                                  isPolling: true,
+                                              }
+                                            : validationError
+                                              ? {
+                                                    title: 'Document review unavailable',
+                                                    message:
+                                                        'We could not load document review results right now. You can continue reviewing and submit without these results.',
+                                                    alertType: 'warning',
+                                                    isPolling: false,
+                                                }
+                                              : validationDisplayState
+                                    }
+                                />
+                                {validationFindingsExpanded &&
+                                    showValidationFindings &&
+                                    hasMismatchFindings && (
+                                        <AIValidationStatusDetails
+                                            findings={
+                                                validationFindingDisplayItems
+                                            }
+                                        />
+                                    )}
+                            </>
+                        ) : undefined
+                    }
                 />
 
                 {isContractActionAndRateCertification && (
