@@ -993,7 +993,7 @@ The latest successful large-submission run completed in `gated-first-pass`, but 
 - The `still in progress` banner clears promptly once `validationStatus` returns complete
 - No duplicate validation trigger is introduced by the fix
 - Existing pending/in-progress/complete state transitions remain correct for normal runs"
-AIFA-056 Clarify AI validation rollout and local-default configuration,Backlog,7-Large Submission Hardening,Medium,"AIFA-050, AIFA-052, AIFA-053","Make AI validation runtime modes and local defaults explicit so engineers do not need to remember ad hoc env vars for large-submission behavior.
+AIFA-056 Clarify AI validation rollout and local-default configuration,Done,7-Large Submission Hardening,Medium,"AIFA-050, AIFA-052, AIFA-053","Make AI validation runtime modes and local defaults explicit so engineers do not need to remember ad hoc env vars for large-submission behavior.
 - Decide whether `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING` should be seeded by `./dev local` or remain an explicit opt-in
 - Document the intended defaults for local dev, evaluation runs, and production-like rollout modes
 - Keep the work to configuration ergonomics and documentation; do not change validation logic in this ticket
@@ -1047,3 +1047,25 @@ Why this matters:
 - Evaluation/reporting paths can read and surface the persisted timing data
 - The timing persistence is additive and does not alter status transitions, retrieval behavior, fallback behavior, or result-cache semantics
 - Future performance tickets can identify whether residual time is dominated by fetch/parse/ocr/embed or retrieval/validation using persisted data instead of object timestamps"
+AIFA-061 Retire obsolete AI validation config branches after rollout stabilization,Backlog,7-Large Submission Hardening,Low,"AIFA-056, AIFA-060","Remove internal AI validation config branches that are no longer needed once the current rollout path is stable, while preserving the one escape hatch that still matters for debugging and baseline comparison.
+- Remove `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING` once reranking is considered part of the normal first-pass path
+- Simplify local bootstrap and docs so `./dev local` reflects the intended default runtime behavior without a separate reranking toggle
+- Keep `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` available as the main debugging and safety override so engineers can still compare the gated path against the simpler all-document baseline unless later evidence shows that comparison is no longer needed
+- Keep the work scoped to config cleanup; do not change validation truth rules, fallback behavior, or accepted feature-flag rollout controls in this ticket
+
+Why this matters:
+After `AIFA-056` and `AIFA-060`, the reranking sub-flag should no longer survive just because it was useful during rollout. Cleaning up obsolete internal config branches before wider team handoff reduces environment archaeology without giving up the broader all-document baseline that is still useful for correctness comparison and debugging.","- Obsolete internal reranking config branches are removed without changing validation outcomes or regressing large-submission performance
+- Local bootstrap and documentation reflect the intended default path with fewer hidden behavior toggles
+- `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` remains available when this ticket closes unless a separate, explicit decision says the simpler all-document baseline is no longer needed for debugging and comparison
+- LaunchDarkly rollout gating and evaluation-only toggles are left unchanged unless separately ticketed"
+AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed,Backlog,7-Large Submission Hardening,Low,"AIFA-060, AIFA-061","Decide whether the broader `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` escape hatch can be removed after the gated path and timing instrumentation are stable enough that the simpler baseline path is no longer needed for debugging or correctness comparison.
+- Review post-hardening evidence and timing diagnostics to decide whether engineers still need the all-document baseline to investigate misses or compare conservative behavior
+- Remove the `all-doc` override only if the team is comfortable losing that comparison path
+- Simplify local/runtime docs and config handling accordingly if the override is retired
+- Keep the work scoped to config cleanup and operational confidence; do not change validation semantics in this ticket
+
+Why this matters:
+The `all-doc` override is more valuable than the reranking sub-flag, but it should not survive indefinitely by default if the gated path becomes the only path the team actually trusts and uses. Capturing its eventual reevaluation separately prevents it from becoming permanent by inertia.","- There is an explicit keep-or-remove decision for `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` based on observed debugging/comparison needs, not inertia
+- If removed, the cleanup does not regress validation outcomes, processing time, or fallback correctness
+- If retained, the ticket records the concrete reason the simpler all-document baseline is still operationally necessary
+- Local/runtime documentation matches the final decision"

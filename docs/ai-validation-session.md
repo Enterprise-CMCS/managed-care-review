@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-056 Clarify AI validation rollout and local-default configuration`.
+The next implementation ticket is `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`.
 
 ## Completed
 
@@ -71,6 +71,7 @@ The next implementation ticket is `AIFA-056 Clarify AI validation rollout and lo
 - AIFA-057 ✔ Add fast revalidation path for form-only edits
 - AIFA-058 ✔ Reduce first-pass latency for large submissions
 - AIFA-054 ✔ Clarify multi-document evidence messaging on Review page
+- AIFA-056 ✔ Clarify AI validation rollout and local-default configuration
 
 ## Current State
 
@@ -289,9 +290,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Clarify local AI validation defaults and rollout ergonomics so large-submission behavior does not depend on remembered env vars.
-- Keep runtime behavior unchanged while documenting or wiring the intended local defaults.
-- Leave timing instrumentation and maintenance follow-ons to `AIFA-060` and `AIFA-059`.
+- Persist explicit phase timings for `fetch`, `parse`, `ocr`, `chunk`, `embed`, `retrieval`, and `validation`.
+- Keep the timing path additive so validation semantics and rollout behavior stay unchanged.
+- Leave config cleanup and reuse-maintenance follow-ons to `AIFA-061`, `AIFA-062`, and `AIFA-059`.
 
 ## Follow-on Performance Tickets
 
@@ -303,13 +304,20 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Recommended Upcoming Order
 
-1. `AIFA-056 Clarify AI validation rollout and local-default configuration`
-2. `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`
-3. `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
+1. `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`
+2. `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
+3. `AIFA-061 Retire obsolete AI validation config branches after rollout stabilization`
 
 ## Follow-on Config Ticket
 
-- `AIFA-056 Clarify AI validation rollout and local-default configuration`
+- `AIFA-061 Retire obsolete AI validation config branches after rollout stabilization`
+- `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`
+
+## AIFA-056 Closeout Notes
+
+- `./dev local` now makes the current AI validation runtime easier to reason about by logging the effective work-selection mode and reranking state at app-api startup.
+- Local large-submission runs now promote LLM-assisted first-pass reranking by default while keeping `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` and `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING=false` available as explicit debugging overrides.
+- The next cleanup decision is no longer whether local defaults are documented; it is when to retire internal config branches like the reranking toggle and eventually the broader `all-doc` escape hatch without losing the simpler baseline comparison path too early.
 
 ## AIFA-054 Closeout Notes
 
@@ -412,6 +420,8 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - `AIFA-055` fixed the stale `still in progress` banner path: completed backend runs now reconcile in the UI without a hard refresh
 - `hasStrongResolvedFieldEvidenceForFallback()` was sufficient for the successful large-submission run, but it is still a pragmatic proxy rather than a richer evidence model and should remain a watched risk rather than a new ticket for now
 - local large-submission behavior is still partly controlled by explicit env configuration such as `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING`, so rollout/default expectations should be documented and made deliberate
+- once timing and rollout cleanup settle, the reranking sub-flag should be retired rather than kept indefinitely; preserve the broader `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` escape hatch longer than the reranking-specific toggle because it is still the simpler baseline path for correctness comparison and debugging
+- if the gated path plus timing diagnostics later make that simpler baseline unnecessary, retire `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` under a separate explicit cleanup decision rather than leaving it behind by inertia
 - artifact inspection for contract `4f1599ce-8cbf-4ea8-a76d-931c9bf0b0f6` showed the banner fix is working and the run completed cleanly in `gated-first-pass`, but total completion time was still longer than ideal
 - that same artifact set showed partial reuse on rerun after form edits: some first-pass documents were served from `stage: cache`, while others still re-entered fresh `embed` work
 - so we now need two separate speed follow-ons:

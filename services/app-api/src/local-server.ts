@@ -18,9 +18,32 @@ function seedLocalValidationDefaults() {
     process.env.VALIDATION_FUNCTION_NAME ||= 'local-ai-form-validation'
     process.env.AI_VALIDATION_ARTIFACT_BUCKET ||=
         'ai-form-augmentation-artifacts'
+    // Local large-submission validation is now intended to exercise the
+    // promoted first-pass path by default. Engineers can still disable it
+    // explicitly for debugging by setting the env var before startup.
+    process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING ||= 'true'
 }
 
 seedLocalValidationDefaults()
+
+function describeLocalValidationRuntime() {
+    const configuredWorkSelectionMode =
+        process.env.AI_VALIDATION_WORK_SELECTION_MODE?.trim() || ''
+    const workSelectionMode =
+        configuredWorkSelectionMode === ''
+            ? 'gated-first-pass (default)'
+            : configuredWorkSelectionMode
+
+    const llmFirstPassRerankingEnabled =
+        process.env.AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING === 'true'
+
+    return {
+        workSelectionMode,
+        llmFirstPassReranking: llmFirstPassRerankingEnabled
+            ? 'enabled'
+            : 'disabled via AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING=false',
+    }
+}
 
 const gqlHandlerPromise = import('./handlers/apollo_gql').then(
     ({ gqlHandler }) => gqlHandler
@@ -333,6 +356,8 @@ if (isNaN(PORT) || PORT < 1 || PORT > 65535) {
 const HOST = process.env.HOST || '127.0.0.1'
 
 app.listen(PORT, HOST, () => {
+    const localValidationRuntime = describeLocalValidationRuntime()
+
     console.info(
         '╔════════════════════════════════════════════════════════════╗'
     )
@@ -353,6 +378,12 @@ app.listen(PORT, HOST, () => {
     console.info(`   GraphQL:     http://${HOST}:${PORT}/local/graphql`)
     console.info(`   Health:      http://${HOST}:${PORT}/local/health_check`)
     console.info(`   Environment: ${process.env.VITE_APP_AUTH_MODE || 'LOCAL'}`)
+    console.info(
+        `   AI review:   workSelection=${localValidationRuntime.workSelectionMode}`
+    )
+    console.info(
+        `                reranking=${localValidationRuntime.llmFirstPassReranking}`
+    )
     console.info('')
     console.info('   Press Ctrl+C to stop')
     console.info('')

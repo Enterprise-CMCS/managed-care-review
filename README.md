@@ -308,6 +308,18 @@ On startup, the service can fetch initial flag values from real LaunchDarkly if 
 
 Both `app-web` (via Vite proxy) and `app-api` (via `LOCAL_LD_SERVICE_URL`) connect to this local service when `VITE_APP_AUTH_MODE=LOCAL`.
 
+### Local AI validation defaults
+
+`./dev local` now runs the real AI validation worker path with explicit local defaults for large-submission behavior.
+
+- Work selection defaults to `gated-first-pass`.
+- The `all-doc` escape hatch remains available with `AI_VALIDATION_WORK_SELECTION_MODE=all-doc`.
+- LLM-assisted first-pass reranking is enabled by default for `./dev local`.
+- You can still disable it for debugging with `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING=false`.
+- The local app-api startup log prints the effective work-selection mode and whether reranking is enabled so you do not need to rediscover env vars mid-debugging.
+
+For reproducible local runs, add any overrides you want to `.envrc.local` before starting `./dev local`.
+
 ## Contributing
 
 We welcome contributions to this project. MC Review is an internal CMS tool for facilitating the review of state Medicaid contracts. It is developed by a federal contracting team under contract with CMS and is deployed internally for that purpose. MC Review is built using agile development processes and accepts both issues and feature requests via GitHub issues on this repository. If you'd like to contribute back any changes to this code base, please create a Pull Request and a team member will review your work. While this repository is dedicated primarily to delivering MC Review to the government, if you find any parts of it useful or find any errors in the code we would love your contributions and feedback. All contributors are required to follow our [Code of Conduct](./CODE_OF_CONDUCT.md)
