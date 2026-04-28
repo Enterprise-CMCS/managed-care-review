@@ -1069,3 +1069,25 @@ The `all-doc` override is more valuable than the reranking sub-flag, but it shou
 - If removed, the cleanup does not regress validation outcomes, processing time, or fallback correctness
 - If retained, the ticket records the concrete reason the simpler all-document baseline is still operationally necessary
 - Local/runtime documentation matches the final decision"
+AIFA-063 Add LocalStack-backed rerun replay harness,Done,7-Large Submission Hardening,Medium,"AIFA-057, AIFA-059","Add a narrow LocalStack-backed rerun replay harness for the AI validation reuse path so future rerun changes can be checked against real artifact shapes instead of helper-only fixtures.
+- Seed LocalStack with realistic `status.json`, `validation-result.json`, and any needed document/chunk artifacts for rerun scenarios
+- Run the validation handler against the seeded state and assert the resulting artifact/diagnostic behavior
+- Keep the harness focused on the risky rerun cases: form-only reruns, OCR-capped skip reuse, changed artifact identity, and all-doc versus gated separation
+- Keep the work scoped to regression safety; do not change validation semantics, cache identity rules, or runtime defaults in this ticket
+
+Why this matters:
+`AIFA-059` made rerun coverage more artifact-shaped, but it still stops short of a full LocalStack replay harness. If more engineers touch reuse behavior later, a seeded-artifact harness provides a higher-confidence regression net without reopening the runtime fix itself.","- Rerun regression coverage executes against LocalStack-backed artifact shapes rather than helper-only fixtures
+- The harness proves form-only reruns reuse prior document artifacts and OCR-capped skip diagnostics when they should
+- The harness proves changed artifact identity and incompatible modes do not reuse when they should not
+- The ticket does not change validation outcomes, retrieval ordering, or final result-cache invalidation behavior"
+AIFA-064 Persist structured supporting citation data for Review-page trust signals,Backlog,4-Frontend Integration,Medium,"AIFA-020C, AIFA-053, AIFA-054","Extend AI validation result artifacts so the frontend can distinguish decisive citations from additional corroborating support when multiple reviewed documents agree with a field outcome.
+- Persist primary citations as the exact chunks used for the final field decision
+- Persist supporting citations or equivalent structured evidence metadata for additional agreeing documents/chunks that reinforce the same normalized field value
+- Persist a small field-level evidence summary such as considered document count and supporting document count without conflating retrieved candidates with true supporting evidence
+- Keep the work scoped to backend artifact/result shaping plus any minimal frontend wiring needed to consume the new structure; do not broaden retrieval, change validation semantics, or overstate weak/ambiguous evidence
+
+Why this matters:
+Current Review-page citations only show the final `results[].citations` array, even when retrieval diagnostics and artifact inspection show that multiple reviewed documents supported the same field outcome. That makes trustworthy results look thinner than they are, while also risking confusion between decisive evidence and merely considered candidates. A structured primary-versus-supporting model would let the UI communicate confidence more honestly.","- Validation artifacts clearly separate primary decision citations from additional corroborating support when more than one reviewed document agrees with a field outcome
+- The frontend can display stronger trust messaging without implying that every retrieved candidate was supporting evidence
+- Single-citation cases remain unchanged and do not claim multi-document support
+- The ticket does not change field outcomes, fallback behavior, or retrieval/ranking semantics"

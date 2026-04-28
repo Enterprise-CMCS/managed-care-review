@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-063 Add LocalStack-backed rerun replay harness`.
+The next implementation ticket is `AIFA-064 Persist structured supporting citation data for Review-page trust signals`.
 
 ## Completed
 
@@ -294,9 +294,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Add the narrow LocalStack-backed rerun replay harness for the reuse path before wider team handoff.
-- Keep it focused on form-only reruns, OCR-capped skip reuse, changed artifact identity, and all-doc versus gated separation.
-- Leave cache-identity hardening and FAISS evaluation as separate later work.
+- Extend validation result artifacts so Review can distinguish decisive citations from corroborating support.
+- Keep the UI work limited to consuming and presenting the new structured evidence model clearly.
+- Leave retrieval semantics and field outcomes unchanged while improving trust signals.
 
 ## Follow-on Performance Tickets
 
@@ -305,10 +305,11 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 ## Follow-on Maintenance Ticket
 
 - `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
+- `AIFA-064 Persist structured supporting citation data for Review-page trust signals`
 
 ## Recommended Upcoming Order
 
-1. `AIFA-063 Add LocalStack-backed rerun replay harness`
+1. `AIFA-064 Persist structured supporting citation data for Review-page trust signals`
 
 ## AIFA-056 Closeout Notes
 
@@ -340,6 +341,13 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 - `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` is intentionally retained for now as the simplest whole-document baseline path for debugging and correctness comparison.
 - The current repo state still treats `all-doc` as a meaningful strategy-level comparison mode in runtime selection, cache compatibility, evaluation wording, and focused resolver coverage.
 - The remaining handoff hardening work should now move to `AIFA-063` rather than revisiting config cleanup again immediately.
+
+## AIFA-063 Closeout Notes
+
+- The rerun/reuse path now has a dedicated LocalStack-backed replay harness that seeds real `status.json`, `validation-result.json`, `chunks.json`, and document-index artifacts before running the real validation handler.
+- The harness proves the highest-risk reuse scenarios directly: form-only reruns, OCR-capped skip reuse, changed artifact identity no-reuse, and `all-doc` versus gated separation.
+- Runtime behavior remains unchanged; this is regression coverage only.
+- In sandboxed environments the harness skips cleanly when LocalStack S3 is unreachable, but the live host-LocalStack verification passed before closeout.
 
 ## AIFA-054 Closeout Notes
 
@@ -456,4 +464,5 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - follow-up fresh runs on the same large document set stayed in the same lower-bound runtime band after the later execution-priority ordering tweak: contract `76c740d8-9dc3-4959-83a3-61560da19eb7` also completed in ~4s with `3 embed / 5 ocr-capped / 4 sufficient-first-pass-evidence`, while contracts `f29e305f-c152-4ea0-bc59-8ec1d4ac1bc8` and `0dd5084a-3dfc-4acb-ab53-bb080dd81454` both completed in ~4s with `4 embed / 4 ocr-capped / 4 sufficient-first-pass-evidence`
 - those later runs changed which first-pass PDFs were processed (`IEHP` entered `embed` while one OCR-capped parse dropped out), but did not show a measurable wall-clock improvement beyond the earlier bounded first-pass stop; treat the execution-priority tweak as safe so far but still unproven for latency reduction
 - a follow-on ticket is now needed for persisted phase timing diagnostics (`AIFA-060`) so future optimization work can target real `fetch/parse/ocr/chunk/embed/retrieval/validation` costs instead of relying on LocalStack object timestamps; keep that measurement work separate from `AIFA-058` so the proven first-pass latency win can close on its own scope
+- artifact review of a later 165-document batch confirmed that final mismatches can be strongly supported by multiple reviewed documents even when `results[].citations` only returns one decisive citation per field, so a follow-on ticket is now needed for structured primary-versus-supporting citation data (`AIFA-064`) rather than looser UI-only wording
 - the `AIFA-057` closeout left two low-priority maintenance follow-ons captured under `AIFA-059`: duplicated reuse-compatibility checks in the worker path and regression coverage that is still more helper-level than artifact-backed
