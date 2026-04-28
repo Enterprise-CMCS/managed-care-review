@@ -1,16 +1,18 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.pageContainer {
-    width: min(calc(100% - 2rem), custom.$mcr-container-max-width-fixed);
-    padding-top: uswds.units(4);
-    padding-bottom: 1.5rem;
-    padding-inline: 0 !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    margin-left: 2rem;
+@mixin contact-body-text {
+    @include custom.mcr-type-style(1rem, 400, 162%, 0.01rem);
+}
+
+.pageWrapper {
     margin-bottom: 2.625rem;
-    margin-right: 0;
+}
+
+.pageContainer {
+    max-width: custom.$mcr-container-max-width-fixed;
+    padding-top: uswds.units(4);
+    padding-left: 2rem;
 
     h1 {
         margin-top: 0;
@@ -19,31 +21,37 @@
 }
 
 .contactIntro {
-    @include custom.mcr-type-style(1rem, 400, 162%, 0.01rem);
-    margin: 0 0 2rem;
+    @include contact-body-text;
+    margin: 0 0 1rem;
+    max-width: custom.$mcr-container-max-width-fixed;
+}
+
+.contactLead {
+    @include contact-body-text;
+    margin: 0 0 0.5rem;
     max-width: custom.$mcr-container-max-width-fixed;
 }
 
 .contactList {
     margin: 0;
     max-width: custom.$mcr-container-max-width-fixed;
-    padding-left: 2rem;
+    padding-left: 1.5rem;
 
     li {
-        margin-bottom: 2.5rem;
+        margin-bottom: 1rem;
     }
 
     li:last-child {
         margin-bottom: 0;
     }
-
-    li > p:last-child {
-        @include custom.mcr-type-style(16px, 400, 162%, 0.16px);
-        margin: 0;
-    }
 }
 
 .contactListItem {
     @include custom.mcr-type-style(1rem, 700, 162%, 0.01rem);
-    margin: 0 0 0.25rem;
+    margin: 0;
+}
+
+.contactListItemLast {
+    @include contact-body-text;
+    margin: 0;
 }
