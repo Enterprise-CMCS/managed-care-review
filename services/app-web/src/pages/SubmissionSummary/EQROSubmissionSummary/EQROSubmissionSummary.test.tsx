@@ -8,6 +8,8 @@ import {
     mockValidStateUser,
     mockContractPackageSubmitted,
     mockContractPackageUnlockedWithUnlockedType,
+    mockEqroContractSubmittedUnderReview,
+    mockEqroContractSubmittedNotSubjectToReview,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../testHelpers'
 import { EQROSubmissionSummary } from './EQROSubmissionSummary'
@@ -420,6 +422,67 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
             expect(screen.getByText('Review decision')).toBeInTheDocument()
         })
 
+        it('shows error UI when no decision is avaliable', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'SUBMITTED',
+                consolidatedStatus: 'SUBMITTED',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+            })
+
+            // Expect Review decision to be visible for state users on submitted submissions
+            expect(screen.getByText('Review decision')).toBeInTheDocument()
+
+            const reviewDecisionSection =
+                screen.getByLabelText('Review decision')
+
+            // Expect review determination unavailable
+            expect(
+                within(reviewDecisionSection).queryByText(
+                    'Review determination unavailable'
+                )
+            ).toBeInTheDocument()
+        })
+
         it('shows Review decision when EQRO submission is Resubmitted', async () => {
             const contract = mockContractPackageSubmitted({
                 id: 'test-abc-123',
@@ -690,13 +753,33 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
         })
 
         it('does not render the withdraw button when EQRO submission is already withdrawn', async () => {
-            const contract = mockContractPackageSubmitted({
+            const contract = mockEqroContractSubmittedUnderReview({
                 id: 'test-abc-123',
                 contractSubmissionType: 'EQRO',
                 status: 'SUBMITTED',
             })
             contract.reviewStatus = 'WITHDRAWN'
             contract.consolidatedStatus = 'WITHDRAWN'
+            contract.reviewStatusActions = [
+                {
+                    __typename: 'ContractReviewStatusActions',
+                    updatedAt: '2026-03-24T16:35:27.793Z',
+                    updatedBy: null,
+                    dateApprovalReleasedToState: null,
+                    updatedReason: null,
+                    contractID: 'test-abc-123',
+                    actionType: 'WITHDRAW',
+                },
+                {
+                    __typename: 'ContractReviewStatusActions',
+                    updatedAt: '2026-03-23T16:35:27.793Z',
+                    updatedBy: null,
+                    dateApprovalReleasedToState: null,
+                    updatedReason: null,
+                    contractID: 'test-abc-123',
+                    actionType: 'UNDER_REVIEW',
+                },
+            ]
 
             renderWithProviders(
                 <Routes>
@@ -751,12 +834,21 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     name: 'Unlock submission',
                 })
             ).not.toBeInTheDocument()
+
+            const reviewDecisionSection =
+                screen.getByLabelText('Review decision')
+
+            expect(
+                within(reviewDecisionSection).queryByText(
+                    'Subject to formal review and approval'
+                )
+            ).toBeInTheDocument()
         })
     })
 
     describe('CMS User undo withdraw submission button', () => {
         it('renders the undo withdraw button when EQRO submission is Withdrawn', async () => {
-            const contract = mockContractPackageSubmitted({
+            const contract = mockEqroContractSubmittedUnderReview({
                 id: 'test-abc-123',
                 contractSubmissionType: 'EQRO',
                 status: 'SUBMITTED',
@@ -817,6 +909,15 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                     'No action can be taken on this submission in its current status.'
                 )
             ).not.toBeInTheDocument()
+
+            const reviewDecisionSection =
+                screen.getByLabelText('Review decision')
+
+            expect(
+                within(reviewDecisionSection).queryByText(
+                    'Subject to formal review and approval'
+                )
+            ).toBeInTheDocument()
         })
 
         it('does not render the undo withdraw button when EQRO submission is Submitted', async () => {
@@ -946,91 +1047,66 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
     })
 
     describe('NEW tag on review determination change', () => {
-        it('shows NEW tag when review determination changes on resubmission', async () => {
-            const contract = mockContractPackageSubmitted({
-                id: 'test-abc-123',
-                contractSubmissionType: 'EQRO',
-                status: 'RESUBMITTED',
-                consolidatedStatus: 'RESUBMITTED',
-            })
-            // Add a previous revision with a different determination (not subject to review)
-            // so that calcChangeInReviewDetermination detects the change.
-            contract.packageSubmissions.push({
-                ...contract.packageSubmissions[0],
-                contractRevision: {
-                    ...contract.packageSubmissions[0].contractRevision,
-                    formData: {
-                        ...contract.packageSubmissions[0].contractRevision
-                            .formData,
-                        eqroProvisionMcoEqrOrRelatedActivities: false,
-                    },
-                },
-            })
-
-            renderWithProviders(
-                <Routes>
-                    <Route element={<SubmissionSideNav />}>
-                        <Route
-                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
-                            element={<EQROSubmissionSummary />}
-                        />
-                    </Route>
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({
-                                user: mockValidCMSUser(),
-                                statusCode: 200,
-                            }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract,
-                            }),
-                            fetchContractWithQuestionsMockSuccess({
-                                contract,
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/eqro/test-abc-123',
-                    },
-                    featureFlags: {
-                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
-                    },
-                }
-            )
-
-            await waitFor(() => {
-                expect(
-                    screen.getByTestId('submission-summary')
-                ).toBeInTheDocument()
-            })
-
-            // Expect NEW tag to be visible when determination changed
-            expect(screen.getByText('NEW')).toBeInTheDocument()
-        })
-
         it('does not show NEW tag when review determination is unchanged on resubmission', async () => {
-            const contract = mockContractPackageSubmitted({
+            const contract = mockEqroContractSubmittedNotSubjectToReview({
                 id: 'test-abc-123',
                 contractSubmissionType: 'EQRO',
                 status: 'RESUBMITTED',
-                consolidatedStatus: 'RESUBMITTED',
+                consolidatedStatus: 'NOT_SUBJECT_TO_REVIEW',
             })
             // Add a previous revision with the same determination (subject to review)
             contract.packageSubmissions.push({
                 ...contract.packageSubmissions[0],
                 contractRevision: {
                     ...contract.packageSubmissions[0].contractRevision,
-                    formData: {
-                        ...contract.packageSubmissions[0].contractRevision
-                            .formData,
-                        eqroProvisionMcoEqrOrRelatedActivities: true,
-                        eqroProvisionMcoNewOptionalActivity: true,
-                        eqroProvisionNewMcoEqrRelatedActivities: false,
+                    unlockInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2026-03-23T17:09:40.003Z',
+                        updatedBy: {
+                            __typename: 'UpdatedBy',
+                            email: 'zuko@example.com',
+                            role: 'CMS_USER',
+                            familyName: 'Hotman',
+                            givenName: 'Zuko',
+                        },
+                        updatedReason:
+                            'Unlocking submission to make it subject to review',
+                    },
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2026-03-24T17:10:31.154Z',
+                        updatedBy: {
+                            __typename: 'UpdatedBy',
+                            email: 'aang@example.com',
+                            role: 'STATE_USER',
+                            familyName: 'Avatar',
+                            givenName: 'Aang',
+                        },
+                        updatedReason:
+                            'Resubmitting to test that the contract is now subject to review',
                     },
                 },
             })
+            contract.reviewStatusActions = [
+                {
+                    __typename: 'ContractReviewStatusActions',
+                    updatedAt: '2026-03-24T16:35:27.793Z',
+                    updatedBy: null,
+                    dateApprovalReleasedToState: null,
+                    updatedReason: null,
+                    contractID: 'test-abc-123',
+                    actionType: 'NOT_SUBJECT_TO_REVIEW',
+                },
+                {
+                    __typename: 'ContractReviewStatusActions',
+                    updatedAt: '2026-03-23T16:35:27.793Z',
+                    updatedBy: null,
+                    dateApprovalReleasedToState: null,
+                    updatedReason: null,
+                    contractID: 'test-abc-123',
+                    actionType: 'NOT_SUBJECT_TO_REVIEW',
+                },
+            ]
 
             renderWithProviders(
                 <Routes>
@@ -1071,31 +1147,81 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                 ).toBeInTheDocument()
             })
 
+            const reviewDecisionSection =
+                screen.getByLabelText('Review decision')
+
             // Expect NEW tag to NOT be visible when determination unchanged
-            expect(screen.queryByText('NEW')).not.toBeInTheDocument()
+            expect(
+                within(reviewDecisionSection).queryByText('NEW')
+            ).not.toBeInTheDocument()
         })
 
         it('shows NEW tag when determination changes from subject to not subject to review', async () => {
-            const contract = mockContractPackageSubmitted({
+            const contract = mockEqroContractSubmittedNotSubjectToReview({
                 id: 'test-abc-123',
                 contractSubmissionType: 'EQRO',
                 status: 'RESUBMITTED',
                 consolidatedStatus: 'NOT_SUBJECT_TO_REVIEW',
             })
             // Add a previous revision that was subject to review
-            contract.packageSubmissions.push({
-                ...contract.packageSubmissions[0],
-                contractRevision: {
-                    ...contract.packageSubmissions[0].contractRevision,
-                    formData: {
-                        ...contract.packageSubmissions[0].contractRevision
-                            .formData,
-                        eqroProvisionMcoEqrOrRelatedActivities: true,
-                        eqroProvisionMcoNewOptionalActivity: true,
-                        eqroProvisionNewMcoEqrRelatedActivities: false,
+            contract.packageSubmissions = [
+                {
+                    ...contract.packageSubmissions[0],
+                    submitInfo: {
+                        __typename: 'UpdateInformation',
+                        updatedAt: '2026-03-24T17:01:31.902Z',
+                        updatedBy: {
+                            __typename: 'UpdatedBy',
+                            email: 'aang@example.com',
+                            role: 'STATE_USER' as const,
+                            familyName: 'Avatar',
+                            givenName: 'Aang',
+                        },
+                        updatedReason: 'Resubmission',
+                    },
+                    contractRevision: {
+                        ...contract.packageSubmissions[0].contractRevision,
+                        id: 'resubmission-submission-id',
                     },
                 },
-            })
+                {
+                    ...contract.packageSubmissions[0],
+                    contractRevision: {
+                        ...contract.packageSubmissions[0].contractRevision,
+                        id: 'initial-submission-id',
+                        formData: {
+                            ...contract.packageSubmissions[0].contractRevision
+                                .formData,
+                            managedCareEntities: ['MCO'],
+                            eqroNewContractor: true,
+                            eqroProvisionMcoNewOptionalActivity: true,
+                            eqroProvisionNewMcoEqrRelatedActivities: true,
+                            eqroProvisionChipEqrRelatedActivities: true,
+                            eqroProvisionMcoEqrOrRelatedActivities: true,
+                        },
+                    },
+                },
+            ]
+            contract.reviewStatusActions = [
+                {
+                    __typename: 'ContractReviewStatusActions',
+                    updatedAt: '2026-03-24T16:35:27.793Z',
+                    updatedBy: null,
+                    dateApprovalReleasedToState: null,
+                    updatedReason: null,
+                    contractID: 'test-abc-123',
+                    actionType: 'NOT_SUBJECT_TO_REVIEW',
+                },
+                {
+                    __typename: 'ContractReviewStatusActions',
+                    updatedAt: '2026-03-23T16:35:27.793Z',
+                    updatedBy: null,
+                    dateApprovalReleasedToState: null,
+                    updatedReason: null,
+                    contractID: 'test-abc-123',
+                    actionType: 'UNDER_REVIEW',
+                },
+            ]
 
             renderWithProviders(
                 <Routes>
@@ -1136,8 +1262,13 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                 ).toBeInTheDocument()
             })
 
+            const reviewDecisionSection =
+                screen.getByLabelText('Review decision')
+
             // Expect NEW tag to be visible when determination changed
-            expect(screen.getByText('NEW')).toBeInTheDocument()
+            expect(
+                within(reviewDecisionSection).queryByText('NEW')
+            ).toBeInTheDocument()
         })
     })
 })

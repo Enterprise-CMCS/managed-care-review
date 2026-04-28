@@ -35,13 +35,18 @@ export type EQROSubmissionTypeSummarySection = {
 
 const calcChangeInReviewDetermination = (
     contract: Contract | UnlockedContract,
-    currentDetermination: boolean
+    currentDetermination?: boolean
 ): boolean => {
     if (
         contract.status === 'DRAFT' ||
         contract.status === 'UNLOCKED' ||
         contract.status === 'SUBMITTED'
     ) {
+        return false
+    }
+
+    // Return false if current determination is unavailable
+    if (currentDetermination === undefined) {
         return false
     }
 
@@ -88,9 +93,18 @@ export const EQROSubmissionTypeSummarySection = ({
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
     const isDraft = contract.status === 'DRAFT'
-    const subjectToReview =
-        contract.consolidatedStatus !== 'NOT_SUBJECT_TO_REVIEW'
     const showReviewDetermination = !(isStateUser && (isUnlocked || isDraft))
+
+    const lastReviewDetermination = contract.reviewStatusActions?.find(
+        (action) =>
+            action.actionType === 'UNDER_REVIEW' ||
+            action.actionType === 'NOT_SUBJECT_TO_REVIEW'
+    )
+
+    const subjectToReview =
+        lastReviewDetermination === undefined
+            ? undefined
+            : lastReviewDetermination.actionType === 'UNDER_REVIEW'
 
     const hasReviewDeterminationChanged = calcChangeInReviewDetermination(
         contract,
