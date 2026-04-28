@@ -313,7 +313,7 @@ Both `app-web` (via Vite proxy) and `app-api` (via `LOCAL_LD_SERVICE_URL`) conne
 `./dev local` now runs the real AI validation worker path with explicit local defaults for large-submission behavior.
 
 - Work selection defaults to `gated-first-pass`.
-- The `all-doc` escape hatch remains available with `AI_VALIDATION_WORK_SELECTION_MODE=all-doc`.
+- The `all-doc` escape hatch remains available with `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` as the simplest baseline path for debugging and correctness comparison.
 - LLM-assisted first-pass reranking is part of the normal `gated-first-pass` path.
 - The local app-api startup log prints the effective work-selection mode so you do not need to rediscover env vars mid-debugging.
 

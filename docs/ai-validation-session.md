@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`.
+The next implementation ticket is `AIFA-063 Add LocalStack-backed rerun replay harness`.
 
 ## Completed
 
@@ -75,6 +75,7 @@ The next implementation ticket is `AIFA-062 Reevaluate and retire all-doc work-s
 - AIFA-060 ✔ Persist AI validation phase timing diagnostics in artifacts
 - AIFA-059 ✔ Clean up reuse compatibility checks and add artifact-backed rerun regression coverage
 - AIFA-061 ✔ Retire obsolete AI validation config branches after rollout stabilization
+- AIFA-062 ✔ Reevaluate and retire all-doc work-selection escape hatch if no longer needed
 
 ## Current State
 
@@ -293,9 +294,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Decide whether the broader `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` escape hatch still earns its maintenance cost now that reranking is part of the normal gated path.
-- Use the current timing diagnostics and recent large-submission behavior as the basis for that decision, not just config cleanliness.
-- Leave the LocalStack-backed rerun replay harness as a separate safety follow-on under `AIFA-063`.
+- Add the narrow LocalStack-backed rerun replay harness for the reuse path before wider team handoff.
+- Keep it focused on form-only reruns, OCR-capped skip reuse, changed artifact identity, and all-doc versus gated separation.
+- Leave cache-identity hardening and FAISS evaluation as separate later work.
 
 ## Follow-on Performance Tickets
 
@@ -307,12 +308,7 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Recommended Upcoming Order
 
-1. `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`
-2. `AIFA-063 Add LocalStack-backed rerun replay harness`
-
-## Follow-on Config Ticket
-
-- `AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed`
+1. `AIFA-063 Add LocalStack-backed rerun replay harness`
 
 ## AIFA-056 Closeout Notes
 
@@ -338,6 +334,12 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 - `AI_VALIDATION_ENABLE_LLM_FIRST_PASS_RERANKING` is now retired; reranking is part of the normal `gated-first-pass` path instead of a separate internal toggle.
 - Local bootstrap and README guidance now reflect the stable path directly, while `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` remains the only broader debugging and baseline-comparison override.
 - The remaining config cleanup decision is now narrower: whether keeping `all-doc` still provides enough operational value to justify its extra branch and docs surface.
+
+## AIFA-062 Closeout Notes
+
+- `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` is intentionally retained for now as the simplest whole-document baseline path for debugging and correctness comparison.
+- The current repo state still treats `all-doc` as a meaningful strategy-level comparison mode in runtime selection, cache compatibility, evaluation wording, and focused resolver coverage.
+- The remaining handoff hardening work should now move to `AIFA-063` rather than revisiting config cleanup again immediately.
 
 ## AIFA-054 Closeout Notes
 

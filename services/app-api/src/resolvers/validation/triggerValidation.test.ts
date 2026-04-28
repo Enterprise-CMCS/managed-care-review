@@ -209,7 +209,7 @@ describe('triggerValidationResolver', () => {
         expect(sentCommand).toBeInstanceOf(InvokeCommand)
     })
 
-    it('keeps the all-doc escape hatch when runtime default is overridden', async () => {
+    it('keeps the all-doc baseline-comparison override when runtime default is overridden', async () => {
         const store = buildStore(
             buildContractWithDraft([
                 'allusers/1776374348125-doc-a.pdf',

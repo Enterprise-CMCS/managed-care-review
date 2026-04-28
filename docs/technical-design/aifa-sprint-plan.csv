@@ -1058,7 +1058,7 @@ After `AIFA-056` and `AIFA-060`, the reranking sub-flag should no longer survive
 - Local bootstrap and documentation reflect the intended default path with fewer hidden behavior toggles
 - `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` remains available when this ticket closes unless a separate, explicit decision says the simpler all-document baseline is no longer needed for debugging and comparison
 - LaunchDarkly rollout gating and evaluation-only toggles are left unchanged unless separately ticketed"
-AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed,Backlog,7-Large Submission Hardening,Low,"AIFA-060, AIFA-061","Decide whether the broader `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` escape hatch can be removed after the gated path and timing instrumentation are stable enough that the simpler baseline path is no longer needed for debugging or correctness comparison.
+AIFA-062 Reevaluate and retire all-doc work-selection escape hatch if no longer needed,Done,7-Large Submission Hardening,Low,"AIFA-060, AIFA-061","Decide whether the broader `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` escape hatch can be removed after the gated path and timing instrumentation are stable enough that the simpler baseline path is no longer needed for debugging or correctness comparison.
 - Review post-hardening evidence and timing diagnostics to decide whether engineers still need the all-document baseline to investigate misses or compare conservative behavior
 - Remove the `all-doc` override only if the team is comfortable losing that comparison path
 - Simplify local/runtime docs and config handling accordingly if the override is retired

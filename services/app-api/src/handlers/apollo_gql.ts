@@ -59,8 +59,9 @@ function resolveValidationWorkSelectionMode(
     value: string | undefined
 ): RuntimeValidationWorkSelectionMode {
     // AIFA-050 promotes the evaluated gated-first-pass strategy into the
-    // product runtime by default. The all-doc path remains available as an
-    // explicit escape hatch through config instead of a dynamic artifact read.
+    // product runtime by default. AIFA-062 keeps the all-doc path available
+    // because it is still the simplest whole-document baseline for debugging
+    // and correctness comparison, not just a leftover rollout toggle.
     if (value == null || value.trim() === '') {
         return 'gated-first-pass'
     }
