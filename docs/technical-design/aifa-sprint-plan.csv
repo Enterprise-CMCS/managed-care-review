@@ -382,7 +382,7 @@ This is the user-visible payoff of the whole system. If the results are not unde
 - The UI handles empty, partial, and multiple-result states gracefully
 - Results are clearly framed as warnings/advisory output rather than mandatory blockers
 - The rendering logic is simple enough to test and maintain"
-AIFA-019A Wire triggerValidation into Review flow,Complete,4-Frontend Integration,High,"AIFA-016, AIFA-017, AIFA-018","Start AI validation from the real product flow instead of relying on manual or out-of-band triggering.
+AIFA-019A Wire triggerValidation into Review flow,Done,4-Frontend Integration,High,"AIFA-016, AIFA-017, AIFA-018","Start AI validation from the real product flow instead of relying on manual or out-of-band triggering.
 - Decide the exact trigger point in the Review-page lifecycle
 - Call `triggerValidation` at a predictable user-safe moment
 - Avoid duplicate triggering on every render, refresh, or poll cycle
@@ -395,7 +395,7 @@ The backend trigger and polling pieces already exist, but users will only see 'V
 - A changed draft document set can cause a fresh validation run when appropriate
 - The Review page moves beyond 'Validation pending' after a real in-app trigger
 - The trigger behavior is testable from the app, not only from direct API/manual calls"
-AIFA-019B Local trigger path for ./dev local,Complete,4-Frontend Integration,High,"AIFA-016, AIFA-017, AIFA-019A","Make locally triggered validation actually execute when running `./dev local`.
+AIFA-019B Local trigger path for ./dev local,Done,4-Frontend Integration,High,"AIFA-016, AIFA-017, AIFA-019A","Make locally triggered validation actually execute when running `./dev local`.
 - Choose a local execution strategy for `triggerValidation`
 - Either invoke the validation worker directly in local mode or provide a local-compatible shim
 - Keep deployed Lambda behavior unchanged
@@ -408,7 +408,7 @@ Without a local trigger path, the frontend can be wired correctly and still neve
 - The Review page can progress through pending, in-progress, and complete states locally
 - Local-only trigger behavior is isolated from deployed Lambda behavior
 - Another engineer can reproduce the local trigger flow without rediscovering setup"
-AIFA-020A Execute full validation pipeline from validationHandler,Complete,3-Infra & API,High,"AIFA-015, AIFA-019B","Replace the current status-only validation handler with the real end-to-end pipeline.
+AIFA-020A Execute full validation pipeline from validationHandler,Done,3-Infra & API,High,"AIFA-015, AIFA-019B","Replace the current status-only validation handler with the real end-to-end pipeline.
 - Load the current chunk artifact instead of assuming prompt inputs are already in memory
 - Embed stored chunks and build the retrieval index inside the handler
 - Build the validation prompt from real retrieved chunks and current form field values
@@ -422,7 +422,7 @@ Right now the Review page can show progress state changes, but the worker does n
 - The stored results reflect the current form values and retrieved chunk evidence
 - `status.json` advances through real pipeline stages and reports failures with useful error text
 - The Review page can display document-backed mismatches after a real product-triggered run"
-AIFA-020B Display validation citations and evidence details,Complete,4-Frontend Integration,High,"AIFA-019, AIFA-020A","Make Review-page findings useful by showing the evidence behind each validation result.
+AIFA-020B Display validation citations and evidence details,Done,4-Frontend Integration,High,"AIFA-019, AIFA-020A","Make Review-page findings useful by showing the evidence behind each validation result.
 - Expand the findings UI to show chunk-level citations for each field result
 - Display document name, page when available, and any other useful source context already stored in the result artifact
 - Distinguish clearly between a high-confidence mismatch, a low-confidence mismatch, and not-enough-evidence
