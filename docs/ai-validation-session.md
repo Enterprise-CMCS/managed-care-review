@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-065 Stabilize first-pass reuse after small document-set changes`.
+The next implementation ticket is `AIFA-066 Persist end-to-end validation lifecycle timing for trigger-to-visible latency`.
 
 ## Completed
 
@@ -77,6 +77,7 @@ The next implementation ticket is `AIFA-065 Stabilize first-pass reuse after sma
 - AIFA-061 ✔ Retire obsolete AI validation config branches after rollout stabilization
 - AIFA-062 ✔ Reevaluate and retire all-doc work-selection escape hatch if no longer needed
 - AIFA-064 ✔ Persist structured supporting citation data for Review-page trust signals
+- AIFA-065 ✔ Stabilize first-pass reuse after small document-set changes
 
 ## Current State
 
@@ -239,6 +240,14 @@ The local PoC now works end to end from the actual form flow, has a reusable eva
 
 Use the `AIFA-049C` promotion decision to choose the runtime work-selection default explicitly while preserving a safe escape hatch.
 
+### AIFA-066 Persist end-to-end validation lifecycle timing for trigger-to-visible latency
+
+Persist additive lifecycle timing so local artifact review can explain why Review & Submit sometimes sits in `processing` and crosses into `still in progress` even when the final worker-phase artifact looks fast.
+
+- Record enough timing to separate trigger acceptance, first in-progress status write, final completion write, and frontend-visible timeout crossing.
+- Keep the work diagnostic-only; do not change validation behavior or timeout policy.
+- Reuse the current LocalStack-backed rerun scenarios to verify the new timing data explains ambiguous slow local runs.
+
 - Make runtime default selection explicit rather than implicitly staying on `all-doc`.
 - Allow promoted `gated-first-pass` default only when the evaluated decision supports it.
 - Preserve an explicit `all-doc` override for local debugging and safety.
@@ -295,9 +304,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Use the persisted timings plus artifact-backed replay to identify why small document-set edits still broaden the active first-pass set.
-- Focus the next optimization on avoiding fresh parse/OCR/embed work when reusable first-pass evidence is still sufficient.
-- Keep validation outcomes, fallback behavior, and work-selection correctness unchanged.
+- Persist enough lifecycle timing to separate trigger/startup delay from worker-phase time and frontend polling lag.
+- Reproduce the long `processing` to `still in progress` path with the current local rerun flow and verify the new timings explain it.
+- Keep the work diagnostic-only; do not change validation semantics or timeout policy.
 
 ## Follow-on Performance Tickets
 
@@ -309,7 +318,14 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Recommended Upcoming Order
 
-1. `AIFA-065 Stabilize first-pass reuse after small document-set changes`
+1. `AIFA-066 Persist end-to-end validation lifecycle timing for trigger-to-visible latency`
+
+## AIFA-065 Closeout Notes
+
+- Gated first-pass reruns now re-check sufficiency after a smaller bounded batch so cached early evidence can stop the run before newly admitted mid-ranked PDFs incur fresh parse/OCR/embed work.
+- A LocalStack-backed replay now proves the targeted reuse win directly: six cached first-pass PDFs can satisfy validation while later ranked peers are skipped with `sufficient-first-pass-evidence` instead of re-entering `embed`.
+- Validation outcomes, fallback behavior, work-selection semantics, and runtime defaults remain unchanged; this is a narrow execution-cost optimization.
+- A later local rerun still exposed a separate end-to-end timing blind spot, so `AIFA-066` is now needed before making stronger trigger-to-visible latency claims.
 
 ## AIFA-064 Closeout Notes
 
@@ -472,4 +488,5 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - a follow-on ticket is now needed for persisted phase timing diagnostics (`AIFA-060`) so future optimization work can target real `fetch/parse/ocr/chunk/embed/retrieval/validation` costs instead of relying on LocalStack object timestamps; keep that measurement work separate from `AIFA-058` so the proven first-pass latency win can close on its own scope
 - artifact review of a later 165-document batch confirmed that final mismatches can be strongly supported by multiple reviewed documents even when `results[].citations` only returns one decisive citation per field, so a follow-on ticket is now needed for structured primary-versus-supporting citation data (`AIFA-064`) rather than looser UI-only wording
 - fresh artifact review for contract `1946e3be-c904-4099-abc0-d8a87b8c6a2a` showed another remaining large-submission bottleneck after a small document-set edit: removing one rates file changed the artifact version, reused many cached first-pass PDFs, but still admitted a slightly broader first-pass set and spent ~7.2s in parse/OCR again while two newly active date-governing PDFs re-entered `embed`; capture this separately as `AIFA-065` so first-pass reuse stability can be optimized without mixing it into citation trust-signal work
+- a later rerun for that same contract exposed a separate observability gap: the final artifact showed near-zero `parse/ocr/embed` time while the Review page still sat in `processing` long enough to hit the non-blocking `still in progress` banner, which means the current artifacts still cannot separate worker-phase cost from local worker startup, status-write timing, stale refresh lag, or frontend polling delay; capture that timing gap as `AIFA-066`
 - the `AIFA-057` closeout left two low-priority maintenance follow-ons captured under `AIFA-059`: duplicated reuse-compatibility checks in the worker path and regression coverage that is still more helper-level than artifact-backed

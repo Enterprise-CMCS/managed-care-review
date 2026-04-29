@@ -1091,7 +1091,7 @@ Current Review-page citations only show the final `results[].citations` array, e
 - The frontend can display stronger trust messaging without implying that every retrieved candidate was supporting evidence
 - Single-citation cases remain unchanged and do not claim multi-document support
 - The ticket does not change field outcomes, fallback behavior, or retrieval/ranking semantics"
-AIFA-065 Stabilize first-pass reuse after small document-set changes,Backlog,7-Large Submission Hardening,Medium,"AIFA-057, AIFA-058, AIFA-059, AIFA-060, AIFA-063","Optimize large-submission reruns where a small document-set change currently invalidates enough first-pass selection to force fresh parse/OCR/embed work on newly admitted date-governing PDFs.
+AIFA-065 Stabilize first-pass reuse after small document-set changes,Done,7-Large Submission Hardening,Medium,"AIFA-057, AIFA-058, AIFA-059, AIFA-060, AIFA-063","Optimize large-submission reruns where a small document-set change currently invalidates enough first-pass selection to force fresh parse/OCR/embed work on newly admitted date-governing PDFs.
 - Use the persisted phase timings plus LocalStack artifact replay to identify why small document-set edits still broaden the active first-pass set
 - Reduce repeated parse/OCR/embed cost when the vast majority of reusable first-pass evidence is unchanged, without changing validation semantics
 - Preserve current correctness guarantees around artifact identity, fallback behavior, and work-selection safety
@@ -1102,3 +1102,14 @@ Artifact review for contract `1946e3be-c904-4099-abc0-d8a87b8c6a2a` showed that 
 - Focused artifact-backed validation proves the optimization against realistic rerun cases
 - Validation outcomes, fallback behavior, and work-selection correctness remain unchanged
 - The optimization is backed by updated timing/artifact evidence rather than anecdotal page timing alone"
+AIFA-066 Persist end-to-end validation lifecycle timing for trigger-to-visible latency,Backlog,7-Large Submission Hardening,Medium,"AIFA-060, AIFA-063, AIFA-065","Persist coarse end-to-end lifecycle timing and transition metadata so engineers can distinguish worker-phase cost from queue/startup/polling delay when Review & Submit appears stuck in processing.
+- Record lifecycle timestamps or durations for at least trigger accepted, first in-progress status write, final completed result write, and any timeout-crossing state that the frontend surfaces
+- Keep the instrumentation additive and diagnostic-only; do not change validation semantics, work-selection behavior, or timeout policy in this ticket
+- Make the data available through existing artifacts or status/result payloads so local artifact review can explain user-visible latency without guessing
+- Use the current local trigger/poll flow and LocalStack-backed rerun scenarios to verify the timing shape captures the slow-path gap that phaseTimingsMs alone misses
+
+Why this matters:
+Recent reruns for contract `1946e3be-c904-4099-abc0-d8a87b8c6a2a` showed a mismatch between persisted worker phase timings and the actual Review-page experience: the final artifact showed near-zero parse/OCR/embed time, yet the page still sat in processing long enough to cross into the non-blocking `still in progress` state. The current artifacts overwrite `status.json` in place and only persist worker-phase timing, so there is no reliable way to separate local worker startup, queueing, stale-result refresh, and frontend polling lag from the final validation pass itself.","- Artifacts or status payloads capture enough lifecycle timing to estimate trigger-to-visible completion without relying on anecdotal browser timing
+- Engineers can distinguish worker-phase cost from startup/queueing/polling delay for reruns and large submissions
+- The instrumentation remains diagnostic-only and does not alter validation outcomes, fallback behavior, or runtime defaults
+- At least one realistic local rerun path demonstrates that the new timing data explains a previously ambiguous long-running Review-page state"

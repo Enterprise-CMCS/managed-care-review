@@ -114,7 +114,9 @@ export const LARGE_BATCH_OCR_FALLBACK_LIMIT = 3
 // Keep the diagnostic first-pass set intentionally small enough to stress
 // whether cheap document ranking would surface useful evidence early.
 export const DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT = 12
-const FIRST_PASS_INDEXING_BATCH_SIZE = 8
+// Keep the first-pass batch small enough that cached early evidence can stop
+// the run before newly admitted mid-ranked peers incur fresh OCR/embed work.
+const FIRST_PASS_INDEXING_BATCH_SIZE = 6
 // Pull a broader pool than the final prompt can hold so large submissions have
 // a chance to surface evidence from more than one noisy top-ranked document.
 export const FIELD_RETRIEVAL_CANDIDATE_COUNT = 8

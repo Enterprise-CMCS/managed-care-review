@@ -320,6 +320,100 @@ await withLocalStackHarness(
 )
 
 await withLocalStackHarness(
+  'localstack replay stops after cached first-pass evidence before later peers incur fresh embed work',
+  async (context) => {
+    const formId = `localstack-first-pass-${randomUUID()}`
+    const documents = Array.from({ length: 8 }, (_, index) => ({
+      documentName: `contract-${index + 1}.pdf`,
+      sourceBucket: context.bucket,
+      sourceKey: `localstack/${formId}/contract-${index + 1}.pdf`
+    }))
+    const artifactVersion = computeArtifactVersion(
+      documents.map((document) => document.sourceKey)
+    )
+    const formFields = buildContractFields('01/01/2024', '12/31/2025')
+
+    await seedCurrentDocuments(context, documents)
+    await seedIndexedDocumentArtifacts({
+      context,
+      formId,
+      artifactVersion,
+      documents: documents.slice(0, 6)
+    })
+
+    await validationHandler({
+      formId,
+      artifactVersion,
+      bucket: context.bucket,
+      formFields,
+      documents,
+      workSelectionMode: 'gated-first-pass',
+      s3Config: getEvaluationStorageConfig().s3Config
+    })
+
+    const storedResult = await context.s3Client.getJson<{
+      results: Array<{ field: string }>
+      documentDiagnostics: Array<{
+        documentName: string
+        stage?: string
+        reason?: string
+      }>
+    }>(context.bucket, getValidationResultKey(formId))
+
+    assert.equal(storedResult.results.length, 2)
+    assert.deepEqual(
+      storedResult.documentDiagnostics.map((diagnostic) => ({
+        documentName: diagnostic.documentName,
+        stage: diagnostic.stage,
+        reason: diagnostic.reason
+      })),
+      [
+        {
+          documentName: 'contract-1.pdf',
+          stage: 'cache',
+          reason: undefined
+        },
+        {
+          documentName: 'contract-2.pdf',
+          stage: 'cache',
+          reason: undefined
+        },
+        {
+          documentName: 'contract-3.pdf',
+          stage: 'cache',
+          reason: undefined
+        },
+        {
+          documentName: 'contract-4.pdf',
+          stage: 'cache',
+          reason: undefined
+        },
+        {
+          documentName: 'contract-5.pdf',
+          stage: 'cache',
+          reason: undefined
+        },
+        {
+          documentName: 'contract-6.pdf',
+          stage: 'cache',
+          reason: undefined
+        },
+        {
+          documentName: 'contract-7.pdf',
+          stage: undefined,
+          reason: 'sufficient-first-pass-evidence'
+        },
+        {
+          documentName: 'contract-8.pdf',
+          stage: undefined,
+          reason: 'sufficient-first-pass-evidence'
+        }
+      ]
+    )
+  }
+)
+
+await withLocalStackHarness(
   'localstack replay keeps all-doc and gated completed results separate',
   async (context) => {
     const formId = `localstack-mode-${randomUUID()}`
