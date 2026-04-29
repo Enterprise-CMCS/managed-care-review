@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-068 Retire obsolete standalone AI dev script`.
+The next implementation ticket is `AIFA-025 Evaluate FAISS implementation behind VectorStore`.
 
 ## Completed
 
@@ -81,6 +81,7 @@ The next implementation ticket is `AIFA-068 Retire obsolete standalone AI dev sc
 - AIFA-066 ✔ Persist end-to-end validation lifecycle timing for trigger-to-visible latency
 - AIFA-067 ✔ Reduce first-pass reranking latency for large submissions
 - AIFA-047 ✔ Strengthen document cache identity with content fingerprints
+- AIFA-068 ✔ Retire obsolete standalone AI dev script
 
 ## Current State
 
@@ -301,15 +302,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-068 Retire obsolete standalone AI dev script
+### AIFA-025 Evaluate FAISS implementation behind VectorStore
 
-Remove the obsolete standalone AI workspace script and its stale references so the PoC has one clear local story: `./dev local` for real behavior, the evaluation harness for quality checks, and worker replay coverage for regression.
+Evaluate whether FAISS is worth introducing now that large-submission hardening has produced more realistic timing, reranking, and reuse behavior.
 
 ## Suggested Next Step
 
-- Remove `services/ai-form-augmentation/src/dev.ts` and the workspace `dev` script that points to it.
-- Update the remaining AI-validation docs that still mention `src/dev.ts` as an active path.
-- Verify `./dev local`, the evaluation harness, and worker replay coverage remain unchanged.
+- Compare brute-force retrieval against realistic post-hardening chunk counts and timings before adding new vector-index complexity.
+- Keep the evaluation grounded in current large-submission artifact behavior rather than generic vector-search assumptions.
+- Treat the standalone dev-script cleanup as complete and do not reopen it unless a missing local debugging path appears.
 
 ## Follow-on Performance Tickets
 
@@ -317,12 +318,18 @@ Remove the obsolete standalone AI workspace script and its stale references so t
 
 ## Follow-on Maintenance Ticket
 
-- `AIFA-068 Retire obsolete standalone AI dev script`
+- none currently queued
 
 ## Recommended Upcoming Order
 
-1. `AIFA-068 Retire obsolete standalone AI dev script`
-2. `AIFA-025 Evaluate FAISS implementation behind VectorStore`
+1. `AIFA-025 Evaluate FAISS implementation behind VectorStore`
+
+## AIFA-068 Closeout Notes
+
+- The obsolete standalone `ai-form-augmentation` entrypoint is gone: `services/ai-form-augmentation/src/dev.ts` was removed and the workspace `dev` script that pointed to it was dropped from `services/ai-form-augmentation/package.json`.
+- The real local PoC paths remain unchanged: `./dev local` still owns product-shaped local behavior, the evaluation harness still owns corpus-driven quality checks, and worker replay coverage still owns rerun/regression validation.
+- The cleanup intentionally leaves historical planning/session mentions of `src/dev.ts` in place rather than rewriting project history; runtime entrypoints are the only source of truth that changed.
+- The main residual risk is social rather than technical: anyone who was privately using `pnpm --filter ai-form-augmentation dev` as a smoke test now needs to use `./dev local`, the evaluation harness, or worker tests instead.
 
 ## AIFA-047 Closeout Notes
 

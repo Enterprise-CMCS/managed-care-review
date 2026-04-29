@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "build": "zsh -lc 'source \"$HOME/.nvm/nvm.sh\" && nvm use && tsc --noEmit'",
-    "dev": "tsx watch src/dev.ts",
     "evaluate:setup": "zsh -lc 'source \"$HOME/.nvm/nvm.sh\" && nvm use && node --import tsx src/evaluation/bootstrapEvaluationStorage.ts'",
     "evaluate": "zsh -lc 'source \"$HOME/.nvm/nvm.sh\" && nvm use && node --import tsx src/evaluation/bootstrapEvaluationStorage.ts && node --import tsx src/evaluation/runDateValidationEvaluation.ts'",
     "test": "zsh -lc 'source \"$HOME/.nvm/nvm.sh\" && nvm use && node --import tsx --test src/**/*.test.ts'"

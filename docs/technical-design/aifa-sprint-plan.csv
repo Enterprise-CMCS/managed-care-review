@@ -1128,7 +1128,7 @@ Fresh artifact review for contract `4fb74e6b-1ef0-43d7-80d3-08a33bfca7fc` on the
 - Large-submission runs spend materially less wall-clock time in pre-index reranking without changing validation outcomes or fallback behavior
 - Work-selection remains conservative: deferred documents stay eligible for later fallback and no hard exclusions are introduced
 - The optimization order is validated against realistic large-batch artifact runs and can stop after the first step that produces a meaningful win"
-AIFA-068 Retire obsolete standalone AI dev script,Backlog,8-Maintenance,Low,"AIFA-019B, AIFA-020A, AIFA-023, AIFA-063","Remove the old standalone `ai-form-augmentation` dev script now that the PoC runs through the real app flow, the evaluation harness, and worker replay coverage.
+AIFA-068 Retire obsolete standalone AI dev script,Done,8-Maintenance,Low,"AIFA-019B, AIFA-020A, AIFA-023, AIFA-063","Remove the old standalone `ai-form-augmentation` dev script now that the PoC runs through the real app flow, the evaluation harness, and worker replay coverage.
 - Remove `services/ai-form-augmentation/src/dev.ts`
 - Remove the `dev` script from `services/ai-form-augmentation/package.json`
 - Update AI-validation docs that still present `src/dev.ts` as an active or recommended path
