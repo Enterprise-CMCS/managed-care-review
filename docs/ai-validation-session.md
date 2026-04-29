@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-025 Evaluate FAISS implementation behind VectorStore`.
+The next implementation ticket is `AIFA-069 Consolidate AI validation runtime entrypoints and exports`.
 
 ## Completed
 
@@ -82,6 +82,7 @@ The next implementation ticket is `AIFA-025 Evaluate FAISS implementation behind
 - AIFA-067 ✔ Reduce first-pass reranking latency for large submissions
 - AIFA-047 ✔ Strengthen document cache identity with content fingerprints
 - AIFA-068 ✔ Retire obsolete standalone AI dev script
+- AIFA-025 ✔ Evaluate FAISS implementation behind VectorStore
 
 ## Current State
 
@@ -302,19 +303,19 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-025 Evaluate FAISS implementation behind VectorStore
+### AIFA-069 Consolidate AI validation runtime entrypoints and exports
 
-Evaluate whether FAISS is worth introducing now that large-submission hardening has produced more realistic timing, reranking, and reuse behavior.
+Review the public/runtime surface of `services/ai-form-augmentation` and tighten obsolete or low-value exports so another engineer can quickly identify the real supported entrypoints.
 
 ## Suggested Next Step
 
-- Compare brute-force retrieval against realistic post-hardening chunk counts and timings before adding new vector-index complexity.
-- Keep the evaluation grounded in current large-submission artifact behavior rather than generic vector-search assumptions.
-- Treat the standalone dev-script cleanup as complete and do not reopen it unless a missing local debugging path appears.
+- Review `services/ai-form-augmentation/src/index.ts`, `runValidation.ts`, and related exported helpers/types for dead or misleading public surface.
+- Remove or tighten obsolete exports only after verified non-usage.
+- Keep runtime behavior unchanged; this is a handoff-oriented cleanup pass, not a validation-logic refactor.
 
 ## Follow-on Performance Tickets
 
-- `AIFA-025 Evaluate FAISS implementation behind VectorStore`
+- none currently queued
 
 ## Follow-on Maintenance Ticket
 
@@ -322,7 +323,18 @@ Evaluate whether FAISS is worth introducing now that large-submission hardening 
 
 ## Recommended Upcoming Order
 
-1. `AIFA-025 Evaluate FAISS implementation behind VectorStore`
+1. `AIFA-069 Consolidate AI validation runtime entrypoints and exports`
+2. `AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries`
+3. `AIFA-071 Clean up AI validation config and local runtime defaults`
+4. `AIFA-072 Reduce AI validation test duplication and brittleness`
+5. `AIFA-073 Refresh AI validation documentation for handoff`
+
+## AIFA-025 Closeout Notes
+
+- The branch now has a documented FAISS evaluation note in `docs/technical-design/ai-validation-faiss-evaluation.md`.
+- Current evidence does not justify introducing FAISS: realistic large-submission runs show retrieval remains cheap relative to reranking, parse/OCR, and embed work, so brute-force search is not the active bottleneck.
+- The recommendation is to keep the current brute-force `VectorStore` and defer any FAISS spike until fresh measurements show retrieval becoming a material share of end-to-end time.
+- Broader future document-type support may increase the chance that FAISS becomes worthwhile later, but it still would not justify immediate vector-index complexity without new measurements.
 
 ## AIFA-068 Closeout Notes
 

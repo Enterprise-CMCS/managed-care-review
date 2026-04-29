@@ -647,7 +647,7 @@ Local Ollama output is good enough for development, but it is not the final qual
 - Preconditions for AWS evaluation are documented clearly
 - The ticket does not overstate current deployment readiness
 - Local PoC progress does not depend on finishing this work first"
-AIFA-025 Evaluate FAISS implementation behind VectorStore,Backlog,6-Production Prep,Low,"AIFA-008, AIFA-039, AIFA-044, AIFA-047, AIFA-049C","Evaluate whether FAISS is worth introducing after large-submission hardening instead of keeping brute-force retrieval.
+AIFA-025 Evaluate FAISS implementation behind VectorStore,Done,6-Production Prep,Low,"AIFA-008, AIFA-039, AIFA-044, AIFA-047, AIFA-049C","Evaluate whether FAISS is worth introducing after large-submission hardening instead of keeping brute-force retrieval.
 - Compare brute-force retrieval against the measured prod-shaped chunk counts and timings
 - Separate vector search time from fetch, parse, OCR, chunk, embed, and validation time
 - Consider packaging, native dependency friction, Lambda compatibility, and actual scale needs
