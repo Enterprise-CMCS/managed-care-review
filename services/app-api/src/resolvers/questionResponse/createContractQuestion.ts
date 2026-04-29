@@ -43,12 +43,6 @@ export function createContractQuestionResolver(
             throw createForbiddenError(msg)
         }
 
-        // Default to setting DMCO as the division when the
-        // request comes through Oauth
-        // if (!user.divisionAssignment && canOauthWrite(context)) {
-        //     user.divisionAssignment = 'DMCO'
-        // }
-
         if (
             !user.divisionAssignment ||
             (user.divisionAssignment &&
