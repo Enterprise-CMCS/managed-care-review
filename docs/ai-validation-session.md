@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-067 Reduce first-pass reranking latency for large submissions`.
+The next implementation ticket is `AIFA-047 Strengthen document cache identity with content fingerprints`.
 
 ## Completed
 
@@ -79,6 +79,7 @@ The next implementation ticket is `AIFA-067 Reduce first-pass reranking latency 
 - AIFA-064 ✔ Persist structured supporting citation data for Review-page trust signals
 - AIFA-065 ✔ Stabilize first-pass reuse after small document-set changes
 - AIFA-066 ✔ Persist end-to-end validation lifecycle timing for trigger-to-visible latency
+- AIFA-067 ✔ Reduce first-pass reranking latency for large submissions
 
 ## Current State
 
@@ -299,27 +300,38 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-046 Split parsed-text artifacts from embedding artifacts
+### AIFA-047 Strengthen document cache identity with content fingerprints
 
-Persist reusable parsed-text artifacts separately so OCR and parse work do not need to be repeated just to rebuild chunks or embeddings.
+Strengthen document cache identity so unchanged S3 keys do not accidentally reuse stale parse, chunk, embedding, or reranking artifacts after content changes.
 
 ## Suggested Next Step
 
-- Start `AIFA-067` by reducing reranking candidate volume on the large-batch path.
-- Cache reranking sample/results for unchanged documents before attempting broader tuning.
-- Keep reranking optimization conservative; do not change fallback semantics or introduce hard exclusions.
+- Prefer cheap reliable content identity such as S3 version metadata where available before considering heavier hashing.
+- Keep the new reranking/document reuse paths aligned with the stronger fingerprint source so stale content cannot silently inherit cached artifacts.
+- Keep fallback behavior and current artifactVersion semantics unchanged while hardening identity.
 
 ## Follow-on Performance Tickets
 
-- `AIFA-060 Persist AI validation phase timing diagnostics in artifacts`
+- `AIFA-025 Evaluate FAISS implementation behind VectorStore`
 
 ## Follow-on Maintenance Ticket
 
-- `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
+- `AIFA-047 Strengthen document cache identity with content fingerprints`
 
 ## Recommended Upcoming Order
 
-1. `AIFA-067 Reduce first-pass reranking latency for large submissions`
+1. `AIFA-047 Strengthen document cache identity with content fingerprints`
+2. `AIFA-025 Evaluate FAISS implementation behind VectorStore`
+
+## AIFA-067 Closeout Notes
+
+- The pre-ticket large-batch bottleneck was clear on contract `4fb74e6b-1ef0-43d7-80d3-08a33bfca7fc`: trigger-to-complete took ~99s, `firstIndexedArtifactAt` landed ~94s after the initial `parsing` status write, reranking touched 36 candidates with 36 fresh samples and 36 reranking LLM calls, and `rerankingDiagnostics.totalElapsedMs` alone was ~90s.
+- Lowering the reranking candidate cap from 36 to 18 cut the next fresh 165-document run for `60515706-c556-4c42-8d90-1ab42a793aa1` to ~62s trigger-to-complete and dropped reranking `totalElapsedMs` to ~53.5s without changing the result shape or first-pass evidence path.
+- Widening reranking reuse from prior indexed docs to prior completed `documentDiagnostics` removed the remaining rerun tax for unchanged documents: the small document-set rerun for `b2739680-205e-4668-a351-acc1cc128909` completed in ~9.6s with `18` cached samples, `0` fresh samples, and `0` reranking LLM calls.
+- The same contract then proved the ideal form-only path: a rerun with only form edits completed in ~1.35s, with reranking `totalElapsedMs` at `1 ms` and `parse/ocr/embed` all at `0 ms`.
+- Validation outcomes, fallback behavior, work-selection defaults, and evidence shaping remained stable through the optimization; this ticket only reduced reranking latency.
+- The remaining hardening risk is cache identity: reranking reuse is now materially more valuable, which makes `AIFA-047` the right next ticket so stale in-place content cannot silently inherit cached parse/chunk/embed/reranking state.
+- Large mixed-batch reruns can still surface a different lead citation when several reviewed documents provide equivalent date evidence; that is a citation-stability tradeoff rather than a finding-correctness issue and is documented for future rollout discussions.
 
 ## AIFA-066 Closeout Notes
 
@@ -339,6 +351,7 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 - Validation results now separate one lead primary citation set from additional supporting references when multiple reviewed documents independently prove the same field result.
 - The Review page now renders primary reviewed references separately from corroborating support and preserves a small evidence summary without implying that every retrieved candidate was supporting evidence.
+- Large mixed-batch reruns can still surface a different lead citation when several reviewed documents provide equivalent date evidence; that is currently an evidence-selection stability tradeoff rather than a finding-correctness problem, but it is worth calling out explicitly when presenting trust behavior.
 - Field outcomes, fallback behavior, retrieval/ranking semantics, and runtime defaults remain unchanged; this is artifact/UI evidence shaping only.
 
 ## AIFA-056 Closeout Notes

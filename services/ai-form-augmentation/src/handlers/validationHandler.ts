@@ -114,8 +114,14 @@ export interface ValidationHandlerResult {
   status: 'completed'
 }
 
+// Process at most two documents in parallel so local OCR/embed work stays busy
+// without overwhelming CPU and memory on large submission runs.
 export const DEFAULT_DOCUMENT_INDEXING_CONCURRENCY = 2
+// Treat 25+ source documents as a large batch; past that point the worker uses
+// more conservative OCR fallback behavior to protect wall-clock latency.
 export const LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT = 25
+// Even on large batches, allow a few OCR rescues so obviously relevant scans
+// can still contribute without reopening broad OCR work across the whole set.
 export const LARGE_BATCH_OCR_FALLBACK_LIMIT = 3
 // Keep the diagnostic first-pass set intentionally small enough to stress
 // whether cheap document ranking would surface useful evidence early.
@@ -132,18 +138,43 @@ export const FIELD_RETRIEVAL_FINAL_CHUNK_LIMIT = 4
 // Allow at most two chunks per document so one contract cannot crowd out all
 // other candidates, but still preserve some same-document continuity.
 export const FIELD_RETRIEVAL_MAX_CHUNKS_PER_DOCUMENT = 2
+// Emit progress every five processed documents so long large-batch runs update
+// status often enough without rewriting artifacts on every single document.
 const INDEXING_PROGRESS_INTERVAL = 5
+// Limit advisory reranking to two concurrent LLM requests to avoid local model
+// thrash while still making forward progress across the candidate pool.
 const FIRST_PASS_RERANKING_CONCURRENCY = 2
+// Always rerank at least the diagnostic first-pass slice because those top
+// candidates are the ones most likely to shape the final first-pass set.
 const FIRST_PASS_RERANKING_PRIORITY_CANDIDATE_LIMIT =
   DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT
-const FIRST_PASS_RERANKING_CANDIDATE_LIMIT = 36
+// Keep the advisory reranking pool tighter than the original 36-document cap;
+// on large batches the broader pool dominated wall-clock time before any
+// indexed artifacts were even written.
+const FIRST_PASS_RERANKING_CANDIDATE_LIMIT = 18
+// Sample only the first two pages because contract term dates usually appear
+// early and later pages rarely justify the extra reranking latency.
 const FIRST_PASS_RERANKING_SAMPLE_PAGE_LIMIT = 2
+// Cap sample text at 2000 characters so reranking prompts stay cheap while
+// still preserving enough nearby language to judge date-governing relevance.
 const FIRST_PASS_RERANKING_SAMPLE_CHAR_LIMIT = 2000
+// Treat very long documents as likely low-yield for first-pass date finding so
+// reranking can push them down unless the sample text is clearly strong.
 const LARGE_DOCUMENT_PAGE_THRESHOLD = 200
+// Apply the same low-yield heuristic to files over roughly 1 MB because those
+// documents often carry bulky rate text rather than concise term language.
 const LARGE_DOCUMENT_SIZE_BYTES_THRESHOLD = 1_000_000
+// Heavily penalize samples that look rate-oriented or otherwise low-yield so
+// they fall behind cleaner amendment-style evidence in first-pass selection.
 const LOW_YIELD_LLM_PRIORITY_PENALTY = 18
+// Large documents that are not clearly high-yield still get a substantial but
+// smaller penalty so strong date-bearing samples can recover if warranted.
 const LARGE_DOCUMENT_NON_HIGH_PRIORITY_PENALTY = 14
+// High-yield samples need a material bump to overtake ambiguous heuristics, but
+// not so much that one advisory signal dominates every other selection factor.
 const HIGH_YIELD_LLM_PRIORITY_BOOST = 10
+// Treat nearby scores as interchangeable for diversity purposes so first-pass
+// selection can represent more than one contract family when evidence is close.
 const FIRST_PASS_DIVERSITY_SCORE_BAND = 4
 
 function buildValidationLifecycleTiming(args: {
@@ -218,6 +249,31 @@ export function buildReusableOcrCappedDocumentCacheKeys(args: {
   )
 }
 
+export function buildReusableRerankingCacheKeys(args: {
+  previousDocumentDiagnostics: ValidationDocumentDiagnostic[]
+  currentDocuments: ValidationSourceDocument[]
+}): Set<string> {
+  const currentDocumentCacheKeys = new Set(
+    args.currentDocuments.map((document) => computeDocumentCacheKey(document))
+  )
+
+  return new Set(
+    args.previousDocumentDiagnostics.flatMap((diagnostic) => {
+      if (diagnostic.sourceBucket == null || diagnostic.sourceKey == null) {
+        return []
+      }
+
+      const cacheKey = computeDocumentCacheKey({
+        documentName: diagnostic.documentName,
+        sourceBucket: diagnostic.sourceBucket,
+        sourceKey: diagnostic.sourceKey
+      })
+
+      return currentDocumentCacheKeys.has(cacheKey) ? [cacheKey] : []
+    })
+  )
+}
+
 export function hasReusableDocumentArtifactInputs(args: {
   artifactVersion: string
   workSelectionMode: Extract<
@@ -278,6 +334,38 @@ export function selectReusableDocumentDiagnostics(args: {
   if (
     args.resultArtifact != null &&
     args.resultArtifact.artifactVersion === args.artifactVersion &&
+    isCompatibleReusableWorkSelectionMode(
+      args.workSelectionMode,
+      args.resultArtifact.workSelectionMode
+    )
+  ) {
+    return args.resultArtifact.documentDiagnostics ?? []
+  }
+
+  return []
+}
+
+function selectReusableRerankingDocumentDiagnostics(args: {
+  workSelectionMode: Extract<
+    ValidationWorkSelectionMode,
+    'all-doc' | 'gated-first-pass'
+  >
+  statusArtifact: ValidationStatusArtifact | null
+  resultArtifact: ValidationResultArtifact | null
+}): ValidationDocumentDiagnostic[] {
+  if (
+    args.statusArtifact != null &&
+    args.statusArtifact.stage === 'complete' &&
+    isCompatibleReusableWorkSelectionMode(
+      args.workSelectionMode,
+      args.statusArtifact.workSelectionMode
+    )
+  ) {
+    return args.statusArtifact.documentDiagnostics ?? []
+  }
+
+  if (
+    args.resultArtifact != null &&
     isCompatibleReusableWorkSelectionMode(
       args.workSelectionMode,
       args.resultArtifact.workSelectionMode
@@ -406,11 +494,23 @@ export async function validationHandler(
         currentDocuments: event.documents,
         allowReuse: canReuseCurrentDocumentArtifacts
       })
+    const reusableRerankingDocumentDiagnostics =
+      selectReusableRerankingDocumentDiagnostics({
+        workSelectionMode: requestedWorkSelectionMode,
+        statusArtifact: previousStatusArtifact,
+        resultArtifact: previousResultArtifact
+      })
+    const reusableRerankingDocumentCacheKeys = buildReusableRerankingCacheKeys({
+      previousDocumentDiagnostics: reusableRerankingDocumentDiagnostics,
+      currentDocuments: event.documents
+    })
     if (requestedWorkSelectionMode === 'gated-first-pass') {
       const reranking = await rerankValidationDocuments({
         event,
         s3Client,
         unchangedDocumentCacheKeys,
+        previousDocumentDiagnostics: reusableRerankingDocumentDiagnostics,
+        reusableRerankingDocumentCacheKeys,
         scoredDocuments: workSelectionDiagnostics
       })
       workSelectionDiagnostics = reranking.scoredDocuments
@@ -1523,6 +1623,8 @@ async function rerankValidationDocuments(args: {
   event: ValidationHandlerEvent
   s3Client: ArtifactS3Client
   unchangedDocumentCacheKeys: Set<string>
+  previousDocumentDiagnostics: ValidationDocumentDiagnostic[]
+  reusableRerankingDocumentCacheKeys: Set<string>
   scoredDocuments: ScoredValidationDocumentDiagnostic[]
 }): Promise<{
   scoredDocuments: ScoredValidationDocumentDiagnostic[]
@@ -1551,10 +1653,31 @@ async function rerankValidationDocuments(args: {
   }
 
   const validationClient = newValidationLlmClient(args.event.validationLlmConfig)
+  const reusableAdjustmentByCacheKey = buildReusableRerankingAdjustmentByCacheKey({
+    previousDocumentDiagnostics: args.previousDocumentDiagnostics,
+    scoredDocuments: args.scoredDocuments,
+    reusableRerankingDocumentCacheKeys: args.reusableRerankingDocumentCacheKeys
+  })
   const rerankedAdjustments = await mapWithConcurrencyLimit(
     rerankingCandidates,
     FIRST_PASS_RERANKING_CONCURRENCY,
     async (diagnostic) => {
+      const cacheKey = computeDocumentCacheKey(diagnostic.document)
+      const reusableAdjustment = reusableAdjustmentByCacheKey.get(cacheKey)
+
+      if (reusableAdjustment) {
+        return [
+          cacheKey,
+          reusableAdjustment,
+          {
+            sampleFetchElapsedMs: 0,
+            llmElapsedMs: 0,
+            sampleSource: 'cached' as const,
+            llmRequested: false
+          }
+        ] as const
+      }
+
       let sampleSource: 'cached' | 'fresh' | null = null
       let llmRequested = false
       const sampleStartedAt = Date.now()
@@ -1569,7 +1692,7 @@ async function rerankValidationDocuments(args: {
 
         if (sample == null) {
           return [
-            computeDocumentCacheKey(diagnostic.document),
+            cacheKey,
             {
               scoreDelta: 0,
               reason: 'Sample unavailable; kept heuristic first-pass ranking.'
@@ -1603,7 +1726,7 @@ async function rerankValidationDocuments(args: {
 
         if (signal == null) {
           return [
-            computeDocumentCacheKey(diagnostic.document),
+            cacheKey,
             {
               scoreDelta: 0,
               reason:
@@ -1619,7 +1742,7 @@ async function rerankValidationDocuments(args: {
         }
 
         return [
-          computeDocumentCacheKey(diagnostic.document),
+          cacheKey,
           buildFirstPassRerankingAdjustment(signal, sample),
           {
             sampleFetchElapsedMs,
@@ -1630,7 +1753,7 @@ async function rerankValidationDocuments(args: {
         ] as const
       } catch {
         return [
-          computeDocumentCacheKey(diagnostic.document),
+          cacheKey,
           {
             scoreDelta: 0,
             reason: 'LLM reranking failed; kept heuristic first-pass ranking.'
@@ -1740,7 +1863,79 @@ async function rerankValidationDocuments(args: {
   }
 }
 
-function selectFirstPassRerankingCandidates(
+function isReusableSuccessfulRerankingReason(reason: string): boolean {
+  return (
+    reason.startsWith('LLM reranking kept this document earlier because') ||
+    reason.startsWith(
+      'LLM reranking deprioritized this large document because'
+    ) ||
+    reason.startsWith(
+      'LLM reranking did not find clear date-governing language'
+    ) ||
+    reason.startsWith(
+      'LLM reranking slightly lowered this document because'
+    ) ||
+    reason === 'LLM reranking kept the heuristic score unchanged.'
+  )
+}
+
+export function buildReusableRerankingAdjustmentByCacheKey(args: {
+  previousDocumentDiagnostics: ValidationDocumentDiagnostic[]
+  scoredDocuments: ScoredValidationDocumentDiagnostic[]
+  reusableRerankingDocumentCacheKeys: Set<string>
+}): Map<string, { scoreDelta: number; reason: string }> {
+  const scoredDocumentByCacheKey = new Map(
+    args.scoredDocuments.map((diagnostic) => [
+      computeDocumentCacheKey(diagnostic.document),
+      diagnostic
+    ])
+  )
+
+  return new Map(
+    args.previousDocumentDiagnostics.flatMap((diagnostic) => {
+      if (
+        diagnostic.sourceBucket == null ||
+        diagnostic.sourceKey == null ||
+        diagnostic.workSelection == null
+      ) {
+        return []
+      }
+
+      const cacheKey = computeDocumentCacheKey({
+        documentName: diagnostic.documentName,
+        sourceBucket: diagnostic.sourceBucket,
+        sourceKey: diagnostic.sourceKey
+      })
+
+      if (!args.reusableRerankingDocumentCacheKeys.has(cacheKey)) {
+        return []
+      }
+
+      const currentDiagnostic = scoredDocumentByCacheKey.get(cacheKey)
+      const reusableReason = diagnostic.workSelection.priorityReasons.find(
+        isReusableSuccessfulRerankingReason
+      )
+
+      if (currentDiagnostic == null || reusableReason == null) {
+        return []
+      }
+
+      return [
+        [
+          cacheKey,
+          {
+            scoreDelta:
+              diagnostic.workSelection.priorityScore -
+              currentDiagnostic.workSelection.priorityScore,
+            reason: reusableReason
+          }
+        ] as const
+      ]
+    })
+  )
+}
+
+export function selectFirstPassRerankingCandidates(
   scoredDocuments: ScoredValidationDocumentDiagnostic[]
 ): ScoredValidationDocumentDiagnostic[] {
   const orderedDocuments = scoredDocuments

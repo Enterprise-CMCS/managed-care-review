@@ -4,6 +4,8 @@ import { computeDocumentCacheKey } from '../artifacts'
 import { buildValidationResultArtifact } from '../results'
 import {
   addSupportingCitationData,
+  buildReusableRerankingCacheKeys,
+  buildReusableRerankingAdjustmentByCacheKey,
   buildReusableDocumentCacheKeys,
   buildReusableOcrCappedDocumentCacheKeys,
   hasReusableDocumentArtifactInputs,
@@ -15,6 +17,7 @@ import {
   LARGE_BATCH_OCR_FALLBACK_LIMIT,
   LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT,
   mapWithConcurrencyLimit,
+  selectFirstPassRerankingCandidates,
   selectFirstPassDocuments,
   scoreValidationDocuments
 } from './validationHandler'
@@ -161,6 +164,39 @@ test('buildReusableOcrCappedDocumentCacheKeys ignores non-current or non-capped 
   })
 
   assert.equal(cacheKeys.size, 0)
+})
+
+test('buildReusableRerankingCacheKeys keeps unchanged docs eligible for advisory reranking reuse', () => {
+  const currentDocument = {
+    documentName: 'contract-a.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/contract-a.pdf'
+  }
+
+  const cacheKeys = buildReusableRerankingCacheKeys({
+    previousDocumentDiagnostics: [
+      {
+        documentName: currentDocument.documentName,
+        sourceBucket: currentDocument.sourceBucket,
+        sourceKey: currentDocument.sourceKey,
+        status: 'skipped',
+        usable: false,
+        chunkCount: 0,
+        workSelection: {
+          priorityScore: 20,
+          priorityReasons: [
+            'heuristic',
+            'LLM reranking kept this document earlier because the first 1-2 page sample looks date-governing.'
+          ],
+          bucket: 'first-pass'
+        },
+        reason: 'sufficient-first-pass-evidence'
+      }
+    ],
+    currentDocuments: [currentDocument]
+  })
+
+  assert.deepEqual([...cacheKeys], [computeDocumentCacheKey(currentDocument)])
 })
 
 test('artifact-backed rerun helpers reuse prior OCR-capped diagnostics from the last completed result artifact', () => {
@@ -413,6 +449,125 @@ test('selectFirstPassDocuments returns scored first-pass documents in current ra
       'provider-agreement.pdf'
     ]
   )
+})
+
+test('selectFirstPassRerankingCandidates preserves the top-ranked set while capping the widened advisory pool', () => {
+  const scoredDocuments = Array.from({ length: 24 }, (_, index) => ({
+    document: {
+      documentName: `plan-${String(index + 1).padStart(2, '0')} 23-${String(
+        30000 + index
+      )} amendment.pdf`,
+      sourceBucket: 'uploads',
+      sourceKey: `contracts/plan-${String(index + 1).padStart(2, '0')}.pdf`
+    },
+    workSelection: {
+      priorityScore: 100 - index,
+      priorityReasons: ['synthetic test priority'],
+      bucket:
+        index < DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT
+          ? ('first-pass' as const)
+          : ('deferred' as const)
+    }
+  }))
+
+  const candidates = selectFirstPassRerankingCandidates(scoredDocuments)
+
+  assert.equal(candidates.length, 18)
+  assert.deepEqual(
+    candidates.map((candidate) => candidate.document.documentName),
+    scoredDocuments.slice(0, 18).map((candidate) => candidate.document.documentName)
+  )
+})
+
+test('buildReusableRerankingAdjustmentByCacheKey reuses prior successful reranking judgments for unchanged docs', () => {
+  const document = {
+    documentName: 'plan-a 23-30001 amendment.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/plan-a.pdf'
+  }
+  const cacheKey = computeDocumentCacheKey(document)
+  const scoredDocuments = [
+    {
+      document,
+      workSelection: {
+        priorityScore: 10,
+        priorityReasons: ['heuristic'],
+        bucket: 'first-pass' as const
+      }
+    }
+  ]
+
+  const reusableAdjustments = buildReusableRerankingAdjustmentByCacheKey({
+    previousDocumentDiagnostics: [
+      {
+        documentName: document.documentName,
+        sourceBucket: document.sourceBucket,
+        sourceKey: document.sourceKey,
+        status: 'processed',
+        usable: true,
+        chunkCount: 4,
+        workSelection: {
+          priorityScore: 20,
+          priorityReasons: [
+            'heuristic',
+            'LLM reranking kept this document earlier because the first 1-2 page sample looks date-governing.'
+          ],
+          bucket: 'first-pass'
+        }
+      }
+    ],
+    scoredDocuments,
+    reusableRerankingDocumentCacheKeys: new Set([cacheKey])
+  })
+
+  assert.deepEqual(reusableAdjustments.get(cacheKey), {
+    scoreDelta: 10,
+    reason:
+      'LLM reranking kept this document earlier because the first 1-2 page sample looks date-governing.'
+  })
+})
+
+test('buildReusableRerankingAdjustmentByCacheKey ignores prior reranking failures', () => {
+  const document = {
+    documentName: 'plan-a 23-30001 amendment.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/plan-a.pdf'
+  }
+  const cacheKey = computeDocumentCacheKey(document)
+
+  const reusableAdjustments = buildReusableRerankingAdjustmentByCacheKey({
+    previousDocumentDiagnostics: [
+      {
+        documentName: document.documentName,
+        sourceBucket: document.sourceBucket,
+        sourceKey: document.sourceKey,
+        status: 'processed',
+        usable: true,
+        chunkCount: 4,
+        workSelection: {
+          priorityScore: 10,
+          priorityReasons: [
+            'heuristic',
+            'LLM reranking failed; kept heuristic first-pass ranking.'
+          ],
+          bucket: 'first-pass'
+        }
+      }
+    ],
+    scoredDocuments: [
+      {
+        document,
+        workSelection: {
+          priorityScore: 10,
+          priorityReasons: ['heuristic'],
+          bucket: 'first-pass'
+        }
+      }
+    ],
+    reusableRerankingDocumentCacheKeys: new Set([cacheKey])
+  })
+
+  assert.equal(reusableAdjustments.size, 0)
 })
 
 test('buildFieldWorkSelectionDiagnostics triggers conservative fallback reasons for weak ambiguous partial evidence', () => {
