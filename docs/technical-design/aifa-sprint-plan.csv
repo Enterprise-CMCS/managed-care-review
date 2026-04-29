@@ -1128,3 +1128,15 @@ Fresh artifact review for contract `4fb74e6b-1ef0-43d7-80d3-08a33bfca7fc` on the
 - Large-submission runs spend materially less wall-clock time in pre-index reranking without changing validation outcomes or fallback behavior
 - Work-selection remains conservative: deferred documents stay eligible for later fallback and no hard exclusions are introduced
 - The optimization order is validated against realistic large-batch artifact runs and can stop after the first step that produces a meaningful win"
+AIFA-068 Retire obsolete standalone AI dev script,Backlog,8-Maintenance,Low,"AIFA-019B, AIFA-020A, AIFA-023, AIFA-063","Remove the old standalone `ai-form-augmentation` dev script now that the PoC runs through the real app flow, the evaluation harness, and worker replay coverage.
+- Remove `services/ai-form-augmentation/src/dev.ts`
+- Remove the `dev` script from `services/ai-form-augmentation/package.json`
+- Update AI-validation docs that still present `src/dev.ts` as an active or recommended path
+- Keep root `./dev local` unchanged; this ticket is only about the obsolete standalone AI workspace script
+
+Why this matters:
+The standalone script was useful early in the PoC when the worker, GraphQL trigger/polling flow, and evaluation harness did not yet exist. It now duplicates an older local-only execution path that manually parses a fixture, writes artifacts, calls the LLM directly, and even uses an outdated field set. Keeping that script around makes the PoC harder to explain because there are multiple local validation entry points but only one product-real path. Removing it reduces confusion and makes the demo story cleaner: `./dev local` for real behavior, the evaluation harness for quality checks, and worker tests or LocalStack replay for regression coverage.","- `services/ai-form-augmentation/src/dev.ts` no longer exists
+- No package script points to `src/dev.ts`
+- `./dev local` still works unchanged
+- The evaluation harness and worker replay coverage still work unchanged
+- AI validation docs no longer present the standalone script as a current recommended flow"

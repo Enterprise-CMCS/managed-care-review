@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-025 Evaluate FAISS implementation behind VectorStore`.
+The next implementation ticket is `AIFA-068 Retire obsolete standalone AI dev script`.
 
 ## Completed
 
@@ -269,9 +269,9 @@ Improve long-run progress visibility without changing validation semantics.
 
 Harden the pipeline for high-document-count submissions by adding a prod-shaped fixture, unsupported-file filtering, document-level failure isolation, bounded concurrency, OCR safety valves, broader retrieval, diagnostic-only work-selection scoring, gated work selection with fallback, partial-coverage UI, and promotion only after evaluation.
 
-### AIFA-025 Evaluate FAISS implementation behind VectorStore
+### AIFA-068 Retire obsolete standalone AI dev script
 
-Evaluate whether FAISS is worth introducing only after large-submission hardening provides realistic chunk counts, retrieval timings, and work-selection behavior.
+Remove the old standalone `ai-form-augmentation` dev script now that the PoC runs through the real app flow, the evaluation harness, and worker replay coverage.
 
 ## Current PoC Direction
 
@@ -301,15 +301,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-025 Evaluate FAISS implementation behind VectorStore
+### AIFA-068 Retire obsolete standalone AI dev script
 
-Evaluate whether FAISS is worth introducing now that large-submission hardening has produced more realistic timing and reuse behavior.
+Remove the obsolete standalone AI workspace script and its stale references so the PoC has one clear local story: `./dev local` for real behavior, the evaluation harness for quality checks, and worker replay coverage for regression.
 
 ## Suggested Next Step
 
-- Compare brute-force retrieval against realistic post-hardening chunk counts and timings before adding new vector-index complexity.
-- Keep the evaluation grounded in current large-submission artifact behavior rather than generic vector-search assumptions.
-- Do not reopen cache identity or reranking work unless the FAISS evaluation uncovers a new bottleneck.
+- Remove `services/ai-form-augmentation/src/dev.ts` and the workspace `dev` script that points to it.
+- Update the remaining AI-validation docs that still mention `src/dev.ts` as an active path.
+- Verify `./dev local`, the evaluation harness, and worker replay coverage remain unchanged.
 
 ## Follow-on Performance Tickets
 
@@ -317,11 +317,12 @@ Evaluate whether FAISS is worth introducing now that large-submission hardening 
 
 ## Follow-on Maintenance Ticket
 
-- none currently queued
+- `AIFA-068 Retire obsolete standalone AI dev script`
 
 ## Recommended Upcoming Order
 
-1. `AIFA-025 Evaluate FAISS implementation behind VectorStore`
+1. `AIFA-068 Retire obsolete standalone AI dev script`
+2. `AIFA-025 Evaluate FAISS implementation behind VectorStore`
 
 ## AIFA-047 Closeout Notes
 
@@ -490,7 +491,7 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - Contract Details is now treated as the preferred point to start background validation because it is the first place in the current workflow where both scoped date fields and supporting documents are usually present.
 - The early trigger now depends on a second `validationStatus` read after the draft save, so future trigger-path changes need to stay aligned with the current stale/current artifact contract.
 - The validation rollout is currently frontend-only, so LaunchDarkly dashboard setup and any future backend trigger paths need to stay aligned with the client-side flag behavior.
-- The sprint plan now treats large-submission hardening as the next phase before FAISS. `AIFA-025` depends on the large-submission fixture, retrieval-breadth work, content-fingerprint work, and promoted work-selection evaluation.
+- The sprint plan now treats `AIFA-068` as the next cleanup step before FAISS evaluation. `AIFA-025` remains the next performance-oriented follow-on after the standalone AI dev-script path is retired.
 - Work selection must remain conservative: low-priority documents are deferred, not hard-excluded; fallback must run whenever first-pass evidence is weak, ambiguous, partial, uncited, or contradicted by diagnostics.
 - PDF eligibility metadata is advisory only; renamed non-PDF files can still pass candidate checks and must be handled by later document-level failure isolation.
 - A newer 165-document run showed `AIFA-052` is now pulling `AAH 23-30212 A03 213A Final.pdf` into first pass and keeping giant `Text Final` / `Rates Text` bodies out, but the run still broadened into `gated-fallback` afterward.
