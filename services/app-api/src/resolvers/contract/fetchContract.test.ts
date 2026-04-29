@@ -1,15 +1,23 @@
 import {
     constructTestPostgresServer,
+    createTestQuestion,
+    createTestQuestionResponse,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { FetchContractDocument } from '../../gen/gqlClient'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    createDBUsersWithFullData,
+    testCMSUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
+    createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createTestContract,
     fetchTestContract,
+    fetchTestContractWithQuestions,
     submitTestContract,
     unlockTestContract,
     updateTestContractDraftRevision,
@@ -19,6 +27,7 @@ import {
     mockGqlContractDraftRevisionFormDataInput,
     testS3Client,
 } from '../../testHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 describe('fetchContract', () => {
@@ -341,134 +350,343 @@ describe('fetchContract', () => {
         )
     })
 
-    it('allows OAuth client with client_credentials to fetch contract', async () => {
-        const stateServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
+    describe('Fetch contract with questions tests', () => {
+        it('returns contract with soft deleted questions filtered out', async () => {
+            const cmsUser = testCMSUser()
+            await createDBUsersWithFullData([cmsUser])
 
-        // Create a contract
-        const stateSubmission =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+                s3Client: mockS3,
+            })
 
-        // Create OAuth client context
-        const oauthServer = await constructTestPostgresServer({
-            context: {
-                user: testStateUser(), // FL state user
-                oauthClient: {
-                    clientId: 'test-oauth-client',
-                    grants: ['client_credentials'],
-                    iss: 'mcreview-test',
-                    scopes: [],
-                    isDelegatedUser: false,
+            const contract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            const questionToKeep = await createTestQuestion(
+                cmsServer,
+                contract.id,
+                {
+                    documents: [
+                        { name: 'Keep me', s3URL: 's3://bucketname/key/keep' },
+                    ],
+                }
+            )
+            const questionToDelete = await createTestQuestion(
+                cmsServer,
+                contract.id,
+                {
+                    documents: [
+                        {
+                            name: 'Delete me',
+                            s3URL: 's3://bucketname/key/delete',
+                        },
+                    ],
+                }
+            )
+
+            const prismaClient = await sharedTestPrismaClient()
+            await prismaClient.contractQuestionAction.create({
+                data: {
+                    questionID: questionToDelete.id,
+                    updatedByID: cmsUser.id,
+                    action: 'DELETE',
                 },
-            },
-            s3Client: mockS3,
+            })
+
+            const fetched = await fetchTestContractWithQuestions(
+                stateServer,
+                contract.id
+            )
+
+            const dmcoQuestions = fetched.questions?.DMCOQuestions
+            expect(dmcoQuestions?.totalCount).toBe(1)
+            expect(dmcoQuestions?.edges).toHaveLength(1)
+            expect(dmcoQuestions?.edges[0].node.id).toBe(questionToKeep.id)
         })
 
-        const fetchResult = await executeGraphQLOperation(oauthServer, {
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+        it('returns contract with soft deleted responses filtered out', async () => {
+            const cmsUser = testCMSUser()
+            await createDBUsersWithFullData([cmsUser])
+
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+                s3Client: mockS3,
+            })
+
+            const contract =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const question = await createTestQuestion(cmsServer, contract.id)
+
+            const afterDeleteResponse = await createTestQuestionResponse(
+                stateServer,
+                question.id,
+                {
+                    documents: [
+                        {
+                            name: 'Delete me',
+                            s3URL: 's3://bucketname/key/delete',
+                        },
+                    ],
+                }
+            )
+            const responseToDeleteID = afterDeleteResponse.responses[0].id
+
+            const afterKeepResponse = await createTestQuestionResponse(
+                stateServer,
+                question.id,
+                {
+                    documents: [
+                        { name: 'Keep me', s3URL: 's3://bucketname/key/keep' },
+                    ],
+                }
+            )
+            const responseToKeepID = afterKeepResponse.responses[0].id
+
+            const prismaClient = await sharedTestPrismaClient()
+            await prismaClient.contractQuestionResponseAction.create({
+                data: {
+                    responseID: responseToDeleteID,
+                    updatedByID: cmsUser.id,
+                    action: 'DELETE',
                 },
-            },
+            })
+
+            const fetched = await fetchTestContractWithQuestions(
+                stateServer,
+                contract.id
+            )
+
+            const responses =
+                fetched.questions?.DMCOQuestions.edges[0].node.responses ?? []
+            expect(responses).toHaveLength(1)
+            expect(responses[0].id).toBe(responseToKeepID)
         })
 
-        expect(fetchResult.errors).toBeUndefined()
-        expect(fetchResult.data?.fetchContract.contract).toBeDefined()
-        expect(fetchResult.data?.fetchContract.contract.id).toBe(
-            stateSubmission.id
-        )
+        it('returns contract with soft deleted documents filtered out without removing parent question or response', async () => {
+            const cmsUser = testCMSUser()
+            await createDBUsersWithFullData([cmsUser])
+
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+                s3Client: mockS3,
+            })
+
+            const contract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            const question = await createTestQuestion(cmsServer, contract.id, {
+                documents: [
+                    { name: 'Q-keep', s3URL: 's3://bucketname/key/q-keep' },
+                    { name: 'Q-delete', s3URL: 's3://bucketname/key/q-delete' },
+                ],
+            })
+            const questionDocToDelete = question.documents.find(
+                (d) => d.name === 'Q-delete'
+            )
+            if (!questionDocToDelete?.id) {
+                throw new Error(
+                    'Test setup: Q-delete document was not seeded with an id'
+                )
+            }
+
+            const responseQuestion = await createTestQuestionResponse(
+                stateServer,
+                question.id,
+                {
+                    documents: [
+                        { name: 'R-keep', s3URL: 's3://bucketname/key/r-keep' },
+                        {
+                            name: 'R-delete',
+                            s3URL: 's3://bucketname/key/r-delete',
+                        },
+                    ],
+                }
+            )
+            const responseDocToDelete =
+                responseQuestion.responses[0].documents.find(
+                    (d) => d.name === 'R-delete'
+                )
+            if (!responseDocToDelete?.id) {
+                throw new Error(
+                    'Test setup: R-delete document was not seeded with an id'
+                )
+            }
+
+            const prismaClient = await sharedTestPrismaClient()
+            await prismaClient.contractQuestionDocumentAction.create({
+                data: {
+                    documentID: questionDocToDelete.id,
+                    updatedByID: cmsUser.id,
+                    action: 'DELETE',
+                },
+            })
+            await prismaClient.contractQuestionResponseDocumentAction.create({
+                data: {
+                    documentID: responseDocToDelete.id,
+                    updatedByID: cmsUser.id,
+                    action: 'DELETE',
+                },
+            })
+
+            const fetched = await fetchTestContractWithQuestions(
+                stateServer,
+                contract.id
+            )
+
+            const dmco = fetched.questions?.DMCOQuestions
+            expect(dmco?.totalCount).toBe(1)
+            expect(dmco?.edges).toHaveLength(1)
+
+            const node = dmco!.edges[0].node
+            expect(node.documents).toHaveLength(1)
+            expect(node.documents[0].name).toBe('Q-keep')
+
+            expect(node.responses).toHaveLength(1)
+            expect(node.responses[0].documents).toHaveLength(1)
+            expect(node.responses[0].documents[0].name).toBe('R-keep')
+        })
     })
 
-    it('denies OAuth client access to contract from different state', async () => {
-        const stateServerFL = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
+    describe('Oauth request tests', () => {
+        it('allows OAuth client with client_credentials to fetch contract', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
 
-        // Create a contract in FL
-        const stateSubmission =
-            await createAndUpdateTestContractWithoutRates(stateServerFL)
+            // Create a contract
+            const stateSubmission =
+                await createAndUpdateTestContractWithoutRates(stateServer)
 
-        // Create OAuth client context with VA state user
-        const oauthServerVA = await constructTestPostgresServer({
-            context: {
-                user: testStateUser({
-                    stateCode: 'VA',
-                    email: 'oauth@va.gov',
-                }),
-                oauthClient: {
-                    clientId: 'test-oauth-client-va',
-                    grants: ['client_credentials'],
-                    iss: 'mcreview-test',
-                    scopes: [],
-                    isDelegatedUser: false,
+            // Create OAuth client context
+            const oauthServer = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser(), // FL state user
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['client_credentials'],
+                        iss: 'mcreview-test',
+                        scopes: [],
+                        isDelegatedUser: false,
+                    },
                 },
-            },
-            s3Client: mockS3,
-        })
+                s3Client: mockS3,
+            })
 
-        const fetchResult = await executeGraphQLOperation(oauthServerVA, {
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+            const fetchResult = await executeGraphQLOperation(oauthServer, {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
-            },
+            })
+
+            expect(fetchResult.errors).toBeUndefined()
+            expect(fetchResult.data?.fetchContract.contract).toBeDefined()
+            expect(fetchResult.data?.fetchContract.contract.id).toBe(
+                stateSubmission.id
+            )
         })
 
-        expect(fetchResult.errors).toBeDefined()
-        if (fetchResult.errors === undefined) {
-            throw new Error('type narrow')
-        }
+        it('denies OAuth client access to contract from different state', async () => {
+            const stateServerFL = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
 
-        expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
-        expect(fetchResult.errors[0].message).toBe(
-            'OAuth client not allowed to access contract from FL'
-        )
-    })
+            // Create a contract in FL
+            const stateSubmission =
+                await createAndUpdateTestContractWithoutRates(stateServerFL)
 
-    it('denies OAuth client without read permissions', async () => {
-        const stateServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
-
-        // Create a contract
-        const stateSubmission =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-
-        // Create OAuth client context without client_credentials grant
-        const oauthServer = await constructTestPostgresServer({
-            context: {
-                user: testStateUser(),
-                oauthClient: {
-                    clientId: 'test-oauth-client',
-                    grants: ['some_other_grant'],
-                    iss: 'mcreview-test',
-                    scopes: [],
-                    isDelegatedUser: false,
+            // Create OAuth client context with VA state user
+            const oauthServerVA = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser({
+                        stateCode: 'VA',
+                        email: 'oauth@va.gov',
+                    }),
+                    oauthClient: {
+                        clientId: 'test-oauth-client-va',
+                        grants: ['client_credentials'],
+                        iss: 'mcreview-test',
+                        scopes: [],
+                        isDelegatedUser: false,
+                    },
                 },
-            },
-            s3Client: mockS3,
-        })
+                s3Client: mockS3,
+            })
 
-        const fetchResult = await executeGraphQLOperation(oauthServer, {
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+            const fetchResult = await executeGraphQLOperation(oauthServerVA, {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
-            },
+            })
+
+            expect(fetchResult.errors).toBeDefined()
+            if (fetchResult.errors === undefined) {
+                throw new Error('type narrow')
+            }
+
+            expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
+            expect(fetchResult.errors[0].message).toBe(
+                'OAuth client not allowed to access contract from FL'
+            )
         })
 
-        expect(fetchResult.errors).toBeDefined()
-        if (fetchResult.errors === undefined) {
-            throw new Error('type narrow')
-        }
+        it('denies OAuth client without read permissions', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
 
-        expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
-        expect(fetchResult.errors[0].message).toBe(
-            'OAuth client does not have read permissions'
-        )
+            // Create a contract
+            const stateSubmission =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+
+            // Create OAuth client context without client_credentials grant
+            const oauthServer = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['some_other_grant'],
+                        iss: 'mcreview-test',
+                        scopes: [],
+                        isDelegatedUser: false,
+                    },
+                },
+                s3Client: mockS3,
+            })
+
+            const fetchResult = await executeGraphQLOperation(oauthServer, {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
+                },
+            })
+
+            expect(fetchResult.errors).toBeDefined()
+            if (fetchResult.errors === undefined) {
+                throw new Error('type narrow')
+            }
+
+            expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
+            expect(fetchResult.errors[0].message).toBe(
+                'OAuth client does not have read permissions'
+            )
+        })
     })
 })

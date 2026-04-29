@@ -1,8 +1,8 @@
 import type { RateQuestionType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import {
+    convertNonDeletedRateQuestions,
     questionInclude,
-    rateQuestionPrismaToDomainType,
 } from './questionHelpers'
 import { parseErrorToError } from '@mc-review/helpers'
 
@@ -21,9 +21,7 @@ export async function findAllQuestionsByRate(
             },
         })
 
-        return result.map((question) =>
-            rateQuestionPrismaToDomainType(question)
-        )
+        return convertNonDeletedRateQuestions(result)
     } catch (e) {
         return parseErrorToError(e)
     }
