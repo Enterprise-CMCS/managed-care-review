@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-069 Consolidate AI validation runtime entrypoints and exports`.
+The next implementation ticket is `AIFA-071 Clean up AI validation config and local runtime defaults`.
 
 ## Completed
 
@@ -82,6 +82,7 @@ The next implementation ticket is `AIFA-069 Consolidate AI validation runtime en
 - AIFA-067 ✔ Reduce first-pass reranking latency for large submissions
 - AIFA-047 ✔ Strengthen document cache identity with content fingerprints
 - AIFA-068 ✔ Retire obsolete standalone AI dev script
+- AIFA-069 ✔ Consolidate AI validation runtime entrypoints and exports
 - AIFA-025 ✔ Evaluate FAISS implementation behind VectorStore
 
 ## Current State
@@ -303,15 +304,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-069 Consolidate AI validation runtime entrypoints and exports
+### AIFA-071 Clean up AI validation config and local runtime defaults
 
-Review the public/runtime surface of `services/ai-form-augmentation` and tighten obsolete or low-value exports so another engineer can quickly identify the real supported entrypoints.
+Audit AI validation env/config handling across app-api local bootstrap, Apollo configuration, cleanup, evaluation, and local worker startup so supported flags and defaults are easier to reason about without changing behavior.
 
 ## Suggested Next Step
 
-- Review `services/ai-form-augmentation/src/index.ts`, `runValidation.ts`, and related exported helpers/types for dead or misleading public surface.
-- Remove or tighten obsolete exports only after verified non-usage.
-- Keep runtime behavior unchanged; this is a handoff-oriented cleanup pass, not a validation-logic refactor.
+- Audit the supported AI validation env vars and where their defaults are applied across app-api and the worker/evaluation paths.
+- Remove stale retired-flag references only where they are still presented as current behavior.
+- Keep `./dev local`, GraphQL validation flow, cleanup, and evaluation behavior unchanged by default.
 
 ## Follow-on Performance Tickets
 
@@ -323,11 +324,17 @@ Review the public/runtime surface of `services/ai-form-augmentation` and tighten
 
 ## Recommended Upcoming Order
 
-1. `AIFA-069 Consolidate AI validation runtime entrypoints and exports`
+1. `AIFA-071 Clean up AI validation config and local runtime defaults`
 2. `AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries`
-3. `AIFA-071 Clean up AI validation config and local runtime defaults`
-4. `AIFA-072 Reduce AI validation test duplication and brittleness`
-5. `AIFA-073 Refresh AI validation documentation for handoff`
+3. `AIFA-072 Reduce AI validation test duplication and brittleness`
+4. `AIFA-073 Refresh AI validation documentation for handoff`
+
+## AIFA-069 Closeout Notes
+
+- Removed dead public surface from `services/ai-form-augmentation`: the unused top-level barrel `src/index.ts`, the unused evaluation barrel `src/evaluation/index.ts`, and several verified-unused type re-exports from active barrels.
+- The real supported runtime surface is now clearer: active subpath imports like `handlers`, `results`, `status`, `artifacts`, `versioning`, and `runValidation.ts` remain intact, while dead broad entrypoints are gone.
+- This ticket intentionally stopped at usage-verified dead surface. Remaining internal-only definitions are still live code in their defining modules and should not be treated as orphaned just because they are no longer re-exported.
+- No runtime behavior changed; the cleanup was limited to exports/entrypoints and validated with usage searches plus `pnpm --filter ai-form-augmentation build`.
 
 ## AIFA-025 Closeout Notes
 

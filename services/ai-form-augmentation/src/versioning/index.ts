@@ -1,4 +1,3 @@
-export type { FormSnapshotField } from './artifactVersion'
 export {
   buildArtifactVersionDocumentIdentity,
   computeArtifactVersion,

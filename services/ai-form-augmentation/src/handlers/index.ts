@@ -2,7 +2,6 @@ export type {
   ValidationIndexingSummaryDiagnostic,
   ValidationSourceDocument,
   ValidationPhaseTimingDiagnostic,
-  ValidationHandlerEvent,
-  ValidationHandlerResult
+  ValidationHandlerEvent
 } from './validationHandler'
 export { validationHandler } from './validationHandler'

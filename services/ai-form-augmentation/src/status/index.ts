@@ -1,7 +1,5 @@
 export type {
   ValidationLifecycleTimingArtifact,
-  ValidationPipelineStage,
-  ValidationIndexingProgressArtifact,
   ValidationStatusArtifact
 } from './statusArtifact'
 
