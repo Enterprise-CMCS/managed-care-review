@@ -11,12 +11,11 @@ import {
     WebTracerProvider,
     BatchSpanProcessor,
 } from '@opentelemetry/sdk-trace-web'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { Resource } from '@opentelemetry/resources'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
-import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
-import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
+import { W3CTraceContextPropagator } from '@opentelemetry/core'
 import { ZoneContextManager } from '@opentelemetry/context-zone'
 import React, { useMemo } from 'react'
 import {
@@ -42,7 +41,6 @@ function initializeTracer() {
     const serviceName = 'app-web-' + import.meta.env.VITE_APP_STAGE_NAME
 
     const provider = new WebTracerProvider({
-        idGenerator: new AWSXRayIdGenerator(),
         resource: new Resource({
             [ATTR_SERVICE_NAME]: serviceName,
             [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: import.meta.env
@@ -60,7 +58,7 @@ function initializeTracer() {
 
     provider.register({
         contextManager: new ZoneContextManager(),
-        propagator: new AWSXRayPropagator(),
+        propagator: new W3CTraceContextPropagator(),
     })
 
     // Get API URL to only propagate trace headers to our backend

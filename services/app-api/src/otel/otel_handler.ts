@@ -7,8 +7,7 @@ import {
     BatchSpanProcessor,
 } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
-import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
+import { W3CTraceContextPropagator } from '@opentelemetry/core'
 import { PrismaInstrumentation } from '@prisma/instrumentation'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
@@ -25,13 +24,12 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
         headers: {},
     })
     const provider = new NodeTracerProvider({
-        idGenerator: new AWSXRayIdGenerator(),
         resource: resource,
         spanProcessors: [new BatchSpanProcessor(exporter)],
     })
 
     provider.register({
-        propagator: new AWSXRayPropagator(),
+        propagator: new W3CTraceContextPropagator(),
     })
 
     // Register Prisma instrumentation to capture database operations
@@ -65,13 +63,11 @@ export function recordException(
 
 export function createTracer(serviceName: string): Tracer {
     const provider = new NodeTracerProvider({
-        idGenerator: new AWSXRayIdGenerator(),
         resource: new Resource({
             [ATTR_SERVICE_NAME]: serviceName,
         }),
     })
 
-    // log to console and send to New Relic
     const exporter = new OTLPTraceExporter({
         url: process.env.API_APP_OTEL_COLLECTOR_URL,
         headers: {},
@@ -79,9 +75,8 @@ export function createTracer(serviceName: string): Tracer {
 
     provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
 
-    // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
     provider.register({
-        propagator: new AWSXRayPropagator(),
+        propagator: new W3CTraceContextPropagator(),
     })
 
     return trace.getTracer(serviceName)
