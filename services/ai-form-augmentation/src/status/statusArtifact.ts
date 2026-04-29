@@ -1,5 +1,6 @@
 import type {
   ValidationDocumentDiagnostic,
+  ValidationRerankingDiagnostics,
   ValidationWorkSelectionMode
 } from '../results'
 
@@ -16,6 +17,13 @@ export interface ValidationIndexingProgressArtifact {
   totalDocuments: number
 }
 
+export interface ValidationLifecycleTimingArtifact {
+  triggerAcceptedAt: string
+  firstStatusWriteAt: string
+  firstIndexedArtifactAt?: string
+  completedAt?: string
+}
+
 export interface ValidationStatusArtifact {
   stage: ValidationPipelineStage
   artifactVersion: string
@@ -24,6 +32,8 @@ export interface ValidationStatusArtifact {
   documentDiagnostics?: ValidationDocumentDiagnostic[]
   indexingProgress?: ValidationIndexingProgressArtifact
   workSelectionMode?: ValidationWorkSelectionMode
+  lifecycleTiming?: ValidationLifecycleTimingArtifact
+  rerankingDiagnostics?: ValidationRerankingDiagnostics
 }
 
 export function getValidationStatusKey(formId: string): string {
@@ -36,7 +46,9 @@ export function buildValidationStatusArtifact(
   error: string | null = null,
   documentDiagnostics: ValidationDocumentDiagnostic[] = [],
   workSelectionMode: ValidationWorkSelectionMode = 'all-doc',
-  indexingProgress?: ValidationIndexingProgressArtifact
+  indexingProgress?: ValidationIndexingProgressArtifact,
+  lifecycleTiming?: ValidationLifecycleTimingArtifact,
+  rerankingDiagnostics?: ValidationRerankingDiagnostics
 ): ValidationStatusArtifact {
   return {
     stage,
@@ -47,7 +59,9 @@ export function buildValidationStatusArtifact(
     error,
     ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {}),
     ...(indexingProgress ? { indexingProgress } : {}),
-    ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {})
+    ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {}),
+    ...(lifecycleTiming ? { lifecycleTiming } : {}),
+    ...(rerankingDiagnostics ? { rerankingDiagnostics } : {})
   }
 }
 
@@ -55,27 +69,37 @@ export function buildFailedValidationStatusArtifact(
   artifactVersion: string,
   error: string,
   documentDiagnostics: ValidationDocumentDiagnostic[] = [],
-  workSelectionMode: ValidationWorkSelectionMode = 'all-doc'
+  workSelectionMode: ValidationWorkSelectionMode = 'all-doc',
+  lifecycleTiming?: ValidationLifecycleTimingArtifact,
+  rerankingDiagnostics?: ValidationRerankingDiagnostics
 ): ValidationStatusArtifact {
   return buildValidationStatusArtifact(
     'failed',
     artifactVersion,
     error,
     documentDiagnostics,
-    workSelectionMode
+    workSelectionMode,
+    undefined,
+    lifecycleTiming,
+    rerankingDiagnostics
   )
 }
 
 export function buildCompletedValidationStatusArtifact(
   artifactVersion: string,
   documentDiagnostics: ValidationDocumentDiagnostic[] = [],
-  workSelectionMode: ValidationWorkSelectionMode = 'all-doc'
+  workSelectionMode: ValidationWorkSelectionMode = 'all-doc',
+  lifecycleTiming?: ValidationLifecycleTimingArtifact,
+  rerankingDiagnostics?: ValidationRerankingDiagnostics
 ): ValidationStatusArtifact {
   return buildValidationStatusArtifact(
     'complete',
     artifactVersion,
     null,
     documentDiagnostics,
-    workSelectionMode
+    workSelectionMode,
+    undefined,
+    lifecycleTiming,
+    rerankingDiagnostics
   )
 }

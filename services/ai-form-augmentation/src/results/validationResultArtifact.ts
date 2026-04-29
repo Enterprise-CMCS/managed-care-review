@@ -12,6 +12,26 @@ export type ValidationPhase =
   | 'validation'
 
 export type ValidationPhaseTimingSummary = Record<ValidationPhase, number>
+export interface ValidationLifecycleTimingSummary {
+  triggerAcceptedAt: string
+  firstStatusWriteAt: string
+  firstIndexedArtifactAt?: string
+  completedAt: string
+}
+
+export interface ValidationRerankingDiagnostics {
+  candidateCount: number
+  sampledDocumentCount: number
+  cachedSampleCount: number
+  freshSampleCount: number
+  sampleUnavailableCount: number
+  llmRequestCount: number
+  sampleFetchElapsedMs: number
+  // This is the aggregate request time across reranking calls, not a wall-clock
+  // span, so concurrent runs can make it larger than totalElapsedMs.
+  llmElapsedMs: number
+  totalElapsedMs: number
+}
 
 export type ValidationWorkSelectionMode =
   | 'all-doc'
@@ -30,6 +50,8 @@ export interface ValidationResultArtifact {
   // them, but the product flow should not depend on this PoC-only detail.
   retrievalDiagnostics?: ValidationRetrievalDiagnostic[]
   phaseTimingsMs?: ValidationPhaseTimingSummary
+  lifecycleTiming?: ValidationLifecycleTimingSummary
+  rerankingDiagnostics?: ValidationRerankingDiagnostics
   workSelectionMode?: ValidationWorkSelectionMode
   fieldWorkSelectionDiagnostics?: ValidationFieldWorkSelectionDiagnostic[]
 }
@@ -97,7 +119,9 @@ export function buildValidationResultArtifact (
   documentDiagnostics: ValidationDocumentDiagnostic[] = [],
   workSelectionMode: ValidationWorkSelectionMode = 'all-doc',
   fieldWorkSelectionDiagnostics: ValidationFieldWorkSelectionDiagnostic[] = [],
-  phaseTimingsMs?: ValidationPhaseTimingSummary
+  phaseTimingsMs?: ValidationPhaseTimingSummary,
+  lifecycleTiming?: ValidationLifecycleTimingSummary,
+  rerankingDiagnostics?: ValidationRerankingDiagnostics
 ): ValidationResultArtifact {
   return {
     artifactVersion,
@@ -109,6 +133,8 @@ export function buildValidationResultArtifact (
     ...(llmDiagnostics.length > 0 ? { llmDiagnostics } : {}),
     ...(retrievalDiagnostics.length > 0 ? { retrievalDiagnostics } : {}),
     ...(phaseTimingsMs ? { phaseTimingsMs } : {}),
+    ...(lifecycleTiming ? { lifecycleTiming } : {}),
+    ...(rerankingDiagnostics ? { rerankingDiagnostics } : {}),
     ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {}),
     ...(fieldWorkSelectionDiagnostics.length > 0
       ? { fieldWorkSelectionDiagnostics }

@@ -1102,7 +1102,7 @@ Artifact review for contract `1946e3be-c904-4099-abc0-d8a87b8c6a2a` showed that 
 - Focused artifact-backed validation proves the optimization against realistic rerun cases
 - Validation outcomes, fallback behavior, and work-selection correctness remain unchanged
 - The optimization is backed by updated timing/artifact evidence rather than anecdotal page timing alone"
-AIFA-066 Persist end-to-end validation lifecycle timing for trigger-to-visible latency,Backlog,7-Large Submission Hardening,Medium,"AIFA-060, AIFA-063, AIFA-065","Persist coarse end-to-end lifecycle timing and transition metadata so engineers can distinguish worker-phase cost from queue/startup/polling delay when Review & Submit appears stuck in processing.
+AIFA-066 Persist end-to-end validation lifecycle timing for trigger-to-visible latency,Done,7-Large Submission Hardening,Medium,"AIFA-060, AIFA-063, AIFA-065","Persist coarse end-to-end lifecycle timing and transition metadata so engineers can distinguish worker-phase cost from queue/startup/polling delay when Review & Submit appears stuck in processing.
 - Record lifecycle timestamps or durations for at least trigger accepted, first in-progress status write, final completed result write, and any timeout-crossing state that the frontend surfaces
 - Keep the instrumentation additive and diagnostic-only; do not change validation semantics, work-selection behavior, or timeout policy in this ticket
 - Make the data available through existing artifacts or status/result payloads so local artifact review can explain user-visible latency without guessing
@@ -1113,3 +1113,18 @@ Recent reruns for contract `1946e3be-c904-4099-abc0-d8a87b8c6a2a` showed a misma
 - Engineers can distinguish worker-phase cost from startup/queueing/polling delay for reruns and large submissions
 - The instrumentation remains diagnostic-only and does not alter validation outcomes, fallback behavior, or runtime defaults
 - At least one realistic local rerun path demonstrates that the new timing data explains a previously ambiguous long-running Review-page state"
+AIFA-067 Reduce first-pass reranking latency for large submissions,Backlog,7-Large Submission Hardening,Medium,"AIFA-052, AIFA-060, AIFA-066","Optimize the pre-index first-pass reranking step for large submissions, where advisory PDF sampling and reranking LLM calls can dominate wall-clock time before any indexed-document artifacts are written.
+- Use the new lifecycle timing plus reranking-specific diagnostics (`candidateCount`, sample-source counts, `sampleFetchElapsedMs`, `llmElapsedMs`, `totalElapsedMs`, `firstIndexedArtifactAt`) to confirm where the wall-clock cost is concentrated
+- Reduce reranking wall-clock cost for large batches without weakening conservative work-selection behavior
+- Follow this implementation order unless fresh evidence contradicts it:
+  1. reduce reranking candidate volume on large batches
+  2. cache reranking sample inputs/results by document identity so unchanged rerun documents do not repay the LLM cost
+  3. short-circuit obvious high-value or low-value cases when heuristics already make the advisory reranking decision clear
+  4. only then consider higher reranking concurrency if the local LLM stack can absorb it safely
+- Keep the work scoped to reranking latency; do not broaden it into retrieval semantics, fallback rules, frontend timeout changes, or more first-pass limit tuning until reranking is materially cheaper
+
+Why this matters:
+Fresh artifact review for contract `4fb74e6b-1ef0-43d7-80d3-08a33bfca7fc` on the usual 165-document batch now makes the bottleneck explicit: trigger-to-complete took ~99s, `firstIndexedArtifactAt` landed ~94s after the initial `parsing` status write, and reranking diagnostics recorded `36` fresh samples plus `36` reranking LLM requests with `llmElapsedMs=174706` and `totalElapsedMs=90074`, while only `3` PDFs were ultimately embedded. That means the dominant wall-clock cost is the current reranking path itself, not broad indexing, retrieval, or final validation.","- Updated timing/artifact evidence isolates reranking as a measurable large-submission bottleneck instead of lumping it into generic processing delay
+- Large-submission runs spend materially less wall-clock time in pre-index reranking without changing validation outcomes or fallback behavior
+- Work-selection remains conservative: deferred documents stay eligible for later fallback and no hard exclusions are introduced
+- The optimization order is validated against realistic large-batch artifact runs and can stop after the first step that produces a meaningful win"

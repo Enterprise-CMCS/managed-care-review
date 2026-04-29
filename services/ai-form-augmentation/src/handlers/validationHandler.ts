@@ -36,8 +36,10 @@ import {
   type ValidationDocumentDiagnostic,
   type ValidationDocumentWorkSelectionDiagnostic,
   type ValidationFieldWorkSelectionDiagnostic,
+  type ValidationLifecycleTimingSummary,
   type ValidationPhase,
   type ValidationPhaseTimingSummary,
+  type ValidationRerankingDiagnostics,
   type ValidationRetrievalDiagnostic,
   type ValidationResultArtifact,
   type ValidationWorkSelectionMode
@@ -49,6 +51,7 @@ import {
   buildFailedValidationStatusArtifact,
   buildValidationStatusArtifact,
   getValidationStatusKey,
+  type ValidationLifecycleTimingArtifact,
   type ValidationStatusArtifact
 } from '../status'
 import {
@@ -85,6 +88,9 @@ export interface ValidationHandlerEvent {
   formId: string
   artifactVersion: string
   bucket: string
+  triggerAcceptedAt?: string
+  firstStatusWriteAt?: string
+  firstIndexedArtifactAt?: string
   s3Config: ArtifactS3ClientConfig
   validationLlmConfig?: ValidationLlmConfig
   formFields: DateValidationFieldInput[]
@@ -139,6 +145,22 @@ const LOW_YIELD_LLM_PRIORITY_PENALTY = 18
 const LARGE_DOCUMENT_NON_HIGH_PRIORITY_PENALTY = 14
 const HIGH_YIELD_LLM_PRIORITY_BOOST = 10
 const FIRST_PASS_DIVERSITY_SCORE_BAND = 4
+
+function buildValidationLifecycleTiming(args: {
+  triggerAcceptedAt?: string
+  firstStatusWriteAt?: string
+  firstIndexedArtifactAt?: string
+  completedAt?: string
+}): ValidationLifecycleTimingArtifact & Partial<ValidationLifecycleTimingSummary> {
+  return {
+    triggerAcceptedAt: args.triggerAcceptedAt ?? new Date().toISOString(),
+    firstStatusWriteAt: args.firstStatusWriteAt ?? new Date().toISOString(),
+    ...(args.firstIndexedArtifactAt
+      ? { firstIndexedArtifactAt: args.firstIndexedArtifactAt }
+      : {}),
+    ...(args.completedAt ? { completedAt: args.completedAt } : {})
+  }
+}
 
 export function buildReusableDocumentCacheKeys(args: {
   previousDocuments: IndexedDocumentSummary[]
@@ -296,6 +318,11 @@ export async function validationHandler(
   // multiple artifacts.
   const statusKey = getValidationStatusKey(event.formId)
   const requestedWorkSelectionMode = event.workSelectionMode ?? 'all-doc'
+  event.triggerAcceptedAt ??= new Date().toISOString()
+  event.firstStatusWriteAt ??= new Date().toISOString()
+  const triggerAcceptedAt = event.triggerAcceptedAt
+  const firstStatusWriteAt = event.firstStatusWriteAt
+  let rerankingDiagnostics: ValidationRerankingDiagnostics | undefined
   let documentDiagnostics: ValidationDocumentDiagnostic[] = [
     ...(event.documentDiagnostics ?? [])
   ]
@@ -348,7 +375,9 @@ export async function validationHandler(
         event.artifactVersion,
         null,
         [],
-        requestedWorkSelectionMode
+        requestedWorkSelectionMode,
+        undefined,
+        buildValidationLifecycleTiming(event)
       )
     )
 
@@ -378,12 +407,14 @@ export async function validationHandler(
         allowReuse: canReuseCurrentDocumentArtifacts
       })
     if (requestedWorkSelectionMode === 'gated-first-pass') {
-      workSelectionDiagnostics = await rerankValidationDocuments({
+      const reranking = await rerankValidationDocuments({
         event,
         s3Client,
         unchangedDocumentCacheKeys,
         scoredDocuments: workSelectionDiagnostics
       })
+      workSelectionDiagnostics = reranking.scoredDocuments
+      rerankingDiagnostics = reranking.diagnostics
     }
     const workSelectionByCacheKey = new Map(
       workSelectionDiagnostics.map((diagnostic) => [
@@ -528,7 +559,9 @@ export async function validationHandler(
           {
             completedDocuments: completedFirstPassDocuments,
             totalDocuments: completedFirstPassDocuments + deferredDocuments.length
-          }
+          },
+          buildValidationLifecycleTiming(event),
+          rerankingDiagnostics
         )
       )
       const fallbackIndexing = await indexValidationDocuments({
@@ -592,6 +625,7 @@ export async function validationHandler(
       retrievedChunksByField: validationPass.retrievedChunksByField,
       retrievalDiagnostics: validationPass.retrievalDiagnostics
     })
+    const completedAt = new Date().toISOString()
 
     logMissingCitationPages(event.formId, resultsWithSupportingCitationData)
 
@@ -613,7 +647,16 @@ export async function validationHandler(
         documentDiagnostics,
         finalWorkSelectionMode,
         fieldWorkSelectionDiagnostics,
-        phaseTimings
+        phaseTimings,
+        {
+          triggerAcceptedAt,
+          firstStatusWriteAt,
+          ...(event.firstIndexedArtifactAt
+            ? { firstIndexedArtifactAt: event.firstIndexedArtifactAt }
+            : {}),
+          completedAt
+        },
+        rerankingDiagnostics
       )
     )
 
@@ -623,7 +666,12 @@ export async function validationHandler(
       buildCompletedValidationStatusArtifact(
         event.artifactVersion,
         documentDiagnostics,
-        finalWorkSelectionMode
+        finalWorkSelectionMode,
+        buildValidationLifecycleTiming({
+          ...event,
+          completedAt
+        }),
+        rerankingDiagnostics
       )
     )
 
@@ -642,7 +690,9 @@ export async function validationHandler(
         event.artifactVersion,
         message,
         documentDiagnostics,
-        requestedWorkSelectionMode
+        requestedWorkSelectionMode,
+        buildValidationLifecycleTiming(event),
+        rerankingDiagnostics
       )
     )
 
@@ -742,7 +792,8 @@ async function indexValidationDocuments(args: {
             {
               completedDocuments,
               totalDocuments: args.totalDocumentsToIndex
-            }
+            },
+            buildValidationLifecycleTiming(args.event)
           )
         )
       }
@@ -949,7 +1000,9 @@ async function executeValidationPass(args: {
       args.event.artifactVersion,
       null,
       [],
-      args.workSelectionMode
+      args.workSelectionMode,
+      undefined,
+      buildValidationLifecycleTiming(args.event)
     )
   )
 
@@ -1050,7 +1103,9 @@ async function executeValidationPass(args: {
       args.event.artifactVersion,
       null,
       [],
-      args.workSelectionMode
+      args.workSelectionMode,
+      undefined,
+      buildValidationLifecycleTiming(args.event)
     )
   )
 
@@ -1123,7 +1178,9 @@ async function executeValidationPass(args: {
         args.event.artifactVersion,
         null,
         [],
-        args.workSelectionMode
+        args.workSelectionMode,
+        undefined,
+        buildValidationLifecycleTiming(args.event)
       )
     )
 
@@ -1340,6 +1397,7 @@ async function indexValidationDocument(args: {
       documentArtifactKey,
       indexedDocumentArtifact
     )
+    event.firstIndexedArtifactAt ??= new Date().toISOString()
 
     return {
       document,
@@ -1466,13 +1524,30 @@ async function rerankValidationDocuments(args: {
   s3Client: ArtifactS3Client
   unchangedDocumentCacheKeys: Set<string>
   scoredDocuments: ScoredValidationDocumentDiagnostic[]
-}): Promise<ScoredValidationDocumentDiagnostic[]> {
+}): Promise<{
+  scoredDocuments: ScoredValidationDocumentDiagnostic[]
+  diagnostics: ValidationRerankingDiagnostics
+}> {
+  const rerankingStartedAt = Date.now()
   const rerankingCandidates = selectFirstPassRerankingCandidates(
     args.scoredDocuments
   )
 
   if (rerankingCandidates.length === 0) {
-    return args.scoredDocuments
+    return {
+      scoredDocuments: args.scoredDocuments,
+      diagnostics: {
+        candidateCount: 0,
+        sampledDocumentCount: 0,
+        cachedSampleCount: 0,
+        freshSampleCount: 0,
+        sampleUnavailableCount: 0,
+        llmRequestCount: 0,
+        sampleFetchElapsedMs: 0,
+        llmElapsedMs: 0,
+        totalElapsedMs: 0
+      }
+    }
   }
 
   const validationClient = newValidationLlmClient(args.event.validationLlmConfig)
@@ -1480,6 +1555,9 @@ async function rerankValidationDocuments(args: {
     rerankingCandidates,
     FIRST_PASS_RERANKING_CONCURRENCY,
     async (diagnostic) => {
+      let sampleSource: 'cached' | 'fresh' | null = null
+      let llmRequested = false
+      const sampleStartedAt = Date.now()
       try {
         const sample = await readFirstPassRerankingSample({
           event: args.event,
@@ -1487,6 +1565,7 @@ async function rerankValidationDocuments(args: {
           unchangedDocumentCacheKeys: args.unchangedDocumentCacheKeys,
           document: diagnostic.document
         })
+        const sampleFetchElapsedMs = Date.now() - sampleStartedAt
 
         if (sample == null) {
           return [
@@ -1494,10 +1573,19 @@ async function rerankValidationDocuments(args: {
             {
               scoreDelta: 0,
               reason: 'Sample unavailable; kept heuristic first-pass ranking.'
+            },
+            {
+              sampleFetchElapsedMs,
+              llmElapsedMs: 0,
+              sampleSource,
+              llmRequested
             }
           ] as const
         }
+        sampleSource = sample.sampleSource
 
+        llmRequested = true
+        const llmStartedAt = Date.now()
         const signal = parseFirstPassRerankingSignal(
           (
             await validationClient.generateValidation({
@@ -1511,6 +1599,7 @@ async function rerankValidationDocuments(args: {
             })
           ).rawText
         )
+        const llmElapsedMs = Date.now() - llmStartedAt
 
         if (signal == null) {
           return [
@@ -1519,13 +1608,25 @@ async function rerankValidationDocuments(args: {
               scoreDelta: 0,
               reason:
                 'LLM reranking response was unusable; kept heuristic score.'
+            },
+            {
+              sampleFetchElapsedMs,
+              llmElapsedMs,
+              sampleSource,
+              llmRequested
             }
           ] as const
         }
 
         return [
           computeDocumentCacheKey(diagnostic.document),
-          buildFirstPassRerankingAdjustment(signal, sample)
+          buildFirstPassRerankingAdjustment(signal, sample),
+          {
+            sampleFetchElapsedMs,
+            llmElapsedMs,
+            sampleSource,
+            llmRequested
+          }
         ] as const
       } catch {
         return [
@@ -1533,13 +1634,48 @@ async function rerankValidationDocuments(args: {
           {
             scoreDelta: 0,
             reason: 'LLM reranking failed; kept heuristic first-pass ranking.'
+          },
+          {
+            sampleFetchElapsedMs: Date.now() - sampleStartedAt,
+            llmElapsedMs: 0,
+            sampleSource,
+            llmRequested
           }
         ] as const
       }
     }
   )
 
-  const adjustmentByCacheKey = new Map(rerankedAdjustments)
+  const adjustmentByCacheKey = new Map(
+    rerankedAdjustments.map(([cacheKey, adjustment]) => [cacheKey, adjustment])
+  )
+  const diagnostics: ValidationRerankingDiagnostics = {
+    candidateCount: rerankingCandidates.length,
+    sampledDocumentCount: rerankedAdjustments.filter(
+      ([, , diagnostic]) => diagnostic.sampleSource != null
+    ).length,
+    cachedSampleCount: rerankedAdjustments.filter(
+      ([, , diagnostic]) => diagnostic.sampleSource === 'cached'
+    ).length,
+    freshSampleCount: rerankedAdjustments.filter(
+      ([, , diagnostic]) => diagnostic.sampleSource === 'fresh'
+    ).length,
+    sampleUnavailableCount: rerankedAdjustments.filter(
+      ([, , diagnostic]) => diagnostic.sampleSource == null
+    ).length,
+    llmRequestCount: rerankedAdjustments.filter(
+      ([, , diagnostic]) => diagnostic.llmRequested
+    ).length,
+    sampleFetchElapsedMs: rerankedAdjustments.reduce(
+      (total, [, , diagnostic]) => total + diagnostic.sampleFetchElapsedMs,
+      0
+    ),
+    llmElapsedMs: rerankedAdjustments.reduce(
+      (total, [, , diagnostic]) => total + diagnostic.llmElapsedMs,
+      0
+    ),
+    totalElapsedMs: Date.now() - rerankingStartedAt
+  }
   const rescoredDocuments = args.scoredDocuments.map((diagnostic, index) => {
     const cacheKey = computeDocumentCacheKey(diagnostic.document)
     const adjustment = adjustmentByCacheKey.get(cacheKey)
@@ -1571,34 +1707,37 @@ async function rerankValidationDocuments(args: {
   const { rerankedFirstPassCacheKeys, diversityReasonsByCacheKey } =
     selectCoverageAwareFirstPassCacheKeys(rescoredDocuments)
 
-  return rescoredDocuments.map(
-    ({
-      diagnostic,
-      cacheKey,
-      priorityScore,
-      priorityReasons,
-      heuristicGroupKey,
-      heuristicGroupKeySource
-    }) => ({
-      document: diagnostic.document,
-      workSelection: {
+  return {
+    scoredDocuments: rescoredDocuments.map(
+      ({
+        diagnostic,
+        cacheKey,
         priorityScore,
-        priorityReasons: [
-          ...priorityReasons,
-          ...(diversityReasonsByCacheKey.get(cacheKey) ?? [])
-        ],
-        bucket: rerankedFirstPassCacheKeys.has(cacheKey)
-          ? 'first-pass'
-          : 'deferred',
-        ...(heuristicGroupKey != null
-          ? {
-              heuristicGroupKey,
-              heuristicGroupKeySource
-            }
-          : {})
-      }
-    })
-  )
+        priorityReasons,
+        heuristicGroupKey,
+        heuristicGroupKeySource
+      }) => ({
+        document: diagnostic.document,
+        workSelection: {
+          priorityScore,
+          priorityReasons: [
+            ...priorityReasons,
+            ...(diversityReasonsByCacheKey.get(cacheKey) ?? [])
+          ],
+          bucket: rerankedFirstPassCacheKeys.has(cacheKey)
+            ? 'first-pass'
+            : 'deferred',
+          ...(heuristicGroupKey != null
+            ? {
+                heuristicGroupKey,
+                heuristicGroupKeySource
+              }
+            : {})
+        }
+      })
+    ),
+    diagnostics
+  }
 }
 
 function selectFirstPassRerankingCandidates(
@@ -1704,6 +1843,7 @@ async function readFirstPassRerankingSample(args: {
   pageCount: number
   fileSizeBytes: number | null
   sampleText: string
+  sampleSource: 'cached' | 'fresh'
 } | null> {
   const cacheKey = computeDocumentCacheKey(args.document)
   const parsedDocumentArtifactKey = getParsedDocumentArtifactKey(
@@ -1724,6 +1864,7 @@ async function readFirstPassRerankingSample(args: {
         // Reuse the cached first pages when we have them so reranking does not
         // re-download unchanged PDFs just to recover advisory metadata.
         fileSizeBytes: null,
+        sampleSource: 'cached',
         sampleText: clipFirstPassSampleText(
           parsedArtifact.pageTexts
             .slice(0, FIRST_PASS_RERANKING_SAMPLE_PAGE_LIMIT)
@@ -1746,6 +1887,7 @@ async function readFirstPassRerankingSample(args: {
   return {
     pageCount: sample.pageCount,
     fileSizeBytes: fileBuffer.byteLength,
+    sampleSource: 'fresh',
     sampleText: clipFirstPassSampleText(sample.pageTexts.join('\n\n'))
   }
 }

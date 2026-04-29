@@ -175,6 +175,7 @@ export function triggerValidationResolver(
             formId: input.contractID,
             artifactVersion,
             bucket: config.artifactBucket,
+            triggerAcceptedAt: new Date().toISOString(),
             formFields,
             documents: sourceDocuments,
             documentDiagnostics,

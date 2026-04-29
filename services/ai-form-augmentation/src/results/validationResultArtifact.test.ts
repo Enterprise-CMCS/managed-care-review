@@ -133,3 +133,68 @@ test('buildValidationResultArtifact preserves phase timings when present', () =>
     validation: 7
   })
 })
+
+test('buildValidationResultArtifact preserves lifecycle timing when present', () => {
+  const artifact = buildValidationResultArtifact(
+    'artifact-v1',
+    'form-hash-v1',
+    [],
+    [],
+    [],
+    [],
+    'gated-first-pass',
+    [],
+    undefined,
+    {
+      triggerAcceptedAt: '2026-04-29T04:00:00.000Z',
+      firstStatusWriteAt: '2026-04-29T04:00:03.000Z',
+      firstIndexedArtifactAt: '2026-04-29T04:00:07.000Z',
+      completedAt: '2026-04-29T04:00:10.000Z'
+    }
+  )
+
+  assert.deepEqual(artifact.lifecycleTiming, {
+    triggerAcceptedAt: '2026-04-29T04:00:00.000Z',
+    firstStatusWriteAt: '2026-04-29T04:00:03.000Z',
+    firstIndexedArtifactAt: '2026-04-29T04:00:07.000Z',
+    completedAt: '2026-04-29T04:00:10.000Z'
+  })
+})
+
+test('buildValidationResultArtifact preserves reranking diagnostics when present', () => {
+  const artifact = buildValidationResultArtifact(
+    'artifact-v1',
+    'form-hash-v1',
+    [],
+    [],
+    [],
+    [],
+    'gated-first-pass',
+    [],
+    undefined,
+    undefined,
+    {
+      candidateCount: 12,
+      sampledDocumentCount: 10,
+      cachedSampleCount: 4,
+      freshSampleCount: 6,
+      sampleUnavailableCount: 2,
+      llmRequestCount: 10,
+      sampleFetchElapsedMs: 1234,
+      llmElapsedMs: 5678,
+      totalElapsedMs: 6789
+    }
+  )
+
+  assert.deepEqual(artifact.rerankingDiagnostics, {
+    candidateCount: 12,
+    sampledDocumentCount: 10,
+    cachedSampleCount: 4,
+    freshSampleCount: 6,
+    sampleUnavailableCount: 2,
+    llmRequestCount: 10,
+    sampleFetchElapsedMs: 1234,
+    llmElapsedMs: 5678,
+    totalElapsedMs: 6789
+  })
+})

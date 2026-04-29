@@ -140,6 +140,7 @@ describe('triggerValidationResolver', () => {
                 formId: 'test-abc-123',
                 bucket: 'ai-form-augmentation-artifacts',
                 artifactVersion: expect.any(String),
+                triggerAcceptedAt: expect.any(String),
                 formFields: [
                     {
                         field: 'contractStartDate',
@@ -279,6 +280,7 @@ describe('triggerValidationResolver', () => {
         const serializedPayload = childStdinEndMock.mock.calls[0][0]
         expect(JSON.parse(serializedPayload)).toEqual(
             expect.objectContaining({
+                triggerAcceptedAt: expect.any(String),
                 documents: [
                     {
                         documentName: 'Eligible Contract.PDF',

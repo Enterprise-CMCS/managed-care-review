@@ -289,14 +289,41 @@ await withLocalStackHarness(
 
     const storedResult = await context.s3Client.getJson<{
       results: Array<{ field: string }>
+      lifecycleTiming?: {
+        triggerAcceptedAt: string
+        firstStatusWriteAt: string
+        completedAt: string
+      }
+      rerankingDiagnostics?: {
+        candidateCount: number
+        sampledDocumentCount: number
+      }
       documentDiagnostics: Array<{
         documentName: string
         stage?: string
         reason?: string
       }>
     }>(context.bucket, getValidationResultKey(formId))
+    const storedStatus = await context.s3Client.getJson<{
+      lifecycleTiming?: {
+        triggerAcceptedAt: string
+        firstStatusWriteAt: string
+        completedAt: string
+      }
+    }>(context.bucket, getValidationStatusKey(formId))
 
     assert.equal(storedResult.results.length, 2)
+    assert.ok(storedResult.lifecycleTiming?.triggerAcceptedAt)
+    assert.ok(storedResult.lifecycleTiming?.firstStatusWriteAt)
+    assert.ok(storedResult.lifecycleTiming?.completedAt)
+    assert.equal(
+      storedStatus.lifecycleTiming?.firstStatusWriteAt,
+      storedResult.lifecycleTiming?.firstStatusWriteAt
+    )
+    assert.equal(
+      storedStatus.lifecycleTiming?.completedAt,
+      storedResult.lifecycleTiming?.completedAt
+    )
     assert.deepEqual(
       storedResult.documentDiagnostics.map((diagnostic) => ({
         documentName: diagnostic.documentName,
@@ -358,9 +385,15 @@ await withLocalStackHarness(
         stage?: string
         reason?: string
       }>
+      rerankingDiagnostics?: {
+        candidateCount: number
+        sampledDocumentCount: number
+      }
     }>(context.bucket, getValidationResultKey(formId))
 
     assert.equal(storedResult.results.length, 2)
+    assert.ok(storedResult.rerankingDiagnostics?.candidateCount)
+    assert.ok(storedResult.rerankingDiagnostics?.sampledDocumentCount)
     assert.deepEqual(
       storedResult.documentDiagnostics.map((diagnostic) => ({
         documentName: diagnostic.documentName,
@@ -497,12 +530,6 @@ await withLocalStackHarness(
     const formSnapshotHash = buildFormSnapshotHashForFields(formFields)
 
     await seedCurrentDocuments(context, [document])
-    await seedIndexedDocumentArtifacts({
-      context,
-      formId,
-      artifactVersion: previousArtifactVersion,
-      documents: [document]
-    })
     await context.s3Client.putJson(
       context.bucket,
       getValidationStatusKey(formId),
@@ -530,10 +557,20 @@ await withLocalStackHarness(
 
     const storedResult = await context.s3Client.getJson<{
       artifactVersion: string
+      lifecycleTiming?: {
+        firstStatusWriteAt: string
+        firstIndexedArtifactAt?: string
+        completedAt: string
+      }
+      rerankingDiagnostics?: unknown
       results: Array<{ field: string }>
     }>(context.bucket, getValidationResultKey(formId))
 
     assert.equal(storedResult.artifactVersion, currentArtifactVersion)
     assert.equal(storedResult.results.length, 2)
+    assert.ok(storedResult.lifecycleTiming?.firstStatusWriteAt)
+    assert.ok(storedResult.lifecycleTiming?.firstIndexedArtifactAt)
+    assert.ok(storedResult.lifecycleTiming?.completedAt)
+    assert.equal(storedResult.rerankingDiagnostics, undefined)
   }
 )

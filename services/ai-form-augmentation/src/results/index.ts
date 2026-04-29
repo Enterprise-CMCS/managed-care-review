@@ -2,9 +2,11 @@ export type {
   ValidationDocumentDiagnostic,
   ValidationDocumentWorkSelectionDiagnostic,
   ValidationFieldWorkSelectionDiagnostic,
+  ValidationLifecycleTimingSummary,
   ValidationLlmDiagnostic,
   ValidationPhase,
   ValidationPhaseTimingSummary,
+  ValidationRerankingDiagnostics,
   ValidationRetrievalDiagnostic,
   ValidationWorkSelectionMode,
   ValidationResultArtifact

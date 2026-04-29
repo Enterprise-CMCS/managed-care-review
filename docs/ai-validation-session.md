@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-066 Persist end-to-end validation lifecycle timing for trigger-to-visible latency`.
+The next implementation ticket is `AIFA-067 Reduce first-pass reranking latency for large submissions`.
 
 ## Completed
 
@@ -78,6 +78,7 @@ The next implementation ticket is `AIFA-066 Persist end-to-end validation lifecy
 - AIFA-062 ✔ Reevaluate and retire all-doc work-selection escape hatch if no longer needed
 - AIFA-064 ✔ Persist structured supporting citation data for Review-page trust signals
 - AIFA-065 ✔ Stabilize first-pass reuse after small document-set changes
+- AIFA-066 ✔ Persist end-to-end validation lifecycle timing for trigger-to-visible latency
 
 ## Current State
 
@@ -304,9 +305,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Persist enough lifecycle timing to separate trigger/startup delay from worker-phase time and frontend polling lag.
-- Reproduce the long `processing` to `still in progress` path with the current local rerun flow and verify the new timings explain it.
-- Keep the work diagnostic-only; do not change validation semantics or timeout policy.
+- Start `AIFA-067` by reducing reranking candidate volume on the large-batch path.
+- Cache reranking sample/results for unchanged documents before attempting broader tuning.
+- Keep reranking optimization conservative; do not change fallback semantics or introduce hard exclusions.
 
 ## Follow-on Performance Tickets
 
@@ -318,7 +319,14 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Recommended Upcoming Order
 
-1. `AIFA-066 Persist end-to-end validation lifecycle timing for trigger-to-visible latency`
+1. `AIFA-067 Reduce first-pass reranking latency for large submissions`
+
+## AIFA-066 Closeout Notes
+
+- Status and result artifacts now persist additive lifecycle timing (`triggerAcceptedAt`, `firstStatusWriteAt`, `firstIndexedArtifactAt`, `completedAt`) so local runs can be analyzed in trigger-to-visible terms instead of only worker phases.
+- Completed artifacts now also persist additive reranking diagnostics, including candidate/sample counts plus aggregate sample-fetch and reranking-LLM elapsed time.
+- The new diagnostics proved the current 165-document bottleneck is pre-index reranking itself, not retrieval or final validation; a fresh large-batch run spent ~90s in reranking before the first indexed artifact was written.
+- Validation semantics, fallback behavior, work-selection defaults, and frontend timeout policy remain unchanged; this ticket is observability only.
 
 ## AIFA-065 Closeout Notes
 
@@ -489,4 +497,6 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - artifact review of a later 165-document batch confirmed that final mismatches can be strongly supported by multiple reviewed documents even when `results[].citations` only returns one decisive citation per field, so a follow-on ticket is now needed for structured primary-versus-supporting citation data (`AIFA-064`) rather than looser UI-only wording
 - fresh artifact review for contract `1946e3be-c904-4099-abc0-d8a87b8c6a2a` showed another remaining large-submission bottleneck after a small document-set edit: removing one rates file changed the artifact version, reused many cached first-pass PDFs, but still admitted a slightly broader first-pass set and spent ~7.2s in parse/OCR again while two newly active date-governing PDFs re-entered `embed`; capture this separately as `AIFA-065` so first-pass reuse stability can be optimized without mixing it into citation trust-signal work
 - a later rerun for that same contract exposed a separate observability gap: the final artifact showed near-zero `parse/ocr/embed` time while the Review page still sat in `processing` long enough to hit the non-blocking `still in progress` banner, which means the current artifacts still cannot separate worker-phase cost from local worker startup, status-write timing, stale refresh lag, or frontend polling delay; capture that timing gap as `AIFA-066`
+- fresh artifact review for contract `d04edd95-22e7-43c9-b053-862317e55cd9` on the usual 165-document batch showed a different remaining bottleneck: only 3 PDFs reached `embed`, but trigger-to-complete still took ~102s and the first indexed-document artifacts did not appear until ~96s after the initial `parsing` status write, which strongly suggests the current first-pass reranking sample/LLM path is now the dominant unoptimized wall-clock cost; capture that separately as `AIFA-067`
+- a fresh post-`AIFA-066` run for contract `4fb74e6b-1ef0-43d7-80d3-08a33bfca7fc` confirmed the reranking bottleneck directly: trigger-to-complete took ~99s, `firstIndexedArtifactAt` landed ~94s after the initial `parsing` status write, reranking touched the full 36-document candidate pool with 36 fresh samples and 36 reranking LLM calls, and `rerankingDiagnostics.totalElapsedMs` alone was ~90s; `AIFA-067` should therefore start by reducing reranking candidate volume, then caching reranking results for unchanged docs, then short-circuiting obvious cases before considering any concurrency change
 - the `AIFA-057` closeout left two low-priority maintenance follow-ons captured under `AIFA-059`: duplicated reuse-compatibility checks in the worker path and regression coverage that is still more helper-level than artifact-backed
