@@ -19,7 +19,8 @@ const main: APIGatewayProxyHandler = async (event) => {
         headers: {
             'content-type': contentType,
             'dd-api-key': process.env.DD_API_KEY ?? '',
-            'dd-otlp-source': 'datadog',
+            'dd-otlp-source': 'ddog-gov.com',
+            'dd-otel-span-mapping': '{span_name_as_resource_name: false}',
         },
     }
 
