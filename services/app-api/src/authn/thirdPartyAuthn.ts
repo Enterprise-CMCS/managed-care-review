@@ -44,7 +44,9 @@ export async function userFromThirdPartyAuthorizer(
                     `Fetch delegated user error. Delegated user not authorized. Role: ${delegatedUser.role}`
                 )
             }
-
+            if (!delegatedUser.divisionAssignment) {
+                delegatedUser.divisionAssignment = 'DMCO'
+            }
             return delegatedUser
         } else {
             // Lookup user from postgres - validates for non-delegated user
