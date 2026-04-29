@@ -22,7 +22,7 @@ export function createContractQuestionResolver(
         const { user, ctx, tracer } = context
         const span = tracer?.startSpan('createContractQuestion', {}, ctx)
 
-        // Check OAuth client read permissions
+        // Check OAuth client write permissions
         if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logError('createContractQuestion', errMessage)
@@ -41,6 +41,12 @@ export function createContractQuestionResolver(
             logError('createContractQuestion', msg)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createForbiddenError(msg)
+        }
+
+        // Default to setting DMCO as the division when the
+        // request comes through Oauth
+        if (!user.divisionAssignment && canOauthWrite(context)) {
+            user.divisionAssignment = 'DMCO'
         }
 
         if (
@@ -134,6 +140,7 @@ export function createContractQuestionResolver(
             ...input,
             documents: docs,
         }
+
         const questionResult = await store.insertContractQuestion(
             inputFormatted,
             user
