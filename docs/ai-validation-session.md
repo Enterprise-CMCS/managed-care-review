@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-047 Strengthen document cache identity with content fingerprints`.
+The next implementation ticket is `AIFA-025 Evaluate FAISS implementation behind VectorStore`.
 
 ## Completed
 
@@ -80,6 +80,7 @@ The next implementation ticket is `AIFA-047 Strengthen document cache identity w
 - AIFA-065 ✔ Stabilize first-pass reuse after small document-set changes
 - AIFA-066 ✔ Persist end-to-end validation lifecycle timing for trigger-to-visible latency
 - AIFA-067 ✔ Reduce first-pass reranking latency for large submissions
+- AIFA-047 ✔ Strengthen document cache identity with content fingerprints
 
 ## Current State
 
@@ -300,15 +301,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-047 Strengthen document cache identity with content fingerprints
+### AIFA-025 Evaluate FAISS implementation behind VectorStore
 
-Strengthen document cache identity so unchanged S3 keys do not accidentally reuse stale parse, chunk, embedding, or reranking artifacts after content changes.
+Evaluate whether FAISS is worth introducing now that large-submission hardening has produced more realistic timing and reuse behavior.
 
 ## Suggested Next Step
 
-- Prefer cheap reliable content identity such as S3 version metadata where available before considering heavier hashing.
-- Keep the new reranking/document reuse paths aligned with the stronger fingerprint source so stale content cannot silently inherit cached artifacts.
-- Keep fallback behavior and current artifactVersion semantics unchanged while hardening identity.
+- Compare brute-force retrieval against realistic post-hardening chunk counts and timings before adding new vector-index complexity.
+- Keep the evaluation grounded in current large-submission artifact behavior rather than generic vector-search assumptions.
+- Do not reopen cache identity or reranking work unless the FAISS evaluation uncovers a new bottleneck.
 
 ## Follow-on Performance Tickets
 
@@ -316,12 +317,18 @@ Strengthen document cache identity so unchanged S3 keys do not accidentally reus
 
 ## Follow-on Maintenance Ticket
 
-- `AIFA-047 Strengthen document cache identity with content fingerprints`
+- none currently queued
 
 ## Recommended Upcoming Order
 
-1. `AIFA-047 Strengthen document cache identity with content fingerprints`
-2. `AIFA-025 Evaluate FAISS implementation behind VectorStore`
+1. `AIFA-025 Evaluate FAISS implementation behind VectorStore`
+
+## AIFA-047 Closeout Notes
+
+- Validation document identity now includes the existing draft-document `sha256` when it is available, so `artifactVersion` and per-document cache keys both invalidate when content changes at the same effective S3 key.
+- The stronger fingerprint is now persisted through indexed/parsed artifacts and stored document diagnostics, which keeps parse/chunk/embed/reranking reuse aligned with the final-result stale/current contract instead of relying on key-only identity.
+- Existing unchanged-document reuse still works: focused tests and live artifact inspection showed unchanged peers reusing normally while a replaced contract PDF paid fresh work and changed the rerun `artifactVersion`.
+- The low-lift fingerprint source is the current draft-document `sha256`; if any future flow cannot provide it reliably, reuse still falls back to the older key-based identity and that limitation should remain explicit.
 
 ## AIFA-067 Closeout Notes
 

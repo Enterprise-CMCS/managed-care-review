@@ -68,6 +68,7 @@ export interface ValidationDocumentDiagnostic {
   documentName: string
   sourceBucket?: string
   sourceKey?: string
+  sourceSha256?: string
   status: 'skipped' | 'failed' | 'processed'
   usable: boolean
   chunkCount: number

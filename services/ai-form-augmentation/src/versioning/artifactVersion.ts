@@ -4,6 +4,18 @@ function sha256(value: string): string {
   return createHash('sha256').update(value).digest('hex')
 }
 
+export function buildArtifactVersionDocumentIdentity(input: {
+  sourceKey: string
+  sourceSha256?: string
+}): string {
+  // Keep artifactVersion aligned with per-document reuse identity so in-place
+  // content rewrites invalidate both stale final results and cached artifacts.
+  return JSON.stringify({
+    sourceKey: input.sourceKey,
+    sourceSha256: input.sourceSha256 ?? null
+  })
+}
+
 export function computeArtifactVersion(documentKeys: string[]): string {
   // Sort first so the version reflects the document set itself rather than the
   // order those keys happened to be collected in.

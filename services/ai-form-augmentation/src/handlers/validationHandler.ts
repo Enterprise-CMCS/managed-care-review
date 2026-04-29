@@ -70,6 +70,7 @@ export interface ValidationSourceDocument {
   documentName: string
   sourceBucket: string
   sourceKey: string
+  sourceSha256?: string
 }
 
 export type ValidationPhaseTimingDiagnostic = {
@@ -241,7 +242,8 @@ export function buildReusableOcrCappedDocumentCacheKeys(args: {
       const cacheKey = computeDocumentCacheKey({
         documentName: diagnostic.documentName,
         sourceBucket: diagnostic.sourceBucket,
-        sourceKey: diagnostic.sourceKey
+        sourceKey: diagnostic.sourceKey,
+        sourceSha256: diagnostic.sourceSha256
       })
 
       return currentDocumentCacheKeys.has(cacheKey) ? [cacheKey] : []
@@ -266,7 +268,8 @@ export function buildReusableRerankingCacheKeys(args: {
       const cacheKey = computeDocumentCacheKey({
         documentName: diagnostic.documentName,
         sourceBucket: diagnostic.sourceBucket,
-        sourceKey: diagnostic.sourceKey
+        sourceKey: diagnostic.sourceKey,
+        sourceSha256: diagnostic.sourceSha256
       })
 
       return currentDocumentCacheKeys.has(cacheKey) ? [cacheKey] : []
@@ -1370,6 +1373,9 @@ async function indexValidationDocument(args: {
           documentName: document.documentName,
           sourceBucket: document.sourceBucket,
           sourceKey: document.sourceKey,
+          ...(document.sourceSha256
+            ? { sourceSha256: document.sourceSha256 }
+            : {}),
           status: 'skipped',
           usable: false,
           chunkCount: 0,
@@ -1456,6 +1462,9 @@ async function indexValidationDocument(args: {
           documentName: document.documentName,
           sourceBucket: document.sourceBucket,
           sourceKey: document.sourceKey,
+          ...(document.sourceSha256
+            ? { sourceSha256: document.sourceSha256 }
+            : {}),
           status: 'skipped',
           usable: false,
           chunkCount: 0,
@@ -1487,6 +1496,7 @@ async function indexValidationDocument(args: {
       documentName: document.documentName,
       sourceBucket: document.sourceBucket,
       sourceKey: document.sourceKey,
+      sourceSha256: document.sourceSha256,
       chunks,
       chunkVectors,
       embeddingModel
@@ -1517,6 +1527,9 @@ async function indexValidationDocument(args: {
         documentName: document.documentName,
         sourceBucket: document.sourceBucket,
         sourceKey: document.sourceKey,
+        ...(document.sourceSha256
+          ? { sourceSha256: document.sourceSha256 }
+          : {}),
         status: 'failed',
         usable: false,
         chunkCount: 0,
@@ -1904,7 +1917,8 @@ export function buildReusableRerankingAdjustmentByCacheKey(args: {
       const cacheKey = computeDocumentCacheKey({
         documentName: diagnostic.documentName,
         sourceBucket: diagnostic.sourceBucket,
-        sourceKey: diagnostic.sourceKey
+        sourceKey: diagnostic.sourceKey,
+        sourceSha256: diagnostic.sourceSha256
       })
 
       if (!args.reusableRerankingDocumentCacheKeys.has(cacheKey)) {
@@ -2448,7 +2462,8 @@ function mergeDocumentDiagnostics(
       computeDocumentCacheKey({
         documentName: diagnostic.documentName,
         sourceBucket: diagnostic.sourceBucket ?? '',
-        sourceKey: diagnostic.sourceKey ?? diagnostic.documentName
+        sourceKey: diagnostic.sourceKey ?? diagnostic.documentName,
+        sourceSha256: diagnostic.sourceSha256
       }),
       diagnostic
     ])
@@ -2459,7 +2474,8 @@ function mergeDocumentDiagnostics(
       computeDocumentCacheKey({
         documentName: diagnostic.documentName,
         sourceBucket: diagnostic.sourceBucket ?? '',
-        sourceKey: diagnostic.sourceKey ?? diagnostic.documentName
+        sourceKey: diagnostic.sourceKey ?? diagnostic.documentName,
+        sourceSha256: diagnostic.sourceSha256
       }),
       diagnostic
     )
@@ -2477,6 +2493,7 @@ function buildDeferredDocumentDiagnostic(
     documentName: document.documentName,
     sourceBucket: document.sourceBucket,
     sourceKey: document.sourceKey,
+    ...(document.sourceSha256 ? { sourceSha256: document.sourceSha256 } : {}),
     status: 'skipped',
     usable: false,
     chunkCount: 0,
@@ -2495,6 +2512,7 @@ function buildProcessedDocumentDiagnostic(
     documentName: document.documentName,
     sourceBucket: document.sourceBucket,
     sourceKey: document.sourceKey,
+    ...(document.sourceSha256 ? { sourceSha256: document.sourceSha256 } : {}),
     status: 'processed',
     usable: true,
     chunkCount,
@@ -2816,6 +2834,7 @@ async function persistParsedDocumentArtifact(args: {
       documentName: args.document.documentName,
       sourceBucket: args.document.sourceBucket,
       sourceKey: args.document.sourceKey,
+      sourceSha256: args.document.sourceSha256,
       pageCount: args.parsed.pageCount,
       rawText: args.parsed.rawText,
       pageTexts: args.parsed.pageTexts,

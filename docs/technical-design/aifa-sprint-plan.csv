@@ -901,7 +901,7 @@ Parsing and OCR are expensive and have different invalidation behavior than embe
 - Existing document-index reuse remains correct
 - Artifact size impact is measured or reported
 - Reuse requires the same document identity inputs used by the current cache logic until AIFA-047 strengthens identity"
-AIFA-047 Strengthen document cache identity with content fingerprints,Backlog,7-Large Submission Hardening,Medium,"AIFA-038, AIFA-046","Strengthen document cache identity so unchanged S3 keys do not accidentally reuse stale parse, chunk, or embedding artifacts after content changes.
+AIFA-047 Strengthen document cache identity with content fingerprints,Done,7-Large Submission Hardening,Medium,"AIFA-038, AIFA-046","Strengthen document cache identity so unchanged S3 keys do not accidentally reuse stale parse, chunk, or embedding artifacts after content changes.
 - Prefer cheap reliable metadata such as version ID where available
 - Document ETag and multipart upload limitations
 - Measure overhead of the chosen fingerprint approach

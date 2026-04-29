@@ -5,6 +5,7 @@ export interface IndexedDocumentSummary {
   documentName: string
   sourceBucket: string
   sourceKey: string
+  sourceSha256?: string
   cacheKey: string
   chunkCount: number
 }
@@ -20,15 +21,17 @@ export function computeDocumentCacheKey(document: {
   documentName: string
   sourceBucket: string
   sourceKey: string
+  sourceSha256?: string
 }): string {
-  // Reuse stays aligned to the current artifactVersion contract by keying off
-  // the same document identity inputs the worker already receives.
+  // Prefer the persisted content fingerprint when it exists so in-place key
+  // rewrites do not silently inherit stale parse/chunk/embed/reranking state.
   return createHash('sha256')
     .update(
       JSON.stringify({
         documentName: document.documentName,
         sourceBucket: document.sourceBucket,
-        sourceKey: document.sourceKey
+        sourceKey: document.sourceKey,
+        sourceSha256: document.sourceSha256 ?? null
       })
     )
     .digest('hex')
@@ -38,6 +41,7 @@ export function summarizeIndexedDocument(input: {
   documentName: string
   sourceBucket: string
   sourceKey: string
+  sourceSha256?: string
   cacheKey?: string
   chunkCount: number
 }): IndexedDocumentSummary {
@@ -45,12 +49,14 @@ export function summarizeIndexedDocument(input: {
     documentName: input.documentName,
     sourceBucket: input.sourceBucket,
     sourceKey: input.sourceKey,
+    ...(input.sourceSha256 ? { sourceSha256: input.sourceSha256 } : {}),
     cacheKey:
       input.cacheKey ??
       computeDocumentCacheKey({
         documentName: input.documentName,
         sourceBucket: input.sourceBucket,
-        sourceKey: input.sourceKey
+        sourceKey: input.sourceKey,
+        sourceSha256: input.sourceSha256
       }),
     chunkCount: input.chunkCount
   }
@@ -60,6 +66,7 @@ export function buildIndexedDocumentArtifact(input: {
   documentName: string
   sourceBucket: string
   sourceKey: string
+  sourceSha256?: string
   chunks: DocumentChunk[]
   chunkVectors: number[][]
   embeddingModel: string
@@ -69,6 +76,7 @@ export function buildIndexedDocumentArtifact(input: {
       documentName: input.documentName,
       sourceBucket: input.sourceBucket,
       sourceKey: input.sourceKey,
+      sourceSha256: input.sourceSha256,
       chunkCount: input.chunks.length
     }),
     embeddingModel: input.embeddingModel,
@@ -90,6 +98,7 @@ export function classifyDocumentSetChanges(
     documentName: string
     sourceBucket: string
     sourceKey: string
+    sourceSha256?: string
   }>
 ): {
   unchanged: IndexedDocumentSummary[]
@@ -97,6 +106,7 @@ export function classifyDocumentSetChanges(
     documentName: string
     sourceBucket: string
     sourceKey: string
+    sourceSha256?: string
     cacheKey: string
   }>
   removed: IndexedDocumentSummary[]

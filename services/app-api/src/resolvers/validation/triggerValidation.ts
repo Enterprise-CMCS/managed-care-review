@@ -12,8 +12,10 @@ import type {
     ValidationWorkSelectionMode,
 } from '../../../../ai-form-augmentation/src/results'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
+import { buildArtifactVersionDocumentIdentity } from '../../../../ai-form-augmentation/src/versioning'
 import {
     getEffectiveValidationDocumentKeys,
+    getValidationDocumentIdentityInputs,
     selectEligibleValidationDocuments,
 } from './validationDocumentKeys'
 import { buildValidationFormFields } from './validationFormFields'
@@ -90,9 +92,7 @@ export function triggerValidationResolver(
             })
         }
 
-        // Keep artifactVersion tied to the persisted document set so adding or
-        // removing unsupported attachments still invalidates earlier diagnostics.
-        const documentKeys = getEffectiveValidationDocumentKeys(
+        const documentIdentityInputs = getValidationDocumentIdentityInputs(
             revision.formData.contractDocuments,
             config.useLocalS3
         )
@@ -119,6 +119,9 @@ export function triggerValidationResolver(
                         // The AI worker should follow the actual object location
                         // in local mode without changing the shared upload stack.
                         sourceKey,
+                        ...(document.sha256
+                            ? { sourceSha256: document.sha256 }
+                            : {}),
                     },
                 ]
             })
@@ -146,7 +149,11 @@ export function triggerValidationResolver(
         // artifactVersion fingerprints the current uploaded contract document set
         // so downstream status/results can be tied to the exact files under review
         // and invalidated cleanly when the document set changes.
-        const artifactVersion = computeArtifactVersion(documentKeys)
+        const artifactVersion = computeArtifactVersion(
+            documentIdentityInputs.map((document) =>
+                buildArtifactVersionDocumentIdentity(document)
+            )
+        )
         // Convert the draft contract form into the narrow field/value payload the
         // AI worker validates. Keeping this shaping step in app-api means the
         // worker stays focused on document retrieval and comparison instead of

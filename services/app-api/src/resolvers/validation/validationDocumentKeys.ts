@@ -10,6 +10,7 @@ type ValidationDocument = {
     s3BucketName?: string
     s3URL?: string
     contentType?: string | null
+    sha256?: string
 }
 
 export type SkippedValidationDocumentDiagnostic = {
@@ -71,6 +72,29 @@ export function getEffectiveValidationDocumentKeys(
             localUploadKey instanceof Error || !localUploadKey
                 ? document.s3Key
                 : localUploadKey,
+        ]
+    })
+}
+
+export function getValidationDocumentIdentityInputs(
+    documents: ValidationDocument[],
+    useLocalS3: boolean
+): Array<{ sourceKey: string; sourceSha256?: string }> {
+    return documents.flatMap((document) => {
+        if (!document.s3Key || !document.s3BucketName) {
+            return []
+        }
+
+        const [sourceKey] = getEffectiveValidationDocumentKeys(
+            [document],
+            useLocalS3
+        )
+
+        return [
+            {
+                sourceKey,
+                ...(document.sha256 ? { sourceSha256: document.sha256 } : {}),
+            },
         ]
     })
 }

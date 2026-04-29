@@ -101,6 +101,34 @@ test('buildReusableDocumentCacheKeys reuses all current documents for form-only 
   assert.equal(cacheKeys.size, 2)
 })
 
+test('buildReusableDocumentCacheKeys does not reuse same-key documents when content fingerprint changes', () => {
+  const currentDocument = {
+    documentName: 'first-pass.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/first-pass.pdf',
+    sourceSha256: 'sha-new'
+  }
+  const cacheKeys = buildReusableDocumentCacheKeys({
+    previousDocuments: [
+      {
+        documentName: currentDocument.documentName,
+        sourceBucket: currentDocument.sourceBucket,
+        sourceKey: currentDocument.sourceKey,
+        sourceSha256: 'sha-old',
+        cacheKey: computeDocumentCacheKey({
+          ...currentDocument,
+          sourceSha256: 'sha-old'
+        }),
+        chunkCount: 2
+      }
+    ],
+    currentDocuments: [currentDocument],
+    allowAllCurrentDocumentsReuse: false
+  })
+
+  assert.equal(cacheKeys.size, 0)
+})
+
 test('buildReusableOcrCappedDocumentCacheKeys reuses prior OCR-capped skips on form-only reruns', () => {
   const cappedDocument = {
     documentName: 'slow-scan.pdf',

@@ -20,6 +20,7 @@ export function buildParsedDocumentArtifact(input: {
   documentName: string
   sourceBucket: string
   sourceKey: string
+  sourceSha256?: string
   pageCount: number
   rawText: string
   pageTexts: string[]
@@ -33,6 +34,7 @@ export function buildParsedDocumentArtifact(input: {
       documentName: input.documentName,
       sourceBucket: input.sourceBucket,
       sourceKey: input.sourceKey,
+      sourceSha256: input.sourceSha256,
       chunkCount: 0
     }),
     pageCount: input.pageCount,
@@ -57,6 +59,7 @@ export function getParsedDocumentArtifactKeyForDocument(
     documentName: string
     sourceBucket: string
     sourceKey: string
+    sourceSha256?: string
   }
 ): string {
   return getParsedDocumentArtifactKey(formId, computeDocumentCacheKey(document))

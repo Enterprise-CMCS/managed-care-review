@@ -14,8 +14,12 @@ import {
 } from '../../../../ai-form-augmentation/src/results'
 import { computeFormSnapshotHash } from '../../../../ai-form-augmentation/src/versioning'
 import { computeArtifactVersion } from '../../../../ai-form-augmentation/src/versioning/artifactVersion'
+import { buildArtifactVersionDocumentIdentity } from '../../../../ai-form-augmentation/src/versioning'
 import type { ValidationResolverConfig } from './triggerValidation'
-import { getEffectiveValidationDocumentKeys } from './validationDocumentKeys'
+import {
+    getEffectiveValidationDocumentKeys,
+    getValidationDocumentIdentityInputs,
+} from './validationDocumentKeys'
 import { buildValidationFormFields } from './validationFormFields'
 
 function buildValidationCoverageSummary(
@@ -110,6 +114,10 @@ export function fetchValidationStatusResolver(
             revision.formData.contractDocuments,
             config.useLocalS3
         )
+        const documentIdentityInputs = getValidationDocumentIdentityInputs(
+            revision.formData.contractDocuments,
+            config.useLocalS3
+        )
 
         if (documentKeys.length === 0) {
             return {
@@ -125,7 +133,11 @@ export function fetchValidationStatusResolver(
         // Recompute the version from the live draft document set on every poll.
         // This is what lets the resolver treat older status/results artifacts as
         // stale after the user changes the uploaded contract documents.
-        const artifactVersion = computeArtifactVersion(documentKeys)
+        const artifactVersion = computeArtifactVersion(
+            documentIdentityInputs.map((document) =>
+                buildArtifactVersionDocumentIdentity(document)
+            )
+        )
         const formSnapshotHash = computeFormSnapshotHash(
             buildValidationFormFields(revision.formData).map((field) => ({
                 field: field.field,

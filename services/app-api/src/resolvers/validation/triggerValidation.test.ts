@@ -42,6 +42,7 @@ const buildContractWithDraft = (documentKeys: Array<string | undefined>) => ({
             contractDocuments: documentKeys.map((s3Key, index) => ({
                 id: `doc-${index}`,
                 name: `Document ${index}`,
+                sha256: `sha-${index}`,
                 s3URL: s3Key
                     ? `s3://local-uploads/${s3Key.replace(/^allusers\//, '')}/Document ${index}.pdf`
                     : '',
@@ -158,11 +159,13 @@ describe('triggerValidationResolver', () => {
                         documentName: 'Document 0',
                         sourceBucket: 'local-uploads',
                         sourceKey: '1776374348125-doc-a.pdf',
+                        sourceSha256: 'sha-0',
                     },
                     {
                         documentName: 'Document 1',
                         sourceBucket: 'local-uploads',
                         sourceKey: '1776374348126-doc-b.pdf',
+                        sourceSha256: 'sha-1',
                     },
                 ],
                 workSelectionMode: 'gated-first-pass',
@@ -179,6 +182,49 @@ describe('triggerValidationResolver', () => {
         )
 
         expect(sendSpy).not.toHaveBeenCalled()
+    })
+
+    it('changes artifactVersion when document content fingerprint changes at the same key', async () => {
+        const contractID = 'test-abc-123'
+        const buildContract = (sha256: string) =>
+            buildContractWithDraftDocuments([
+                {
+                    id: 'doc-0',
+                    name: 'Document 0',
+                    sha256,
+                    s3URL: 's3://local-uploads/1776374348125-doc-a.pdf/Document 0.pdf',
+                    s3BucketName: 'local-uploads',
+                    s3Key: 'allusers/1776374348125-doc-a.pdf',
+                },
+            ])
+
+        const firstResolver = triggerValidationResolver(
+            buildStore(buildContract('sha-a')),
+            {
+                ...baseConfig,
+                useLocalS3: true,
+            }
+        ) as NonNullable<MutationResolvers['triggerValidation']>
+        const secondResolver = triggerValidationResolver(
+            buildStore(buildContract('sha-b')),
+            {
+                ...baseConfig,
+                useLocalS3: true,
+            }
+        ) as NonNullable<MutationResolvers['triggerValidation']>
+
+        const firstResult = await invokeTriggerValidationResolver(
+            firstResolver,
+            contractID
+        )
+        const secondResult = await invokeTriggerValidationResolver(
+            secondResolver,
+            contractID
+        )
+
+        expect(firstResult.artifactVersion).not.toEqual(
+            secondResult.artifactVersion
+        )
     })
 
     it('uses Lambda invoke when useLocalS3 is false', async () => {

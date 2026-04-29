@@ -2,7 +2,11 @@ import { describe, expect, it, vi } from 'vitest'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { fetchValidationStatusResolver } from './fetchValidationStatus'
 import type { Store } from '../../postgres'
-import { computeFormSnapshotHash } from '../../../../ai-form-augmentation/src/versioning'
+import {
+    buildArtifactVersionDocumentIdentity,
+    computeArtifactVersion,
+    computeFormSnapshotHash,
+} from '../../../../ai-form-augmentation/src/versioning'
 import { buildValidationFormFields } from './validationFormFields'
 
 const { getJsonMock } = vi.hoisted(() => ({
@@ -23,8 +27,12 @@ const baseConfig = {
     defaultWorkSelectionMode: 'gated-first-pass' as const,
 }
 
-const currentArtifactVersion =
-    'f39f158107adaf18d7374ba14765dd351b2813e95e108836237ab76fcf6018ff' // pragma: allowlist secret
+const currentArtifactVersion = computeArtifactVersion([
+    buildArtifactVersionDocumentIdentity({
+        sourceKey: 'uploads/contracts/doc-a.pdf',
+        sourceSha256: 'sha-0',
+    }),
+])
 
 const buildStore = (draftRevision: unknown): Store =>
     ({
@@ -41,6 +49,7 @@ const buildDraftRevision = () => ({
             {
                 id: 'doc-0',
                 name: 'Document 0',
+                sha256: 'sha-0',
                 s3URL: 's3://uploads-bucket/uploads/contracts/doc-a.pdf',
                 s3BucketName: 'uploads-bucket',
                 s3Key: 'uploads/contracts/doc-a.pdf',
@@ -254,6 +263,7 @@ describe('fetchValidationStatusResolver', () => {
                     {
                         id: 'doc-0',
                         name: 'Document 0',
+                        sha256: 'sha-0',
                         s3URL: 's3://uploads-bucket/uploads/contracts/doc-a.pdf',
                         s3BucketName: 'uploads-bucket',
                         s3Key: 'uploads/contracts/doc-a.pdf',
@@ -271,8 +281,7 @@ describe('fetchValidationStatusResolver', () => {
 
         expect(result).toEqual({
             stage: 'complete',
-            artifactVersion:
-                'f39f158107adaf18d7374ba14765dd351b2813e95e108836237ab76fcf6018ff', // pragma: allowlist secret
+            artifactVersion: currentArtifactVersion,
             isStale: true,
             error: null,
             coverageSummary: null,
