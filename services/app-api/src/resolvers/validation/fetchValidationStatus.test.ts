@@ -279,4 +279,92 @@ describe('fetchValidationStatusResolver', () => {
             results: [],
         })
     })
+
+    it('passes through supporting citation data when present on stored results', async () => {
+        const draftRevision = buildDraftRevision()
+        const formSnapshotHash = computeFormSnapshotHash(
+            buildValidationFormFields(draftRevision.formData).map((field) => ({
+                field: field.field,
+                value: field.value,
+            }))
+        )
+
+        getJsonMock
+            .mockResolvedValueOnce({
+                stage: 'complete',
+                artifactVersion: currentArtifactVersion,
+                updatedAt: '2026-04-17T00:00:00.000Z',
+                error: null,
+            })
+            .mockResolvedValueOnce({
+                artifactVersion: currentArtifactVersion,
+                formSnapshotHash,
+                results: [
+                    {
+                        field: 'contractStartDate',
+                        outcome: 'mismatch',
+                        confidence: 'high',
+                        message: 'Start date mismatch.',
+                        citations: [
+                            {
+                                chunkId: 'primary.pdf::chunk-0',
+                                documentName: 'primary.pdf',
+                                page: 1,
+                                order: 0,
+                            },
+                        ],
+                        supportingCitations: [
+                            {
+                                chunkId: 'supporting.pdf::chunk-0',
+                                documentName: 'supporting.pdf',
+                                page: 2,
+                                order: 0,
+                            },
+                        ],
+                        evidenceSummary: {
+                            consideredDocumentCount: 3,
+                            supportingDocumentCount: 2,
+                        },
+                    },
+                ],
+            })
+
+        const store = buildStore(draftRevision)
+
+        const resolver = fetchValidationStatusResolver(
+            store,
+            baseConfig
+        ) as NonNullable<QueryResolvers['validationStatus']>
+
+        const result = await invokeValidationStatusResolver(resolver)
+
+        expect(result.results).toEqual([
+            {
+                field: 'contractStartDate',
+                outcome: 'mismatch',
+                confidence: 'high',
+                message: 'Start date mismatch.',
+                citations: [
+                    {
+                        chunkId: 'primary.pdf::chunk-0',
+                        documentName: 'primary.pdf',
+                        page: 1,
+                        order: 0,
+                    },
+                ],
+                supportingCitations: [
+                    {
+                        chunkId: 'supporting.pdf::chunk-0',
+                        documentName: 'supporting.pdf',
+                        page: 2,
+                        order: 0,
+                    },
+                ],
+                evidenceSummary: {
+                    consideredDocumentCount: 3,
+                    supportingDocumentCount: 2,
+                },
+            },
+        ])
+    })
 })

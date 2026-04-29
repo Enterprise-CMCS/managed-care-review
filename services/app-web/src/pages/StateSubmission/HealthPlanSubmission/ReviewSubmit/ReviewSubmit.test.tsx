@@ -46,8 +46,22 @@ const validationStatusMock = (overrides?: {
             chunkId: string
             documentName: string
             page: number | null
+            startPage?: number | null
+            endPage?: number | null
             order: number
         }[]
+        supportingCitations?: {
+            chunkId: string
+            documentName: string
+            page: number | null
+            startPage?: number | null
+            endPage?: number | null
+            order: number
+        }[]
+        evidenceSummary?: {
+            consideredDocumentCount: number
+            supportingDocumentCount: number
+        }
     }[]
 }) => ({
     request: {
@@ -709,7 +723,9 @@ describe('ReviewSubmit', () => {
                 )
             ).toBeInTheDocument()
             expect(
-                screen.queryByText(/Some uploaded documents could not be fully reviewed\./)
+                screen.queryByText(
+                    /Some uploaded documents could not be fully reviewed\./
+                )
             ).not.toBeInTheDocument()
         })
 
@@ -809,6 +825,18 @@ describe('ReviewSubmit', () => {
                                                 order: 0,
                                             },
                                         ],
+                                        supportingCitations: [
+                                            {
+                                                chunkId: 'scan-c.pdf::chunk-0',
+                                                documentName: 'scan-c.pdf',
+                                                page: 6,
+                                                order: 0,
+                                            },
+                                        ],
+                                        evidenceSummary: {
+                                            consideredDocumentCount: 3,
+                                            supportingDocumentCount: 3,
+                                        },
                                     },
                                 ],
                             }),
@@ -886,11 +914,11 @@ describe('ReviewSubmit', () => {
                 )
             ).toBeInTheDocument()
             expect(
-                screen.getByText('Reviewed reference:')
-            ).toBeInTheDocument()
+                screen.getAllByText('Primary reviewed reference:')
+            ).toHaveLength(2)
             expect(
                 screen.getByText(
-                    'Reviewed references from 2 documents:'
+                    'Additional supporting references from 1 reviewed document:'
                 )
             ).toBeInTheDocument()
             const validationStatusRegion = within(
@@ -910,6 +938,12 @@ describe('ReviewSubmit', () => {
             ).toBeInTheDocument()
             expect(
                 validationStatusRegion.getByText('Page 4')
+            ).toBeInTheDocument()
+            expect(
+                validationStatusRegion.getByText('scan-c.pdf')
+            ).toBeInTheDocument()
+            expect(
+                validationStatusRegion.getByText('Page 6')
             ).toBeInTheDocument()
         })
 

@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-064 Persist structured supporting citation data for Review-page trust signals`.
+The next implementation ticket is `AIFA-065 Stabilize first-pass reuse after small document-set changes`.
 
 ## Completed
 
@@ -76,6 +76,7 @@ The next implementation ticket is `AIFA-064 Persist structured supporting citati
 - AIFA-059 ✔ Clean up reuse compatibility checks and add artifact-backed rerun regression coverage
 - AIFA-061 ✔ Retire obsolete AI validation config branches after rollout stabilization
 - AIFA-062 ✔ Reevaluate and retire all-doc work-selection escape hatch if no longer needed
+- AIFA-064 ✔ Persist structured supporting citation data for Review-page trust signals
 
 ## Current State
 
@@ -294,9 +295,9 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 
 ## Suggested Next Step
 
-- Extend validation result artifacts so Review can distinguish decisive citations from corroborating support.
-- Keep the UI work limited to consuming and presenting the new structured evidence model clearly.
-- Leave retrieval semantics and field outcomes unchanged while improving trust signals.
+- Use the persisted timings plus artifact-backed replay to identify why small document-set edits still broaden the active first-pass set.
+- Focus the next optimization on avoiding fresh parse/OCR/embed work when reusable first-pass evidence is still sufficient.
+- Keep validation outcomes, fallback behavior, and work-selection correctness unchanged.
 
 ## Follow-on Performance Tickets
 
@@ -305,11 +306,16 @@ Persist reusable parsed-text artifacts separately so OCR and parse work do not n
 ## Follow-on Maintenance Ticket
 
 - `AIFA-059 Clean up reuse compatibility checks and add artifact-backed rerun regression coverage`
-- `AIFA-064 Persist structured supporting citation data for Review-page trust signals`
 
 ## Recommended Upcoming Order
 
-1. `AIFA-064 Persist structured supporting citation data for Review-page trust signals`
+1. `AIFA-065 Stabilize first-pass reuse after small document-set changes`
+
+## AIFA-064 Closeout Notes
+
+- Validation results now separate one lead primary citation set from additional supporting references when multiple reviewed documents independently prove the same field result.
+- The Review page now renders primary reviewed references separately from corroborating support and preserves a small evidence summary without implying that every retrieved candidate was supporting evidence.
+- Field outcomes, fallback behavior, retrieval/ranking semantics, and runtime defaults remain unchanged; this is artifact/UI evidence shaping only.
 
 ## AIFA-056 Closeout Notes
 
@@ -465,4 +471,5 @@ Prevent broad fallback from continuing to index expensive deferred documents onc
 - those later runs changed which first-pass PDFs were processed (`IEHP` entered `embed` while one OCR-capped parse dropped out), but did not show a measurable wall-clock improvement beyond the earlier bounded first-pass stop; treat the execution-priority tweak as safe so far but still unproven for latency reduction
 - a follow-on ticket is now needed for persisted phase timing diagnostics (`AIFA-060`) so future optimization work can target real `fetch/parse/ocr/chunk/embed/retrieval/validation` costs instead of relying on LocalStack object timestamps; keep that measurement work separate from `AIFA-058` so the proven first-pass latency win can close on its own scope
 - artifact review of a later 165-document batch confirmed that final mismatches can be strongly supported by multiple reviewed documents even when `results[].citations` only returns one decisive citation per field, so a follow-on ticket is now needed for structured primary-versus-supporting citation data (`AIFA-064`) rather than looser UI-only wording
+- fresh artifact review for contract `1946e3be-c904-4099-abc0-d8a87b8c6a2a` showed another remaining large-submission bottleneck after a small document-set edit: removing one rates file changed the artifact version, reused many cached first-pass PDFs, but still admitted a slightly broader first-pass set and spent ~7.2s in parse/OCR again while two newly active date-governing PDFs re-entered `embed`; capture this separately as `AIFA-065` so first-pass reuse stability can be optimized without mixing it into citation trust-signal work
 - the `AIFA-057` closeout left two low-priority maintenance follow-ons captured under `AIFA-059`: duplicated reuse-compatibility checks in the worker path and regression coverage that is still more helper-level than artifact-backed

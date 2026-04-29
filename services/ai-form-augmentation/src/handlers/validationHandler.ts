@@ -54,6 +54,8 @@ import {
 import {
   normalizeLlmValidationResult,
   parseValidationResponse,
+  resolveDisplayedDocumentDateFromCitedChunks,
+  resolveSupportedFieldDateFromChunks,
   runDeterministicDateValidation,
   shouldFallbackConflictingClauseResolutionToLlm,
   type ValidationResponseIssue
@@ -582,7 +584,14 @@ export async function validationHandler(
       )
     }
 
-    logMissingCitationPages(event.formId, validationPass.reconciledResults)
+    const resultsWithSupportingCitationData = addSupportingCitationData({
+      formFields: event.formFields,
+      results: validationPass.reconciledResults,
+      retrievedChunksByField: validationPass.retrievedChunksByField,
+      retrievalDiagnostics: validationPass.retrievalDiagnostics
+    })
+
+    logMissingCitationPages(event.formId, resultsWithSupportingCitationData)
 
     await s3Client.putJson(
       event.bucket,
@@ -592,7 +601,7 @@ export async function validationHandler(
         // Persist the form-value hash alongside the results so later cache logic
         // can distinguish document changes from form-only edits.
         formSnapshotHash,
-        validationPass.reconciledResults,
+        resultsWithSupportingCitationData,
         validationPass.llmDiagnostics,
         event.formFields.flatMap((field) => {
           const diagnostic = validationPass.retrievalDiagnostics.get(field.field)
@@ -896,6 +905,18 @@ async function executeValidationPass(args: {
     DateValidationFieldInput['field'],
     ValidationRetrievalDiagnostic
   >
+  retrievedChunksByField: Map<
+    DateValidationFieldInput['field'],
+    Array<{
+      chunkId: string
+      documentName: string
+      page: number | null
+      startPage: number | null
+      endPage: number | null
+      order: number
+      text: string
+    }>
+  >
 }> {
   const chunks = args.indexedDocuments.flatMap((document) => document.chunks)
   const chunkVectors = args.indexedDocuments.flatMap(
@@ -1149,7 +1170,8 @@ async function executeValidationPass(args: {
   return {
     reconciledResults,
     llmDiagnostics,
-    retrievalDiagnostics
+    retrievalDiagnostics,
+    retrievedChunksByField
   }
 }
 
@@ -2211,6 +2233,141 @@ function reconcileValidationResults(
       ]
     })
   }))
+}
+
+function dedupeValidationCitations(
+  citations: DateValidationResult['citations']
+): DateValidationResult['citations'] {
+  const seenChunkIds = new Set<string>()
+
+  return citations.filter((citation) => {
+    if (seenChunkIds.has(citation.chunkId)) {
+      return false
+    }
+
+    seenChunkIds.add(citation.chunkId)
+    return true
+  })
+}
+
+export function addSupportingCitationData(args: {
+  formFields: DateValidationFieldInput[]
+  results: DateValidationResult[]
+  retrievedChunksByField: Map<
+    DateValidationFieldInput['field'],
+    Array<{
+      chunkId: string
+      documentName: string
+      page: number | null
+      startPage: number | null
+      endPage: number | null
+      order: number
+      text: string
+    }>
+  >
+  retrievalDiagnostics: Map<
+    DateValidationFieldInput['field'],
+    ValidationRetrievalDiagnostic
+  >
+}): DateValidationResult[] {
+  return args.results.map((result) => {
+    const field = args.formFields.find((candidate) => candidate.field === result.field)
+
+    if (!field || result.citations.length === 0) {
+      return result
+    }
+
+    // Keep one lead primary document for the Review page and demote additional
+    // agreeing documents into supporting references without changing the
+    // underlying validation outcome.
+    const leadPrimaryDocumentName = result.citations[0]?.documentName
+    const primaryCitations = dedupeValidationCitations(
+      result.citations.filter(
+        (citation) => citation.documentName === leadPrimaryDocumentName
+      )
+    )
+    const demotedPrimarySupportingCitations = dedupeValidationCitations(
+      result.citations.filter(
+        (citation) => citation.documentName !== leadPrimaryDocumentName
+      )
+    )
+    const retrievedChunks = args.retrievedChunksByField.get(field.field) ?? []
+    const primaryDocumentDate = resolveDisplayedDocumentDateFromCitedChunks({
+      field: field.field,
+      retrievedChunks,
+      citations: primaryCitations
+    })
+
+    if (!primaryDocumentDate) {
+      return {
+        ...result,
+        citations: primaryCitations
+      }
+    }
+
+    const primaryChunkIds = new Set(primaryCitations.map((citation) => citation.chunkId))
+    const primaryDocumentNames = new Set(
+      primaryCitations.map((citation) => citation.documentName)
+    )
+    const retrievedChunksByDocument = retrievedChunks.reduce(
+      (grouped, chunk) => {
+        const existing = grouped.get(chunk.documentName) ?? []
+        existing.push(chunk)
+        grouped.set(chunk.documentName, existing)
+        return grouped
+      },
+      new Map<string, typeof retrievedChunks>()
+    )
+    const supportingCitations = dedupeValidationCitations(
+      [
+        ...demotedPrimarySupportingCitations,
+        ...[...retrievedChunksByDocument.values()].flatMap((documentChunks) => {
+        if (documentChunks.length === 0) {
+          return []
+        }
+
+        if (primaryDocumentNames.has(documentChunks[0].documentName)) {
+          return []
+        }
+
+        const resolvedSupport = resolveSupportedFieldDateFromChunks(
+          field.field,
+          documentChunks
+        )
+
+        if (!resolvedSupport || resolvedSupport.date !== primaryDocumentDate) {
+          return []
+        }
+
+        return resolvedSupport.chunks.map((chunk) => ({
+          chunkId: chunk.chunkId,
+          documentName: chunk.documentName,
+          page: chunk.page,
+          ...(chunk.startPage != null ? { startPage: chunk.startPage } : {}),
+          ...(chunk.endPage != null ? { endPage: chunk.endPage } : {}),
+          order: chunk.order
+        }))
+      })
+      ].filter((citation) => !primaryChunkIds.has(citation.chunkId))
+    )
+    const supportingDocumentCount = new Set([
+      ...primaryCitations.map((citation) => citation.documentName),
+      ...supportingCitations.map((citation) => citation.documentName)
+    ]).size
+    const consideredDocumentCount =
+      args.retrievalDiagnostics.get(field.field)?.representedDocumentCount ??
+      new Set(retrievedChunks.map((chunk) => chunk.documentName)).size
+
+    return {
+      ...result,
+      citations: primaryCitations,
+      ...(supportingCitations.length > 0 ? { supportingCitations } : {}),
+      evidenceSummary: {
+        consideredDocumentCount,
+        supportingDocumentCount
+      }
+    }
+  })
 }
 
 function buildEmptyValidationPhaseTimingSummary(): ValidationPhaseTimingSummary {

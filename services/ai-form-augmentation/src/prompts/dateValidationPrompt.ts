@@ -14,6 +14,20 @@ export interface DateValidationCitationInput {
   text: string
 }
 
+export interface DateValidationCitation {
+  chunkId: string
+  documentName: string
+  page: number | null
+  startPage?: number | null
+  endPage?: number | null
+  order: number
+}
+
+export interface DateValidationEvidenceSummary {
+  consideredDocumentCount: number
+  supportingDocumentCount: number
+}
+
 export interface BuildDateValidationPromptInput {
   formFields: DateValidationFieldInput[]
   retrievedChunks: DateValidationCitationInput[]
@@ -25,14 +39,9 @@ export interface DateValidationResult {
   confidence: 'high' | 'medium' | 'low'
   message: string
   decisionSource?: 'deterministic' | 'llm'
-  citations: Array<{
-    chunkId: string
-    documentName: string
-    page: number | null
-    startPage?: number | null
-    endPage?: number | null
-    order: number
-  }>
+  citations: DateValidationCitation[]
+  supportingCitations?: DateValidationCitation[]
+  evidenceSummary?: DateValidationEvidenceSummary
 }
 
 function formatFormFields(fields: DateValidationFieldInput[]): string {

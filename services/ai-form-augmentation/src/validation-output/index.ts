@@ -3,11 +3,18 @@ export type {
   ValidationResponseIssue
 } from './parser'
 export { shouldFallbackConflictingClauseResolutionToLlm } from './clauseResolutionFallback'
-export { runDeterministicDateValidation } from './deterministicDateValidation'
+export {
+  resolveSupportedFieldDateFromChunks,
+  runDeterministicDateValidation
+} from './deterministicDateValidation'
 export {
   extractJsonArray,
   normalizeValidationResponse,
   parseValidationResponse,
   ValidationResponseParseError
 } from './parser'
-export { normalizeMismatchMessage, normalizeLlmValidationResult } from './normalizeMismatchMessage'
+export {
+  normalizeMismatchMessage,
+  normalizeLlmValidationResult,
+  resolveDisplayedDocumentDateFromCitedChunks
+} from './normalizeMismatchMessage'

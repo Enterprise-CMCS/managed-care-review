@@ -53,6 +53,11 @@ function buildCitation(
   }
 }
 
+export interface ResolvedSupportedFieldDate {
+  date: string
+  chunks: DateValidationCitationInput[]
+}
+
 function buildConflictingDateMessage(
   field: DateValidationFieldInput
 ): string {
@@ -207,6 +212,45 @@ export function resolveSingleLabeledDateFromChunks(
 
   const [resolvedCandidate] = uniqueCandidates.values()
   return canonicalizeDateToken(resolvedCandidate) ?? resolvedCandidate
+}
+
+export function resolveSupportedFieldDateFromChunks(
+  field: SupportedField,
+  chunks: DateValidationCitationInput[]
+): ResolvedSupportedFieldDate | null {
+  const uniqueCandidates = new Map<
+    string,
+    {
+      date: string
+      chunks: DateValidationCitationInput[]
+    }
+  >()
+
+  for (const chunk of chunks) {
+    for (const labeledDate of extractLabeledDates(field, chunk)) {
+      const normalizedDate = normalizeDateToken(labeledDate)
+      const resolvedDate = canonicalizeDateToken(labeledDate) ?? labeledDate
+      const existing = uniqueCandidates.get(normalizedDate)
+
+      if (existing) {
+        if (!existing.chunks.some((candidate) => candidate.chunkId === chunk.chunkId)) {
+          existing.chunks.push(chunk)
+        }
+        continue
+      }
+
+      uniqueCandidates.set(normalizedDate, {
+        date: resolvedDate,
+        chunks: [chunk]
+      })
+    }
+  }
+
+  if (uniqueCandidates.size === 1) {
+    return [...uniqueCandidates.values()][0] ?? null
+  }
+
+  return resolveSingleTermRangeDateFromChunks(field, chunks)
 }
 
 function truncateAtNextKnownLabel(value: string): string | null {

@@ -71,15 +71,32 @@ export const AIValidationFindingsCard = ({
             </p>
             <div className={styles.validationFindingsCards}>
                 {findings.map((finding) => {
-                    const uniqueDocumentCount = new Set(
-                        finding.citations.map(
+                    const primaryDocumentCount = new Set(
+                        finding.primaryCitations.map(
                             (citation) => citation.documentName
                         )
                     ).size
-                    const evidenceLabel =
-                        uniqueDocumentCount > 1
-                            ? `Reviewed references from ${uniqueDocumentCount} documents:`
-                            : 'Reviewed reference:'
+                    const supportingDocumentCount =
+                        finding.supportingCitations.length > 0
+                            ? (finding.evidenceSummary
+                                  ?.supportingDocumentCount ??
+                              new Set([
+                                  ...finding.primaryCitations.map(
+                                      (citation) => citation.documentName
+                                  ),
+                                  ...finding.supportingCitations.map(
+                                      (citation) => citation.documentName
+                                  ),
+                              ]).size)
+                            : 0
+                    const additionalSupportingDocumentCount = Math.max(
+                        supportingDocumentCount - primaryDocumentCount,
+                        new Set(
+                            finding.supportingCitations.map(
+                                (citation) => citation.documentName
+                            )
+                        ).size
+                    )
 
                     return (
                         <article
@@ -95,9 +112,7 @@ export const AIValidationFindingsCard = ({
                                     {finding.fieldLabel}
                                 </h3>
                                 <div
-                                    className={
-                                        styles.validationFindingMetaList
-                                    }
+                                    className={styles.validationFindingMetaList}
                                 >
                                     <div
                                         className={
@@ -192,23 +207,21 @@ export const AIValidationFindingsCard = ({
                                         {finding.advisoryNote}
                                     </p>
                                 )}
-                                {finding.citations.length > 0 ? (
-                                    <div
-                                        className={styles.findingEvidence}
-                                    >
+                                {finding.primaryCitations.length > 0 ? (
+                                    <div className={styles.findingEvidence}>
                                         <p
                                             className={
                                                 styles.findingEvidenceLabel
                                             }
                                         >
-                                            {evidenceLabel}
+                                            Primary reviewed reference:
                                         </p>
                                         <ul
                                             className={
                                                 styles.findingEvidenceList
                                             }
                                         >
-                                            {finding.citations.map(
+                                            {finding.primaryCitations.map(
                                                 (citation) => (
                                                     <li
                                                         key={`${finding.fieldLabel}-${citation.documentName}`}
@@ -230,6 +243,45 @@ export const AIValidationFindingsCard = ({
                                                 )
                                             )}
                                         </ul>
+                                        {finding.supportingCitations.length >
+                                            0 && (
+                                            <>
+                                                <p
+                                                    className={
+                                                        styles.findingEvidenceLabel
+                                                    }
+                                                >
+                                                    {`Additional supporting references from ${additionalSupportingDocumentCount} reviewed document${additionalSupportingDocumentCount === 1 ? '' : 's'}:`}
+                                                </p>
+                                                <ul
+                                                    className={
+                                                        styles.findingEvidenceList
+                                                    }
+                                                >
+                                                    {finding.supportingCitations.map(
+                                                        (citation) => (
+                                                            <li
+                                                                key={`${finding.fieldLabel}-supporting-${citation.documentName}`}
+                                                                className={
+                                                                    styles.findingEvidenceItem
+                                                                }
+                                                            >
+                                                                <span>
+                                                                    {
+                                                                        citation.documentName
+                                                                    }
+                                                                </span>
+                                                                <span>
+                                                                    {citation.pageLabels.join(
+                                                                        ', '
+                                                                    )}
+                                                                </span>
+                                                            </li>
+                                                        )
+                                                    )}
+                                                </ul>
+                                            </>
+                                        )}
                                     </div>
                                 ) : (
                                     <p

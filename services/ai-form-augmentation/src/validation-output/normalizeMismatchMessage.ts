@@ -6,14 +6,32 @@ import type {
 import {
   buildConflictingDateDetail,
   resolveMultipleLabeledDatesFromChunks,
-  resolveSingleLabeledDateFromChunks
+  resolveSupportedFieldDateFromChunks
 } from './deterministicDateValidation'
 import { VALIDATION_FIELD_CONFIG } from '../validationFields'
-import { resolveSingleTermRangeDateFromChunks } from './termRangeDateResolution'
 import { buildFieldSpecificMismatchMessage } from './mismatchMessage'
 
 function normalizeDisplayedDate(value: string): string {
   return value.trim()
+}
+
+export function resolveDisplayedDocumentDateFromCitedChunks(input: {
+  field: DateValidationFieldInput['field']
+  retrievedChunks: DateValidationCitationInput[]
+  citations: DateValidationResult['citations']
+}): string | null {
+  const citedChunkIds = new Set(input.citations.map((citation) => citation.chunkId))
+  const citedChunks = input.retrievedChunks.filter((chunk) =>
+    citedChunkIds.has(chunk.chunkId)
+  )
+
+  if (citedChunks.length === 0) {
+    return null
+  }
+
+  return (
+    resolveSupportedFieldDateFromChunks(input.field, citedChunks)?.date ?? null
+  )
 }
 
 export function normalizeLlmValidationResult(input: {
@@ -50,13 +68,8 @@ export function normalizeLlmValidationResult(input: {
   }
 
   if (result.outcome === 'match') {
-    const resolvedDocumentDate = resolveSingleLabeledDateFromChunks(
-      field.field,
-      citedChunks
-    )
     const fallbackDocumentDate =
-      resolvedDocumentDate ??
-      resolveSingleTermRangeDateFromChunks(field.field, citedChunks)?.date
+      resolveSupportedFieldDateFromChunks(field.field, citedChunks)?.date
 
     if (fallbackDocumentDate == null) {
       return result
@@ -72,13 +85,8 @@ export function normalizeLlmValidationResult(input: {
     return result
   }
 
-  const resolvedDocumentDate = resolveSingleLabeledDateFromChunks(
-    field.field,
-    citedChunks
-  )
   const fallbackDocumentDate =
-    resolvedDocumentDate ??
-    resolveSingleTermRangeDateFromChunks(field.field, citedChunks)?.date
+    resolveSupportedFieldDateFromChunks(field.field, citedChunks)?.date
 
   if (fallbackDocumentDate == null) {
     return result

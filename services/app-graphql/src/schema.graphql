@@ -544,6 +544,8 @@ type ValidationFinding {
     confidence: String!
     message: String!
     citations: [ValidationCitation!]!
+    supportingCitations: [ValidationCitation!]
+    evidenceSummary: ValidationEvidenceSummary
 }
 
 type ValidationCitation {
@@ -553,6 +555,11 @@ type ValidationCitation {
     startPage: Int
     endPage: Int
     order: Int!
+}
+
+type ValidationEvidenceSummary {
+    consideredDocumentCount: Int!
+    supportingDocumentCount: Int!
 }
 
 type ValidationStatusPayload {

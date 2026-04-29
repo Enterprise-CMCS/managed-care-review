@@ -35,7 +35,7 @@ describe('mapAIValidationFindings', () => {
             } satisfies ValidationFinding,
         ]
 
-        expect(mapAIValidationFindings(findings)[0].citations).toEqual([
+        expect(mapAIValidationFindings(findings)[0].primaryCitations).toEqual([
             {
                 documentName: 'doc.pdf',
                 pageLabels: ['Pages 1-2'],
@@ -72,11 +72,62 @@ describe('mapAIValidationFindings', () => {
             } satisfies ValidationFinding,
         ]
 
-        expect(mapAIValidationFindings(findings)[0].citations).toEqual([
+        expect(mapAIValidationFindings(findings)[0].primaryCitations).toEqual([
             {
                 documentName: 'doc.pdf',
                 pageLabels: ['Page 1', 'Page 3'],
             },
         ])
+    })
+
+    it('maps supporting citations separately from primary citations', () => {
+        const findings = [
+            {
+                field: 'contractStartDate',
+                outcome: 'mismatch',
+                confidence: 'high',
+                message:
+                    'Document start date (01/01/2024) does not match form start date (04/01/2026).',
+                citations: [
+                    {
+                        chunkId: 'primary::chunk-0',
+                        documentName: 'primary.pdf',
+                        page: 1,
+                        order: 0,
+                    },
+                ],
+                supportingCitations: [
+                    {
+                        chunkId: 'supporting::chunk-0',
+                        documentName: 'supporting.pdf',
+                        page: 2,
+                        order: 0,
+                    },
+                ],
+                evidenceSummary: {
+                    consideredDocumentCount: 3,
+                    supportingDocumentCount: 2,
+                },
+            } satisfies ValidationFinding,
+        ]
+
+        expect(mapAIValidationFindings(findings)[0]).toMatchObject({
+            primaryCitations: [
+                {
+                    documentName: 'primary.pdf',
+                    pageLabels: ['Page 1'],
+                },
+            ],
+            supportingCitations: [
+                {
+                    documentName: 'supporting.pdf',
+                    pageLabels: ['Page 2'],
+                },
+            ],
+            evidenceSummary: {
+                consideredDocumentCount: 3,
+                supportingDocumentCount: 2,
+            },
+        })
     })
 })

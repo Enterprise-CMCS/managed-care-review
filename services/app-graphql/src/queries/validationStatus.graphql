@@ -25,6 +25,18 @@ query ValidationStatus($input: ValidationStatusInput!) {
                 endPage
                 order
             }
+            supportingCitations {
+                chunkId
+                documentName
+                page
+                startPage
+                endPage
+                order
+            }
+            evidenceSummary {
+                consideredDocumentCount
+                supportingDocumentCount
+            }
         }
     }
 }

@@ -1,6 +1,40 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { runDeterministicDateValidation } from './deterministicDateValidation'
+import {
+  resolveSupportedFieldDateFromChunks,
+  runDeterministicDateValidation
+} from './deterministicDateValidation'
+
+test('resolveSupportedFieldDateFromChunks returns the uniquely supported labeled date and contributing chunks', () => {
+  const resolved = resolveSupportedFieldDateFromChunks('contractEndDate', [
+    {
+      chunkId: 'chunk-0',
+      documentName: 'supporting.pdf',
+      page: 1,
+      startPage: 1,
+      endPage: 1,
+      order: 0,
+      text:
+        'Original Contract Expiration Date: 12/31/2024 Current Contract Expiration Date: 12/31/2026'
+    },
+    {
+      chunkId: 'chunk-1',
+      documentName: 'supporting.pdf',
+      page: 2,
+      startPage: 2,
+      endPage: 2,
+      order: 1,
+      text:
+        'Paragraph 2 is amended to read: January 1, 2024 through December 31, 2026.'
+    }
+  ])
+
+  assert.equal(resolved?.date, '12/31/2026')
+  assert.deepEqual(
+    resolved?.chunks.map((chunk) => chunk.chunkId),
+    ['chunk-1']
+  )
+})
 
 test('runDeterministicDateValidation treats amendment effective date as the operative start date when the amendment extends the contract term', () => {
   const result = runDeterministicDateValidation({

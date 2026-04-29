@@ -16,10 +16,18 @@ export interface AIValidationDisplayItem {
     }
     reasonLabel?: string
     advisoryNote?: string
-    citations: Array<{
+    primaryCitations: Array<{
         documentName: string
         pageLabels: string[]
     }>
+    supportingCitations: Array<{
+        documentName: string
+        pageLabels: string[]
+    }>
+    evidenceSummary?: {
+        consideredDocumentCount: number
+        supportingDocumentCount: number
+    }
 }
 
 const FIELD_LABELS: Record<string, string> = {
@@ -126,7 +134,8 @@ function mergeOverlappingPageLabels(args: {
         const nextPage = Number(nextSinglePageMatch[1])
         const coveredByExistingRange = args.existingPageLabels.some(
             (pageLabel) => {
-                const existingRangeMatch = pageLabel.match(/^Pages (\d+)-(\d+)$/)
+                const existingRangeMatch =
+                    pageLabel.match(/^Pages (\d+)-(\d+)$/)
 
                 if (!existingRangeMatch) {
                     return false
@@ -173,21 +182,11 @@ function mergeOverlappingPageLabels(args: {
 export function mapAIValidationFindings(
     findings: ValidationFinding[]
 ): AIValidationDisplayItem[] {
-    return findings.map((finding) => ({
-        fieldLabel: getFieldLabel(finding.field),
-        outcome: finding.outcome,
-        outcomeLabel: getOutcomeLabel(finding.outcome),
-        confidence: finding.confidence,
-        confidenceLabel: getConfidenceLabel(finding.confidence),
-        message: finding.message,
-        comparedValues: extractComparedValues({
-            outcome: finding.outcome,
-            message: finding.message,
-        }),
-        reasonLabel: getReasonLabel(finding.outcome),
-        advisoryNote: getAdvisoryNote(finding.outcome),
-        citations: Array.from(
-            finding.citations.reduce((grouped, citation) => {
+    const mapCitationGroups = (
+        citations: NonNullable<ValidationFinding['citations']>
+    ) =>
+        Array.from(
+            citations.reduce((grouped, citation) => {
                 const pageLabel = getPageLabel({
                     page: citation.page,
                     startPage: citation.startPage,
@@ -209,6 +208,25 @@ export function mapAIValidationFindings(
 
                 return grouped
             }, new Map<string, { documentName: string; pageLabels: string[] }>())
-        ).map(([, citationGroup]) => citationGroup),
+        ).map(([, citationGroup]) => citationGroup)
+
+    return findings.map((finding) => ({
+        fieldLabel: getFieldLabel(finding.field),
+        outcome: finding.outcome,
+        outcomeLabel: getOutcomeLabel(finding.outcome),
+        confidence: finding.confidence,
+        confidenceLabel: getConfidenceLabel(finding.confidence),
+        message: finding.message,
+        comparedValues: extractComparedValues({
+            outcome: finding.outcome,
+            message: finding.message,
+        }),
+        reasonLabel: getReasonLabel(finding.outcome),
+        advisoryNote: getAdvisoryNote(finding.outcome),
+        primaryCitations: mapCitationGroups(finding.citations),
+        supportingCitations: mapCitationGroups(
+            finding.supportingCitations ?? []
+        ),
+        evidenceSummary: finding.evidenceSummary ?? undefined,
     }))
 }

@@ -3,6 +3,7 @@ import test from 'node:test'
 import { computeDocumentCacheKey } from '../artifacts'
 import { buildValidationResultArtifact } from '../results'
 import {
+  addSupportingCitationData,
   buildReusableDocumentCacheKeys,
   buildReusableOcrCappedDocumentCacheKeys,
   hasReusableDocumentArtifactInputs,
@@ -516,6 +517,149 @@ test('buildFieldWorkSelectionDiagnostics marks deferred-document citations as fa
     {
       field: 'contractStartDate',
       evidenceSource: 'fallback'
+    }
+  ])
+})
+
+test('addSupportingCitationData keeps one lead primary citation document and demotes additional agreeing documents to supporting citations', () => {
+  const results = addSupportingCitationData({
+    formFields: [
+      {
+        field: 'contractEndDate',
+        label: 'Contract End Date',
+        value: '04/04/2026'
+      }
+    ],
+    results: [
+      {
+        field: 'contractEndDate',
+        outcome: 'mismatch',
+        confidence: 'high',
+        message:
+          'Document end date (12/31/2025) does not match form end date (04/04/2026).',
+        citations: [
+          {
+            chunkId: 'lead.pdf::chunk-1',
+            documentName: 'lead.pdf',
+            page: 1,
+            startPage: 1,
+            endPage: 1,
+            order: 1
+          },
+          {
+            chunkId: 'support-a.pdf::chunk-1',
+            documentName: 'support-a.pdf',
+            page: 1,
+            startPage: 1,
+            endPage: 1,
+            order: 1
+          },
+          {
+            chunkId: 'support-b.pdf::chunk-1',
+            documentName: 'support-b.pdf',
+            page: 1,
+            startPage: 1,
+            endPage: 1,
+            order: 1
+          }
+        ]
+      }
+    ],
+    retrievedChunksByField: new Map([
+      [
+        'contractEndDate',
+        [
+          {
+            chunkId: 'lead.pdf::chunk-1',
+            documentName: 'lead.pdf',
+            page: 1,
+            startPage: 1,
+            endPage: 1,
+            order: 1,
+            text:
+              'Paragraph 2 is amended to read: January 1, 2024 through December 31, 2025.'
+          },
+          {
+            chunkId: 'support-a.pdf::chunk-1',
+            documentName: 'support-a.pdf',
+            page: 1,
+            startPage: 1,
+            endPage: 1,
+            order: 1,
+            text:
+              'Paragraph 2 is amended to read: January 1, 2024 through December 31, 2025.'
+          },
+          {
+            chunkId: 'support-b.pdf::chunk-1',
+            documentName: 'support-b.pdf',
+            page: 1,
+            startPage: 1,
+            endPage: 1,
+            order: 1,
+            text:
+              'Paragraph 2 is amended to read: January 1, 2024 through December 31, 2025.'
+          }
+        ]
+      ]
+    ]),
+    retrievalDiagnostics: new Map([
+      [
+        'contractEndDate',
+        {
+          field: 'contractEndDate',
+          candidateChunkCount: 8,
+          initialChunkCount: 4,
+          finalChunkCount: 4,
+          representedDocumentCount: 3,
+          droppedCandidateCount: 4,
+          competingDateCount: 1,
+          clauseEvidencePresentInitially: true,
+          clauseEvidencePresentFinally: true,
+          clauseEvidenceAdded: false
+        }
+      ]
+    ])
+  })
+
+  assert.deepEqual(results, [
+    {
+      field: 'contractEndDate',
+      outcome: 'mismatch',
+      confidence: 'high',
+      message:
+        'Document end date (12/31/2025) does not match form end date (04/04/2026).',
+      citations: [
+        {
+          chunkId: 'lead.pdf::chunk-1',
+          documentName: 'lead.pdf',
+          page: 1,
+          startPage: 1,
+          endPage: 1,
+          order: 1
+        }
+      ],
+      supportingCitations: [
+        {
+          chunkId: 'support-a.pdf::chunk-1',
+          documentName: 'support-a.pdf',
+          page: 1,
+          startPage: 1,
+          endPage: 1,
+          order: 1
+        },
+        {
+          chunkId: 'support-b.pdf::chunk-1',
+          documentName: 'support-b.pdf',
+          page: 1,
+          startPage: 1,
+          endPage: 1,
+          order: 1
+        }
+      ],
+      evidenceSummary: {
+        consideredDocumentCount: 3,
+        supportingDocumentCount: 3
+      }
     }
   ])
 })

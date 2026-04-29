@@ -33,12 +33,13 @@ const mismatchFindings: AIValidationDisplayItem[] = [
             reviewedValue: '01/01/2024',
         },
         reasonLabel: 'Submitted date differs from reviewed document date.',
-        citations: [
+        primaryCitations: [
             {
                 documentName: 'AAH 23-30212 A03 213A Final.pdf',
                 pageLabels: ['Page 1'],
             },
         ],
+        supportingCitations: [],
     },
     {
         fieldLabel: 'Contract end date',
@@ -53,11 +54,13 @@ const mismatchFindings: AIValidationDisplayItem[] = [
             reviewedValue: '12/31/2025',
         },
         reasonLabel: 'Submitted date differs from reviewed document date.',
-        citations: [
+        primaryCitations: [
             {
                 documentName: 'AAH 23-30212 A03 213A Final.pdf',
                 pageLabels: ['Page 1'],
             },
+        ],
+        supportingCitations: [
             {
                 documentName: 'CCAH 23-30241 A03 213A Final.pdf',
                 pageLabels: ['Page 2', 'Page 4'],
@@ -79,12 +82,13 @@ const matchFindings: AIValidationDisplayItem[] = [
             submittedValue: '01/01/2024',
             reviewedValue: '01/01/2024',
         },
-        citations: [
+        primaryCitations: [
             {
                 documentName: 'AAH 23-30212 A03 213A Final.pdf',
                 pageLabels: ['Page 1'],
             },
         ],
+        supportingCitations: [],
     },
     {
         fieldLabel: 'Contract end date',
@@ -98,12 +102,13 @@ const matchFindings: AIValidationDisplayItem[] = [
             submittedValue: '12/31/2025',
             reviewedValue: '12/31/2025',
         },
-        citations: [
+        primaryCitations: [
             {
                 documentName: 'AAH 23-30212 A03 213A Final.pdf',
                 pageLabels: ['Page 1'],
             },
         ],
+        supportingCitations: [],
     },
 ]
 
@@ -121,7 +126,8 @@ const unverifiableFindings: AIValidationDisplayItem[] = [
             reviewedValue: '01/01/2024',
         },
         reasonLabel: 'Submitted date differs from reviewed document date.',
-        citations: [],
+        primaryCitations: [],
+        supportingCitations: [],
     },
     {
         fieldLabel: 'Contract end date',
@@ -133,7 +139,8 @@ const unverifiableFindings: AIValidationDisplayItem[] = [
             'Could not verify contract end date from the reviewed documents.',
         advisoryNote:
             'Reviewed documents did not provide enough clear date evidence for this field.',
-        citations: [],
+        primaryCitations: [],
+        supportingCitations: [],
     },
 ]
 
@@ -151,7 +158,10 @@ const ScenarioFrame = ({
 
     return (
         <SectionCard style={{ marginBottom: '1.5rem', maxWidth: '52rem' }}>
-            <SectionHeader header={`Contract details: ${label}`} hideBorderTop />
+            <SectionHeader
+                header={`Contract details: ${label}`}
+                hideBorderTop
+            />
             <AIValidationStatusHeader
                 state={state}
                 summaryMessage={summaryMessage}

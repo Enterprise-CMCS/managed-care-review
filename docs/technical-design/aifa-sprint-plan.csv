@@ -1080,7 +1080,7 @@ Why this matters:
 - The harness proves form-only reruns reuse prior document artifacts and OCR-capped skip diagnostics when they should
 - The harness proves changed artifact identity and incompatible modes do not reuse when they should not
 - The ticket does not change validation outcomes, retrieval ordering, or final result-cache invalidation behavior"
-AIFA-064 Persist structured supporting citation data for Review-page trust signals,Backlog,4-Frontend Integration,Medium,"AIFA-020C, AIFA-053, AIFA-054","Extend AI validation result artifacts so the frontend can distinguish decisive citations from additional corroborating support when multiple reviewed documents agree with a field outcome.
+AIFA-064 Persist structured supporting citation data for Review-page trust signals,Done,4-Frontend Integration,Medium,"AIFA-020C, AIFA-053, AIFA-054","Extend AI validation result artifacts so the frontend can distinguish decisive citations from additional corroborating support when multiple reviewed documents agree with a field outcome.
 - Persist primary citations as the exact chunks used for the final field decision
 - Persist supporting citations or equivalent structured evidence metadata for additional agreeing documents/chunks that reinforce the same normalized field value
 - Persist a small field-level evidence summary such as considered document count and supporting document count without conflating retrieved candidates with true supporting evidence
@@ -1091,3 +1091,14 @@ Current Review-page citations only show the final `results[].citations` array, e
 - The frontend can display stronger trust messaging without implying that every retrieved candidate was supporting evidence
 - Single-citation cases remain unchanged and do not claim multi-document support
 - The ticket does not change field outcomes, fallback behavior, or retrieval/ranking semantics"
+AIFA-065 Stabilize first-pass reuse after small document-set changes,Backlog,7-Large Submission Hardening,Medium,"AIFA-057, AIFA-058, AIFA-059, AIFA-060, AIFA-063","Optimize large-submission reruns where a small document-set change currently invalidates enough first-pass selection to force fresh parse/OCR/embed work on newly admitted date-governing PDFs.
+- Use the persisted phase timings plus LocalStack artifact replay to identify why small document-set edits still broaden the active first-pass set
+- Reduce repeated parse/OCR/embed cost when the vast majority of reusable first-pass evidence is unchanged, without changing validation semantics
+- Preserve current correctness guarantees around artifact identity, fallback behavior, and work-selection safety
+- Keep the work focused on reuse stability and first-pass execution cost; do not broaden this into citation/UI or cache-identity redesign
+
+Why this matters:
+Artifact review for contract `1946e3be-c904-4099-abc0-d8a87b8c6a2a` showed that removing one rates file and retriggering validation still caused a noticeably slow rerun. The latest artifacts prove reuse is only partial: many first-pass PDFs returned from `stage: cache`, but a small shift in the first-pass set still pulled additional date-bearing PDFs back through fresh `embed` work and spent ~7.2s in parse/OCR again. That is now the main remaining large-submission latency bottleneck after the earlier rerun and first-pass improvements.","- Small document-set edits do not needlessly reintroduce fresh parse/OCR/embed work for previously irrelevant first-pass peers when existing reusable evidence is still sufficient
+- Focused artifact-backed validation proves the optimization against realistic rerun cases
+- Validation outcomes, fallback behavior, and work-selection correctness remain unchanged
+- The optimization is backed by updated timing/artifact evidence rather than anecdotal page timing alone"
