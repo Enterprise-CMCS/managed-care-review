@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-077 Harden AI validation prompt and log data framing`.
+The next implementation ticket is `AIFA-080 Harden local AI validation worker subprocess management`.
 
 ## Completed
 
@@ -91,6 +91,7 @@ The next implementation ticket is `AIFA-077 Harden AI validation prompt and log 
 - AIFA-075 ✔ Remove production documents from AI validation corpus
 - AIFA-074 ✔ Reduce AI validation artifact contract verbosity
 - AIFA-076 ✔ Add contract-level authorization to AI validation resolvers
+- AIFA-077 ✔ Harden AI validation prompt and log data framing
 
 ## Current State
 
@@ -311,15 +312,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-077 Harden AI validation prompt and log data framing
+### AIFA-080 Harden local AI validation worker subprocess management
 
-Reduce prompt-injection and sensitive-log exposure in the current AI validation prompts and logging paths without changing prompt goals, validation semantics, or artifact behavior.
+Make the local spawned AI validation worker safer and more predictable in the `useLocalS3` path without changing Lambda behavior, validation semantics, or artifact behavior.
 
 ## Suggested Next Step
 
-- Frame document metadata and extracted evidence as data, not free-form instructions, in reranking and validation prompts.
-- Reduce raw filename and raw provider error-body leakage in current logging/error paths.
-- Preserve current validation outcomes, work-selection behavior, and artifact semantics.
+- Stabilize local worker subprocess lifecycle around spawn ownership, timeout handling, and repo-root resolution.
+- Improve local stderr handling without changing Lambda invocation behavior or worker payload semantics.
+- Preserve current validation behavior, artifact semantics, and authorized trigger behavior.
 
 ## Follow-on Performance Tickets
 
@@ -331,11 +332,18 @@ Reduce prompt-injection and sensitive-log exposure in the current AI validation 
 
 ## Recommended Upcoming Order
 
-1. `AIFA-077 Harden AI validation prompt and log data framing`
-2. `AIFA-080 Harden local AI validation worker subprocess management`
-3. `AIFA-078 Correct fallback-pass status progression`
-4. `AIFA-079 Introduce typed artifact-not-found handling`
-5. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+1. `AIFA-080 Harden local AI validation worker subprocess management`
+2. `AIFA-078 Correct fallback-pass status progression`
+3. `AIFA-079 Introduce typed artifact-not-found handling`
+4. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+
+## AIFA-077 Closeout Notes
+
+- Validation and reranking prompts now frame form values, document metadata, and extracted evidence text as untrusted data rather than free-form instruction text.
+- The prompt builders now explicitly tell the model to ignore instructions embedded inside retrieved evidence or other supplied data.
+- `triggerValidation` no longer logs raw unsupported-document filenames in routine skip logging; it now logs grouped skip reasons and counts.
+- Ollama non-2xx failures now surface a normalized truncated body preview instead of the full raw provider response body.
+- Validation semantics, work-selection behavior, artifact shapes, and Review-page behavior did not change.
 
 ## AIFA-076 Closeout Notes
 

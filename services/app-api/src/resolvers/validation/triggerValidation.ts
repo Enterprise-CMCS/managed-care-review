@@ -34,6 +34,18 @@ export interface ValidationResolverConfig {
     defaultWorkSelectionMode: RuntimeValidationWorkSelectionMode
 }
 
+function summarizeSkippedValidationDocuments(
+    skippedDocuments: { reason: string }[]
+): { reason: string; count: number }[] {
+    const counts = new Map<string, number>()
+
+    for (const document of skippedDocuments) {
+        counts.set(document.reason, (counts.get(document.reason) ?? 0) + 1)
+    }
+
+    return [...counts.entries()].map(([reason, count]) => ({ reason, count }))
+}
+
 export function triggerValidationResolver(
     store: Store,
     config: ValidationResolverConfig
@@ -95,7 +107,8 @@ export function triggerValidationResolver(
             console.info('triggerValidation skipped unsupported documents', {
                 contractID: input.contractID,
                 skippedDocumentCount: skippedDocuments.length,
-                skippedDocuments,
+                skippedDocumentReasons:
+                    summarizeSkippedValidationDocuments(skippedDocuments),
             })
         }
 

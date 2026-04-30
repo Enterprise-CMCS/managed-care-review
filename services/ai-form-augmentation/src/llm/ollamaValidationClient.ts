@@ -14,6 +14,20 @@ interface OllamaGenerateResponse {
   done: boolean
 }
 
+function summarizeOllamaErrorBody(value: string): string {
+  const normalized = value.replace(/\s+/g, ' ').trim()
+
+  if (normalized.length === 0) {
+    return '[empty response body]'
+  }
+
+  if (normalized.length <= 200) {
+    return normalized
+  }
+
+  return `${normalized.slice(0, 200)}... [truncated ${normalized.length - 200} chars]`
+}
+
 export class OllamaValidationClient implements ValidationLlmClient {
   private readonly baseUrl: string
   private readonly model: string
@@ -43,7 +57,7 @@ export class OllamaValidationClient implements ValidationLlmClient {
       const errorText = await response.text()
 
       throw new Error(
-        `Ollama request failed (${response.status} ${response.statusText}): ${errorText}`
+        `Ollama request failed (${response.status} ${response.statusText}): ${summarizeOllamaErrorBody(errorText)}`
       )
     }
 

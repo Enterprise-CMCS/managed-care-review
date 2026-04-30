@@ -422,14 +422,14 @@ describe('triggerValidationResolver', () => {
             {
                 contractID: 'test-abc-123',
                 skippedDocumentCount: 2,
-                skippedDocuments: [
+                skippedDocumentReasons: [
                     {
-                        documentName: 'Supporting Rate.docx',
                         reason: 'missing-pdf-extension',
+                        count: 1,
                     },
                     {
-                        documentName: 'Mime Mismatch.pdf',
                         reason: 'content-type-mismatch',
+                        count: 1,
                     },
                 ],
             }
