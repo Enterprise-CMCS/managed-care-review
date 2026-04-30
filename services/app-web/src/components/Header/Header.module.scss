@@ -183,6 +183,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    min-height: 4rem;
     text-decoration: none;
 
     .logoImg {
@@ -191,9 +192,10 @@
     }
 
     span {
+        display: flex;
+        align-items: center;
         margin-left: 1rem;
         color: custom.$mcr-foundation-white;
-        height: 100%;
     }
 }
 
