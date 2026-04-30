@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-No active AI validation implementation ticket is currently queued.
+The next implementation ticket is `AIFA-077 Harden AI validation prompt and log data framing`.
 
 ## Completed
 
@@ -90,6 +90,7 @@ No active AI validation implementation ticket is currently queued.
 - AIFA-073 ✔ Refresh AI validation documentation for handoff
 - AIFA-075 ✔ Remove production documents from AI validation corpus
 - AIFA-074 ✔ Reduce AI validation artifact contract verbosity
+- AIFA-076 ✔ Add contract-level authorization to AI validation resolvers
 
 ## Current State
 
@@ -310,13 +311,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-- none currently queued
+### AIFA-077 Harden AI validation prompt and log data framing
+
+Reduce prompt-injection and sensitive-log exposure in the current AI validation prompts and logging paths without changing prompt goals, validation semantics, or artifact behavior.
 
 ## Suggested Next Step
 
-- Hold on additional AI validation cleanup until a new ticket is explicitly approved.
-- If more work is needed, start from the committed session file and sprint CSV rather than the older planning docs.
-- Preserve the current runtime and artifact semantics unless a later ticket explicitly reopens them.
+- Frame document metadata and extracted evidence as data, not free-form instructions, in reranking and validation prompts.
+- Reduce raw filename and raw provider error-body leakage in current logging/error paths.
+- Preserve current validation outcomes, work-selection behavior, and artifact semantics.
 
 ## Follow-on Performance Tickets
 
@@ -328,7 +331,18 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Recommended Upcoming Order
 
-- none currently queued
+1. `AIFA-077 Harden AI validation prompt and log data framing`
+2. `AIFA-080 Harden local AI validation worker subprocess management`
+3. `AIFA-078 Correct fallback-pass status progression`
+4. `AIFA-079 Introduce typed artifact-not-found handling`
+5. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+
+## AIFA-076 Closeout Notes
+
+- Added contract-level authorization checks to both `triggerValidation` and `validationStatus` using the same state/CMS/admin and OAuth read pattern already used by contract read resolvers.
+- Unauthorized users can no longer trigger AI validation runs or read stored validation results for contracts outside their allowed access scope.
+- Authorized-user behavior did not change: worker behavior, artifact semantics, polling behavior, and Review-page behavior remain the same for allowed access.
+- Focused resolver tests passed for authorized access plus state-mismatch and OAuth-without-read denial paths.
 
 ## AIFA-074 Closeout Notes
 

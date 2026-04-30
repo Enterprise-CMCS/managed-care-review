@@ -20,6 +20,7 @@ import {
     getEffectiveValidationDocumentKeys,
     getValidationDocumentIdentityInputs,
 } from './validationDocumentKeys'
+import { assertCanAccessValidationContract } from './validationAuthorization'
 import { buildValidationFormFields } from './validationFormFields'
 
 function buildValidationCoverageSummary(
@@ -78,7 +79,7 @@ export function fetchValidationStatusResolver(
     store: Store,
     config: ValidationResolverConfig
 ): QueryResolvers['validationStatus'] {
-    return async (_parent, { input }) => {
+    return async (_parent, { input }, context) => {
         const contractResult = await store.findContractWithHistory(
             input.contractID
         )
@@ -103,6 +104,12 @@ export function fetchValidationStatusResolver(
                 },
             })
         }
+
+        assertCanAccessValidationContract({
+            operationName: 'validationStatus',
+            context,
+            stateCode: contractResult.stateCode,
+        })
 
         // Polling is tied to the user’s in-progress submission workflow, so the
         // current draft revision is the only source of truth for artifact status.

@@ -18,6 +18,7 @@ import {
     getValidationDocumentIdentityInputs,
     selectEligibleValidationDocuments,
 } from './validationDocumentKeys'
+import { assertCanAccessValidationContract } from './validationAuthorization'
 import { buildValidationFormFields } from './validationFormFields'
 
 export type RuntimeValidationWorkSelectionMode = Extract<
@@ -37,7 +38,7 @@ export function triggerValidationResolver(
     store: Store,
     config: ValidationResolverConfig
 ): MutationResolvers['triggerValidation'] {
-    return async (_parent, { input }, _context: Context) => {
+    return async (_parent, { input }, context: Context) => {
         const contractResult = await store.findContractWithHistory(
             input.contractID
         )
@@ -62,6 +63,12 @@ export function triggerValidationResolver(
                 },
             })
         }
+
+        assertCanAccessValidationContract({
+            operationName: 'triggerValidation',
+            context,
+            stateCode: contractResult.stateCode,
+        })
 
         // Validation is triggered while a user is still preparing a submission, so
         // the editable draft revision is the only version that should drive the

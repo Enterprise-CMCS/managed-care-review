@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { fetchValidationStatusResolver } from './fetchValidationStatus'
 import type { Store } from '../../postgres'
+import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     buildArtifactVersionDocumentIdentity,
     computeArtifactVersion,
@@ -10,6 +11,7 @@ import {
 import type { ValidationResultArtifact } from '../../../../ai-form-augmentation/src/results'
 import type { ValidationStatusArtifact } from '../../../../ai-form-augmentation/src/status'
 import { buildValidationFormFields } from './validationFormFields'
+import type { Context } from '../../handlers/apollo_gql'
 
 const { getJsonMock } = vi.hoisted(() => ({
     getJsonMock: vi.fn(),
@@ -39,6 +41,7 @@ const currentArtifactVersion = computeArtifactVersion([
 const buildStore = (draftRevision: unknown): Store =>
     ({
         findContractWithHistory: vi.fn().mockResolvedValue({
+            stateCode: 'FL',
             draftRevision,
         }),
     }) as unknown as Store
@@ -99,21 +102,78 @@ const queueStatusAndResultArtifacts = (args: {
 
 const invokeValidationStatusResolver = async (
     resolver: NonNullable<QueryResolvers['validationStatus']>,
-    contractID = 'test-abc-123'
+    contractID = 'test-abc-123',
+    context: Context = { user: testAdminUser() }
 ) => {
     if (typeof resolver === 'function') {
-        return resolver({}, { input: { contractID } }, {} as never, {} as never)
+        return resolver({}, { input: { contractID } }, context, {} as never)
     }
 
-    return resolver.resolve(
-        {},
-        { input: { contractID } },
-        {} as never,
-        {} as never
-    )
+    return resolver.resolve({}, { input: { contractID } }, context, {} as never)
 }
 
 describe('fetchValidationStatusResolver', () => {
+    it('forbids a state user from reading validation status for another state contract', async () => {
+        const draftRevision = buildDraftRevision()
+        const store = {
+            findContractWithHistory: vi.fn().mockResolvedValue({
+                stateCode: 'MN',
+                draftRevision,
+            }),
+        } as unknown as Store
+        const resolver = fetchValidationStatusResolver(
+            store,
+            baseConfig
+        ) as NonNullable<QueryResolvers['validationStatus']>
+
+        const result = invokeValidationStatusResolver(
+            resolver,
+            'test-abc-123',
+            {
+                user: testStateUser({ stateCode: 'FL' }),
+            }
+        )
+
+        await expect(result).rejects.toMatchObject({
+            message:
+                'User from state FL not allowed to access contract from MN',
+            extensions: {
+                code: 'FORBIDDEN',
+                cause: 'INVALID_STATE_REQUESTER',
+            },
+        })
+    })
+
+    it('forbids an OAuth client without read permission from reading validation status', async () => {
+        const resolver = fetchValidationStatusResolver(
+            buildStore(buildDraftRevision()),
+            baseConfig
+        ) as NonNullable<QueryResolvers['validationStatus']>
+
+        const result = invokeValidationStatusResolver(
+            resolver,
+            'test-abc-123',
+            {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'client-123',
+                    iss: 'https://issuer.example',
+                    grants: ['authorization_code'],
+                    scopes: [],
+                    isDelegatedUser: false,
+                },
+            }
+        )
+
+        await expect(result).rejects.toMatchObject({
+            message: 'OAuth client does not have read permissions',
+            extensions: {
+                code: 'FORBIDDEN',
+                cause: 'INSUFFICIENT_OAUTH_GRANTS',
+            },
+        })
+    })
+
     it('returns a partial coverage summary for eligible documents that were not fully reviewed', async () => {
         const draftRevision = buildDraftRevision()
         const formSnapshotHash = buildFormSnapshotHash(draftRevision)

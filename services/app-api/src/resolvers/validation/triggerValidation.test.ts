@@ -3,11 +3,13 @@ import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda'
 import type { GraphQLError } from 'graphql'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MutationResolvers } from '../../gen/gqlServer'
+import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     triggerValidationResolver,
     type ValidationResolverConfig,
 } from './triggerValidation'
 import type { Store } from '../../postgres'
+import type { Context } from '../../handlers/apollo_gql'
 
 const { spawnMock, childStdinEndMock, childStderrOnMock, childOnMock } =
     vi.hoisted(() => ({
@@ -35,6 +37,7 @@ const buildStore = (result: unknown): Store =>
     }) as unknown as Store
 
 const buildContractWithDraft = (documentKeys: Array<string | undefined>) => ({
+    stateCode: 'FL',
     draftRevision: {
         formData: {
             contractDateStart: new Date(Date.UTC(2025, 0, 1)),
@@ -56,6 +59,7 @@ const buildContractWithDraft = (documentKeys: Array<string | undefined>) => ({
 const buildContractWithDraftDocuments = (
     contractDocuments: Array<Record<string, unknown>>
 ) => ({
+    stateCode: 'FL',
     draftRevision: {
         formData: {
             contractDateStart: new Date(Date.UTC(2025, 0, 1)),
@@ -67,18 +71,14 @@ const buildContractWithDraftDocuments = (
 
 const invokeTriggerValidationResolver = async (
     resolver: NonNullable<MutationResolvers['triggerValidation']>,
-    contractID = 'test-abc-123'
+    contractID = 'test-abc-123',
+    context: Context = { user: testAdminUser() }
 ) => {
     if (typeof resolver === 'function') {
-        return resolver({}, { input: { contractID } }, {} as never, {} as never)
+        return resolver({}, { input: { contractID } }, context, {} as never)
     }
 
-    return resolver.resolve(
-        {},
-        { input: { contractID } },
-        {} as never,
-        {} as never
-    )
+    return resolver.resolve({}, { input: { contractID } }, context, {} as never)
 }
 
 describe('triggerValidationResolver', () => {
@@ -225,6 +225,71 @@ describe('triggerValidationResolver', () => {
         expect(firstResult.artifactVersion).not.toEqual(
             secondResult.artifactVersion
         )
+    })
+
+    it('forbids a state user from triggering validation for another state contract', async () => {
+        const store = buildStore({
+            ...buildContractWithDraft(['uploads/contracts/doc-a.pdf']),
+            stateCode: 'MN',
+        })
+        const resolver = triggerValidationResolver(
+            store,
+            baseConfig
+        ) as NonNullable<MutationResolvers['triggerValidation']>
+
+        const result = invokeTriggerValidationResolver(
+            resolver,
+            'test-abc-123',
+            {
+                user: testStateUser({ stateCode: 'FL' }),
+            }
+        )
+
+        await expect(result).rejects.toMatchObject({
+            message:
+                'User from state FL not allowed to access contract from MN',
+            extensions: {
+                code: 'FORBIDDEN',
+                cause: 'INVALID_STATE_REQUESTER',
+            },
+        })
+
+        expect(spawnMock).not.toHaveBeenCalled()
+    })
+
+    it('forbids an OAuth client without read permission from triggering validation', async () => {
+        const store = buildStore(
+            buildContractWithDraft(['uploads/contracts/doc-a.pdf'])
+        )
+        const resolver = triggerValidationResolver(
+            store,
+            baseConfig
+        ) as NonNullable<MutationResolvers['triggerValidation']>
+
+        const result = invokeTriggerValidationResolver(
+            resolver,
+            'test-abc-123',
+            {
+                user: testStateUser(),
+                oauthClient: {
+                    clientId: 'client-123',
+                    iss: 'https://issuer.example',
+                    grants: ['authorization_code'],
+                    scopes: [],
+                    isDelegatedUser: false,
+                },
+            }
+        )
+
+        await expect(result).rejects.toMatchObject({
+            message: 'OAuth client does not have read permissions',
+            extensions: {
+                code: 'FORBIDDEN',
+                cause: 'INSUFFICIENT_OAUTH_GRANTS',
+            },
+        })
+
+        expect(spawnMock).not.toHaveBeenCalled()
     })
 
     it('uses Lambda invoke when useLocalS3 is false', async () => {
