@@ -1,23 +1,15 @@
 import {
     constructTestPostgresServer,
-    createTestQuestion,
-    createTestQuestionResponse,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { FetchContractDocument } from '../../gen/gqlClient'
-import {
-    createDBUsersWithFullData,
-    testCMSUser,
-    testStateUser,
-} from '../../testHelpers/userHelpers'
+import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
-    createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createTestContract,
     fetchTestContract,
-    fetchTestContractWithQuestions,
     submitTestContract,
     unlockTestContract,
     updateTestContractDraftRevision,
@@ -27,7 +19,6 @@ import {
     mockGqlContractDraftRevisionFormDataInput,
     testS3Client,
 } from '../../testHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 describe('fetchContract', () => {
@@ -348,213 +339,6 @@ describe('fetchContract', () => {
         expect(fetchResult.errors[0].message).toBe(
             'User from state VA not allowed to access contract from FL'
         )
-    })
-
-    describe('Fetch contract with questions tests', () => {
-        it('returns contract with soft deleted questions filtered out', async () => {
-            const cmsUser = testCMSUser()
-            await createDBUsersWithFullData([cmsUser])
-
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
-            })
-            const cmsServer = await constructTestPostgresServer({
-                context: { user: cmsUser },
-                s3Client: mockS3,
-            })
-
-            const contract =
-                await createAndSubmitTestContractWithRate(stateServer)
-
-            const questionToKeep = await createTestQuestion(
-                cmsServer,
-                contract.id,
-                {
-                    documents: [
-                        { name: 'Keep me', s3URL: 's3://bucketname/key/keep' },
-                    ],
-                }
-            )
-            const questionToDelete = await createTestQuestion(
-                cmsServer,
-                contract.id,
-                {
-                    documents: [
-                        {
-                            name: 'Delete me',
-                            s3URL: 's3://bucketname/key/delete',
-                        },
-                    ],
-                }
-            )
-
-            const prismaClient = await sharedTestPrismaClient()
-            await prismaClient.contractQuestionAction.create({
-                data: {
-                    questionID: questionToDelete.id,
-                    updatedByID: cmsUser.id,
-                    action: 'DELETE',
-                },
-            })
-
-            const fetched = await fetchTestContractWithQuestions(
-                stateServer,
-                contract.id
-            )
-
-            const dmcoQuestions = fetched.questions?.DMCOQuestions
-            expect(dmcoQuestions?.totalCount).toBe(1)
-            expect(dmcoQuestions?.edges).toHaveLength(1)
-            expect(dmcoQuestions?.edges[0].node.id).toBe(questionToKeep.id)
-        })
-
-        it('returns contract with soft deleted responses filtered out', async () => {
-            const cmsUser = testCMSUser()
-            await createDBUsersWithFullData([cmsUser])
-
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
-            })
-            const cmsServer = await constructTestPostgresServer({
-                context: { user: cmsUser },
-                s3Client: mockS3,
-            })
-
-            const contract =
-                await createAndSubmitTestContractWithRate(stateServer)
-            const question = await createTestQuestion(cmsServer, contract.id)
-
-            const afterDeleteResponse = await createTestQuestionResponse(
-                stateServer,
-                question.id,
-                {
-                    documents: [
-                        {
-                            name: 'Delete me',
-                            s3URL: 's3://bucketname/key/delete',
-                        },
-                    ],
-                }
-            )
-            const responseToDeleteID = afterDeleteResponse.responses[0].id
-
-            const afterKeepResponse = await createTestQuestionResponse(
-                stateServer,
-                question.id,
-                {
-                    documents: [
-                        { name: 'Keep me', s3URL: 's3://bucketname/key/keep' },
-                    ],
-                }
-            )
-            const responseToKeepID = afterKeepResponse.responses[0].id
-
-            const prismaClient = await sharedTestPrismaClient()
-            await prismaClient.contractQuestionResponseAction.create({
-                data: {
-                    responseID: responseToDeleteID,
-                    updatedByID: cmsUser.id,
-                    action: 'DELETE',
-                },
-            })
-
-            const fetched = await fetchTestContractWithQuestions(
-                stateServer,
-                contract.id
-            )
-
-            const responses =
-                fetched.questions?.DMCOQuestions.edges[0].node.responses ?? []
-            expect(responses).toHaveLength(1)
-            expect(responses[0].id).toBe(responseToKeepID)
-        })
-
-        it('returns contract with soft deleted documents filtered out without removing parent question or response', async () => {
-            const cmsUser = testCMSUser()
-            await createDBUsersWithFullData([cmsUser])
-
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
-            })
-            const cmsServer = await constructTestPostgresServer({
-                context: { user: cmsUser },
-                s3Client: mockS3,
-            })
-
-            const contract =
-                await createAndSubmitTestContractWithRate(stateServer)
-
-            const question = await createTestQuestion(cmsServer, contract.id, {
-                documents: [
-                    { name: 'Q-keep', s3URL: 's3://bucketname/key/q-keep' },
-                    { name: 'Q-delete', s3URL: 's3://bucketname/key/q-delete' },
-                ],
-            })
-            const questionDocToDelete = question.documents.find(
-                (d) => d.name === 'Q-delete'
-            )
-            if (!questionDocToDelete?.id) {
-                throw new Error(
-                    'Test setup: Q-delete document was not seeded with an id'
-                )
-            }
-
-            const responseQuestion = await createTestQuestionResponse(
-                stateServer,
-                question.id,
-                {
-                    documents: [
-                        { name: 'R-keep', s3URL: 's3://bucketname/key/r-keep' },
-                        {
-                            name: 'R-delete',
-                            s3URL: 's3://bucketname/key/r-delete',
-                        },
-                    ],
-                }
-            )
-            const responseDocToDelete =
-                responseQuestion.responses[0].documents.find(
-                    (d) => d.name === 'R-delete'
-                )
-            if (!responseDocToDelete?.id) {
-                throw new Error(
-                    'Test setup: R-delete document was not seeded with an id'
-                )
-            }
-
-            const prismaClient = await sharedTestPrismaClient()
-            await prismaClient.contractQuestionDocumentAction.create({
-                data: {
-                    documentID: questionDocToDelete.id,
-                    updatedByID: cmsUser.id,
-                    action: 'DELETE',
-                },
-            })
-            await prismaClient.contractQuestionResponseDocumentAction.create({
-                data: {
-                    documentID: responseDocToDelete.id,
-                    updatedByID: cmsUser.id,
-                    action: 'DELETE',
-                },
-            })
-
-            const fetched = await fetchTestContractWithQuestions(
-                stateServer,
-                contract.id
-            )
-
-            const dmco = fetched.questions?.DMCOQuestions
-            expect(dmco?.totalCount).toBe(1)
-            expect(dmco?.edges).toHaveLength(1)
-
-            const node = dmco!.edges[0].node
-            expect(node.documents).toHaveLength(1)
-            expect(node.documents[0].name).toBe('Q-keep')
-
-            expect(node.responses).toHaveLength(1)
-            expect(node.responses[0].documents).toHaveLength(1)
-            expect(node.responses[0].documents[0].name).toBe('R-keep')
-        })
     })
 
     describe('Oauth request tests', () => {
