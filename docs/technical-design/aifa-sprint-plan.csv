@@ -1164,3 +1164,9 @@ AIFA-074 Reduce AI validation artifact contract verbosity,Backlog,Cleanup / Hand
 - Verbose or repetitive artifact helper/type surface is reduced without redesigning the artifact model
 - `status.json` and `validation-result.json` remain semantically compatible with existing runtime readers
 - No validation outcomes, work-selection behavior, polling behavior, or UI behavior change"
+AIFA-075 Remove production documents from AI validation corpus,Backlog,Cleanup / Handoff Readiness,High,"AIFA-072, AIFA-073","Remove production-derived PDFs from the AI validation PoC by replacing active corpus dependencies with synthetic or safely generated fixtures, removing obsolete unused fixtures, and updating all references so evaluation, demo, and replay paths still work without sensitive content in the repo. Do not change: validation runtime behavior, scenario semantics unless needed to remove prod content safely, work-selection behavior, artifact semantics, or Review-page behavior.","- No production-derived AI validation PDFs remain in the repo
+- Every active corpus scenario still has a safe replacement fixture or is explicitly removed with no coverage loss
+- Default evaluation corpus still preserves match, mismatch, not-enough-evidence, and competing-date coverage
+- The large-submission scenario still preserves its document-count and disposition shape without production documents
+- LocalStack replay tests no longer depend on a production-derived PDF
+- No stale references to removed fixtures remain in tests or docs"

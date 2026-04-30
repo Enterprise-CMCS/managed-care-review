@@ -311,6 +311,10 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 Refresh AI validation docs so current PoC behavior, entrypoints, config expectations, and scope are clear for handoff, while historical notes remain clearly historical.
 
+### AIFA-075 Remove production documents from AI validation corpus
+
+Replace production-derived AI validation PDF fixtures with synthetic or safely generated fixtures, remove obsolete unused production-derived PDFs, and update corpus/test/doc references so the PoC keeps working without sensitive content in the repo.
+
 ## Suggested Next Step
 
 - Refresh the PoC brief and technical-design docs so they reflect the current local-first, PDF-only validation flow.
@@ -323,12 +327,13 @@ Refresh AI validation docs so current PoC behavior, entrypoints, config expectat
 
 ## Follow-on Maintenance Ticket
 
-- `AIFA-074 Reduce AI validation artifact contract verbosity`
+- `AIFA-075 Remove production documents from AI validation corpus`
 
 ## Recommended Upcoming Order
 
 1. `AIFA-073 Refresh AI validation documentation for handoff`
-2. `AIFA-074 Reduce AI validation artifact contract verbosity`
+2. `AIFA-075 Remove production documents from AI validation corpus`
+3. `AIFA-074 Reduce AI validation artifact contract verbosity`
 
 ## AIFA-072 Closeout Notes
 
