@@ -18,6 +18,15 @@ fragment contractQuestionFragment on ContractQuestion {
     responses {
         ...questionResponseFragment
     }
+    actions {
+        id
+        createdAt
+        action
+        reason
+        updatedBy {
+            ...adminUserFragment
+        }
+    }
 }
 
 fragment rateQuestionFragment on RateQuestion {
