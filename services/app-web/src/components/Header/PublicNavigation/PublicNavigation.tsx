@@ -1,5 +1,4 @@
 import React from 'react'
-import { GridContainer } from '@trussworks/react-uswds'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { ReactRouterLinkWithLogging } from '../../TealiumLogging'
 import styles from './PublicNavigation.module.scss'
@@ -63,14 +62,14 @@ export const PublicNavigation = ({
 
     return (
         <div className={styles.navigation}>
-            <GridContainer className={styles.navigationContainer}>
+            <div className={styles.navigationContainer}>
                 <nav
                     aria-label="Public page navigation"
                     className={styles.primaryNav}
                 >
                     <ul className="usa-accordion">{items}</ul>
                 </nav>
-            </GridContainer>
+            </div>
         </div>
     )
 }

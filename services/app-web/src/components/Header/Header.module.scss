@@ -1,3 +1,4 @@
+//stylelint-disable selector-pseudo-class-no-unknown
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
@@ -80,15 +81,23 @@
     color: custom.$mcr-foundation-white;
 }
 
+.loggedOutSignInButton {
+    margin-right: 1rem !important;
+}
+
+@include uswds.at-media-max('desktop') {
+    .loggedOutSignInButton {
+        margin-right: 1rem !important;
+    }
+}
+
 @include uswds.at-media-max('tablet') {
     .loggedOutSignInButton {
         display: inline-flex !important;
+        flex: 0 0 auto;
         width: auto !important;
-        margin-top: 0.125rem;
-        margin-bottom: 0.5rem;
-        margin-right: 1rem;
         margin-left: auto;
-        align-self: flex-end;
+        margin-bottom: 0.5rem;
     }
 }
 
@@ -151,6 +160,18 @@
 
 .banner {
     background: custom.$mcr-cmsblue-base;
+}
+
+@include uswds.at-media-max('desktop') {
+    .bannerContainer {
+        padding-right: 1rem !important;
+        padding-left: 1rem !important;
+    }
+
+    .bannerLogo :global(.usa-logo) {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
 }
 
 .bannerLogo {
