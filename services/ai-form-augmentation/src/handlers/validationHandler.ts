@@ -115,6 +115,15 @@ export interface ValidationHandlerResult {
   status: 'completed'
 }
 
+function getIndexingProgressStage(
+  workSelectionMode: 'all-doc' | 'gated-first-pass' | 'gated-fallback'
+): 'parsing' | 'retrieving' {
+  // Once the first pass has already parsed/indexed its initial document set,
+  // fallback expansion is better represented as later retrieval expansion than
+  // as a return to the initial parsing stage.
+  return workSelectionMode === 'gated-fallback' ? 'retrieving' : 'parsing'
+}
+
 // Process at most two documents in parallel so local OCR/embed work stays busy
 // without overwhelming CPU and memory on large submission runs.
 export const DEFAULT_DOCUMENT_INDEXING_CONCURRENCY = 2
@@ -654,7 +663,7 @@ export async function validationHandler(
         event.bucket,
         statusKey,
         buildValidationStatusArtifact(
-          'parsing',
+          getIndexingProgressStage('gated-fallback'),
           event.artifactVersion,
           null,
           [],
@@ -887,7 +896,7 @@ async function indexValidationDocuments(args: {
           args.event.bucket,
           args.statusKey,
           buildValidationStatusArtifact(
-            'parsing',
+            getIndexingProgressStage(args.workSelectionMode),
             args.event.artifactVersion,
             null,
             [],

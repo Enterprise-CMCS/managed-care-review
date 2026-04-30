@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-078 Correct fallback-pass status progression`.
+The next implementation ticket is `AIFA-079 Introduce typed artifact-not-found handling`.
 
 ## Completed
 
@@ -93,6 +93,7 @@ The next implementation ticket is `AIFA-078 Correct fallback-pass status progres
 - AIFA-076 ✔ Add contract-level authorization to AI validation resolvers
 - AIFA-077 ✔ Harden AI validation prompt and log data framing
 - AIFA-080 ✔ Harden local AI validation worker subprocess management
+- AIFA-078 ✔ Correct fallback-pass status progression
 
 ## Current State
 
@@ -313,15 +314,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-078 Correct fallback-pass status progression
+### AIFA-079 Introduce typed artifact-not-found handling
 
-Stop reporting fallback expansion work as initial `parsing` once first-pass parsing/indexing has already completed, without changing work-selection semantics, artifact keys, or Review-page behavior.
+Replace string-matching on missing-artifact error text with a typed artifact-not-found path shared across current worker, resolver, and evaluation readers.
 
 ## Suggested Next Step
 
-- Keep fallback progress truthful once first-pass parsing/indexing has already completed.
-- Preserve existing polling and Review-page compatibility while correcting the fallback-stage regression.
-- Avoid broad status-contract redesign or work-selection behavior changes.
+- Replace current missing-artifact string matching with explicit typed detection.
+- Preserve existing cache reuse, polling, and evaluation behavior for ordinary missing-artifact cases.
+- Avoid broader error-handling redesign or artifact lookup changes.
 
 ## Follow-on Performance Tickets
 
@@ -333,9 +334,15 @@ Stop reporting fallback expansion work as initial `parsing` once first-pass pars
 
 ## Recommended Upcoming Order
 
-1. `AIFA-078 Correct fallback-pass status progression`
-2. `AIFA-079 Introduce typed artifact-not-found handling`
-3. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+1. `AIFA-079 Introduce typed artifact-not-found handling`
+2. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+
+## AIFA-078 Closeout Notes
+
+- Fallback expansion no longer rewrites status back to the initial `parsing` meaning once first-pass parsing/indexing has already completed.
+- `gated-fallback` indexing progress now reuses the existing `retrieving` stage instead of introducing a new status contract.
+- Work-selection behavior, fallback decision rules, artifact keys, and Review-page compatibility did not change.
+- The focused regression check now asserts that `gated-fallback` progress is surfaced without emitting `parsing`.
 
 ## AIFA-080 Closeout Notes
 

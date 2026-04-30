@@ -1178,12 +1178,20 @@ describe('validationHandler', () => {
                     bucket === 'ai-form-augmentation-artifacts' &&
                     key === getValidationStatusKey('test-form') &&
                     artifact?.workSelectionMode === 'gated-fallback' &&
-                    (artifact?.stage === 'parsing' ||
-                        artifact?.stage === 'retrieving' ||
+                    (artifact?.stage === 'retrieving' ||
                         artifact?.stage === 'deterministic-validation' ||
                         artifact?.stage === 'llm-validation')
             )
         ).toBe(true)
+        expect(
+            putJsonMock.mock.calls.some(
+                ([bucket, key, artifact]) =>
+                    bucket === 'ai-form-augmentation-artifacts' &&
+                    key === getValidationStatusKey('test-form') &&
+                    artifact?.workSelectionMode === 'gated-fallback' &&
+                    artifact?.stage === 'parsing'
+            )
+        ).toBe(false)
     })
 
     it('routes unresolved fields to the llm with field-specific retrieval context', async () => {
