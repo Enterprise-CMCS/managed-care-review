@@ -85,12 +85,6 @@
     margin-right: 1rem !important;
 }
 
-@include uswds.at-media-max('desktop') {
-    .loggedOutSignInButton {
-        margin-right: 1rem !important;
-    }
-}
-
 @include uswds.at-media-max('tablet') {
     .loggedOutSignInButton {
         display: inline-flex !important;
@@ -113,12 +107,11 @@
     }
 
     .headerItemsContainer {
-        display: flex;
-        flex-wrap: wrap;
         flex-direction: column;
         justify-content: space-between;
         padding-top: 1rem;
         padding-bottom: 1rem;
+
         li {
             border-top: none !important;
             margin-top: 1rem;
@@ -140,6 +133,7 @@
         ul {
             margin-top: 0.5rem !important;
             padding: 1rem;
+
             li {
                 margin: 0;
             }
