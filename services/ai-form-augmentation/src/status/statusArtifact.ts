@@ -29,6 +29,8 @@ export interface ValidationStatusArtifact {
   artifactVersion: string
   updatedAt: string
   error: string | null
+  // Status artifacts may carry the same diagnostics as the final result so
+  // polling and failed runs can still explain coverage before completion.
   documentDiagnostics?: ValidationDocumentDiagnostic[]
   indexingProgress?: ValidationIndexingProgressArtifact
   workSelectionMode?: ValidationWorkSelectionMode

@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries`.
+The next implementation ticket is `AIFA-072 Reduce AI validation test duplication and brittleness`.
 
 ## Completed
 
@@ -84,6 +84,7 @@ The next implementation ticket is `AIFA-070 Normalize AI validation artifact and
 - AIFA-068 ✔ Retire obsolete standalone AI dev script
 - AIFA-069 ✔ Consolidate AI validation runtime entrypoints and exports
 - AIFA-071 ✔ Clean up AI validation config and local runtime defaults
+- AIFA-070 ✔ Normalize AI validation artifact and diagnostic contract boundaries
 - AIFA-025 ✔ Evaluate FAISS implementation behind VectorStore
 
 ## Current State
@@ -305,15 +306,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries
+### AIFA-072 Reduce AI validation test duplication and brittleness
 
-Review `status.json`, `validation-result.json`, and related mapping/types to clarify product-facing versus diagnostic-only data without redesigning the artifact model or changing behavior.
+Review AI validation tests across worker, app-api, and Review-page UI to reduce duplicated setup, overly implementation-specific assertions, and brittle helper-shaped coverage while preserving the highest-value regression checks.
 
 ## Suggested Next Step
 
-- Review worker artifact/status/result types alongside app-api and Review-page mappings for confusing or redundant contract surface.
-- Clarify comments and naming only where it improves contract understanding without changing artifact semantics.
-- Keep polling, Review-page rendering, and diagnostic meaning unchanged.
+- Review worker, resolver, and Review-page tests for duplicated setup and implementation-shaped assertions.
+- Reduce brittleness without weakening coverage for reruns, stale/current behavior, LocalStack replay, and evidence rendering.
+- Keep runtime code behavior and artifact semantics unchanged.
 
 ## Follow-on Performance Tickets
 
@@ -325,9 +326,15 @@ Review `status.json`, `validation-result.json`, and related mapping/types to cla
 
 ## Recommended Upcoming Order
 
-1. `AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries`
-2. `AIFA-072 Reduce AI validation test duplication and brittleness`
-3. `AIFA-073 Refresh AI validation documentation for handoff`
+1. `AIFA-072 Reduce AI validation test duplication and brittleness`
+2. `AIFA-073 Refresh AI validation documentation for handoff`
+
+## AIFA-070 Closeout Notes
+
+- Clarified in code that `validation-result.json` is the canonical completed artifact while `status.json` is the in-progress or failed polling artifact.
+- Made the canonical diagnostic precedence rule explicit in both the polling resolver and the evaluation path: when a completed result exists, its diagnostics and phase timings win over status snapshots.
+- Added focused resolver coverage proving coverage summaries prefer completed result diagnostics over older status diagnostics.
+- The main remaining artifact concern is verbosity, not ambiguity. Further cleanup should avoid schema redesign and instead focus on tests and documentation unless a concrete runtime problem appears.
 
 ## AIFA-071 Closeout Notes
 

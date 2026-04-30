@@ -544,8 +544,10 @@ function buildLargeSubmissionDiagnostics(args: {
   phaseTimings: Record<ValidationPhaseTimingDiagnostic['phase'], number>
   indexingSummary: ValidationIndexingSummaryDiagnostic
 }): DateValidationLargeSubmissionDiagnostics {
-  const documentDiagnostics =
-    args.resultArtifact?.documentDiagnostics ?? args.statusArtifact?.documentDiagnostics ?? []
+  const documentDiagnostics = getCanonicalDocumentDiagnostics({
+    resultArtifact: args.resultArtifact,
+    statusArtifact: args.statusArtifact
+  })
   const firstPassDocumentNames = new Set(
     documentDiagnostics
       .filter((diagnostic) => diagnostic.workSelection?.bucket === 'first-pass')
@@ -620,7 +622,10 @@ function buildLargeSubmissionDiagnostics(args: {
       recommendation: workSelectionEvaluation.recommendation
     },
     indexing: args.indexingSummary,
-    phaseTimingsMs: args.resultArtifact?.phaseTimingsMs ?? args.phaseTimings,
+    phaseTimingsMs: getCanonicalPhaseTimings({
+      resultArtifact: args.resultArtifact,
+      phaseTimings: args.phaseTimings
+    }),
     artifactSizesBytes: {
       parsedText: null,
       chunks: approximateJsonSize(args.chunksArtifact),
@@ -631,6 +636,27 @@ function buildLargeSubmissionDiagnostics(args: {
       results: approximateJsonSize(args.resultArtifact)
     }
   }
+}
+
+function getCanonicalDocumentDiagnostics(args: {
+  resultArtifact: ValidationResultArtifact | null
+  statusArtifact: ValidationStatusArtifact | null
+}): ValidationDocumentDiagnostic[] {
+  // Completed result artifacts are the canonical completed record. Status
+  // artifacts only fill the gap while a run is still in flight or failed
+  // before a final result was written.
+  return (
+    args.resultArtifact?.documentDiagnostics ??
+    args.statusArtifact?.documentDiagnostics ??
+    []
+  )
+}
+
+function getCanonicalPhaseTimings(args: {
+  resultArtifact: ValidationResultArtifact | null
+  phaseTimings: Record<ValidationPhaseTimingDiagnostic['phase'], number>
+}): Record<ValidationPhaseTimingDiagnostic['phase'], number> {
+  return args.resultArtifact?.phaseTimingsMs ?? args.phaseTimings
 }
 
 export function evaluateWorkSelectionStrategy(args: {

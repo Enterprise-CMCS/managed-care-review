@@ -42,6 +42,9 @@ export interface ValidationResultArtifact {
   artifactVersion: string
   formSnapshotHash: string
   results: DateValidationResult[]
+  // Result artifacts are the canonical completed record. When both result and
+  // status artifacts exist, consumers should prefer these diagnostics because
+  // they reflect the final stored outcome rather than an in-progress snapshot.
   documentDiagnostics?: ValidationDocumentDiagnostic[]
   // Keep LLM-path diagnostics off the user-facing result contract while still
   // making malformed or incomplete model output measurable in evaluation runs.
@@ -66,6 +69,8 @@ export interface ValidationDocumentWorkSelectionDiagnostic {
 
 export interface ValidationDocumentDiagnostic {
   documentName: string
+  // Trigger-time unsupported-file skips do not have worker-fetch metadata, so
+  // source location stays optional even though worker-reviewed PDFs persist it.
   sourceBucket?: string
   sourceKey?: string
   sourceSha256?: string
@@ -103,6 +108,8 @@ export interface ValidationRetrievalDiagnostic {
 
 export interface ValidationFieldWorkSelectionDiagnostic {
   field: string
+  // This is product-relevant because the Review page explains whether a field
+  // was resolved from the initial pass, fallback, or only partial coverage.
   evidenceSource: 'all-doc' | 'first-pass' | 'fallback' | 'partial'
   fallbackReasons?: string[]
 }

@@ -61,6 +61,19 @@ function buildValidationCoverageSummary(
     }
 }
 
+function getPreferredDocumentDiagnostics(args: {
+    resultArtifact: ValidationResultArtifact | null
+    statusArtifact: ValidationStatusArtifact | null
+}): ValidationDocumentDiagnostic[] | undefined {
+    // Completed results are the canonical diagnostic record. Status artifacts
+    // only win when a result does not exist yet, such as in-progress or failed
+    // runs that still need to surface partial coverage to the Review page.
+    return (
+        args.resultArtifact?.documentDiagnostics ??
+        args.statusArtifact?.documentDiagnostics
+    )
+}
+
 export function fetchValidationStatusResolver(
     store: Store,
     config: ValidationResolverConfig
@@ -301,8 +314,10 @@ export function fetchValidationStatusResolver(
         }
 
         const coverageSummary = buildValidationCoverageSummary(
-            resultArtifact?.documentDiagnostics ??
-                statusArtifact?.documentDiagnostics
+            getPreferredDocumentDiagnostics({
+                resultArtifact,
+                statusArtifact,
+            })
         )
 
         if (statusArtifact?.stage === 'failed') {

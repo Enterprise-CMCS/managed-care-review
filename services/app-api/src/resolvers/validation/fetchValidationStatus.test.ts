@@ -231,6 +231,74 @@ describe('fetchValidationStatusResolver', () => {
         })
     })
 
+    it('prefers completed result diagnostics over older status diagnostics for coverage summary', async () => {
+        const draftRevision = buildDraftRevision()
+        const formSnapshotHash = computeFormSnapshotHash(
+            buildValidationFormFields(draftRevision.formData).map((field) => ({
+                field: field.field,
+                value: field.value,
+            }))
+        )
+
+        getJsonMock
+            .mockResolvedValueOnce({
+                stage: 'complete',
+                artifactVersion: currentArtifactVersion,
+                updatedAt: '2026-04-17T00:00:00.000Z',
+                error: null,
+                documentDiagnostics: [
+                    {
+                        documentName: 'status-only-failed.pdf',
+                        sourceBucket: 'uploads-bucket',
+                        sourceKey: 'uploads/contracts/doc-b.pdf',
+                        status: 'failed',
+                        usable: false,
+                        chunkCount: 0,
+                    },
+                ],
+            })
+            .mockResolvedValueOnce({
+                artifactVersion: currentArtifactVersion,
+                formSnapshotHash,
+                results: [],
+                documentDiagnostics: [
+                    {
+                        documentName: 'result-processed.pdf',
+                        sourceBucket: 'uploads-bucket',
+                        sourceKey: 'uploads/contracts/doc-a.pdf',
+                        status: 'processed',
+                        usable: true,
+                        chunkCount: 8,
+                    },
+                ],
+            })
+
+        const store = buildStore(draftRevision)
+
+        const resolver = fetchValidationStatusResolver(
+            store,
+            baseConfig
+        ) as NonNullable<QueryResolvers['validationStatus']>
+
+        const result = await invokeValidationStatusResolver(resolver)
+
+        expect(result).toEqual({
+            stage: 'complete',
+            artifactVersion: currentArtifactVersion,
+            isStale: false,
+            error: null,
+            coverageSummary: {
+                isPartial: false,
+                skippedDocuments: 0,
+                failedDocuments: 0,
+                ocrCappedDocuments: 0,
+                deferredDocuments: 0,
+                unprocessedDocuments: 0,
+            },
+            results: [],
+        })
+    })
+
     it('marks results stale when form date values change without document changes', async () => {
         getJsonMock
             .mockResolvedValueOnce({
