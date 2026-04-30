@@ -127,6 +127,18 @@ function buildDocumentChunk(documentName: string) {
   }
 }
 
+function buildSourceDocument(
+  bucket: string,
+  formId: string,
+  documentName = 'contract-a.pdf'
+): ValidationSourceDocument {
+  return {
+    documentName,
+    sourceBucket: bucket,
+    sourceKey: `localstack/${formId}/${documentName}`
+  }
+}
+
 async function seedCurrentDocuments(
   context: LocalStackHarnessContext,
   documents: ValidationSourceDocument[]
@@ -182,6 +194,21 @@ async function seedIndexedDocumentArtifacts(args: {
       )
     )
   ])
+}
+
+async function seedSingleIndexedDocument(args: {
+  context: LocalStackHarnessContext
+  formId: string
+  artifactVersion: string
+  document: ValidationSourceDocument
+}): Promise<void> {
+  await seedCurrentDocuments(args.context, [args.document])
+  await seedIndexedDocumentArtifacts({
+    context: args.context,
+    formId: args.formId,
+    artifactVersion: args.artifactVersion,
+    documents: [args.document]
+  })
 }
 
 async function withLocalStackHarness(
@@ -450,21 +477,16 @@ await withLocalStackHarness(
   'localstack replay keeps all-doc and gated completed results separate',
   async (context) => {
     const formId = `localstack-mode-${randomUUID()}`
-    const document = {
-      documentName: 'contract-a.pdf',
-      sourceBucket: context.bucket,
-      sourceKey: `localstack/${formId}/contract-a.pdf`
-    }
+    const document = buildSourceDocument(context.bucket, formId)
     const artifactVersion = computeArtifactVersion([document.sourceKey])
     const formFields = buildContractFields('01/01/2024', '12/31/2025')
     const formSnapshotHash = buildFormSnapshotHashForFields(formFields)
 
-    await seedCurrentDocuments(context, [document])
-    await seedIndexedDocumentArtifacts({
+    await seedSingleIndexedDocument({
       context,
       formId,
       artifactVersion,
-      documents: [document]
+      document
     })
     await context.s3Client.putJson(
       context.bucket,
@@ -519,11 +541,7 @@ await withLocalStackHarness(
   'localstack replay does not reuse completed results when artifact identity changes',
   async (context) => {
     const formId = `localstack-artifact-${randomUUID()}`
-    const document = {
-      documentName: 'contract-a.pdf',
-      sourceBucket: context.bucket,
-      sourceKey: `localstack/${formId}/contract-a.pdf`
-    }
+    const document = buildSourceDocument(context.bucket, formId)
     const previousArtifactVersion = 'artifact-v1'
     const currentArtifactVersion = 'artifact-v2'
     const formFields = buildContractFields('01/01/2024', '12/31/2025')

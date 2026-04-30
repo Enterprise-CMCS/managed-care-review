@@ -7,6 +7,8 @@ import {
     computeArtifactVersion,
     computeFormSnapshotHash,
 } from '../../../../ai-form-augmentation/src/versioning'
+import type { ValidationResultArtifact } from '../../../../ai-form-augmentation/src/results'
+import type { ValidationStatusArtifact } from '../../../../ai-form-augmentation/src/status'
 import { buildValidationFormFields } from './validationFormFields'
 
 const { getJsonMock } = vi.hoisted(() => ({
@@ -58,6 +60,43 @@ const buildDraftRevision = () => ({
     },
 })
 
+const buildFormSnapshotHash = (draftRevision = buildDraftRevision()) =>
+    computeFormSnapshotHash(
+        buildValidationFormFields(draftRevision.formData).map((field) => ({
+            field: field.field,
+            value: field.value,
+        }))
+    )
+
+const buildStatusArtifact = (
+    overrides: Partial<ValidationStatusArtifact> = {}
+): ValidationStatusArtifact => ({
+    stage: 'complete',
+    artifactVersion: currentArtifactVersion,
+    updatedAt: '2026-04-17T00:00:00.000Z',
+    error: null,
+    ...overrides,
+})
+
+const buildResultArtifact = (
+    formSnapshotHash: string,
+    overrides: Partial<ValidationResultArtifact> = {}
+): ValidationResultArtifact => ({
+    artifactVersion: currentArtifactVersion,
+    formSnapshotHash,
+    results: [],
+    ...overrides,
+})
+
+const queueStatusAndResultArtifacts = (args: {
+    statusArtifact: ValidationStatusArtifact
+    resultArtifact: ValidationResultArtifact
+}) => {
+    getJsonMock
+        .mockResolvedValueOnce(args.statusArtifact)
+        .mockResolvedValueOnce(args.resultArtifact)
+}
+
 const invokeValidationStatusResolver = async (
     resolver: NonNullable<QueryResolvers['validationStatus']>,
     contractID = 'test-abc-123'
@@ -77,24 +116,11 @@ const invokeValidationStatusResolver = async (
 describe('fetchValidationStatusResolver', () => {
     it('returns a partial coverage summary for eligible documents that were not fully reviewed', async () => {
         const draftRevision = buildDraftRevision()
-        const formSnapshotHash = computeFormSnapshotHash(
-            buildValidationFormFields(draftRevision.formData).map((field) => ({
-                field: field.field,
-                value: field.value,
-            }))
-        )
+        const formSnapshotHash = buildFormSnapshotHash(draftRevision)
 
-        getJsonMock
-            .mockResolvedValueOnce({
-                stage: 'complete',
-                artifactVersion: currentArtifactVersion,
-                updatedAt: '2026-04-17T00:00:00.000Z',
-                error: null,
-            })
-            .mockResolvedValueOnce({
-                artifactVersion: currentArtifactVersion,
-                formSnapshotHash,
-                results: [],
+        queueStatusAndResultArtifacts({
+            statusArtifact: buildStatusArtifact(),
+            resultArtifact: buildResultArtifact(formSnapshotHash, {
                 documentDiagnostics: [
                     {
                         documentName: 'contract-main.pdf',
@@ -138,7 +164,8 @@ describe('fetchValidationStatusResolver', () => {
                         reason: 'missing-pdf-extension',
                     },
                 ],
-            })
+            }),
+        })
 
         const store = buildStore(draftRevision)
 
@@ -168,24 +195,11 @@ describe('fetchValidationStatusResolver', () => {
 
     it('does not mark coverage partial when only unsupported documents were skipped before worker execution', async () => {
         const draftRevision = buildDraftRevision()
-        const formSnapshotHash = computeFormSnapshotHash(
-            buildValidationFormFields(draftRevision.formData).map((field) => ({
-                field: field.field,
-                value: field.value,
-            }))
-        )
+        const formSnapshotHash = buildFormSnapshotHash(draftRevision)
 
-        getJsonMock
-            .mockResolvedValueOnce({
-                stage: 'complete',
-                artifactVersion: currentArtifactVersion,
-                updatedAt: '2026-04-17T00:00:00.000Z',
-                error: null,
-            })
-            .mockResolvedValueOnce({
-                artifactVersion: currentArtifactVersion,
-                formSnapshotHash,
-                results: [],
+        queueStatusAndResultArtifacts({
+            statusArtifact: buildStatusArtifact(),
+            resultArtifact: buildResultArtifact(formSnapshotHash, {
                 documentDiagnostics: [
                     {
                         documentName: 'contract-main.pdf',
@@ -203,7 +217,8 @@ describe('fetchValidationStatusResolver', () => {
                         reason: 'missing-pdf-extension',
                     },
                 ],
-            })
+            }),
+        })
 
         const store = buildStore(draftRevision)
 
@@ -233,19 +248,10 @@ describe('fetchValidationStatusResolver', () => {
 
     it('prefers completed result diagnostics over older status diagnostics for coverage summary', async () => {
         const draftRevision = buildDraftRevision()
-        const formSnapshotHash = computeFormSnapshotHash(
-            buildValidationFormFields(draftRevision.formData).map((field) => ({
-                field: field.field,
-                value: field.value,
-            }))
-        )
+        const formSnapshotHash = buildFormSnapshotHash(draftRevision)
 
-        getJsonMock
-            .mockResolvedValueOnce({
-                stage: 'complete',
-                artifactVersion: currentArtifactVersion,
-                updatedAt: '2026-04-17T00:00:00.000Z',
-                error: null,
+        queueStatusAndResultArtifacts({
+            statusArtifact: buildStatusArtifact({
                 documentDiagnostics: [
                     {
                         documentName: 'status-only-failed.pdf',
@@ -256,11 +262,8 @@ describe('fetchValidationStatusResolver', () => {
                         chunkCount: 0,
                     },
                 ],
-            })
-            .mockResolvedValueOnce({
-                artifactVersion: currentArtifactVersion,
-                formSnapshotHash,
-                results: [],
+            }),
+            resultArtifact: buildResultArtifact(formSnapshotHash, {
                 documentDiagnostics: [
                     {
                         documentName: 'result-processed.pdf',
@@ -271,7 +274,8 @@ describe('fetchValidationStatusResolver', () => {
                         chunkCount: 8,
                     },
                 ],
-            })
+            }),
+        })
 
         const store = buildStore(draftRevision)
 
@@ -300,15 +304,12 @@ describe('fetchValidationStatusResolver', () => {
     })
 
     it('marks results stale when form date values change without document changes', async () => {
-        getJsonMock
-            .mockResolvedValueOnce({
-                stage: 'complete',
+        queueStatusAndResultArtifacts({
+            statusArtifact: buildStatusArtifact({
                 artifactVersion:
                     '4eb8e3d3d3dd8a33d728c4fd35afceee5fe6f6f0416d5d0f401b5f9efc0db1aa', // pragma: allowlist secret
-                updatedAt: '2026-04-17T00:00:00.000Z',
-                error: null,
-            })
-            .mockResolvedValueOnce({
+            }),
+            resultArtifact: {
                 artifactVersion:
                     '4eb8e3d3d3dd8a33d728c4fd35afceee5fe6f6f0416d5d0f401b5f9efc0db1aa', // pragma: allowlist secret
                 formSnapshotHash: 'stale-form-hash',
@@ -321,7 +322,8 @@ describe('fetchValidationStatusResolver', () => {
                         citations: [],
                     },
                 ],
-            })
+            },
+        })
 
         const store = buildStore({
             formData: {
@@ -359,23 +361,11 @@ describe('fetchValidationStatusResolver', () => {
 
     it('passes through supporting citation data when present on stored results', async () => {
         const draftRevision = buildDraftRevision()
-        const formSnapshotHash = computeFormSnapshotHash(
-            buildValidationFormFields(draftRevision.formData).map((field) => ({
-                field: field.field,
-                value: field.value,
-            }))
-        )
+        const formSnapshotHash = buildFormSnapshotHash(draftRevision)
 
-        getJsonMock
-            .mockResolvedValueOnce({
-                stage: 'complete',
-                artifactVersion: currentArtifactVersion,
-                updatedAt: '2026-04-17T00:00:00.000Z',
-                error: null,
-            })
-            .mockResolvedValueOnce({
-                artifactVersion: currentArtifactVersion,
-                formSnapshotHash,
+        queueStatusAndResultArtifacts({
+            statusArtifact: buildStatusArtifact(),
+            resultArtifact: buildResultArtifact(formSnapshotHash, {
                 results: [
                     {
                         field: 'contractStartDate',
@@ -404,7 +394,8 @@ describe('fetchValidationStatusResolver', () => {
                         },
                     },
                 ],
-            })
+            }),
+        })
 
         const store = buildStore(draftRevision)
 

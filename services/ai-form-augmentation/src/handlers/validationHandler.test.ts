@@ -22,6 +22,31 @@ import {
   scoreValidationDocuments
 } from './validationHandler'
 
+function buildCompletedResultArtifact(overrides: {
+  artifactVersion?: string
+  formSnapshotHash?: string
+  workSelectionMode?: 'all-doc' | 'gated-first-pass' | 'gated-fallback'
+} = {}) {
+  return buildValidationResultArtifact(
+    overrides.artifactVersion ?? 'artifact-v1',
+    overrides.formSnapshotHash ?? 'stale-form-hash',
+    [],
+    [],
+    [],
+    [],
+    overrides.workSelectionMode ?? 'gated-fallback'
+  )
+}
+
+function buildInProgressStatusArtifact(artifactVersion = 'artifact-v1') {
+  return {
+    stage: 'parsing' as const,
+    artifactVersion,
+    updatedAt: '2026-04-27T23:00:00.000Z',
+    error: null
+  }
+}
+
 test('mapWithConcurrencyLimit preserves order while bounding active work', async () => {
   const items = [0, 1, 2, 3, 4]
   let active = 0
@@ -258,12 +283,7 @@ test('artifact-backed rerun helpers reuse prior OCR-capped diagnostics from the 
   const diagnostics = selectReusableDocumentDiagnostics({
     artifactVersion: 'artifact-v1',
     workSelectionMode: 'gated-first-pass',
-    statusArtifact: {
-      stage: 'parsing',
-      artifactVersion: 'artifact-v1',
-      updatedAt: '2026-04-27T23:00:00.000Z',
-      error: null
-    },
+    statusArtifact: buildInProgressStatusArtifact(),
     resultArtifact: previousCompletedResult
   })
 
@@ -281,21 +301,8 @@ test('hasReusableDocumentArtifactInputs falls back to the previous completed res
     hasReusableDocumentArtifactInputs({
       artifactVersion: 'artifact-v1',
       workSelectionMode: 'gated-first-pass',
-      statusArtifact: {
-        stage: 'parsing',
-        artifactVersion: 'artifact-v1',
-        updatedAt: '2026-04-27T23:00:00.000Z',
-        error: null
-      },
-      resultArtifact: buildValidationResultArtifact(
-        'artifact-v1',
-        'stale-form-hash',
-        [],
-        [],
-        [],
-        [],
-        'gated-fallback'
-      )
+      statusArtifact: buildInProgressStatusArtifact(),
+      resultArtifact: buildCompletedResultArtifact()
     }),
     true
   )
@@ -307,15 +314,7 @@ test('hasReusableDocumentArtifactInputs rejects changed artifact identity even w
       artifactVersion: 'artifact-v2',
       workSelectionMode: 'gated-first-pass',
       statusArtifact: null,
-      resultArtifact: buildValidationResultArtifact(
-        'artifact-v1',
-        'stale-form-hash',
-        [],
-        [],
-        [],
-        [],
-        'gated-fallback'
-      )
+      resultArtifact: buildCompletedResultArtifact()
     }),
     false
   )

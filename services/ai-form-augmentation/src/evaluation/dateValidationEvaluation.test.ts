@@ -3,8 +3,33 @@ import test from 'node:test'
 import {
   buildWorkSelectionPromotionDecision,
   compareWorkSelectionOutcomes,
-  evaluateWorkSelectionStrategy
+  evaluateWorkSelectionStrategy,
+  type DateValidationEvaluationScenarioReport,
+  type DateValidationWorkSelectionComparison
 } from './dateValidationEvaluation'
+
+const buildScenarioReport = (
+  overrides: Partial<DateValidationEvaluationScenarioReport> = {}
+): DateValidationEvaluationScenarioReport => ({
+  scenarioId: 'scan-match-baseline',
+  documentName: 'scan.pdf',
+  summary: 'fixture',
+  passed: true,
+  statusStage: 'complete',
+  error: null,
+  fieldReports: [],
+  ...overrides
+})
+
+const buildWorkSelectionComparison = (
+  overrides: Partial<DateValidationWorkSelectionComparison> = {}
+): DateValidationWorkSelectionComparison => ({
+  gatedPassed: true,
+  comparison: 'match',
+  fallbackRequiredFieldCount: 0,
+  fieldComparisons: [],
+  ...overrides
+})
 
 test('evaluateWorkSelectionStrategy requires fallback when cited evidence comes from deferred oddly named documents', () => {
   const strategy = evaluateWorkSelectionStrategy({
@@ -216,21 +241,9 @@ test('compareWorkSelectionOutcomes treats gated not-enough-evidence as more cons
 
 test('buildWorkSelectionPromotionDecision keeps all-doc default when the prod-shaped comparison is missing', () => {
   const decision = buildWorkSelectionPromotionDecision([
-    {
-      scenarioId: 'scan-match-baseline',
-      documentName: 'scan.pdf',
-      summary: 'fixture',
-      passed: true,
-      statusStage: 'complete',
-      error: null,
-      workSelectionComparison: {
-        gatedPassed: true,
-        comparison: 'match',
-        fallbackRequiredFieldCount: 0,
-        fieldComparisons: []
-      },
-      fieldReports: []
-    }
+    buildScenarioReport({
+      workSelectionComparison: buildWorkSelectionComparison()
+    })
   ])
 
   assert.deepEqual(decision, {
@@ -246,13 +259,9 @@ test('buildWorkSelectionPromotionDecision keeps all-doc default when the prod-sh
 
 test('buildWorkSelectionPromotionDecision recommends gated-first-pass only when the prod-shaped comparison is present and non-risky', () => {
   const decision = buildWorkSelectionPromotionDecision([
-    {
+    buildScenarioReport({
       scenarioId: 'prod-shaped-large-submission',
       documentName: 'prod-shaped.pdf',
-      summary: 'fixture',
-      passed: true,
-      statusStage: 'complete',
-      error: null,
       largeSubmissionDiagnostics: {
         totalDocuments: 165,
         eligibleDocuments: 132,
@@ -310,14 +319,10 @@ test('buildWorkSelectionPromotionDecision recommends gated-first-pass only when 
           results: 40
         }
       },
-      workSelectionComparison: {
-        gatedPassed: true,
-        comparison: 'match',
-        fallbackRequiredFieldCount: 1,
-        fieldComparisons: []
-      },
-      fieldReports: []
-    }
+      workSelectionComparison: buildWorkSelectionComparison({
+        fallbackRequiredFieldCount: 1
+      })
+    })
   ])
 
   assert.deepEqual(decision, {

@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-072 Reduce AI validation test duplication and brittleness`.
+The next implementation ticket is `AIFA-073 Refresh AI validation documentation for handoff`.
 
 ## Completed
 
@@ -86,6 +86,7 @@ The next implementation ticket is `AIFA-072 Reduce AI validation test duplicatio
 - AIFA-071 ✔ Clean up AI validation config and local runtime defaults
 - AIFA-070 ✔ Normalize AI validation artifact and diagnostic contract boundaries
 - AIFA-025 ✔ Evaluate FAISS implementation behind VectorStore
+- AIFA-072 ✔ Reduce AI validation test duplication and brittleness
 
 ## Current State
 
@@ -306,15 +307,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-072 Reduce AI validation test duplication and brittleness
+### AIFA-073 Refresh AI validation documentation for handoff
 
-Review AI validation tests across worker, app-api, and Review-page UI to reduce duplicated setup, overly implementation-specific assertions, and brittle helper-shaped coverage while preserving the highest-value regression checks.
+Refresh AI validation docs so current PoC behavior, entrypoints, config expectations, and scope are clear for handoff, while historical notes remain clearly historical.
 
 ## Suggested Next Step
 
-- Review worker, resolver, and Review-page tests for duplicated setup and implementation-shaped assertions.
-- Reduce brittleness without weakening coverage for reruns, stale/current behavior, LocalStack replay, and evidence rendering.
-- Keep runtime code behavior and artifact semantics unchanged.
+- Refresh the PoC brief and technical-design docs so they reflect the current local-first, PDF-only validation flow.
+- Separate current runtime guidance from historical planning notes without deleting useful history.
+- Keep runtime behavior, ticket history, and session-log intent unchanged.
 
 ## Follow-on Performance Tickets
 
@@ -322,12 +323,19 @@ Review AI validation tests across worker, app-api, and Review-page UI to reduce 
 
 ## Follow-on Maintenance Ticket
 
-- none currently queued
+- `AIFA-074 Reduce AI validation artifact contract verbosity`
 
 ## Recommended Upcoming Order
 
-1. `AIFA-072 Reduce AI validation test duplication and brittleness`
-2. `AIFA-073 Refresh AI validation documentation for handoff`
+1. `AIFA-073 Refresh AI validation documentation for handoff`
+2. `AIFA-074 Reduce AI validation artifact contract verbosity`
+
+## AIFA-072 Closeout Notes
+
+- Reduced repeated test setup in focused app-api and worker suites without changing runtime code or artifact semantics.
+- Tightened new resolver-test helpers to use real artifact/result types instead of loose records, so the cleanup stays self-checking against current contracts.
+- Extended the cleanup into `validationHandler.test.ts` and `validationHandler.localstack.test.ts` only at small repeated setup seams; the larger assertion-heavy behavior checks were intentionally left as-is to avoid inventing a test DSL.
+- Focused resolver, evaluation, and worker unit tests passed. LocalStack replay tests remained skip-safe when LocalStack was unavailable, so the main remaining risk is environment reachability rather than test intent.
 
 ## AIFA-070 Closeout Notes
 
