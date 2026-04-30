@@ -27,7 +27,7 @@ import {
 } from '../versioning'
 
 const FIXTURE_PDF_PATH = new URL(
-  '../../fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
+  '../../fixtures/pdf/synthetic-amendment-baseline.pdf',
   import.meta.url
 )
 const TEST_EMBEDDING_MODEL = 'localstack-test-model'

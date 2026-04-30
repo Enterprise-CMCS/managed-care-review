@@ -11,7 +11,7 @@ import {
 const buildScenarioReport = (
   overrides: Partial<DateValidationEvaluationScenarioReport> = {}
 ): DateValidationEvaluationScenarioReport => ({
-  scenarioId: 'scan-match-baseline',
+  scenarioId: 'baseline-contract-term-match',
   documentName: 'scan.pdf',
   summary: 'fixture',
   passed: true,

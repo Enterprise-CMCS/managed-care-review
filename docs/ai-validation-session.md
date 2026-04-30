@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-075 Remove production documents from AI validation corpus`.
+The next implementation ticket is `AIFA-074 Reduce AI validation artifact contract verbosity`.
 
 ## Completed
 
@@ -88,6 +88,7 @@ The next implementation ticket is `AIFA-075 Remove production documents from AI 
 - AIFA-025 ✔ Evaluate FAISS implementation behind VectorStore
 - AIFA-072 ✔ Reduce AI validation test duplication and brittleness
 - AIFA-073 ✔ Refresh AI validation documentation for handoff
+- AIFA-075 ✔ Remove production documents from AI validation corpus
 
 ## Current State
 
@@ -308,15 +309,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-075 Remove production documents from AI validation corpus
+### AIFA-074 Reduce AI validation artifact contract verbosity
 
-Replace production-derived AI validation PDF fixtures with synthetic or safely generated fixtures, remove obsolete unused production-derived PDFs, and update corpus/test/doc references so the PoC keeps working without sensitive content in the repo.
+Reduce maintainability overhead in AI validation artifact contracts now that their runtime meaning is clearer.
 
 ## Suggested Next Step
 
-- Inventory the checked-in AI validation PDF fixtures and replace active production-derived corpus dependencies with safe fixtures.
-- Preserve evaluation, replay, and demo coverage while removing sensitive documents from the repo.
-- Keep runtime behavior, scenario semantics, and Review-page behavior unchanged.
+- Review verbose status/result/diagnostic helper/type surface for safe simplification.
+- Preserve artifact semantics, GraphQL behavior, and Review-page behavior exactly.
+- Keep this focused on maintainability rather than schema redesign.
 
 ## Follow-on Performance Tickets
 
@@ -324,12 +325,18 @@ Replace production-derived AI validation PDF fixtures with synthetic or safely g
 
 ## Follow-on Maintenance Ticket
 
-- `AIFA-074 Reduce AI validation artifact contract verbosity`
+- none currently queued
 
 ## Recommended Upcoming Order
 
-1. `AIFA-075 Remove production documents from AI validation corpus`
-2. `AIFA-074 Reduce AI validation artifact contract verbosity`
+1. `AIFA-074 Reduce AI validation artifact contract verbosity`
+
+## AIFA-075 Closeout Notes
+
+- Replaced the active AI validation corpus PDFs with synthetic fixtures and removed the production-derived checked-in PDFs they depended on.
+- Updated the evaluation corpus, LocalStack replay seed path, and fixture README so the active AI validation paths no longer reference the removed production-derived filenames.
+- Renamed old source-derived scenario ids to neutral ids so the corpus no longer leaks provenance through `scan`, `scha`, or `ahf` labels.
+- Runtime behavior did not change. The main residual risk is validation depth rather than correctness: focused corpus/parser/build checks passed, while LocalStack replay remained skip-safe because LocalStack was unavailable in this sandbox.
 
 ## AIFA-073 Closeout Notes
 

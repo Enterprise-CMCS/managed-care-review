@@ -43,10 +43,10 @@ export interface DateValidationCorpusScenario {
 
 export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
   {
-    id: 'scan-match-baseline',
-    documentName: 'scan-07-65712-a26-213a-final.pdf',
-    fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
-    summary: 'Baseline contract term match case using the SCAN amendment PDF.',
+    id: 'baseline-contract-term-match',
+    documentName: 'synthetic-amendment-baseline.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-amendment-baseline.pdf',
+    summary: 'Baseline contract term match case using a synthetic amendment PDF.',
     tags: ['match', 'demo'],
     expectations: [
       {
@@ -70,9 +70,9 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
     }
   },
   {
-    id: 'scan-start-date-mismatch',
-    documentName: 'scan-07-65712-a26-213a-final.pdf',
-    fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
+    id: 'baseline-start-date-mismatch',
+    documentName: 'synthetic-amendment-baseline.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-amendment-baseline.pdf',
     summary:
       'Mismatch case where the form start date differs from the contract start date in the document.',
     tags: ['mismatch', 'demo'],
@@ -98,9 +98,9 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
     }
   },
   {
-    id: 'scan-end-date-mismatch',
-    documentName: 'scan-07-65712-a26-213a-final.pdf',
-    fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
+    id: 'baseline-end-date-mismatch',
+    documentName: 'synthetic-amendment-baseline.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-amendment-baseline.pdf',
     summary:
       'Mismatch case where the form end date differs from the contract end date in the document.',
     tags: ['mismatch'],
@@ -125,9 +125,9 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
     }
   },
   {
-    id: 'scan-competing-date-mentions',
-    documentName: 'scan-07-65712-a26-213a-final.pdf',
-    fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
+    id: 'baseline-competing-date-mentions',
+    documentName: 'synthetic-amendment-baseline.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-amendment-baseline.pdf',
     summary:
       'Competing-date case where contract term dates and amendment effective date appear in the same source document.',
     tags: ['ambiguous', 'competing-dates'],
@@ -152,9 +152,9 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
     }
   },
   {
-    id: 'scha-snbc-start-match-end-competing',
-    documentName: '2024_SCHA_SNBC_235544_Amend_1.pdf',
-    fixturePath: 'fixtures/pdf/2024_SCHA_SNBC_235544_Amend_1.pdf',
+    id: 'amendment-start-match-end-competing',
+    documentName: 'synthetic-amendment-expiration-match.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-amendment-expiration-match.pdf',
     summary:
       'Amendment document with a clean contract start date and competing contract expiration labels.',
     tags: ['match', 'competing-dates'],
@@ -177,9 +177,9 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
     }
   },
   {
-    id: 'scha-seniors-start-mismatch-end-competing',
-    documentName: '2024_SCHA_Seniors_235536_Amend_1.pdf',
-    fixturePath: 'fixtures/pdf/2024_SCHA_Seniors_235536_Amend_1.pdf',
+    id: 'amendment-start-mismatch-end-competing',
+    documentName: 'synthetic-amendment-expiration-mismatch.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-amendment-expiration-mismatch.pdf',
     summary:
       'Amendment document with a clear contract start date plus competing expiration labels for the end-date field.',
     tags: ['mismatch', 'competing-dates'],
@@ -202,11 +202,11 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
     }
   },
   {
-    id: 'ahf-start-date-mismatch-end-competing',
-    documentName: 'AHF 11-88286 A21 text.final.pdf',
-    fixturePath: 'fixtures/pdf/AHF 11-88286 A21 text.final.pdf',
+    id: 'term-clause-start-mismatch-end-competing',
+    documentName: 'synthetic-term-clause-competing-end-dates.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-term-clause-competing-end-dates.pdf',
     summary:
-      'AHF term-clause fixture with a start-date mismatch plus competing end dates in the same clause.',
+      'Synthetic term-clause fixture with a start-date mismatch plus competing end dates in the same clause.',
     tags: ['mismatch', 'competing-dates'],
     expectations: [
       {
@@ -227,11 +227,11 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
     }
   },
   {
-    id: 'ahf-term-clause-competing-end-dates',
-    documentName: 'AHF 11-88286 A21 text.final.pdf',
-    fixturePath: 'fixtures/pdf/AHF 11-88286 A21 text.final.pdf',
+    id: 'term-clause-competing-end-dates',
+    documentName: 'synthetic-term-clause-competing-end-dates.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-term-clause-competing-end-dates.pdf',
     summary:
-      'Compact term-clause fixture with a clean start date and competing end dates in the same sentence.',
+      'Compact synthetic term-clause fixture with a clean start date and competing end dates in the same sentence.',
     tags: ['match', 'competing-dates'],
     expectations: [
       {
@@ -254,7 +254,7 @@ export const DATE_VALIDATION_CORPUS: DateValidationCorpusScenario[] = [
   {
     id: 'prod-shaped-large-submission',
     documentName: 'zz_buried_oddly_named_contract_evidence.pdf',
-    fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
+    fixturePath: 'fixtures/pdf/synthetic-amendment-baseline.pdf',
     summary:
       'Synthetic 165-document large-submission fixture shaped from a real production archive listing without committing production documents.',
     tags: ['large-submission', 'prod-shaped', 'evaluation-only'],
@@ -299,13 +299,13 @@ function buildProdShapedLargeSubmissionDocuments(): DateValidationCorpusDocument
       count: 65,
       prefix: 'contract-text',
       fixturePath:
-        'fixtures/pdf/medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf',
+        'fixtures/pdf/synthetic-administrative-cover-sheet.pdf',
       role: 'irrelevant-contract',
       tags: ['eligible-pdf', 'contract-text']
     }),
     {
       documentName: 'zz_buried_oddly_named_contract_evidence.pdf',
-      fixturePath: 'fixtures/pdf/scan-07-65712-a26-213a-final.pdf',
+      fixturePath: 'fixtures/pdf/synthetic-amendment-baseline.pdf',
       contentType: 'application/pdf',
       disposition: 'eligible',
       role: 'relevant-contract',
@@ -320,7 +320,7 @@ function buildProdShapedLargeSubmissionDocuments(): DateValidationCorpusDocument
       count: 66,
       prefix: 'rate-text',
       fixturePath:
-        'fixtures/pdf/medicaid-managed-care-contract-and-rate-submission-cover-sheet.pdf',
+        'fixtures/pdf/synthetic-administrative-cover-sheet.pdf',
       role: 'irrelevant-rate',
       tags: ['eligible-pdf', 'rate-text']
     }),
