@@ -19,6 +19,11 @@
     @include custom.mcr-type-style(1rem, 700, 150%);
 }
 
+@mixin navigation-gutters($left, $right) {
+    padding-right: $right;
+    padding-left: $left;
+}
+
 .navigation {
     background-color: custom.$mcr-cmsblue-base;
     position: relative;
@@ -29,9 +34,8 @@
     max-width: custom.$mcr-container-max-width-fixed;
     width: 100%;
     margin: 0 auto;
-    padding-right: 3rem;
-    padding-left: 2rem;
     box-sizing: border-box;
+    @include navigation-gutters(2rem, 3rem);
 }
 
 .primaryNav {
@@ -56,12 +60,14 @@
         float: none;
         border-top: 0;
 
-        &:first-child .navigationLink {
-            padding-left: 0;
-        }
+        &:first-child {
+            .navigationLink {
+                padding-left: 0;
 
-        &:first-child .navigationLink::after {
-            left: 0;
+                &::after {
+                    left: 0;
+                }
+            }
         }
     }
 }
@@ -117,14 +123,10 @@
 
 @include uswds.at-media-max('desktop') {
     .navigationContainer {
-        padding-right: 2rem;
-        padding-left: 1rem;
+        @include navigation-gutters(1rem, 2rem);
     }
 
     .primaryNav {
-        width: 100%;
-        margin-right: 0;
-
         a:not(.usa-button):hover {
             background-color: transparent !important;
             color: custom.$mcr-foundation-white !important;
@@ -136,15 +138,15 @@
         }
 
         .navigationLink:hover::after {
-            background-color: custom.$mcr-blue-cool-light; // !important;
+            background-color: custom.$mcr-blue-cool-light;
         }
 
         .navigationLinkActive {
-            color: custom.$mcr-foundation-white; //!important;
+            color: custom.$mcr-foundation-white;
         }
 
         .navigationLinkActive::after {
-            background-color: custom.$mcr-cyan-vivid; //!important;
+            background-color: custom.$mcr-cyan-vivid;
         }
     }
 
@@ -153,9 +155,5 @@
         padding-right: 1rem;
         padding-left: 1rem;
         text-align: left;
-
-        &::after {
-            @include underline-bar(1rem);
-        }
     }
 }

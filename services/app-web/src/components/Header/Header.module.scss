@@ -139,29 +139,7 @@
             }
         }
     }
-}
 
-.landingPageHeading {
-    background-color: custom.$mcr-cmsblue-dark;
-    color: custom.$mcr-foundation-white;
-    padding: 1rem 0;
-    & h1,
-    & h2 {
-        display: flex;
-        flex-flow: column;
-        text-align: center;
-        margin: 0;
-    }
-    & h1 {
-        margin-bottom: 10px;
-    }
-}
-
-.banner {
-    background: custom.$mcr-cmsblue-base;
-}
-
-@include uswds.at-media-max('desktop') {
     .bannerContainer {
         padding-right: 1rem !important;
         padding-left: 1rem !important;
@@ -171,6 +149,28 @@
         margin-left: 0 !important;
         margin-right: 0 !important;
     }
+}
+
+.landingPageHeading {
+    background-color: custom.$mcr-cmsblue-dark;
+    color: custom.$mcr-foundation-white;
+    padding: 1rem 0;
+
+    & h1,
+    & h2 {
+        display: flex;
+        flex-flow: column;
+        text-align: center;
+        margin: 0;
+    }
+
+    & h1 {
+        margin-bottom: 10px;
+    }
+}
+
+.banner {
+    background: custom.$mcr-cmsblue-base;
 }
 
 .bannerLogo {
