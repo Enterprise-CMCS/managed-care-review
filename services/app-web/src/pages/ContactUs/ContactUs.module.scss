@@ -5,6 +5,18 @@
     @include custom.mcr-type-style(1rem, 400, 162%, 0.01rem);
 }
 
+@mixin contact-link-color {
+    a {
+        color: uswds.color('primary');
+
+        &:hover,
+        &:active,
+        &:visited {
+            color: uswds.color('primary');
+        }
+    }
+}
+
 .pageWrapper {
     margin-bottom: 2.625rem;
 }
@@ -22,6 +34,7 @@
 
 .contactIntro {
     @include contact-body-text;
+    @include contact-link-color;
     margin: 0 0 1rem;
     max-width: custom.$mcr-container-max-width-fixed;
 }
@@ -53,5 +66,6 @@
 
 .contactListItemLast {
     @include contact-body-text;
+    @include contact-link-color;
     margin: 0;
 }

@@ -1,6 +1,8 @@
 import React from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 
+import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
+import { DmcoSupportLink } from '../../components/ErrorAlert/DmcoSupportLink'
 import styles from './ContactUs.module.scss'
 
 export const ContactUs = (): React.ReactElement => {
@@ -29,9 +31,7 @@ export const ContactUs = (): React.ReactElement => {
                         </p>
                         <p className={styles.contactListItemLast}>
                             Email your primary CMS contact or{' '}
-                            <a href="mailto:MCGDMCOactions@cms.hhs.gov">
-                                MCGDMCOactions@cms.hhs.gov
-                            </a>
+                            <DmcoSupportLink />
                         </p>
                     </li>
                     <li>
@@ -41,9 +41,7 @@ export const ContactUs = (): React.ReactElement => {
                         </p>
                         <p className={styles.contactListItemLast}>
                             Email{' '}
-                            <a href="mailto:MC_Review_HelpDesk@cms.hhs.gov">
-                                MC_Review_HelpDesk@cms.hhs.gov
-                            </a>
+                            <ContactSupportLink alternateText="MC_Review_HelpDesk@cms.hhs.gov" />
                         </p>
                     </li>
                 </ul>
