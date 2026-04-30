@@ -1,8 +1,8 @@
 import React from 'react'
+import { useStringConstants } from '../../hooks/useStringConstants'
 import { LinkWithLogging } from '../TealiumLogging/Link'
 
 const DMCO_SUPPORT_EMAIL = 'MCGDMCOactions@cms.hhs.gov'
-const DMCO_SUPPORT_HREF = `mailto:${DMCO_SUPPORT_EMAIL}`
 
 type DmcoSupportLinkProps = {
     alternateText?: string
@@ -15,13 +15,14 @@ export const DmcoSupportLink = ({
     className,
     variant = 'unstyled',
 }: DmcoSupportLinkProps): React.ReactElement => {
+    const stringConstants = useStringConstants(DMCO_SUPPORT_EMAIL)
     const displayText = alternateText ?? DMCO_SUPPORT_EMAIL
 
     return (
         <LinkWithLogging
             className={className}
             variant={variant}
-            href={DMCO_SUPPORT_HREF}
+            href={stringConstants.MAIL_TO_SUPPORT_HREF}
             target="_blank"
             rel="noreferrer"
         >
