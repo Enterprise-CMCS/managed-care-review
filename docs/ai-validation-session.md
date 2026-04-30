@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-079 Introduce typed artifact-not-found handling`.
+The next implementation ticket is `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`.
 
 ## Completed
 
@@ -94,6 +94,7 @@ The next implementation ticket is `AIFA-079 Introduce typed artifact-not-found h
 - AIFA-077 ✔ Harden AI validation prompt and log data framing
 - AIFA-080 ✔ Harden local AI validation worker subprocess management
 - AIFA-078 ✔ Correct fallback-pass status progression
+- AIFA-079 ✔ Introduce typed artifact-not-found handling
 
 ## Current State
 
@@ -314,15 +315,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-079 Introduce typed artifact-not-found handling
+### AIFA-081 Remove stale duplicate app-api AI validation behavior tests
 
-Replace string-matching on missing-artifact error text with a typed artifact-not-found path shared across current worker, resolver, and evaluation readers.
+Remove or narrow stale app-api duplicate AI validation behavior tests that drift from the canonical worker suite and now fail independently.
 
 ## Suggested Next Step
 
-- Replace current missing-artifact string matching with explicit typed detection.
-- Preserve existing cache reuse, polling, and evaluation behavior for ordinary missing-artifact cases.
-- Avoid broader error-handling redesign or artifact lookup changes.
+- Remove or reduce stale duplicate app-api behavior suites without changing worker logic.
+- Preserve canonical worker coverage as the source of truth for AI validation behavior.
+- Avoid runtime behavior changes while cleaning up misleading failing tests.
 
 ## Follow-on Performance Tickets
 
@@ -334,8 +335,14 @@ Replace string-matching on missing-artifact error text with a typed artifact-not
 
 ## Recommended Upcoming Order
 
-1. `AIFA-079 Introduce typed artifact-not-found handling`
-2. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+1. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+
+## AIFA-079 Closeout Notes
+
+- Missing artifact reads now use a shared typed `ArtifactNotFoundError` instead of relying on `"S3 object not found"` string matching.
+- Current polling, reuse-cache, worker optional-artifact reads, and evaluation optional-artifact reads now treat only the typed not-found path as ordinary absence.
+- Non-not-found storage failures still surface through the existing error paths.
+- Cache reuse, polling semantics, evaluation behavior, validation behavior, and artifact semantics did not change.
 
 ## AIFA-078 Closeout Notes
 

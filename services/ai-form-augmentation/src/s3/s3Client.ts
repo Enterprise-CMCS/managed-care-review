@@ -1,5 +1,17 @@
 import { GetObjectCommand, NoSuchKey, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
+export class ArtifactNotFoundError extends Error {
+  readonly bucket: string
+  readonly key: string
+
+  constructor(bucket: string, key: string) {
+    super(`S3 object not found: s3://${bucket}/${key}`)
+    this.name = 'ArtifactNotFoundError'
+    this.bucket = bucket
+    this.key = key
+  }
+}
+
 export type ArtifactS3ClientConfig = {
   region: string
   endpoint?: string
@@ -112,7 +124,7 @@ async function getBufferOrThrow (
     return Buffer.from(bytes)
   } catch (error) {
     if (error instanceof NoSuchKey) {
-      throw new Error(`S3 object not found: s3://${bucket}/${key}`)
+      throw new ArtifactNotFoundError(bucket, key)
     }
 
     throw error

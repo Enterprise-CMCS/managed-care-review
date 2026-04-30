@@ -3,6 +3,7 @@ import type { QueryResolvers } from '../../gen/gqlServer'
 import { fetchValidationStatusResolver } from './fetchValidationStatus'
 import type { Store } from '../../postgres'
 import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
+import { ArtifactNotFoundError } from '../../../../ai-form-augmentation/src/s3'
 import {
     buildArtifactVersionDocumentIdentity,
     computeArtifactVersion,
@@ -17,11 +18,16 @@ const { getJsonMock } = vi.hoisted(() => ({
     getJsonMock: vi.fn(),
 }))
 
-vi.mock('../../../../ai-form-augmentation/src/s3', () => ({
-    newArtifactS3Client: vi.fn(() => ({
-        getJson: getJsonMock,
-    })),
-}))
+vi.mock('../../../../ai-form-augmentation/src/s3', async (importOriginal) => {
+    const actual = (await importOriginal()) as Record<string, unknown>
+
+    return {
+        ...actual,
+        newArtifactS3Client: vi.fn(() => ({
+            getJson: getJsonMock,
+        })),
+    }
+})
 
 const baseConfig = {
     validationFunctionName: 'test-validation-function',
@@ -113,6 +119,60 @@ const invokeValidationStatusResolver = async (
 }
 
 describe('fetchValidationStatusResolver', () => {
+    it('treats missing status and result artifacts as not-started', async () => {
+        const draftRevision = buildDraftRevision()
+        getJsonMock
+            .mockRejectedValueOnce(
+                new ArtifactNotFoundError(
+                    'ai-form-augmentation-artifacts',
+                    'rag-indexes/test-abc-123/status.json'
+                )
+            )
+            .mockRejectedValueOnce(
+                new ArtifactNotFoundError(
+                    'ai-form-augmentation-artifacts',
+                    'rag-indexes/test-abc-123/validation-result.json'
+                )
+            )
+
+        const resolver = fetchValidationStatusResolver(
+            buildStore(draftRevision),
+            baseConfig
+        ) as NonNullable<QueryResolvers['validationStatus']>
+
+        await expect(invokeValidationStatusResolver(resolver)).resolves.toEqual(
+            {
+                stage: 'not-started',
+                artifactVersion: currentArtifactVersion,
+                isStale: false,
+                error: null,
+                coverageSummary: null,
+                results: [],
+            }
+        )
+    })
+
+    it('surfaces non-not-found artifact read failures', async () => {
+        const draftRevision = buildDraftRevision()
+        getJsonMock.mockRejectedValueOnce(new Error('boom'))
+
+        const resolver = fetchValidationStatusResolver(
+            buildStore(draftRevision),
+            baseConfig
+        ) as NonNullable<QueryResolvers['validationStatus']>
+
+        await expect(
+            invokeValidationStatusResolver(resolver)
+        ).rejects.toMatchObject({
+            message:
+                'Failed to read validation status for contract test-abc-123: boom',
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'ARTIFACT_READ_FAILED',
+            },
+        })
+    })
+
     it('forbids a state user from reading validation status for another state contract', async () => {
         const draftRevision = buildDraftRevision()
         const store = {

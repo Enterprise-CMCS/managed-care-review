@@ -4,7 +4,7 @@ import {
   isCompatibleReusableWorkSelectionMode,
   readReusableValidationResult
 } from './validationCache'
-import type { ArtifactS3Client } from '../s3'
+import { ArtifactNotFoundError, type ArtifactS3Client } from '../s3'
 import { buildValidationResultArtifact } from '../results'
 import { buildCompletedValidationStatusArtifact } from '../status'
 
@@ -20,7 +20,7 @@ function createArtifactS3Client(
     },
     async getJson<T>(_bucket: string, key: string): Promise<T> {
       if (!(key in artifacts)) {
-        throw new Error(`S3 object not found: s3://fixture-bucket/${key}`)
+        throw new ArtifactNotFoundError('fixture-bucket', key)
       }
 
       return artifacts[key] as T

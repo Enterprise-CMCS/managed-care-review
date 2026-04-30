@@ -1,6 +1,6 @@
 import type { ValidationResultArtifact } from '../results'
 import { getValidationResultKey } from '../results'
-import type { ArtifactS3Client } from '../s3'
+import { ArtifactNotFoundError, type ArtifactS3Client } from '../s3'
 import type { ValidationStatusArtifact } from '../status'
 import { getValidationStatusKey } from '../status'
 import type { ValidationWorkSelectionMode } from '../results'
@@ -100,7 +100,7 @@ async function readOptionalArtifact<T>(
   try {
     return await s3Client.getJson<T>(bucket, key)
   } catch (error) {
-    if (error instanceof Error && error.message.includes('S3 object not found')) {
+    if (error instanceof ArtifactNotFoundError) {
       return null
     }
 

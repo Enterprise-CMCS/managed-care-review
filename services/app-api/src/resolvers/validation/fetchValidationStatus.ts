@@ -2,7 +2,10 @@ import { GraphQLError } from 'graphql'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logError, logSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
-import { newArtifactS3Client } from '../../../../ai-form-augmentation/src/s3'
+import {
+    ArtifactNotFoundError,
+    newArtifactS3Client,
+} from '../../../../ai-form-augmentation/src/s3'
 import {
     getValidationStatusKey,
     type ValidationStatusArtifact,
@@ -192,10 +195,7 @@ export function fetchValidationStatusResolver(
                     getValidationStatusKey(input.contractID)
                 )
         } catch (error) {
-            if (
-                error instanceof Error &&
-                error.message.includes('S3 object not found')
-            ) {
+            if (error instanceof ArtifactNotFoundError) {
                 // Missing status is a normal polling condition when validation
                 // has not started yet or has not written its first artifact.
                 statusArtifact = null
@@ -227,10 +227,7 @@ export function fetchValidationStatusResolver(
                     getValidationResultKey(input.contractID)
                 )
         } catch (error) {
-            if (
-                error instanceof Error &&
-                error.message.includes('S3 object not found')
-            ) {
+            if (error instanceof ArtifactNotFoundError) {
                 // Missing results are also normal while validation is still in
                 // progress or before it has been triggered at all.
                 resultArtifact = null
