@@ -34,6 +34,34 @@ export interface ValidationResolverConfig {
     defaultWorkSelectionMode: RuntimeValidationWorkSelectionMode
 }
 
+const LOCAL_VALIDATION_WORKER_TIMEOUT_MS = 5 * 60 * 1000
+
+function getLocalValidationWorkerCwd(): string {
+    return resolve(__dirname, '../../../../..')
+}
+
+function flushLocalValidationWorkerStderrBuffer(args: {
+    buffer: string
+    flushRemainder?: boolean
+}): string {
+    const lines = args.buffer.split('\n')
+    const completeLines = args.flushRemainder ? lines : lines.slice(0, -1)
+
+    for (const line of completeLines) {
+        const trimmed = line.trim()
+
+        if (trimmed.length > 0) {
+            logError('triggerValidation.localExecution', trimmed)
+        }
+    }
+
+    if (args.flushRemainder) {
+        return ''
+    }
+
+    return lines.length > 0 ? lines[lines.length - 1] : ''
+}
+
 function summarizeSkippedValidationDocuments(
     skippedDocuments: { reason: string }[]
 ): { reason: string; count: number }[] {
@@ -293,7 +321,6 @@ export function triggerValidationResolver(
 function startLocalValidationWorker(
     payload: Parameters<typeof JSON.stringify>[0]
 ): void {
-    const repoRoot = resolve(process.cwd(), '../..')
     const childProcess = spawn(
         'pnpm',
         [
@@ -304,25 +331,43 @@ function startLocalValidationWorker(
             'src/runValidation.ts',
         ],
         {
-            cwd: repoRoot,
+            cwd: getLocalValidationWorkerCwd(),
             stdio: ['pipe', 'ignore', 'pipe'],
         }
     )
+    let stderrBuffer = ''
+    const timeoutId = setTimeout(() => {
+        logError(
+            'triggerValidation.localExecution',
+            `Local validation worker exceeded ${LOCAL_VALIDATION_WORKER_TIMEOUT_MS}ms; sending SIGTERM`
+        )
+        childProcess.kill('SIGTERM')
+    }, LOCAL_VALIDATION_WORKER_TIMEOUT_MS)
+
+    timeoutId.unref?.()
+    childProcess.unref()
 
     childProcess.stdin?.end(JSON.stringify(payload))
 
     childProcess.stderr?.on('data', (chunk) => {
-        logError(
-            'triggerValidation.localExecution',
-            Buffer.from(chunk).toString().trim()
-        )
+        stderrBuffer += Buffer.from(chunk).toString()
+        stderrBuffer = flushLocalValidationWorkerStderrBuffer({
+            buffer: stderrBuffer,
+        })
     })
 
     childProcess.on('error', (error) => {
+        clearTimeout(timeoutId)
         logError('triggerValidation.localExecution', error.message)
     })
 
     childProcess.on('exit', (code) => {
+        clearTimeout(timeoutId)
+        stderrBuffer = flushLocalValidationWorkerStderrBuffer({
+            buffer: stderrBuffer,
+            flushRemainder: true,
+        })
+
         if (code && code !== 0) {
             logError(
                 'triggerValidation.localExecution',

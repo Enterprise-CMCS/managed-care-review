@@ -1,7 +1,7 @@
 import type { ChildProcessWithoutNullStreams } from 'node:child_process'
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda'
 import type { GraphQLError } from 'graphql'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { testAdminUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
@@ -11,13 +11,21 @@ import {
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
 
-const { spawnMock, childStdinEndMock, childStderrOnMock, childOnMock } =
-    vi.hoisted(() => ({
-        spawnMock: vi.fn(),
-        childStdinEndMock: vi.fn(),
-        childStderrOnMock: vi.fn(),
-        childOnMock: vi.fn(),
-    }))
+const {
+    spawnMock,
+    childStdinEndMock,
+    childStderrOnMock,
+    childOnMock,
+    childKillMock,
+    childUnrefMock,
+} = vi.hoisted(() => ({
+    spawnMock: vi.fn(),
+    childStdinEndMock: vi.fn(),
+    childStderrOnMock: vi.fn(),
+    childOnMock: vi.fn(),
+    childKillMock: vi.fn(),
+    childUnrefMock: vi.fn(),
+}))
 
 vi.mock('node:child_process', () => ({
     spawn: spawnMock,
@@ -93,7 +101,13 @@ describe('triggerValidationResolver', () => {
                 on: childStderrOnMock,
             },
             on: childOnMock,
+            kill: childKillMock,
+            unref: childUnrefMock,
         } as unknown as ChildProcessWithoutNullStreams)
+    })
+
+    afterEach(() => {
+        vi.useRealTimers()
     })
 
     it('starts local validation worker process when useLocalS3 is true', async () => {
@@ -133,6 +147,7 @@ describe('triggerValidationResolver', () => {
                 stdio: ['pipe', 'ignore', 'pipe'],
             })
         )
+        expect(childUnrefMock).toHaveBeenCalledTimes(1)
         expect(childStdinEndMock).toHaveBeenCalledTimes(1)
 
         const serializedPayload = childStdinEndMock.mock.calls[0][0]
@@ -182,6 +197,86 @@ describe('triggerValidationResolver', () => {
         )
 
         expect(sendSpy).not.toHaveBeenCalled()
+    })
+
+    it('resolves the local worker cwd independently of process cwd', async () => {
+        const processCwdSpy = vi
+            .spyOn(process, 'cwd')
+            .mockReturnValue('/tmp/not-the-repo-root')
+        const store = buildStore(
+            buildContractWithDraft(['allusers/1776374348125-doc-a.pdf'])
+        )
+        const resolver = triggerValidationResolver(store, {
+            ...baseConfig,
+            useLocalS3: true,
+        }) as NonNullable<MutationResolvers['triggerValidation']>
+
+        await invokeTriggerValidationResolver(resolver)
+
+        expect(processCwdSpy).not.toHaveBeenCalled()
+        expect(spawnMock).toHaveBeenCalledWith(
+            'pnpm',
+            expect.any(Array),
+            expect.objectContaining({
+                cwd: expect.stringMatching(/managed-care-review$/),
+            })
+        )
+    })
+
+    it('terminates a stalled local worker after the timeout window', async () => {
+        vi.useFakeTimers()
+
+        const store = buildStore(
+            buildContractWithDraft(['allusers/1776374348125-doc-a.pdf'])
+        )
+        const resolver = triggerValidationResolver(store, {
+            ...baseConfig,
+            useLocalS3: true,
+        }) as NonNullable<MutationResolvers['triggerValidation']>
+
+        await invokeTriggerValidationResolver(resolver)
+        await vi.advanceTimersByTimeAsync(5 * 60 * 1000)
+
+        expect(childKillMock).toHaveBeenCalledWith('SIGTERM')
+    })
+
+    it('logs local worker stderr one trimmed line at a time', async () => {
+        const consoleErrorSpy = vi
+            .spyOn(console, 'error')
+            .mockImplementation(() => undefined)
+        const store = buildStore(
+            buildContractWithDraft(['allusers/1776374348125-doc-a.pdf'])
+        )
+        const resolver = triggerValidationResolver(store, {
+            ...baseConfig,
+            useLocalS3: true,
+        }) as NonNullable<MutationResolvers['triggerValidation']>
+
+        await invokeTriggerValidationResolver(resolver)
+
+        const stderrHandler = childStderrOnMock.mock.calls.find(
+            ([event]) => event === 'data'
+        )?.[1] as ((chunk: Buffer) => void) | undefined
+        const exitHandler = childOnMock.mock.calls.find(
+            ([event]) => event === 'exit'
+        )?.[1] as ((code: number | null) => void) | undefined
+
+        stderrHandler?.(Buffer.from('first line\nsecond'))
+        stderrHandler?.(Buffer.from(' line\n'))
+        exitHandler?.(0)
+
+        expect(consoleErrorSpy).toHaveBeenCalledWith({
+            message: 'triggerValidation.localExecution failed',
+            operation: 'triggerValidation.localExecution',
+            status: 'ERROR',
+            error: 'first line',
+        })
+        expect(consoleErrorSpy).toHaveBeenCalledWith({
+            message: 'triggerValidation.localExecution failed',
+            operation: 'triggerValidation.localExecution',
+            status: 'ERROR',
+            error: 'second line',
+        })
     })
 
     it('changes artifactVersion when document content fingerprint changes at the same key', async () => {

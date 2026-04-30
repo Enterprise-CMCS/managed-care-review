@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-080 Harden local AI validation worker subprocess management`.
+The next implementation ticket is `AIFA-078 Correct fallback-pass status progression`.
 
 ## Completed
 
@@ -92,6 +92,7 @@ The next implementation ticket is `AIFA-080 Harden local AI validation worker su
 - AIFA-074 ✔ Reduce AI validation artifact contract verbosity
 - AIFA-076 ✔ Add contract-level authorization to AI validation resolvers
 - AIFA-077 ✔ Harden AI validation prompt and log data framing
+- AIFA-080 ✔ Harden local AI validation worker subprocess management
 
 ## Current State
 
@@ -312,15 +313,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-080 Harden local AI validation worker subprocess management
+### AIFA-078 Correct fallback-pass status progression
 
-Make the local spawned AI validation worker safer and more predictable in the `useLocalS3` path without changing Lambda behavior, validation semantics, or artifact behavior.
+Stop reporting fallback expansion work as initial `parsing` once first-pass parsing/indexing has already completed, without changing work-selection semantics, artifact keys, or Review-page behavior.
 
 ## Suggested Next Step
 
-- Stabilize local worker subprocess lifecycle around spawn ownership, timeout handling, and repo-root resolution.
-- Improve local stderr handling without changing Lambda invocation behavior or worker payload semantics.
-- Preserve current validation behavior, artifact semantics, and authorized trigger behavior.
+- Keep fallback progress truthful once first-pass parsing/indexing has already completed.
+- Preserve existing polling and Review-page compatibility while correcting the fallback-stage regression.
+- Avoid broad status-contract redesign or work-selection behavior changes.
 
 ## Follow-on Performance Tickets
 
@@ -332,10 +333,17 @@ Make the local spawned AI validation worker safer and more predictable in the `u
 
 ## Recommended Upcoming Order
 
-1. `AIFA-080 Harden local AI validation worker subprocess management`
-2. `AIFA-078 Correct fallback-pass status progression`
-3. `AIFA-079 Introduce typed artifact-not-found handling`
-4. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+1. `AIFA-078 Correct fallback-pass status progression`
+2. `AIFA-079 Introduce typed artifact-not-found handling`
+3. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+
+## AIFA-080 Closeout Notes
+
+- The local `useLocalS3` worker path now resolves its working directory from the resolver file location instead of depending on caller `cwd`.
+- Local spawned workers are now `unref()`'d so they do not keep app-api alive unnecessarily after the trigger returns.
+- A bounded local-worker timeout now logs and sends `SIGTERM` to stalled subprocesses.
+- Local stderr is now buffered and logged line-by-line instead of emitting raw chunk boundaries.
+- Lambda behavior, worker payload semantics, validation behavior, and artifact semantics did not change.
 
 ## AIFA-077 Closeout Notes
 
