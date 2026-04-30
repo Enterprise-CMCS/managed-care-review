@@ -97,7 +97,12 @@
         flex: 0 0 auto;
         width: auto !important;
         margin-left: auto;
-        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 422px) {
+    .loggedOutSignInButton {
+        transform: translateY(-0.5rem);
     }
 }
 
