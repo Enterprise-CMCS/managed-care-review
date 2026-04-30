@@ -1,56 +1,57 @@
 # AI Validation PoC
 
 ## Goal
-Add AI validation to Review & Submit page.
 
-## PoC scope
-- PDF only
-- dates only
-- brute-force retrieval (no FAISS)
-- local embeddings
-- Ollama for LLM
-- large-submission hardening before vector-index optimization
+Provide advisory AI validation on Review & Submit by comparing uploaded contract PDFs against the form's `contractStartDate` and `contractEndDate`.
 
-## Rules
-- TypeScript only
-- minimal changes
-- follow repo patterns
-- use interfaces (VectorStore, EmbeddingProvider)
-- keep work selection conservative: defer low-priority documents, do not hard-exclude them
+## Current Scope
 
-## Current ticket
-AIFA-039 Add prod-shaped large-submission evaluation fixture
+- local-first execution from the real app flow via `./dev local`
+- PDF-only document support
+- start and end dates only
+- advisory Review-page findings, not a submission gate
+- brute-force retrieval, not FAISS
+- local embeddings and local-model development flow by default
+- conservative work selection with fallback
 
-## AIFA-038 metadata and eligibility decision
+## Current Implementation
 
-Trigger-time contract document metadata currently available in app-api:
-- `name`
-- `s3URL` (deprecated, still used locally to recover the historical upload key)
-- `s3BucketName`
-- `s3Key`
-- `sha256`
-- `dateAdded`
-- `downloadURL`
+The PoC now runs end to end through the product-shaped local path:
 
-Metadata not currently available on the draft contract document shape:
-- content type/MIME type
-- object size
-- ETag
-- S3 version ID
+- app-api triggers validation from the real draft revision
+- the worker parses PDFs, chunks text, retrieves evidence, validates the two scoped fields, and persists artifacts
+- Review & Submit polls `validationStatus` and renders findings with citations
+- reruns reuse prior artifacts conservatively when document and form identity still match
+- the evaluation harness measures fixed corpus scenarios, including an opt-in prod-shaped large-submission scenario
 
-PDF eligibility rule for later filtering:
-- A document must have both `s3BucketName` and `s3Key`; otherwise it cannot be fetched by the worker.
-- A document is a PDF candidate when either the display `name` or `s3Key` ends in `.pdf`, case-insensitively.
-- If content type becomes available later and conflicts with the PDF extension rule, treat the document as unsupported and record a mismatch diagnostic.
-- If content type is missing, do not block an otherwise eligible `.pdf` candidate.
-- Extension and content type metadata are advisory only; actual PDF parse success must still be verified by the worker.
+## What This PoC Is For
 
-Renamed non-PDF risk:
-- A non-PDF renamed to `.pdf` can pass metadata eligibility.
-- Intended behavior is to let it reach PDF parsing and record a document-level failure once AIFA-041 adds per-document failure isolation.
-- AIFA-040 should filter clearly unsupported files before worker execution, but should not claim renamed `.pdf` files were reviewed successfully.
+- proving the end-to-end user flow
+- measuring start/end-date result quality against a fixed corpus
+- hardening reruns, diagnostics, and large-submission behavior
+- supporting a credible local demo path
 
-artifactVersion decision:
-- For AIFA-038, no runtime behavior changes.
-- `artifactVersion` continues to hash all persisted contract document keys.
-- Filtering in AIFA-040 should decide deliberately whether skipped unsupported documents remain part of versioning; the current conservative default avoids cache reuse surprises before diagnostics exist.
+## What This PoC Is Not
+
+- general contract intelligence
+- broad field coverage beyond start and end dates
+- DOCX, XLSX, or generalized image support
+- FAISS or production retrieval-scale optimization
+- production Bedrock-readiness or final model-quality claims
+
+## Handoff Rules
+
+- treat AI findings as advisory and non-blocking
+- treat `artifactVersion` as the source of truth for stale-versus-current artifacts
+- preserve the current local-first, PDF-only, two-field scope unless a later ticket changes it explicitly
+- keep work selection conservative; deferred documents may be skipped early, but fallback must remain able to recover them when evidence is weak or partial
+
+## Source Of Truth
+
+Use these documents in this order:
+
+1. `docs/ai-validation-session.md`
+2. `docs/technical-design/aifa-sprint-plan.csv`
+3. this brief
+
+This brief summarizes the current PoC shape. The session file and sprint CSV remain the authoritative source for current ticket sequencing and recent implementation history.

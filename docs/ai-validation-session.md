@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-073 Refresh AI validation documentation for handoff`.
+The next implementation ticket is `AIFA-075 Remove production documents from AI validation corpus`.
 
 ## Completed
 
@@ -87,6 +87,7 @@ The next implementation ticket is `AIFA-073 Refresh AI validation documentation 
 - AIFA-070 ✔ Normalize AI validation artifact and diagnostic contract boundaries
 - AIFA-025 ✔ Evaluate FAISS implementation behind VectorStore
 - AIFA-072 ✔ Reduce AI validation test duplication and brittleness
+- AIFA-073 ✔ Refresh AI validation documentation for handoff
 
 ## Current State
 
@@ -307,19 +308,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-073 Refresh AI validation documentation for handoff
-
-Refresh AI validation docs so current PoC behavior, entrypoints, config expectations, and scope are clear for handoff, while historical notes remain clearly historical.
-
 ### AIFA-075 Remove production documents from AI validation corpus
 
 Replace production-derived AI validation PDF fixtures with synthetic or safely generated fixtures, remove obsolete unused production-derived PDFs, and update corpus/test/doc references so the PoC keeps working without sensitive content in the repo.
 
 ## Suggested Next Step
 
-- Refresh the PoC brief and technical-design docs so they reflect the current local-first, PDF-only validation flow.
-- Separate current runtime guidance from historical planning notes without deleting useful history.
-- Keep runtime behavior, ticket history, and session-log intent unchanged.
+- Inventory the checked-in AI validation PDF fixtures and replace active production-derived corpus dependencies with safe fixtures.
+- Preserve evaluation, replay, and demo coverage while removing sensitive documents from the repo.
+- Keep runtime behavior, scenario semantics, and Review-page behavior unchanged.
 
 ## Follow-on Performance Tickets
 
@@ -327,13 +324,19 @@ Replace production-derived AI validation PDF fixtures with synthetic or safely g
 
 ## Follow-on Maintenance Ticket
 
-- `AIFA-075 Remove production documents from AI validation corpus`
+- `AIFA-074 Reduce AI validation artifact contract verbosity`
 
 ## Recommended Upcoming Order
 
-1. `AIFA-073 Refresh AI validation documentation for handoff`
-2. `AIFA-075 Remove production documents from AI validation corpus`
-3. `AIFA-074 Reduce AI validation artifact contract verbosity`
+1. `AIFA-075 Remove production documents from AI validation corpus`
+2. `AIFA-074 Reduce AI validation artifact contract verbosity`
+
+## AIFA-073 Closeout Notes
+
+- Refreshed the tracked PoC brief so it now describes the current local-first, PDF-only, two-field validation flow instead of stale ticket-era implementation notes.
+- Removed the outdated `AIFA-039` current-ticket reference and reframed the brief around current scope, current implementation, handoff rules, and source-of-truth ordering.
+- Intentionally left the older untracked technical-design planning docs alone as historical artifacts instead of rewriting them into current operational guidance.
+- No runtime behavior changed; the main residual risk is that historical planning docs still exist separately, but the session file and sprint CSV remain the live implementation record.
 
 ## AIFA-072 Closeout Notes
 
