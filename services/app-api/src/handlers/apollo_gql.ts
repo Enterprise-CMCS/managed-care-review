@@ -26,7 +26,6 @@ import {
 } from '../authn'
 import { NewPostgresStore } from '../postgres'
 import { configureResolvers } from '../resolvers'
-import type { RuntimeValidationWorkSelectionMode } from '../resolvers/validation/triggerValidation'
 import { configurePostgres, configureEmailer } from './configuration'
 import {
     newAWSEmailParameterStore,
@@ -51,34 +50,10 @@ import {
 } from '../zip'
 import { configureCorsHeaders } from '../cors/configureCorsHelpers'
 import { logError } from '../logger'
+import { resolveValidationWorkSelectionMode } from './validationRuntimeConfig'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
-
-function resolveValidationWorkSelectionMode(
-    value: string | undefined
-): RuntimeValidationWorkSelectionMode {
-    // AIFA-050 promotes the evaluated gated-first-pass strategy into the
-    // product runtime by default. AIFA-062 keeps the all-doc path available
-    // because it is still the simplest whole-document baseline for debugging
-    // and correctness comparison, not just a leftover rollout toggle.
-    if (value == null || value.trim() === '') {
-        return 'gated-first-pass'
-    }
-
-    const normalizedValue = value.trim().toLowerCase()
-
-    if (
-        normalizedValue === 'all-doc' ||
-        normalizedValue === 'gated-first-pass'
-    ) {
-        return normalizedValue
-    }
-
-    throw new Error(
-        `Configuration Error: AI_VALIDATION_WORK_SELECTION_MODE must be "all-doc" or "gated-first-pass". Current value: ${value}`
-    )
-}
 
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {

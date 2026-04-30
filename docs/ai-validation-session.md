@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-071 Clean up AI validation config and local runtime defaults`.
+The next implementation ticket is `AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries`.
 
 ## Completed
 
@@ -83,6 +83,7 @@ The next implementation ticket is `AIFA-071 Clean up AI validation config and lo
 - AIFA-047 ✔ Strengthen document cache identity with content fingerprints
 - AIFA-068 ✔ Retire obsolete standalone AI dev script
 - AIFA-069 ✔ Consolidate AI validation runtime entrypoints and exports
+- AIFA-071 ✔ Clean up AI validation config and local runtime defaults
 - AIFA-025 ✔ Evaluate FAISS implementation behind VectorStore
 
 ## Current State
@@ -304,15 +305,15 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-071 Clean up AI validation config and local runtime defaults
+### AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries
 
-Audit AI validation env/config handling across app-api local bootstrap, Apollo configuration, cleanup, evaluation, and local worker startup so supported flags and defaults are easier to reason about without changing behavior.
+Review `status.json`, `validation-result.json`, and related mapping/types to clarify product-facing versus diagnostic-only data without redesigning the artifact model or changing behavior.
 
 ## Suggested Next Step
 
-- Audit the supported AI validation env vars and where their defaults are applied across app-api and the worker/evaluation paths.
-- Remove stale retired-flag references only where they are still presented as current behavior.
-- Keep `./dev local`, GraphQL validation flow, cleanup, and evaluation behavior unchanged by default.
+- Review worker artifact/status/result types alongside app-api and Review-page mappings for confusing or redundant contract surface.
+- Clarify comments and naming only where it improves contract understanding without changing artifact semantics.
+- Keep polling, Review-page rendering, and diagnostic meaning unchanged.
 
 ## Follow-on Performance Tickets
 
@@ -324,10 +325,16 @@ Audit AI validation env/config handling across app-api local bootstrap, Apollo c
 
 ## Recommended Upcoming Order
 
-1. `AIFA-071 Clean up AI validation config and local runtime defaults`
-2. `AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries`
-3. `AIFA-072 Reduce AI validation test duplication and brittleness`
-4. `AIFA-073 Refresh AI validation documentation for handoff`
+1. `AIFA-070 Normalize AI validation artifact and diagnostic contract boundaries`
+2. `AIFA-072 Reduce AI validation test duplication and brittleness`
+3. `AIFA-073 Refresh AI validation documentation for handoff`
+
+## AIFA-071 Closeout Notes
+
+- App-api runtime config now resolves `AI_VALIDATION_WORK_SELECTION_MODE` through one shared helper, so the GraphQL handler and `./dev local` describe the same effective default and override behavior.
+- Evaluation storage now prefers the same `AI_VALIDATION_ARTIFACT_BUCKET` env the runtime already uses while keeping `AI_VALIDATION_S3_BUCKET` as a compatibility fallback for existing local evaluation scripts.
+- The cleanup intentionally did not broaden into riskier env normalization such as `REGION` versus `AWS_REGION`; that remains a separate concern if it becomes worth addressing later.
+- Default behavior remains unchanged: `gated-first-pass` is still the default, `AI_VALIDATION_WORK_SELECTION_MODE=all-doc` still works, and evaluation still falls back to the same LocalStack bucket/endpoint/credentials when env vars are unset.
 
 ## AIFA-069 Closeout Notes
 

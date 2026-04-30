@@ -10,6 +10,7 @@ import type {
     APIGatewayProxyResult,
     Context,
 } from 'aws-lambda'
+import { describeValidationWorkSelectionMode } from './handlers/validationRuntimeConfig'
 
 function seedLocalValidationDefaults() {
     // AIFA-016 introduced required validation env vars for the GraphQL handler.
@@ -23,13 +24,13 @@ function seedLocalValidationDefaults() {
 seedLocalValidationDefaults()
 
 function describeLocalValidationRuntime() {
-    const configuredWorkSelectionMode =
-        process.env.AI_VALIDATION_WORK_SELECTION_MODE?.trim() || ''
     return {
-        workSelectionMode:
-            configuredWorkSelectionMode === ''
-                ? 'gated-first-pass (default)'
-                : configuredWorkSelectionMode,
+        artifactBucket:
+            process.env.AI_VALIDATION_ARTIFACT_BUCKET ??
+            'ai-form-augmentation-artifacts (default)',
+        workSelectionMode: describeValidationWorkSelectionMode(
+            process.env.AI_VALIDATION_WORK_SELECTION_MODE
+        ),
     }
 }
 
@@ -367,7 +368,7 @@ app.listen(PORT, HOST, () => {
     console.info(`   Health:      http://${HOST}:${PORT}/local/health_check`)
     console.info(`   Environment: ${process.env.VITE_APP_AUTH_MODE || 'LOCAL'}`)
     console.info(
-        `   AI review:   workSelection=${localValidationRuntime.workSelectionMode}`
+        `   AI review:   bucket=${localValidationRuntime.artifactBucket}, workSelection=${localValidationRuntime.workSelectionMode}`
     )
     console.info('')
     console.info('   Press Ctrl+C to stop')
