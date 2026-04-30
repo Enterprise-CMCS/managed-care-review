@@ -1,3 +1,4 @@
+//stylelint-disable selector-pseudo-class-no-unknown
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
@@ -80,27 +81,32 @@
     color: custom.$mcr-foundation-white;
 }
 
+.loggedOutSignInButton {
+    margin-right: 1rem !important;
+}
+
 @include uswds.at-media-max('tablet') {
     .loggedOutSignInButton {
         display: inline-flex !important;
+        flex: 0 0 auto;
         width: auto !important;
-        margin-top: 0.125rem;
-        margin-bottom: 0.5rem;
-        margin-right: 1rem;
         margin-left: auto;
-        align-self: flex-end;
     }
 }
 
-@media (min-width: 63px) and (max-width: 1280px) {
+@media (max-width: 422px) {
+    .loggedOutSignInButton {
+        transform: translateY(-0.5rem);
+    }
+}
+
+@include uswds.at-media-max('desktop') {
     .divider {
         position: absolute;
         display: none;
     }
 
     .headerItemsContainer {
-        display: flex;
-        flex-wrap: wrap;
         flex-direction: column;
         justify-content: space-between;
         padding-top: 1rem;
@@ -127,18 +133,29 @@
         ul {
             margin-top: 0.5rem !important;
             padding: 1rem;
+
             li {
                 margin: 0;
             }
         }
     }
 
+    .bannerContainer {
+        padding-right: 1rem !important;
+        padding-left: 1rem !important;
+    }
+
+    .bannerLogo :global(.usa-logo) {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
 }
 
 .landingPageHeading {
     background-color: custom.$mcr-cmsblue-dark;
     color: custom.$mcr-foundation-white;
     padding: 1rem 0;
+
     & h1,
     & h2 {
         display: flex;
@@ -146,6 +163,7 @@
         text-align: center;
         margin: 0;
     }
+
     & h1 {
         margin-bottom: 10px;
     }
@@ -159,6 +177,7 @@
     display: flex;
     flex-direction: row;
     align-items: center;
+    min-height: 4rem;
     text-decoration: none;
 
     .logoImg {
@@ -167,9 +186,10 @@
     }
 
     span {
+        display: flex;
+        align-items: center;
         margin-left: 1rem;
         color: custom.$mcr-foundation-white;
-        height: 100%;
     }
 }
 
