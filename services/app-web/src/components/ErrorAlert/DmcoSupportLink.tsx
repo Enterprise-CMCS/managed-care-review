@@ -15,14 +15,14 @@ export const DmcoSupportLink = ({
     className,
     variant = 'unstyled',
 }: DmcoSupportLinkProps): React.ReactElement => {
-    const stringConstants = useStringConstants(DMCO_SUPPORT_EMAIL)
+    const stringConstants = useStringConstants()
     const displayText = alternateText ?? DMCO_SUPPORT_EMAIL
 
     return (
         <LinkWithLogging
             className={className}
             variant={variant}
-            href={stringConstants.MAIL_TO_SUPPORT_HREF}
+            href={stringConstants.MAIL_TO_DMCO_SUPPORT_HREF}
             target="_blank"
             rel="noreferrer"
         >
