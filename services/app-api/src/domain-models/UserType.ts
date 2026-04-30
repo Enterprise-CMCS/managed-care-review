@@ -50,7 +50,6 @@ const cmsApproverUserSchema = baseUserSchema.extend({
 
 const cmsUsersUnionSchema = z.union([cmsUserSchema, cmsApproverUserSchema])
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const adminUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.ADMIN_USER),
 })
@@ -102,4 +101,5 @@ export {
     userRolesSchema,
     baseUserSchema,
     cmsUsersUnionSchema,
+    adminUserSchema,
 }

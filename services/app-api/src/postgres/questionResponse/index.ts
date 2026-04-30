@@ -1,5 +1,6 @@
 export { findAllQuestionsByContract } from './findAllQuestionsByContract'
 export { insertContractQuestion } from './insertContractQuestion'
+export { softDeleteContractQuestion } from './softDeleteContractQuestion'
 export {
     convertToIndexQuestionsPayload,
     contractQuestionPrismaToDomainType,

@@ -1,6 +1,25 @@
 import { z } from 'zod'
-import { cmsUsersUnionSchema, stateUserSchema } from './UserType'
+import {
+    adminUserSchema,
+    cmsUsersUnionSchema,
+    stateUserSchema,
+} from './UserType'
 import { divisionType } from './DivisionType'
+
+const questionActionTypeSchema = z.enum([
+    'DELETE',
+    'RESTORE',
+    'CASCADE_DELETE',
+    'CASCADE_RESTORE',
+])
+
+const questionActionSchema = z.object({
+    id: z.uuid(),
+    createdAt: z.date(),
+    action: questionActionTypeSchema,
+    reason: z.string().nullable().optional(),
+    updatedBy: adminUserSchema,
+})
 
 const document = z.object({
     id: z.uuid(),
@@ -29,6 +48,7 @@ const commonQuestionSchema = z.object({
     division: divisionType, // DMCO, DMCP, OACT
     documents: z.array(document),
     responses: z.array(questionResponseSchema),
+    actions: z.array(questionActionSchema),
 })
 
 const contractQuestion = commonQuestionSchema.extend({
@@ -116,6 +136,8 @@ type QuestionResponseType = z.infer<typeof questionResponseSchema>
 
 type InsertQuestionResponseArgs = z.infer<typeof insertQuestionResponseArgs>
 
+type QuestionAction = z.infer<typeof questionActionSchema>
+
 export type {
     IndexContractQuestionsPayload,
     CreateContractQuestionPayload,
@@ -129,6 +151,7 @@ export type {
     IndexRateQuestionsPayload,
     QuestionResponseType,
     InsertQuestionResponseArgs,
+    QuestionAction,
 }
 
 export {
@@ -141,4 +164,6 @@ export {
     createRateQuestionInput,
     indexRateQuestionsPayload,
     insertQuestionResponseArgs,
+    questionActionSchema,
+    questionActionTypeSchema,
 }

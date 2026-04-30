@@ -1,8 +1,10 @@
 import type {
+    AdminUserType,
     CMSUsersUnionType,
     IndexContractQuestionsPayload,
     IndexRateQuestionsPayload,
     ContractQuestionType,
+    QuestionAction,
     QuestionResponseType,
     RateQuestionType,
 } from '../../domain-models'
@@ -40,6 +42,9 @@ const questionInclude = {
             createdAt: 'desc',
         },
         take: 1,
+        include: {
+            updatedBy: true,
+        },
     },
     responses: {
         include: {
@@ -81,6 +86,8 @@ type PrismaRateQuestionType = Prisma.RateQuestionGetPayload<{
 }>
 
 // Both types are similar only difference is one related to a contract and the other a rate.
+// Pure shape conversion — does NOT filter soft-deleted descendants. Callers
+// that want a filtered view should pre-filter with `filterDeletedDescendants`.
 const commonQuestionPrismaToDomainType = <
     P extends PrismaQuestionType | PrismaRateQuestionType,
     R extends ContractQuestionType | RateQuestionType,
@@ -90,14 +97,42 @@ const commonQuestionPrismaToDomainType = <
     ({
         ...prismaQuestion,
         addedBy: prismaQuestion.addedBy as CMSUsersUnionType,
-        documents: prismaQuestion.documents.filter((d) => !isDeleted(d)),
-        responses: prismaQuestion.responses
-            .filter((r) => !isDeleted(r))
-            .map((r) => ({
-                ...r,
-                documents: r.documents.filter((d) => !isDeleted(d)),
-            })) as QuestionResponseType[],
+        actions: prismaQuestion.actions.map((a) => ({
+            id: a.id,
+            createdAt: a.createdAt,
+            action: a.action,
+            reason: a.reason,
+            updatedBy: a.updatedBy as AdminUserType,
+        })) as QuestionAction[],
+        responses: prismaQuestion.responses as QuestionResponseType[],
     }) as unknown as R
+
+// Drops deleted questions and strips deleted docs/responses/response-docs.
+// Use for the read-side view; skip when surfacing deletes (e.g. delete resolver).
+const filterDeletedDescendants = <
+    P extends PrismaQuestionType | PrismaRateQuestionType,
+>(
+    prismaQuestions: P[]
+): P[] => {
+    const result: P[] = []
+    for (const question of prismaQuestions) {
+        if (isDeleted(question)) continue
+        const responses = []
+        for (const response of question.responses) {
+            if (isDeleted(response)) continue
+            responses.push({
+                ...response,
+                documents: response.documents.filter((d) => !isDeleted(d)),
+            })
+        }
+        result.push({
+            ...question,
+            documents: question.documents.filter((d) => !isDeleted(d)),
+            responses,
+        } as P)
+    }
+    return result
+}
 
 const contractQuestionPrismaToDomainType = (
     prismaQuestion: PrismaQuestionType
@@ -110,14 +145,12 @@ const rateQuestionPrismaToDomainType = (
 const convertNonDeletedContractQuestions = (
     questions: PrismaQuestionType[]
 ): ContractQuestionType[] =>
-    questions
-        .filter((q) => !isDeleted(q))
-        .map(contractQuestionPrismaToDomainType)
+    filterDeletedDescendants(questions).map(contractQuestionPrismaToDomainType)
 
 const convertNonDeletedRateQuestions = (
     questions: PrismaRateQuestionType[]
 ): RateQuestionType[] =>
-    questions.filter((q) => !isDeleted(q)).map(rateQuestionPrismaToDomainType)
+    filterDeletedDescendants(questions).map(rateQuestionPrismaToDomainType)
 
 const convertToCommonIndexQuestionsPayload = <
     P extends ContractQuestionType | RateQuestionType,
@@ -152,7 +185,10 @@ const convertToIndexRateQuestionsPayload = (
     convertToCommonIndexQuestionsPayload(rateQuestions)
 
 export {
+    DELETE_ACTIONS,
+    isDeleted,
     questionInclude,
+    filterDeletedDescendants,
     contractQuestionPrismaToDomainType,
     rateQuestionPrismaToDomainType,
     convertNonDeletedContractQuestions,
