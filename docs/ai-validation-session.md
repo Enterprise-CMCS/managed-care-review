@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`.
+No AI validation implementation ticket is currently queued.
 
 ## Completed
 
@@ -95,6 +95,7 @@ The next implementation ticket is `AIFA-081 Remove stale duplicate app-api AI va
 - AIFA-080 ✔ Harden local AI validation worker subprocess management
 - AIFA-078 ✔ Correct fallback-pass status progression
 - AIFA-079 ✔ Introduce typed artifact-not-found handling
+- AIFA-081 ✔ Remove stale duplicate app-api AI validation behavior tests
 
 ## Current State
 
@@ -315,15 +316,12 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-081 Remove stale duplicate app-api AI validation behavior tests
-
-Remove or narrow stale app-api duplicate AI validation behavior tests that drift from the canonical worker suite and now fail independently.
+none currently queued
 
 ## Suggested Next Step
 
-- Remove or reduce stale duplicate app-api behavior suites without changing worker logic.
-- Preserve canonical worker coverage as the source of truth for AI validation behavior.
-- Avoid runtime behavior changes while cleaning up misleading failing tests.
+- Hold further AI validation work until a new ticket is explicitly approved.
+- Use the committed session file and sprint CSV as the source of truth for any future follow-up.
 
 ## Follow-on Performance Tickets
 
@@ -335,7 +333,14 @@ Remove or narrow stale app-api duplicate AI validation behavior tests that drift
 
 ## Recommended Upcoming Order
 
-1. `AIFA-081 Remove stale duplicate app-api AI validation behavior tests`
+none currently queued
+
+## AIFA-081 Closeout Notes
+
+- Removed the stale app-api-side duplicate behavior suites for `validationHandler` and deterministic date validation.
+- Canonical worker behavior coverage remains in `services/ai-form-augmentation`, while app-api keeps only resolver-specific validation tests.
+- No runtime validation behavior, artifact behavior, resolver behavior, or Review-page behavior changed.
+- Remaining focused app-api validation tests passed cleanly after the duplicate removals.
 
 ## AIFA-079 Closeout Notes
 
