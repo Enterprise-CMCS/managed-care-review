@@ -18,6 +18,7 @@ import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { canRead } from '../../authorization/oauthAuthorization'
 import { NotFoundError } from '../../postgres/postgresErrors'
+import { getRateLastUpdatedForDisplay } from '../helpers'
 
 const DEFAULT_INDEX_RATES_PAGE_SIZE = 10
 const MAX_INDEX_RATES_PAGE_SIZE = 50
@@ -54,12 +55,18 @@ const validateAndReturnRates = (
 }
 
 function compareRates(a: RateType, b: RateType): number {
-    const updatedAtDiff = b.updatedAt.getTime() - a.updatedAt.getTime()
+    const updatedAtDiff =
+        rateLastUpdatedForDisplay(b).getTime() -
+        rateLastUpdatedForDisplay(a).getTime()
     if (updatedAtDiff !== 0) {
         return updatedAtDiff
     }
 
     return b.id.localeCompare(a.id)
+}
+
+function rateLastUpdatedForDisplay(rate: RateType): Date {
+    return getRateLastUpdatedForDisplay(rate) ?? rate.updatedAt
 }
 
 function encodeRateCursor(cursor: RateCursor): string {
@@ -191,7 +198,7 @@ export function indexRatesConnectionResolver(
                 ? sortedRates.findIndex(
                       (rate) =>
                           rate.id === decodedAfter.rateID &&
-                          rate.updatedAt.toISOString() ===
+                          rateLastUpdatedForDisplay(rate).toISOString() ===
                               decodedAfter.updatedAt
                   ) + 1
                 : 0
@@ -215,7 +222,10 @@ export function indexRatesConnectionResolver(
                         edges.push({
                             cursor: encodeRateCursor({
                                 rateID: rate.id,
-                                updatedAt: rate.updatedAt.toISOString(),
+                                updatedAt:
+                                    rateLastUpdatedForDisplay(
+                                        rate
+                                    ).toISOString(),
                             }),
                             node: {
                                 ...rate,
@@ -228,7 +238,8 @@ export function indexRatesConnectionResolver(
                     edges.push({
                         cursor: encodeRateCursor({
                             rateID: rate.id,
-                            updatedAt: rate.updatedAt.toISOString(),
+                            updatedAt:
+                                rateLastUpdatedForDisplay(rate).toISOString(),
                         }),
                         node: {
                             ...rate,

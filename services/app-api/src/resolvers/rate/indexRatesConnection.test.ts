@@ -6,12 +6,14 @@ import {
 import type { RateConnectionEdge } from '../../gen/gqlServer'
 import {
     iterableCmsUsersMockData,
+    testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
 import { assertAnErrorCode } from '../../testHelpers/gqlAssertions'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('indexRatesConnection', () => {
     describe.each(iterableCmsUsersMockData)(
@@ -149,6 +151,120 @@ describe('indexRatesConnection', () => {
             })
         }
     )
+
+    it('paginates by lastUpdatedForDisplay after fetching rates', async () => {
+        const ldService = testLDService({
+            'rate-edit-unlock': true,
+        })
+        const mockS3 = testS3Client()
+        const prismaClient = await sharedTestPrismaClient()
+
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const displayLatestContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const displayOlderContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        const displayLatestRateID =
+            displayLatestContract.packageSubmissions[0].rateRevisions[0].rateID
+        const displayOlderRateID =
+            displayOlderContract.packageSubmissions[0].rateRevisions[0].rateID
+
+        await prismaClient.$transaction([
+            prismaClient.updateInfoTable.updateMany({
+                where: {
+                    submittedRates: {
+                        some: {
+                            rateID: displayLatestRateID,
+                        },
+                    },
+                },
+                data: {
+                    updatedAt: new Date('2025-01-02T00:00:00.000Z'),
+                },
+            }),
+            prismaClient.updateInfoTable.updateMany({
+                where: {
+                    submittedRates: {
+                        some: {
+                            rateID: displayOlderRateID,
+                        },
+                    },
+                },
+                data: {
+                    updatedAt: new Date('2025-01-01T00:00:00.000Z'),
+                },
+            }),
+            prismaClient.rateTable.update({
+                where: {
+                    id: displayLatestRateID,
+                },
+                data: {
+                    updatedAt: new Date('2020-01-01T00:00:00.000Z'),
+                },
+            }),
+            prismaClient.rateTable.update({
+                where: {
+                    id: displayOlderRateID,
+                },
+                data: {
+                    updatedAt: new Date('2024-01-01T00:00:00.000Z'),
+                },
+            }),
+        ])
+
+        const firstPage = await executeGraphQLOperation(cmsServer, {
+            query: IndexRatesConnectionDocument,
+            variables: {
+                input: {
+                    rateIDs: [displayLatestRateID, displayOlderRateID],
+                },
+                first: 1,
+            },
+        })
+
+        expect(firstPage.errors).toBeUndefined()
+        expect(firstPage.data?.indexRatesConnection.totalCount).toBe(2)
+        expect(firstPage.data?.indexRatesConnection.edges).toHaveLength(1)
+        expect(firstPage.data?.indexRatesConnection.edges[0].node.id).toBe(
+            displayLatestRateID
+        )
+        expect(firstPage.data?.indexRatesConnection.pageInfo.hasNextPage).toBe(
+            true
+        )
+
+        const secondPage = await executeGraphQLOperation(cmsServer, {
+            query: IndexRatesConnectionDocument,
+            variables: {
+                input: {
+                    rateIDs: [displayLatestRateID, displayOlderRateID],
+                },
+                first: 1,
+                after: firstPage.data?.indexRatesConnection.pageInfo.endCursor,
+            },
+        })
+
+        expect(secondPage.errors).toBeUndefined()
+        expect(secondPage.data?.indexRatesConnection.totalCount).toBe(2)
+        expect(secondPage.data?.indexRatesConnection.edges).toHaveLength(1)
+        expect(secondPage.data?.indexRatesConnection.edges[0].node.id).toBe(
+            displayOlderRateID
+        )
+        expect(secondPage.data?.indexRatesConnection.pageInfo.hasNextPage).toBe(
+            false
+        )
+    })
 
     it('preserves state user authorization and state scoping with pagination', async () => {
         const ldService = testLDService({
