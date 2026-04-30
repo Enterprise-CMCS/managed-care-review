@@ -1,8 +1,11 @@
-import type {
-  ValidationDocumentDiagnostic,
-  ValidationRerankingDiagnostics,
-  ValidationWorkSelectionMode
-} from '../results'
+import {
+  buildOptionalArtifactField,
+  buildSharedValidationArtifactFields,
+  type ValidationDocumentDiagnostic,
+  type ValidationLifecycleTimingArtifact,
+  type ValidationRerankingDiagnostics,
+  type ValidationWorkSelectionMode
+} from '../artifacts/validationArtifactContract'
 
 export type ValidationPipelineStage =
   | 'parsing'
@@ -15,13 +18,6 @@ export type ValidationPipelineStage =
 export interface ValidationIndexingProgressArtifact {
   completedDocuments: number
   totalDocuments: number
-}
-
-export interface ValidationLifecycleTimingArtifact {
-  triggerAcceptedAt: string
-  firstStatusWriteAt: string
-  firstIndexedArtifactAt?: string
-  completedAt?: string
 }
 
 export interface ValidationStatusArtifact {
@@ -59,11 +55,13 @@ export function buildValidationStatusArtifact(
     artifactVersion,
     updatedAt: new Date().toISOString(),
     error,
-    ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {}),
-    ...(indexingProgress ? { indexingProgress } : {}),
-    ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {}),
-    ...(lifecycleTiming ? { lifecycleTiming } : {}),
-    ...(rerankingDiagnostics ? { rerankingDiagnostics } : {})
+    ...buildSharedValidationArtifactFields({
+      documentDiagnostics,
+      workSelectionMode,
+      lifecycleTiming,
+      rerankingDiagnostics
+    }),
+    ...buildOptionalArtifactField('indexingProgress', indexingProgress)
   }
 }
 

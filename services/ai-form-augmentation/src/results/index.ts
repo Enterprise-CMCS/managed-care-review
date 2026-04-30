@@ -1,14 +1,16 @@
 export type {
   ValidationDocumentDiagnostic,
   ValidationDocumentWorkSelectionDiagnostic,
-  ValidationFieldWorkSelectionDiagnostic,
   ValidationLifecycleTimingSummary,
-  ValidationLlmDiagnostic,
   ValidationPhase,
   ValidationPhaseTimingSummary,
   ValidationRerankingDiagnostics,
+  ValidationWorkSelectionMode
+} from '../artifacts/validationArtifactContract'
+export type {
+  ValidationFieldWorkSelectionDiagnostic,
+  ValidationLlmDiagnostic,
   ValidationRetrievalDiagnostic,
-  ValidationWorkSelectionMode,
   ValidationResultArtifact
 } from './validationResultArtifact'
 export {

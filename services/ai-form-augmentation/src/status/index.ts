@@ -1,7 +1,7 @@
 export type {
-  ValidationLifecycleTimingArtifact,
   ValidationStatusArtifact
 } from './statusArtifact'
+export type { ValidationLifecycleTimingArtifact } from '../artifacts/validationArtifactContract'
 
 export {
   buildCompletedValidationStatusArtifact,

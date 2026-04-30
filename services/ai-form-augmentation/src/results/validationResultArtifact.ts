@@ -1,42 +1,16 @@
 import type { DateValidationResult } from '../prompts'
-import type { PdfOcrDisposition } from '../parsing'
 import type { ValidationResponseIssue } from '../validation-output'
-
-export type ValidationPhase =
-  | 'fetch'
-  | 'parse'
-  | 'ocr'
-  | 'chunk'
-  | 'embed'
-  | 'retrieval'
-  | 'validation'
-
-export type ValidationPhaseTimingSummary = Record<ValidationPhase, number>
-export interface ValidationLifecycleTimingSummary {
-  triggerAcceptedAt: string
-  firstStatusWriteAt: string
-  firstIndexedArtifactAt?: string
-  completedAt: string
-}
-
-export interface ValidationRerankingDiagnostics {
-  candidateCount: number
-  sampledDocumentCount: number
-  cachedSampleCount: number
-  freshSampleCount: number
-  sampleUnavailableCount: number
-  llmRequestCount: number
-  sampleFetchElapsedMs: number
-  // This is the aggregate request time across reranking calls, not a wall-clock
-  // span, so concurrent runs can make it larger than totalElapsedMs.
-  llmElapsedMs: number
-  totalElapsedMs: number
-}
-
-export type ValidationWorkSelectionMode =
-  | 'all-doc'
-  | 'gated-first-pass'
-  | 'gated-fallback'
+import {
+  buildOptionalArtifactArrayField,
+  buildOptionalArtifactField,
+  buildSharedValidationArtifactFields,
+  type ValidationDocumentDiagnostic,
+  type ValidationLifecycleTimingSummary,
+  type ValidationPhase,
+  type ValidationPhaseTimingSummary,
+  type ValidationRerankingDiagnostics,
+  type ValidationWorkSelectionMode
+} from '../artifacts/validationArtifactContract'
 
 export interface ValidationResultArtifact {
   artifactVersion: string
@@ -57,31 +31,6 @@ export interface ValidationResultArtifact {
   rerankingDiagnostics?: ValidationRerankingDiagnostics
   workSelectionMode?: ValidationWorkSelectionMode
   fieldWorkSelectionDiagnostics?: ValidationFieldWorkSelectionDiagnostic[]
-}
-
-export interface ValidationDocumentWorkSelectionDiagnostic {
-  priorityScore: number
-  priorityReasons: string[]
-  bucket: 'first-pass' | 'deferred'
-  heuristicGroupKey?: string
-  heuristicGroupKeySource?: 'filename-prefix'
-}
-
-export interface ValidationDocumentDiagnostic {
-  documentName: string
-  // Trigger-time unsupported-file skips do not have worker-fetch metadata, so
-  // source location stays optional even though worker-reviewed PDFs persist it.
-  sourceBucket?: string
-  sourceKey?: string
-  sourceSha256?: string
-  status: 'skipped' | 'failed' | 'processed'
-  usable: boolean
-  chunkCount: number
-  ocrDisposition?: PdfOcrDisposition
-  workSelection?: ValidationDocumentWorkSelectionDiagnostic
-  reason?: string
-  error?: string
-  stage?: 'cache' | 'fetch' | 'parse' | 'chunk' | 'embed'
 }
 
 export interface ValidationLlmDiagnostic {
@@ -137,15 +86,21 @@ export function buildValidationResultArtifact (
     // the difference between a document change and a form-data-only change.
     formSnapshotHash,
     results,
-    ...(documentDiagnostics.length > 0 ? { documentDiagnostics } : {}),
-    ...(llmDiagnostics.length > 0 ? { llmDiagnostics } : {}),
-    ...(retrievalDiagnostics.length > 0 ? { retrievalDiagnostics } : {}),
-    ...(phaseTimingsMs ? { phaseTimingsMs } : {}),
-    ...(lifecycleTiming ? { lifecycleTiming } : {}),
-    ...(rerankingDiagnostics ? { rerankingDiagnostics } : {}),
-    ...(workSelectionMode !== 'all-doc' ? { workSelectionMode } : {}),
-    ...(fieldWorkSelectionDiagnostics.length > 0
-      ? { fieldWorkSelectionDiagnostics }
-      : {})
+    ...buildSharedValidationArtifactFields({
+      documentDiagnostics,
+      workSelectionMode,
+      lifecycleTiming,
+      rerankingDiagnostics
+    }),
+    ...buildOptionalArtifactArrayField('llmDiagnostics', llmDiagnostics),
+    ...buildOptionalArtifactArrayField(
+      'retrievalDiagnostics',
+      retrievalDiagnostics
+    ),
+    ...buildOptionalArtifactField('phaseTimingsMs', phaseTimingsMs),
+    ...buildOptionalArtifactArrayField(
+      'fieldWorkSelectionDiagnostics',
+      fieldWorkSelectionDiagnostics
+    )
   }
 }

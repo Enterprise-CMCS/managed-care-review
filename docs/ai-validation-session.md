@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-074 Reduce AI validation artifact contract verbosity`.
+No active AI validation implementation ticket is currently queued.
 
 ## Completed
 
@@ -89,6 +89,7 @@ The next implementation ticket is `AIFA-074 Reduce AI validation artifact contra
 - AIFA-072 ✔ Reduce AI validation test duplication and brittleness
 - AIFA-073 ✔ Refresh AI validation documentation for handoff
 - AIFA-075 ✔ Remove production documents from AI validation corpus
+- AIFA-074 ✔ Reduce AI validation artifact contract verbosity
 
 ## Current State
 
@@ -309,15 +310,13 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-074 Reduce AI validation artifact contract verbosity
-
-Reduce maintainability overhead in AI validation artifact contracts now that their runtime meaning is clearer.
+- none currently queued
 
 ## Suggested Next Step
 
-- Review verbose status/result/diagnostic helper/type surface for safe simplification.
-- Preserve artifact semantics, GraphQL behavior, and Review-page behavior exactly.
-- Keep this focused on maintainability rather than schema redesign.
+- Hold on additional AI validation cleanup until a new ticket is explicitly approved.
+- If more work is needed, start from the committed session file and sprint CSV rather than the older planning docs.
+- Preserve the current runtime and artifact semantics unless a later ticket explicitly reopens them.
 
 ## Follow-on Performance Tickets
 
@@ -329,7 +328,14 @@ Reduce maintainability overhead in AI validation artifact contracts now that the
 
 ## Recommended Upcoming Order
 
-1. `AIFA-074 Reduce AI validation artifact contract verbosity`
+- none currently queued
+
+## AIFA-074 Closeout Notes
+
+- Reduced artifact-contract duplication by moving shared document-diagnostic, timing, work-selection, and reranking types into one internal contract module.
+- Consolidated repeated optional-field assembly used by `validation-result.json` and `status.json` builders without changing any persisted keys or runtime semantics.
+- Preserved the stricter completed-result lifecycle timing contract while still allowing in-progress lifecycle timing on status artifacts.
+- Focused build and contract-reader tests passed. No current PoC functionality changed, and no meaningful runtime efficiency regression is expected because the cleanup only touched small in-memory builder logic.
 
 ## AIFA-075 Closeout Notes
 
