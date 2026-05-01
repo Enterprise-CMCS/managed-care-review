@@ -2,6 +2,7 @@ import { BreadcrumbBar, Breadcrumb } from '@trussworks/react-uswds'
 import styles from './Breadcrumbs.module.scss'
 import { NavLinkWithLogging } from '../TealiumLogging'
 import classNames from 'classnames'
+import type { JSX } from 'react'
 
 type BreadcrumbItem = {
     text: string

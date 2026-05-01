@@ -7,7 +7,7 @@ import { dayjs } from '@mc-review/dates'
 import { SESSION_ACTIONS } from '../../pages/Wrapper/AuthenticatedRouteWrapper'
 
 type SessionTimeoutModalProps = {
-    modalRef: React.RefObject<ModalRef>
+    modalRef: React.RefObject<ModalRef | null>
 }
 
 export const SessionTimeoutModal = ({

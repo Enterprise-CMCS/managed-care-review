@@ -1,5 +1,6 @@
 import { ActionButton, type ActionButtonProps } from '../../ActionButton'
 import { TealiumButtonEventObject } from '../../../tealium'
+import type { JSX } from 'react'
 
 // Eventually ActionButton will be entirely swapped out for ModalOpenButton - part MCR-3782 when unlock reason modal is added
 type UnlockRateButtonProps = JSX.IntrinsicElements['button'] &

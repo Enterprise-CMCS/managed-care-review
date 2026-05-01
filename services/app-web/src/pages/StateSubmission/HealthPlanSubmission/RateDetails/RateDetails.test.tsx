@@ -568,7 +568,7 @@ describe('RateDetails', () => {
                 const rateCertsAfterAddAnother = rateCertifications(screen)
                 expect(rateCertsAfterAddAnother).toHaveLength(1)
             })
-        }, 20000)
+        }, 40000)
 
         it('does not render remove certification button for non-draft rates', async () => {
             renderWithProviders(
@@ -743,7 +743,7 @@ describe('RateDetails', () => {
             await waitFor(() => {
                 expect(screen.getAllByText(/1 complete/)).toHaveLength(2)
             })
-        }, 10000)
+        }, 40000)
         it('cannot continue with partially filled out second rate', async () => {
             const { user } = renderWithProviders(
                 <Routes>

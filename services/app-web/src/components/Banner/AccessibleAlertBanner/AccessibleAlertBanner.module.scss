@@ -18,4 +18,10 @@
     [class*='usa-alert__text'] {
         font-size: 1rem;
     }
+
+    [class*='usa-alert__body'] {
+        margin-left: 0;
+        margin-right: 0;
+        font-size: 1rem;
+    }
 }

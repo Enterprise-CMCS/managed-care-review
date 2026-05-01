@@ -1,5 +1,5 @@
 import { useTealium } from '../../../hooks'
-import { useEffect } from 'react'
+import { useEffect, type JSX } from 'react'
 import { AccessibleAlertBanner } from '../../Banner/AccessibleAlertBanner/AccessibleAlertBanner'
 
 export const UploadErrorAlert = ({

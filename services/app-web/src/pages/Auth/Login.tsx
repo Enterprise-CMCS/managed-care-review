@@ -42,7 +42,7 @@ export function Login({ defaultEmail }: Props): React.ReactElement {
         return fields.loginEmail.length > 0 && fields.loginPassword.length > 0
     }
 
-    async function handleSubmit(event: React.FormEvent) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
         const result = await signIn(fields.loginEmail, fields.loginPassword)

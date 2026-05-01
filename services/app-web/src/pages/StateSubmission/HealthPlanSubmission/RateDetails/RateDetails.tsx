@@ -520,7 +520,9 @@ const RateDetails = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="RateDetailsForm"
-                                onSubmit={(e) => {
+                                onSubmit={(
+                                    e: React.FormEvent<HTMLFormElement>
+                                ) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)
                                     handleSubmit(e)

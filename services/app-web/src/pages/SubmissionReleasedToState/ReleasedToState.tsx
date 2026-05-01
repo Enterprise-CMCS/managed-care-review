@@ -184,7 +184,7 @@ const ReleasedToState = () => {
                     <Form
                         id="ReleasedToStateForm"
                         className={styles.formContainer}
-                        onSubmit={(e) => {
+                        onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
                         }}

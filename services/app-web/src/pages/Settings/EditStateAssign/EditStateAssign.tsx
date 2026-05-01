@@ -221,7 +221,7 @@ export const EditStateAssign = (): React.ReactElement => {
                         )}
                         <UswdsForm
                             id="EditStateAssignForm"
-                            onSubmit={(e) => {
+                            onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                                 setShouldValidate(true)
                                 return handleSubmit(e)
                             }}

@@ -1,13 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, type JSX } from 'react'
 import classnames from 'classnames'
 
 import styles from './Tabs.module.scss'
 import { useNavigate } from 'react-router-dom'
 
+type TabPanelChildProps = {
+    id: string
+    tabName: string
+    nestedRoute?: string
+}
+
 type TabsProps = {
     defaultActiveTab?: string
     headingLevel?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5'
-    children: React.ReactElement[] // TabPanels
+    children: React.ReactElement<TabPanelChildProps>[] // TabPanels
 } & JSX.IntrinsicElements['div']
 
 export const Tabs = ({
@@ -22,7 +28,7 @@ export const Tabs = ({
         route: child.props.nestedRoute,
     }))
 
-    const handleClick = (name: string, route: string) => {
+    const handleClick = (name: string, route?: string) => {
         if (route) navigate(route)
         setActiveTab(name)
     }

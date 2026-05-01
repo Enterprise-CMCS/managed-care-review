@@ -115,7 +115,7 @@ describe('FieldCharacterCount component', () => {
             '1 character over limit'
         )
         expect(screen.getByTestId('characterCountMessage')).toHaveClass(
-            'usa-character-count__message--invalid'
+            'usa-character-count__status--invalid'
         )
     })
 

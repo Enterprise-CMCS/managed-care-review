@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-
 import { LoginStatusType, useAuth } from '../../../contexts/AuthContext'
 import { User } from '../../../gen/gqlClient'
 import { idmRedirectURL } from '../../../pages/Auth/cognitoAuth'

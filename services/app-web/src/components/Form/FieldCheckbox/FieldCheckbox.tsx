@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { type JSX } from 'react'
 import { useField } from 'formik'
 import { Checkbox } from '@trussworks/react-uswds'
 import { useTealium } from '../../../hooks'

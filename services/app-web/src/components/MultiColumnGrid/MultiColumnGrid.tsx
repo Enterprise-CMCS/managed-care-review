@@ -1,6 +1,9 @@
 import React from 'react'
-import { Grid } from '@trussworks/react-uswds'
-import { ColumnSizes } from '@trussworks/react-uswds/lib/components/grid/types'
+import { Grid, type DefaultGridProps } from '@trussworks/react-uswds'
+
+// trussworks v10 doesn't re-export ColumnSizes from its root entry. Derive it
+// from Grid's `col` prop.
+type ColumnSizes = NonNullable<DefaultGridProps['col']>
 
 export type ChildrenType = React.ReactNode | React.ReactPortal
 export type ChildrenPairType = ChildrenType[][]

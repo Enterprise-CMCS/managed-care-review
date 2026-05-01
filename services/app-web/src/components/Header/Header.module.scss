@@ -1,8 +1,6 @@
-//stylelint-disable selector-pseudo-class-no-unknown
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-// This is to override all the styles in USWDS classes.
 @mixin override-uswds-nav {
     font-weight: uswds.font-weight('light') !important;
     font-size: 1rem !important;
@@ -62,6 +60,7 @@
         right: 0 !important;
         margin-top: 1.5rem !important;
         width: fit-content;
+        padding: 1rem;
         background-color: custom.$mcr-cmsblue-base !important;
 
         > li {
@@ -145,9 +144,11 @@
         padding-left: 1rem !important;
     }
 
-    .bannerLogo :global(.usa-logo) {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
+    .bannerLogo {
+        [class*='usa-logo'] {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
     }
 }
 
