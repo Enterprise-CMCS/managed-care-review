@@ -1,4 +1,3 @@
-import { pipeline } from "@xenova/transformers"
 import type { EmbeddingProvider } from "./embeddingProvider"
 
 // Xenova's pipeline type is intentionally broad because the same helper can
@@ -58,6 +57,8 @@ export class XenovaEmbeddingProvider implements EmbeddingProvider {
   // needed, then return the cached instance on later calls.
   private async getExtractor(): Promise<FeatureExtractionPipeline> {
     if (!this.extractorPromise) {
+      const { pipeline } = await import("@xenova/transformers")
+
       // Lazily load the model once so repeated calls do not reinitialize it.
       // The cast stays inside this adapter so the rest of the codebase can rely
       // on the clean EmbeddingProvider interface instead of Xenova's broad types.

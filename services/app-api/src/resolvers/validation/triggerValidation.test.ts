@@ -199,10 +199,12 @@ describe('triggerValidationResolver', () => {
         expect(sendSpy).not.toHaveBeenCalled()
     })
 
-    it('resolves the local worker cwd independently of process cwd', async () => {
+    it('resolves the local worker cwd from repo markers when process cwd is nested', async () => {
         const processCwdSpy = vi
             .spyOn(process, 'cwd')
-            .mockReturnValue('/tmp/not-the-repo-root')
+            .mockReturnValue(
+                '/Users/juanruiz/managed-care-review/services/app-api'
+            )
         const store = buildStore(
             buildContractWithDraft(['allusers/1776374348125-doc-a.pdf'])
         )
@@ -213,7 +215,7 @@ describe('triggerValidationResolver', () => {
 
         await invokeTriggerValidationResolver(resolver)
 
-        expect(processCwdSpy).not.toHaveBeenCalled()
+        expect(processCwdSpy).toHaveBeenCalled()
         expect(spawnMock).toHaveBeenCalledWith(
             'pnpm',
             expect.any(Array),

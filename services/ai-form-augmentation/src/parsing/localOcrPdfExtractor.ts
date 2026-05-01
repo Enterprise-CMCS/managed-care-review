@@ -1,5 +1,3 @@
-import { pdf } from 'pdf-to-img'
-import { createWorker } from 'tesseract.js'
 import type { PdfParseResult, PdfTextExtractor } from './types'
 
 export class LocalOcrPdfExtractor implements PdfTextExtractor {
@@ -7,6 +5,10 @@ export class LocalOcrPdfExtractor implements PdfTextExtractor {
     fileBuffer: Buffer,
     fileName: string
   ): Promise<PdfParseResult> {
+    const [{ pdf }, { createWorker }] = await Promise.all([
+      import('pdf-to-img'),
+      import('tesseract.js')
+    ])
     const worker = await createWorker('eng')
     const pageTexts: string[] = []
     let pageCount = 0

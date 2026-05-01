@@ -507,6 +507,27 @@ test('selectFirstPassRerankingCandidates preserves the top-ranked set while capp
   )
 })
 
+test('selectFirstPassRerankingCandidates skips reranking for a single-document submission', () => {
+  const scoredDocuments = scoreValidationDocuments(
+    [
+      {
+        documentName: 'contract-only.pdf',
+        sourceBucket: 'uploads',
+        sourceKey: 'contracts/contract-only.pdf'
+      }
+    ],
+    [
+      {
+        field: 'contractStartDate',
+        label: 'Contract Start Date',
+        value: '01/01/2024'
+      }
+    ]
+  )
+
+  assert.deepEqual(selectFirstPassRerankingCandidates(scoredDocuments), [])
+})
+
 test('buildReusableRerankingAdjustmentByCacheKey reuses prior successful reranking judgments for unchanged docs', () => {
   const document = {
     documentName: 'plan-a 23-30001 amendment.pdf',

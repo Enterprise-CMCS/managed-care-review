@@ -1961,6 +1961,12 @@ export function buildReusableRerankingAdjustmentByCacheKey(args: {
 export function selectFirstPassRerankingCandidates(
   scoredDocuments: ScoredValidationDocumentDiagnostic[]
 ): ScoredValidationDocumentDiagnostic[] {
+  // A single candidate cannot be meaningfully reranked, so skip the advisory
+  // LLM pass entirely and avoid paying model latency on one-document runs.
+  if (scoredDocuments.length <= 1) {
+    return []
+  }
+
   const orderedDocuments = scoredDocuments
     .map((document, originalIndex) => ({
       document,

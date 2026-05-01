@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process'
-import { resolve } from 'node:path'
+import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import { InvokeCommand, LambdaClient } from '@aws-sdk/client-lambda'
 import { GraphQLError } from 'graphql'
 import type { Context } from '../../handlers/apollo_gql'
@@ -37,7 +38,32 @@ export interface ValidationResolverConfig {
 const LOCAL_VALIDATION_WORKER_TIMEOUT_MS = 5 * 60 * 1000
 
 function getLocalValidationWorkerCwd(): string {
-    return resolve(__dirname, '../../../../..')
+    const repoMarkers = ['pnpm-workspace.yaml', 'package.json']
+    const searchRoots = [process.cwd(), __dirname]
+
+    for (const startDir of searchRoots) {
+        let currentDir = startDir
+
+        while (true) {
+            const hasRepoMarkers = repoMarkers.every((marker) =>
+                existsSync(resolve(currentDir, marker))
+            )
+
+            if (hasRepoMarkers) {
+                return currentDir
+            }
+
+            const parentDir = dirname(currentDir)
+
+            if (parentDir === currentDir) {
+                break
+            }
+
+            currentDir = parentDir
+        }
+    }
+
+    return process.cwd()
 }
 
 function flushLocalValidationWorkerStderrBuffer(args: {
