@@ -265,7 +265,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailerMode = process.env.EMAILER_MODE
-    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
     const s3DocumentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
@@ -286,12 +285,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
-    }
-
-    if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
-        throw new Error(
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
-        )
     }
 
     if (parameterStoreMode !== 'LOCAL' && parameterStoreMode !== 'AWS') {
@@ -320,7 +313,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Initialize OpenTelemetry tracing once during cold start
     // This prevents duplicate provider registrations on every request
-    initTracer('app-api-' + stageName, otelCollectorUrl)
+    initTracer('app-api-' + stageName)
     console.info('OpenTelemetry tracer initialized for app-api-' + stageName)
 
     const pgResult = await configurePostgres(
@@ -451,7 +444,6 @@ async function initializeGQLHandler(): Promise<Handler> {
         applicationEndpoint,
         emailSource: emailer.config.emailSource,
         emailerMode,
-        otelCollectorUrl,
         parameterStoreMode,
     }
 

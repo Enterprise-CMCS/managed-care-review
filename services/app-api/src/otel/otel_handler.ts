@@ -12,7 +12,17 @@ import { PrismaInstrumentation } from '@prisma/instrumentation'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 
-export function initTracer(serviceName: string, otelCollectorURL: string) {
+const DD_TRACES_URL = 'https://otlp.ddog-gov.com/v1/traces'
+
+function getDDHeaders() {
+    return {
+        'dd-api-key': process.env.DD_API_KEY ?? '',
+        'dd-otlp-source': 'ddog-gov.com',
+        'dd-otel-span-mapping': '{span_name_as_resource_name: false}',
+    }
+}
+
+export function initTracer(serviceName: string) {
     console.info('-----Setting OTEL instrumentation-----')
 
     const resource = new Resource({
@@ -20,8 +30,8 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
     })
 
     const exporter = new OTLPTraceExporter({
-        url: otelCollectorURL,
-        headers: {},
+        url: DD_TRACES_URL,
+        headers: getDDHeaders(),
     })
     const provider = new NodeTracerProvider({
         resource: resource,
@@ -69,8 +79,8 @@ export function createTracer(serviceName: string): Tracer {
     })
 
     const exporter = new OTLPTraceExporter({
-        url: process.env.API_APP_OTEL_COLLECTOR_URL,
-        headers: {},
+        url: DD_TRACES_URL,
+        headers: getDDHeaders(),
     })
 
     provider.addSpanProcessor(new SimpleSpanProcessor(exporter))

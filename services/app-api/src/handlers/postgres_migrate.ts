@@ -5,15 +5,8 @@ import { initTracer, recordException } from '../otel/otel_handler'
 import { RDSClient, CreateDBClusterSnapshotCommand } from '@aws-sdk/client-rds'
 
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
-    // setup otel tracing
-    const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
-    if (!otelCollectorURL || otelCollectorURL === '') {
-        const errMsg =
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL must be set'
-        return fmtMigrateError(errMsg)
-    }
     const serviceName = 'postgres-migrate'
-    initTracer(serviceName, otelCollectorURL)
+    initTracer(serviceName)
 
     // get the relevant env vars and check that they exist.
     const dbURL = process.env.DATABASE_URL
