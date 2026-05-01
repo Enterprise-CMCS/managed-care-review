@@ -181,6 +181,11 @@ const LARGE_DOCUMENT_PAGE_THRESHOLD = 200
 // Apply the same low-yield heuristic to files over roughly 1 MB because those
 // documents often carry bulky rate text rather than concise term language.
 const LARGE_DOCUMENT_SIZE_BYTES_THRESHOLD = 1_000_000
+// Reuse the same large-document threshold for first-pass admission control so
+// giant low-yield PDFs can be deferred before chunk/embed work begins.
+const PROGRESSIVE_COST_ADMISSION_PAGE_THRESHOLD = LARGE_DOCUMENT_PAGE_THRESHOLD
+const PROGRESSIVE_COST_ADMISSION_SIZE_BYTES_THRESHOLD =
+  LARGE_DOCUMENT_SIZE_BYTES_THRESHOLD
 // Heavily penalize samples that look rate-oriented or otherwise low-yield so
 // they fall behind cleaner amendment-style evidence in first-pass selection.
 const LOW_YIELD_LLM_PRIORITY_PENALTY = 18
@@ -607,12 +612,24 @@ export async function validationHandler(
       requestedWorkSelectionMode === 'all-doc'
         ? event.documents
         : selectFirstPassDocuments(workSelectionDiagnostics)
+    const costScreenedFirstPass =
+      requestedWorkSelectionMode === 'gated-first-pass'
+        ? await screenFirstPassDocumentsForCost({
+            event,
+            s3Client,
+            unchangedDocumentCacheKeys,
+            selectedDocuments,
+            workSelectionByCacheKey
+          })
+        : null
+    const admittedSelectedDocuments =
+      costScreenedFirstPass?.admittedDocuments ?? selectedDocuments
     const baselineDeferredDocuments =
       requestedWorkSelectionMode === 'all-doc'
         ? []
         : event.documents.filter(
             (document) =>
-              !selectedDocuments.some(
+              !admittedSelectedDocuments.some(
                 (selectedDocument) =>
                   computeDocumentCacheKey(selectedDocument) ===
                   computeDocumentCacheKey(document)
@@ -639,7 +656,7 @@ export async function validationHandler(
             unchangedDocumentCacheKeys,
             reusableOcrCappedDocumentCacheKeys,
             shouldAttemptOcrFallback,
-            selectedDocuments,
+            selectedDocuments: admittedSelectedDocuments,
             workSelectionByCacheKey
           })
         : undefined
@@ -655,10 +672,10 @@ export async function validationHandler(
             unchangedDocumentCacheKeys,
             reusableOcrCappedDocumentCacheKeys,
             shouldAttemptOcrFallback,
-            documents: selectedDocuments,
+            documents: admittedSelectedDocuments,
             workSelectionByCacheKey,
             completedDocumentOffset: 0,
-            totalDocumentsToIndex: selectedDocuments.length,
+            totalDocumentsToIndex: admittedSelectedDocuments.length,
             workSelectionMode: requestedWorkSelectionMode
           })),
         deferredDocuments: [] as ValidationSourceDocument[]
@@ -666,10 +683,12 @@ export async function validationHandler(
     let indexedDocuments = allDocumentIndexing.indexedDocuments
     documentDiagnostics = [
       ...documentDiagnostics,
+      ...(costScreenedFirstPass?.deferredDocumentDiagnostics ?? []),
       ...allDocumentIndexing.documentDiagnostics
     ]
     const completedFirstPassDocuments =
-      selectedDocuments.length - allDocumentIndexing.deferredDocuments.length
+      admittedSelectedDocuments.length -
+      allDocumentIndexing.deferredDocuments.length
     const deferredDocuments = [
       ...allDocumentIndexing.deferredDocuments,
       ...baselineDeferredDocuments
@@ -784,9 +803,24 @@ export async function validationHandler(
         )
       })
     } else if (requestedWorkSelectionMode === 'gated-first-pass') {
+      const existingDiagnosticCacheKeys = new Set(
+        documentDiagnostics.map((diagnostic) =>
+          computeDocumentCacheKey({
+            documentName: diagnostic.documentName,
+            sourceBucket: diagnostic.sourceBucket ?? '',
+            sourceKey: diagnostic.sourceKey ?? diagnostic.documentName,
+            sourceSha256: diagnostic.sourceSha256
+          })
+        )
+      )
       documentDiagnostics = mergeDocumentDiagnostics(
         documentDiagnostics,
-        baselineDeferredDocuments.map((document) =>
+        baselineDeferredDocuments
+          .filter(
+            (document) =>
+              !existingDiagnosticCacheKeys.has(computeDocumentCacheKey(document))
+          )
+          .map((document) =>
           buildDeferredDocumentDiagnostic(
             document,
             workSelectionByCacheKey.get(computeDocumentCacheKey(document))
@@ -1620,6 +1654,11 @@ type ScoredValidationDocumentDiagnostic = {
 }
 
 type FirstPassRerankingSignal = 'high' | 'medium' | 'low'
+type FirstPassSample = {
+  pageCount: number
+  fileSizeBytes: number | null
+  sampleText: string
+}
 type HeuristicGroupKeyDiagnostic = {
   heuristicGroupKey?: string
   heuristicGroupKeySource?: 'filename-prefix'
@@ -2215,6 +2254,57 @@ async function readFirstPassRerankingSample(args: {
   }
 }
 
+export async function screenFirstPassDocumentsForCost(args: {
+  event: ValidationHandlerEvent
+  s3Client: ArtifactS3Client
+  unchangedDocumentCacheKeys: Set<string>
+  selectedDocuments: ValidationSourceDocument[]
+  workSelectionByCacheKey: Map<string, ValidationDocumentWorkSelectionDiagnostic>
+}): Promise<{
+  admittedDocuments: ValidationSourceDocument[]
+  deferredDocumentDiagnostics: ValidationDocumentDiagnostic[]
+}> {
+  const screeningResults = await mapWithConcurrencyLimit(
+    args.selectedDocuments,
+    DEFAULT_DOCUMENT_INDEXING_CONCURRENCY,
+    async (document) => {
+      const cacheKey = computeDocumentCacheKey(document)
+
+      try {
+        const sample = await readFirstPassRerankingSample({
+          event: args.event,
+          s3Client: args.s3Client,
+          unchangedDocumentCacheKeys: args.unchangedDocumentCacheKeys,
+          document
+        })
+
+        return {
+          cacheKey,
+          sample:
+            sample == null
+              ? null
+              : {
+                  pageCount: sample.pageCount,
+                  fileSizeBytes: sample.fileSizeBytes,
+                  sampleText: sample.sampleText
+                }
+        }
+      } catch {
+        return { cacheKey, sample: null }
+      }
+    }
+  )
+  const samplesByCacheKey = new Map(
+    screeningResults.map(({ cacheKey, sample }) => [cacheKey, sample])
+  )
+
+  return applyProgressiveCostAdmissionDecisions({
+    documents: args.selectedDocuments,
+    samplesByCacheKey,
+    workSelectionByCacheKey: args.workSelectionByCacheKey
+  })
+}
+
 function clipFirstPassSampleText(value: string): string {
   return value.slice(0, FIRST_PASS_RERANKING_SAMPLE_CHAR_LIMIT).trim()
 }
@@ -2327,6 +2417,148 @@ export function selectFirstPassDocuments(
         right.workSelection.priorityScore - left.workSelection.priorityScore
     )
     .map((diagnostic) => diagnostic.document)
+}
+
+export function buildProgressiveCostAdmissionDecision(args: {
+  document: ValidationSourceDocument
+  sample: FirstPassSample
+}): { defer: boolean; reason?: string } {
+  // Keep this intentionally heuristic-only: it is a cheap admission check that
+  // runs before chunk/embed work, not a second reranking or validation pass.
+  const isCostlyDocument =
+    args.sample.pageCount >= PROGRESSIVE_COST_ADMISSION_PAGE_THRESHOLD ||
+    (args.sample.fileSizeBytes != null &&
+      args.sample.fileSizeBytes >=
+        PROGRESSIVE_COST_ADMISSION_SIZE_BYTES_THRESHOLD)
+
+  if (!isCostlyDocument) {
+    return { defer: false }
+  }
+
+  const normalizedNameAndSample =
+    `${args.document.documentName} ${args.document.sourceKey} ${args.sample.sampleText}`.toLowerCase()
+  const hasExplicitDateLiteral =
+    /\b\d{1,2}\/\d{1,2}\/\d{4}\b/.test(normalizedNameAndSample) ||
+    /\b(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},\s+\d{4}\b/.test(
+      normalizedNameAndSample
+    )
+  const hasOperativeDatePhrase =
+    containsAny(normalizedNameAndSample, [
+      'effective date',
+      'expiration date',
+      'through end date',
+      'amendment',
+      'amended to read',
+      'extends through',
+      'shall commence',
+      'shall terminate',
+      'contract start date',
+      'contract end date',
+      'is extended to',
+      'is hereby amended',
+      'remains in full force'
+    ]) || /\b(start|end|effective|expiration)\s+date\b/.test(normalizedNameAndSample)
+  const showsDateGoverningSignals =
+    hasExplicitDateLiteral && hasOperativeDatePhrase
+  const looksBoilerplateHeavy =
+    containsAny(normalizedNameAndSample, [
+      'scope of work',
+      'service overview',
+      'definitions',
+      'covered services',
+      'contract representatives',
+      'page 1 of',
+      'exhibit a',
+      'attachment i'
+    ]) || containsAny(args.document.documentName.toLowerCase(), [' text', 'sow'])
+  const looksLowYield =
+    containsAny(normalizedNameAndSample, [
+      'rate',
+      'rates',
+      'capitation',
+      'per member per month',
+      'pmpm',
+      'fee schedule',
+      'reimbursement',
+      'compensation',
+      'scope of work',
+      'service area',
+      'covered services'
+    ]) ||
+    looksBoilerplateHeavy ||
+    containsAny(args.document.documentName.toLowerCase(), [' text', 'rate'])
+
+  if (looksLowYield && !showsDateGoverningSignals) {
+    return {
+      defer: true,
+      reason:
+        'Deferred this costly document from the first pass because its early sample looks low-yield for contract date validation.'
+    }
+  }
+
+  return { defer: false }
+}
+
+export function applyProgressiveCostAdmissionDecisions(args: {
+  documents: ValidationSourceDocument[]
+  samplesByCacheKey: Map<string, FirstPassSample | null>
+  workSelectionByCacheKey: Map<string, ValidationDocumentWorkSelectionDiagnostic>
+}): {
+  admittedDocuments: ValidationSourceDocument[]
+  deferredDocumentDiagnostics: ValidationDocumentDiagnostic[]
+} {
+  const admittedDocuments: ValidationSourceDocument[] = []
+  const deferredDocuments: Array<{
+    document: ValidationSourceDocument
+    sample: FirstPassSample
+    reason: string
+  }> = []
+
+  for (const document of args.documents) {
+    const cacheKey = computeDocumentCacheKey(document)
+    const sample = args.samplesByCacheKey.get(cacheKey) ?? null
+
+    if (sample == null) {
+      admittedDocuments.push(document)
+      continue
+    }
+
+    const decision = buildProgressiveCostAdmissionDecision({ document, sample })
+
+    if (decision.defer) {
+      deferredDocuments.push({
+        document,
+        sample,
+        reason:
+          decision.reason ??
+          'Deferred this costly document from the first pass because its early sample looks low-yield for contract date validation.'
+      })
+      continue
+    }
+
+    admittedDocuments.push(document)
+  }
+
+  if (admittedDocuments.length === 0 && deferredDocuments.length > 0) {
+    deferredDocuments.sort(
+      (left, right) =>
+        left.sample.pageCount - right.sample.pageCount ||
+        (left.sample.fileSizeBytes ?? Number.MAX_SAFE_INTEGER) -
+          (right.sample.fileSizeBytes ?? Number.MAX_SAFE_INTEGER)
+    )
+    admittedDocuments.push(deferredDocuments.shift()!.document)
+  }
+
+  return {
+    admittedDocuments,
+    deferredDocumentDiagnostics: deferredDocuments.map(({ document, reason }) =>
+      buildDeferredDocumentDiagnostic(
+        document,
+        args.workSelectionByCacheKey.get(computeDocumentCacheKey(document)),
+        reason
+      )
+    )
+  }
 }
 
 function buildHeuristicGroupKeyDiagnostic(

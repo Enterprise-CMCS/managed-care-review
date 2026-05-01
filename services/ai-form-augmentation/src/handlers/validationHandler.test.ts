@@ -2,9 +2,12 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { computeDocumentCacheKey } from '../artifacts'
 import { buildValidationResultArtifact } from '../results'
+import { ArtifactNotFoundError, type ArtifactS3Client } from '../s3'
 import {
   addSupportingCitationData,
+  applyProgressiveCostAdmissionDecisions,
   buildFirstPassRerankingPrompt,
+  buildProgressiveCostAdmissionDecision,
   buildReusableRerankingCacheKeys,
   buildReusableRerankingAdjustmentByCacheKey,
   buildReusableDocumentCacheKeys,
@@ -19,6 +22,7 @@ import {
   LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT,
   mapWithConcurrencyLimit,
   runFirstPassRerankingRequestWithTimeout,
+  screenFirstPassDocumentsForCost,
   selectFirstPassRerankingCandidates,
   selectFirstPassDocuments,
   scoreValidationDocuments
@@ -506,6 +510,290 @@ test('selectFirstPassDocuments returns scored first-pass documents in current ra
       'provider-agreement.pdf'
     ]
   )
+})
+
+test('buildProgressiveCostAdmissionDecision defers a giant low-yield rate document from the first pass', () => {
+  const decision = buildProgressiveCostAdmissionDecision({
+    document: {
+      documentName: 'CalViva 23-30220 A03 Text.pdf',
+      sourceBucket: 'uploads',
+      sourceKey: 'contracts/CalViva 23-30220 A03 Text.pdf'
+    },
+    sample: {
+      pageCount: 646,
+      fileSizeBytes: 2_670_000,
+      sampleText:
+        'Rates and reimbursement schedule. Per member per month capitation amounts by service area.'
+    }
+  })
+
+  assert.deepEqual(decision, {
+    defer: true,
+    reason:
+      'Deferred this costly document from the first pass because its early sample looks low-yield for contract date validation.'
+  })
+})
+
+test('buildProgressiveCostAdmissionDecision defers a giant boilerplate text document even when it mentions generic contract terms', () => {
+  const decision = buildProgressiveCostAdmissionDecision({
+    document: {
+      documentName: 'AAH 23-30212 A03 Text.pdf',
+      sourceBucket: 'uploads',
+      sourceKey: 'contracts/AAH 23-30212 A03 Text.pdf'
+    },
+    sample: {
+      pageCount: 630,
+      fileSizeBytes: 2_615_480,
+      sampleText:
+        'Exhibit A SCOPE OF WORK. Service Overview. The services described in this Contract must be performed as needed. Either party may make changes to the information in this Exhibit.'
+    }
+  })
+
+  assert.deepEqual(decision, {
+    defer: true,
+    reason:
+      'Deferred this costly document from the first pass because its early sample looks low-yield for contract date validation.'
+  })
+})
+
+test('buildProgressiveCostAdmissionDecision keeps a giant document when the early sample looks date-governing', () => {
+  const decision = buildProgressiveCostAdmissionDecision({
+    document: {
+      documentName: 'Provider Amendment Text.pdf',
+      sourceBucket: 'uploads',
+      sourceKey: 'contracts/provider-amendment-text.pdf'
+    },
+    sample: {
+      pageCount: 400,
+      fileSizeBytes: 1_400_000,
+      sampleText:
+        'This amendment is hereby amended to read that the effective date is January 1, 2024 through December 31, 2025.'
+    }
+  })
+
+  assert.deepEqual(decision, { defer: false })
+})
+
+test('applyProgressiveCostAdmissionDecisions defers costly low-yield documents but keeps smaller first-pass evidence in scope', () => {
+  const admittedDocument = {
+    documentName: 'AAH 23-30212 A03 213A Final.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/AAH 23-30212 A03 213A Final.pdf'
+  }
+  const deferredDocument = {
+    documentName: 'CalViva 23-30220 A03 Text.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/CalViva 23-30220 A03 Text.pdf'
+  }
+
+  const screening = applyProgressiveCostAdmissionDecisions({
+    documents: [admittedDocument, deferredDocument],
+    samplesByCacheKey: new Map([
+      [
+        computeDocumentCacheKey(admittedDocument),
+        {
+          pageCount: 12,
+          fileSizeBytes: 180_000,
+          sampleText: 'Amendment effective date January 1, 2024 through end date December 31, 2025.'
+        }
+      ],
+      [
+        computeDocumentCacheKey(deferredDocument),
+        {
+          pageCount: 646,
+          fileSizeBytes: 2_670_000,
+          sampleText:
+            'Rates and reimbursement schedule. Per member per month capitation amounts by service area.'
+        }
+      ]
+    ]),
+    workSelectionByCacheKey: new Map([
+      [
+        computeDocumentCacheKey(admittedDocument),
+        {
+          priorityScore: 14,
+          priorityReasons: ['heuristic'],
+          bucket: 'first-pass'
+        }
+      ],
+      [
+        computeDocumentCacheKey(deferredDocument),
+        {
+          priorityScore: 9,
+          priorityReasons: ['heuristic'],
+          bucket: 'first-pass'
+        }
+      ]
+    ])
+  })
+
+  assert.deepEqual(screening.admittedDocuments, [admittedDocument])
+  assert.deepEqual(screening.deferredDocumentDiagnostics, [
+    {
+      documentName: deferredDocument.documentName,
+      sourceBucket: deferredDocument.sourceBucket,
+      sourceKey: deferredDocument.sourceKey,
+      status: 'skipped',
+      usable: false,
+      chunkCount: 0,
+      workSelection: {
+        priorityScore: 9,
+        priorityReasons: ['heuristic'],
+        bucket: 'first-pass'
+      },
+      reason:
+        'Deferred this costly document from the first pass because its early sample looks low-yield for contract date validation.'
+    }
+  ])
+})
+
+test('applyProgressiveCostAdmissionDecisions keeps one cheapest document admitted when every screened document looks low-yield', () => {
+  const giantOne = {
+    documentName: 'Rates Text A.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/rates-text-a.pdf'
+  }
+  const giantTwo = {
+    documentName: 'Rates Text B.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/rates-text-b.pdf'
+  }
+
+  const screening = applyProgressiveCostAdmissionDecisions({
+    documents: [giantOne, giantTwo],
+    samplesByCacheKey: new Map([
+      [
+        computeDocumentCacheKey(giantOne),
+        {
+          pageCount: 650,
+          fileSizeBytes: 2_800_000,
+          sampleText: 'Rates and capitation by service area.'
+        }
+      ],
+      [
+        computeDocumentCacheKey(giantTwo),
+        {
+          pageCount: 400,
+          fileSizeBytes: 1_900_000,
+          sampleText: 'Rates and reimbursement schedule.'
+        }
+      ]
+    ]),
+    workSelectionByCacheKey: new Map()
+  })
+
+  assert.deepEqual(screening.admittedDocuments, [giantTwo])
+  assert.deepEqual(screening.deferredDocumentDiagnostics, [
+    {
+      documentName: giantOne.documentName,
+      sourceBucket: giantOne.sourceBucket,
+      sourceKey: giantOne.sourceKey,
+      status: 'skipped',
+      usable: false,
+      chunkCount: 0,
+      reason:
+        'Deferred this costly document from the first pass because its early sample looks low-yield for contract date validation.'
+    }
+  ])
+})
+
+test('screenFirstPassDocumentsForCost still screens unchanged giant text documents on form-only reruns', async () => {
+  const admittedDocument = {
+    documentName: 'AAH 23-30212 A03 213A Final.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/AAH 23-30212 A03 213A Final.pdf'
+  }
+  const deferredDocument = {
+    documentName: 'CalViva 23-30220 A03 Text.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/CalViva 23-30220 A03 Text.pdf'
+  }
+  const cacheKey = computeDocumentCacheKey(deferredDocument)
+  const s3Client: ArtifactS3Client = {
+    async putJson() {},
+    async getJson<T>(_bucket: string, key: string): Promise<T> {
+      if (key.endsWith(`${cacheKey}.json`)) {
+        return {
+          generatedAt: '2026-05-01T00:00:00.000Z',
+          document: {
+            documentName: deferredDocument.documentName,
+            sourceBucket: deferredDocument.sourceBucket,
+            sourceKey: deferredDocument.sourceKey,
+            cacheKey,
+            chunkCount: 0
+          },
+          pageCount: 646,
+          rawText:
+            'Exhibit A SCOPE OF WORK. Service Overview. The services described in this Contract must be performed as needed.',
+          pageTexts: [
+            'Exhibit A SCOPE OF WORK. Service Overview. The services described in this Contract must be performed as needed.'
+          ],
+          extractionMethod: 'native-text',
+          extractionNotes: [],
+          ocrDisposition: 'not-needed'
+        } as T
+      }
+
+      throw new ArtifactNotFoundError('artifacts', key)
+    },
+    async putText() {},
+    async putBuffer() {},
+    async getBuffer() {
+      throw new Error('screening should reuse the cached parsed artifact for unchanged documents')
+    }
+  }
+
+  const screening = await screenFirstPassDocumentsForCost({
+    event: {
+      formId: 'form-123',
+      artifactVersion: 'artifact-v1',
+      bucket: 'artifacts',
+      s3Config: { region: 'us-east-1' },
+      formFields: [],
+      documents: [admittedDocument, deferredDocument],
+      workSelectionMode: 'gated-first-pass'
+    },
+    s3Client,
+    unchangedDocumentCacheKeys: new Set([cacheKey]),
+    selectedDocuments: [admittedDocument, deferredDocument],
+    workSelectionByCacheKey: new Map([
+      [
+        computeDocumentCacheKey(admittedDocument),
+        {
+          priorityScore: 14,
+          priorityReasons: ['heuristic'],
+          bucket: 'first-pass'
+        }
+      ],
+      [
+        cacheKey,
+        {
+          priorityScore: 9,
+          priorityReasons: ['heuristic'],
+          bucket: 'first-pass'
+        }
+      ]
+    ])
+  })
+
+  assert.deepEqual(screening.admittedDocuments, [admittedDocument])
+  assert.deepEqual(screening.deferredDocumentDiagnostics, [
+    {
+      documentName: deferredDocument.documentName,
+      sourceBucket: deferredDocument.sourceBucket,
+      sourceKey: deferredDocument.sourceKey,
+      status: 'skipped',
+      usable: false,
+      chunkCount: 0,
+      workSelection: {
+        priorityScore: 9,
+        priorityReasons: ['heuristic'],
+        bucket: 'first-pass'
+      },
+      reason:
+        'Deferred this costly document from the first pass because its early sample looks low-yield for contract date validation.'
+    }
+  ])
 })
 
 test('selectFirstPassRerankingCandidates preserves the top-ranked set while capping the widened advisory pool', () => {

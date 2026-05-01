@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-094 Add progressive-cost document admission guardrails`.
+The next implementation ticket is `AIFA-095 Reuse reranking decisions on form-only reruns`.
 
 ## Completed
 
@@ -96,6 +96,7 @@ The next implementation ticket is `AIFA-094 Add progressive-cost document admiss
 - AIFA-078 ✔ Correct fallback-pass status progression
 - AIFA-079 ✔ Introduce typed artifact-not-found handling
 - AIFA-081 ✔ Remove stale duplicate app-api AI validation behavior tests
+- AIFA-094 ✔ Add progressive-cost document admission guardrails
 - AIFA-093 ✔ Bound large-batch reranking latency
 
 ## Current State
@@ -328,15 +329,41 @@ Reduce unacceptable first-pass latency on small and large submissions by decidin
 
 Keep this scoped to first-pass document admission and indexing guardrails only. Do not change Review-page behavior, field scope, or the existing conservative fallback requirement when strong first-pass evidence is not available.
 
+### AIFA-094 Working Notes
+
+- Fresh artifact review for `0e90d406-434e-4eeb-abad-f0199439f690` showed the tightened admission guardrail completing the usual large `165`-document batch in about `34s` trigger-to-complete, materially faster than the older `~62s` session benchmark.
+- That same fresh run deferred giant low-yield `A03 Text` / `Rates Text` bodies instead of letting them wedge first-pass indexing, while still completing both date fields from first-pass evidence.
+- A later retrigger of the same contract family also completed cleanly, but the `~34s` first fresh run is the more important benchmark because it is the cleaner post-fix signal.
+- A later form-only rerun on `177e9eb0-5c0a-402b-8012-5048f27bbf92` confirmed the admission/indexing regression is fixed: parse/OCR/chunk/embed stayed at `0`, giant unchanged low-yield docs stayed deferred, and the remaining `~20s` cost came from reranking reuse gaps rather than document admission work.
+- Separate quality review of `526baa9e-7e1b-493f-ab30-5fb0a942ea53` showed a different gap: the worker admitted and processed the correct PDFs and extracted the obvious governing clause text (`Period of Contract: January 1, 2025 through December 30, 2027`) but still returned `not-enough-evidence`. That is a clause-recognition / evidence-interpretation miss, not a first-pass heuristics miss.
+
+## Future Quality Direction
+
+- For broad multi-state coverage, do not try to enumerate every state or document template. That does not scale.
+- The more realistic direction is hybrid extraction:
+  - keep deterministic rules as a cheap high-confidence fast-path
+  - add schema-constrained, citation-required LLM extraction when deterministic extraction stays unresolved
+  - require cited verbatim support for any accepted date
+- The Kansas-style contract in `526baa9e-7e1b-493f-ab30-5fb0a942ea53` is the concrete example for this direction: the clause text was present and clear, but the current clause recognizer did not treat `Period of Contract: <date> through <date>` as governing evidence.
+- Maintenance implication:
+  - this feature will require ongoing quality maintenance if the product promise is broad document coverage across states and agencies
+  - the scalable version of that maintenance is clause-family coverage plus structured diagnostics, not state-by-state template chasing
+  - when the LLM successfully resolves a clause family the deterministic layer missed, those cited phrases can be harvested as candidate fast-path patterns for later human review and promotion
+- Product implication:
+  - there is no realistic path to "all 50 states and beyond" quality with zero maintenance
+  - the least-bad maintenance model is targeted clause-family hardening with auditable cited outputs
+
 ## Suggested Next Step
 
-- Add progressive-cost document admission guardrails so low-yield PDFs can be screened cheaply before full chunk/embed work.
-- Re-check both small mixed submissions and large batches after that change, especially runs containing large text-heavy contract artifacts.
-- Keep conservative fallback intact when first-pass evidence is partial, weak, or missing.
+- Reuse prior reranking decisions on form-only reruns so unchanged documents do not trigger fresh advisory LLM calls unnecessarily.
+- Keep the new admission/indexing guardrails from AIFA-094 intact while cutting rerun latency further.
+- Verify large form-only reruns complete faster without reintroducing giant-document admission regressions.
 
 ## Follow-on Performance Tickets
 
 - `AIFA-094 Add progressive-cost document admission guardrails`
+- `AIFA-095 Reuse reranking decisions on form-only reruns`
+- `AIFA-096 Add citation-required LLM governing-date extraction for unresolved cases`
 
 ## Follow-on Maintenance Ticket
 
@@ -344,10 +371,22 @@ Keep this scoped to first-pass document admission and indexing guardrails only. 
 
 ## Recommended Upcoming Order
 
-1. `AIFA-094 Add progressive-cost document admission guardrails`
-2. `AIFA-090 Persist embedding identity on AI validation artifacts`
-3. `AIFA-091 Centralize AI validation runtime and provider configuration`
-4. `AIFA-092 Extract explicit AI validation worker launch contract`
+1. `AIFA-095 Reuse reranking decisions on form-only reruns`
+2. `AIFA-096 Add citation-required LLM governing-date extraction for unresolved cases`
+3. `AIFA-090 Persist embedding identity on AI validation artifacts`
+4. `AIFA-091 Centralize AI validation runtime and provider configuration`
+5. `AIFA-092 Extract explicit AI validation worker launch contract`
+
+## AIFA-094 Closeout Notes
+
+- Added progressive-cost first-pass admission screening on the `gated-first-pass` path so costly low-yield PDFs can be deferred before chunk/embed work.
+- The guardrail now applies regardless of total submission count and uses cheap signals such as filename/type hints, page count, file size, and a small early text sample.
+- Fresh large-batch runs improved materially: the usual `165`-document local batch completed in about `34s`, materially faster than the earlier `~62s` session benchmark, while giant `A03 Text` / `Rates Text` bodies stayed out of expensive indexing.
+- The form-only rerun regression was fixed: unchanged giant low-yield documents no longer bypass screening, and `177e9eb0-5c0a-402b-8012-5048f27bbf92` confirmed reruns can stay at `0` parse/OCR/chunk/embed work while still completing.
+- Explicit deferred diagnostics are now preserved for cost-screened documents instead of being overwritten later by generic `deferred-first-pass` merge behavior.
+- New follow-up risks:
+  - form-only reruns still spend too much time in advisory reranking when document inputs are unchanged, which is now queued as `AIFA-095`
+  - cross-state clause recognition still has a quality gap, shown by `526baa9e-7e1b-493f-ab30-5fb0a942ea53`, where the worker extracted `Period of Contract: January 1, 2025 through December 30, 2027` but still returned `not-enough-evidence`
 
 ## AIFA-093 Closeout Notes
 
