@@ -30,17 +30,11 @@ import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { LogGroup } from 'aws-cdk-lib/aws-logs'
 import { ResourceNames } from '../config/shared'
 import { isReviewEnvironment } from '../config/environments'
-import {
-    Architecture,
-    Runtime,
-    LayerVersion,
-    type ILayerVersion,
-} from 'aws-cdk-lib/aws-lambda'
+import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
-import { AWS_OTEL_LAYER_ARN } from './constants'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
@@ -74,9 +68,6 @@ export class AppApiStack extends BaseStack {
     public readonly restoreIAToStandardFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
-
-    // Shared OTEL layer for all functions
-    private readonly otelLayer: ILayerVersion
 
     // Network resources from Network stack
     private readonly vpc: IVpc
@@ -233,19 +224,12 @@ export class AppApiStack extends BaseStack {
             },
         })
 
-        // Create OTEL layer for all functions (matches serverless provider-level default)
-        this.otelLayer = LayerVersion.fromLayerVersionArn(
-            this,
-            'OtelLayer',
-            AWS_OTEL_LAYER_ARN
-        )
-
         // Populate common lambda parameters into variables to be used during function creation
         const securityGroups = this.getLambdaSecurityGroups()
         const role = this.createLambdaRole()
         const environment = this.getLambdaEnvironment()
 
-        // Create simple Lambda functions first (no VPC, layers, or complex dependencies)
+        // Create simple Lambda functions first (no VPC or complex dependencies)
         this.healthFunction = this.createLambdaFunction(
             'health',
             'health_check',
@@ -255,7 +239,6 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.otelLayer],
             }
         )
 
@@ -268,11 +251,8 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.otelLayer],
             }
         )
-
-        // OTEL function needs the ADOT layer and collector.yml file
 
         this.otelFunction = new NodejsFunction(this, 'otelFunction', {
             functionName: `${ResourceNames.apiName('app-api', this.stage)}-otel`,
@@ -293,10 +273,6 @@ export class AppApiStack extends BaseStack {
             memorySize: 1024,
             environment,
             role,
-            layers: [this.otelLayer],
-            bundling: this.createBundling('otel', [
-                this.getOtelBundlingCommands(),
-            ]),
         })
 
         this.thirdPartyApiAuthorizerFunction = this.createLambdaFunction(
@@ -308,7 +284,6 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.otelLayer],
             }
         )
 
@@ -322,7 +297,6 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -332,7 +306,6 @@ export class AppApiStack extends BaseStack {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling('oauth-token', [
-                        this.getOtelBundlingCommands(),
                         this.getPrismaCleanupCommands(),
                     ]),
                 },
@@ -348,7 +321,6 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.otelLayer],
             }
         )
 
@@ -385,7 +357,6 @@ export class AppApiStack extends BaseStack {
                     CONNECT_TIMEOUT: '60',
                 },
                 role,
-                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -399,7 +370,6 @@ export class AppApiStack extends BaseStack {
                     ...this.createBundling(
                         'migrate',
                         [
-                            this.getOtelBundlingCommands(),
                             this.getPrismaSchemaAndMigrationsBundlingCommands(),
                             this.getPrismaCleanupCommands(),
                         ],
@@ -423,7 +393,6 @@ export class AppApiStack extends BaseStack {
                 memorySize: 4096, // Higher memory for zip operations
                 environment,
                 role,
-                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -433,7 +402,6 @@ export class AppApiStack extends BaseStack {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling('regenerate-zips', [
-                        this.getOtelBundlingCommands(),
                         this.getPrismaCleanupCommands(),
                     ]),
                 },
@@ -453,7 +421,6 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -463,7 +430,6 @@ export class AppApiStack extends BaseStack {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling('migrate-s3-urls', [
-                        this.getOtelBundlingCommands(),
                         this.getPrismaCleanupCommands(),
                     ]),
                 },
@@ -526,14 +492,6 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role: restoreIAToStandardRole,
-                layers: [this.otelLayer],
-                bundling: {
-                    format: OutputFormat.ESM,
-                    banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling('restore-ia-to-standard', [
-                        this.getOtelBundlingCommands(),
-                    ]),
-                },
             }
         )
 
@@ -547,7 +505,6 @@ export class AppApiStack extends BaseStack {
                 memorySize: 1024,
                 environment,
                 role,
-                layers: [this.otelLayer],
                 vpc: this.vpc,
                 vpcSubnets: {
                     subnetType: SubnetType.PRIVATE_WITH_EGRESS,
@@ -563,7 +520,6 @@ export class AppApiStack extends BaseStack {
                     ...this.createBundling(
                         'graphql',
                         [
-                            this.getOtelBundlingCommands(),
                             this.getEtaTemplatesBundlingCommands(),
                             this.getPrismaCleanupCommands(),
                         ],
@@ -586,23 +542,6 @@ export class AppApiStack extends BaseStack {
         this.setupCleanupSchedule()
 
         this.createOutputs()
-    }
-
-    /**
-     * Get OTEL-specific bundling commands (collector.yml copy and API key replacement)
-     * Matches behavior from serverless esbuild configuration
-     */
-    private getOtelBundlingCommands(): (
-        outputDir: string,
-        appApiPath: string
-    ) => string[] {
-        return (outputDir: string, appApiPath: string) => [
-            // Copy collector.yml for OTEL configuration
-            `cp "${appApiPath}/collector.yml" "${outputDir}/collector.yml" || echo "collector.yml not found at ${appApiPath}/collector.yml"`,
-            // Replace Datadog API key placeholder with actual value (matches esbuild behavior)
-            // Use sed that works on both macOS and Linux
-            `sed -i.bak 's/\\$DD_API_KEY/${process.env.DD_API_KEY || ''}/g' "${outputDir}/collector.yml" && rm -f "${outputDir}/collector.yml.bak"`,
-        ]
     }
 
     /**
@@ -696,7 +635,6 @@ export class AppApiStack extends BaseStack {
                 beforeBundling(inputDir: string, outputDir: string): string[] {
                     return [
                         `echo "CDK bundling ${functionName} - inputDir: ${inputDir}"`,
-                        `find ${inputDir} -name "collector.yml" 2>/dev/null || true`,
                     ]
                 },
                 beforeInstall(): string[] {
@@ -737,9 +675,7 @@ export class AppApiStack extends BaseStack {
                 'handlers',
                 `${handlerFile}.ts`
             ),
-            bundling: this.createBundling(functionName, [
-                this.getOtelBundlingCommands(),
-            ]),
+            bundling: this.createBundling(functionName),
             ...options,
         })
     }
@@ -993,7 +929,7 @@ export class AppApiStack extends BaseStack {
             EMAILER_MODE: emailerMode,
             PARAMETER_STORE_MODE: parameterStoreMode,
             APPLICATION_ENDPOINT: applicationEndpoint,
-            OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yml',
+
             DD_API_KEY: process.env.DD_API_KEY || '',
             LD_SDK_KEY: ldSdkKey,
             JWT_SECRET: jwtSecret,
