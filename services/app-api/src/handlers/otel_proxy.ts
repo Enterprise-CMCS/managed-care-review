@@ -26,9 +26,10 @@ const main: APIGatewayProxyHandler = async (event) => {
 
     try {
         const response = await axios.post(DD_TRACES_URL, event.body, options)
-        console.info(
-            `otel_proxy: forwarded to datadog, status=${response.status}`
-        )
+        console.info(`otel_proxy: forwarded to datadog`, {
+            status: response.status,
+            responseData: response.data,
+        })
     } catch (err) {
         const parsed = parseErrorToError(err)
         const axiosErr = err as {
