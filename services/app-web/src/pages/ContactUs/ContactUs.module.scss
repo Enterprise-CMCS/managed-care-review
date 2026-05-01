@@ -1,0 +1,71 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+@mixin contact-body-text {
+    @include custom.mcr-type-style(1rem, 400, 162%, 0.01rem);
+}
+
+@mixin contact-link-color {
+    a {
+        color: uswds.color('primary');
+
+        &:hover,
+        &:active,
+        &:visited {
+            color: uswds.color('primary');
+        }
+    }
+}
+
+.pageWrapper {
+    margin-bottom: 2.625rem;
+}
+
+.pageContainer {
+    max-width: custom.$mcr-container-max-width-fixed;
+    padding-top: 2rem;
+    padding-left: 2rem;
+
+    h1 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+}
+
+.contactIntro {
+    @include contact-body-text;
+    @include contact-link-color;
+    margin: 0 0 1rem;
+    max-width: custom.$mcr-container-max-width-fixed;
+}
+
+.contactLead {
+    @include contact-body-text;
+    margin: 0 0 0.5rem;
+    max-width: custom.$mcr-container-max-width-fixed;
+}
+
+.contactList {
+    margin: 0;
+    max-width: custom.$mcr-container-max-width-fixed;
+    padding-left: 1.5rem;
+
+    li {
+        margin-bottom: 1rem;
+    }
+
+    li:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.contactListItem {
+    @include custom.mcr-type-style(1rem, 700, 162%, 0.01rem);
+    margin: 0;
+}
+
+.contactListItemLast {
+    @include contact-body-text;
+    @include contact-link-color;
+    margin: 0;
+}

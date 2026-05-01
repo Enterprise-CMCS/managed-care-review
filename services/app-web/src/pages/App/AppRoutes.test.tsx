@@ -20,6 +20,34 @@ describe('AppRoutes and routing configuration', () => {
     afterAll(() => {
         vi.clearAllMocks()
     })
+
+    const expectContactUsPage = () => {
+        expect(
+            screen.getByRole('heading', {
+                name: /Contact us/i,
+                level: 1,
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('link', {
+                name: /FAQ page/i,
+            })
+        ).toHaveAttribute(
+            'href',
+            'https://www.medicaid.gov/resources-for-states/managed-care-review-mc-review/managed-care-review-faqs'
+        )
+        expect(
+            screen.getByRole('link', {
+                name: /MCGDMCOactions@cms\.hhs\.gov/i,
+            })
+        ).toHaveAttribute('href', 'mailto:MCGDMCOactions@cms.hhs.gov')
+        expect(
+            screen.getByRole('link', {
+                name: /MC_Review_HelpDesk@cms\.hhs\.gov/i,
+            })
+        ).toHaveAttribute('href', 'mailto:MC_Review_HelpDesk@cms.hhs.gov')
+    }
+
     describe('/[root]', () => {
         it('state dashboard when state user logged in', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
@@ -228,12 +256,7 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Contact Us/i,
-                        level: 1,
-                    })
-                ).toBeInTheDocument()
+                expectContactUsPage()
             })
         })
 
@@ -255,12 +278,7 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Contact Us/i,
-                        level: 1,
-                    })
-                ).toBeInTheDocument()
+                expectContactUsPage()
             })
         })
 
@@ -278,12 +296,7 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Contact Us/i,
-                        level: 1,
-                    })
-                ).toBeInTheDocument()
+                expectContactUsPage()
             })
         })
 
