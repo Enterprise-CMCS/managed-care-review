@@ -1,13 +1,7 @@
 {
   "extends": "stylelint-config-recommended-scss",
   "rules": {
-      "color-no-hex": true,
-      "selector-pseudo-class-no-unknown": [
-        true,
-        {
-          "ignorePseudoClasses": ["global"]
-        }
-      ]
+      "color-no-hex": true
     },
     "overrides": [
       {
