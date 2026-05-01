@@ -1769,6 +1769,7 @@ async function rerankValidationDocuments(args: {
         cachedSampleCount: 0,
         freshSampleCount: 0,
         sampleUnavailableCount: 0,
+        reusedDecisionCount: 0,
         llmRequestCount: 0,
         timedOutCount: 0,
         sampleFetchElapsedMs: 0,
@@ -1799,6 +1800,7 @@ async function rerankValidationDocuments(args: {
             sampleFetchElapsedMs: 0,
             llmElapsedMs: 0,
             sampleSource: 'cached' as const,
+            reusedDecision: true,
             llmRequested: false,
             timedOut: false
           }
@@ -1828,6 +1830,7 @@ async function rerankValidationDocuments(args: {
               sampleFetchElapsedMs,
               llmElapsedMs: 0,
               sampleSource,
+              reusedDecision: false,
               llmRequested,
               timedOut: false
             }
@@ -1864,6 +1867,7 @@ async function rerankValidationDocuments(args: {
               sampleFetchElapsedMs,
               llmElapsedMs,
               sampleSource,
+              reusedDecision: false,
               llmRequested,
               timedOut: true
             }
@@ -1886,6 +1890,7 @@ async function rerankValidationDocuments(args: {
               sampleFetchElapsedMs,
               llmElapsedMs,
               sampleSource,
+              reusedDecision: false,
               llmRequested,
               timedOut: false
             }
@@ -1899,6 +1904,7 @@ async function rerankValidationDocuments(args: {
             sampleFetchElapsedMs,
             llmElapsedMs,
             sampleSource,
+            reusedDecision: false,
             llmRequested,
             timedOut: false
           }
@@ -1914,6 +1920,7 @@ async function rerankValidationDocuments(args: {
             sampleFetchElapsedMs: Date.now() - sampleStartedAt,
             llmElapsedMs: 0,
             sampleSource,
+            reusedDecision: false,
             llmRequested,
             timedOut: false
           }
@@ -1938,6 +1945,9 @@ async function rerankValidationDocuments(args: {
     ).length,
     sampleUnavailableCount: rerankedAdjustments.filter(
       ([, , diagnostic]) => diagnostic.sampleSource == null
+    ).length,
+    reusedDecisionCount: rerankedAdjustments.filter(
+      ([, , diagnostic]) => diagnostic.reusedDecision
     ).length,
     llmRequestCount: rerankedAdjustments.filter(
       ([, , diagnostic]) => diagnostic.llmRequested
@@ -2019,7 +2029,7 @@ async function rerankValidationDocuments(args: {
   }
 }
 
-function isReusableSuccessfulRerankingReason(reason: string): boolean {
+function isReusableRerankingReason(reason: string): boolean {
   return (
     reason.startsWith('LLM reranking kept this document earlier because') ||
     reason.startsWith(
@@ -2031,7 +2041,12 @@ function isReusableSuccessfulRerankingReason(reason: string): boolean {
     reason.startsWith(
       'LLM reranking slightly lowered this document because'
     ) ||
-    reason === 'LLM reranking kept the heuristic score unchanged.'
+    reason === 'LLM reranking kept the heuristic score unchanged.' ||
+    reason ===
+      'LLM reranking exceeded the per-call time budget; kept heuristic first-pass ranking.' ||
+    reason === 'LLM reranking failed; kept heuristic first-pass ranking.' ||
+    reason === 'LLM reranking response was unusable; kept heuristic score.' ||
+    reason === 'Sample unavailable; kept heuristic first-pass ranking.'
   )
 }
 
@@ -2069,9 +2084,11 @@ export function buildReusableRerankingAdjustmentByCacheKey(args: {
       }
 
       const currentDiagnostic = scoredDocumentByCacheKey.get(cacheKey)
-      const reusableReason = diagnostic.workSelection.priorityReasons.find(
-        isReusableSuccessfulRerankingReason
-      )
+      // Form-only reruns should not keep re-paying advisory reranking for
+      // unchanged docs. Reuse both prior score-changing outcomes and prior
+      // no-op fallbacks so reruns can stay on the same heuristic decision.
+      const reusableReason =
+        diagnostic.workSelection.priorityReasons.find(isReusableRerankingReason)
 
       if (currentDiagnostic == null || reusableReason == null) {
         return []

@@ -921,7 +921,7 @@ test('buildReusableRerankingAdjustmentByCacheKey reuses prior successful reranki
   })
 })
 
-test('buildReusableRerankingAdjustmentByCacheKey ignores prior reranking failures', () => {
+test('buildReusableRerankingAdjustmentByCacheKey reuses prior reranking failures as no-op adjustments', () => {
   const document = {
     documentName: 'plan-a 23-30001 amendment.pdf',
     sourceBucket: 'uploads',
@@ -961,10 +961,13 @@ test('buildReusableRerankingAdjustmentByCacheKey ignores prior reranking failure
     reusableRerankingDocumentCacheKeys: new Set([cacheKey])
   })
 
-  assert.equal(reusableAdjustments.size, 0)
+  assert.deepEqual(reusableAdjustments.get(cacheKey), {
+    scoreDelta: 0,
+    reason: 'LLM reranking failed; kept heuristic first-pass ranking.'
+  })
 })
 
-test('buildReusableRerankingAdjustmentByCacheKey ignores prior reranking timeouts', () => {
+test('buildReusableRerankingAdjustmentByCacheKey reuses prior reranking timeouts as no-op adjustments', () => {
   const document = {
     documentName: 'plan-a 23-30001 amendment.pdf',
     sourceBucket: 'uploads',
@@ -1004,7 +1007,11 @@ test('buildReusableRerankingAdjustmentByCacheKey ignores prior reranking timeout
     reusableRerankingDocumentCacheKeys: new Set([cacheKey])
   })
 
-  assert.equal(reusableAdjustments.size, 0)
+  assert.deepEqual(reusableAdjustments.get(cacheKey), {
+    scoreDelta: 0,
+    reason:
+      'LLM reranking exceeded the per-call time budget; kept heuristic first-pass ranking.'
+  })
 })
 
 test('buildFieldWorkSelectionDiagnostics triggers conservative fallback reasons for weak ambiguous partial evidence', () => {

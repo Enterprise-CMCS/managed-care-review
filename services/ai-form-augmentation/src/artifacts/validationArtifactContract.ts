@@ -33,6 +33,7 @@ export interface ValidationRerankingDiagnostics {
   cachedSampleCount: number
   freshSampleCount: number
   sampleUnavailableCount: number
+  reusedDecisionCount: number
   llmRequestCount: number
   timedOutCount: number
   sampleFetchElapsedMs: number

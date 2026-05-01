@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-095 Reuse reranking decisions on form-only reruns`.
+The next implementation ticket is `AIFA-096 Add citation-required LLM governing-date extraction for unresolved cases`.
 
 ## Completed
 
@@ -98,6 +98,7 @@ The next implementation ticket is `AIFA-095 Reuse reranking decisions on form-on
 - AIFA-081 ✔ Remove stale duplicate app-api AI validation behavior tests
 - AIFA-094 ✔ Add progressive-cost document admission guardrails
 - AIFA-093 ✔ Bound large-batch reranking latency
+- AIFA-095 ✔ Reuse reranking decisions on form-only reruns
 
 ## Current State
 
@@ -355,14 +356,12 @@ Keep this scoped to first-pass document admission and indexing guardrails only. 
 
 ## Suggested Next Step
 
-- Reuse prior reranking decisions on form-only reruns so unchanged documents do not trigger fresh advisory LLM calls unnecessarily.
-- Keep the new admission/indexing guardrails from AIFA-094 intact while cutting rerun latency further.
-- Verify large form-only reruns complete faster without reintroducing giant-document admission regressions.
+- Add citation-required governing-date extraction for unresolved cases after deterministic extraction misses.
+- Keep deterministic clause resolution as the cheap fast-path for obvious governing evidence.
+- Use the Kansas-style miss from `526baa9e-7e1b-493f-ab30-5fb0a942ea53` as the concrete regression fixture.
 
 ## Follow-on Performance Tickets
 
-- `AIFA-094 Add progressive-cost document admission guardrails`
-- `AIFA-095 Reuse reranking decisions on form-only reruns`
 - `AIFA-096 Add citation-required LLM governing-date extraction for unresolved cases`
 
 ## Follow-on Maintenance Ticket
@@ -371,11 +370,23 @@ Keep this scoped to first-pass document admission and indexing guardrails only. 
 
 ## Recommended Upcoming Order
 
-1. `AIFA-095 Reuse reranking decisions on form-only reruns`
-2. `AIFA-096 Add citation-required LLM governing-date extraction for unresolved cases`
-3. `AIFA-090 Persist embedding identity on AI validation artifacts`
-4. `AIFA-091 Centralize AI validation runtime and provider configuration`
-5. `AIFA-092 Extract explicit AI validation worker launch contract`
+1. `AIFA-096 Add citation-required LLM governing-date extraction for unresolved cases`
+2. `AIFA-090 Persist embedding identity on AI validation artifacts`
+3. `AIFA-091 Centralize AI validation runtime and provider configuration`
+4. `AIFA-092 Extract explicit AI validation worker launch contract`
+
+## AIFA-095 Closeout Notes
+
+- Reused compatible prior reranking outcomes for unchanged documents on form-only reruns instead of issuing fresh advisory LLM calls again.
+- Persisted additive reranking diagnostics now make reuse explicit via `reusedDecisionCount`.
+- Fresh-run behavior did not regress: `3e2e4a3a-84b8-4b24-8d2b-26ed94da77bd` still completed in about `35s`, in line with the strong post-`AIFA-094` large-batch baseline.
+- Form-only rerun latency dropped materially on that same contract:
+  - rerun completed in about `2s`
+  - `fetch/parse/ocr/chunk/embed` all stayed at `0`
+  - reranking reused all `8` decisions with `llmRequestCount: 0` and `reusedDecisionCount: 8`
+- New follow-up risks:
+  - reruns now intentionally reuse prior no-op reranking outcomes for unchanged documents instead of retrying those advisory calls
+  - cross-state clause recognition remains the next quality bottleneck, shown by `526baa9e-7e1b-493f-ab30-5fb0a942ea53`
 
 ## AIFA-094 Closeout Notes
 
