@@ -1216,3 +1216,9 @@ AIFA-093 Bound large-batch reranking latency,Backlog,7-Large Submission Hardenin
 - Small and moderate submissions keep the current reranking behavior
 - Single-document submissions continue to skip reranking entirely
 - Large-batch wall-clock latency improves materially on the 100+ document local fixture without changing Review-page contract or result artifact shape beyond additive diagnostics"
+AIFA-094 Add giant low-yield document indexing guardrails,Backlog,7-Large Submission Hardening,High,"AIFA-093","Reduce pathological first-pass indexing time on obviously irrelevant giant PDFs by adding document-level cost/relevance guardrails that do not depend on total submission count. Scope includes hard defer-or-skip behavior for massive documents whose sampled text clearly looks low-yield for start/end-date validation, plus explicit diagnostics explaining why they were bypassed. Do not change: Review-page behavior, field scope, core validation semantics, or the requirement that deferred giant documents still remain eligible for conservative fallback when first-pass evidence is insufficient.","- Giant-document low-yield guardrails apply based on document characteristics rather than total submission count alone
+- Massive documents whose sampled text clearly looks low-yield for start/end-date validation are deferred or skipped before full chunk/embed work in first pass
+- Small submissions with giant irrelevant PDFs no longer remain stuck in `parsing` because those documents are fully indexed up front
+- Persisted diagnostics make it clear when giant documents were bypassed for cost/relevance reasons
+- Conservative fallback behavior remains intact when first-pass evidence is partial, weak, or missing
+- Large relevant documents that present strong date-governing sampled text are not blanket-skipped solely because of size"

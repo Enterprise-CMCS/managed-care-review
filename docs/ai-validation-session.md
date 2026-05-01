@@ -325,17 +325,29 @@ Reduce large-submission first-pass latency by adding:
 
 Keep this scoped to the advisory reranking layer only. Do not change Review-page behavior, core validation semantics, or the existing single-document reranking bypass.
 
+### AIFA-094 Add giant low-yield document indexing guardrails
+
+Reduce pathological indexing time on obviously irrelevant giant PDFs by adding document-level guardrails that do not depend on total submission count.
+
+- apply giant-document low-yield screening to any submission size
+- defer or skip first-pass indexing when a massive document sample is clearly irrelevant to start/end-date validation
+- persist explicit diagnostics when a giant document is bypassed for cost/relevance reasons
+
+Keep this scoped to first-pass document admission and indexing guardrails only. Do not change Review-page behavior, field scope, or the existing conservative fallback requirement when strong first-pass evidence is not available.
+
 ## Suggested Next Step
 
 - Start with a bounded large-batch reranking change that:
   - caps worst-case reranking latency per LLM call
   - reduces reranking call volume on very large submissions
-- Re-measure 100+ document runs after that change before doing more AWS prep work.
+- Follow immediately with giant low-yield document indexing guardrails so small submissions with huge irrelevant PDFs do not still hang in `parsing`.
+- Re-measure both 100+ document runs and small mixed submissions after those two changes before doing more AWS prep work.
 - Keep the change behavior-preserving outside the advisory first-pass selection layer.
 
 ## Follow-on Performance Tickets
 
 - `AIFA-093 Bound large-batch reranking latency`
+- `AIFA-094 Add giant low-yield document indexing guardrails`
 
 ## Follow-on Maintenance Ticket
 
@@ -344,9 +356,10 @@ Keep this scoped to the advisory reranking layer only. Do not change Review-page
 ## Recommended Upcoming Order
 
 1. `AIFA-093 Bound large-batch reranking latency`
-2. `AIFA-090 Persist embedding identity on AI validation artifacts`
-3. `AIFA-091 Centralize AI validation runtime and provider configuration`
-4. `AIFA-092 Extract explicit AI validation worker launch contract`
+2. `AIFA-094 Add giant low-yield document indexing guardrails`
+3. `AIFA-090 Persist embedding identity on AI validation artifacts`
+4. `AIFA-091 Centralize AI validation runtime and provider configuration`
+5. `AIFA-092 Extract explicit AI validation worker launch contract`
 
 ## AIFA-081 Closeout Notes
 
