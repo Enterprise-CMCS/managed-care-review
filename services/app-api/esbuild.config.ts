@@ -18,32 +18,6 @@ export default () => {
         },
         plugins: [
             {
-                name: 'copy-and-replace-collector',
-                setup(build: PluginBuild) {
-                    // copy collector.yml to the build directory
-                    build.onStart(() => {
-                        fs.copyFileSync(
-                            'collector.yml',
-                            '.esbuild/.build/collector.yml'
-                        )
-                    })
-
-                    // replace the api key placeholder
-                    build.onEnd(() => {
-                        const filePath = path.join(
-                            __dirname,
-                            '.esbuild/.build/collector.yml'
-                        )
-                        let contents = fs.readFileSync(filePath, 'utf8')
-                        contents = contents.replace(
-                            '$DD_API_KEY',
-                            process.env.DD_API_KEY ?? 'undefined'
-                        )
-                        fs.writeFileSync(filePath, contents)
-                    })
-                },
-            },
-            {
                 name: 'copy-eta-templates',
                 setup(build: PluginBuild) {
                     build.onStart(async () => {
