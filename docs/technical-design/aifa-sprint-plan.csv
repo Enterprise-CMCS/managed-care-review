@@ -1197,3 +1197,22 @@ AIFA-081 Remove stale duplicate app-api AI validation behavior tests,Done,Cleanu
 - Canonical worker behavior coverage remains intact and continues to be the source of truth for worker behavior assertions
 - App-api validation test runs no longer fail because of duplicated stale worker expectations
 - No runtime behavior, artifact behavior, or resolver behavior change"
+AIFA-090 Persist embedding identity on AI validation artifacts,Backlog,AWS Migration Prep,Medium,,"Add provider/model identity to embedding-dependent AI validation artifacts and reject incompatible reuse so a future AWS provider swap cannot silently mix Xenova and AWS-built vectors. Do not change: artifact keys, validation semantics, Review-page behavior, or field scope.","- Embedding-dependent artifacts persist `embeddingProvider` and `embeddingModel`
+- Vector dimension is persisted if it is cheap to capture without changing behavior
+- Reuse rejects provider/model mismatch across local vs future AWS providers and differing AWS embedding model IDs
+- Parsed-text-only artifacts remain reusable where appropriate
+- Current local product behavior remains unchanged aside from additive metadata and safer reuse checks"
+AIFA-091 Centralize AI validation runtime and provider configuration,Backlog,AWS Migration Prep,Low,,"Move current local runtime/provider assumptions behind one explicit config boundary so future AWS-mode introduction does not depend on scattered defaults. Do not change: local-first behavior, GraphQL contract, validation behavior, or Review-page behavior.","- Current local defaults are preserved
+- Provider/runtime assumptions are defined in one clear place
+- Local S3, local model, and artifact bucket assumptions are no longer scattered ad hoc
+- No product behavior or GraphQL contract changes occur"
+AIFA-092 Extract explicit AI validation worker launch contract,Backlog,AWS Migration Prep,Low,AIFA-091,"Define a single explicit typed payload contract for the worker launch boundary and use it consistently across local and Lambda execution. Do not change: worker behavior, artifactVersion semantics, Review-page behavior, or field scope.","- One explicit launch contract exists for the worker payload
+- `triggerValidation` builds that payload through a clear boundary
+- Local execution and Lambda invocation use the same payload shape
+- No launch timing, artifactVersion, or worker behavior semantics change"
+AIFA-093 Bound large-batch reranking latency,Backlog,7-Large Submission Hardening,Medium,,"Reduce large-submission first-pass latency by bounding the advisory reranking layer rather than changing core validation behavior. Scope includes a per-call reranking LLM timeout with explicit timeout diagnostics and a stricter reranking candidate cap for very large batches. Do not change: Review-page behavior, artifact contracts, field scope, single-document reranking bypass, or core deterministic/LLM validation semantics outside advisory first-pass selection.","- Advisory reranking LLM calls have a bounded per-call timeout and timed-out reranking attempts fall back to the existing heuristic-score path
+- Persisted reranking diagnostics distinguish timeout-driven fallback from generic reranking failure and include a timed-out count
+- Very large submissions use a stricter reranking candidate cap than the normal 18-candidate path
+- Small and moderate submissions keep the current reranking behavior
+- Single-document submissions continue to skip reranking entirely
+- Large-batch wall-clock latency improves materially on the 100+ document local fixture without changing Review-page contract or result artifact shape beyond additive diagnostics"

@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-No AI validation implementation ticket is currently queued.
+The next implementation ticket is `AIFA-093 Bound large-batch reranking latency`.
 
 ## Completed
 
@@ -316,16 +316,26 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-none currently queued
+### AIFA-093 Bound large-batch reranking latency
+
+Reduce large-submission first-pass latency by adding:
+
+- a per-call reranking LLM timeout with explicit diagnostics
+- a stricter reranking candidate cap for very large batches
+
+Keep this scoped to the advisory reranking layer only. Do not change Review-page behavior, core validation semantics, or the existing single-document reranking bypass.
 
 ## Suggested Next Step
 
-- Hold further AI validation work until a new ticket is explicitly approved.
-- Use the committed session file and sprint CSV as the source of truth for any future follow-up.
+- Start with a bounded large-batch reranking change that:
+  - caps worst-case reranking latency per LLM call
+  - reduces reranking call volume on very large submissions
+- Re-measure 100+ document runs after that change before doing more AWS prep work.
+- Keep the change behavior-preserving outside the advisory first-pass selection layer.
 
 ## Follow-on Performance Tickets
 
-- none currently queued
+- `AIFA-093 Bound large-batch reranking latency`
 
 ## Follow-on Maintenance Ticket
 
@@ -333,7 +343,10 @@ none currently queued
 
 ## Recommended Upcoming Order
 
-none currently queued
+1. `AIFA-093 Bound large-batch reranking latency`
+2. `AIFA-090 Persist embedding identity on AI validation artifacts`
+3. `AIFA-091 Centralize AI validation runtime and provider configuration`
+4. `AIFA-092 Extract explicit AI validation worker launch contract`
 
 ## AIFA-081 Closeout Notes
 
