@@ -34,6 +34,7 @@ export interface ValidationRerankingDiagnostics {
   freshSampleCount: number
   sampleUnavailableCount: number
   llmRequestCount: number
+  timedOutCount: number
   sampleFetchElapsedMs: number
   // This is the aggregate request time across reranking calls, not a wall-clock
   // span, so concurrent runs can make it larger than totalElapsedMs.

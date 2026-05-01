@@ -2,7 +2,7 @@
 
 ## Current Ticket
 
-The next implementation ticket is `AIFA-093 Bound large-batch reranking latency`.
+The next implementation ticket is `AIFA-094 Add progressive-cost document admission guardrails`.
 
 ## Completed
 
@@ -96,6 +96,7 @@ The next implementation ticket is `AIFA-093 Bound large-batch reranking latency`
 - AIFA-078 ✔ Correct fallback-pass status progression
 - AIFA-079 ✔ Introduce typed artifact-not-found handling
 - AIFA-081 ✔ Remove stale duplicate app-api AI validation behavior tests
+- AIFA-093 ✔ Bound large-batch reranking latency
 
 ## Current State
 
@@ -316,38 +317,26 @@ The main change in direction is that the PoC is no longer framed as "general doc
 
 ## Next Tickets
 
-### AIFA-093 Bound large-batch reranking latency
+### AIFA-094 Add progressive-cost document admission guardrails
 
-Reduce large-submission first-pass latency by adding:
+Reduce unacceptable first-pass latency on small and large submissions by deciding more cheaply which documents deserve expensive indexing work.
 
-- a per-call reranking LLM timeout with explicit diagnostics
-- a stricter reranking candidate cap for very large batches
-
-Keep this scoped to the advisory reranking layer only. Do not change Review-page behavior, core validation semantics, or the existing single-document reranking bypass.
-
-### AIFA-094 Add giant low-yield document indexing guardrails
-
-Reduce pathological indexing time on obviously irrelevant giant PDFs by adding document-level guardrails that do not depend on total submission count.
-
-- apply giant-document low-yield screening to any submission size
-- defer or skip first-pass indexing when a massive document sample is clearly irrelevant to start/end-date validation
-- persist explicit diagnostics when a giant document is bypassed for cost/relevance reasons
+- apply per-document cost/relevance screening regardless of total submission count
+- use cheap signals such as filename/type heuristics, page count, file size, and a small early text sample before full chunk/embed work
+- defer or skip expensive first-pass indexing when a document is both costly and clearly low-yield for start/end-date validation
+- persist explicit diagnostics when a document is bypassed for cost/relevance reasons
 
 Keep this scoped to first-pass document admission and indexing guardrails only. Do not change Review-page behavior, field scope, or the existing conservative fallback requirement when strong first-pass evidence is not available.
 
 ## Suggested Next Step
 
-- Start with a bounded large-batch reranking change that:
-  - caps worst-case reranking latency per LLM call
-  - reduces reranking call volume on very large submissions
-- Follow immediately with giant low-yield document indexing guardrails so small submissions with huge irrelevant PDFs do not still hang in `parsing`.
-- Re-measure both 100+ document runs and small mixed submissions after those two changes before doing more AWS prep work.
-- Keep the change behavior-preserving outside the advisory first-pass selection layer.
+- Add progressive-cost document admission guardrails so low-yield PDFs can be screened cheaply before full chunk/embed work.
+- Re-check both small mixed submissions and large batches after that change, especially runs containing large text-heavy contract artifacts.
+- Keep conservative fallback intact when first-pass evidence is partial, weak, or missing.
 
 ## Follow-on Performance Tickets
 
-- `AIFA-093 Bound large-batch reranking latency`
-- `AIFA-094 Add giant low-yield document indexing guardrails`
+- `AIFA-094 Add progressive-cost document admission guardrails`
 
 ## Follow-on Maintenance Ticket
 
@@ -355,11 +344,17 @@ Keep this scoped to first-pass document admission and indexing guardrails only. 
 
 ## Recommended Upcoming Order
 
-1. `AIFA-093 Bound large-batch reranking latency`
-2. `AIFA-094 Add giant low-yield document indexing guardrails`
-3. `AIFA-090 Persist embedding identity on AI validation artifacts`
-4. `AIFA-091 Centralize AI validation runtime and provider configuration`
-5. `AIFA-092 Extract explicit AI validation worker launch contract`
+1. `AIFA-094 Add progressive-cost document admission guardrails`
+2. `AIFA-090 Persist embedding identity on AI validation artifacts`
+3. `AIFA-091 Centralize AI validation runtime and provider configuration`
+4. `AIFA-092 Extract explicit AI validation worker launch contract`
+
+## AIFA-093 Closeout Notes
+
+- Added a bounded per-call timeout for advisory reranking requests and persisted additive timeout diagnostics via `timedOutCount`.
+- Large submissions now use a stricter reranking candidate cap, while small and moderate submissions keep the prior 18-candidate advisory behavior and single-document runs still skip reranking entirely.
+- The change improved pure reranking cost control, but large mixed batches revealed that first-pass document admission still depends too much on reranking demotion to keep giant low-yield text PDFs out of expensive indexing work.
+- That observed tradeoff makes `AIFA-094` more urgent: progressive-cost document admission needs to handle expensive low-yield PDFs earlier rather than relying on reranking alone.
 
 ## AIFA-081 Closeout Notes
 

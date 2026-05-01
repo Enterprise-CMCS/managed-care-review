@@ -162,6 +162,13 @@ const FIRST_PASS_RERANKING_PRIORITY_CANDIDATE_LIMIT =
 // on large batches the broader pool dominated wall-clock time before any
 // indexed artifacts were even written.
 const FIRST_PASS_RERANKING_CANDIDATE_LIMIT = 18
+// Keep very large submissions on a smaller advisory pool so reranking remains
+// a refinement layer instead of consuming most of the first-pass wall-clock.
+const VERY_LARGE_SUBMISSION_RERANKING_TRIGGER_DOCUMENT_COUNT = 50
+const VERY_LARGE_SUBMISSION_RERANKING_CANDIDATE_LIMIT = 8
+// Bound each advisory reranking request so slow local-model responses fall
+// back to the existing heuristic order instead of blocking the whole first pass.
+const FIRST_PASS_RERANKING_TIMEOUT_MS = 6000
 // Sample only the first two pages because contract term dates usually appear
 // early and later pages rarely justify the extra reranking latency.
 const FIRST_PASS_RERANKING_SAMPLE_PAGE_LIMIT = 2
@@ -258,6 +265,63 @@ export function buildReusableOcrCappedDocumentCacheKeys(args: {
       return currentDocumentCacheKeys.has(cacheKey) ? [cacheKey] : []
     })
   )
+}
+
+type TimedRerankingRequestResult<T> =
+  | {
+      timedOut: true
+      elapsedMs: number
+    }
+  | {
+      timedOut: false
+      elapsedMs: number
+      value: T
+    }
+
+export async function runFirstPassRerankingRequestWithTimeout<T>(args: {
+  timeoutMs: number
+  operation: () => Promise<T>
+}): Promise<TimedRerankingRequestResult<T>> {
+  // Keep timeout enforcement local to reranking for now. This bounds how long
+  // the worker waits on one advisory call without widening the LLM client seam
+  // into provider-specific abort/cancellation behavior in this ticket.
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  const startedAt = Date.now()
+  const operationResultPromise = args
+    .operation()
+    .then((value) => ({ type: 'resolved' as const, value }))
+    .catch((error: unknown) => ({ type: 'rejected' as const, error }))
+
+  try {
+    const result = await Promise.race([
+      operationResultPromise,
+      new Promise<{ type: 'timed-out' }>((resolve) => {
+        timeoutId = setTimeout(() => resolve({ type: 'timed-out' }), args.timeoutMs)
+      })
+    ])
+    const elapsedMs = Date.now() - startedAt
+
+    if (result.type === 'timed-out') {
+      return {
+        timedOut: true,
+        elapsedMs
+      }
+    }
+
+    if (result.type === 'rejected') {
+      throw result.error
+    }
+
+    return {
+      timedOut: false,
+      elapsedMs,
+      value: result.value
+    }
+  } finally {
+    if (timeoutId != null) {
+      clearTimeout(timeoutId)
+    }
+  }
 }
 
 export function buildReusableRerankingCacheKeys(args: {
@@ -1667,6 +1731,7 @@ async function rerankValidationDocuments(args: {
         freshSampleCount: 0,
         sampleUnavailableCount: 0,
         llmRequestCount: 0,
+        timedOutCount: 0,
         sampleFetchElapsedMs: 0,
         llmElapsedMs: 0,
         totalElapsedMs: 0
@@ -1695,7 +1760,8 @@ async function rerankValidationDocuments(args: {
             sampleFetchElapsedMs: 0,
             llmElapsedMs: 0,
             sampleSource: 'cached' as const,
-            llmRequested: false
+            llmRequested: false,
+            timedOut: false
           }
         ] as const
       }
@@ -1723,28 +1789,51 @@ async function rerankValidationDocuments(args: {
               sampleFetchElapsedMs,
               llmElapsedMs: 0,
               sampleSource,
-              llmRequested
+              llmRequested,
+              timedOut: false
             }
           ] as const
         }
         sampleSource = sample.sampleSource
 
         llmRequested = true
-        const llmStartedAt = Date.now()
-        const signal = parseFirstPassRerankingSignal(
-          (
-            await validationClient.generateValidation({
-              prompt: buildFirstPassRerankingPrompt({
-                document: diagnostic.document,
-                formFields: args.event.formFields,
-                pageCount: sample.pageCount,
-                fileSizeBytes: sample.fileSizeBytes,
-                sampleText: sample.sampleText
+        const timedRerankingResponse =
+          await runFirstPassRerankingRequestWithTimeout({
+            timeoutMs: FIRST_PASS_RERANKING_TIMEOUT_MS,
+            operation: () =>
+              validationClient.generateValidation({
+                prompt: buildFirstPassRerankingPrompt({
+                  document: diagnostic.document,
+                  formFields: args.event.formFields,
+                  pageCount: sample.pageCount,
+                  fileSizeBytes: sample.fileSizeBytes,
+                  sampleText: sample.sampleText
+                })
               })
-            })
-          ).rawText
+          })
+        const llmElapsedMs = timedRerankingResponse.elapsedMs
+
+        if (timedRerankingResponse.timedOut) {
+          return [
+            cacheKey,
+            {
+              scoreDelta: 0,
+              reason:
+                'LLM reranking exceeded the per-call time budget; kept heuristic first-pass ranking.'
+            },
+            {
+              sampleFetchElapsedMs,
+              llmElapsedMs,
+              sampleSource,
+              llmRequested,
+              timedOut: true
+            }
+          ] as const
+        }
+
+        const signal = parseFirstPassRerankingSignal(
+          timedRerankingResponse.value.rawText
         )
-        const llmElapsedMs = Date.now() - llmStartedAt
 
         if (signal == null) {
           return [
@@ -1758,7 +1847,8 @@ async function rerankValidationDocuments(args: {
               sampleFetchElapsedMs,
               llmElapsedMs,
               sampleSource,
-              llmRequested
+              llmRequested,
+              timedOut: false
             }
           ] as const
         }
@@ -1770,7 +1860,8 @@ async function rerankValidationDocuments(args: {
             sampleFetchElapsedMs,
             llmElapsedMs,
             sampleSource,
-            llmRequested
+            llmRequested,
+            timedOut: false
           }
         ] as const
       } catch {
@@ -1784,7 +1875,8 @@ async function rerankValidationDocuments(args: {
             sampleFetchElapsedMs: Date.now() - sampleStartedAt,
             llmElapsedMs: 0,
             sampleSource,
-            llmRequested
+            llmRequested,
+            timedOut: false
           }
         ] as const
       }
@@ -1810,6 +1902,9 @@ async function rerankValidationDocuments(args: {
     ).length,
     llmRequestCount: rerankedAdjustments.filter(
       ([, , diagnostic]) => diagnostic.llmRequested
+    ).length,
+    timedOutCount: rerankedAdjustments.filter(
+      ([, , diagnostic]) => diagnostic.timedOut
     ).length,
     sampleFetchElapsedMs: rerankedAdjustments.reduce(
       (total, [, , diagnostic]) => total + diagnostic.sampleFetchElapsedMs,
@@ -1982,11 +2077,15 @@ export function selectFirstPassRerankingCandidates(
         left.originalIndex - right.originalIndex
     )
     .map((entry) => entry.document)
+  const candidateLimit =
+    scoredDocuments.length >= VERY_LARGE_SUBMISSION_RERANKING_TRIGGER_DOCUMENT_COUNT
+      ? VERY_LARGE_SUBMISSION_RERANKING_CANDIDATE_LIMIT
+      : FIRST_PASS_RERANKING_CANDIDATE_LIMIT
   const priorityCandidates = orderedDocuments.slice(
     0,
     Math.min(
       FIRST_PASS_RERANKING_PRIORITY_CANDIDATE_LIMIT,
-      FIRST_PASS_RERANKING_CANDIDATE_LIMIT
+      candidateLimit
     )
   )
   const remainingCandidates = orderedDocuments.slice(priorityCandidates.length)
@@ -2002,7 +2101,7 @@ export function selectFirstPassRerankingCandidates(
   )
 
   for (const candidate of remainingCandidates) {
-    if (candidatePool.length >= FIRST_PASS_RERANKING_CANDIDATE_LIMIT) {
+    if (candidatePool.length >= candidateLimit) {
       break
     }
 
@@ -2020,7 +2119,7 @@ export function selectFirstPassRerankingCandidates(
   }
 
   for (const candidate of remainingCandidates) {
-    if (candidatePool.length >= FIRST_PASS_RERANKING_CANDIDATE_LIMIT) {
+    if (candidatePool.length >= candidateLimit) {
       break
     }
 

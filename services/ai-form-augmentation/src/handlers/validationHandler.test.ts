@@ -18,6 +18,7 @@ import {
   LARGE_BATCH_OCR_FALLBACK_LIMIT,
   LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT,
   mapWithConcurrencyLimit,
+  runFirstPassRerankingRequestWithTimeout,
   selectFirstPassRerankingCandidates,
   selectFirstPassDocuments,
   scoreValidationDocuments
@@ -335,6 +336,34 @@ test('mapWithConcurrencyLimit keeps draining remaining work after earlier items 
   assert.equal(completed.includes(3), true)
 })
 
+test('runFirstPassRerankingRequestWithTimeout returns a timeout result when reranking exceeds the per-call budget', async () => {
+  const result = await runFirstPassRerankingRequestWithTimeout({
+    timeoutMs: 5,
+    operation: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 25))
+      return 'late-response'
+    }
+  })
+
+  assert.equal(result.timedOut, true)
+  assert.ok(result.elapsedMs >= 5)
+})
+
+test('runFirstPassRerankingRequestWithTimeout preserves successful results under the per-call budget', async () => {
+  const result = await runFirstPassRerankingRequestWithTimeout({
+    timeoutMs: 25,
+    operation: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 5))
+      return 'timely-response'
+    }
+  })
+
+  assert.equal(result.timedOut, false)
+  if (!result.timedOut) {
+    assert.equal(result.value, 'timely-response')
+  }
+})
+
 test('createOcrFallbackPolicy preserves OCR fallback for small submissions', () => {
   const shouldAttemptOcrFallback = createOcrFallbackPolicy(
     LARGE_BATCH_OCR_TRIGGER_DOCUMENT_COUNT - 1
@@ -528,6 +557,34 @@ test('selectFirstPassRerankingCandidates skips reranking for a single-document s
   assert.deepEqual(selectFirstPassRerankingCandidates(scoredDocuments), [])
 })
 
+test('selectFirstPassRerankingCandidates uses a stricter candidate cap for very large submissions', () => {
+  const scoredDocuments = Array.from({ length: 60 }, (_, index) => ({
+    document: {
+      documentName: `plan-${String(index + 1).padStart(2, '0')} 23-${String(
+        30000 + index
+      )} amendment.pdf`,
+      sourceBucket: 'uploads',
+      sourceKey: `contracts/plan-${String(index + 1).padStart(2, '0')}.pdf`
+    },
+    workSelection: {
+      priorityScore: 100 - index,
+      priorityReasons: ['synthetic test priority'],
+      bucket:
+        index < DIAGNOSTIC_FIRST_PASS_DOCUMENT_LIMIT
+          ? ('first-pass' as const)
+          : ('deferred' as const)
+    }
+  }))
+
+  const candidates = selectFirstPassRerankingCandidates(scoredDocuments)
+
+  assert.equal(candidates.length, 8)
+  assert.deepEqual(
+    candidates.map((candidate) => candidate.document.documentName),
+    scoredDocuments.slice(0, 8).map((candidate) => candidate.document.documentName)
+  )
+})
+
 test('buildReusableRerankingAdjustmentByCacheKey reuses prior successful reranking judgments for unchanged docs', () => {
   const document = {
     documentName: 'plan-a 23-30001 amendment.pdf',
@@ -598,6 +655,49 @@ test('buildReusableRerankingAdjustmentByCacheKey ignores prior reranking failure
           priorityReasons: [
             'heuristic',
             'LLM reranking failed; kept heuristic first-pass ranking.'
+          ],
+          bucket: 'first-pass'
+        }
+      }
+    ],
+    scoredDocuments: [
+      {
+        document,
+        workSelection: {
+          priorityScore: 10,
+          priorityReasons: ['heuristic'],
+          bucket: 'first-pass'
+        }
+      }
+    ],
+    reusableRerankingDocumentCacheKeys: new Set([cacheKey])
+  })
+
+  assert.equal(reusableAdjustments.size, 0)
+})
+
+test('buildReusableRerankingAdjustmentByCacheKey ignores prior reranking timeouts', () => {
+  const document = {
+    documentName: 'plan-a 23-30001 amendment.pdf',
+    sourceBucket: 'uploads',
+    sourceKey: 'contracts/plan-a.pdf'
+  }
+  const cacheKey = computeDocumentCacheKey(document)
+
+  const reusableAdjustments = buildReusableRerankingAdjustmentByCacheKey({
+    previousDocumentDiagnostics: [
+      {
+        documentName: document.documentName,
+        sourceBucket: document.sourceBucket,
+        sourceKey: document.sourceKey,
+        status: 'processed',
+        usable: true,
+        chunkCount: 4,
+        workSelection: {
+          priorityScore: 10,
+          priorityReasons: [
+            'heuristic',
+            'LLM reranking exceeded the per-call time budget; kept heuristic first-pass ranking.'
           ],
           bucket: 'first-pass'
         }

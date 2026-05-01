@@ -180,6 +180,7 @@ test('buildValidationResultArtifact preserves reranking diagnostics when present
       freshSampleCount: 6,
       sampleUnavailableCount: 2,
       llmRequestCount: 10,
+      timedOutCount: 3,
       sampleFetchElapsedMs: 1234,
       llmElapsedMs: 5678,
       totalElapsedMs: 6789
@@ -193,6 +194,7 @@ test('buildValidationResultArtifact preserves reranking diagnostics when present
     freshSampleCount: 6,
     sampleUnavailableCount: 2,
     llmRequestCount: 10,
+    timedOutCount: 3,
     sampleFetchElapsedMs: 1234,
     llmElapsedMs: 5678,
     totalElapsedMs: 6789

@@ -139,6 +139,7 @@ test('buildCompletedValidationStatusArtifact preserves reranking diagnostics whe
       freshSampleCount: 6,
       sampleUnavailableCount: 2,
       llmRequestCount: 10,
+      timedOutCount: 3,
       sampleFetchElapsedMs: 1234,
       llmElapsedMs: 5678,
       totalElapsedMs: 6789
@@ -152,6 +153,7 @@ test('buildCompletedValidationStatusArtifact preserves reranking diagnostics whe
     freshSampleCount: 6,
     sampleUnavailableCount: 2,
     llmRequestCount: 10,
+    timedOutCount: 3,
     sampleFetchElapsedMs: 1234,
     llmElapsedMs: 5678,
     totalElapsedMs: 6789
