@@ -1,10 +1,7 @@
-query indexRatesConnection(
-    $input: IndexRatesInput
-    $first: Int
-    $after: String
-) {
-    indexRatesConnection(input: $input, first: $first, after: $after) {
+query indexRatesConnection($input: IndexRatesConnectionInput) {
+    indexRatesConnection(input: $input) {
         totalCount
+        totalPages
         edges {
             cursor
             node {

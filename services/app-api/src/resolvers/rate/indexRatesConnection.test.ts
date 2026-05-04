@@ -52,13 +52,16 @@ describe('indexRatesConnection', () => {
                 const firstPage = await executeGraphQLOperation(cmsServer, {
                     query: IndexRatesConnectionDocument,
                     variables: {
-                        input: { rateIDs },
-                        first: 2,
+                        input: {
+                            rateIDs,
+                            first: 2,
+                        },
                     },
                 })
 
                 expect(firstPage.errors).toBeUndefined()
                 expect(firstPage.data?.indexRatesConnection.totalCount).toBe(3)
+                expect(firstPage.data?.indexRatesConnection.totalPages).toBe(2)
                 expect(firstPage.data?.indexRatesConnection.edges).toHaveLength(
                     2
                 )
@@ -77,15 +80,18 @@ describe('indexRatesConnection', () => {
                 const secondPage = await executeGraphQLOperation(cmsServer, {
                     query: IndexRatesConnectionDocument,
                     variables: {
-                        input: { rateIDs },
-                        first: 2,
-                        after: firstPage.data?.indexRatesConnection.pageInfo
-                            .endCursor,
+                        input: {
+                            rateIDs,
+                            first: 2,
+                            after: firstPage.data?.indexRatesConnection.pageInfo
+                                .endCursor,
+                        },
                     },
                 })
 
                 expect(secondPage.errors).toBeUndefined()
                 expect(secondPage.data?.indexRatesConnection.totalCount).toBe(3)
+                expect(secondPage.data?.indexRatesConnection.totalPages).toBe(2)
                 expect(
                     secondPage.data?.indexRatesConnection.edges
                 ).toHaveLength(1)
@@ -119,13 +125,15 @@ describe('indexRatesConnection', () => {
                 const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexRatesConnectionDocument,
                     variables: {
-                        first: 51,
+                        input: {
+                            first: 151,
+                        },
                     },
                 })
 
                 expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
                 expect(result.errors?.[0].message).toContain(
-                    'first must be between 1 and 50'
+                    'first must be between 1 and 150'
                 )
             })
 
@@ -140,7 +148,9 @@ describe('indexRatesConnection', () => {
                 const result = await executeGraphQLOperation(cmsServer, {
                     query: IndexRatesConnectionDocument,
                     variables: {
-                        after: 'not-a-cursor',
+                        input: {
+                            after: 'not-a-cursor',
+                        },
                     },
                 })
 
@@ -229,13 +239,14 @@ describe('indexRatesConnection', () => {
             variables: {
                 input: {
                     rateIDs: [displayLatestRateID, displayOlderRateID],
+                    first: 1,
                 },
-                first: 1,
             },
         })
 
         expect(firstPage.errors).toBeUndefined()
         expect(firstPage.data?.indexRatesConnection.totalCount).toBe(2)
+        expect(firstPage.data?.indexRatesConnection.totalPages).toBe(2)
         expect(firstPage.data?.indexRatesConnection.edges).toHaveLength(1)
         expect(firstPage.data?.indexRatesConnection.edges[0].node.id).toBe(
             displayLatestRateID
@@ -249,14 +260,16 @@ describe('indexRatesConnection', () => {
             variables: {
                 input: {
                     rateIDs: [displayLatestRateID, displayOlderRateID],
+                    first: 1,
+                    after: firstPage.data?.indexRatesConnection.pageInfo
+                        .endCursor,
                 },
-                first: 1,
-                after: firstPage.data?.indexRatesConnection.pageInfo.endCursor,
             },
         })
 
         expect(secondPage.errors).toBeUndefined()
         expect(secondPage.data?.indexRatesConnection.totalCount).toBe(2)
+        expect(secondPage.data?.indexRatesConnection.totalPages).toBe(2)
         expect(secondPage.data?.indexRatesConnection.edges).toHaveLength(1)
         expect(secondPage.data?.indexRatesConnection.edges[0].node.id).toBe(
             displayOlderRateID
@@ -311,13 +324,14 @@ describe('indexRatesConnection', () => {
                         contract2.packageSubmissions[0].rateRevisions[0].rateID,
                         contract3.packageSubmissions[0].rateRevisions[0].rateID,
                     ],
+                    first: 1,
                 },
-                first: 1,
             },
         })
 
         expect(result.errors).toBeUndefined()
         expect(result.data?.indexRatesConnection.totalCount).toBe(2)
+        expect(result.data?.indexRatesConnection.totalPages).toBe(2)
         expect(result.data?.indexRatesConnection.edges).toHaveLength(1)
         expect(result.data?.indexRatesConnection.pageInfo.hasNextPage).toBe(
             true

@@ -3,20 +3,82 @@
 
 ### April 28, 2026
 #### Added
-- New endpoint `indexRatesConnection` added to the API for paginated submitted-rate results.
-    - Accepts the existing optional `IndexRatesInput` filter object:
-        - `stateCode`: optional state filter for CMS and admin users
-        - `rateIDs`: optional list of rate IDs to limit the result set
-    - Accepts pagination arguments:
-        - `first`: optional page size, default is 10, max is 50
-        - `after`: optional opaque cursor for fetching the next page
+- New endpoint `indexRatesConnection` added to the API for paginated submitted-rate results. The api can be called with no input parameters, and a default page size of 10 will be used. 
+    - Accepts the new object `IndexRatesConnectionInput`
+        - The new object contains the same, optional filter paramters that `IndexRatesInput` accepts:
+            - `stateCode`: optional state filter for CMS and admin users
+            - `rateIDs`: optional list of rate IDs to limit the result set
+        - The new object also contains pagination specific arguments:
+            - `first`: optional page size, default is 10, max is 150
+            - `after`: optional opaque cursor for fetching the next page
     - Returns `RateConnection`
         - `totalCount`: total number of matching submitted rates
+        - `totalPages`: total number of pages based on totalCount and requested page size
         - `edges`: list of `RateConnectionEdge`
         - `pageInfo`: pagination metadata with `hasNextPage` and `endCursor`
     - `RateConnectionEdge` includes:
         - `cursor`: opaque cursor for the current edge
         - `node`: the `Rate`
+    - Example query:
+        ```graphql
+        query IndexRatesConnection($input: IndexRatesConnectionInput) {
+            indexRatesConnection(input: $input) {
+                totalCount
+                totalPages
+                edges {
+                    cursor
+                    node {
+                        id
+                        stateCode
+                        consolidatedStatus
+                    }
+                }
+                pageInfo {
+                    hasNextPage
+                    endCursor
+                }
+            }
+        }
+        ```
+    - Example first-page variables, with no additional filters - fetches more than the default 10 rates per page:
+        ```json
+        {
+            "input": {
+                "first": 50 
+            }
+        }
+        ```
+    - Example next-page variables, with no additional filters - fetches the next 50 records using the `pageInfo.endCursor` from the previous example's response:
+        ```json
+        {
+            "input": {
+                "first": 10,
+                "after": "string-end-cursor"
+            }
+        }
+        ```
+    - Example first-page variables, with optional filters - fetches less than the default 10 rates per page:
+        ```json
+        {
+            "input": {
+                "first": 1,
+                "rateIDs": ["7af9410d-9f9a-4bb7-a23f-2bf53b224be7", "35325f91-7f9a-4bf6-9d45-5d72575e8d37"],
+                "stateCode": "MN"
+            }
+        }
+        ```
+    - Example next-page variables, with optional filters - fetches the next 1 record using the `pageInfo.endCursor` from the previous exampl's response'.
+        ```json
+        {
+            "input": {
+                "first": 1,
+                "rateIDs": ["7af9410d-9f9a-4bb7-a23f-2bf53b224be7", "35325f91-7f9a-4bf6-9d45-5d72575e8d37"],
+                "stateCode": "MN",
+                "after": "string-end-cursor"
+            }
+        }
+        ```
+    - GraphQL connection pagination uses cursors instead of page numbers or offsets. Cursors should be treated as **black-box values** — clients should not attempt to interpret or construct them. To fetch the next page, pass the previous response’s `pageInfo.endCursor` as `after` when `pageInfo.hasNextPage` is `true`.
     - Existing `indexRates` behavior is unchanged and remains available as the non-paginated query.
 
 ### April 24, 2026
@@ -178,4 +240,3 @@
 ### May 2, 2025
 #### Deleted
 - `withdrawAndReplaceRedundantRate` endpoint deleted. It was an Admin only action that was used to address bookkeeping errors with rates
-

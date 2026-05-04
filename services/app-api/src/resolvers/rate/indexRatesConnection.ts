@@ -1,9 +1,9 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { Span } from '@opentelemetry/api'
 import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-    setSuccessAttributesOnActiveSpan,
+    recordResolverError,
+    setResolverDetails,
+    withResolverSpan,
 } from '../attributeHelper'
 import {
     hasAdminPermissions,
@@ -21,7 +21,7 @@ import { NotFoundError } from '../../postgres/postgresErrors'
 import { getRateLastUpdatedForDisplay } from '../helpers'
 
 const DEFAULT_INDEX_RATES_PAGE_SIZE = 10
-const MAX_INDEX_RATES_PAGE_SIZE = 50
+const MAX_INDEX_RATES_PAGE_SIZE = 150
 
 type RateCursor = {
     rateID: string
@@ -49,7 +49,7 @@ const validateAndReturnRates = (
             '\n'
         )}`
         logError('indexRatesConnectionResolver', errMessage)
-        setErrorAttributesOnActiveSpan(errMessage, span)
+        recordResolverError(span, errMessage)
     }
     return parsedRates
 }
@@ -125,117 +125,112 @@ function normalizeAfterCursor(after?: string) {
 export function indexRatesConnectionResolver(
     store: Store
 ): QueryResolvers['indexRatesConnection'] {
-    return async (_parent, { input, first, after }, context) => {
-        const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('indexRatesConnection', {}, ctx)
-        setResolverDetailsOnActiveSpan('indexRatesConnection', user, span)
+    return async (_parent, { input }, context) => {
+        const first = input?.first
+        const after = input?.after
+        const { user } = context
 
-        if (!canRead(context)) {
-            const errMessage = `OAuth client does not have read permissions`
-            logError('indexRatesConnection', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createForbiddenError(errMessage)
-        }
+        return withResolverSpan(
+            context,
+            'indexRatesConnection',
+            {
+                'mcreview.rate_ids_count': input?.rateIDs?.length ?? 0,
+                'mcreview.pagination.first':
+                    first ?? DEFAULT_INDEX_RATES_PAGE_SIZE,
+                'mcreview.pagination.has_after': Boolean(after),
+                ...(input?.stateCode
+                    ? { 'mcreview.state_code': input.stateCode }
+                    : {}),
+            },
+            async (span) => {
+                setResolverDetails(span, user)
 
-        const adminPermissions = hasAdminPermissions(user)
-        const cmsUser = hasCMSPermissions(user)
-        const stateUser = isStateUser(user)
-
-        if (adminPermissions || cmsUser || stateUser) {
-            const pageSize = normalizeIndexRatesPageSize(first ?? undefined)
-            let ratesWithHistory
-            if (stateUser) {
-                ratesWithHistory =
-                    await store.findAllRatesWithHistoryBySubmitInfo({
-                        stateCode: user.stateCode,
-                        rateIDs: input?.rateIDs ?? undefined,
-                        useZod: true,
-                    })
-            } else if (input && input.stateCode) {
-                ratesWithHistory =
-                    await store.findAllRatesWithHistoryBySubmitInfo({
-                        stateCode: input.stateCode,
-                        rateIDs: input?.rateIDs ?? undefined,
-                        useZod: true,
-                    })
-            } else {
-                ratesWithHistory =
-                    await store.findAllRatesWithHistoryBySubmitInfo({
-                        rateIDs: input?.rateIDs ?? undefined,
-                        useZod: false,
-                    })
-            }
-
-            if (ratesWithHistory instanceof Error) {
-                const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
-                setErrorAttributesOnActiveSpan(errMessage, span)
-
-                if (ratesWithHistory instanceof NotFoundError) {
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'NOT_FOUND',
-                            cause: 'DB_ERROR',
-                        },
-                    })
+                if (!canRead(context)) {
+                    const errMessage = `OAuth client does not have read permissions`
+                    logError('indexRatesConnection', errMessage)
+                    throw createForbiddenError(errMessage)
                 }
 
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
+                const adminPermissions = hasAdminPermissions(user)
+                const cmsUser = hasCMSPermissions(user)
+                const stateUser = isStateUser(user)
 
-            const rates = validateAndReturnRates(ratesWithHistory, span)
+                if (adminPermissions || cmsUser || stateUser) {
+                    const pageSize = normalizeIndexRatesPageSize(
+                        first ?? undefined
+                    )
+                    let ratesWithHistory
+                    if (stateUser) {
+                        ratesWithHistory =
+                            await store.findAllRatesWithHistoryBySubmitInfo({
+                                stateCode: user.stateCode,
+                                rateIDs: input?.rateIDs ?? undefined,
+                                useZod: true,
+                            })
+                    } else if (input && input.stateCode) {
+                        ratesWithHistory =
+                            await store.findAllRatesWithHistoryBySubmitInfo({
+                                stateCode: input.stateCode,
+                                rateIDs: input?.rateIDs ?? undefined,
+                                useZod: true,
+                            })
+                    } else {
+                        ratesWithHistory =
+                            await store.findAllRatesWithHistoryBySubmitInfo({
+                                rateIDs: input?.rateIDs ?? undefined,
+                                useZod: false,
+                            })
+                    }
 
-            const filteredRates = stateUser
-                ? rates.filter((rate) => user.stateCode === rate.stateCode)
-                : rates
-            const sortedRates = [...filteredRates].sort(compareRates)
-            const decodedAfter = normalizeAfterCursor(after ?? undefined)
-            const startIndex = decodedAfter
-                ? sortedRates.findIndex(
-                      (rate) =>
-                          rate.id === decodedAfter.rateID &&
-                          rateLastUpdatedForDisplay(rate).toISOString() ===
-                              decodedAfter.updatedAt
-                  ) + 1
-                : 0
+                    if (ratesWithHistory instanceof Error) {
+                        const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
 
-            if (decodedAfter && startIndex === 0) {
-                throw createUserInputError(
-                    'after cursor does not match any rate in this result set',
-                    'after',
-                    after
-                )
-            }
+                        if (ratesWithHistory instanceof NotFoundError) {
+                            throw new GraphQLError(errMessage, {
+                                extensions: {
+                                    code: 'NOT_FOUND',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
+                        }
 
-            const pageRates = sortedRates.slice(
-                startIndex,
-                startIndex + pageSize
-            )
-            const edges: Array<{ cursor: string; node: RateType }> = []
-            if (stateUser) {
-                pageRates.forEach((rate) => {
-                    if (user.stateCode === rate.stateCode) {
-                        edges.push({
-                            cursor: encodeRateCursor({
-                                rateID: rate.id,
-                                updatedAt:
-                                    rateLastUpdatedForDisplay(
-                                        rate
-                                    ).toISOString(),
-                            }),
-                            node: {
-                                ...rate,
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
                             },
                         })
                     }
-                })
-            } else {
-                pageRates.forEach((rate) => {
-                    edges.push({
+
+                    const rates = validateAndReturnRates(ratesWithHistory, span)
+
+                    const sortedRates = [...rates].sort(compareRates)
+                    const decodedAfter = normalizeAfterCursor(
+                        after ?? undefined
+                    )
+                    const startIndex = decodedAfter
+                        ? sortedRates.findIndex(
+                              (rate) =>
+                                  rate.id === decodedAfter.rateID &&
+                                  rateLastUpdatedForDisplay(
+                                      rate
+                                  ).toISOString() === decodedAfter.updatedAt
+                          ) + 1
+                        : 0
+
+                    if (decodedAfter && startIndex === 0) {
+                        throw createUserInputError(
+                            'after cursor does not match any rate in this result set',
+                            'after',
+                            after
+                        )
+                    }
+
+                    const pageRates = sortedRates.slice(
+                        startIndex,
+                        startIndex + pageSize
+                    )
+                    const edges = pageRates.map((rate) => ({
                         cursor: encodeRateCursor({
                             rateID: rate.id,
                             updatedAt:
@@ -244,31 +239,34 @@ export function indexRatesConnectionResolver(
                         node: {
                             ...rate,
                         },
-                    })
-                })
-            }
+                    }))
 
-            logSuccess(
-                context.oauthClient
-                    ? 'indexRatesConnection - oauthClient'
-                    : 'indexRatesConnection'
-            )
-            setSuccessAttributesOnActiveSpan(span)
-            return {
-                totalCount: filteredRates.length,
-                edges,
-                pageInfo: {
-                    hasNextPage: startIndex + pageSize < filteredRates.length,
-                    endCursor: edges[edges.length - 1]?.cursor ?? null,
-                },
+                    logSuccess(
+                        context.oauthClient
+                            ? 'indexRatesConnection - oauthClient'
+                            : 'indexRatesConnection'
+                    )
+                    const totalCount = rates.length
+                    const totalPages = Math.ceil(totalCount / pageSize)
+
+                    return {
+                        totalCount,
+                        totalPages,
+                        edges,
+                        pageInfo: {
+                            hasNextPage: startIndex + pageSize < totalCount,
+                            endCursor: edges[edges.length - 1]?.cursor ?? null,
+                        },
+                    }
+                } else {
+                    const authInfo = !!context.oauthClient
+                    const errMsg = authInfo
+                        ? `OAuth client not authorized to fetch rate reviews data`
+                        : 'user not authorized to fetch rate reviews data'
+                    logError('indexRatesConnection', errMsg)
+                    throw createForbiddenError(errMsg)
+                }
             }
-        } else {
-            const authInfo = !!context.oauthClient
-            const errMsg = authInfo
-                ? `OAuth client not authorized to fetch rate reviews data`
-                : 'user not authorized to fetch rate reviews data'
-            setErrorAttributesOnActiveSpan(errMsg, span)
-            throw createForbiddenError(errMsg)
-        }
+        )
     }
 }
