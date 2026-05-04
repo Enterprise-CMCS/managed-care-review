@@ -13,7 +13,7 @@ import { Prisma } from '../../generated/client'
 export type SoftDeleteContractQuestionArgsType = {
     questionID: string
     user: AdminUserType
-    reason?: string
+    reason: string
 }
 
 const MAX_SERIALIZATION_RETRIES = 2
@@ -26,9 +26,10 @@ const MAX_SERIALIZATION_RETRIES = 2
  * repeated calls don't pile up redundant action rows.
  *
  * @param tx - The Prisma transaction object used for database operations
+ * @param args
  * @param args.questionID - ID of the contract question to soft delete
  * @param args.user - Admin user performing the delete
- * @param args.reason - Optional reason recorded on every action row
+ * @param args.reason - Reason recorded on every action row
  */
 const softDeleteContractQuestionInsideTransaction = async (
     tx: PrismaTransactionType,

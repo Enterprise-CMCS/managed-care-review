@@ -743,6 +743,8 @@ type CreateContractQuestionPayload {
 input DeleteContractQuestionInput {
     "The ID of the contract question to soft delete"
     questionID: ID!
+    "Reason recorded on the delete action"
+    reason: String!
 }
 
 type DeleteContractQuestionPayload {

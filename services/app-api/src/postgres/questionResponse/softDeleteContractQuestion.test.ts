@@ -59,10 +59,12 @@ describe('softDeleteContractQuestion', () => {
             softDeleteContractQuestion(prismaClient, {
                 questionID: question.id,
                 user: adminUser,
+                reason: 'concurrent delete test',
             }),
             softDeleteContractQuestion(prismaClient, {
                 questionID: question.id,
                 user: adminUser,
+                reason: 'concurrent delete test',
             }),
         ])
 

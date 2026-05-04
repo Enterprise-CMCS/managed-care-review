@@ -40,7 +40,8 @@ export function deleteContractQuestionResolver(
 
                 const result = await store.softDeleteContractQuestion(
                     input.questionID,
-                    user
+                    user,
+                    input.reason
                 )
 
                 if (result instanceof Error) {

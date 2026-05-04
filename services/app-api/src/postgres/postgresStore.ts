@@ -267,7 +267,7 @@ type Store = {
     softDeleteContractQuestion: (
         questionID: string,
         user: AdminUserType,
-        reason?: string
+        reason: string
     ) => Promise<ContractQuestionType | Error>
     findAllQuestionsByContract: (
         pkgID: string
