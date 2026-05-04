@@ -194,7 +194,9 @@ export const Landing = (): React.ReactElement => {
                         <Grid row gap className="margin-top-2">
                             <Grid tablet={{ col: 6 }}>
                                 <div className={styles.detailsSteps}>
-                                    <h2>How it works</h2>
+                                    <h2 className="mcr-homepage-h2-bold">
+                                        How it works
+                                    </h2>
                                     <ul>
                                         <li className={styles.login}>
                                             <span>Sign in with IDM</span>
@@ -228,7 +230,7 @@ export const Landing = (): React.ReactElement => {
                                 </div>
                             </Grid>
                             <Grid tablet={{ col: 6 }}>
-                                <h2 className="margin-top-0">
+                                <h2 className="margin-top-0 mcr-homepage-h2-bold">
                                     Submit your managed care health plans to CMS
                                     for review
                                 </h2>
@@ -261,7 +263,9 @@ export const Landing = (): React.ReactElement => {
                                     </li>
                                 </ul>
 
-                                <h3>Not accepted by MC-Review at this time:</h3>
+                                <h5 className="margin-bottom-0">
+                                    Not accepted by MC-Review at this time:
+                                </h5>
                                 <ul className={styles.detailsList}>
                                     <li>State directed preprints</li>
                                     <li>
