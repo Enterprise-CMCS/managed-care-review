@@ -25,8 +25,15 @@ function getDDHeaders() {
 export function initTracer(serviceName: string) {
     console.info('-----Setting OTEL instrumentation-----')
 
+    if (!process.env.stage) {
+        throw new Error(
+            'Configuration error: stage environment variable is required for OpenTelemetry'
+        )
+    }
+
     const resource = new Resource({
         [ATTR_SERVICE_NAME]: serviceName,
+        'deployment.environment': process.env.stage,
     })
 
     const exporter = new OTLPTraceExporter({
@@ -72,9 +79,16 @@ export function recordException(
 }
 
 export function createTracer(serviceName: string): Tracer {
+    if (!process.env.stage) {
+        throw new Error(
+            'Configuration error: stage environment variable is required for OpenTelemetry'
+        )
+    }
+
     const provider = new NodeTracerProvider({
         resource: new Resource({
             [ATTR_SERVICE_NAME]: serviceName,
+            'deployment.environment': process.env.stage,
         }),
     })
 
