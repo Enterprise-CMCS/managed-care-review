@@ -1,4 +1,5 @@
 import { softDeleteContractQuestion } from './softDeleteContractQuestion'
+import { UserInputPostgresError } from '../postgresErrors'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import {
     constructTestPostgresServer,
@@ -68,27 +69,29 @@ describe('softDeleteContractQuestion', () => {
             }),
         ])
 
-        expect(r1).not.toBeInstanceOf(Error)
-        expect(r2).not.toBeInstanceOf(Error)
-
-        // Both calls return the same shape — one wrote the action rows, the
-        // other refetched via the idempotency branch — so each result should
-        // surface the deleted question with its descendants intact.
-        const expectedQuestion = expect.objectContaining({
-            id: question.id,
-            actions: expect.arrayContaining([
-                expect.objectContaining({ action: 'DELETE' }),
-            ]),
-            documents: [expect.objectContaining({ id: questionDocID })],
-            responses: [
-                expect.objectContaining({
-                    id: responseID,
-                    documents: [expect.objectContaining({ id: responseDocID })],
-                }),
-            ],
-        })
-        expect(r1).toEqual(expectedQuestion)
-        expect(r2).toEqual(expectedQuestion)
+        // One call wins and returns the deleted question. The other lost the
+        // race and surfaces UserInputPostgresError ("already deleted") — same
+        // signal a non-race subsequent delete would get.
+        const winner = [r1, r2].find((r) => !(r instanceof Error))
+        const loser = [r1, r2].find((r) => r instanceof Error)
+        expect(winner).toEqual(
+            expect.objectContaining({
+                id: question.id,
+                actions: expect.arrayContaining([
+                    expect.objectContaining({ action: 'DELETE' }),
+                ]),
+                documents: [expect.objectContaining({ id: questionDocID })],
+                responses: [
+                    expect.objectContaining({
+                        id: responseID,
+                        documents: [
+                            expect.objectContaining({ id: responseDocID }),
+                        ],
+                    }),
+                ],
+            })
+        )
+        expect(loser).toBeInstanceOf(UserInputPostgresError)
 
         const questionActions =
             await prismaClient.contractQuestionAction.findMany({

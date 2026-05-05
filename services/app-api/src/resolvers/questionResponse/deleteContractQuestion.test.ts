@@ -127,6 +127,7 @@ describe('deleteContractQuestion', () => {
             })
         expect(questionAction?.action).toBe('DELETE')
         expect(questionAction?.updatedByID).toBe(adminUser.id)
+        expect(questionAction?.reason).toBe('Some reason')
 
         const responseActions =
             await prismaClient.contractQuestionResponseAction.findMany({
@@ -134,7 +135,10 @@ describe('deleteContractQuestion', () => {
             })
         expect(responseActions).toHaveLength(responseIDs.length)
         expect(
-            responseActions.every((a) => a.action === 'CASCADE_DELETE')
+            responseActions.every(
+                (a) =>
+                    a.action === 'CASCADE_DELETE' && a.reason === 'Some reason'
+            )
         ).toBe(true)
 
         const questionDocActions =
@@ -143,7 +147,10 @@ describe('deleteContractQuestion', () => {
             })
         expect(questionDocActions).toHaveLength(questionDocIDs.length)
         expect(
-            questionDocActions.every((a) => a.action === 'CASCADE_DELETE')
+            questionDocActions.every(
+                (a) =>
+                    a.action === 'CASCADE_DELETE' && a.reason === 'Some reason'
+            )
         ).toBe(true)
 
         const responseDocActions =
@@ -152,7 +159,10 @@ describe('deleteContractQuestion', () => {
             })
         expect(responseDocActions).toHaveLength(responseDocIDs.length)
         expect(
-            responseDocActions.every((a) => a.action === 'CASCADE_DELETE')
+            responseDocActions.every(
+                (a) =>
+                    a.action === 'CASCADE_DELETE' && a.reason === 'Some reason'
+            )
         ).toBe(true)
 
         // Subsequent fetches no longer surface the deleted question.
@@ -192,6 +202,48 @@ describe('deleteContractQuestion', () => {
         expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
         expect(assertAnError(result).message).toBe(
             'user not authorized to delete a question'
+        )
+    })
+
+    it('returns BAD_USER_INPUT when deleting an already-deleted question', async () => {
+        const cmsUser = testCMSUser()
+        const adminUser = testAdminUser()
+        await createDBUsersWithFullData([cmsUser, adminUser])
+
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: cmsUser },
+            s3Client: mockS3,
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: { user: adminUser },
+            s3Client: mockS3,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const question = await createTestQuestion(cmsServer, contract.id)
+
+        // First delete succeeds.
+        await deleteTestContractQuestion(adminServer, question.id)
+
+        // Second delete on the same id should be rejected — same signal a
+        // race-loser gets at the store layer.
+        const result = await executeGraphQLOperation(adminServer, {
+            query: DeleteContractQuestionDocument,
+            variables: {
+                input: {
+                    questionID: question.id,
+                    reason: 'Some reason',
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(result).message).toBe(
+            `Question with id ${question.id} is already deleted`
         )
     })
 
