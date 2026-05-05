@@ -33,33 +33,32 @@
     @include custom.container;
     padding: 0 !important;
     justify-content: center;
+
+    @include uswds.at-media-max('tablet') {
+        flex-direction: column;
+    }
 }
 
 .sideNavContainer {
-    padding: uswds.units(4) uswds.units(3);
+    padding: uswds.units(4) uswds.units(2);
     min-width: 18rem;
     width: 18rem;
     max-width: 18rem;
 
-    margin-left: 0.5rem;
+    @include uswds.at-media('desktop') {
+        padding-left: uswds.units(4);
+        padding-right: uswds.units(4);
+    }
+
+    @include uswds.at-media-max('tablet') {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin-left: uswds.units(1);
+    }
 }
 
 .contentContainer {
     flex: 1 1 auto;
     min-width: 0;
-}
-
-@include uswds.at-media-max('tablet') {
-    .pageHeaderContainer {
-        padding-left: uswds.units(2) !important;
-        padding-right: uswds.units(2) !important;
-    }
-
-    .sideNavContainer {
-        min-width: 14rem;
-        width: 14rem;
-        max-width: 14rem;
-        padding-left: uswds.units(2);
-        padding-right: uswds.units(2);
-    }
 }
