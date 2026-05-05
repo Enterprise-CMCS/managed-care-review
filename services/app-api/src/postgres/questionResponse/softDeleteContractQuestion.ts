@@ -4,7 +4,7 @@ import {
     questionInclude,
     contractQuestionPrismaToDomainType,
 } from './questionHelpers'
-import { NotFoundError } from '../postgresErrors'
+import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { parseErrorToError } from '@mc-review/helpers'
@@ -66,18 +66,13 @@ const softDeleteContractQuestionInsideTransaction = async (
         )
     }
 
-    // 3. Idempotent: already deleted → return current state, don't write more action rows.
+    // 3. Already deleted → surface a typed error so the resolver can emit
+    //    BAD_USER_INPUT. Race-loser ends up here too, which is honest: from
+    //    their POV the question really was already deleted.
     if (isDeleted(existing)) {
-        const current = await tx.contractQuestion.findUnique({
-            where: { id: questionID },
-            include: questionInclude,
-        })
-        if (!current) {
-            return new NotFoundError(
-                `Question with id ${questionID} was not found to delete`
-            )
-        }
-        return contractQuestionPrismaToDomainType(current)
+        return new UserInputPostgresError(
+            `Question with id ${questionID} is already deleted`
+        )
     }
 
     // 4. Collect active descendants — skip ones already deleted so we don't overwrite prior DELETEs.

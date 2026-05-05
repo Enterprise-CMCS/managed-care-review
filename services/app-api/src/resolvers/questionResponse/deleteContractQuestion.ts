@@ -3,7 +3,12 @@ import { isAdminUser } from '../../domain-models'
 import { logError, logSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError } from '../errorUtils'
-import { NotFoundError, type Store } from '../../postgres'
+import {
+    NotFoundError,
+    UserInputPostgresError,
+    handleUserInputPostgresError,
+    type Store,
+} from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
@@ -54,6 +59,15 @@ export function deleteContractQuestionResolver(
                                 cause: 'DB_ERROR',
                             },
                         })
+                    }
+
+                    if (result instanceof UserInputPostgresError) {
+                        logError('deleteContractQuestion', result.message)
+                        throw handleUserInputPostgresError(
+                            result,
+                            'questionID',
+                            input.questionID
+                        )
                     }
 
                     const errMessage = `Issue soft deleting contract question. Message: ${result.message}`
