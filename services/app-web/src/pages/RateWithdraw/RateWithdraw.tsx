@@ -135,7 +135,7 @@ export const RateWithdraw = () => {
                     <Form
                         id="RateWithdrawForm"
                         className={styles.formContainer}
-                        onSubmit={(e) => {
+                        onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                             setShouldValidate(true)
                             return handleSubmit(e)
                         }}

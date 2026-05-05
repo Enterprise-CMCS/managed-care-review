@@ -52,7 +52,7 @@ export const Header = ({
     return route !== 'GRAPHQL_EXPLORER' ? (
         <header>
             <div className={styles.banner}>
-                <GridContainer>
+                <GridContainer className={styles.bannerContainer}>
                     <Grid row className="flex-justify flex-align-center">
                         <NavLink className={styles.bannerLogo} to="/">
                             <Logo

@@ -15,29 +15,37 @@
     border-radius: 0;
 }
 
+@mixin navigation-link-text {
+    @include custom.mcr-type-style(1rem, 700, 150%);
+}
+
+@mixin navigation-gutters($left, $right) {
+    padding-right: $right;
+    padding-left: $left;
+}
+
 .navigation {
     background-color: custom.$mcr-cmsblue-base;
-    border-top: 0.125rem solid custom.$mcr-periwinkle;
     position: relative;
     z-index: 1;
 }
 
 .navigationContainer {
     max-width: custom.$mcr-container-max-width-fixed;
-    display: flex;
-    padding-left: 1rem;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    @include navigation-gutters(2rem, 3rem);
 }
 
 .primaryNav {
-    float: none !important;
-    display: flex !important;
+    display: block;
     width: 100%;
-    padding: 0;
-    background: transparent !important;
-    border-right: 0;
+    box-sizing: border-box;
+    border-top: 0.125rem solid custom.$mcr-periwinkle;
 
-    :global(.usa-nav__primary) {
-        display: flex !important;
+    ul {
+        display: flex;
         justify-content: flex-start;
         width: 100%;
         list-style: none;
@@ -46,14 +54,21 @@
         border-top: 0;
     }
 
-    :global(.usa-nav__primary-item) {
+    li {
         display: flex;
+        flex: 0 0 auto;
         float: none;
         border-top: 0;
-    }
 
-    :global(.usa-nav__close) {
-        display: none !important;
+        &:first-child {
+            .navigationLink {
+                padding-left: 0;
+
+                &::after {
+                    left: 0;
+                }
+            }
+        }
     }
 }
 
@@ -65,10 +80,8 @@
     height: 3.25rem;
     padding: 1rem 1rem 1.25rem;
     color: custom.$mcr-foundation-white !important;
-    font-size: 1rem;
-    font-weight: 700 !important;
-    line-height: 150%;
-    text-decoration: none !important;
+    @include navigation-link-text;
+    text-decoration: none;
     white-space: nowrap;
     transition: box-shadow 0.15s ease;
     background-color: transparent !important;
@@ -109,47 +122,31 @@
 }
 
 @include uswds.at-media-max('desktop') {
+    .navigationContainer {
+        @include navigation-gutters(1rem, 2rem);
+    }
+
     .primaryNav {
-        position: static !important;
-        right: auto !important;
-        bottom: auto !important;
-        top: auto !important;
-        display: flex !important;
-        flex-direction: row !important;
-        overflow: visible !important;
-        width: 100%;
-        padding: 0;
-        background: transparent !important;
-        z-index: auto;
-
-        :global(.usa-nav__inner) {
-            width: 100%;
-        }
-
-        :global(.usa-nav__primary-item) {
-            flex: 0 0 auto;
-        }
-
-        :global(.usa-nav__primary a:not(.usa-button):hover) {
+        a:not(.usa-button):hover {
             background-color: transparent !important;
             color: custom.$mcr-foundation-white !important;
         }
 
-        :global(.usa-nav__primary .usa-nav__link:not(.usa-current):hover::after),
-        :global(.usa-nav__primary .usa-current::after) {
+        .navigationLink:hover::after,
+        .navigationLinkActive::after {
             @include mobile-underline-bar(0.75rem);
         }
 
-        :global(.usa-nav__primary .usa-nav__link:not(.usa-current):hover::after) {
-            background-color: custom.$mcr-blue-cool-light !important;
+        .navigationLink:hover::after {
+            background-color: custom.$mcr-blue-cool-light;
         }
 
-        :global(.usa-nav__primary .usa-current) {
-            color: custom.$mcr-foundation-white !important;
+        .navigationLinkActive {
+            color: custom.$mcr-foundation-white;
         }
 
-        :global(.usa-nav__primary .usa-current::after) {
-            background-color: custom.$mcr-cyan-vivid !important;
+        .navigationLinkActive::after {
+            background-color: custom.$mcr-cyan-vivid;
         }
     }
 
@@ -158,9 +155,5 @@
         padding-right: 1rem;
         padding-left: 1rem;
         text-align: left;
-
-        &::after {
-            @include underline-bar(1rem);
-        }
     }
 }

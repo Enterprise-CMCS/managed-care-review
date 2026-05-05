@@ -2,9 +2,10 @@ import React, {
     useState,
     useEffect,
     FocusEvent,
-    FormEvent,
+    InputEvent,
     KeyboardEvent,
     Ref,
+    type JSX,
 } from 'react'
 import classnames from 'classnames'
 
@@ -156,7 +157,7 @@ export const DatePicker = ({
         if (onChange) onChange('')
     }
 
-    const handleExternalInput = (event: FormEvent<HTMLInputElement>): void => {
+    const handleExternalInput = (event: InputEvent<HTMLInputElement>): void => {
         // Keep external & internal input values in sync
         const value = (event.target as HTMLInputElement).value
         setExternalValue(value)
@@ -395,8 +396,4 @@ export const DatePicker = ({
             </div>
         </div>
     )
-}
-
-DatePicker.defaultProps = {
-    minDate: DEFAULT_MIN_DATE,
 }

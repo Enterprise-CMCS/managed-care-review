@@ -9,7 +9,7 @@ import {
     formatDate,
     parseDateString,
 } from '../../FilterAccordion/FilterDateRange/_DatePicker/utils'
-import { FormGroup, Label } from '@trussworks/react-uswds/'
+import { FormGroup, Label } from '@trussworks/react-uswds'
 import { PoliteErrorMessage } from '../../PoliteErrorMessage'
 
 /*

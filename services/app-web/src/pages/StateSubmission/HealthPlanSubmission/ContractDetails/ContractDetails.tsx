@@ -597,7 +597,9 @@ export const ContractDetails = ({
                             <UswdsForm
                                 className={styles.formContainer}
                                 id="ContractDetailsForm"
-                                onSubmit={(e) => {
+                                onSubmit={(
+                                    e: React.FormEvent<HTMLFormElement>
+                                ) => {
                                     setShouldValidate(true)
                                     setFocusErrorSummaryHeading(true)
                                     handleSubmit(e)

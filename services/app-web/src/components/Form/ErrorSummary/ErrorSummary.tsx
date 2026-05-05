@@ -32,7 +32,7 @@ const ErrorSummaryMessage = ({
             href={href}
             className={classnames(styles.message)}
             data-testid="error-summary-message"
-            onClick={(event) => {
+            onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
                 const fieldElement: HTMLElement | null =
                     document.querySelector(fieldSelector)
 

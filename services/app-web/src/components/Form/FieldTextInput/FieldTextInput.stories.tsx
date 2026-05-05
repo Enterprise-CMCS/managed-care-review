@@ -13,7 +13,7 @@ const schema = Yup.object().shape({
     ),
 })
 
-const Template: StoryFn<TextInputProps> = (args) => (
+const Template: StoryFn<TextInputProps> = (args: TextInputProps) => (
     <Formik
         initialValues={{ submissionDescription: '' }}
         validationSchema={schema}

@@ -1,4 +1,10 @@
-import React, { useRef, forwardRef, useImperativeHandle, useState } from 'react'
+import React, {
+    useRef,
+    forwardRef,
+    useImperativeHandle,
+    useState,
+    type JSX,
+} from 'react'
 import { Fieldset, FormGroup, Label } from '@trussworks/react-uswds'
 import {
     DatePicker,

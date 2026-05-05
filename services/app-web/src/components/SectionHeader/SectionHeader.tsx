@@ -1,6 +1,7 @@
 import styles from './SectionHeader.module.scss'
 import classNames from 'classnames'
-import { NavLinkWithLogging } from '../TealiumLogging/Link'
+import { NavLinkWithLogging } from '../TealiumLogging'
+import type { JSX } from 'react'
 
 type HeadingTag = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
 

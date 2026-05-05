@@ -9,18 +9,18 @@
         "build": "tsc --noEmit"
     },
     "dependencies": {
-        "@launchdarkly/node-server-sdk": "9.10.2",
+        "@launchdarkly/node-server-sdk": "9.10.13",
         "@mc-review/common-code": "workspace:*",
         "express": "^5.2.1",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
         "express-rate-limit": "^8.3.2"
     },
     "devDependencies": {
         "@types/express": "^5.0.6",
         "@types/node": "^25.5.0",
-        "@types/react": "^18.2.0",
-        "@types/react-dom": "^18.2.0",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
         "@vitejs/plugin-react": "^5.0.4",
         "nodemon": "^3.1.14",
         "tsx": "^4.19.4",

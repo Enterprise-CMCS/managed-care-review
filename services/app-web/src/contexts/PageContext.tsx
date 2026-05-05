@@ -11,7 +11,7 @@ import { useCallback } from 'react'
 type PageContextType = {
     heading?: string | React.ReactElement
     activeMainContentId?: string
-    activeModalRef?: React.RefObject<ModalRef>
+    activeModalRef?: React.RefObject<ModalRef | null>
     /**
      * Set headings in priority order
      *    1. If there is a custom heading, use that (relevant for heading related to the api loaded resource, such as the submission name)
@@ -33,7 +33,7 @@ type PageContextType = {
     updateModalRef: ({
         updatedModalRef,
     }: {
-        updatedModalRef?: React.RefObject<ModalRef>
+        updatedModalRef?: React.RefObject<ModalRef | null>
     }) => void
     /**
      * Set the current pages main content element, this allows the skip main content link to bypass side nav.
@@ -59,7 +59,7 @@ const PageProvider: React.FC<
         string | React.ReactElement | undefined
     >(undefined)
     const [activeModal, setActiveModal] = React.useState<
-        React.RefObject<ModalRef> | undefined
+        React.RefObject<ModalRef | null> | undefined
     >(undefined)
     const [activeMainContentId, setActiveMainContent] = React.useState<
         string | undefined
@@ -86,7 +86,7 @@ const PageProvider: React.FC<
     const updateModalRef = ({
         updatedModalRef,
     }: {
-        updatedModalRef?: React.RefObject<ModalRef>
+        updatedModalRef?: React.RefObject<ModalRef | null>
     }) => {
         setActiveModal(updatedModalRef)
     }

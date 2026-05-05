@@ -29,7 +29,13 @@ html {
     font-weight: bold;
 }
 
-.usa-hint:not(.usa-character-count__message--invalid) {
+// Footer logos background — USWDS v3 dropped the $theme-footer-logos-background
+// setting, so a CSS class override is the only path.
+.usa-footer__logo {
+    background-color: #f0fafd;
+}
+
+.usa-hint:not(.usa-character-count__status--invalid) {
     color: $mcr-foundation-hint;
 }
 
