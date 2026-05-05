@@ -40,44 +40,46 @@
             }
         }
         ```
-    - Example first-page variables, with no additional filters - fetches more than the default 10 rates per page:
-        ```json
-        {
-            "input": {
-                "first": 50 
+    - Example calls with no additional filters
+        - First request, fetches 50 records, more than the default 10 rates per page:
+            ```json
+            {
+                "input": {
+                    "first": 50 
+                }
             }
-        }
-        ```
-    - Example next-page variables, with no additional filters - fetches the next 50 records using the `pageInfo.endCursor` from the previous example's response:
-        ```json
-        {
-            "input": {
-                "first": 10,
-                "after": "string-end-cursor"
+            ```
+        - Second request, fetches the next 50 records using the `pageInfo.endCursor` from the previous example's response:
+            ```json
+            {
+                "input": {
+                    "first": 50,
+                    "after": "string-end-cursor"
+                }
             }
-        }
-        ```
-    - Example first-page variables, with optional filters - fetches less than the default 10 rates per page:
-        ```json
-        {
-            "input": {
-                "first": 1,
-                "rateIDs": ["7af9410d-9f9a-4bb7-a23f-2bf53b224be7", "35325f91-7f9a-4bf6-9d45-5d72575e8d37"],
-                "stateCode": "MN"
+            ```
+    - Example calls with additional filters
+        - First request, fetches 1 record and includes filters for specific Rate IDs and state:
+            ```json
+            {
+                "input": {
+                    "first": 1,
+                    "rateIDs": ["7af9410d-9f9a-4bb7-a23f-2bf53b224be7", "35325f91-7f9a-4bf6-9d45-5d72575e8d37"],
+                    "stateCode": "MN"
+                }
             }
-        }
-        ```
-    - Example next-page variables, with optional filters - fetches the next 1 record using the `pageInfo.endCursor` from the previous exampl's response'.
-        ```json
-        {
-            "input": {
-                "first": 1,
-                "rateIDs": ["7af9410d-9f9a-4bb7-a23f-2bf53b224be7", "35325f91-7f9a-4bf6-9d45-5d72575e8d37"],
-                "stateCode": "MN",
-                "after": "string-end-cursor"
+            ```
+        - Second request, fetches the next 1 record using the `pageInfo.endCursor` from the previous example's response.
+            ```json
+            {
+                "input": {
+                    "first": 1,
+                    "rateIDs": ["7af9410d-9f9a-4bb7-a23f-2bf53b224be7", "35325f91-7f9a-4bf6-9d45-5d72575e8d37"],
+                    "stateCode": "MN",
+                    "after": "string-end-cursor"
+                }
             }
-        }
-        ```
+            ```
     - GraphQL connection pagination uses cursors instead of page numbers or offsets. Cursors should be treated as **black-box values** — clients should not attempt to interpret or construct them. To fetch the next page, pass the previous response’s `pageInfo.endCursor` as `after` when `pageInfo.hasNextPage` is `true`.
     - Existing `indexRates` behavior is unchanged and remains available as the non-paginated query.
 
