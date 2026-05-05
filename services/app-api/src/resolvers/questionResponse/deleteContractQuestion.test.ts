@@ -183,7 +183,9 @@ describe('deleteContractQuestion', () => {
 
         const result = await executeGraphQLOperation(cmsServer, {
             query: DeleteContractQuestionDocument,
-            variables: { input: { questionID: question.id } },
+            variables: {
+                input: { questionID: question.id, reason: 'Some reason' },
+            },
         })
 
         expect(result.errors).toBeDefined()
@@ -205,7 +207,12 @@ describe('deleteContractQuestion', () => {
         const missingID = '00000000-0000-0000-0000-000000000000'
         const result = await executeGraphQLOperation(adminServer, {
             query: DeleteContractQuestionDocument,
-            variables: { input: { questionID: missingID } },
+            variables: {
+                input: {
+                    questionID: missingID,
+                    reason: 'Some reason',
+                },
+            },
         })
 
         expect(result.errors).toBeDefined()

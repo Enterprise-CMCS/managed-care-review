@@ -420,7 +420,7 @@ const deleteTestContractQuestion = async (
 ): Promise<ContractQuestion> => {
     const result = await executeGraphQLOperation(server, {
         query: DeleteContractQuestionDocument,
-        variables: { input: { questionID } },
+        variables: { input: { questionID, reason: 'Some reason' } },
     })
 
     if (result.errors)
