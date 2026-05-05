@@ -16,6 +16,11 @@ export const ResourcesLayout = (): React.ReactElement => {
 
     return (
         <div className={styles.background}>
+            <div className={styles.pageHeader}>
+                <GridContainer className={styles.pageHeaderContainer}>
+                    <h1 className={styles.pageHeaderTitle}>Resources</h1>
+                </GridContainer>
+            </div>
             <GridContainer className={styles.layoutContainer}>
                 <div className={styles.sideNavContainer}>
                     <SideNav
