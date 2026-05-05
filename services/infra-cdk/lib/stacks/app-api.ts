@@ -142,6 +142,7 @@ export class AppApiStack extends BaseStack {
         this.apiGateway = new RestApi(this, 'AppApiGateway', {
             restApiName: `${ResourceNames.apiName('app-api', this.stage)}-gateway`,
             description: 'API Gateway for app-api Lambda functions',
+            binaryMediaTypes: ['application/x-protobuf'],
             // Disable CDK's automatic CfnAccount creation — we manage it manually (above)
             cloudWatchRole: false,
             deployOptions: {

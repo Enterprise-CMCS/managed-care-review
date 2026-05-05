@@ -24,8 +24,12 @@ const main: APIGatewayProxyHandler = async (event) => {
         },
     }
 
+    const body = event.isBase64Encoded
+        ? Buffer.from(event.body ?? '', 'base64')
+        : event.body
+
     try {
-        const response = await axios.post(DD_TRACES_URL, event.body, options)
+        const response = await axios.post(DD_TRACES_URL, body, options)
         console.info(`otel_proxy: forwarded to datadog`, {
             status: response.status,
             responseData: response.data,
