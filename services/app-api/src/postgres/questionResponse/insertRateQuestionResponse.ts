@@ -38,7 +38,7 @@ export async function insertRateQuestionResponse(
             },
         })
 
-        if (question?.actions?.[0].action === 'DELETE') {
+        if (question?.actions?.[0]?.action === 'DELETE') {
             return new Error(
                 `Cannot create response for question with the ID: ${response.questionID}. Question was deleted.`
             )
