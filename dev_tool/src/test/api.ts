@@ -36,7 +36,14 @@ export async function runAPITests(
     // reset the db, wiping it and running all the migrations files that exist
     await runner.runCommandAndOutput(
         'prisma reset',
-        ['npx', 'prisma', 'migrate', 'reset', '--force'],
+        [
+            'npx',
+            'prisma',
+            'migrate',
+            'reset',
+            '--force',
+            '--config=../../prisma.config.ts',
+        ],
         'services/app-api'
     )
 

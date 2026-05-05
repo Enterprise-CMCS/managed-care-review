@@ -137,10 +137,14 @@ async function runOnlineTests() {
 }
 
 function runPrisma(args: string[]) {
-    const proc = spawn('npx', ['prisma'].concat(args), {
-        cwd: 'services/app-api',
-        stdio: 'inherit',
-    })
+    const proc = spawn(
+        'npx',
+        ['prisma', '--config=../../prisma.config.ts'].concat(args),
+        {
+            cwd: 'services/app-api',
+            stdio: 'inherit',
+        }
+    )
 
     proc.on('close', (code) => {
         process.exit(code ? code : 0)

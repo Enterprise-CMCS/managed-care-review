@@ -284,6 +284,23 @@ type Mutation {
         input: CreateContractQuestionInput!
     ): CreateContractQuestionPayload!
 
+    """
+    deleteContractQuestion soft-deletes a contract question by recording a DELETE action
+    in the question's audit log. The question itself is not removed from the database;
+    subsequent reads filter it out via the audit log's latest action.
+
+    This can only be called by an AdminUser.
+
+    Errors:
+    - ForbiddenError:
+        - A non-AdminUser called this
+    - UserInputError:
+        - A question cannot be found with the given questionID
+    """
+    deleteContractQuestion(
+        input: DeleteContractQuestionInput!
+    ): DeleteContractQuestionPayload!
+
     #    """
     #    updateQuestion updates a Question for the given Contract
     #    Only the due date can be changed
@@ -723,6 +740,18 @@ type CreateContractQuestionPayload {
     question: ContractQuestion!
 }
 
+input DeleteContractQuestionInput {
+    "The ID of the contract question to soft delete"
+    questionID: ID!
+    "Reason recorded on the delete action"
+    reason: String!
+}
+
+type DeleteContractQuestionPayload {
+    "The soft-deleted contract question"
+    question: ContractQuestion!
+}
+
 input CreateRateQuestionInput {
     "The ID of the rate for which to create a question"
     rateID: ID!
@@ -1154,6 +1183,25 @@ type ContractQuestion {
     #    rateIDs: [String!]
     #
     responses: [QuestionResponse!]!
+    "Audit log entries for actions taken on this question. Currently scoped to the most recent action; may expand to full history later."
+    actions: [QuestionAction!]
+}
+
+"The kind of action recorded on a Q&A audit row."
+enum QuestionActionType {
+    DELETE
+    RESTORE
+    CASCADE_DELETE
+    CASCADE_RESTORE
+}
+
+"A single audit log entry recording an action taken on a Q&A row."
+type QuestionAction {
+    id: ID!
+    createdAt: DateTime!
+    action: QuestionActionType!
+    reason: String
+    updatedBy: AdminUser!
 }
 
 """

@@ -39,6 +39,7 @@ const currentQuestion: ContractQuestionType = {
     documents: [],
     division: 'DMCO',
     responses: [],
+    actions: [],
 }
 
 const formData: ContractFormDataType = {

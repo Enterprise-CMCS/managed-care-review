@@ -70,6 +70,7 @@ export type {
     InsertQuestionResponseArgs,
     QuestionResponseType,
     QuestionAndResponseDocument,
+    QuestionAction,
 } from './QuestionsType'
 
 export type { AuditDocument } from './DocumentType'

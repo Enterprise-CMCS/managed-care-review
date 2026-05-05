@@ -10,6 +10,7 @@ import type {
     ProgramType,
     UserType,
     StateUserType,
+    AdminUserType,
     ContractQuestionType,
     CreateContractQuestionInput,
     InsertQuestionResponseArgs,
@@ -40,6 +41,7 @@ import {
     insertRateQuestion,
     findAllQuestionsByRate,
     insertRateQuestionResponse,
+    softDeleteContractQuestion,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
 import {
@@ -262,6 +264,11 @@ type Store = {
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
     ) => Promise<ContractQuestionType | Error>
+    softDeleteContractQuestion: (
+        questionID: string,
+        user: AdminUserType,
+        reason: string
+    ) => Promise<ContractQuestionType | Error>
     findAllQuestionsByContract: (
         pkgID: string
     ) => Promise<ContractQuestionType[] | Error>
@@ -404,6 +411,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             insertContractQuestion(client, questionInput, user),
         insertContractQuestionResponse: (questionInput, user) =>
             insertContractQuestionResponse(client, questionInput, user),
+        softDeleteContractQuestion: (questionID, user, reason) =>
+            softDeleteContractQuestion(client, { questionID, user, reason }),
         findAllQuestionsByContract: (pkgID) =>
             findAllQuestionsByContract(client, pkgID),
         insertRateQuestion: (questionInput, user) =>

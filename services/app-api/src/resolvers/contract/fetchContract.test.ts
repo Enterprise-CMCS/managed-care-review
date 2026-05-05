@@ -341,134 +341,136 @@ describe('fetchContract', () => {
         )
     })
 
-    it('allows OAuth client with client_credentials to fetch contract', async () => {
-        const stateServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
+    describe('Oauth request tests', () => {
+        it('allows OAuth client with client_credentials to fetch contract', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
 
-        // Create a contract
-        const stateSubmission =
-            await createAndUpdateTestContractWithoutRates(stateServer)
+            // Create a contract
+            const stateSubmission =
+                await createAndUpdateTestContractWithoutRates(stateServer)
 
-        // Create OAuth client context
-        const oauthServer = await constructTestPostgresServer({
-            context: {
-                user: testStateUser(), // FL state user
-                oauthClient: {
-                    clientId: 'test-oauth-client',
-                    grants: ['client_credentials'],
-                    iss: 'mcreview-test',
-                    scopes: [],
-                    isDelegatedUser: false,
+            // Create OAuth client context
+            const oauthServer = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser(), // FL state user
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['client_credentials'],
+                        iss: 'mcreview-test',
+                        scopes: [],
+                        isDelegatedUser: false,
+                    },
                 },
-            },
-            s3Client: mockS3,
-        })
+                s3Client: mockS3,
+            })
 
-        const fetchResult = await executeGraphQLOperation(oauthServer, {
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+            const fetchResult = await executeGraphQLOperation(oauthServer, {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
-            },
+            })
+
+            expect(fetchResult.errors).toBeUndefined()
+            expect(fetchResult.data?.fetchContract.contract).toBeDefined()
+            expect(fetchResult.data?.fetchContract.contract.id).toBe(
+                stateSubmission.id
+            )
         })
 
-        expect(fetchResult.errors).toBeUndefined()
-        expect(fetchResult.data?.fetchContract.contract).toBeDefined()
-        expect(fetchResult.data?.fetchContract.contract.id).toBe(
-            stateSubmission.id
-        )
-    })
+        it('denies OAuth client access to contract from different state', async () => {
+            const stateServerFL = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
 
-    it('denies OAuth client access to contract from different state', async () => {
-        const stateServerFL = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
+            // Create a contract in FL
+            const stateSubmission =
+                await createAndUpdateTestContractWithoutRates(stateServerFL)
 
-        // Create a contract in FL
-        const stateSubmission =
-            await createAndUpdateTestContractWithoutRates(stateServerFL)
-
-        // Create OAuth client context with VA state user
-        const oauthServerVA = await constructTestPostgresServer({
-            context: {
-                user: testStateUser({
-                    stateCode: 'VA',
-                    email: 'oauth@va.gov',
-                }),
-                oauthClient: {
-                    clientId: 'test-oauth-client-va',
-                    grants: ['client_credentials'],
-                    iss: 'mcreview-test',
-                    scopes: [],
-                    isDelegatedUser: false,
+            // Create OAuth client context with VA state user
+            const oauthServerVA = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser({
+                        stateCode: 'VA',
+                        email: 'oauth@va.gov',
+                    }),
+                    oauthClient: {
+                        clientId: 'test-oauth-client-va',
+                        grants: ['client_credentials'],
+                        iss: 'mcreview-test',
+                        scopes: [],
+                        isDelegatedUser: false,
+                    },
                 },
-            },
-            s3Client: mockS3,
-        })
+                s3Client: mockS3,
+            })
 
-        const fetchResult = await executeGraphQLOperation(oauthServerVA, {
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+            const fetchResult = await executeGraphQLOperation(oauthServerVA, {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
-            },
+            })
+
+            expect(fetchResult.errors).toBeDefined()
+            if (fetchResult.errors === undefined) {
+                throw new Error('type narrow')
+            }
+
+            expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
+            expect(fetchResult.errors[0].message).toBe(
+                'OAuth client not allowed to access contract from FL'
+            )
         })
 
-        expect(fetchResult.errors).toBeDefined()
-        if (fetchResult.errors === undefined) {
-            throw new Error('type narrow')
-        }
+        it('denies OAuth client without read permissions', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
 
-        expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
-        expect(fetchResult.errors[0].message).toBe(
-            'OAuth client not allowed to access contract from FL'
-        )
-    })
+            // Create a contract
+            const stateSubmission =
+                await createAndUpdateTestContractWithoutRates(stateServer)
 
-    it('denies OAuth client without read permissions', async () => {
-        const stateServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
-
-        // Create a contract
-        const stateSubmission =
-            await createAndUpdateTestContractWithoutRates(stateServer)
-
-        // Create OAuth client context without client_credentials grant
-        const oauthServer = await constructTestPostgresServer({
-            context: {
-                user: testStateUser(),
-                oauthClient: {
-                    clientId: 'test-oauth-client',
-                    grants: ['some_other_grant'],
-                    iss: 'mcreview-test',
-                    scopes: [],
-                    isDelegatedUser: false,
+            // Create OAuth client context without client_credentials grant
+            const oauthServer = await constructTestPostgresServer({
+                context: {
+                    user: testStateUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['some_other_grant'],
+                        iss: 'mcreview-test',
+                        scopes: [],
+                        isDelegatedUser: false,
+                    },
                 },
-            },
-            s3Client: mockS3,
-        })
+                s3Client: mockS3,
+            })
 
-        const fetchResult = await executeGraphQLOperation(oauthServer, {
-            query: FetchContractDocument,
-            variables: {
-                input: {
-                    contractID: stateSubmission.id,
+            const fetchResult = await executeGraphQLOperation(oauthServer, {
+                query: FetchContractDocument,
+                variables: {
+                    input: {
+                        contractID: stateSubmission.id,
+                    },
                 },
-            },
+            })
+
+            expect(fetchResult.errors).toBeDefined()
+            if (fetchResult.errors === undefined) {
+                throw new Error('type narrow')
+            }
+
+            expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
+            expect(fetchResult.errors[0].message).toBe(
+                'OAuth client does not have read permissions'
+            )
         })
-
-        expect(fetchResult.errors).toBeDefined()
-        if (fetchResult.errors === undefined) {
-            throw new Error('type narrow')
-        }
-
-        expect(fetchResult.errors[0].extensions?.code).toBe('FORBIDDEN')
-        expect(fetchResult.errors[0].message).toBe(
-            'OAuth client does not have read permissions'
-        )
     })
 })

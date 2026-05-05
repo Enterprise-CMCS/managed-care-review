@@ -40,6 +40,7 @@ const questions: ContractQuestionType[] = [
         documents: [],
         division: 'DMCO',
         responses: [],
+        actions: [],
     },
 ]
 
