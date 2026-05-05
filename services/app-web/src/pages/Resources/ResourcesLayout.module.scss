@@ -1,0 +1,26 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+.background {
+    width: 100%;
+    min-height: 100%;
+    background-color: custom.$mcr-foundation-white;
+}
+
+.layoutContainer {
+    @include custom.container;
+    padding: 0 !important;
+    justify-content: center;
+}
+
+.sideNavContainer {
+    padding: uswds.units(4) uswds.units(3);
+    min-width: 18rem;
+    width: 18rem;
+    max-width: 18rem;
+}
+
+.contentContainer {
+    flex: 1 1 auto;
+    min-width: 0;
+}

@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { Route, Routes, useLocation, Navigate } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
@@ -22,6 +22,7 @@ import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
 import { ContactUs } from '../ContactUs/ContactUs'
 import { Resources } from '../Resources/Resources'
+import { ResourcesLayout } from '../Resources/ResourcesLayout'
 import { Landing } from '../Landing/Landing'
 import { MccrsId } from '../MccrsId/MccrsId'
 import {
@@ -85,19 +86,39 @@ function componentForAuthMode(
 
 // Routes that are agnostic to user login and authentication
 // Should be available on all defined routes lists
-// Hide Contact us and Resources pages behind the feature flag
+// Hide "Contact us" and "Resources and Training" pages behind the feature flag
 const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
-    <Fragment>
-        <Route path={RoutesRecord.HELP} element={<Help />} />
+    <>
         <Route
             path={RoutesRecord.CONTACT_US}
             element={showResourcesNavPages ? <ContactUs /> : <Error404 />}
         />
         <Route
-            path={RoutesRecord.RESOURCES}
-            element={showResourcesNavPages ? <Resources /> : <Error404 />}
+            path="/help"
+            element={<Navigate to={RoutesRecord.HELP} replace />}
         />
-    </Fragment>
+        <Route
+            path="/training"
+            element={
+                showResourcesNavPages ? (
+                    <Navigate to={RoutesRecord.RESOURCES_TRAINING} replace />
+                ) : (
+                    <Error404 />
+                )
+            }
+        />
+        <Route path={RoutesRecord.RESOURCES} element={<ResourcesLayout />}>
+            <Route
+                index
+                element={<Navigate to={RoutesRecord.HELP} replace />}
+            />
+            <Route path="help" element={<Help />} />
+            <Route
+                path="training"
+                element={showResourcesNavPages ? <Resources /> : <Error404 />}
+            />
+        </Route>
+    </>
 )
 
 const StateUserRoutes = ({
@@ -490,6 +511,7 @@ export const AppRoutes = ({
             'HELP' as const,
             'CONTACT_US' as const,
             'RESOURCES' as const,
+            'RESOURCES_TRAINING' as const,
             'UNKNOWN_ROUTE' as const,
         ]
         if (!loggedInUser) {
