@@ -5,7 +5,11 @@ import { ReactRouterLinkWithLogging } from '../../components/TealiumLogging/Link
 import { getRouteName } from '../../routeHelpers'
 import styles from './ResourcesLayout.module.scss'
 
-export const ResourcesLayout = (): React.ReactElement => {
+export const ResourcesLayout = ({
+    showSideNav = true,
+}: {
+    showSideNav?: boolean
+}): React.ReactElement => {
     const { pathname } = useLocation()
     const routeName = getRouteName(pathname)
 
@@ -22,24 +26,28 @@ export const ResourcesLayout = (): React.ReactElement => {
                 </GridContainer>
             </div>
             <GridContainer className={styles.layoutContainer}>
-                <div className={styles.sideNavContainer}>
-                    <SideNav
-                        items={[
-                            <ReactRouterLinkWithLogging
-                                to="help"
-                                className={isSelectedLink('HELP')}
-                            >
-                                Submission form guidance
-                            </ReactRouterLinkWithLogging>,
-                            <ReactRouterLinkWithLogging
-                                to="training"
-                                className={isSelectedLink('RESOURCES_TRAINING')}
-                            >
-                                Resources and training
-                            </ReactRouterLinkWithLogging>,
-                        ]}
-                    />
-                </div>
+                {showSideNav && (
+                    <div className={styles.sideNavContainer}>
+                        <SideNav
+                            items={[
+                                <ReactRouterLinkWithLogging
+                                    to="help"
+                                    className={isSelectedLink('HELP')}
+                                >
+                                    Submission form guidance
+                                </ReactRouterLinkWithLogging>,
+                                <ReactRouterLinkWithLogging
+                                    to="training"
+                                    className={isSelectedLink(
+                                        'RESOURCES_TRAINING'
+                                    )}
+                                >
+                                    Resources and training
+                                </ReactRouterLinkWithLogging>,
+                            ]}
+                        />
+                    </div>
+                )}
                 <div className={styles.contentContainer}>
                     <Outlet />
                 </div>

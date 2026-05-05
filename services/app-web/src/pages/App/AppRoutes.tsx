@@ -107,7 +107,10 @@ const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
                 )
             }
         />
-        <Route path={RoutesRecord.RESOURCES} element={<ResourcesLayout />}>
+        <Route
+            path={RoutesRecord.RESOURCES}
+            element={<ResourcesLayout showSideNav={showResourcesNavPages} />}
+        >
             <Route
                 index
                 element={<Navigate to={RoutesRecord.HELP} replace />}
