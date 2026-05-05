@@ -40,6 +40,7 @@ import {
 import { getSubmissionPath } from '../../../routeHelpers'
 import { StatusTag } from '../../../components/ContractTable'
 import { ChangeHistory } from '../../../components/ChangeHistory'
+import { ReviewDecisionRecord } from '@mc-review/constants'
 
 export const EQROSubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -177,7 +178,9 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const showWithdrawBtn =
         hasCMSPermissions &&
         withdrawSubmissionFlag &&
-        ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
+        ['SUBMITTED', 'RESUBMITTED', 'NOT_SUBJECT_TO_REVIEW'].includes(
+            consolidatedStatus
+        )
     const showUndoWithdrawBtn =
         hasCMSPermissions &&
         undoWithdrawSubmissionFlag &&
@@ -188,11 +191,6 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         withdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN' &&
         latestContractAction
-    const undoWithdrawAction =
-        latestContractAction?.actionType === 'UNDER_REVIEW' &&
-        contract.reviewStatusActions?.[1]?.actionType === 'WITHDRAW'
-    const showPermUndoWithdrawBanner =
-        undoWithdrawAction && undoWithdrawSubmissionFlag && isStateUser
 
     // Get the correct update info depending on the submission status
     let updateInfo: UpdateInformation | undefined = undefined
@@ -228,7 +226,15 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
 
     const renderStatusAlerts = () => {
         if (showTempUndoWithdrawBanner) {
-            return <StatusUpdatedBanner className={styles.banner} />
+            const status = isSubjectToReview
+                ? 'Submitted'
+                : ReviewDecisionRecord['NOT_SUBJECT_TO_REVIEW']
+            return (
+                <StatusUpdatedBanner
+                    className={styles.banner}
+                    message={`Submission status updated to "${status}".`}
+                />
+            )
         }
 
         if (showWithdrawnBanner && latestContractAction.updatedBy) {
@@ -243,10 +249,6 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     }}
                 />
             )
-        }
-
-        if (showPermUndoWithdrawBanner) {
-            return <StatusUpdatedBanner className={styles.banner} />
         }
 
         if (isUnlocked && updateInfo) {

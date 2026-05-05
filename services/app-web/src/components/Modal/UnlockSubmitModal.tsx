@@ -41,7 +41,7 @@ type UnlockSubmitModalProps = {
     submissionData: Rate | Contract
     modalType: ModalTypes
     submissionName?: string
-    modalRef: React.RefObject<ModalRef>
+    modalRef: React.RefObject<ModalRef | null>
     setIsSubmitting?: React.Dispatch<React.SetStateAction<boolean>>
 }
 

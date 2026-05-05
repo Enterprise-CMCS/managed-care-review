@@ -554,6 +554,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                                     hash: '#submission-description',
                                                 }}
                                                 target="_blank"
+                                                className="display-inline-block"
                                             >
                                                 View description examples
                                             </ReactRouterLinkWithLogging>

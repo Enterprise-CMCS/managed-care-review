@@ -738,6 +738,7 @@ export const SubmissionType = ({
                                                         hash: '#submission-description',
                                                     }}
                                                     target="_blank"
+                                                    className="display-inline-block"
                                                 >
                                                     View description examples
                                                 </ReactRouterLinkWithLogging>

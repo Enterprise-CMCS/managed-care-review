@@ -42,7 +42,7 @@ const ButtonWithLogging = (props: ButtonWithLoggingType) => {
 
     return (
         <Button
-            onClick={(e) => {
+            onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                 logButtonEvent({
                     text: extractText(children),
                     button_type: button_type ?? type,

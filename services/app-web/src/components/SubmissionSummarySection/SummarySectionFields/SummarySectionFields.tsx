@@ -155,20 +155,36 @@ export const ReviewDecision = ({
     label,
     newDetermination,
 }: {
-    subjectToReview: boolean
+    subjectToReview?: boolean
     label?: string
     newDetermination?: boolean
 }) => {
-    const renderReviewDetermination = subjectToReview
-        ? 'Subject to formal review and approval'
-        : 'Not subject to formal review and approval'
+    const unavailableDetermination = subjectToReview === undefined
+    let renderReviewDetermination = ''
+
+    if (unavailableDetermination) {
+        renderReviewDetermination = 'Review determination unavailable'
+    } else {
+        renderReviewDetermination = subjectToReview
+            ? 'Subject to formal review and approval'
+            : 'Not subject to formal review and approval'
+    }
 
     return (
-        <DataDetail id="reviewDecision" label={label ?? 'Review decision'}>
-            <span>
-                {newDetermination && <NewTag className={styles.tagSpacing} />}
-                {renderReviewDetermination}
-            </span>
+        <DataDetail
+            id="reviewDecision"
+            label={label ?? 'Review decision'}
+            explainMissingData={unavailableDetermination}
+            explainMissingDataMsg={renderReviewDetermination}
+        >
+            {!unavailableDetermination && (
+                <span>
+                    {newDetermination && (
+                        <NewTag className={styles.tagSpacing} />
+                    )}
+                    {renderReviewDetermination}
+                </span>
+            )}
         </DataDetail>
     )
 }

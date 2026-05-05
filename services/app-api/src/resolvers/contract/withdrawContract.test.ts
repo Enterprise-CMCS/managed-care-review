@@ -24,7 +24,6 @@ import type { RateFormDataInput, RateStrippedEdge } from '../../gen/gqlClient'
 import {
     SubmitContractDocument,
     UpdateDraftContractRatesDocument,
-    WithdrawContractDocument,
 } from '../../gen/gqlClient'
 import {
     addNewRateToTestContract,
@@ -1321,7 +1320,7 @@ describe('withdrawContract', () => {
         )
     })
 
-    it('cannot withdraw EQRO or CHIP-only HEALTH_PLAN contract with NOT_SUBJECT_TO_REVIEW status', async () => {
+    it('can withdraw EQRO or CHIP-only HEALTH_PLAN contract with NOT_SUBJECT_TO_REVIEW status', async () => {
         const stateServer = await constructTestPostgresServer({
             context: { user: stateUser },
             ldService: testLDService({
@@ -1367,33 +1366,19 @@ describe('withdrawContract', () => {
         expect(chipSubmitted.contractSubmissionType).toBe('HEALTH_PLAN')
         expect(chipSubmitted.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
 
-        const eqroWithdrawResult = await executeGraphQLOperation(cmsServer, {
-            query: WithdrawContractDocument,
-            variables: {
-                input: {
-                    contractID: eqroSubmitted.id,
-                    updatedReason: 'withdraw submission',
-                },
-            },
-        })
-        expect(eqroWithdrawResult.errors).toBeDefined()
-        expect(eqroWithdrawResult.errors?.[0].message).toBe(
-            'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
+        const eqroWithdrawn = await withdrawTestContract(
+            cmsServer,
+            eqroSubmitted.id,
+            'withdraw EQRO submission'
         )
+        expect(eqroWithdrawn.consolidatedStatus).toBe('WITHDRAWN')
 
-        const chipWithdrawResult = await executeGraphQLOperation(cmsServer, {
-            query: WithdrawContractDocument,
-            variables: {
-                input: {
-                    contractID: chipSubmitted.id,
-                    updatedReason: 'withdraw submission',
-                },
-            },
-        })
-        expect(chipWithdrawResult.errors).toBeDefined()
-        expect(chipWithdrawResult.errors?.[0].message).toBe(
-            'Attempted to withdraw submission with invalid contract status of NOT_SUBJECT_TO_REVIEW'
+        const chipWithdrawn = await withdrawTestContract(
+            cmsServer,
+            chipSubmitted.id,
+            'withdraw CHIP submission'
         )
+        expect(chipWithdrawn.consolidatedStatus).toBe('WITHDRAWN')
     })
 
     it('can withdraw EQRO contract with SUBMITTED status', async () => {

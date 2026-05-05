@@ -1,8 +1,7 @@
 import React from 'react'
 import styles from './FilterAccordion.module.scss'
-import { Accordion } from '@trussworks/react-uswds'
+import { Accordion, type AccordionProps } from '@trussworks/react-uswds'
 import { FilterSelectPropType } from './FilterSelect/FilterSelect'
-import type { AccordionItemProps } from '@trussworks/react-uswds/lib/components/Accordion/Accordion'
 import { ButtonWithLogging } from '../TealiumLogging'
 import { useTealium } from '../../hooks'
 import { extractText } from '../TealiumLogging/tealiamLoggingHelpers'
@@ -29,7 +28,7 @@ export const FilterAccordion = ({
         return React.cloneElement(child)
     })
 
-    const accordionItems: AccordionItemProps[] = [
+    const accordionItems: AccordionProps['items'] = [
         {
             title: filterTitle,
             headingLevel,

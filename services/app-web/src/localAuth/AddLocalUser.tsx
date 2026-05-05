@@ -157,7 +157,7 @@ const AddLocalUser = () => {
                     <Grid>
                         <Form
                             className={styles.formContainer}
-                            onSubmit={(e) => {
+                            onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                                 setShouldValidate(true)
                                 return handleSubmit(e)
                             }}

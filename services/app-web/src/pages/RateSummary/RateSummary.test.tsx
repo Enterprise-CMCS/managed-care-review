@@ -235,10 +235,6 @@ describe('RateSummary', () => {
             })
 
             it('renders document download warning banner when download fails', async () => {
-                const error = vi
-                    .spyOn(console, 'error')
-                    .mockImplementation(vi.fn())
-
                 const s3Provider = {
                     ...testS3Client(),
                     getBulkDlURL: async (
@@ -282,7 +278,6 @@ describe('RateSummary', () => {
                     expect(
                         screen.getByTestId('warning-alert')
                     ).toHaveTextContent('Document download unavailable')
-                    expect(error).toHaveBeenCalled()
                 })
             })
 

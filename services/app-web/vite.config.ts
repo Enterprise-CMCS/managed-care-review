@@ -5,6 +5,7 @@ import 'vitest/config'
 import react from '@vitejs/plugin-react'
 import svgr from 'vite-plugin-svgr'
 import graphqlLoader from 'vite-plugin-graphql-loader'
+import { viteStaticCopy } from 'vite-plugin-static-copy'
 import path from 'path'
 
 export default defineConfig(() => ({
@@ -21,6 +22,24 @@ export default defineConfig(() => ({
             include: '**/*.svg',
         }),
         graphqlLoader(),
+        // USWDS v3's CSS references assets at $theme-image-path / $theme-font-path
+        // (configured to /uswds/img and /uswds/fonts in src/index.scss).
+        viteStaticCopy({
+            targets: [
+                {
+                    src: 'node_modules/@uswds/uswds/dist/img/**/*',
+                    dest: 'uswds/img',
+                    // Strip `node_modules/@uswds/uswds/dist/img` (5 segments)
+                    // so files land at /uswds/img/<file> and /uswds/img/<subdir>/<file>.
+                    rename: { stripBase: 5 },
+                },
+                {
+                    src: 'node_modules/@uswds/uswds/dist/fonts/**/*',
+                    dest: 'uswds/fonts',
+                    rename: { stripBase: 5 },
+                },
+            ],
+        }),
     ],
     server: {
         open: true,
@@ -61,7 +80,6 @@ export default defineConfig(() => ({
     },
     resolve: {
         alias: {
-            '~uswds': path.resolve(__dirname, './node_modules/uswds'),
             '@mc-review/common-code': path.resolve(
                 __dirname,
                 '../../packages/common-code'
@@ -100,6 +118,14 @@ export default defineConfig(() => ({
         environment: 'jsdom',
         setupFiles: 'src/setupTests.ts',
         globals: true,
+        // Inline-transform react-uswds so vi.mock('focus-trap-react') in test
+        // files also intercepts uswds' internal imports (pnpm gives uswds its
+        // own resolution path that escapes mocks otherwise).
+        server: {
+            deps: {
+                inline: ['@trussworks/react-uswds'],
+            },
+        },
         coverage: {
             reporter: ['text', 'json', 'lcov'],
             reportsDirectory: './coverage',
