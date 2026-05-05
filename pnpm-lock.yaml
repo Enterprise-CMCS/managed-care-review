@@ -1043,8 +1043,8 @@ importers:
         specifier: ^3.1042.0
         version: 3.1042.0
       '@aws-solutions-constructs/aws-apigateway-lambda':
-        specifier: 2.100.1
-        version: 2.100.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1)
+        specifier: 2.101.0
+        version: 2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-cloudfront-s3':
         specifier: 2.101.0
         version: 2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1)
@@ -1994,11 +1994,11 @@ packages:
     resolution: {integrity: sha512-PMYKKtJd70IsSG0yHrdAbxBr+ZWBKLvzFZfD3/urxgf6hXVMzuU5M+3MJ5G67RpOmLBu1fAUN65SbWuKUCOlAA==}
     engines: {node: '>=20.0.0'}
 
-  '@aws-solutions-constructs/aws-apigateway-lambda@2.100.1':
-    resolution: {integrity: sha512-0ygy5lzsjnvzy8lptFcgjICJsenSy4OjkyG2B0Jfu3JXgI9PYdaoon3CSRGFeMMlyPxL5HYCPvvN5tY16jG4IQ==}
+  '@aws-solutions-constructs/aws-apigateway-lambda@2.101.0':
+    resolution: {integrity: sha512-MPeRlwbbuXg866brPumA271t+sl5gjykKTwKQmAgUu7MJOk/uHFUO1+UplDSluaM1vce8nIgsggSse6LIGyuLA==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.100.1
-      aws-cdk-lib: ^2.239.0
+      '@aws-solutions-constructs/core': 2.101.0
+      aws-cdk-lib: ^2.248.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/aws-cloudfront-s3@2.101.0':
@@ -2600,8 +2600,8 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0-0
 
-  '@babel/plugin-transform-modules-systemjs@7.29.0':
-    resolution: {integrity: sha512-PrujnVFbOdUpw4UHiVwKvKRLMMic8+eC0CuNlxjsyZUiBjhFdPsewdXCkveh2KqBA9/waD0W1b4hXSOBQJezpQ==}
+  '@babel/plugin-transform-modules-systemjs@7.29.4':
+    resolution: {integrity: sha512-N7QmZ0xRZfjHOfZeQLJjwgX2zS9pdGHSVl/cjSGlo4dXMqvurfxXDMKY4RqEKzPozV78VMcd0lxyG13mlbKc4w==}
     engines: {node: '>=6.9.0'}
     peerDependencies:
       '@babel/core': ^7.0.0-0
@@ -15464,7 +15464,7 @@ snapshots:
       fast-xml-parser: 5.7.2
       tslib: 2.8.1
 
-  '@aws-solutions-constructs/aws-apigateway-lambda@2.100.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-apigateway-lambda@2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
       '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.252.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.252.0(constructs@10.5.1)
@@ -16144,7 +16144,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@babel/plugin-transform-modules-systemjs@7.29.0(@babel/core@7.29.0)':
+  '@babel/plugin-transform-modules-systemjs@7.29.4(@babel/core@7.29.0)':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/helper-module-transforms': 7.28.6(@babel/core@7.29.0)
@@ -16405,7 +16405,7 @@ snapshots:
       '@babel/plugin-transform-member-expression-literals': 7.27.1(@babel/core@7.29.0)
       '@babel/plugin-transform-modules-amd': 7.27.1(@babel/core@7.29.0)
       '@babel/plugin-transform-modules-commonjs': 7.28.6(@babel/core@7.29.0)
-      '@babel/plugin-transform-modules-systemjs': 7.29.0(@babel/core@7.29.0)
+      '@babel/plugin-transform-modules-systemjs': 7.29.4(@babel/core@7.29.0)
       '@babel/plugin-transform-modules-umd': 7.27.1(@babel/core@7.29.0)
       '@babel/plugin-transform-named-capturing-groups-regex': 7.29.0(@babel/core@7.29.0)
       '@babel/plugin-transform-new-target': 7.27.1(@babel/core@7.29.0)
