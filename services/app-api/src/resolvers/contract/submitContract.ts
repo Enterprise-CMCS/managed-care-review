@@ -7,6 +7,9 @@ import { isStateUser, contractSubmitters } from '../../domain-models'
 import {
     type CHIPFederalAuthority,
     federalAuthorityKeysForCHIP,
+    modifiedProvisionMedicaidAmendmentKeys,
+    modifiedProvisionMedicaidBaseKeys,
+    provisionCHIPKeys,
 } from '@mc-review/submissions'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
@@ -28,7 +31,7 @@ import {
     isContractWithProvisions,
     generateApplicableProvisionsList,
 } from '../../domain-models/contractAndRates'
-import type { GeneralizedModifiedProvisions } from '@mc-review/submissions'
+import type { GeneralizedProvisionType } from '@mc-review/submissions'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 
@@ -161,8 +164,9 @@ export function submitContract(
                     )
                 }
 
-                const initialFormData =
-                    contractWithHistory.draftRevision.formData
+                const initialFormData = {
+                    ...contractWithHistory.draftRevision.formData,
+                }
                 const contractRevisionID = contractWithHistory.draftRevision.id
                 const draftRatesWithoutLinkedRates =
                     contractWithHistory.draftRates?.filter((rate) => {
@@ -176,35 +180,44 @@ export function submitContract(
                 if (isCHIPOnly(contractWithHistory)) {
                     // remove invalid provisions
                     if (isContractWithProvisions(contractWithHistory)) {
-                        const validProvisionsKeys =
-                            generateApplicableProvisionsList(
-                                contractWithHistory
-                            )
-                        const validProvisionsData: Partial<GeneralizedModifiedProvisions> =
-                            {}
-                        validProvisionsKeys.forEach((provision) => {
-                            contractWithHistory.draftRevision!.formData[
-                                provision
-                            ] = validProvisionsData[provision]
+                        const validProvisionsKeys: GeneralizedProvisionType[] =
+                            [
+                                ...generateApplicableProvisionsList(
+                                    contractWithHistory
+                                ),
+                            ]
+
+                        const allProvisionKeys: GeneralizedProvisionType[] = [
+                            ...provisionCHIPKeys,
+                            ...modifiedProvisionMedicaidBaseKeys,
+                            ...modifiedProvisionMedicaidAmendmentKeys,
+                        ]
+
+                        allProvisionKeys.forEach((provision) => {
+                            if (!validProvisionsKeys.includes(provision)) {
+                                initialFormData[provision] = undefined
+                            }
                         })
                     }
 
-                    contractWithHistory.draftRevision.formData.federalAuthorities =
-                        contractWithHistory.draftRevision.formData.federalAuthorities.filter(
-                            (authority) =>
-                                federalAuthorityKeysForCHIP.includes(
-                                    authority as CHIPFederalAuthority
-                                )
+                    initialFormData.federalAuthorities =
+                        initialFormData.federalAuthorities.filter((authority) =>
+                            federalAuthorityKeysForCHIP.includes(
+                                authority as CHIPFederalAuthority
+                            )
                         )
                 }
 
                 const contractToParse = Object.assign({}, contractWithHistory)
+                contractToParse.draftRevision = {
+                    ...contractWithHistory.draftRevision,
+                    formData: initialFormData,
+                }
 
                 contractToParse.draftRates = draftRatesWithoutLinkedRates
 
                 // MCR-5970 if user changes DSNP, ensure rate medicaidPopulations is cleared out
-                const isDsnp =
-                    contractWithHistory.draftRevision.formData.dsnpContract
+                const isDsnp = initialFormData.dsnpContract
 
                 const parsedContract = isEQRO
                     ? parseEQROContract(
