@@ -1,0 +1,54 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+.pageWrapper {
+    margin-bottom: 2.625rem;
+}
+
+.pageContainer {
+    max-width: custom.$mcr-container-max-width-fixed;
+    padding-top: uswds.units(4);
+    padding-bottom: uswds.units(4);
+
+    h2 {
+        @include custom.mcr-type-style(40px, 700, 100%, 0);
+        margin-top: 0;
+        margin-bottom: uswds.units(4);
+    }
+}
+
+.resourceSection {
+    margin-bottom: uswds.units(7);
+
+    h3 {
+        @include custom.mcr-type-style(20px, 400, 140%, 0.2px);
+        margin-top: 0;
+        margin-bottom: uswds.units(3);
+    }
+}
+
+.resourceList {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: uswds.color('primary');
+
+    li {
+        margin: 0;
+        padding: 0;
+    }
+
+    li::marker {
+        color: uswds.color('primary');
+    }
+
+    a {
+        @include custom.mcr-type-style(16px, 400, 162%, 0.16px);
+        color: uswds.color('primary');
+
+        &:hover,
+        &:active,
+        &:visited {
+            color: uswds.color('primary');
+        }
+    }
+}

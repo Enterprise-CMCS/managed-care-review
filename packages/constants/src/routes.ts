@@ -248,7 +248,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     GRAPHQL_EXPLORER: 'GraphQL explorer',
     RESOURCES: 'Resources',
     HELP: 'Help',
-    RESOURCES_TRAINING: 'Resources and training',
+    RESOURCES_TRAINING: 'Resources & Training',
     SETTINGS: 'MC-Review settings',
     MCR_SETTINGS: 'MC-Review settings',
     STATE_ASSIGNMENTS: 'State assignments',
