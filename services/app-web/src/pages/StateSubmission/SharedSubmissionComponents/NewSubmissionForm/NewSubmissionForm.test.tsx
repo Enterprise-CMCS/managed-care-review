@@ -167,6 +167,7 @@ it('renders SDP radio when SDP flag is on', async () => {
 })
 
 it('redirects to Salesforce SDP URL when SDP is selected and flag is on', async () => {
+    import.meta.env.VITE_APP_SDP_PORTAL_URL = 'https://test.example.com/sdp'
     Object.defineProperty(window, 'location', {
         writable: true,
         value: { ...originalLocation, href: '' },
@@ -198,9 +199,7 @@ it('redirects to Salesforce SDP URL when SDP is selected and flag is on', async 
     await userEvent.click(startButton)
 
     await waitFor(() => {
-        expect(window.location.href).toBe(
-            'https://cmsapps5--mcrevval.sandbox.my.site.com/s/state-directed-preprint-submission'
-        )
+        expect(window.location.href).toBe('https://test.example.com/sdp')
     })
 })
 
