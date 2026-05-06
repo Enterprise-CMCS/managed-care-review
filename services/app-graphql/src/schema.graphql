@@ -1200,7 +1200,7 @@ type QuestionAction {
     id: ID!
     createdAt: DateTime!
     action: QuestionActionType!
-    reason: String
+    reason: String!
     updatedBy: AdminUser!
 }
 
