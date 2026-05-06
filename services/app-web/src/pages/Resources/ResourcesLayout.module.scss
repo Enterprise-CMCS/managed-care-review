@@ -42,7 +42,10 @@ $resources-side-nav-separator: custom.$mcr-gray-lightest;
 }
 
 .sideNavContainer {
-    padding: uswds.units(4) uswds.units(2);
+    padding-top: uswds.units(4);
+    padding-right: uswds.units(3);
+    padding-bottom: 0;
+    padding-left: uswds.units(2);
     min-width: $resources-side-nav-width;
     width: $resources-side-nav-width;
     max-width: $resources-side-nav-width;
@@ -79,7 +82,7 @@ $resources-side-nav-separator: custom.$mcr-gray-lightest;
     }
 
     @include uswds.at-media('desktop') {
-        padding-inline: uswds.units(4);
+        padding-left: uswds.units(4);
     }
 
     @include uswds.at-media-max('tablet') {

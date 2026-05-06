@@ -1,14 +1,9 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
-.pageWrapper {
-    margin-bottom: 2.625rem;
-}
-
 .pageContainer {
     max-width: custom.$mcr-container-max-width-fixed;
     padding-top: uswds.units(4);
-    padding-bottom: uswds.units(4);
 
     h2 {
         @include custom.mcr-type-style(40px, 700, 100%, 0);
@@ -18,12 +13,12 @@
 }
 
 .resourceSection {
-    margin-bottom: uswds.units(7);
+    margin-bottom: uswds.units(4);
 
     h3 {
         @include custom.mcr-type-style(20px, 400, 140%, 0.2px);
         margin-top: 0;
-        margin-bottom: uswds.units(3);
+        margin-bottom: uswds.units(2);
     }
 }
 
