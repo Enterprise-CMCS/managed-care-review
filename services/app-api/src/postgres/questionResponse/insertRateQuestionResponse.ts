@@ -24,6 +24,26 @@ export async function insertRateQuestionResponse(
     }))
 
     try {
+        const question = await client.rateQuestion.findFirst({
+            where: {
+                id: response.questionID,
+            },
+            include: {
+                actions: {
+                    orderBy: {
+                        createdAt: 'desc',
+                    },
+                    take: 1,
+                },
+            },
+        })
+
+        if (question?.actions?.[0]?.action === 'DELETE') {
+            return new Error(
+                `Cannot create response for question with the ID: ${response.questionID}. Question was deleted.`
+            )
+        }
+
         const result = await client.rateQuestion.update({
             where: {
                 id: response.questionID,
