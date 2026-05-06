@@ -1,5 +1,5 @@
-query indexRatesConnection($input: IndexRatesConnectionInput) {
-    indexRatesConnection(input: $input) {
+query indexRatesPaginated($input: IndexRatesPaginatedInput) {
+    indexRatesPaginated(input: $input) {
         totalCount
         totalPages
         edges {

@@ -48,7 +48,7 @@ const validateAndReturnRates = (
         const errMessage = `Failed to parse the following rates:\n${errorParseRates.join(
             '\n'
         )}`
-        logError('indexRatesConnectionResolver', errMessage)
+        logError('indexRatesPaginatedResolver', errMessage)
         recordResolverError(span, errMessage)
     }
     return parsedRates
@@ -92,14 +92,14 @@ function decodeRateCursor(encodedCursor: string): RateCursor {
     }
 }
 
-function normalizeIndexRatesPageSize(first?: number): number {
-    const pageSize = first ?? DEFAULT_INDEX_RATES_PAGE_SIZE
+function normalizeIndexRatesPageSize(requestedPageSize?: number): number {
+    const pageSize = requestedPageSize ?? DEFAULT_INDEX_RATES_PAGE_SIZE
 
     if (pageSize < 1 || pageSize > MAX_INDEX_RATES_PAGE_SIZE) {
         throw createUserInputError(
-            `first must be between 1 and ${MAX_INDEX_RATES_PAGE_SIZE}`,
-            'first',
-            first
+            `pageSize must be between 1 and ${MAX_INDEX_RATES_PAGE_SIZE}`,
+            'pageSize',
+            requestedPageSize
         )
     }
 
@@ -122,21 +122,21 @@ function normalizeAfterCursor(after?: string) {
     }
 }
 
-export function indexRatesConnectionResolver(
+export function indexRatesPaginatedResolver(
     store: Store
-): QueryResolvers['indexRatesConnection'] {
+): QueryResolvers['indexRatesPaginated'] {
     return async (_parent, { input }, context) => {
-        const first = input?.first
+        const pageSizeInput = input?.pageSize
         const after = input?.after
         const { user } = context
 
         return withResolverSpan(
             context,
-            'indexRatesConnection',
+            'indexRatesPaginated',
             {
                 'mcreview.rate_ids_count': input?.rateIDs?.length ?? 0,
-                'mcreview.pagination.first':
-                    first ?? DEFAULT_INDEX_RATES_PAGE_SIZE,
+                'mcreview.pagination.page_size':
+                    pageSizeInput ?? DEFAULT_INDEX_RATES_PAGE_SIZE,
                 'mcreview.pagination.has_after': Boolean(after),
                 ...(input?.stateCode
                     ? { 'mcreview.state_code': input.stateCode }
@@ -147,7 +147,7 @@ export function indexRatesConnectionResolver(
 
                 if (!canRead(context)) {
                     const errMessage = `OAuth client does not have read permissions`
-                    logError('indexRatesConnection', errMessage)
+                    logError('indexRatesPaginated', errMessage)
                     throw createForbiddenError(errMessage)
                 }
 
@@ -157,7 +157,7 @@ export function indexRatesConnectionResolver(
 
                 if (adminPermissions || cmsUser || stateUser) {
                     const pageSize = normalizeIndexRatesPageSize(
-                        first ?? undefined
+                        pageSizeInput ?? undefined
                     )
                     let ratesWithHistory
                     if (stateUser) {
@@ -243,8 +243,8 @@ export function indexRatesConnectionResolver(
 
                     logSuccess(
                         context.oauthClient
-                            ? 'indexRatesConnection - oauthClient'
-                            : 'indexRatesConnection'
+                            ? 'indexRatesPaginated - oauthClient'
+                            : 'indexRatesPaginated'
                     )
                     const totalCount = rates.length
                     const totalPages = Math.ceil(totalCount / pageSize)
@@ -263,7 +263,7 @@ export function indexRatesConnectionResolver(
                     const errMsg = authInfo
                         ? `OAuth client not authorized to fetch rate reviews data`
                         : 'user not authorized to fetch rate reviews data'
-                    logError('indexRatesConnection', errMsg)
+                    logError('indexRatesPaginated', errMsg)
                     throw createForbiddenError(errMsg)
                 }
             }

@@ -3,13 +3,13 @@
 
 ### April 28, 2026
 #### Added
-- New endpoint `indexRatesConnection` added to the API for paginated submitted-rate results. The api can be called with no input parameters, and a default page size of 10 will be used. 
-    - Accepts the new object `IndexRatesConnectionInput`
-        - The new object contains the same, optional filter paramters that `IndexRatesInput` accepts:
+- New endpoint `indexRatesPaginated` added to the API for paginated submitted-rate results. The API can be called with no input parameters, and a default page size of 10 will be used.
+    - Accepts the new object `IndexRatesPaginatedInput`
+        - The new object contains the same optional filter parameters that `IndexRatesInput` accepts:
             - `stateCode`: optional state filter for CMS and admin users
             - `rateIDs`: optional list of rate IDs to limit the result set
         - The new object also contains pagination specific arguments:
-            - `first`: optional page size, default is 10, max is 150
+            - `pageSize`: optional page size, default is 10, max is 150
             - `after`: optional opaque cursor for fetching the next page
     - Returns `RateConnection`
         - `totalCount`: total number of matching submitted rates
@@ -19,68 +19,7 @@
     - `RateConnectionEdge` includes:
         - `cursor`: opaque cursor for the current edge
         - `node`: the `Rate`
-    - Example query:
-        ```graphql
-        query IndexRatesConnection($input: IndexRatesConnectionInput) {
-            indexRatesConnection(input: $input) {
-                totalCount
-                totalPages
-                edges {
-                    cursor
-                    node {
-                        id
-                        stateCode
-                        consolidatedStatus
-                    }
-                }
-                pageInfo {
-                    hasNextPage
-                    endCursor
-                }
-            }
-        }
-        ```
-    - Example calls with no additional filters
-        - First request, fetches 50 records, more than the default 10 rates per page:
-            ```json
-            {
-                "input": {
-                    "first": 50 
-                }
-            }
-            ```
-        - Second request, fetches the next 50 records using the `pageInfo.endCursor` from the previous example's response:
-            ```json
-            {
-                "input": {
-                    "first": 50,
-                    "after": "string-end-cursor"
-                }
-            }
-            ```
-    - Example calls with additional filters
-        - First request, fetches 1 record and includes filters for specific Rate IDs and state:
-            ```json
-            {
-                "input": {
-                    "first": 1,
-                    "rateIDs": ["7af9410d-9f9a-4bb7-a23f-2bf53b224be7", "35325f91-7f9a-4bf6-9d45-5d72575e8d37"],
-                    "stateCode": "MN"
-                }
-            }
-            ```
-        - Second request, fetches the next 1 record using the `pageInfo.endCursor` from the previous example's response.
-            ```json
-            {
-                "input": {
-                    "first": 1,
-                    "rateIDs": ["7af9410d-9f9a-4bb7-a23f-2bf53b224be7", "35325f91-7f9a-4bf6-9d45-5d72575e8d37"],
-                    "stateCode": "MN",
-                    "after": "string-end-cursor"
-                }
-            }
-            ```
-    - GraphQL connection pagination uses cursors instead of page numbers or offsets. Cursors should be treated as **black-box values** — clients should not attempt to interpret or construct them. To fetch the next page, pass the previous response’s `pageInfo.endCursor` as `after` when `pageInfo.hasNextPage` is `true`.
+    - Usage examples and cursor behavior are documented in [indexRatesPaginated pagination](docs/technical-design/index-rates-pagination.md).
     - Existing `indexRates` behavior is unchanged and remains available as the non-paginated query.
 
 ### April 24, 2026

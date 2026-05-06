@@ -1,4 +1,4 @@
-import { IndexRatesConnectionDocument } from '../../gen/gqlClient'
+import { IndexRatesPaginatedDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     executeGraphQLOperation,
@@ -15,7 +15,7 @@ import { assertAnErrorCode } from '../../testHelpers/gqlAssertions'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
-describe('indexRatesConnection', () => {
+describe('indexRatesPaginated', () => {
     describe.each(iterableCmsUsersMockData)(
         '$userRole tests',
         ({ mockUser }) => {
@@ -50,60 +50,60 @@ describe('indexRatesConnection', () => {
                 ]
 
                 const firstPage = await executeGraphQLOperation(cmsServer, {
-                    query: IndexRatesConnectionDocument,
+                    query: IndexRatesPaginatedDocument,
                     variables: {
                         input: {
                             rateIDs,
-                            first: 2,
+                            pageSize: 2,
                         },
                     },
                 })
 
                 expect(firstPage.errors).toBeUndefined()
-                expect(firstPage.data?.indexRatesConnection.totalCount).toBe(3)
-                expect(firstPage.data?.indexRatesConnection.totalPages).toBe(2)
-                expect(firstPage.data?.indexRatesConnection.edges).toHaveLength(
+                expect(firstPage.data?.indexRatesPaginated.totalCount).toBe(3)
+                expect(firstPage.data?.indexRatesPaginated.totalPages).toBe(2)
+                expect(firstPage.data?.indexRatesPaginated.edges).toHaveLength(
                     2
                 )
                 expect(
-                    firstPage.data?.indexRatesConnection.pageInfo.hasNextPage
+                    firstPage.data?.indexRatesPaginated.pageInfo.hasNextPage
                 ).toBe(true)
                 expect(
-                    firstPage.data?.indexRatesConnection.pageInfo.endCursor
-                ).toBe(firstPage.data?.indexRatesConnection.edges[1].cursor)
+                    firstPage.data?.indexRatesPaginated.pageInfo.endCursor
+                ).toBe(firstPage.data?.indexRatesPaginated.edges[1].cursor)
 
                 const firstPageIDs =
-                    firstPage.data?.indexRatesConnection.edges.map(
+                    firstPage.data?.indexRatesPaginated.edges.map(
                         (edge: RateConnectionEdge) => edge.node.id
                     )
 
                 const secondPage = await executeGraphQLOperation(cmsServer, {
-                    query: IndexRatesConnectionDocument,
+                    query: IndexRatesPaginatedDocument,
                     variables: {
                         input: {
                             rateIDs,
-                            first: 2,
-                            after: firstPage.data?.indexRatesConnection.pageInfo
+                            pageSize: 2,
+                            after: firstPage.data?.indexRatesPaginated.pageInfo
                                 .endCursor,
                         },
                     },
                 })
 
                 expect(secondPage.errors).toBeUndefined()
-                expect(secondPage.data?.indexRatesConnection.totalCount).toBe(3)
-                expect(secondPage.data?.indexRatesConnection.totalPages).toBe(2)
+                expect(secondPage.data?.indexRatesPaginated.totalCount).toBe(3)
+                expect(secondPage.data?.indexRatesPaginated.totalPages).toBe(2)
+                expect(secondPage.data?.indexRatesPaginated.edges).toHaveLength(
+                    1
+                )
                 expect(
-                    secondPage.data?.indexRatesConnection.edges
-                ).toHaveLength(1)
-                expect(
-                    secondPage.data?.indexRatesConnection.pageInfo.hasNextPage
+                    secondPage.data?.indexRatesPaginated.pageInfo.hasNextPage
                 ).toBe(false)
                 expect(
-                    secondPage.data?.indexRatesConnection.pageInfo.endCursor
-                ).toBe(secondPage.data?.indexRatesConnection.edges[0].cursor)
+                    secondPage.data?.indexRatesPaginated.pageInfo.endCursor
+                ).toBe(secondPage.data?.indexRatesPaginated.edges[0].cursor)
 
                 const secondPageIDs =
-                    secondPage.data?.indexRatesConnection.edges.map(
+                    secondPage.data?.indexRatesPaginated.edges.map(
                         (edge: RateConnectionEdge) => edge.node.id
                     )
 
@@ -114,7 +114,7 @@ describe('indexRatesConnection', () => {
                 ).toEqual([...rateIDs].sort())
             })
 
-            it('returns BAD_USER_INPUT when first exceeds the page size limit', async () => {
+            it('returns BAD_USER_INPUT when pageSize exceeds the page size limit', async () => {
                 const cmsUser = mockUser()
                 const cmsServer = await constructTestPostgresServer({
                     context: { user: cmsUser },
@@ -123,17 +123,17 @@ describe('indexRatesConnection', () => {
                 })
 
                 const result = await executeGraphQLOperation(cmsServer, {
-                    query: IndexRatesConnectionDocument,
+                    query: IndexRatesPaginatedDocument,
                     variables: {
                         input: {
-                            first: 151,
+                            pageSize: 151,
                         },
                     },
                 })
 
                 expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
                 expect(result.errors?.[0].message).toContain(
-                    'first must be between 1 and 150'
+                    'pageSize must be between 1 and 150'
                 )
             })
 
@@ -146,7 +146,7 @@ describe('indexRatesConnection', () => {
                 })
 
                 const result = await executeGraphQLOperation(cmsServer, {
-                    query: IndexRatesConnectionDocument,
+                    query: IndexRatesPaginatedDocument,
                     variables: {
                         input: {
                             after: 'not-a-cursor',
@@ -235,46 +235,46 @@ describe('indexRatesConnection', () => {
         ])
 
         const firstPage = await executeGraphQLOperation(cmsServer, {
-            query: IndexRatesConnectionDocument,
+            query: IndexRatesPaginatedDocument,
             variables: {
                 input: {
                     rateIDs: [displayLatestRateID, displayOlderRateID],
-                    first: 1,
+                    pageSize: 1,
                 },
             },
         })
 
         expect(firstPage.errors).toBeUndefined()
-        expect(firstPage.data?.indexRatesConnection.totalCount).toBe(2)
-        expect(firstPage.data?.indexRatesConnection.totalPages).toBe(2)
-        expect(firstPage.data?.indexRatesConnection.edges).toHaveLength(1)
-        expect(firstPage.data?.indexRatesConnection.edges[0].node.id).toBe(
+        expect(firstPage.data?.indexRatesPaginated.totalCount).toBe(2)
+        expect(firstPage.data?.indexRatesPaginated.totalPages).toBe(2)
+        expect(firstPage.data?.indexRatesPaginated.edges).toHaveLength(1)
+        expect(firstPage.data?.indexRatesPaginated.edges[0].node.id).toBe(
             displayLatestRateID
         )
-        expect(firstPage.data?.indexRatesConnection.pageInfo.hasNextPage).toBe(
+        expect(firstPage.data?.indexRatesPaginated.pageInfo.hasNextPage).toBe(
             true
         )
 
         const secondPage = await executeGraphQLOperation(cmsServer, {
-            query: IndexRatesConnectionDocument,
+            query: IndexRatesPaginatedDocument,
             variables: {
                 input: {
                     rateIDs: [displayLatestRateID, displayOlderRateID],
-                    first: 1,
-                    after: firstPage.data?.indexRatesConnection.pageInfo
+                    pageSize: 1,
+                    after: firstPage.data?.indexRatesPaginated.pageInfo
                         .endCursor,
                 },
             },
         })
 
         expect(secondPage.errors).toBeUndefined()
-        expect(secondPage.data?.indexRatesConnection.totalCount).toBe(2)
-        expect(secondPage.data?.indexRatesConnection.totalPages).toBe(2)
-        expect(secondPage.data?.indexRatesConnection.edges).toHaveLength(1)
-        expect(secondPage.data?.indexRatesConnection.edges[0].node.id).toBe(
+        expect(secondPage.data?.indexRatesPaginated.totalCount).toBe(2)
+        expect(secondPage.data?.indexRatesPaginated.totalPages).toBe(2)
+        expect(secondPage.data?.indexRatesPaginated.edges).toHaveLength(1)
+        expect(secondPage.data?.indexRatesPaginated.edges[0].node.id).toBe(
             displayOlderRateID
         )
-        expect(secondPage.data?.indexRatesConnection.pageInfo.hasNextPage).toBe(
+        expect(secondPage.data?.indexRatesPaginated.pageInfo.hasNextPage).toBe(
             false
         )
     })
@@ -316,7 +316,7 @@ describe('indexRatesConnection', () => {
         )
 
         const result = await executeGraphQLOperation(defaultStateServer, {
-            query: IndexRatesConnectionDocument,
+            query: IndexRatesPaginatedDocument,
             variables: {
                 input: {
                     rateIDs: [
@@ -324,20 +324,18 @@ describe('indexRatesConnection', () => {
                         contract2.packageSubmissions[0].rateRevisions[0].rateID,
                         contract3.packageSubmissions[0].rateRevisions[0].rateID,
                     ],
-                    first: 1,
+                    pageSize: 1,
                 },
             },
         })
 
         expect(result.errors).toBeUndefined()
-        expect(result.data?.indexRatesConnection.totalCount).toBe(2)
-        expect(result.data?.indexRatesConnection.totalPages).toBe(2)
-        expect(result.data?.indexRatesConnection.edges).toHaveLength(1)
-        expect(result.data?.indexRatesConnection.pageInfo.hasNextPage).toBe(
-            true
-        )
+        expect(result.data?.indexRatesPaginated.totalCount).toBe(2)
+        expect(result.data?.indexRatesPaginated.totalPages).toBe(2)
+        expect(result.data?.indexRatesPaginated.edges).toHaveLength(1)
+        expect(result.data?.indexRatesPaginated.pageInfo.hasNextPage).toBe(true)
         expect(
-            result.data?.indexRatesConnection.edges.every(
+            result.data?.indexRatesPaginated.edges.every(
                 (edge: RateConnectionEdge) =>
                     edge.node.stateCode === defaultStateUser.stateCode
             )

@@ -48,18 +48,18 @@ type Query {
     """
     indexRates(input: IndexRatesInput): IndexRatesPayload!
     """
-    indexRatesConnection returns full submitted rates using a paginated connection shape.
-    indexRatesConnection can be called by CMS, admin users, and state users. 
-    If called by a state user, the response will conain rate data from only their state.
+    indexRatesPaginated returns full submitted rates using a paginated connection shape.
+    indexRatesPaginated can be called by CMS, admin users, and state users.
+    If called by a state user, the response will contain rate data from only their state.
 
     Errors:
     - ForbiddenError: User must be a CMS, Admin, or State type user
     - NotFoundError:  No submitted rates found
     - UserInputError: `after` cursor is invalid
     - UserInputError: `after` cursor does not match a rate
-    - UserInputError: `first` must be between 1 and MAX_INDEX_RATES_PAGE_SIZE
+    - UserInputError: `pageSize` must be between 1 and MAX_INDEX_RATES_PAGE_SIZE
     """
-    indexRatesConnection(input: IndexRatesConnectionInput): RateConnection!
+    indexRatesPaginated(input: IndexRatesPaginatedInput): RateConnection!
     """
     indexRatesStripped returns abbreviated rate data
     Intended for use with CMS dashboards, initially minimal rate query
@@ -2302,7 +2302,7 @@ input IndexRatesInput {
     rateIDs: [String!]
 
 }
-input IndexRatesConnectionInput {
+input IndexRatesPaginatedInput {
     """
     Optional state filter for CMS and admin users.
     State users are always limited to their own state.
@@ -2318,7 +2318,7 @@ input IndexRatesConnectionInput {
     Maximum number of rates to return.
     Defaults to 10 when omitted. Maximum is 150.
     """
-    first: Int
+    pageSize: Int
 
     """
     Opaque pagination cursor from pageInfo.endCursor.

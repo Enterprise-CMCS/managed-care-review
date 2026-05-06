@@ -25,7 +25,7 @@ import {
     rateStrippedResolver,
     rateRevisionResolver,
     rateFormDataResolver,
-    indexRatesConnectionResolver,
+    indexRatesPaginatedResolver,
     indexRatesResolver,
     indexRatesStripped,
     fetchRateResolver,
@@ -92,7 +92,7 @@ export function configureResolvers(
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
             indexRates: indexRatesResolver(store),
-            indexRatesConnection: indexRatesConnectionResolver(store),
+            indexRatesPaginated: indexRatesPaginatedResolver(store),
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
