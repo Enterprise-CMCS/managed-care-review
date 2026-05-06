@@ -24,26 +24,35 @@ import { NewStateSubmissionForm } from '../../HealthPlanSubmission/New'
 import { EQROSubmissionDetails } from '../../EQROSubmission'
 import { Error404 } from '../../../Errors/Error404Page'
 import styles from './NewSubmissionForm.module.scss'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 const newSubmissionFormSchema = Yup.object().shape({
-    contractType: Yup.string().required('You must select a contract type'),
+    contractSubmissionType: Yup.string().required(
+        'You must select a submission type'
+    ),
 })
 
 export interface NewSubmissionFormValueType {
-    contractType?: ContractSubmissionTypeParams
+    contractSubmissionType?: ContractSubmissionTypeParams
 }
 
 type FormError =
     FormikErrors<NewSubmissionFormValueType>[keyof FormikErrors<NewSubmissionFormValueType>]
 
 const initialNewSubmissionValues: NewSubmissionFormValueType = {
-    contractType: undefined,
+    contractSubmissionType: undefined,
 }
 
 export const NewSubmission = () => {
     const { updateActiveMainContent } = usePage()
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
+    const ldClient = useLDClient()
+    const isSDPEnabled = ldClient?.variation(
+        featureFlags.SDP.flag,
+        featureFlags.SDP.defaultValue
+    )
 
     // Set the active main content to focus when click the Skip to main content button.
     useEffect(() => {
@@ -54,11 +63,20 @@ export const NewSubmission = () => {
         shouldValidate && Boolean(error)
 
     const onSubmit = (values: NewSubmissionFormValueType) => {
-        navigate(
-            generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
-                contractSubmissionType: values.contractType,
-            })
-        )
+        if (
+            isSDPEnabled &&
+            values.contractSubmissionType ===
+                ContractSubmissionTypeRecord['SDP']
+        ) {
+            //TODO: add new env urls to parameter store for val and prod once available
+            window.location.href = import.meta.env.VITE_APP_SDP_PORTAL_URL
+        } else {
+            navigate(
+                generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
+                    contractSubmissionType: values.contractSubmissionType,
+                })
+            )
+        }
     }
 
     return (
@@ -95,52 +113,74 @@ export const NewSubmission = () => {
                     >
                         <fieldset className="usa-fieldset">
                             <FormGroup
-                                error={showFieldErrors(errors.contractType)}
+                                error={showFieldErrors(
+                                    errors.contractSubmissionType
+                                )}
                             >
                                 <Fieldset
                                     role="radiogroup"
                                     aria-required
                                     className={styles.radioGroup}
-                                    legend="Contract type"
+                                    legend="Submission type"
                                 >
                                     <span
                                         className={styles.requiredOptionalText}
                                     >
                                         Required
                                     </span>
-                                    {showFieldErrors(errors.contractType) && (
-                                        <PoliteErrorMessage formFieldLabel="Contract type">
-                                            {errors.contractType as string}
+                                    {showFieldErrors(
+                                        errors.contractSubmissionType
+                                    ) && (
+                                        <PoliteErrorMessage formFieldLabel="Submission type">
+                                            {
+                                                errors.contractSubmissionType as string
+                                            }
                                         </PoliteErrorMessage>
                                     )}
                                     <FieldRadio
                                         id="healthPlan"
-                                        name="contractType"
+                                        name="contractSubmissionType"
                                         label="Health plan"
                                         aria-required
                                         data-testid="health-plan"
                                         value="health-plan"
                                         list_position={1}
                                         list_options={2}
-                                        parent_component_heading="Contract type"
+                                        parent_component_heading="Submission type"
                                         radio_button_title="Health plan"
                                         labelDescription="Submit your Medicaid and CHIP managed care plans. This includes base contracts, amendments to base contracts, and rate certifications."
                                         tile
                                     />
                                     <FieldRadio
                                         id="eqro"
-                                        name="contractType"
+                                        name="contractSubmissionType"
                                         label="External Quality Review Organization (EQRO)"
                                         data-testid="eqro"
                                         aria-required
                                         value="eqro"
                                         list_position={2}
                                         list_options={2}
-                                        parent_component_heading="Contract type"
+                                        parent_component_heading="Submission type"
                                         radio_button_title="External Quality Review Organization (EQRO)"
                                         labelDescription="Submit base contracts and amendments to base contracts between your state and an EQRO."
                                         tile
                                     />
+                                    {isSDPEnabled && (
+                                        <FieldRadio
+                                            id="sdp"
+                                            name="contractSubmissionType"
+                                            label="State Directed Payment Preprint (SDP)"
+                                            data-testid="sdp"
+                                            aria-required
+                                            value="sdp"
+                                            list_position={3}
+                                            list_options={2}
+                                            parent_component_heading="Submission type"
+                                            radio_button_title="State Directed Payment Preprint (SDP)"
+                                            labelDescription="Submit preprints to get prior approval for state directed payments"
+                                            tile
+                                        />
+                                    )}
                                 </Fieldset>
                             </FormGroup>
                         </fieldset>
@@ -159,12 +199,12 @@ export const NewSubmission = () => {
                             <ActionButton
                                 type="submit"
                                 link_url={
-                                    values.contractType
+                                    values.contractSubmissionType
                                         ? generatePath(
                                               RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
                                               {
                                                   contractSubmissionType:
-                                                      values.contractType,
+                                                      values.contractSubmissionType,
                                               }
                                           )
                                         : RoutesRecord.SUBMISSIONS_NEW

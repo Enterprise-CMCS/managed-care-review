@@ -86,6 +86,7 @@ NR_ACCOUNT_ID=$(get_ssm_param "/configuration/react_app_nr_account_id" "VITE_APP
 NR_TRUST_KEY=$(get_ssm_param "/configuration/react_app_nr_trust_key" "VITE_APP_NR_TRUST_KEY")
 NR_LICENSE_KEY=$(get_ssm_param "/configuration/react_app_nr_license_key" "VITE_APP_NR_LICENSE_KEY")
 NR_AGENT_ID=$(get_ssm_param "/configuration/react_app_nr_agent_id" "VITE_APP_NR_AGENT_ID")
+SDP_PORTAL_URL=$(get_ssm_param "/configuration/sdp_portal_url" "VITE_APP_SDP_PORTAL_URL")
 
 echo "=== Configuration Summary ==="
 echo "VITE_APP_API_URL: $API_URL"
@@ -133,6 +134,7 @@ export VITE_APP_NR_ACCOUNT_ID="$NR_ACCOUNT_ID"
 export VITE_APP_NR_AGENT_ID="$NR_AGENT_ID"
 export VITE_APP_NR_LICENSE_KEY="$NR_LICENSE_KEY"
 export VITE_APP_NR_TRUST_KEY="$NR_TRUST_KEY"
+export VITE_APP_SDP_PORTAL_URL="$SDP_PORTAL_URL"
 
 # Make variables available to calling script
 cat << EOF > "/tmp/cdk-config-${STAGE_NAME}.env"
@@ -154,6 +156,7 @@ VITE_APP_NR_ACCOUNT_ID=${NR_ACCOUNT_ID}
 VITE_APP_NR_AGENT_ID=${NR_AGENT_ID}
 VITE_APP_NR_LICENSE_KEY=${NR_LICENSE_KEY}
 VITE_APP_NR_TRUST_KEY=${NR_TRUST_KEY}
+VITE_APP_SDP_PORTAL_URL=${SDP_PORTAL_URL}
 EOF
 
 echo "Configuration exported to /tmp/cdk-config-${STAGE_NAME}.env"
