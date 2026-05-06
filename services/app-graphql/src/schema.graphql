@@ -38,20 +38,34 @@ type Query {
     indexUsers: IndexUsersPayload!
 
     """
-    indexRates returns full submitted rates
-    indexRates can be called by CMS and admin users, also used in link rate dropdown
+    indexRates returns full submitted rates.
+    indexRates can be called by CMS, admin users, and state users; also used in link rate dropdown.
+    If called by a state user, the response will contain rate data from only their state.
 
     Errors:
-    - ForbiddenError: User must be a CMS or Admin type user
+    - ForbiddenError: User must be a CMS, Admin, or State type user
     - NotFoundError:  No submitted rates found
     """
     indexRates(input: IndexRatesInput): IndexRatesPayload!
+    """
+    indexRatesPaginated returns full submitted rates using a paginated connection shape.
+    indexRatesPaginated can be called by CMS, admin users, and state users.
+    If called by a state user, the response will contain rate data from only their state.
+
+    Errors:
+    - ForbiddenError: User must be a CMS, Admin, or State type user
+    - NotFoundError:  No submitted rates found
+    - UserInputError: `after` cursor is invalid
+    - UserInputError: `after` cursor does not match a rate
+    - UserInputError: `pageSize` must be between 1 and MAX_INDEX_RATES_PAGE_SIZE
+    """
+    indexRatesPaginated(input: IndexRatesPaginatedInput): RateConnection!
     """
     indexRatesStripped returns abbreviated rate data
     Intended for use with CMS dashboards, initially minimal rate query
 
       Errors:
-    - ForbiddenError: User must be a CMS or Admin type user
+    - ForbiddenError: User must be a CMS, Admin, or State type user
     - NotFoundError: No submitted rates found
     """
     indexRatesStripped(input: IndexRatesInput): IndexRatesStrippedPayload!
@@ -640,6 +654,11 @@ input UndoWithdrawContractInput {
 
 type ContractEdge {
     node: Contract!
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
 }
 
 type IndexContractsPayload {
@@ -2329,15 +2348,54 @@ type RateEdge {
 input IndexRatesInput {
     stateCode: String
     rateIDs: [String!]
+
+}
+input IndexRatesPaginatedInput {
+    """
+    Optional state filter for CMS and admin users.
+    State users are always limited to their own state.
+    """
+    stateCode: String
+
+    """
+    Optional list of rate IDs to limit results.
+    """
+    rateIDs: [String!]
+
+    """
+    Maximum number of rates to return.
+    Defaults to 10 when omitted. Maximum is 150.
+    """
+    pageSize: Int
+
+    """
+    Opaque pagination cursor from pageInfo.endCursor.
+    Omit for the first page.
+    """
+    after: String
 }
 
 type IndexRatesPayload {
     "Total number of submitted rates returned on request"
     totalCount: Int
-    """
-    Rates that include rate and contract revisions
-    """
+    "Rates that include rate and contract revisions"
     edges: [RateEdge!]!
+}
+
+type RateConnectionEdge {
+    cursor: String!
+    node: Rate!
+}
+
+type RateConnection {
+    "Total number of submitted rates returned on request"
+    totalCount: Int
+    "Total number of pages based on totalCount and requested page size"
+    totalPages: Int
+    "Rates that include rate and contract revisions"
+    edges: [RateConnectionEdge!]!
+    "Provides the end cursor and a boolean to tell users if there are more pages available"
+    pageInfo: PageInfo!
 }
 
 type RateStrippedEdge {
@@ -2832,6 +2890,6 @@ enum OAuthScope {
 }
 
 enum UploadBucketName {
-    HEALTH_PLAN_DOCS,
+    HEALTH_PLAN_DOCS
     QUESTION_ANSWER_DOCS
 }

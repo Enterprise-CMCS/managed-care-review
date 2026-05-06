@@ -1,0 +1,28 @@
+query indexRatesPaginated($input: IndexRatesPaginatedInput) {
+    indexRatesPaginated(input: $input) {
+        totalCount
+        totalPages
+        edges {
+            cursor
+            node {
+                ...rateFieldsFragment
+
+                draftRevision {
+                    ...rateRevisionFragment
+                }
+
+                revisions {
+                    ...rateRevisionFragment
+                }
+
+                packageSubmissions {
+                    ...ratePackageSubmissionsFragment
+                }
+            }
+        }
+        pageInfo {
+            hasNextPage
+            endCursor
+        }
+    }
+}

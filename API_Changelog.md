@@ -1,6 +1,27 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### April 28, 2026
+#### Added
+- New endpoint `indexRatesPaginated` added to the API for paginated submitted-rate results. The API can be called with no input parameters, and a default page size of 10 will be used.
+    - Accepts the new object `IndexRatesPaginatedInput`
+        - The new object contains the same optional filter parameters that `IndexRatesInput` accepts:
+            - `stateCode`: optional state filter for CMS and admin users
+            - `rateIDs`: optional list of rate IDs to limit the result set
+        - The new object also contains pagination specific arguments:
+            - `pageSize`: optional page size, default is 10, max is 150
+            - `after`: optional opaque cursor for fetching the next page
+    - Returns `RateConnection`
+        - `totalCount`: total number of matching submitted rates
+        - `totalPages`: total number of pages based on totalCount and requested page size
+        - `edges`: list of `RateConnectionEdge`
+        - `pageInfo`: pagination metadata with `hasNextPage` and `endCursor`
+    - `RateConnectionEdge` includes:
+        - `cursor`: opaque cursor for the current edge
+        - `node`: the `Rate`
+    - Usage examples and cursor behavior are documented in [indexRatesPaginated pagination](docs/technical-design/index-rates-pagination.md).
+    - Existing `indexRates` behavior is unchanged and remains available as the non-paginated query.
+
 ### May 6, 2026
 #### Added
 - New mutation `deleteContractQuestion` added to the API

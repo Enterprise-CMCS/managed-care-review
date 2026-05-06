@@ -1,4 +1,4 @@
-import type { ContractType } from '../domain-models'
+import type { ContractType, RateType } from '../domain-models'
 
 type WithLatest = {
     latestQuestionCreatedAt?: Date | string | null
@@ -63,5 +63,31 @@ export function getLastUpdatedForDisplay(
         latestLinkedRateSubmit,
         latestContractResponse,
         latestRateResponse,
+    ])
+}
+
+export function getRateLastUpdatedForDisplay(
+    rate: Partial<RateType>
+): Date | undefined {
+    const rateUpdated = toDate(rate.updatedAt)
+    const draftUpdated = toDate(rate.draftRevision?.updatedAt)
+    const lastUnlocked = toDate(rate.draftRevision?.unlockInfo?.updatedAt)
+
+    const lastSubmitted = latestDate(
+        (rate.packageSubmissions ?? []).map((ps) =>
+            toDate(ps?.rateRevision?.submitInfo?.updatedAt)
+        )
+    )
+
+    const latestReviewAction = latestDate(
+        (rate.reviewStatusActions ?? []).map((a) => toDate(a?.updatedAt))
+    )
+
+    return latestDate([
+        rateUpdated,
+        draftUpdated,
+        lastUnlocked,
+        lastSubmitted,
+        latestReviewAction,
     ])
 }
