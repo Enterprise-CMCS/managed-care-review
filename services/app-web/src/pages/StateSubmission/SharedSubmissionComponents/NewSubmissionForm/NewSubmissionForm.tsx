@@ -28,18 +28,20 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 
 const newSubmissionFormSchema = Yup.object().shape({
-    submissionType: Yup.string().required('You must select a submission type'),
+    contractSubmissionType: Yup.string().required(
+        'You must select a submission type'
+    ),
 })
 
 export interface NewSubmissionFormValueType {
-    submissionType?: ContractSubmissionTypeParams
+    contractSubmissionType?: ContractSubmissionTypeParams
 }
 
 type FormError =
     FormikErrors<NewSubmissionFormValueType>[keyof FormikErrors<NewSubmissionFormValueType>]
 
 const initialNewSubmissionValues: NewSubmissionFormValueType = {
-    submissionType: undefined,
+    contractSubmissionType: undefined,
 }
 
 export const NewSubmission = () => {
@@ -63,14 +65,15 @@ export const NewSubmission = () => {
     const onSubmit = (values: NewSubmissionFormValueType) => {
         if (
             isSDPEnabled &&
-            values.submissionType === ContractSubmissionTypeRecord['SDP']
+            values.contractSubmissionType ===
+                ContractSubmissionTypeRecord['SDP']
         ) {
             //TODO: add new env urls to parameter store for val and prod once available
             window.location.href = import.meta.env.VITE_APP_SDP_PORTAL_URL
         } else {
             navigate(
                 generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
-                    contractSubmissionType: values.submissionType,
+                    contractSubmissionType: values.contractSubmissionType,
                 })
             )
         }
@@ -110,7 +113,9 @@ export const NewSubmission = () => {
                     >
                         <fieldset className="usa-fieldset">
                             <FormGroup
-                                error={showFieldErrors(errors.submissionType)}
+                                error={showFieldErrors(
+                                    errors.contractSubmissionType
+                                )}
                             >
                                 <Fieldset
                                     role="radiogroup"
@@ -123,14 +128,18 @@ export const NewSubmission = () => {
                                     >
                                         Required
                                     </span>
-                                    {showFieldErrors(errors.submissionType) && (
+                                    {showFieldErrors(
+                                        errors.contractSubmissionType
+                                    ) && (
                                         <PoliteErrorMessage formFieldLabel="Submission type">
-                                            {errors.submissionType as string}
+                                            {
+                                                errors.contractSubmissionType as string
+                                            }
                                         </PoliteErrorMessage>
                                     )}
                                     <FieldRadio
                                         id="healthPlan"
-                                        name="submissionType"
+                                        name="contractSubmissionType"
                                         label="Health plan"
                                         aria-required
                                         data-testid="health-plan"
@@ -144,7 +153,7 @@ export const NewSubmission = () => {
                                     />
                                     <FieldRadio
                                         id="eqro"
-                                        name="submissionType"
+                                        name="contractSubmissionType"
                                         label="External Quality Review Organization (EQRO)"
                                         data-testid="eqro"
                                         aria-required
@@ -159,7 +168,7 @@ export const NewSubmission = () => {
                                     {isSDPEnabled && (
                                         <FieldRadio
                                             id="sdp"
-                                            name="submissionType"
+                                            name="contractSubmissionType"
                                             label="State Directed Payment Preprint (SDP)"
                                             data-testid="sdp"
                                             aria-required
@@ -190,12 +199,12 @@ export const NewSubmission = () => {
                             <ActionButton
                                 type="submit"
                                 link_url={
-                                    values.submissionType
+                                    values.contractSubmissionType
                                         ? generatePath(
                                               RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
                                               {
                                                   contractSubmissionType:
-                                                      values.submissionType,
+                                                      values.contractSubmissionType,
                                               }
                                           )
                                         : RoutesRecord.SUBMISSIONS_NEW
