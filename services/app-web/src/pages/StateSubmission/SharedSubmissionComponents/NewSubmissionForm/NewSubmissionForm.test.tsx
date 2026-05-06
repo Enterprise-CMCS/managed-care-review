@@ -5,6 +5,15 @@ import { NewSubmission, NewSubmissionForm } from './NewSubmissionForm'
 import React from 'react'
 import { waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { afterEach } from 'vitest'
+
+const originalLocation = window.location
+afterEach(() => {
+    Object.defineProperty(window, 'location', {
+        writable: true,
+        value: originalLocation,
+    })
+})
 
 it('routes to new health plan url', async () => {
     let testLocation: Location
@@ -98,6 +107,103 @@ it('routes to new EQRO url', async () => {
     })
 })
 
+it('does not render SDP radio when SDP flag is off', async () => {
+    renderWithProviders(
+        <Routes>
+            <Route
+                path={RoutesRecord.SUBMISSIONS_NEW}
+                element={<NewSubmission />}
+            />
+        </Routes>,
+        {
+            routerProvider: {
+                route: `/submissions/new`,
+            },
+        }
+    )
+
+    await waitFor(() => {
+        expect(
+            screen.getByRole('heading', { name: 'New submission' })
+        ).toBeInTheDocument()
+    })
+
+    expect(
+        screen.queryByRole('radio', {
+            name: /State Directed Payment Preprint/,
+        })
+    ).toBeNull()
+})
+
+it('renders SDP radio when SDP flag is on', async () => {
+    renderWithProviders(
+        <Routes>
+            <Route
+                path={RoutesRecord.SUBMISSIONS_NEW}
+                element={<NewSubmission />}
+            />
+        </Routes>,
+        {
+            routerProvider: {
+                route: `/submissions/new`,
+            },
+            featureFlags: {
+                sdp: true,
+            },
+        }
+    )
+
+    await waitFor(() => {
+        expect(
+            screen.getByRole('heading', { name: 'New submission' })
+        ).toBeInTheDocument()
+    })
+
+    expect(
+        screen.getByRole('radio', {
+            name: /State Directed Payment Preprint/,
+        })
+    ).toBeInTheDocument()
+})
+
+it('redirects to Salesforce SDP URL when SDP is selected and flag is on', async () => {
+    Object.defineProperty(window, 'location', {
+        writable: true,
+        value: { ...originalLocation, href: '' },
+    })
+
+    renderWithProviders(
+        <Routes>
+            <Route
+                path={RoutesRecord.SUBMISSIONS_NEW}
+                element={<NewSubmission />}
+            />
+        </Routes>,
+        {
+            routerProvider: {
+                route: `/submissions/new`,
+            },
+            featureFlags: {
+                sdp: true,
+            },
+        }
+    )
+
+    const sdpRadio = await screen.findByRole('radio', {
+        name: /State Directed Payment Preprint/,
+    })
+    const startButton = screen.getByRole('button', { name: /Start/ })
+
+    await userEvent.click(sdpRadio)
+    await userEvent.click(startButton)
+
+    await waitFor(() => {
+        expect(window.location.href).toBe(
+            'https://cmsapps5--mcrevval.sandbox.my.site.com/s/state-directed-preprint-submission'
+        )
+    })
+})
+
 it('renders inline errors', async () => {
     renderWithProviders(
         <Routes>
@@ -134,10 +240,10 @@ it('renders inline errors', async () => {
     await userEvent.click(startButton)
 
     expect(
-        screen.getByText('You must select a contract type')
+        screen.getByText('You must select a submission type')
     ).toBeInTheDocument()
 
     await userEvent.click(eqroRadio)
 
-    expect(screen.queryByText('You must select a contract type')).toBeNull()
+    expect(screen.queryByText('You must select a submission type')).toBeNull()
 })

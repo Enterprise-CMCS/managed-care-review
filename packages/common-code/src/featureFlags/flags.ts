@@ -26,6 +26,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Enables SDP functionality for state
+     */
+    SDP: {
+        flag: 'sdp',
+        defaultValue: false,
+    },
+    /**
      * Enables D-SNP functionality for state and CMS
      */
     DSNP: {
