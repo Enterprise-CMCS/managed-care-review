@@ -1,10 +1,21 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
+import { usePage } from '../../contexts/PageContext'
 import styles from './Resources.module.scss'
 
 export const Resources = (): React.ReactElement => {
+    const { updateActiveMainContent } = usePage()
+    const activeMainContentId = 'resourcesTrainingMainContent'
+
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
+
     return (
-        <GridContainer className={styles.pageContainer}>
+        <GridContainer
+            id={activeMainContentId}
+            className={styles.pageContainer}
+        >
             <h1>Resources and training</h1>
 
             <section className={styles.resourceSection}>

@@ -13,10 +13,11 @@ export const ResourcesLayout = ({
     const { pathname } = useLocation()
     const routeName = getRouteName(pathname)
 
-    const isSelectedLink = (route: 'HELP' | 'RESOURCES_TRAINING'): string =>
+    const isCurrentLink = (route: 'HELP' | 'RESOURCES_TRAINING'): boolean =>
         routeName === route || (route === 'HELP' && routeName === 'RESOURCES')
-            ? 'usa-current'
-            : ''
+
+    const isSelectedLink = (route: 'HELP' | 'RESOURCES_TRAINING'): string =>
+        isCurrentLink(route) ? 'usa-current' : ''
 
     return (
         <div className={styles.background}>
@@ -33,6 +34,11 @@ export const ResourcesLayout = ({
                                 <ReactRouterLinkWithLogging
                                     to="help"
                                     className={isSelectedLink('HELP')}
+                                    aria-current={
+                                        isCurrentLink('HELP')
+                                            ? 'page'
+                                            : undefined
+                                    }
                                 >
                                     Submission form guidance
                                 </ReactRouterLinkWithLogging>,
@@ -41,6 +47,11 @@ export const ResourcesLayout = ({
                                     className={isSelectedLink(
                                         'RESOURCES_TRAINING'
                                     )}
+                                    aria-current={
+                                        isCurrentLink('RESOURCES_TRAINING')
+                                            ? 'page'
+                                            : undefined
+                                    }
                                 >
                                     Resources and training
                                 </ReactRouterLinkWithLogging>,
