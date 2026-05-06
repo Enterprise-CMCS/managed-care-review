@@ -5,6 +5,7 @@ $resources-side-nav-width: 18rem;
 $resources-side-nav-separator: custom.$mcr-gray-lightest;
 
 .background {
+    flex: 1 0 auto;
     width: 100%;
     min-height: 100%;
     background-color: custom.$mcr-foundation-white;
@@ -18,17 +19,15 @@ $resources-side-nav-separator: custom.$mcr-gray-lightest;
 .pageHeaderContainer {
     @include custom.container;
     align-items: flex-end;
-    min-height: 4.625rem;
+    min-height: uswds.units(10);
     padding-top: uswds.units(3);
     padding-bottom: uswds.units(3);
 }
 
 .pageHeaderTitle {
+    @include custom.mcr-type-style(22px, uswds.font-weight('normal'), 1.2);
     margin: 0;
     color: custom.$mcr-foundation-white;
-    font-size: 1.375rem;
-    font-weight: uswds.font-weight('normal');
-    line-height: 1.2;
 }
 
 .layoutContainer {
@@ -67,7 +66,6 @@ $resources-side-nav-separator: custom.$mcr-gray-lightest;
     .usa-sidenav .usa-current {
         @include custom.mcr-type-style(16px, 700, 162%, 0.16px);
         color: uswds.color('primary');
-        padding-left: 1rem;
     }
 
     .usa-sidenav .usa-current::before {
@@ -86,10 +84,10 @@ $resources-side-nav-separator: custom.$mcr-gray-lightest;
     }
 
     @include uswds.at-media-max('tablet') {
-        width: 100%;
+        width: auto;
         max-width: none;
         min-width: 0;
-        margin-left: uswds.units(1);
+        margin-inline: uswds.units(1) uswds.units(2);
     }
 }
 

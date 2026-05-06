@@ -22,7 +22,7 @@ export const ResourcesLayout = ({
         <div className={styles.background}>
             <div className={styles.pageHeader}>
                 <GridContainer className={styles.pageHeaderContainer}>
-                    <h1 className={styles.pageHeaderTitle}>Resources</h1>
+                    <div className={styles.pageHeaderTitle}>Resources</div>
                 </GridContainer>
             </div>
             <GridContainer className={styles.layoutContainer}>

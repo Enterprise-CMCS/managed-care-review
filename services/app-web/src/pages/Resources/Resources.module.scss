@@ -1,11 +1,18 @@
 @use '../../styles/custom.scss' as custom;
 @use '../../styles/uswdsImports.scss' as uswds;
 
+$resources-link-color: uswds.color('primary');
+
 .pageContainer {
     max-width: custom.$mcr-container-max-width-fixed;
     padding-top: uswds.units(4);
+    padding-left: 0 !important;
 
-    h2 {
+    @include uswds.at-media-max('tablet') {
+        padding-left: uswds.units(2) !important;
+    }
+
+    h1 {
         @include custom.mcr-type-style(40px, 700, 100%, 0);
         margin-top: 0;
         margin-bottom: uswds.units(4);
@@ -15,7 +22,7 @@
 .resourceSection {
     margin-bottom: uswds.units(4);
 
-    h3 {
+    h4 {
         @include custom.mcr-type-style(20px, 400, 140%, 0.2px);
         margin-top: 0;
         margin-bottom: uswds.units(2);
@@ -25,7 +32,7 @@
 .resourceList {
     margin: 0;
     padding-left: 1.5rem;
-    color: uswds.color('primary');
+    color: $resources-link-color;
 
     li {
         margin: 0;
@@ -33,17 +40,17 @@
     }
 
     li::marker {
-        color: uswds.color('primary');
+        color: $resources-link-color;
     }
 
     a {
         @include custom.mcr-type-style(16px, 400, 162%, 0.16px);
-        color: uswds.color('primary');
+        color: $resources-link-color;
 
         &:hover,
         &:active,
         &:visited {
-            color: uswds.color('primary');
+            color: $resources-link-color;
         }
     }
 }
