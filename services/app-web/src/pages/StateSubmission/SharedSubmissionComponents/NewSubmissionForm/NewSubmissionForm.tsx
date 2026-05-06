@@ -65,8 +65,8 @@ export const NewSubmission = () => {
             isSDPEnabled &&
             values.submissionType === ContractSubmissionTypeRecord['SDP']
         ) {
-            window.location.href =
-                'https://cmsapps5--mcrevval.sandbox.my.site.com/s/state-directed-preprint-submission'
+            //TODO: add new env urls to parameter store for val and prod once available
+            window.location.href = import.meta.env.VITE_APP_SDP_PORTAL_URL
         } else {
             navigate(
                 generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
