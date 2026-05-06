@@ -347,8 +347,8 @@ describe('AppRoutes and routing configuration', () => {
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
-                        name: /Resources and Training/i,
-                        level: 1,
+                        name: /Help documentation/i,
+                        level: 2,
                     })
                 ).toBeInTheDocument()
             })
@@ -374,8 +374,8 @@ describe('AppRoutes and routing configuration', () => {
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
-                        name: /Resources and Training/i,
-                        level: 1,
+                        name: /Help documentation/i,
+                        level: 2,
                     })
                 ).toBeInTheDocument()
             })
@@ -397,8 +397,8 @@ describe('AppRoutes and routing configuration', () => {
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
-                        name: /Resources and Training/i,
-                        level: 1,
+                        name: /Help documentation/i,
+                        level: 2,
                     })
                 ).toBeInTheDocument()
             })
@@ -423,11 +423,12 @@ describe('AppRoutes and routing configuration', () => {
             await waitFor(() => {
                 expect(
                     screen.getByRole('heading', {
-                        name: /Page not found/i,
-                        level: 1,
+                        name: /Help documentation/i,
+                        level: 2,
                     })
                 ).toBeInTheDocument()
             })
+            expect(screen.queryByTestId('sidenav')).not.toBeInTheDocument()
         })
     })
 
