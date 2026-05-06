@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, type JSX } from 'react'
 import { usePrevious } from '../../hooks'
 import { v4 as uuidv4 } from 'uuid'
 import {
@@ -398,9 +398,6 @@ export const FileUpload = ({
                 accept={inputProps.accept}
                 ref={fileInputRef}
                 aria-required={inputRequired}
-                crossOrigin="anonymous"
-                onPointerEnterCapture={() => {}}
-                onPointerLeaveCapture={() => {}}
             />
             <p tabIndex={-1} ref={summaryRef} className={styles.fileSummary}>
                 {`${summary} ${summaryDetailText}`}

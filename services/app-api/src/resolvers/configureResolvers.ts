@@ -4,6 +4,7 @@ import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     createContractQuestionResolver,
+    deleteContractQuestionResolver,
     createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
     createRateQuestionResolver,
@@ -130,6 +131,7 @@ export function configureResolvers(
                 store,
                 emailer
             ),
+            deleteContractQuestion: deleteContractQuestionResolver(store),
             createContractQuestionResponse:
                 createContractQuestionResponseResolver(store, emailer),
             createRateQuestion: createRateQuestionResolver(store, emailer),

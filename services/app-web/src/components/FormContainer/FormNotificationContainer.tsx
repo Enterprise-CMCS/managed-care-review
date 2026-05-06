@@ -1,6 +1,7 @@
 import classnames from 'classnames'
 import styles from './FormContainer.module.scss'
 import { GridContainer } from '@trussworks/react-uswds'
+import type { JSX } from 'react'
 
 type NotificationContainerProps = {
     testID?: string

@@ -25,7 +25,7 @@ interface ModalComponentProps {
     onSubmitText?: string
     onCancelText?: string
     className?: string
-    modalRef: React.RefObject<ModalRef>
+    modalRef: React.RefObject<ModalRef | null>
     submitButtonProps?: Partial<ActionButtonProps>
     isSubmitting?: boolean
     modalAlert?: GenericApiErrorProps
@@ -74,9 +74,6 @@ export const Modal = ({
             id={id}
             ref={modalRef}
             className={`${styles.modal} ${className}`}
-            placeholder={null}
-            onPointerEnterCapture={null}
-            onPointerLeaveCapture={null}
         >
             {modalHeading && (
                 <ModalHeading id={`${id}-heading`}>{modalHeading}</ModalHeading>

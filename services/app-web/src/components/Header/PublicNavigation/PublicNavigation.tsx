@@ -1,5 +1,4 @@
 import React from 'react'
-import { GridContainer, PrimaryNav } from '@trussworks/react-uswds'
 import { RoutesRecord, RouteT } from '@mc-review/constants'
 import { ReactRouterLinkWithLogging } from '../../TealiumLogging'
 import styles from './PublicNavigation.module.scss'
@@ -45,28 +44,32 @@ export const PublicNavigation = ({
         const isActive = item.isActive(route, pathname)
 
         return (
-            <ReactRouterLinkWithLogging
-                key={item.label}
-                to={item.to}
-                className={`usa-nav__link ${styles.navigationLink} ${
-                    isActive ? `usa-current ${styles.navigationLinkActive}` : ''
-                }`}
-                aria-current={isActive ? 'page' : undefined}
-            >
-                {item.label}
-            </ReactRouterLinkWithLogging>
+            <li key={item.label} className="usa-nav__primary-item">
+                <ReactRouterLinkWithLogging
+                    to={item.to}
+                    className={`usa-nav__link ${styles.navigationLink} ${
+                        isActive
+                            ? `usa-current ${styles.navigationLinkActive}`
+                            : ''
+                    }`}
+                    aria-current={isActive ? 'page' : undefined}
+                >
+                    {item.label}
+                </ReactRouterLinkWithLogging>
+            </li>
         )
     })
 
     return (
         <div className={styles.navigation}>
-            <GridContainer className={styles.navigationContainer}>
-                <PrimaryNav
-                    items={items}
+            <div className={styles.navigationContainer}>
+                <nav
                     aria-label="Public page navigation"
                     className={styles.primaryNav}
-                />
-            </GridContainer>
+                >
+                    <ul className="usa-accordion">{items}</ul>
+                </nav>
+            </div>
         </div>
     )
 }

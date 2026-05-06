@@ -1,5 +1,4 @@
 import { render, screen } from '@testing-library/react'
-import renderer from 'react-test-renderer'
 import userEvent from '@testing-library/user-event'
 
 import { FileItemT } from '../FileProcessor/FileProcessor'
@@ -99,12 +98,10 @@ describe('FileItemList component', () => {
             complete,
             duplicateError,
         ]
-        const tree = renderer
-            .create(
-                <FileItemsList fileItems={fileItems} {...buttonActionProps} />
-            )
-            .toJSON()
-        expect(tree).toMatchSnapshot()
+        const { container } = render(
+            <FileItemsList fileItems={fileItems} {...buttonActionProps} />
+        )
+        expect(container).toMatchSnapshot()
     })
 
     it('button actions in a list work as expected', async () => {

@@ -22,6 +22,20 @@
     - Usage examples and cursor behavior are documented in [indexRatesPaginated pagination](docs/technical-design/index-rates-pagination.md).
     - Existing `indexRates` behavior is unchanged and remains available as the non-paginated query.
 
+### May 6, 2026
+#### Added
+- New mutation `deleteContractQuestion` added to the API
+    - Soft-deletes a contract question by recording a `DELETE` action in the question's audit log. The question is not removed from the database, and subsequent reads filter it out based on the latest audit log action.
+    - Deleting a contract question also cascades soft-deletes to any active related question documents, question responses, and question response documents by recording `CASCADE_DELETE` actions for those records.
+    - Parameters (via `DeleteContractQuestionInput`)
+        - `questionID`: required ID, the ID of the contract question to soft delete
+        - `reason`: required String, the reason recorded on the delete action
+    - Returns `DeleteContractQuestionPayload`
+        - `question`: ContractQuestion
+    - Errors
+        - `ForbiddenError`: A non-AdminUser called this
+        - `UserInputError`: A question cannot be found with the given `questionID`
+
 ### April 24, 2026
 #### Updated
 - **`withdrawContract`** endpoint now accepts contracts with a consolidated status of `NOT_SUBJECT_TO_REVIEW` in addition to `SUBMITTED` and `RESUBMITTED`. Applies to EQRO submissions with no review-triggering provisions and CHIP-only `HEALTH_PLAN` submissions.

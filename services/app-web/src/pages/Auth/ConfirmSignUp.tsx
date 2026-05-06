@@ -33,7 +33,7 @@ export function ConfirmSignUp({
         setFields({ ...fields, [id]: value })
     }
 
-    async function handleSubmit(event: React.FormEvent) {
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
         event.preventDefault()
 
         setIsLoading(true)

@@ -7,7 +7,7 @@ export default {
     component: FieldRadio,
 }
 
-const Template: StoryFn<FieldRadioProps> = (args) => (
+const Template: StoryFn<FieldRadioProps> = (args: FieldRadioProps) => (
     <Formik
         initialValues={{ input1: '' }}
         onSubmit={(e) => console.info('submitted')}
