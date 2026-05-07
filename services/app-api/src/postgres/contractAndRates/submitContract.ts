@@ -32,6 +32,7 @@ async function submitContractInsideTransaction(
         where: {
             contractID: contractID,
             submitInfoID: null,
+            reverseUnlockInfoID: null,
         },
     })
 

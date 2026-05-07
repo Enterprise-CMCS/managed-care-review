@@ -4,6 +4,7 @@ import { findRateWithHistory } from './findRateWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import {
     getConsolidatedContractStatus,
+    getLatestActiveRevision,
     getContractRateStatus,
     getContractReviewStatus,
 } from './prismaSharedContractRateHelpers'
@@ -80,8 +81,13 @@ const withdrawRateInsideTransaction = async (
         )
     }
 
+    const latestRateRev = getLatestActiveRevision(rate.revisions)
+    if (!latestRateRev) {
+        throw new Error(`Could not find active revision for rate ${rateID}`)
+    }
+
     // collect all contracts submitted with this rate
-    const submittedContractsIds = rate.revisions[0].relatedSubmissions
+    const submittedContractsIds = latestRateRev.relatedSubmissions
         .map((sub) =>
             sub.submittedContracts.map((contract) => contract.contractID)
         )
@@ -96,9 +102,6 @@ const withdrawRateInsideTransaction = async (
     const contractIDs = [
         ...new Set([...submittedContractsIds, ...draftContractsIds]),
     ]
-
-    // Get the contractIDs of the latest submission package of each related submission
-    const latestRateRev = rate.revisions[0]
 
     // get data for every contract
     const contracts = await tx.contractTable.findMany({
@@ -291,6 +294,14 @@ const withdrawRateInsideTransaction = async (
     if (submitRate instanceof Error) {
         throw submitRate
     }
+
+    // A withdrawn rate should not remain in any draft working set, whether the
+    // contract had previously submitted the rate or was only linked in draft.
+    await tx.draftRateJoinTable.deleteMany({
+        where: {
+            rateID,
+        },
+    })
 
     // Add review status action to rate and create new joins on withdrawn rate join table
     await tx.rateTable.update({

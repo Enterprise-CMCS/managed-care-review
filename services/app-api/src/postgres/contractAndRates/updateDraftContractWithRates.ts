@@ -25,6 +25,7 @@ async function updateDraftContractFormData(
                     where: {
                         contractID: contractID,
                         submitInfoID: null,
+                        reverseUnlockInfoID: null,
                     },
                     include: {
                         contract: {

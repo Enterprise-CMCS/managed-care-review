@@ -25,6 +25,7 @@ async function unlockContractInsideTransaction(
     const currentRev = await tx.contractRevisionTable.findFirst({
         where: {
             contractID: contractID,
+            reverseUnlockInfoID: null,
         },
         orderBy: {
             createdAt: 'desc',
@@ -126,7 +127,7 @@ async function unlockContractInsideTransaction(
         },
     })
 
-    // filter out submissionPackages to only this latest revision. We only want to compare rates from the lates submission.
+    // filter out submissionPackages to only this latest revision. We only want to compare rates from this latest submission.
     const submissionPackageEntries =
         currentRev.relatedSubmisions[0].submissionPackages.filter(
             (pkg) => pkg.contractRevisionID === currentRev.id

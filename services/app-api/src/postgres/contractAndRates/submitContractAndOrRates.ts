@@ -4,6 +4,7 @@ import type {
     ContractRevisionTable,
     RateRevisionTable,
 } from '../../generated/client'
+import { getLatestActiveRevision } from './prismaSharedContractRateHelpers'
 
 const includeContractRevWithOnlyDocs = {
     submitInfo: true,
@@ -46,6 +47,7 @@ async function submitContractAndOrRates(
         const allRevisions = await tx.contractRevisionTable.findMany({
             where: {
                 contractID: contractID,
+                reverseUnlockInfoID: null,
             },
             include: includeContractRevWithOnlyDocs,
             orderBy: {
@@ -138,6 +140,7 @@ async function submitContractAndOrRates(
             submitInfo: {
                 is: null,
             },
+            reverseUnlockInfoID: null,
         },
         include: {
             rateDocuments: {
@@ -707,6 +710,9 @@ async function submitContractAndOrRates(
                 contract: {
                     include: {
                         revisions: {
+                            where: {
+                                reverseUnlockInfoID: null,
+                            },
                             orderBy: {
                                 createdAt: 'desc',
                             },
@@ -716,6 +722,9 @@ async function submitContractAndOrRates(
                 rate: {
                     include: {
                         revisions: {
+                            where: {
+                                reverseUnlockInfoID: null,
+                            },
                             orderBy: {
                                 createdAt: 'desc',
                             },
@@ -730,10 +739,18 @@ async function submitContractAndOrRates(
     // [contractID, rateID] tuple
     const connectionsToRemove: [string, string][] = []
     for (const draftLink of currentDraftRateLinksForNewSubmissions) {
-        const latestContractRev = draftLink.contract.revisions[0]
+        const latestContractRev = getLatestActiveRevision(
+            draftLink.contract.revisions
+        )
+        if (!latestContractRev) {
+            continue
+        }
         const notDraftContract = latestContractRev.submitInfoID !== null
 
-        const latestRateRev = draftLink.rate.revisions[0]
+        const latestRateRev = getLatestActiveRevision(draftLink.rate.revisions)
+        if (!latestRateRev) {
+            continue
+        }
         const notDraftRate = latestRateRev.submitInfoID !== null
 
         if (notDraftContract && notDraftRate) {
