@@ -48,6 +48,15 @@ describe('AppRoutes and routing configuration', () => {
         ).toHaveAttribute('href', 'mailto:MC_Review_HelpDesk@cms.hhs.gov')
     }
 
+    const expectSubmissionFormGuidancePage = () => {
+        expect(
+            screen.getByRole('heading', {
+                name: /Submission form guidance/i,
+                level: 1,
+            })
+        ).toBeInTheDocument()
+    }
+
     const expectResourcesTrainingPage = () => {
         expect(
             screen.getByRole('heading', {
@@ -241,12 +250,7 @@ describe('AppRoutes and routing configuration', () => {
 
             await screen.findByTestId('help-authenticated')
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
@@ -265,12 +269,7 @@ describe('AppRoutes and routing configuration', () => {
             })
             await screen.findByTestId('help-authenticated')
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
@@ -288,12 +287,7 @@ describe('AppRoutes and routing configuration', () => {
 
             await screen.findByTestId('help-unauthenticated')
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
     })
@@ -405,12 +399,7 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
@@ -432,12 +421,7 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
@@ -455,16 +439,11 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
-        it('shows 404 page when feature flag is off', async () => {
+        it('shows Submission form guidance without sidenav when feature flag is off', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/resources' },
                 apolloProvider: {
@@ -481,12 +460,7 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
             expect(screen.queryByTestId('sidenav')).not.toBeInTheDocument()
         })
@@ -578,6 +552,30 @@ describe('AppRoutes and routing configuration', () => {
                     })
                 ).toBeInTheDocument()
             })
+        })
+    })
+
+    describe('/resources/help', () => {
+        it('shows Submission form guidance without sidenav when feature flag is off', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources/help' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': false,
+                },
+            })
+
+            await waitFor(() => {
+                expectSubmissionFormGuidancePage()
+            })
+            expect(screen.queryByTestId('sidenav')).not.toBeInTheDocument()
         })
     })
 

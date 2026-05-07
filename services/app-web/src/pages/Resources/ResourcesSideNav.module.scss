@@ -95,3 +95,13 @@ $resources-side-nav-separator: custom.$mcr-gray-lightest;
     flex: 1 1 auto;
     min-width: 0;
 }
+
+.noSideNavContentContainer {
+    @include uswds.at-media('tablet') {
+        padding-left: uswds.units(2);
+    }
+
+    @include uswds.at-media('desktop') {
+        padding-left: uswds.units(4);
+    }
+}

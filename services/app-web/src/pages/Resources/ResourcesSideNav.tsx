@@ -1,4 +1,5 @@
 import React from 'react'
+import classNames from 'classnames'
 import { GridContainer, SideNav } from '@trussworks/react-uswds'
 import { Outlet, useLocation } from 'react-router-dom'
 import { ReactRouterLinkWithLogging } from '../../components/TealiumLogging/Link'
@@ -59,7 +60,12 @@ export const ResourcesSideNav = ({
                         />
                     </div>
                 )}
-                <div className={styles.contentContainer}>
+                <div
+                    className={classNames(
+                        styles.contentContainer,
+                        !showSideNav && styles.noSideNavContentContainer
+                    )}
+                >
                     <Outlet />
                 </div>
             </GridContainer>
