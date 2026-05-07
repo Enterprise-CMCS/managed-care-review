@@ -8,6 +8,7 @@ import {
     approveTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    reverseUnlockTestContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -196,6 +197,77 @@ it('returns related contracts with correct status', async () => {
             {
                 id: contractC.id,
                 consolidatedStatus: 'APPROVED',
+            },
+        ])
+    )
+})
+
+it('preserves related contract status after reverse unlock', async () => {
+    const client = await sharedTestPrismaClient()
+
+    const stateServer = await constructTestPostgresServer({
+        context: {
+            user: testStateUser(),
+        },
+    })
+
+    const cmsServer = await constructTestPostgresServer({
+        context: {
+            user: testCMSUser(),
+        },
+    })
+
+    const submittedContractA =
+        await createAndSubmitTestContractWithRate(stateServer)
+    const rateAID =
+        submittedContractA.packageSubmissions[0].rateRevisions[0].rateID
+
+    const contractB = await createAndUpdateTestContractWithoutRates(stateServer)
+
+    must(
+        await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: contractB.id,
+                    lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'LINK',
+                            rateID: rateAID,
+                        },
+                        {
+                            type: 'CREATE',
+                            formData: testRateFormInputData(),
+                        },
+                    ],
+                },
+            },
+        })
+    )
+
+    await submitTestContract(stateServer, contractB.id)
+
+    await unlockTestContract(cmsServer, submittedContractA.id, 'unlock A')
+    await reverseUnlockTestContract(
+        cmsServer,
+        submittedContractA.id,
+        'reverse unlock A'
+    )
+
+    const rateARelatedStrippedContracts = must(
+        await findRateRelatedContracts(client, rateAID)
+    )
+
+    expect(rateARelatedStrippedContracts).toEqual(
+        expect.arrayContaining([
+            {
+                id: submittedContractA.id,
+                consolidatedStatus: 'SUBMITTED',
+            },
+            {
+                id: contractB.id,
+                consolidatedStatus: 'SUBMITTED',
             },
         ])
     )

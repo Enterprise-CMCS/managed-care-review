@@ -8,6 +8,7 @@ import {
     FetchContractWithQuestionsDocument,
     ApproveContractDocument,
     ReverseApproveContractDocument,
+    ReverseUnlockContractDocument,
     WithdrawContractDocument,
     UndoWithdrawContractDocument,
 } from '../gen/gqlClient'
@@ -234,6 +235,33 @@ async function reverseApproveTestContract(
     }
 
     return result.data.reverseApproveContract.contract
+}
+
+async function reverseUnlockTestContract(
+    server: ApolloServer,
+    contractID: string,
+    updatedReason?: string
+): Promise<Contract> {
+    const input = {
+        contractID,
+        updatedReason: updatedReason || 'Reversing unlock',
+    }
+    const result = await executeGraphQLOperation(server, {
+        query: ReverseUnlockContractDocument,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `reverseUnlockTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+
+    if (!result.data.reverseUnlockContract.contract) {
+        throw new Error('reverseUnlockTestContract returned nothing')
+    }
+
+    return result.data.reverseUnlockContract.contract
 }
 
 const fetchTestContractWithQuestions = async (
@@ -693,6 +721,7 @@ export {
     createAndSubmitTestContract,
     approveTestContract,
     reverseApproveTestContract,
+    reverseUnlockTestContract,
     fetchTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,

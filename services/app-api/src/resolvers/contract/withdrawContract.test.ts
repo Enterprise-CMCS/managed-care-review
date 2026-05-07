@@ -13,6 +13,7 @@ import {
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createAndUpdateTestEQROContract,
+    reverseUnlockTestContract,
     submitTestContract,
     unlockTestContract,
     withdrawTestContract,
@@ -351,6 +352,224 @@ describe('withdrawContract', () => {
                 `Withdraw submission. withdraw contract A`,
                 `CMS withdrew the submission from review. withdraw contract A`,
             ])
+        )
+    })
+
+    it('can withdraw contract and reassigns parent contract after reverse unlock and resubmit', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const draftContract =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        if (!draftContract.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContract.id,
+                        lastSeenUpdatedAt:
+                            draftContract.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const contractA = await submitTestContract(
+            stateServer,
+            draftContract.id
+        )
+
+        const rateARevision = contractA.packageSubmissions[0].rateRevisions[0]
+        const rateBRevision = contractA.packageSubmissions[0].rateRevisions[1]
+        const rateCRevision = contractA.packageSubmissions[0].rateRevisions[2]
+
+        if (!rateARevision) {
+            throw new Error('Unexpected error, expecting rate to exist')
+        }
+
+        if (!rateBRevision) {
+            throw new Error('Unexpected error, expecting rate to exist')
+        }
+
+        if (!rateCRevision) {
+            throw new Error('Unexpected error, expecting rate to exist')
+        }
+
+        const draftContractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        if (!draftContractB.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContractB.id,
+                        lastSeenUpdatedAt:
+                            draftContractB.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateBRevision.rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        await submitTestContract(stateServer, draftContractB.id)
+
+        const draftContractC =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        if (!draftContractC.draftRevision) {
+            throw new Error(
+                'Unexpected error, no draft revision on draft contract'
+            )
+        }
+
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContractC.id,
+                        lastSeenUpdatedAt:
+                            draftContractC.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateCRevision.rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        await submitTestContract(stateServer, draftContractC.id)
+        await approveTestContract(cmsServer, draftContractC.id)
+
+        await unlockTestContract(
+            cmsServer,
+            contractA.id,
+            'unlock before reverse unlock withdrawal path'
+        )
+
+        const reversedContract = await reverseUnlockTestContract(
+            cmsServer,
+            contractA.id,
+            'reverse accidental unlock before withdrawal path'
+        )
+
+        expect(reversedContract.consolidatedStatus).toBe('SUBMITTED')
+        expect(reversedContract.draftRevision).toBeNull()
+
+        await unlockTestContract(
+            cmsServer,
+            contractA.id,
+            'unlock again before withdrawal path'
+        )
+
+        const resubmittedContract = await submitTestContract(
+            stateServer,
+            contractA.id,
+            'resubmit after reverse unlock before withdrawal path'
+        )
+
+        expect(resubmittedContract.consolidatedStatus).toBe('RESUBMITTED')
+
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'withdraw contract A after reverse unlock'
+        )
+
+        const indexRatesStripped = await fetchTestIndexRatesStripped(
+            cmsServer,
+            contractA.stateCode
+        )
+
+        const rateA = indexRatesStripped.edges.find(
+            (edge: RateStrippedEdge) => edge.node.id === rateARevision.rateID
+        )?.node
+        const rateB = indexRatesStripped.edges.find(
+            (edge: RateStrippedEdge) => edge.node.id === rateBRevision.rateID
+        )?.node
+        const rateC = indexRatesStripped.edges.find(
+            (edge: RateStrippedEdge) => edge.node.id === rateCRevision.rateID
+        )?.node
+
+        if (!rateA) {
+            throw new Error('Expected rateA to exist')
+        }
+        if (!rateB) {
+            throw new Error('Expected rateB to exist')
+        }
+        if (!rateC) {
+            throw new Error('Expected rateC to exist')
+        }
+
+        expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+        expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
+        expect(rateA.parentContractID).toBe(contractA.id)
+
+        expect(rateB.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rateB.parentContractID).toBe(draftContractB.id)
+
+        expect(rateC.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rateC.parentContractID).toBe(draftContractC.id)
+
+        const contractAHistory =
+            contractHistoryToDescriptions(withdrawnContract)
+
+        expect(contractAHistory).toStrictEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                'unlock again before withdrawal path',
+                'resubmit after reverse unlock before withdrawal path',
+                'Withdraw submission. withdraw contract A after reverse unlock',
+                'CMS withdrew the submission from review. withdraw contract A after reverse unlock',
+            ])
+        )
+        expect(contractAHistory).not.toContain(
+            'reverse accidental unlock before withdrawal path'
         )
     })
 
