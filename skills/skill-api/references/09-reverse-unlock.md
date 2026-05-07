@@ -17,9 +17,9 @@ This is intentionally not modeled as a new `packageSubmission` or a new review a
 
 ## Core Rules
 
-### Active draft
+### Active unlocked draft
 
-An active draft revision is:
+An active unlocked draft revision is:
 
 - `unlockInfo != null`
 - `submitInfo == null`
@@ -38,6 +38,11 @@ These revisions remain in revision history for internal audit, but must not:
 - become `draftRevision`
 - determine current contract or rate status
 - be treated as editable drafts
+
+Note:
+
+- the parser still has to recognize an initial draft revision separately
+- reverse unlock specifically cares about unlocked draft revisions versus reversed unlocked revisions
 
 ### Current state after reverse unlock
 
@@ -83,6 +88,28 @@ Important expectations:
 - current-state helpers must not treat reversed unlocked revisions as current
 - parsers must keep reversed unlocked revisions out of `draftRevision`
 - `packageSubmissions` must remain unchanged by reverse unlock
+
+### Draft vs unlocked helpers
+
+There are two different concepts in the code now:
+
+- `isDraftRevision`
+- `isUnlockedRevision`
+
+They are not interchangeable.
+
+`isDraftRevision` is broader and exists because the parser still needs to recognize both:
+
+- initial draft revisions
+- unlocked draft revisions
+
+`isUnlockedRevision` is narrower and only applies to revisions where:
+
+- `unlockInfo != null`
+- `submitInfo == null`
+- `reverseUnlockInfo == null`
+
+This distinction matters because reverse unlock specifically changes how unlocked revisions are treated, while the API still needs to preserve ordinary initial draft behavior.
 
 ## File Map
 
