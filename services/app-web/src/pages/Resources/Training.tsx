@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { usePage } from '../../contexts/PageContext'
-import styles from './Resources.module.scss'
+import styles from './Training.module.scss'
 
 export const Training = (): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
