@@ -1,6 +1,6 @@
 import opentelemetry, { type Tracer, SpanStatusCode } from '@opentelemetry/api'
 import { trace } from '@opentelemetry/api'
-import { Resource } from '@opentelemetry/resources'
+import { resourceFromAttributes } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
 import {
     SimpleSpanProcessor,
@@ -31,7 +31,7 @@ export function initTracer(serviceName: string) {
         )
     }
 
-    const resource = new Resource({
+    const resource = resourceFromAttributes({
         [ATTR_SERVICE_NAME]: serviceName,
         'deployment.environment': process.env.stage,
     })
@@ -41,7 +41,7 @@ export function initTracer(serviceName: string) {
         headers: getDDHeaders(),
     })
     const provider = new NodeTracerProvider({
-        resource: resource,
+        resource,
         spanProcessors: [new BatchSpanProcessor(exporter)],
     })
 
@@ -85,19 +85,18 @@ export function createTracer(serviceName: string): Tracer {
         )
     }
 
-    const provider = new NodeTracerProvider({
-        resource: new Resource({
-            [ATTR_SERVICE_NAME]: serviceName,
-            'deployment.environment': process.env.stage,
-        }),
-    })
-
     const exporter = new OTLPTraceExporter({
         url: DD_TRACES_URL,
         headers: getDDHeaders(),
     })
 
-    provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
+    const provider = new NodeTracerProvider({
+        resource: resourceFromAttributes({
+            [ATTR_SERVICE_NAME]: serviceName,
+            'deployment.environment': process.env.stage,
+        }),
+        spanProcessors: [new SimpleSpanProcessor(exporter)],
+    })
 
     provider.register({
         propagator: new W3CTraceContextPropagator(),

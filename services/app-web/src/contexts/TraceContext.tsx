@@ -12,7 +12,7 @@ import {
     BatchSpanProcessor,
 } from '@opentelemetry/sdk-trace-web'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { Resource } from '@opentelemetry/resources'
+import { resourceFromAttributes } from '@opentelemetry/resources'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { getWebAutoInstrumentations } from '@opentelemetry/auto-instrumentations-web'
 import { W3CTraceContextPropagator } from '@opentelemetry/core'
@@ -40,21 +40,21 @@ function initializeTracer() {
 
     const serviceName = 'app-web-' + import.meta.env.VITE_APP_STAGE_NAME
 
-    const provider = new WebTracerProvider({
-        resource: new Resource({
-            [ATTR_SERVICE_NAME]: serviceName,
-            [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: import.meta.env
-                .VITE_APP_STAGE_NAME,
-        }),
-    })
-
     const collectorOptions = {
         url: import.meta.env.VITE_APP_OTEL_COLLECTOR_URL,
         headers: {},
     }
 
     const exporter = new OTLPTraceExporter(collectorOptions)
-    provider.addSpanProcessor(new BatchSpanProcessor(exporter))
+
+    const provider = new WebTracerProvider({
+        resource: resourceFromAttributes({
+            [ATTR_SERVICE_NAME]: serviceName,
+            [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: import.meta.env
+                .VITE_APP_STAGE_NAME,
+        }),
+        spanProcessors: [new BatchSpanProcessor(exporter)],
+    })
 
     provider.register({
         contextManager: new ZoneContextManager(),
