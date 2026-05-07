@@ -42,7 +42,13 @@ export const Header = ({
     const shouldShowPublicNavigation =
         !loggedInUser &&
         showResourcesNavPages &&
-        ['ROOT', 'HELP', 'CONTACT_US', 'RESOURCES'].includes(route)
+        [
+            'ROOT',
+            'RESOURCES',
+            'HELP',
+            'CONTACT_US',
+            'RESOURCES_TRAINING',
+        ].includes(route)
 
     const handleLogout = async () => {
         await logout({ type: 'DEFAULT' })
