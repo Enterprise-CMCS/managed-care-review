@@ -30,7 +30,6 @@ import type {
     RateTableWithoutDraftContractsPayload,
     RateTableWithoutDraftContractsStrippedPayload,
     RateRevisionTableWithRelatedSubmissionContracts,
-    SubmissionPackageContractRevisionData,
     RateTableWithRelatedContractsPayload,
     RateRevisionOverridesTablePayload,
 } from './prismaSubmittedRateHelpers'
@@ -49,10 +48,17 @@ type UpdateInfoTableWithUpdater = Prisma.UpdateInfoTableGetPayload<{
     include: typeof subincludeUpdateInfo
 }>
 
+interface RevisionStatusInfo {
+    id: string
+    updatedAt: Date
+    updatedReason: string
+}
+
 const DRAFT_PARENT_PLACEHOLDER = 'DRAFT_PARENT_REPLACE_ME'
 
 const includeContractFormData = {
     unlockInfo: includeUpdateInfo,
+    reverseUnlockInfo: includeUpdateInfo,
     submitInfo: includeUpdateInfo,
     contract: true,
 
@@ -73,6 +79,14 @@ const includeContractFormData = {
     },
 } satisfies Prisma.ContractRevisionTableInclude
 
+// Lose type for validating revision state.
+interface RevisionWithStatusInfo {
+    createdAt: Date
+    submitInfo?: RevisionStatusInfo | null
+    unlockInfo?: RevisionStatusInfo | null
+    reverseUnlockInfo?: RevisionStatusInfo | null
+}
+
 function convertUpdateInfoToDomainModel(
     info?: UpdateInfoTableWithUpdater | null
 ): UpdateInfoType | undefined {
@@ -88,18 +102,75 @@ function convertUpdateInfoToDomainModel(
 }
 
 // -----
-function getContractRateStatus(
-    revisions:
-        | ContractRevisionTableWithFormData[]
-        | RateRevisionTableWithFormData[]
-        | StrippedRateRevisionTableWithFormData[]
-        | SubmissionPackageContractRevisionData[]
-): PackageStatusType {
-    // need to order revisions from latest to earliest
+
+// A reversed unlock revision will have reverseUnlockInfo and unlockInfo
+function isReversedUnlockedRevision(revision: RevisionWithStatusInfo): boolean {
+    return (
+        revision.unlockInfo != null &&
+        revision.reverseUnlockInfo != null &&
+        revision.submitInfo == null
+    )
+}
+
+// An unlocked revision will only have unlockInfo.
+function isUnlockedRevision(revision: RevisionWithStatusInfo): boolean {
+    return (
+        revision.unlockInfo != null &&
+        revision.submitInfo == null &&
+        revision.reverseUnlockInfo == null
+    )
+}
+
+// A draft revision can be either the initial draft or an unlocked draft.
+function isDraftRevision(revision: RevisionWithStatusInfo): boolean {
+    return revision.submitInfo == null && revision.reverseUnlockInfo == null
+}
+
+// A submitted revision will always have a submit info.
+function isSubmittedRevision(revision: RevisionWithStatusInfo): boolean {
+    return revision.submitInfo != null
+}
+
+/**
+ * Returns the latest revision that should be treated as current.
+ * Revisions that were unlocked and then reverse unlocked are kept for history, but are not current.
+ */
+function getLatestActiveRevision<T extends RevisionWithStatusInfo>(
+    revisions: T[]
+): T | undefined {
     const revs = [...revisions].sort(
         (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
     )
-    const latestRevision = revs[0]
+
+    return revs.find((revision) => !isReversedUnlockedRevision(revision))
+}
+
+// -----
+function getContractRateStatus(
+    revisions: RevisionWithStatusInfo[]
+): PackageStatusType {
+    let latestRevision = getLatestActiveRevision(revisions)
+
+    if (!latestRevision) {
+        latestRevision = [...revisions].sort(
+            (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
+        )[0]
+
+        if (latestRevision) {
+            logError(
+                'prismaSharedContractRateHelpers',
+                'No active revision found when deriving contract/rate status; falling back to latest stored revision'
+            )
+        }
+    }
+
+    if (!latestRevision) {
+        logError(
+            'prismaSharedContractRateHelpers',
+            'Cannot derive contract/rate status: no revisions found'
+        )
+        return 'DRAFT'
+    }
 
     const submitInfo = latestRevision.submitInfo
     const unlockInfo = latestRevision.unlockInfo
@@ -205,6 +276,7 @@ interface RateRevisionWithSubmittedContracts {
             contractID: string
         }>
     } | null
+    reverseUnlockInfo?: unknown | null
     relatedSubmissions: Array<unknown>
 }
 
@@ -268,9 +340,11 @@ const getNewParentContract = (
           status: ConsolidatedContractStatusType
       }
     | undefined => {
-    const latestRevision = [...rateRevisions].sort(
-        (revA, revB) => revB.createdAt.getTime() - revA.createdAt.getTime()
-    )[0]
+    const latestRevision = getLatestActiveRevision(rateRevisions)
+
+    if (!latestRevision?.submitInfo?.submittedContracts[0]) {
+        return undefined
+    }
 
     // find the current parent contract
     const currentContractID =
@@ -393,6 +467,7 @@ const getRelatedContracts = (
 const includeRateFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
+    reverseUnlockInfo: includeUpdateInfo,
     rate: true,
 
     rateDocuments: {
@@ -442,11 +517,13 @@ const includeRateFormData = {
 const includeStrippedRateFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
+    reverseUnlockInfo: includeUpdateInfo,
 } satisfies Prisma.RateRevisionTableInclude
 
 const includeStrippedContractFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
+    reverseUnlockInfo: includeUpdateInfo,
     contract: true,
 } satisfies Prisma.ContractRevisionTableInclude
 
@@ -503,7 +580,10 @@ function rateFormDataToDomainModel(
     let statePrograms: ProgramType[] | Error | undefined = undefined
 
     for (const contract of rateRevision.contractsWithSharedRateRevision) {
-        const contractPrograms = contract.revisions[0].programIDs
+        const latestContractRevision = getLatestActiveRevision(
+            contract.revisions
+        )
+        const contractPrograms = latestContractRevision?.programIDs ?? []
 
         if (!statePrograms) {
             statePrograms = findStatePrograms(contract.stateCode)
@@ -763,6 +843,11 @@ export {
     includeStrippedContractFormData,
     getContractRateStatus,
     getContractReviewStatus,
+    getLatestActiveRevision,
+    isDraftRevision,
+    isUnlockedRevision,
+    isSubmittedRevision,
+    isReversedUnlockedRevision,
     convertUpdateInfoToDomainModel,
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,
