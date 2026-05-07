@@ -122,7 +122,7 @@ describe('Header', () => {
 
         it('highlights Resources navigation for the help page when feature flag is enabled', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/help' },
+                routerProvider: { route: '/resources/help' },
                 apolloProvider: {
                     mocks: [fetchCurrentUserMock({ statusCode: 403 })],
                 },

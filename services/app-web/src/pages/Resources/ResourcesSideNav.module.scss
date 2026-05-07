@@ -1,0 +1,97 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+$resources-side-nav-width: 18rem;
+$resources-side-nav-separator: custom.$mcr-gray-lightest;
+
+.background {
+    flex: 1 0 auto;
+    width: 100%;
+    min-height: 100%;
+    background-color: custom.$mcr-foundation-white;
+}
+
+.pageHeader {
+    width: 100%;
+    background-color: custom.$mcr-cmsblue-dark;
+}
+
+.pageHeaderContainer {
+    @include custom.container;
+    align-items: flex-end;
+    min-height: uswds.units(10);
+    padding-top: uswds.units(3);
+    padding-bottom: uswds.units(3);
+}
+
+.pageHeaderTitle {
+    @include custom.mcr-type-style(22px, uswds.font-weight('normal'), 1.2);
+    margin: 0;
+    color: custom.$mcr-foundation-white;
+}
+
+.layoutContainer {
+    @include custom.container;
+    padding: 0 !important;
+    justify-content: center;
+
+    @include uswds.at-media-max('tablet') {
+        flex-direction: column;
+    }
+}
+
+.sideNavContainer {
+    padding-top: uswds.units(4);
+    padding-right: uswds.units(3);
+    padding-bottom: 0;
+    padding-left: uswds.units(2);
+    min-width: $resources-side-nav-width;
+    width: $resources-side-nav-width;
+    max-width: $resources-side-nav-width;
+
+    .usa-sidenav {
+        border-top: 1px solid $resources-side-nav-separator;
+    }
+
+    .usa-sidenav li {
+        border-bottom: 1px solid $resources-side-nav-separator;
+    }
+
+    .usa-sidenav a {
+        @include custom.mcr-type-style(16px, 400, 162%, 0.16px);
+        position: relative;
+        padding: 0.375rem 0 0.375rem 1rem;
+    }
+
+    .usa-sidenav .usa-current {
+        @include custom.mcr-type-style(16px, 700, 162%, 0.16px);
+        color: uswds.color('primary');
+    }
+
+    .usa-sidenav .usa-current::before {
+        content: '';
+        position: absolute;
+        top: 1px;
+        bottom: 1px;
+        left: 0;
+        width: 0.25rem;
+        border-radius: 1.875rem;
+        background-color: uswds.color('primary');
+    }
+
+    @include uswds.at-media('desktop') {
+        padding-left: uswds.units(4);
+    }
+
+    @include uswds.at-media-max('tablet') {
+        width: auto;
+        max-width: none;
+        min-width: 0;
+        margin-inline: uswds.units(1) uswds.units(2);
+    }
+}
+
+.contentContainer {
+    flex: 1 1 auto;
+    min-width: 0;
+}

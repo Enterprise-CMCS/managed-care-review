@@ -203,6 +203,66 @@ describe('submitContract', () => {
             expect(sub.rateRevisions).toHaveLength(1)
         })
 
+        it('preserves CHIP amendment provision answers on submit', async () => {
+            const stateServer = await constructTestPostgresServer({
+                ldService: testLDService({
+                    'chip-submission-automation': true,
+                }),
+                s3Client: mockS3,
+            })
+
+            const draft = await createTestContract(stateServer)
+
+            await updateTestContractDraftRevision(
+                stateServer,
+                draft.id,
+                undefined,
+                {
+                    populationCovered: 'CHIP',
+                    contractType: 'AMENDMENT',
+                    federalAuthorities: ['TITLE_XXI'],
+                    inLieuServicesAndSettings: true,
+                    modifiedBenefitsProvided: true,
+                    modifiedGeoAreaServed: false,
+                    modifiedMedicaidBeneficiaries: true,
+                    modifiedRiskSharingStrategy: true,
+                    modifiedEnrollmentProcess: false,
+                    modifiedMedicalLossRatioStandards: true,
+                    modifiedGrevienceAndAppeal: false,
+                    modifiedNetworkAdequacyStandards: true,
+                    modifiedLengthOfContract: false,
+                    modifiedNonRiskPaymentArrangements: true,
+                }
+            )
+
+            const submittedContract = await submitTestContract(
+                stateServer,
+                draft.id
+            )
+            const submittedFormData =
+                submittedContract.packageSubmissions[0].contractRevision
+                    .formData
+
+            expect(submittedFormData.modifiedBenefitsProvided).toBe(true)
+            expect(submittedFormData.modifiedGeoAreaServed).toBe(false)
+            expect(submittedFormData.modifiedMedicaidBeneficiaries).toBe(true)
+            expect(submittedFormData.modifiedEnrollmentProcess).toBe(false)
+            expect(submittedFormData.modifiedMedicalLossRatioStandards).toBe(
+                true
+            )
+            expect(submittedFormData.modifiedGrevienceAndAppeal).toBe(false)
+            expect(submittedFormData.modifiedNetworkAdequacyStandards).toBe(
+                true
+            )
+            expect(submittedFormData.modifiedLengthOfContract).toBe(false)
+            expect(submittedFormData.modifiedNonRiskPaymentArrangements).toBe(
+                true
+            )
+
+            expect(submittedFormData.inLieuServicesAndSettings).toBeNull()
+            expect(submittedFormData.modifiedRiskSharingStrategy).toBeNull()
+        })
+
         it('can submit a contract with a rate linked to a still unsubmitted contract (MCR-4245 bug)', async () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,

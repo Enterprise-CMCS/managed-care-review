@@ -525,7 +525,7 @@ model ContractQuestionAction {
   id          String             @id @default(uuid())
   createdAt   DateTime           @default(now())
   action      QuestionActionType
-  reason      String?
+  reason      String
   questionID  String
   question    ContractQuestion   @relation(fields: [questionID], references: [id])
   updatedByID String
@@ -553,7 +553,7 @@ model ContractQuestionDocumentAction {
   id          String                   @id @default(uuid())
   createdAt   DateTime                 @default(now())
   action      QuestionActionType
-  reason      String?
+  reason      String
   documentID  String
   document    ContractQuestionDocument @relation(fields: [documentID], references: [id])
   updatedByID String
@@ -581,7 +581,7 @@ model ContractQuestionResponseDocumentAction {
   id          String                           @id @default(uuid())
   createdAt   DateTime                         @default(now())
   action      QuestionActionType
-  reason      String?
+  reason      String
   documentID  String
   document    ContractQuestionResponseDocument @relation(fields: [documentID], references: [id])
   updatedByID String
@@ -608,7 +608,7 @@ model ContractQuestionResponseAction {
   id          String                   @id @default(uuid())
   createdAt   DateTime                 @default(now())
   action      QuestionActionType
-  reason      String?
+  reason      String
   responseID  String
   response    ContractQuestionResponse @relation(fields: [responseID], references: [id])
   updatedByID String
@@ -637,7 +637,7 @@ model RateQuestionAction {
   id          String             @id @default(uuid())
   createdAt   DateTime           @default(now())
   action      QuestionActionType
-  reason      String?
+  reason      String
   questionID  String
   question    RateQuestion       @relation(fields: [questionID], references: [id])
   updatedByID String
@@ -664,7 +664,7 @@ model RateQuestionResponseAction {
   id          String               @id @default(uuid())
   createdAt   DateTime             @default(now())
   action      QuestionActionType
-  reason      String?
+  reason      String
   responseID  String
   response    RateQuestionResponse @relation(fields: [responseID], references: [id])
   updatedByID String
@@ -692,7 +692,7 @@ model RateQuestionDocumentAction {
   id          String               @id @default(uuid())
   createdAt   DateTime             @default(now())
   action      QuestionActionType
-  reason      String?
+  reason      String
   documentID  String
   document    RateQuestionDocument @relation(fields: [documentID], references: [id])
   updatedByID String
@@ -720,7 +720,7 @@ model RateQuestionResponseDocumentAction {
   id          String                       @id @default(uuid())
   createdAt   DateTime                     @default(now())
   action      QuestionActionType
-  reason      String?
+  reason      String
   documentID  String
   document    RateQuestionResponseDocument @relation(fields: [documentID], references: [id])
   updatedByID String

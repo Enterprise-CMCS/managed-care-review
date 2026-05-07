@@ -17,7 +17,7 @@ const questionActionSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
     action: questionActionTypeSchema,
-    reason: z.string().nullable().optional(),
+    reason: z.string(),
     updatedBy: adminUserSchema,
 })
 
