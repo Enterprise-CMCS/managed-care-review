@@ -40,6 +40,7 @@ import { SubmissionSideNav } from '../SubmissionSideNav'
 import {
     ContractQuestionResponse,
     UploadContractResponse,
+    DeleteContractQuestion,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
@@ -293,6 +294,14 @@ const CMSUserRoutes = ({
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
                         element={<UploadContractQuestions />}
                     />
+                    {isAdminUser && (
+                        <Route
+                            path={
+                                RoutesRecord.SUBMISSIONS_DELETE_CONTRACT_QUESTION
+                            }
+                            element={<DeleteContractQuestion />}
+                        />
+                    )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
                         element={

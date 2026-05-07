@@ -13,12 +13,14 @@ import { sortRoundsByDate } from './CMSQuestionResponseTable'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
+    questionType: 'contract' | 'rate'
     header?: string
     contractStatus?: ConsolidatedContractStatus
 }
 
 export const StateQuestionResponseTable = ({
     indexQuestions,
+    questionType,
     header,
     contractStatus,
 }: StateQuestionResponseTableProps) => {
@@ -89,6 +91,7 @@ export const StateQuestionResponseTable = ({
                                 question={questionData}
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
+                                questionType={questionType}
                                 contractStatus={contractStatus}
                                 qaSectionHeaderId="outsandingContractQuestions"
                             />
@@ -116,6 +119,7 @@ export const StateQuestionResponseTable = ({
                                 question={questionData}
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
+                                questionType={questionType}
                                 contractStatus={contractStatus}
                                 qaSectionHeaderId="answeredContractQuestions"
                             />
