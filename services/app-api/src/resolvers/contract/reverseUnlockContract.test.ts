@@ -7,6 +7,7 @@ import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
     contractHistoryToDescriptions,
+    createAndSubmitTestContract,
     createAndUpdateTestContractWithoutRates,
     createAndSubmitTestContractWithRate,
     fetchTestContract,
@@ -241,14 +242,14 @@ describe('reverseUnlockContract', () => {
             emailer: mockEmailer,
         })
 
-        const draftContract = await createAndUpdateTestContractWithoutRates(
+        const submittedContract = await createAndSubmitTestContract(
             stateServer,
             undefined,
             {
                 submissionType: 'CONTRACT_ONLY',
             }
         )
-        const contractID = draftContract.id
+        const contractID = submittedContract.id
 
         const firstUnlock = await unlockTestContract(
             cmsServer,
