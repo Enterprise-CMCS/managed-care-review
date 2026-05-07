@@ -25,6 +25,8 @@ import {
     rateFormDataToDomainModel,
     getParentContractID,
     DRAFT_PARENT_PLACEHOLDER,
+    isDraftRevision,
+    isSubmittedRevision,
 } from './prismaSharedContractRateHelpers'
 import type {
     RateTableWithoutDraftContractsPayload,
@@ -153,7 +155,7 @@ function rateWithoutDraftContractsToDomainModel(
     for (const rateRev of rateRevisions) {
         // If we have a draft revision
         // We set the draft revision aside, format it properly
-        if (!rateRev.submitInfo) {
+        if (isDraftRevision(rateRev)) {
             if (draftRevision) {
                 return new Error(
                     'PROGRAMMING ERROR: a rate may not have multiple drafts simultaneously. ID: ' +
@@ -166,8 +168,9 @@ function rateWithoutDraftContractsToDomainModel(
             // skip the rest of the processing
             continue
         }
-
-        submittedRevisions.push(rateRevisionToDomainModel(rateRev))
+        if (isSubmittedRevision(rateRev)) {
+            submittedRevisions.push(rateRevisionToDomainModel(rateRev))
+        }
     }
 
     // New C+R package history code
@@ -358,7 +361,7 @@ function strippedRateWithoutDraftContractsToDomainModel(
     const submittedRevisions: RateRevisionType[] = []
     for (const rateRev of rateRevisions) {
         // set draft revision aside from submitted revisions.
-        if (!rateRev.submitInfo) {
+        if (isDraftRevision(rateRev)) {
             if (draftRevision) {
                 return new Error(
                     'PROGRAMMING ERROR: a rate may not have multiple drafts simultaneously. ID: ' +
@@ -368,8 +371,9 @@ function strippedRateWithoutDraftContractsToDomainModel(
             draftRevision = strippedRateRevisionToDomainModel(rateRev)
             continue
         }
-
-        submittedRevisions.push(strippedRateRevisionToDomainModel(rateRev))
+        if (isSubmittedRevision(rateRev)) {
+            submittedRevisions.push(strippedRateRevisionToDomainModel(rateRev))
+        }
     }
 
     const parentContractID = getParentContractID(rateRevisions)
