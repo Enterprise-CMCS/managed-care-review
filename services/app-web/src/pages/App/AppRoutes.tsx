@@ -21,8 +21,8 @@ import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404Page'
 import { Help } from '../Help/Help'
 import { ContactUs } from '../ContactUs/ContactUs'
-import { Resources } from '../Resources/Resources'
-import { ResourcesLayout } from '../Resources/ResourcesLayout'
+import { Training } from '../Resources/Training'
+import { ResourcesSideNav } from '../Resources/ResourcesSideNav'
 import { Landing } from '../Landing/Landing'
 import { MccrsId } from '../MccrsId/MccrsId'
 import {
@@ -109,7 +109,7 @@ const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
         />
         <Route
             path={RoutesRecord.RESOURCES}
-            element={<ResourcesLayout showSideNav={showResourcesNavPages} />}
+            element={<ResourcesSideNav showSideNav={showResourcesNavPages} />}
         >
             <Route
                 index
@@ -118,7 +118,7 @@ const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
             <Route path="help" element={<Help />} />
             <Route
                 path="training"
-                element={showResourcesNavPages ? <Resources /> : <Error404 />}
+                element={showResourcesNavPages ? <Training /> : <Error404 />}
             />
         </Route>
     </>

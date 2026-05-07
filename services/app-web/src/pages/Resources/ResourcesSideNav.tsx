@@ -3,9 +3,9 @@ import { GridContainer, SideNav } from '@trussworks/react-uswds'
 import { Outlet, useLocation } from 'react-router-dom'
 import { ReactRouterLinkWithLogging } from '../../components/TealiumLogging/Link'
 import { getRouteName } from '../../routeHelpers'
-import styles from './ResourcesLayout.module.scss'
+import styles from './ResourcesSideNav.module.scss'
 
-export const ResourcesLayout = ({
+export const ResourcesSideNav = ({
     showSideNav = true,
 }: {
     showSideNav?: boolean

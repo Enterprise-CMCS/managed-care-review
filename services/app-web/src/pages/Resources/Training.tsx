@@ -3,7 +3,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { usePage } from '../../contexts/PageContext'
 import styles from './Resources.module.scss'
 
-export const Resources = (): React.ReactElement => {
+export const Training = (): React.ReactElement => {
     const { updateActiveMainContent } = usePage()
     const activeMainContentId = 'resourcesTrainingMainContent'
 
