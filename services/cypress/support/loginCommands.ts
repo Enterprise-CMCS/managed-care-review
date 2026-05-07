@@ -113,12 +113,11 @@ Cypress.Commands.add('logInAsCMSUser', (args) => {
 Cypress.Commands.add(
     'logInAsAdminUser',
     ({ initialURL } = { initialURL: '/' }) => {
-        cy.visit(initialURL)
+        cy.visit('/auth')
 
         cy.findByText(
             'Medicaid and CHIP Managed Care Reporting and Review System'
         )
-        cy.findByRole('link', { name: 'Sign In' }).click()
         const authMode = Cypress.env('AUTH_MODE')
 
         if (authMode === 'LOCAL') {
@@ -135,19 +134,33 @@ Cypress.Commands.add(
         } else {
             throw new Error(`Auth mode is not defined or is IDM: ${authMode}`)
         }
-        cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
-        cy.url({ timeout: 20_000 }).should('contain', initialURL)
 
-        if (initialURL === '/mc-review-settings') {
-            cy.wait('@fetchMcReviewSettingsQuery')
-        } else if (initialURL?.includes('submissions')) {
-            cy.wait('@fetchContractWithQuestionsQuery', { timeout: 20_000 })
-        } else {
-            cy.wait('@indexContractsStrippedQuery', { timeout: 80_000 })
-            cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
-                'exist'
-            )
-            cy.findByRole('heading', { name: 'Submissions' }).should('exist')
+        cy.wait('@fetchCurrentUserQuery', { timeout: 20_000 })
+        cy.wait('@indexContractsStrippedQuery', { timeout: 80_000 })
+        cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
+            'exist'
+        )
+        cy.findByRole('heading', { name: 'Submissions' }).should('exist')
+
+        // After logging in, we visit the initial URL if it's not the dashboard.
+        if (initialURL !== '/') {
+            cy.visit(initialURL)
+            cy.url({ timeout: 20_000 }).should('contain', initialURL)
+
+            if (initialURL === '/mc-review-settings') {
+                cy.wait('@fetchMcReviewSettingsQuery')
+            } else if (initialURL.includes('submissions/')) {
+                cy.wait('@fetchContractWithQuestionsQuery', {
+                    timeout: 20_000,
+                })
+            } else if (initialURL.match(submissionRateQAPattern)) {
+                cy.wait('@fetchRateWithQuestionsQuery', { timeout: 80_000 })
+            } else {
+                cy.wait('@indexContractsStrippedQuery', { timeout: 80_000 })
+                cy.findByTestId('cms-dashboard-page', {
+                    timeout: 10_000,
+                }).should('exist')
+            }
         }
     }
 )

@@ -183,6 +183,65 @@ describe('Q&A', () => {
                                 ).should('exist')
                             })
                     })
+
+                    // Log out as state user, log in as admin to delete the contract question
+                    cy.logOut()
+
+                    cy.logInAsAdminUser({
+                        initialURL: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}`,
+                    })
+
+                    cy.findByTestId('submission-summary').should('exist')
+
+                    // Navigate to contract questions
+                    cy.findByRole('link', {
+                        name: /Contract questions/,
+                    }).click()
+                    cy.url({ timeout: 10_000 }).should(
+                        'contain',
+                        `${contract.id}/question-and-answers`
+                    )
+
+                    // Delete the first DMCO round 1 question
+                    cy.deleteQuestion({
+                        reason: 'No longer applicable',
+                    })
+
+                    // The deleted question's document should no longer be on the page
+                    cy.findByText('questions_for_submission.pdf', {
+                        timeout: 10_000,
+                    }).should('not.exist')
+
+                    // Log out as admin, log back in as CMS user to confirm they can still add a new question
+                    cy.logOut()
+
+                    cy.logInAsCMSUser({
+                        initialURL: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}/question-and-answers`,
+                    })
+
+                    cy.url({ timeout: 10_000 }).should(
+                        'contain',
+                        `${contract.id}/question-and-answers`
+                    )
+
+                    // Add a new question after the prior one was deleted
+                    cy.addQuestion({
+                        documentPath: 'documents/questions_for_submission.pdf',
+                    })
+
+                    // Newly uploaded question should appear in the CMS user's division section
+                    cy.findByRole('heading', {
+                        name: "Your division's questions",
+                    })
+                        .should('exist')
+                        .parent()
+                        .parent()
+                        .parent()
+                        .within(() => {
+                            cy.findByText('questions_for_submission.pdf', {
+                                timeout: 5_000,
+                            }).should('exist')
+                        })
                 }
             )
         })
