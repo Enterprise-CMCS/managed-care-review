@@ -7,7 +7,7 @@ describe('Q&A', () => {
         cy.interceptGraphQL()
     })
 
-    it('can add questions and responses', () => {
+    it('can add and delete questions and responses', () => {
         // Assign Division to CMS user zuko
         cy.apiAssignDivisionToCMSUser(cmsUser(), 'DMCO').then(() => {
             // Create a new submission
