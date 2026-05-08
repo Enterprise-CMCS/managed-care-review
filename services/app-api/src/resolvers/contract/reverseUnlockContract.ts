@@ -9,10 +9,7 @@ import {
 } from '../../postgres'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import {
-    hasAdminPermissions,
-    hasCMSPermissions,
-} from '../../domain-models/user'
+import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
 export function reverseUnlockContract(

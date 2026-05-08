@@ -19,7 +19,7 @@ import {
     unlockTestContract,
     withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
-import { mockGqlContractDraftRevisionFormDataInput } from '../../testHelpers/gqlContractInputMocks'
+import { mockGqlContractDraftRevisionFormDataInput } from '../../testHelpers'
 import {
     addLinkedRateToTestContract,
     fetchTestRateById,

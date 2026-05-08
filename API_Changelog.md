@@ -1,6 +1,21 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### May 8, 2026
+#### Added
+- New mutation `reverseUnlockContract` added to the API
+    - Reverses a previously unlocked contract submission by returning the contract to its prior submitted or resubmitted state. The reverse-unlock action is internal-only revision history and does not create a new `packageSubmission`.
+    - Reversing unlock also restores child rates unlocked with the contract and removes linked draft rates from the changes to the submission while it was unlocked.
+    - Parameters (via `ReverseUnlockContractInput`)
+        - `contractID`: required ID, the ID of the contract to reverse unlock for
+        - `updatedReason`: required String, the reason for reversing the unlock
+    - Returns `ReverseUnlockContractPayload`
+        - `contract`: Contract
+    - Errors
+        - `ForbiddenError`: A non-CMS or non-Admin user called this
+        - `UserInputError`: The contract is not currently `UNLOCKED`
+        - `INTERNAL_SERVER_ERROR`: DB_ERROR — a contract cannot be found by id or the reverse unlock could not be completed
+
 ### April 28, 2026
 #### Added
 - New endpoint `indexRatesPaginated` added to the API for paginated submitted-rate results. The API can be called with no input parameters, and a default page size of 10 will be used.
