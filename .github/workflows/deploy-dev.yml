@@ -51,9 +51,9 @@ jobs:
         name: Create GitHub deployment
         id: ghdeployment
         with:
-          token: "${{ github.token }}"
+          token: '${{ github.token }}'
           environment: dev-cdk
-          description: "Manual CDK dev deployment from branch: ${{ inputs.branch }}"
+          description: 'Manual CDK dev deployment from branch: ${{ inputs.branch }}'
           initial-status: in_progress
 
   web-unit-tests:
@@ -98,12 +98,6 @@ jobs:
         with:
           name: cypress-gen
           path: ./services/cypress/gen
-
-      - name: upload unit test coverage
-        uses: actions/upload-artifact@v7
-        with:
-          name: unit-test-coverage
-          path: ./services/app-web/coverage/coverage-final.json
 
   api-unit-tests:
     name: test - api unit tests
@@ -221,8 +215,8 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: dev
-          changed-services: "github-oidc"
-          use-cdk-role: "true"
+          changed-services: 'github-oidc'
+          use-cdk-role: 'true'
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
@@ -268,7 +262,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: dev
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Deploy Network stack
         working-directory: services/infra-cdk
@@ -356,14 +350,7 @@ jobs:
             --require-approval never
 
   deploy-cdk-app-dev:
-    needs:
-      [
-        begin-deployment,
-        deploy-cdk-infrastructure-dev,
-        web-unit-tests,
-        api-unit-tests,
-        packages-unit-tests,
-      ]
+    needs: [begin-deployment, deploy-cdk-infrastructure-dev, web-unit-tests, api-unit-tests, packages-unit-tests]
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-dev.result == 'success' &&
@@ -396,7 +383,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: dev
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
@@ -471,7 +458,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: dev
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Get CDK configuration for app-web build
         env:
@@ -528,14 +515,14 @@ jobs:
         if: needs.deploy-cdk-app-dev.result != 'success' || needs.deploy-frontend-app-dev.result != 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: "${{ github.token }}"
-          state: "failure"
+          token: '${{ github.token }}'
+          state: 'failure'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
         if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: "${{ github.token }}"
-          state: "success"
+          token: '${{ github.token }}'
+          state: 'success'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
