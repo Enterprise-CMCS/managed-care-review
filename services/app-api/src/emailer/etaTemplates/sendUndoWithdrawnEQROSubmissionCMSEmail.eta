@@ -1,0 +1,7 @@
+<h1 style=<%~'"font-weight: normal;"'%>>Submission <%= it.contractName %> status was updated to '<%= it.status %>' by CMS</h1>
+<b>Withdraw reversed by:</b> <a href="mailto:<%= it.updatedBy %>"><%= it.updatedBy %></a><br />
+<b>Status:</b> <%= it.status %><br />
+<b>Review decision:</b> <%= it.reviewDecision %><br />
+<b>Reason for withdrawal reversal:</b> <%= it.reason %><br />
+<br />
+<a href="<%= it.contractSummaryURL %>">View submission</a><br />
