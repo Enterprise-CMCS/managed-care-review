@@ -9,7 +9,10 @@ import {
 } from '../../postgres'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { hasCMSPermissions } from '../../domain-models/user'
+import {
+    hasAdminPermissions,
+    hasCMSPermissions,
+} from '../../domain-models/user'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
 export function reverseUnlockContract(
@@ -38,7 +41,7 @@ export function reverseUnlockContract(
                     })
                 }
 
-                if (!hasCMSPermissions(user)) {
+                if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
                     const message =
                         'user not authorized to reverse unlock a contract'
                     logError('reverseUnlockContract', message)
