@@ -19,6 +19,13 @@
     [class^='usa-step-indicator__header'] {
         display: inline;
     }
+
+    [class^='usa-step-indicator__current-step'] {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
     @media (min-width: 40em) {
         [class^='usa-step-indicator__segment-label'] {
             padding-right: 1rem;
