@@ -42,7 +42,7 @@
         "@bahmutov/cypress-esbuild-preprocessor": "^2.2.8",
         "@cypress/code-coverage": "^3.14.7",
         "@testing-library/cypress": "^10.1.0",
-        "axe-core": "^4.11.3",
+        "axe-core": "^4.11.4",
         "buffer": "^6.0.3",
         "c8": "^11.0.0",
         "cypress": "^15.8.2",
