@@ -1,6 +1,7 @@
 import {
     testEmailConfig,
     mockContractRev,
+    mockEQROContract,
     mockMNState,
 } from '../../testHelpers/emailerHelpers'
 import type {
@@ -327,4 +328,44 @@ test('renders overall email for a new question as expected', async () => {
     }
 
     expect(result.bodyHTML).toMatchSnapshot()
+})
+
+test('renders correctly for an EQRO submission', async () => {
+    const eqroContract = mockEQROContract()
+    const sub = eqroContract.packageSubmissions[0].contractRevision
+    const defaultStatePrograms = mockMNState().programs
+    const name = packageName(
+        sub.contract.stateCode,
+        sub.contract.stateNumber,
+        sub.formData.programIDs,
+        defaultStatePrograms
+    )
+
+    const template = await sendQuestionStateEmail(
+        sub,
+        'EQRO',
+        defaultSubmitters,
+        testEmailConfig(),
+        defaultStatePrograms,
+        currentQuestion
+    )
+
+    if (template instanceof Error) {
+        throw template
+    }
+
+    expect(template).toEqual(
+        expect.objectContaining({
+            toAddresses: expect.arrayContaining([
+                ...sub.formData.stateContacts.map((c) => c.email),
+                ...defaultSubmitters,
+                ...testEmailConfig().devReviewTeamEmails,
+            ]),
+            subject: expect.stringContaining(`New questions about ${name}`),
+            bodyHTML: expect.stringContaining(
+                `http://localhost/submissions/eqro/${sub.contract.id}/question-and-answers`
+            ),
+        })
+    )
+    expect(template.bodyHTML).toMatchSnapshot()
 })
