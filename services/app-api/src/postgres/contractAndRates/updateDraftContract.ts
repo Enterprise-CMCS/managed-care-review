@@ -18,6 +18,7 @@ async function updateDraftContractInsideTransaction(
         where: {
             contractID: contractID,
             submitInfoID: null,
+            reverseUnlockInfoID: null,
         },
         include: {
             contract: true,

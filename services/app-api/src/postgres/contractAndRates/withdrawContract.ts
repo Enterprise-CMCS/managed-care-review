@@ -10,6 +10,7 @@ import { submitContractAndOrRates } from './submitContractAndOrRates'
 import { includeRateRevisionWithRelatedSubmissionContracts } from './prismaSubmittedRateHelpers'
 import {
     getNewParentContract,
+    getLatestActiveRevision,
     getParentContractID,
 } from './prismaSharedContractRateHelpers'
 import type { RatesToReassign } from './reassignParentContract'
@@ -104,7 +105,13 @@ const withdrawContractInsideTransaction = async (
 
     // Loop through all rates to determine which ones can be withdrawn or reassigned parent contract
     for (const rate of rates) {
-        const latestRateRevision = rate.revisions[0]
+        const latestRateRevision = getLatestActiveRevision(rate.revisions)
+
+        if (!latestRateRevision) {
+            throw new Error(
+                `Could not find active revision for rate ${rate.id}`
+            )
+        }
 
         // get the latest parentContract ID of the rate
         const parentContractID = getParentContractID(rate.revisions)
@@ -131,7 +138,7 @@ const withdrawContractInsideTransaction = async (
             const reassignRate = {
                 rateID: rate.id,
                 rateName:
-                    rate.revisions[0].rateCertificationName ?? 'Unknown Rate',
+                    latestRateRevision.rateCertificationName ?? 'Unknown Rate',
             }
 
             // if the contract exists in the dictionary, then add the rate to the array else add a new entry with rate and contract status
@@ -224,7 +231,8 @@ const withdrawContractInsideTransaction = async (
         ratesForDisplay.push({
             id: rate.id,
             rateCertificationName:
-                rate.revisions[0].rateCertificationName ?? 'Unknown Rate',
+                getLatestActiveRevision(rate.revisions)
+                    ?.rateCertificationName ?? 'Unknown Rate',
         })
 
         // Add withdraw action to all rates that are withdrawn with this submission

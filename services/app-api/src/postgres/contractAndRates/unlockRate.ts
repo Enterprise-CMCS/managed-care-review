@@ -24,6 +24,7 @@ async function unlockRateInDB(
     const currentRev = await tx.rateRevisionTable.findFirst({
         where: {
             rateID,
+            reverseUnlockInfoID: null,
         },
         include: {
             rateDocuments: {

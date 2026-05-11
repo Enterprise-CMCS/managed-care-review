@@ -23,6 +23,8 @@ import {
     getContractRateStatus,
     getContractReviewStatus,
     DRAFT_PARENT_PLACEHOLDER,
+    isDraftRevision,
+    isSubmittedRevision,
 } from './prismaSharedContractRateHelpers'
 import type {
     ContractTableWithoutDraftRates,
@@ -164,7 +166,7 @@ function contractWithHistoryToDomainModelWithoutRates(
     for (const contractRev of contractRevisions) {
         // If we have a draft revision
         // We set the draft revision aside, format it properly
-        if (!contractRev.submitInfo) {
+        if (isDraftRevision(contractRev)) {
             if (draftRevision) {
                 return new Error(
                     'PROGRAMMING ERROR: a contract may not have multiple drafts simultaneously. ID: ' +
@@ -176,7 +178,10 @@ function contractWithHistoryToDomainModelWithoutRates(
             // skip the rest of the processing
             continue
         }
-        submittedRevisions.push(contractRevisionToDomainModel(contractRev))
+
+        if (isSubmittedRevision(contractRev)) {
+            submittedRevisions.push(contractRevisionToDomainModel(contractRev))
+        }
     }
 
     // Every revision has a set of submissions it was part of.
@@ -373,7 +378,7 @@ function strippedContractToDomainModel(
     )
 
     for (const contractRev of contractRevisions) {
-        if (!contractRev.submitInfo) {
+        if (isDraftRevision(contractRev)) {
             if (draftRevision) {
                 return new Error(
                     'PROGRAMMING ERROR: a contract may not have multiple drafts simultaneously. ID: ' +
@@ -383,9 +388,11 @@ function strippedContractToDomainModel(
             draftRevision = strippedContractRevisionToDomainModel(contractRev)
             continue
         }
-        submittedRevisions.push(
-            strippedContractRevisionToDomainModel(contractRev)
-        )
+        if (isSubmittedRevision(contractRev)) {
+            submittedRevisions.push(
+                strippedContractRevisionToDomainModel(contractRev)
+            )
+        }
     }
 
     const status = getContractRateStatus(contractRevisions)
