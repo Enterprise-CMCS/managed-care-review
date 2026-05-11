@@ -5,7 +5,6 @@ export {
     divisionFullNames,
     getNextCMSRoundNumber,
     getAddedByName,
-    getQuestionRoundForQuestionID,
 } from './questionResponseHelpers'
 export type {
     QuestionData,

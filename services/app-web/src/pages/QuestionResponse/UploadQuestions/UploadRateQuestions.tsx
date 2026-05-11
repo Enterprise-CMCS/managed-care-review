@@ -127,7 +127,7 @@ export const UploadRateQuestions = () => {
     }
 
     return (
-        <div className={styles.uploadFormContainer}>
+        <div className={styles.questionResponseMiniFormPage}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

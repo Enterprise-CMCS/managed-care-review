@@ -42,6 +42,34 @@ Cypress.Commands.add(
 )
 
 Cypress.Commands.add(
+    'deleteQuestion',
+    ({ reason }: { reason: string }) => {
+        cy.findAllByRole('link', { name: 'Delete question' })
+            .first()
+            .should('exist')
+            .click()
+
+        cy.findByRole('heading', { level: 2, name: /Delete question/ }).should(
+            'exist'
+        )
+
+        cy.findByTestId('deleteQuestionReason').type(reason)
+
+        cy.findByRole('button', { name: 'Delete question' })
+            .should('exist')
+            .click()
+
+        cy.wait(
+            [
+                '@deleteContractQuestionMutation',
+                '@fetchContractWithQuestionsQuery',
+            ],
+            { timeout: 50_000 }
+        )
+    }
+)
+
+Cypress.Commands.add(
     'addResponse',
     ({ documentPath }: { documentPath: string }) => {
         // Find Upload response button in DMCO section and click

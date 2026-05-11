@@ -134,26 +134,6 @@ interface GenericQuestionsPayload {
     OACTQuestions: GenericQuestionsList
 }
 
-// gets question round for a division to display -  default to 0 if API response isn't matching up as expected
-const getQuestionRoundForQuestionID = (
-    questions: GenericQuestionsPayload,
-    division: Division,
-    questionID: string
-): number => {
-    const questionsEdges = questions?.[`${division}Questions`].edges
-
-    const matchingQuestion = questionsEdges.find(
-        (question) => question.node.id == questionID
-    )
-    if (!matchingQuestion) {
-        return 0
-    } else {
-        return questionsEdges.indexOf(matchingQuestion) !== undefined
-            ? questionsEdges.indexOf(matchingQuestion) + 1
-            : 0
-    }
-}
-
 const getNextCMSRoundNumber = (
     questions: GenericQuestionsPayload,
     division: Division
@@ -184,7 +164,6 @@ export {
     extractQuestions,
     getUserDivision,
     getDivisionOrder,
-    getQuestionRoundForQuestionID,
     getNextCMSRoundNumber,
     divisionFullNames,
     getAddedByName,

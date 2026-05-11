@@ -17,7 +17,6 @@ import { FileItemT } from '../../../components'
 import {
     extractDocumentsFromQuestion,
     extractQuestions,
-    getQuestionRoundForQuestionID,
     isValidCmsDivison,
 } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
@@ -140,13 +139,9 @@ export const UploadContractResponse = () => {
     const question = extractQuestions(contract.questions).find(
         (question) => question.id == questionID
     )
-    const questionRound = getQuestionRoundForQuestionID(
-        contract.questions,
-        realDivision,
-        questionID
-    )
+    const questionRound = question?.round ?? 0
     return (
-        <div className={styles.uploadFormContainer}>
+        <div className={styles.questionResponseMiniFormPage}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

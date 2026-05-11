@@ -95,12 +95,14 @@ export const ContractQuestionResponse = () => {
                 {hasCMSPermissions ? (
                     <CMSQuestionResponseTable
                         indexQuestions={contract.questions}
+                        questionType="contract"
                         userDivision={division}
                         consolidatedStatus={contract.consolidatedStatus}
                     />
                 ) : (
                     <StateQuestionResponseTable
                         indexQuestions={contract.questions}
+                        questionType="contract"
                         contractStatus={contract.consolidatedStatus}
                     />
                 )}

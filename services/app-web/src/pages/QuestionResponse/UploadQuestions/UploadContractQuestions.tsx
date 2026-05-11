@@ -133,7 +133,7 @@ export const UploadContractQuestions = () => {
     )
 
     return (
-        <div className={styles.uploadFormContainer}>
+        <div className={styles.questionResponseMiniFormPage}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

@@ -14,6 +14,7 @@ import { IndexQuestionType } from '../QuestionResponseHelpers'
 
 type CMSQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
+    questionType: 'contract' | 'rate'
     consolidatedStatus?: ConsolidatedContractStatus | ConsolidatedRateStatus
     userDivision?: Division
 }
@@ -77,6 +78,7 @@ const sortQuestionRounds = (
 
 export const CMSQuestionResponseTable = ({
     indexQuestions,
+    questionType,
     consolidatedStatus,
     userDivision,
 }: CMSQuestionResponseTableProps) => {
@@ -118,6 +120,7 @@ export const CMSQuestionResponseTable = ({
                                 question={questionData}
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
+                                questionType={questionType}
                             />
                         ))
                     )
@@ -142,6 +145,7 @@ export const CMSQuestionResponseTable = ({
                                 question={questionData}
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
+                                questionType={questionType}
                             />
                         ))
                     )
