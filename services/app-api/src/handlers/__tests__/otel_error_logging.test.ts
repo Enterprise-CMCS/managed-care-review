@@ -7,6 +7,15 @@ import { vi } from 'vitest'
 import { executeGraphQLOperation } from '../../testHelpers/gqlHelpers'
 
 describe('OTEL Error Logging', () => {
+    beforeAll(() => {
+        vi.stubEnv('DD_API_KEY', 'test-dd-api-key')
+        vi.stubEnv('stage', 'test')
+    })
+
+    afterAll(() => {
+        vi.unstubAllEnvs()
+    })
+
     describe('Apollo Server error logging', () => {
         it('captures GraphQL resolver errors with stack traces', async () => {
             const typeDefs = gql`
