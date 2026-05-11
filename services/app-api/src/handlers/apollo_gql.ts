@@ -12,7 +12,7 @@ import {
     startServerAndCreateLambdaHandler,
     handlers,
 } from '@as-integrations/aws-lambda'
-import { initTracer, recordException } from '../otel/otel_handler'
+import { initTracer, recordException, flushTracer } from '../otel/otel_handler'
 import type { APIGatewayProxyEvent, Handler } from 'aws-lambda'
 
 import typeDefs from '../../../app-graphql/src/schema.graphql'
@@ -497,6 +497,8 @@ const gqlHandler: Handler = async (event, context) => {
 
     // Call handler async-style (Node.js 24 pattern) - callback param unused
     const response = await initializedHandler(event, context, () => {})
+    // Flush spans before Lambda freezes — BatchSpanProcessor timer won't fire after handler returns
+    await flushTracer()
     const payloadSize = Buffer.from(event.body).length
 
     if (payloadSize > 5.5 * 1024 * 1024) {

@@ -14,10 +14,17 @@ import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 
 const DD_TRACES_URL = 'https://otlp.ddog-gov.com/v1/traces'
 
+let tracerProvider: NodeTracerProvider | undefined
+
 function getDDHeaders() {
+    if (!process.env.DD_API_KEY) {
+        throw new Error(
+            'Configuration error: DD_API_KEY environment variable is required for OpenTelemetry'
+        )
+    }
     return {
-        'dd-api-key': process.env.DD_API_KEY ?? '',
-        'dd-otlp-source': 'ddog-gov.com',
+        'dd-api-key': process.env.DD_API_KEY,
+        'dd-otlp-source': 'datadog',
         'dd-otel-span-mapping': '{span_name_as_resource_name: false}',
     }
 }
@@ -55,7 +62,15 @@ export function initTracer(serviceName: string) {
         instrumentations: [new PrismaInstrumentation()],
     })
 
+    tracerProvider = provider
     console.info('Prisma instrumentation registered')
+}
+
+// Call after each Lambda invocation to flush queued spans before Lambda freezes
+export async function flushTracer(): Promise<void> {
+    if (tracerProvider) {
+        await tracerProvider.forceFlush()
+    }
 }
 
 export function recordException(

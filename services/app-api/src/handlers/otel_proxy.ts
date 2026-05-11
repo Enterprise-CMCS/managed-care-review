@@ -15,11 +15,23 @@ const main: APIGatewayProxyHandler = async (event) => {
         `otel_proxy: received trace payload, body=${bodyBytes} bytes, content-type=${contentType}`
     )
 
+    if (!process.env.DD_API_KEY) {
+        console.error('otel_proxy: DD_API_KEY is not set')
+        return {
+            statusCode: 500,
+            body: JSON.stringify('DD_API_KEY is required'),
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+        }
+    }
+
     const options = {
         headers: {
             'content-type': contentType,
-            'dd-api-key': process.env.DD_API_KEY ?? '',
-            'dd-otlp-source': 'ddog-gov.com',
+            'dd-api-key': process.env.DD_API_KEY,
+            'dd-otlp-source': 'datadog',
             'dd-otel-span-mapping': '{span_name_as_resource_name: false}',
         },
     }
