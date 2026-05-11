@@ -20,6 +20,7 @@ import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import {
     approveTestContract,
     createAndSubmitTestContractWithRate,
+    createAndUpdateTestEQROContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -386,6 +387,50 @@ describe('createQuestion', () => {
                 ),
                 bodyHTML: expect.stringContaining(
                     `http://localhost/submissions/health-plan/${contract.id}/question-and-answers`
+                ),
+            })
+        )
+    })
+
+    it('send state email with EQRO question-and-answers URL when question is created on an EQRO submission', async () => {
+        const config = testEmailConfig()
+        const mockEmailer = testEmailer(config)
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+            emailer: mockEmailer,
+        })
+
+        const draft = await createAndUpdateTestEQROContract(stateServer)
+        const contract = await submitTestContract(stateServer, draft.id)
+        expect(contract.contractSubmissionType).toBe('EQRO')
+
+        await createTestQuestion(cmsServer, contract.id)
+
+        const formData =
+            contract.packageSubmissions[0].contractRevision.formData
+        const contractName =
+            contract.packageSubmissions[0].contractRevision.contractName
+
+        const stateReceiverEmails = formData.stateContacts.map(
+            (contact) => contact.email
+        )
+
+        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `[LOCAL] New questions about ${contractName}`
+                ),
+                sourceEmail: config.emailSource,
+                toAddresses: expect.arrayContaining(stateReceiverEmails),
+                bodyText: expect.stringContaining(
+                    `CMS asked questions about ${contractName}`
+                ),
+                bodyHTML: expect.stringContaining(
+                    `http://localhost/submissions/eqro/${contract.id}/question-and-answers`
                 ),
             })
         )
