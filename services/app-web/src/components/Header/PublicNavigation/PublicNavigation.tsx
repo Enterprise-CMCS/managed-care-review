@@ -27,7 +27,10 @@ const publicNavItems: PublicNavItem[] = [
         label: 'Resources',
         to: RoutesRecord.RESOURCES,
         isActive: (route, pathname) =>
-            route === 'HELP' || pathname.startsWith(RoutesRecord.RESOURCES),
+            route === 'HELP' ||
+            route === 'RESOURCES' ||
+            route === 'RESOURCES_TRAINING' ||
+            pathname.startsWith(RoutesRecord.RESOURCES),
     },
     {
         label: 'Contact us',

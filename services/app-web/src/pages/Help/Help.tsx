@@ -5,11 +5,18 @@ import styles from './Help.module.scss'
 import { useAuth } from '../../contexts/AuthContext'
 import { ContactSupportLink } from '../../components/ErrorAlert/ContactSupportLink'
 import { useStringConstants } from '../../hooks/useStringConstants'
+import { usePage } from '../../contexts/PageContext'
 
 export const Help = (): React.ReactElement => {
     const location = useLocation()
     const stringConstants = useStringConstants()
     const { loggedInUser } = useAuth()
+    const { updateActiveMainContent } = usePage()
+    const activeMainContentId = 'helpPageMainContent'
+
+    useEffect(() => {
+        updateActiveMainContent(activeMainContentId)
+    }, [activeMainContentId, updateActiveMainContent])
 
     useEffect(() => {
         if (location.hash) {
@@ -21,17 +28,18 @@ export const Help = (): React.ReactElement => {
 
     return (
         <GridContainer
+            id={activeMainContentId}
             className={styles.pageContainer}
             data-testid={
                 loggedInUser ? 'help-authenticated' : 'help-unauthenticated'
             }
         >
-            <h2>Help documentation</h2>
+            <h1>Submission form guidance</h1>
             <section className={styles.helpSection}>
                 <h3 id="submission-description">
                     Submission description examples
                 </h3>
-                <h4>Example #1</h4>
+                <h5>Example #1</h5>
                 <p className="line-height-sans-4 measure-6">
                     This amendment revises calendar year (CY) 2019 capitation
                     rates, adds new language concerning capitation payments
@@ -40,7 +48,7 @@ export const Help = (): React.ReactElement => {
                     claims within thirty (30), rather than twenty-one (21)
                     calendar days of receipt.
                 </p>
-                <h4>Example #2</h4>
+                <h5>Example #2</h5>
                 <p className="line-height-sans-4 measure-6">
                     Amendment 8 adds SUPPORT Act DUR provisions effective
                     10/1/19; reinvestment account language to comply with
@@ -54,12 +62,12 @@ export const Help = (): React.ReactElement => {
             </section>
             <section className={styles.helpSection}>
                 <h3 id="effective-date-guidance">Effective date guidance</h3>
-                <h4>Contract effective dates</h4>
+                <h5>Contract effective dates</h5>
                 <p className="line-height-sans-4 measure-6">
                     These dates should reflect the full length of your initial
                     base contract, which may span multiple years.
                 </p>
-                <h4>Amendment effective dates</h4>
+                <h5>Amendment effective dates</h5>
                 <p className="line-height-sans-4 measure-6">
                     These dates should reflect the length of your contract
                     amendment, which could be for a subset of your base
@@ -73,10 +81,10 @@ export const Help = (): React.ReactElement => {
                 id="dual-eligible-special-needs-plans"
             >
                 <h3>Dual Eligible Special Needs Plan (D-SNP) guidance</h3>
-                <h4>
+                <h5>
                     Is this contract associated with a Dual-Eligible Special
                     Needs Plan (D-SNP) that covers Medicaid benefits?
-                </h4>
+                </h5>
                 <p className="line-height-sans-4 measure-6">
                     Choose ‘Yes’ if any of the following apply:
                     <ul>
@@ -102,7 +110,7 @@ export const Help = (): React.ReactElement => {
             </section>
             <section className={styles.helpSection}>
                 <h3 id="non-compliance-guidance">Non-compliance guidance</h3>
-                <h4>Contractual versus operational compliance</h4>
+                <h5>Contractual versus operational compliance</h5>
                 <p className="line-height-sans-4 measure-6">
                     A contract action is contractually compliant if the
                     requirements are explicitly stated in the contract.
@@ -120,7 +128,7 @@ export const Help = (): React.ReactElement => {
                     all applicable requirements.” and complete the question that
                     follows.
                 </p>
-                <h4>Example #1</h4>
+                <h5>Example #1</h5>
                 <p className="line-height-sans-4 measure-6">
                     This contract action is not compliant with § 438.71(a), due
                     to the need for legislative approval. We plan to incorporate
@@ -130,7 +138,7 @@ export const Help = (): React.ReactElement => {
                     plans, informing them that the system must be implemented no
                     later than July 1, 2024.
                 </p>
-                <h4>Example #2</h4>
+                <h5>Example #2</h5>
                 <p className="line-height-sans-4 measure-6">
                     This contract action does not include the requirement at
                     §438.10(c)(6)(ii). The state overlooked this requirement
@@ -147,7 +155,7 @@ export const Help = (): React.ReactElement => {
                 <h3 id="rate-cert-type-definitions">
                     Rate certification type definitions
                 </h3>
-                <h4>New rate certification</h4>
+                <h5>New rate certification</h5>
                 <p className="line-height-sans-4 measure-6">
                     This should be selected for all rate certifications for
                     initial base contracts and rate certifications for required
@@ -155,7 +163,7 @@ export const Help = (): React.ReactElement => {
                     the 12-month rating period on your certification, it is
                     considered new.
                 </p>
-                <h4>Amendment to prior rate certification</h4>
+                <h5>Amendment to prior rate certification</h5>
                 <p className="line-height-sans-4 measure-6">
                     This should be selected for any rate certifications that are
                     making changes to capitation rates in your current 12-month
@@ -166,7 +174,7 @@ export const Help = (): React.ReactElement => {
                 <h3 id="managed-care-programs-guidance">
                     Managed care programs guidance
                 </h3>
-                <h4>Managed care programs list</h4>
+                <h5>Managed care programs list</h5>
                 <p className="line-height-sans-4 measure-6">
                     When making a submission in MC-Review, you will be required
                     to select from a pre-set list which managed care state
@@ -193,7 +201,7 @@ export const Help = (): React.ReactElement => {
                 <h3 id="document-definitions-requirements">
                     Documents definitions and requirements
                 </h3>
-                <h4 id="key-documents">Key documents</h4>
+                <h5 id="key-documents">Key documents</h5>
                 <Table bordered fixed fullWidth>
                     <thead>
                         <tr>
@@ -300,7 +308,7 @@ export const Help = (): React.ReactElement => {
                         </tr>
                     </tbody>
                 </Table>
-                <h4 id="supporting-documents">Supporting documents</h4>
+                <h5 id="supporting-documents">Supporting documents</h5>
                 <Table bordered fixed fullWidth>
                     <thead>
                         <tr>

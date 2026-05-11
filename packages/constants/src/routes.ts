@@ -12,6 +12,7 @@ const ROUTES = [
     'HELP',
     'CONTACT_US',
     'RESOURCES',
+    'RESOURCES_TRAINING',
     'SETTINGS',
     'MCR_SETTINGS',
     'EDIT_STATE_ASSIGNMENTS',
@@ -45,6 +46,7 @@ const ROUTES = [
     'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
+    'SUBMISSIONS_DELETE_CONTRACT_QUESTION',
     'SUBMISSIONS_RELEASED_TO_STATE',
     'SUBMISSION_WITHDRAW',
     'UNDO_SUBMISSION_WITHDRAW',
@@ -54,6 +56,7 @@ type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
 const ContractSubmissionTypeRecord = {
     HEALTH_PLAN: 'health-plan',
     EQRO: 'eqro',
+    SDP: 'sdp'
 } as const
 type ContractSubmissionTypeRecordKeys =
     keyof typeof ContractSubmissionTypeRecord
@@ -73,9 +76,10 @@ const RoutesRecord: Record<RouteT, string> = {
     DASHBOARD_SUBMISSIONS: '/dashboard/submissions',
     DASHBOARD_RATES: '/dashboard/rate-reviews',
     GRAPHQL_EXPLORER: '/dev/graphql-explorer',
-    HELP: '/help',
-    CONTACT_US: '/contact-us',
     RESOURCES: '/resources',
+    HELP: '/resources/help',
+    CONTACT_US: '/contact-us',
+    RESOURCES_TRAINING: '/resources/training',
     SETTINGS: '/settings',
     MCR_SETTINGS: '/mc-review-settings',
     STATE_ASSIGNMENTS: '/mc-review-settings/state-assignments',
@@ -125,6 +129,8 @@ const RoutesRecord: Record<RouteT, string> = {
         '/submissions/:contractSubmissionType/:id/question-and-answers/:division/:questionID/upload-response',
     SUBMISSIONS_UPLOAD_RATE_RESPONSE:
         '/submissions/:contractSubmissionType/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
+    SUBMISSIONS_DELETE_CONTRACT_QUESTION:
+        '/submissions/:contractSubmissionType/:id/question-and-answers/:division/:questionID/delete-question',
     SUBMISSIONS_RELEASED_TO_STATE:
         '/submissions/:contractSubmissionType/:id/released-to-state',
     SUBMISSION_WITHDRAW:
@@ -187,6 +193,7 @@ const QUESTION_RESPONSE_FORM_ROUTES: RouteTWithUnknown[] = [
     'RATES_UPLOAD_QUESTION',
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
+    'SUBMISSIONS_DELETE_CONTRACT_QUESTION',
 ]
 
 // Collect CMS review or workflow related forms
@@ -219,6 +226,7 @@ const SUBMISSION_PAGE_HEADING_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_UPLOAD_CONTRACT_QUESTION',
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
+    'SUBMISSIONS_DELETE_CONTRACT_QUESTION',
     'SUBMISSIONS_RELEASED_TO_STATE',
     'SUBMISSION_WITHDRAW',
     'UNDO_SUBMISSION_WITHDRAW',
@@ -244,8 +252,9 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     AUTH: 'Login',
     CONTACT_US: 'Contact us',
     GRAPHQL_EXPLORER: 'GraphQL explorer',
+    RESOURCES: 'Resources',
     HELP: 'Help',
-    RESOURCES: 'Resources and training',
+    RESOURCES_TRAINING: 'Resources & Training',
     SETTINGS: 'MC-Review settings',
     MCR_SETTINGS: 'MC-Review settings',
     STATE_ASSIGNMENTS: 'State assignments',
@@ -280,6 +289,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS: 'Contract Q&A',
     SUBMISSIONS_UPLOAD_CONTRACT_QUESTION: 'Add questions',
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE: 'Add response',
+    SUBMISSIONS_DELETE_CONTRACT_QUESTION: 'Delete question',
     SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'Rate Q&A',
     SUBMISSIONS_UPLOAD_RATE_RESPONSE: 'Add rate response',
     SUBMISSIONS_RELEASED_TO_STATE: 'Released to state',

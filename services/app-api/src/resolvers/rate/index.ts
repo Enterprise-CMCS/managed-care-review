@@ -1,6 +1,7 @@
 export { rateResolver, rateStrippedResolver } from './rateResolver'
 export { rateRevisionResolver } from './rateRevisionResolver'
 export { rateFormDataResolver } from './rateFormDataResolver'
+export { indexRatesPaginatedResolver } from './indexRatesPaginated'
 export { indexRatesResolver } from './indexRates'
 export { indexRatesStripped } from './indexRatesStripped'
 export { fetchRateResolver } from './fetchRate'

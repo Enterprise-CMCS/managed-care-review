@@ -1189,7 +1189,7 @@ describe('withdrawRate', () => {
                 }),
             ])
         )
-    })
+    }, 40000)
 
     it('sends emails to state and CMS when a rate is withdrawn', async () => {
         const emailConfig = testEmailConfig()

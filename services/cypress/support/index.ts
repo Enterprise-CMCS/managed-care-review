@@ -106,6 +106,7 @@ declare global {
             // question response commands
             addQuestion({ documentPath }: { documentPath: string }): void
             addResponse({ documentPath }: { documentPath: string }): void
+            deleteQuestion({ reason }: { reason: string }): void
 
             // Launch Darkly commands
             stubFeatureFlags(): void

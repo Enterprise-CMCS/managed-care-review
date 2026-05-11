@@ -37,6 +37,7 @@ async function updateDraftRate(
             where: {
                 rateID: rateID,
                 submitInfoID: null,
+                reverseUnlockInfoID: null,
             },
             orderBy: {
                 createdAt: 'desc',

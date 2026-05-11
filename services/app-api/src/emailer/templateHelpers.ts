@@ -14,7 +14,11 @@ import type {
 import { logError } from '../logger'
 import { parseErrorToError } from '@mc-review/helpers'
 import { pruneDuplicateEmails } from './formatters'
-import { findStatePrograms, packageName } from '@mc-review/submissions'
+import {
+    eqroValidationAndReviewDetermination,
+    findStatePrograms,
+    packageName,
+} from '@mc-review/submissions'
 import { rateSummaryURL, submissionSummaryURL } from './generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
 import type { SubmissionType } from '../gen/gqlServer'
@@ -385,6 +389,14 @@ export type WithdrawContractEtaDataType = {
     formattedRates: RateEtaDataType[]
 }
 
+export type UndoWithdrawEQROContractEtaDataType =
+    WithdrawContractEtaDataType & {
+        status: string
+        reviewDecision: string
+        MCGDMCOContactEmail?: string
+        CMSContactEmail?: string
+    }
+
 // Function to format ETA template data for both withdraw and undo withdraw submission
 const parseEmailDataWithdrawSubmission = (
     contract: ContractType,
@@ -465,6 +477,51 @@ const parseEmailDataWithdrawSubmission = (
     }
 }
 
+const parseEmailDataUndoWithdrawEQROSubmission = (
+    contract: ContractType,
+    rates: RateForDisplayType[],
+    config: EmailConfiguration
+): UndoWithdrawEQROContractEtaDataType | Error => {
+    if (contract.contractSubmissionType !== 'EQRO') {
+        return new Error(
+            'Cannot parse EQRO undo withdraw email data for non-EQRO contract'
+        )
+    }
+
+    const etaData = parseEmailDataWithdrawSubmission(
+        contract,
+        rates,
+        config,
+        'UNDO_WITHDRAW'
+    )
+    if (etaData instanceof Error) {
+        return etaData
+    }
+
+    const latestSubmission = contract.packageSubmissions[0]
+    if (!latestSubmission) {
+        return new Error(
+            'Cannot parse EQRO undo withdraw email data: contract has no submitted revision'
+        )
+    }
+
+    const subjectToReview = eqroValidationAndReviewDetermination(
+        contract.id,
+        latestSubmission.contractRevision.formData
+    )
+    if (subjectToReview instanceof Error) {
+        return subjectToReview
+    }
+
+    return {
+        ...etaData,
+        status: subjectToReview ? 'Submitted' : 'Not subject to review',
+        reviewDecision: subjectToReview
+            ? 'Subject to formal review and approval'
+            : 'Not subject to formal review and approval',
+    }
+}
+
 type FieldYesNoUserValue = 'Yes' | 'No' | undefined // Use for user facing display
 const booleanAsYesNoUserValue = (bool?: boolean | null): FieldYesNoUserValue =>
     bool ? 'Yes' : bool === false ? 'No' : undefined
@@ -484,5 +541,6 @@ export {
     getRateSubmitterEmails,
     getRateStateContactEmails,
     parseEmailDataWithdrawSubmission,
+    parseEmailDataUndoWithdrawEQROSubmission,
     booleanAsYesNoUserValue,
 }

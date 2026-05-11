@@ -15,6 +15,7 @@ import {
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContract,
+    reverseUnlockTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
@@ -128,14 +129,20 @@ describe('updateDraftContractRates', () => {
         expect(result.errors[0].extensions?.code).toBe('FORBIDDEN')
     })
 
-    it('rejects updates to submitted contract', async () => {
+    it('rejects updates to submitted contract, including after reverse unlock', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            context: {
+                user: testCMSUser(),
+            },
         })
 
         const draft = await createAndSubmitTestContract(stateServer)
 
-        const result = await executeGraphQLOperation(stateServer, {
+        const submittedResult = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
                 input: {
@@ -179,15 +186,88 @@ describe('updateDraftContractRates', () => {
             },
         })
 
-        expect(result.errors).toBeDefined()
-        if (!result.errors) {
+        expect(submittedResult.errors).toBeDefined()
+        if (!submittedResult.errors) {
             throw new Error('No Errors')
         }
 
-        expect(result.errors[0].message).toBe(
+        expect(submittedResult.errors[0].message).toBe(
             'you cannot update a contract that is not DRAFT or UNLOCKED'
         )
-        expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(submittedResult.errors[0].extensions?.code).toBe(
+            'BAD_USER_INPUT'
+        )
+
+        const unlockedContract = await unlockTestContract(
+            cmsServer,
+            draft.id,
+            'unlock before reverse unlock updateDraftContractRates test'
+        )
+
+        const reversedContract = await reverseUnlockTestContract(
+            cmsServer,
+            draft.id,
+            'reverse unlock before updateDraftContractRates test'
+        )
+
+        expect(unlockedContract.consolidatedStatus).toBe('UNLOCKED')
+        expect(reversedContract.consolidatedStatus).toBe('SUBMITTED')
+
+        const reverseUnlockResult = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: draft.id,
+                    lastSeenUpdatedAt: reversedContract.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'CREATE',
+                            formData: {
+                                rateType: 'NEW',
+                                rateCapitationType: 'RATE_CELL',
+                                rateDateStart: '2024-01-01',
+                                rateDateEnd: '2025-01-01',
+                                rateProgramIDs: ['foo'],
+                                rateMedicaidPopulations: ['MEDICAID_ONLY'],
+                                deprecatedRateProgramIDs: [],
+
+                                rateDocuments: [
+                                    {
+                                        s3URL: 's3://bucketname/key/test1',
+                                        name: 'ratedoc1.doc',
+                                        sha256: 'foobar',
+                                    },
+                                ],
+                                supportingDocuments: [],
+                                certifyingActuaryContacts: [
+                                    {
+                                        name: 'Foo Person',
+                                        titleRole: 'Bar Job',
+                                        email: 'foo@example.com',
+                                        actuarialFirm: 'GUIDEHOUSE',
+                                    },
+                                ],
+                                addtlActuaryContacts: [],
+                                actuaryCommunicationPreference:
+                                    'OACT_TO_ACTUARY',
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(reverseUnlockResult.errors).toBeDefined()
+        if (!reverseUnlockResult.errors) {
+            throw new Error('No Errors')
+        }
+
+        expect(reverseUnlockResult.errors[0].message).toBe(
+            'you cannot update a contract that is not DRAFT or UNLOCKED'
+        )
+        expect(reverseUnlockResult.errors[0].extensions?.code).toBe(
+            'BAD_USER_INPUT'
+        )
     })
 
     it('errors on concurrent updates', async () => {

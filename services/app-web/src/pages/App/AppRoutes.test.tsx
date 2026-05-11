@@ -48,6 +48,75 @@ describe('AppRoutes and routing configuration', () => {
         ).toHaveAttribute('href', 'mailto:MC_Review_HelpDesk@cms.hhs.gov')
     }
 
+    const expectSubmissionFormGuidancePage = () => {
+        expect(
+            screen.getByRole('heading', {
+                name: /Submission form guidance/i,
+                level: 1,
+            })
+        ).toBeInTheDocument()
+    }
+
+    const expectResourcesTrainingPage = () => {
+        expect(
+            screen.getByRole('heading', {
+                name: /Resources and training/i,
+                level: 1,
+            })
+        ).toBeInTheDocument()
+
+        expect(
+            screen.getByRole('link', {
+                name: /State user manual \(opens in new window\)/i,
+            })
+        ).toHaveAttribute(
+            'href',
+            'https://www.medicaid.gov/medicaid/managed-care/idm-instns-mc-rvw-state-user-manul.pdf'
+        )
+
+        expect(
+            screen.getByRole('link', {
+                name: /Account creation user manual \(opens in new window\)/i,
+            })
+        ).toHaveAttribute(
+            'href',
+            'https://www.medicaid.gov/medicaid/managed-care/idm-instns-mc-rvw-state-user.pdf'
+        )
+
+        expect(
+            screen.getByRole('link', {
+                name: /State Guide to CMS Criteria for Medicaid Managed Care Contract Review and Approval \(opens in new window\)/i,
+            })
+        ).toHaveAttribute(
+            'href',
+            'https://www.medicaid.gov/medicaid/downloads/mce-checklist-state-user-guide.pdf'
+        )
+
+        expect(
+            screen.getByRole('link', {
+                name: /Medicaid Managed Care Rate Development Guide \(opens in new window\)/i,
+            })
+        ).toHaveAttribute(
+            'href',
+            'https://www.medicaid.gov/medicaid/managed-care/guidance/rate-review-and-rate-guides'
+        )
+
+        expect(
+            screen.getByRole('link', {
+                name: /MC-Review training webinar recording \(opens in new window\)/i,
+            })
+        ).toHaveAttribute('href', 'https://www.youtube.com/watch?v=1d-f0pnLLLE')
+
+        expect(
+            screen.getByRole('link', {
+                name: /MC-Review training webinar - Slide deck \(opens in new window\)/i,
+            })
+        ).toHaveAttribute(
+            'href',
+            'https://www.medicaid.gov/medicaid/managed-care/mc-rvw-state-wbnr-sprng-2024.pdf'
+        )
+    }
+
     describe('/[root]', () => {
         it('state dashboard when state user logged in', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
@@ -181,12 +250,7 @@ describe('AppRoutes and routing configuration', () => {
 
             await screen.findByTestId('help-authenticated')
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
@@ -205,12 +269,7 @@ describe('AppRoutes and routing configuration', () => {
             })
             await screen.findByTestId('help-authenticated')
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
@@ -228,12 +287,7 @@ describe('AppRoutes and routing configuration', () => {
 
             await screen.findByTestId('help-unauthenticated')
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Help documentation/i,
-                        level: 2,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
     })
@@ -345,12 +399,7 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Resources and Training/i,
-                        level: 1,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
@@ -372,12 +421,7 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Resources and Training/i,
-                        level: 1,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
             })
         })
 
@@ -395,18 +439,98 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect(
-                    screen.getByRole('heading', {
-                        name: /Resources and Training/i,
-                        level: 1,
-                    })
-                ).toBeInTheDocument()
+                expectSubmissionFormGuidancePage()
+            })
+        })
+
+        it('shows Submission form guidance without sidenav when feature flag is off', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': false,
+                },
+            })
+
+            await waitFor(() => {
+                expectSubmissionFormGuidancePage()
+            })
+            expect(screen.queryByTestId('sidenav')).not.toBeInTheDocument()
+        })
+    })
+
+    describe('/resources/training', () => {
+        it('can be accessed by state user', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources/training' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': true,
+                },
+            })
+
+            await waitFor(() => {
+                expectResourcesTrainingPage()
+            })
+        })
+
+        it('can be accessed by CMS user', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources/training' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser(),
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': true,
+                },
+            })
+
+            await waitFor(() => {
+                expectResourcesTrainingPage()
+            })
+        })
+
+        it('can be accessed by unauthenticated users', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources/training' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 403,
+                        }),
+                    ],
+                },
+                featureFlags: { 'resources-nav-pages': true },
+            })
+
+            await waitFor(() => {
+                expectResourcesTrainingPage()
             })
         })
 
         it('shows 404 page when feature flag is off', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/resources' },
+                routerProvider: { route: '/resources/training' },
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -428,6 +552,30 @@ describe('AppRoutes and routing configuration', () => {
                     })
                 ).toBeInTheDocument()
             })
+        })
+    })
+
+    describe('/resources/help', () => {
+        it('shows Submission form guidance without sidenav when feature flag is off', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/resources/help' },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                        }),
+                    ],
+                },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'resources-nav-pages': false,
+                },
+            })
+
+            await waitFor(() => {
+                expectSubmissionFormGuidancePage()
+            })
+            expect(screen.queryByTestId('sidenav')).not.toBeInTheDocument()
         })
     })
 

@@ -19,7 +19,6 @@ import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissio
 import {
     extractDocumentsFromQuestion,
     extractQuestions,
-    getQuestionRoundForQuestionID,
     isValidCmsDivison,
 } from '../QuestionResponseHelpers/questionResponseHelpers'
 import { QuestionDisplayTable } from '../QATable/QuestionDisplayTable'
@@ -114,11 +113,10 @@ export const UploadRateResponse = () => {
     if (!rate || rate.status === 'DRAFT' || !questionID || !rate.questions) {
         return <GenericErrorPage />
     }
-    const questionRoundNumber = getQuestionRoundForQuestionID(
-        rate.questions,
-        realDivision,
-        questionID
+    const question = extractQuestions(rate.questions).find(
+        (q) => q.id === questionID
     )
+    const questionRoundNumber = question?.round ?? 0
 
     const handleFormSubmit = async (cleaned: FileItemT[]) => {
         const responseDocs = cleaned.map((item) => {
@@ -148,12 +146,9 @@ export const UploadRateResponse = () => {
             )
         }
     }
-    const question = extractQuestions(rate.questions).find(
-        (question) => question.id == questionID
-    )
 
     return (
-        <div className={styles.uploadFormContainer}>
+        <div className={styles.questionResponseMiniFormPage}>
             <Breadcrumbs
                 className="usa-breadcrumb--wrap"
                 items={[

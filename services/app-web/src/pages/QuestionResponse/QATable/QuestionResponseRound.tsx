@@ -19,6 +19,7 @@ export type QuestionResponseRoundPropType = {
     question: QuestionType
     roundTitle: string
     currentUser: User
+    questionType: 'contract' | 'rate'
     contractStatus?: ConsolidatedContractStatus
     qaSectionHeaderId?: string
 }
@@ -38,14 +39,19 @@ export const QuestionResponseRound = ({
     question,
     roundTitle,
     currentUser,
+    questionType,
     contractStatus,
     qaSectionHeaderId,
 }: QuestionResponseRoundPropType) => {
     const isStateUser = currentUser?.__typename === 'StateUser'
+    const isAdminUser = currentUser?.__typename === 'AdminUser'
     const isApprovedContract = contractStatus === 'APPROVED'
     const classes = classNames('usa-button', {
         'usa-button--outline': question.responses.length > 0,
     })
+
+    const showUploadResponseBtn = isStateUser && !isApprovedContract
+    const showDeleteQuestionBtn = isAdminUser && questionType === 'contract'
 
     const documents = extractDocumentsFromQuestion(question)
 
@@ -56,7 +62,7 @@ export const QuestionResponseRound = ({
         >
             <div className={styles.tableHeader}>
                 <h4 id={`${question.id}-header`}>{roundTitle}</h4>
-                {isStateUser && !isApprovedContract && (
+                {showUploadResponseBtn && (
                     <NavLinkWithLogging
                         className={classes}
                         variant="unstyled"
@@ -64,6 +70,16 @@ export const QuestionResponseRound = ({
                         to={`./${question.division.toLowerCase()}/${question.id}/upload-response`}
                     >
                         Upload response
+                    </NavLinkWithLogging>
+                )}
+                {showDeleteQuestionBtn && (
+                    <NavLinkWithLogging
+                        className={classes}
+                        variant="unstyled"
+                        aria-describedby={`${qaSectionHeaderId} ${question.id}-header`}
+                        to={`./${question.division.toLowerCase()}/${question.id}/delete-question`}
+                    >
+                        Delete question
                     </NavLinkWithLogging>
                 )}
             </div>

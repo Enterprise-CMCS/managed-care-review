@@ -1,7 +1,7 @@
 import type { ContractQuestionType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import {
-    contractQuestionPrismaToDomainType,
+    convertNonDeletedContractQuestions,
     questionInclude,
 } from './questionHelpers'
 
@@ -20,9 +20,7 @@ export async function findAllQuestionsByContract(
             },
         })
 
-        return findResult.map((question) =>
-            contractQuestionPrismaToDomainType(question)
-        )
+        return convertNonDeletedContractQuestions(findResult)
     } catch (e: unknown) {
         if (e instanceof Error) {
             return e

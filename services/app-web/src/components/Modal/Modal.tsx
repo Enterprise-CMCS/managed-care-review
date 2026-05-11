@@ -70,6 +70,7 @@ export const Modal = ({
     return (
         <UswdsModal
             aria-labelledby={`${id}-heading`}
+            aria-describedby={`${id}-modal-description`}
             {...divProps}
             id={id}
             ref={modalRef}

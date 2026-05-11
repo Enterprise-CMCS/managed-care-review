@@ -10,8 +10,12 @@ import {
     CreateRateQuestionDocument,
     CreateRateQuestionResponseMutation,
     CreateRateQuestionResponseDocument,
+    DeleteContractQuestionDocument,
+    DeleteContractQuestionInput,
+    DeleteContractQuestionMutation,
+    Division,
 } from '../gen/gqlClient'
-import { mockValidCMSUser } from './userGQLMock'
+import { mockValidAdminUser, mockValidCMSUser } from './userGQLMock'
 
 const createContractQuestionSuccess = (
     question?:
@@ -143,6 +147,73 @@ const createRateQuestionResponseNetworkFailure = (
     }
 }
 
+const deleteContractQuestionMockSuccess = (
+    overrides?: Partial<DeleteContractQuestionInput> & {
+        contractID?: string
+        division?: Division
+    }
+): MockLink.MockedResponse<DeleteContractQuestionMutation> => {
+    const input: DeleteContractQuestionInput = {
+        questionID: overrides?.questionID ?? 'dmco-question-1-id',
+        reason: overrides?.reason ?? 'no longer applicable',
+    }
+    const contractID = overrides?.contractID ?? 'test-abc-123'
+    const division = overrides?.division ?? 'DMCO'
+
+    return {
+        request: {
+            query: DeleteContractQuestionDocument,
+            variables: { input },
+        },
+        result: {
+            data: {
+                deleteContractQuestion: {
+                    question: {
+                        __typename: 'ContractQuestion',
+                        id: input.questionID,
+                        contractID,
+                        createdAt: new Date('2022-12-16'),
+                        addedBy: mockValidCMSUser(),
+                        division,
+                        round: 1,
+                        documents: [
+                            {
+                                id: `${input.questionID}-document-1`,
+                                s3URL: `s3://bucketname/key/${input.questionID}-document-1`,
+                                name: `${input.questionID}-document-1`,
+                                downloadURL: 'https://example.com',
+                            },
+                        ],
+                        responses: [],
+                        actions: [
+                            {
+                                __typename: 'QuestionAction',
+                                id: 'delete-action-1',
+                                createdAt: new Date(),
+                                action: 'DELETE',
+                                reason: input.reason,
+                                updatedBy: mockValidAdminUser(),
+                            },
+                        ],
+                    },
+                },
+            },
+        },
+    }
+}
+
+const deleteContractQuestionMockNetworkFailure = (
+    input?: Partial<DeleteContractQuestionInput>
+): MockLink.MockedResponse<DeleteContractQuestionMutation> => {
+    return {
+        request: {
+            query: DeleteContractQuestionDocument,
+            variables: input ? { input } : undefined,
+        },
+        error: new Error('A network error occurred'),
+    }
+}
+
 export {
     createContractQuestionNetworkFailure,
     createContractQuestionResponseNetworkFailure,
@@ -150,4 +221,6 @@ export {
     createRateQuestionNetworkFailure,
     createRateQuestionResponseNetworkFailure,
     createRateQuestionSuccess,
+    deleteContractQuestionMockSuccess,
+    deleteContractQuestionMockNetworkFailure,
 }

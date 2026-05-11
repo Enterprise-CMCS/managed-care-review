@@ -32,6 +32,9 @@ import {
     CreateRateQuestionResponseMutationVariables,
     ApproveContractMutation,
     ApproveContractMutationVariables,
+    DeleteContractQuestionMutation,
+    DeleteContractQuestionMutationVariables,
+    DeleteContractQuestionInput,
 } from '../gen/gqlClient'
 import type { GraphQLFormattedError } from 'graphql'
 import { CombinedGraphQLErrors } from '@apollo/client/errors'
@@ -666,6 +669,77 @@ export const createRateQuestionResponseWrapper = async (
                 `[UNEXPECTED]: Error attempting to add response, no data present but returning 200.`
             )
             return new Error(ERROR_MESSAGES.response_error_generic)
+        }
+    } catch (error) {
+        return parseErrorToError(error)
+    }
+}
+
+export const deleteContractQuestionWrapper = async (
+    deleteQuestion: useMutation.MutationFunction<DeleteContractQuestionMutation, DeleteContractQuestionMutationVariables>,
+    contractID: string,
+    input: DeleteContractQuestionInput,
+    division: Division
+): Promise<DeleteContractQuestionMutation | GraphQLErrors | Error> => {
+    try {
+        const result = await deleteQuestion({
+            variables: { input },
+            update(cache, { data }) {
+                if (data) {
+                    const deletedQuestionID =
+                        data.deleteContractQuestion.question.id
+                    const cached =
+                        cache.readQuery<FetchContractWithQuestionsQuery>({
+                            query: FetchContractWithQuestionsDocument,
+                            variables: {
+                                input: { contractID },
+                            },
+                        })
+                    const contract = cached?.fetchContract.contract
+
+                    if (contract) {
+                        const questions =
+                            contract.questions as IndexContractQuestionsPayload
+                        const indexQuestionDivision =
+                            divisionToIndexQuestionDivision(division)
+                        const divisionQuestions =
+                            questions[indexQuestionDivision]
+
+                        const filteredEdges = divisionQuestions.edges.filter(
+                            (edge) => edge.node.id !== deletedQuestionID
+                        )
+
+                        cache.writeQuery({
+                            query: FetchContractWithQuestionsDocument,
+                            data: {
+                                fetchContract: {
+                                    contract: {
+                                        ...contract,
+                                        questions: {
+                                            ...contract.questions,
+                                            [indexQuestionDivision]: {
+                                                ...divisionQuestions,
+                                                totalCount: filteredEdges.length,
+                                                edges: filteredEdges,
+                                            },
+                                        },
+                                    },
+                                },
+                            } as FetchContractWithQuestionsQuery,
+                        })
+                    }
+                }
+            },
+            onQueryUpdated: () => true,
+        })
+
+        if (result.data?.deleteContractQuestion) {
+            return result.data
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to delete question, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.question_error_generic)
         }
     } catch (error) {
         return parseErrorToError(error)

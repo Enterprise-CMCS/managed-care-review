@@ -16,17 +16,13 @@
     }
 }
 
-.uploadFormContainer {
-    max-width: custom.$mcr-container-standard-width-fixed;
-    background-color: none;
-    @include uswds.at-media('tablet') {
-        min-width: 20rem;
-        max-width: 40rem;
-        margin: 0 auto;
-    }
+.questionResponseMiniFormPage {
+    @include custom.mini-form-page-container;
 }
+
 .tableHeader {
     h2 {
+        margin-top: 34px;
         margin-bottom: 0;
     }
 }

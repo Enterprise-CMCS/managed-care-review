@@ -4,6 +4,7 @@ import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     createContractQuestionResolver,
+    deleteContractQuestionResolver,
     createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
     createRateQuestionResolver,
@@ -25,6 +26,7 @@ import {
     rateStrippedResolver,
     rateRevisionResolver,
     rateFormDataResolver,
+    indexRatesPaginatedResolver,
     indexRatesResolver,
     indexRatesStripped,
     fetchRateResolver,
@@ -55,6 +57,7 @@ import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { approveContract } from './contract/approveContract'
 import { reverseApproveContract } from './contract/reverseApproveContract'
+import { reverseUnlockContract } from './contract/reverseUnlockContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 import { updateEmailSettings } from './settings/updateEmailSettings'
@@ -91,6 +94,7 @@ export function configureResolvers(
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
             indexRates: indexRatesResolver(store),
+            indexRatesPaginated: indexRatesPaginatedResolver(store),
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
@@ -113,6 +117,7 @@ export function configureResolvers(
             updateDraftContractRates: updateDraftContractRates(store),
             approveContract: approveContract(store),
             reverseApproveContract: reverseApproveContract(store),
+            reverseUnlockContract: reverseUnlockContract(store),
             withdrawContract: withdrawContract(store, emailer, documentZip),
             undoWithdrawContract: undoWithdrawContract(
                 store,
@@ -128,6 +133,7 @@ export function configureResolvers(
                 store,
                 emailer
             ),
+            deleteContractQuestion: deleteContractQuestionResolver(store),
             createContractQuestionResponse:
                 createContractQuestionResponseResolver(store, emailer),
             createRateQuestion: createRateQuestionResolver(store, emailer),

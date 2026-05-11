@@ -38,20 +38,34 @@ type Query {
     indexUsers: IndexUsersPayload!
 
     """
-    indexRates returns full submitted rates
-    indexRates can be called by CMS and admin users, also used in link rate dropdown
+    indexRates returns full submitted rates.
+    indexRates can be called by CMS, admin users, and state users; also used in link rate dropdown.
+    If called by a state user, the response will contain rate data from only their state.
 
     Errors:
-    - ForbiddenError: User must be a CMS or Admin type user
+    - ForbiddenError: User must be a CMS, Admin, or State type user
     - NotFoundError:  No submitted rates found
     """
     indexRates(input: IndexRatesInput): IndexRatesPayload!
+    """
+    indexRatesPaginated returns full submitted rates using a paginated connection shape.
+    indexRatesPaginated can be called by CMS, admin users, and state users.
+    If called by a state user, the response will contain rate data from only their state.
+
+    Errors:
+    - ForbiddenError: User must be a CMS, Admin, or State type user
+    - NotFoundError:  No submitted rates found
+    - UserInputError: `after` cursor is invalid
+    - UserInputError: `after` cursor does not match a rate
+    - UserInputError: `pageSize` must be between 1 and MAX_INDEX_RATES_PAGE_SIZE
+    """
+    indexRatesPaginated(input: IndexRatesPaginatedInput): RateConnection!
     """
     indexRatesStripped returns abbreviated rate data
     Intended for use with CMS dashboards, initially minimal rate query
 
       Errors:
-    - ForbiddenError: User must be a CMS or Admin type user
+    - ForbiddenError: User must be a CMS, Admin, or State type user
     - NotFoundError: No submitted rates found
     """
     indexRatesStripped(input: IndexRatesInput): IndexRatesStrippedPayload!
@@ -284,6 +298,23 @@ type Mutation {
         input: CreateContractQuestionInput!
     ): CreateContractQuestionPayload!
 
+    """
+    deleteContractQuestion soft-deletes a contract question by recording a DELETE action
+    in the question's audit log. The question itself is not removed from the database;
+    subsequent reads filter it out via the audit log's latest action.
+
+    This can only be called by an AdminUser.
+
+    Errors:
+    - ForbiddenError:
+        - A non-AdminUser called this
+    - UserInputError:
+        - A question cannot be found with the given questionID
+    """
+    deleteContractQuestion(
+        input: DeleteContractQuestionInput!
+    ): DeleteContractQuestionPayload!
+
     #    """
     #    updateQuestion updates a Question for the given Contract
     #    Only the due date can be changed
@@ -446,6 +477,21 @@ type Mutation {
     reverseApproveContract(input: ReverseApproveContractInput!): ReverseApproveContractPayload
 
     """
+    reverseUnlockContract is a CMS user only action to discard an unlocked draft and restore the last submitted contract state
+
+    Errors:
+    - ForbiddenError:
+        - A non CMS/CMS Approver user called this
+    - UserInputError:
+        - A contract is not in the correct status: UNLOCKED
+        - The latest contract revision is not an unlocked draft revision
+    - INTERNAL_SERVER_ERROR
+        - DB_ERROR
+            - A contract cannot be found by id
+    """
+    reverseUnlockContract(input: ReverseUnlockContractInput!): ReverseUnlockContractPayload
+
+    """
     withdrawRate is CMS user only action to withdraw a rate from review
 
     Errors:
@@ -585,6 +631,17 @@ input ReverseApproveContractInput {
     updatedReason: String!
 }
 
+type ReverseUnlockContractPayload {
+    contract: Contract!
+}
+
+input ReverseUnlockContractInput {
+    "The ID of the contract to reverse unlock for"
+    contractID: ID!
+    "The reason for reversing the unlock"
+    updatedReason: String!
+}
+
 type WithdrawRatePayload {
     rate: Rate!
 }
@@ -623,6 +680,11 @@ input UndoWithdrawContractInput {
 
 type ContractEdge {
     node: Contract!
+}
+
+type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
 }
 
 type IndexContractsPayload {
@@ -720,6 +782,18 @@ input CreateContractQuestionInput {
 
 type CreateContractQuestionPayload {
     "The newly created Question"
+    question: ContractQuestion!
+}
+
+input DeleteContractQuestionInput {
+    "The ID of the contract question to soft delete"
+    questionID: ID!
+    "Reason recorded on the delete action"
+    reason: String!
+}
+
+type DeleteContractQuestionPayload {
+    "The soft-deleted contract question"
     question: ContractQuestion!
 }
 
@@ -1154,6 +1228,25 @@ type ContractQuestion {
     #    rateIDs: [String!]
     #
     responses: [QuestionResponse!]!
+    "Audit log entries for actions taken on this question. Currently scoped to the most recent action; may expand to full history later."
+    actions: [QuestionAction!]
+}
+
+"The kind of action recorded on a Q&A audit row."
+enum QuestionActionType {
+    DELETE
+    RESTORE
+    CASCADE_DELETE
+    CASCADE_RESTORE
+}
+
+"A single audit log entry recording an action taken on a Q&A row."
+type QuestionAction {
+    id: ID!
+    createdAt: DateTime!
+    action: QuestionActionType!
+    reason: String!
+    updatedBy: AdminUser!
 }
 
 """
@@ -2281,15 +2374,54 @@ type RateEdge {
 input IndexRatesInput {
     stateCode: String
     rateIDs: [String!]
+
+}
+input IndexRatesPaginatedInput {
+    """
+    Optional state filter for CMS and admin users.
+    State users are always limited to their own state.
+    """
+    stateCode: String
+
+    """
+    Optional list of rate IDs to limit results.
+    """
+    rateIDs: [String!]
+
+    """
+    Maximum number of rates to return.
+    Defaults to 10 when omitted. Maximum is 150.
+    """
+    pageSize: Int
+
+    """
+    Opaque pagination cursor from pageInfo.endCursor.
+    Omit for the first page.
+    """
+    after: String
 }
 
 type IndexRatesPayload {
     "Total number of submitted rates returned on request"
     totalCount: Int
-    """
-    Rates that include rate and contract revisions
-    """
+    "Rates that include rate and contract revisions"
     edges: [RateEdge!]!
+}
+
+type RateConnectionEdge {
+    cursor: String!
+    node: Rate!
+}
+
+type RateConnection {
+    "Total number of submitted rates returned on request"
+    totalCount: Int
+    "Total number of pages based on totalCount and requested page size"
+    totalPages: Int
+    "Rates that include rate and contract revisions"
+    edges: [RateConnectionEdge!]!
+    "Provides the end cursor and a boolean to tell users if there are more pages available"
+    pageInfo: PageInfo!
 }
 
 type RateStrippedEdge {
@@ -2784,6 +2916,6 @@ enum OAuthScope {
 }
 
 enum UploadBucketName {
-    HEALTH_PLAN_DOCS,
+    HEALTH_PLAN_DOCS
     QUESTION_ANSWER_DOCS
 }

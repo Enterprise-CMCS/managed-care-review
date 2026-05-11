@@ -5,6 +5,29 @@
     max-width: custom.$mcr-container-max-width-fixed;
     padding-top: uswds.units(4);
     padding-bottom: uswds.units(4);
+    padding-left: 0 !important;
+
+    @include uswds.at-media-max('tablet') {
+        padding-left: uswds.units(2) !important;
+    }
+
+    h1 {
+        @include custom.mcr-type-style(34px, 700, 100%, 0);
+        margin-top: 0;
+        margin-bottom: uswds.units(4);
+    }
+
+    h3 {
+        @include custom.mcr-type-style(24px, 400, 140%, 0);
+        margin-top: 0;
+        margin-bottom: uswds.units(2);
+    }
+
+    h5 {
+        @include custom.mcr-type-style(17px, 700, 162%, 0);
+        margin-top: 0;
+        margin-bottom: uswds.units(2);
+    }
 }
 
 .helpSection {

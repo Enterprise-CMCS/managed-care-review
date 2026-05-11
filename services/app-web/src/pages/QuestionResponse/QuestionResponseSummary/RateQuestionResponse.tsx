@@ -98,12 +98,14 @@ export const RateQuestionResponse = () => {
                 {hasCMSPermissions ? (
                     <CMSQuestionResponseTable
                         indexQuestions={rate.questions}
+                        questionType="rate"
                         consolidatedStatus={rate.consolidatedStatus}
                         userDivision={division}
                     />
                 ) : (
                     <StateQuestionResponseTable
                         indexQuestions={rate.questions}
+                        questionType="rate"
                         header={`Rate Q&A`}
                     />
                 )}

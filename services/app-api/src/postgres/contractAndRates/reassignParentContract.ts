@@ -69,6 +69,9 @@ const reassignParentContractInTransaction = async (
                 stateCode: true,
                 stateNumber: true,
                 revisions: {
+                    where: {
+                        reverseUnlockInfoID: null,
+                    },
                     orderBy: {
                         createdAt: 'desc',
                     },

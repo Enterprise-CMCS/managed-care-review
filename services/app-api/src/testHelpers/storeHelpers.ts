@@ -74,6 +74,9 @@ function mockStoreThatErrors(): Store {
         insertContractQuestion: async (_ID) => {
             return genericError
         },
+        softDeleteContractQuestion: async (_ID) => {
+            return genericError
+        },
         findAllQuestionsByContract: async (_pkgID) => {
             return genericError
         },
@@ -157,6 +160,9 @@ function mockStoreThatErrors(): Store {
             return genericError
         },
         reverseApproveContract: async (_ID) => {
+            return genericError
+        },
+        reverseUnlockContract: async (_ID) => {
             return genericError
         },
         withdrawContract: async (_ID) => {

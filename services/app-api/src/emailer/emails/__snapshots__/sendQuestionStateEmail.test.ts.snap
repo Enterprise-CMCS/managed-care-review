@@ -1,5 +1,18 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`renders correctly for an EQRO submission 1`] = `
+"CMS asked questions about MCR-MN-0004-SNBC<br />
+<b>Sent by:</b> Ronald McDonald (DMCO) <a href="cms@email.com">cms@email.com</a>
+<br />
+<b>Date:</b> 12/31/2023<br />
+<br />
+You must respond to the questions before CMS can continue their review. Responses should be submitted in DOC or DOCX format.<br />
+<br />
+<a href="http://localhost/submissions/eqro/test-abc-123/question-and-answers">Open the submission in MC-Review to answer questions</a>
+
+"
+`;
+
 exports[`renders overall email for a new question as expected 1`] = `
 "CMS asked questions about MCR-MN-0003-SNBC<br />
 <b>Sent by:</b> Ronald McDonald (DMCO) <a href="cms@email.com">cms@email.com</a>

@@ -1,6 +1,56 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### May 8, 2026
+#### Added
+- New mutation `reverseUnlockContract` added to the API
+    - Reverses a previously unlocked contract submission by returning the contract to its prior submitted or resubmitted state. The reverse-unlock action is internal-only revision history and does not create a new `packageSubmission`.
+    - Reversing unlock also restores child rates unlocked with the contract and removes linked draft rates from the changes to the submission while it was unlocked.
+    - Parameters (via `ReverseUnlockContractInput`)
+        - `contractID`: required ID, the ID of the contract to reverse unlock for
+        - `updatedReason`: required String, the reason for reversing the unlock
+    - Returns `ReverseUnlockContractPayload`
+        - `contract`: Contract
+    - Errors
+        - `ForbiddenError`: A non-CMS or non-Admin user called this
+        - `UserInputError`: The contract is not currently `UNLOCKED`
+        - `INTERNAL_SERVER_ERROR`: DB_ERROR — a contract cannot be found by id or the reverse unlock could not be completed
+
+### April 28, 2026
+#### Added
+- New endpoint `indexRatesPaginated` added to the API for paginated submitted-rate results. The API can be called with no input parameters, and a default page size of 10 will be used.
+    - Accepts the new object `IndexRatesPaginatedInput`
+        - The new object contains the same optional filter parameters that `IndexRatesInput` accepts:
+            - `stateCode`: optional state filter for CMS and admin users
+            - `rateIDs`: optional list of rate IDs to limit the result set
+        - The new object also contains pagination specific arguments:
+            - `pageSize`: optional page size, default is 10, max is 150
+            - `after`: optional opaque cursor for fetching the next page
+    - Returns `RateConnection`
+        - `totalCount`: total number of matching submitted rates
+        - `totalPages`: total number of pages based on totalCount and requested page size
+        - `edges`: list of `RateConnectionEdge`
+        - `pageInfo`: pagination metadata with `hasNextPage` and `endCursor`
+    - `RateConnectionEdge` includes:
+        - `cursor`: opaque cursor for the current edge
+        - `node`: the `Rate`
+    - Usage examples and cursor behavior are documented in [indexRatesPaginated pagination](docs/technical-design/index-rates-pagination.md).
+    - Existing `indexRates` behavior is unchanged and remains available as the non-paginated query.
+
+### May 6, 2026
+#### Added
+- New mutation `deleteContractQuestion` added to the API
+    - Soft-deletes a contract question by recording a `DELETE` action in the question's audit log. The question is not removed from the database, and subsequent reads filter it out based on the latest audit log action.
+    - Deleting a contract question also cascades soft-deletes to any active related question documents, question responses, and question response documents by recording `CASCADE_DELETE` actions for those records.
+    - Parameters (via `DeleteContractQuestionInput`)
+        - `questionID`: required ID, the ID of the contract question to soft delete
+        - `reason`: required String, the reason recorded on the delete action
+    - Returns `DeleteContractQuestionPayload`
+        - `question`: ContractQuestion
+    - Errors
+        - `ForbiddenError`: A non-AdminUser called this
+        - `UserInputError`: A question cannot be found with the given `questionID`
+
 ### April 24, 2026
 #### Updated
 - **`withdrawContract`** endpoint now accepts contracts with a consolidated status of `NOT_SUBJECT_TO_REVIEW` in addition to `SUBMITTED` and `RESUBMITTED`. Applies to EQRO submissions with no review-triggering provisions and CHIP-only `HEALTH_PLAN` submissions.
@@ -160,4 +210,3 @@
 ### May 2, 2025
 #### Deleted
 - `withdrawAndReplaceRedundantRate` endpoint deleted. It was an Admin only action that was used to address bookkeeping errors with rates
-

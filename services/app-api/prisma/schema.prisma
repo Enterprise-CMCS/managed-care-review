@@ -86,7 +86,7 @@ model ContractTable {
 model ContractOverrides {
   id String @id @default(uuid())
 
-  //overides meta data
+  // overides meta data
   createdAt   DateTime      @default(now())
   updatedByID String?
   updatedBy   User?         @relation(fields: [updatedByID], references: [id])
@@ -94,7 +94,7 @@ model ContractOverrides {
   contractID  String
   description String
 
-  //overrides
+  // overrides
   initiallySubmittedAt DateTime?
 }
 
@@ -122,7 +122,7 @@ model RateTable {
 model RateOverrides {
   id String @id @default(uuid())
 
-  //overrides metadata
+  // overrides metadata
   createdAt   DateTime  @default(now())
   updatedByID String?
   updatedBy   User?     @relation(fields: [updatedByID], references: [id])
@@ -183,10 +183,12 @@ model ContractRevisionTable {
   contractID String
   contract   ContractTable @relation(fields: [contractID], references: [id])
 
-  unlockInfoID String?
-  unlockInfo   UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
-  submitInfoID String?
-  submitInfo   UpdateInfoTable? @relation("submitContractInfo", fields: [submitInfoID], references: [id])
+  unlockInfoID        String?
+  unlockInfo          UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
+  reverseUnlockInfoID String?
+  reverseUnlockInfo   UpdateInfoTable? @relation("reverseUnlockContractInfo", fields: [reverseUnlockInfoID], references: [id])
+  submitInfoID        String?
+  submitInfo          UpdateInfoTable? @relation("submitContractInfo", fields: [submitInfoID], references: [id])
 
   relatedSubmisions  UpdateInfoTable[]
   submissionPackages SubmissionPackageJoinTable[] @relation("contractRevision")
@@ -231,7 +233,7 @@ model ContractRevisionTable {
   statutoryRegulatoryAttestation               Boolean?
   statutoryRegulatoryAttestationDescription    String?
 
-  //EQRO submission fields only
+  // EQRO submission fields only
   eqroNewContractor                       Boolean?
   eqroProvisionMcoNewOptionalActivity     Boolean?
   eqroProvisionNewMcoEqrRelatedActivities Boolean?
@@ -244,12 +246,14 @@ model RateRevisionTable {
   rateID String
   rate   RateTable @relation(fields: [rateID], references: [id])
 
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @default(now()) @updatedAt
-  unlockInfoID String?
-  unlockInfo   UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id], onDelete: Cascade)
-  submitInfoID String?
-  submitInfo   UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id], onDelete: Cascade)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @default(now()) @updatedAt
+  unlockInfoID        String?
+  unlockInfo          UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id], onDelete: Cascade)
+  reverseUnlockInfoID String?
+  reverseUnlockInfo   UpdateInfoTable? @relation("reverseUnlockRateInfo", fields: [reverseUnlockInfoID], references: [id], onDelete: Cascade)
+  submitInfoID        String?
+  submitInfo          UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id], onDelete: Cascade)
 
   relatedSubmissions UpdateInfoTable[]
   submissionPackages SubmissionPackageJoinTable[] @relation("rateRevision")
@@ -312,8 +316,12 @@ model UpdateInfoTable {
   submittedRates     RateRevisionTable[]     @relation("submitRateInfo")
 
   // These relations are inverse 1:1 relations that are not really used.
-  unlockedContracts  ContractRevisionTable[]      @relation("unlockContractInfo")
-  unlockedRates      RateRevisionTable[]          @relation("unlockRateInfo")
+  unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
+  unlockedRates     RateRevisionTable[]     @relation("unlockRateInfo")
+
+  reverseUnlockedContracts ContractRevisionTable[] @relation("reverseUnlockContractInfo")
+  reverseUnlockedRates     RateRevisionTable[]     @relation("reverseUnlockRateInfo")
+
   submissionPackages SubmissionPackageJoinTable[] @relation("submission")
 
   // these get ALL related contracts + revisions for given update.
@@ -471,6 +479,15 @@ model User {
   oauthClients                OAuthClient[]
   rateOverrides               RateOverrides[]
   contractOverrides           ContractOverrides[]
+
+  contractQuestionActions                 ContractQuestionAction[]
+  contractQuestionDocumentActions         ContractQuestionDocumentAction[]
+  contractQuestionResponseActions         ContractQuestionResponseAction[]
+  contractQuestionResponseDocumentActions ContractQuestionResponseDocumentAction[]
+  rateQuestionActions                     RateQuestionAction[]
+  rateQuestionDocumentActions             RateQuestionDocumentAction[]
+  rateQuestionResponseActions             RateQuestionResponseAction[]
+  rateQuestionResponseDocumentActions     RateQuestionResponseDocumentAction[]
 }
 
 model UserAudit {
@@ -486,6 +503,9 @@ model UserAudit {
   priorValue      Json?
 }
 
+/// Deletion is tracked in ContractQuestionAction. A row is deleted when its
+/// latest action is DELETE or CASCADE_DELETE. Use the store functions to
+/// handle cascading deletes or restores.
 model ContractQuestion {
   id            String                     @id @default(uuid())
   createdAt     DateTime                   @default(now())
@@ -497,8 +517,24 @@ model ContractQuestion {
   division      Division
   documents     ContractQuestionDocument[]
   responses     ContractQuestionResponse[]
+
+  actions ContractQuestionAction[]
 }
 
+model ContractQuestionAction {
+  id          String             @id @default(uuid())
+  createdAt   DateTime           @default(now())
+  action      QuestionActionType
+  reason      String
+  questionID  String
+  question    ContractQuestion   @relation(fields: [questionID], references: [id])
+  updatedByID String
+  updatedBy   User               @relation(fields: [updatedByID], references: [id])
+
+  @@index([questionID, createdAt(sort: Desc)])
+}
+
+/// See ContractQuestion for soft-delete contract.
 model ContractQuestionDocument {
   id           String           @id @default(uuid())
   createdAt    DateTime         @default(now())
@@ -509,8 +545,24 @@ model ContractQuestionDocument {
   s3Key        String? // S3 object key (e.g., "allusers/uuid.pdf")
   questionID   String
   question     ContractQuestion @relation(fields: [questionID], references: [id])
+
+  actions ContractQuestionDocumentAction[]
 }
 
+model ContractQuestionDocumentAction {
+  id          String                   @id @default(uuid())
+  createdAt   DateTime                 @default(now())
+  action      QuestionActionType
+  reason      String
+  documentID  String
+  document    ContractQuestionDocument @relation(fields: [documentID], references: [id])
+  updatedByID String
+  updatedBy   User                     @relation(fields: [updatedByID], references: [id])
+
+  @@index([documentID, createdAt(sort: Desc)])
+}
+
+/// See ContractQuestion for soft-delete contract.
 model ContractQuestionResponseDocument {
   id           String                   @id @default(uuid())
   createdAt    DateTime                 @default(now())
@@ -521,8 +573,24 @@ model ContractQuestionResponseDocument {
   s3URL        String // DEPRECATED: Use s3BucketName + s3Key instead
   s3BucketName String? // S3 bucket name
   s3Key        String? // S3 object key (e.g., "allusers/uuid.pdf")
+
+  actions ContractQuestionResponseDocumentAction[]
 }
 
+model ContractQuestionResponseDocumentAction {
+  id          String                           @id @default(uuid())
+  createdAt   DateTime                         @default(now())
+  action      QuestionActionType
+  reason      String
+  documentID  String
+  document    ContractQuestionResponseDocument @relation(fields: [documentID], references: [id])
+  updatedByID String
+  updatedBy   User                             @relation(fields: [updatedByID], references: [id])
+
+  @@index([documentID, createdAt(sort: Desc)])
+}
+
+/// See ContractQuestion for soft-delete contract.
 model ContractQuestionResponse {
   id            String                             @id @default(uuid())
   createdAt     DateTime                           @default(now())
@@ -532,8 +600,24 @@ model ContractQuestionResponse {
   addedByUserID String
   addedBy       User                               @relation(fields: [addedByUserID], references: [id])
   documents     ContractQuestionResponseDocument[]
+
+  actions ContractQuestionResponseAction[]
 }
 
+model ContractQuestionResponseAction {
+  id          String                   @id @default(uuid())
+  createdAt   DateTime                 @default(now())
+  action      QuestionActionType
+  reason      String
+  responseID  String
+  response    ContractQuestionResponse @relation(fields: [responseID], references: [id])
+  updatedByID String
+  updatedBy   User                     @relation(fields: [updatedByID], references: [id])
+
+  @@index([responseID, createdAt(sort: Desc)])
+}
+
+/// See ContractQuestion for soft-delete contract.
 model RateQuestion {
   id            String                 @id @default(uuid())
   createdAt     DateTime               @default(now())
@@ -545,8 +629,24 @@ model RateQuestion {
   division      Division
   documents     RateQuestionDocument[]
   responses     RateQuestionResponse[]
+
+  actions RateQuestionAction[]
 }
 
+model RateQuestionAction {
+  id          String             @id @default(uuid())
+  createdAt   DateTime           @default(now())
+  action      QuestionActionType
+  reason      String
+  questionID  String
+  question    RateQuestion       @relation(fields: [questionID], references: [id])
+  updatedByID String
+  updatedBy   User               @relation(fields: [updatedByID], references: [id])
+
+  @@index([questionID, createdAt(sort: Desc)])
+}
+
+/// See ContractQuestion for soft-delete contract.
 model RateQuestionResponse {
   id            String                         @id @default(uuid())
   createdAt     DateTime                       @default(now())
@@ -556,8 +656,24 @@ model RateQuestionResponse {
   addedByUserID String
   addedBy       User                           @relation(fields: [addedByUserID], references: [id])
   documents     RateQuestionResponseDocument[]
+
+  actions RateQuestionResponseAction[]
 }
 
+model RateQuestionResponseAction {
+  id          String               @id @default(uuid())
+  createdAt   DateTime             @default(now())
+  action      QuestionActionType
+  reason      String
+  responseID  String
+  response    RateQuestionResponse @relation(fields: [responseID], references: [id])
+  updatedByID String
+  updatedBy   User                 @relation(fields: [updatedByID], references: [id])
+
+  @@index([responseID, createdAt(sort: Desc)])
+}
+
+/// See ContractQuestion for soft-delete contract.
 model RateQuestionDocument {
   id           String       @id @default(uuid())
   createdAt    DateTime     @default(now())
@@ -568,8 +684,24 @@ model RateQuestionDocument {
   s3Key        String? // S3 object key (e.g., "allusers/uuid.pdf")
   questionID   String
   question     RateQuestion @relation(fields: [questionID], references: [id])
+
+  actions RateQuestionDocumentAction[]
 }
 
+model RateQuestionDocumentAction {
+  id          String               @id @default(uuid())
+  createdAt   DateTime             @default(now())
+  action      QuestionActionType
+  reason      String
+  documentID  String
+  document    RateQuestionDocument @relation(fields: [documentID], references: [id])
+  updatedByID String
+  updatedBy   User                 @relation(fields: [updatedByID], references: [id])
+
+  @@index([documentID, createdAt(sort: Desc)])
+}
+
+/// See ContractQuestion for soft-delete contract.
 model RateQuestionResponseDocument {
   id           String               @id @default(uuid())
   createdAt    DateTime             @default(now())
@@ -580,6 +712,28 @@ model RateQuestionResponseDocument {
   s3Key        String? // S3 object key (e.g., "allusers/uuid.pdf")
   responseID   String
   response     RateQuestionResponse @relation(fields: [responseID], references: [id])
+
+  actions RateQuestionResponseDocumentAction[]
+}
+
+model RateQuestionResponseDocumentAction {
+  id          String                       @id @default(uuid())
+  createdAt   DateTime                     @default(now())
+  action      QuestionActionType
+  reason      String
+  documentID  String
+  document    RateQuestionResponseDocument @relation(fields: [documentID], references: [id])
+  updatedByID String
+  updatedBy   User                         @relation(fields: [updatedByID], references: [id])
+
+  @@index([documentID, createdAt(sort: Desc)])
+}
+
+enum QuestionActionType {
+  DELETE
+  RESTORE
+  CASCADE_DELETE
+  CASCADE_RESTORE
 }
 
 enum Division {

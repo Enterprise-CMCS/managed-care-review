@@ -10,6 +10,7 @@ import type {
     ProgramType,
     UserType,
     StateUserType,
+    AdminUserType,
     ContractQuestionType,
     CreateContractQuestionInput,
     InsertQuestionResponseArgs,
@@ -40,6 +41,7 @@ import {
     insertRateQuestion,
     findAllQuestionsByRate,
     insertRateQuestionResponse,
+    softDeleteContractQuestion,
 } from './questionResponse'
 import { findAllSupportedStates } from './state'
 import {
@@ -58,6 +60,7 @@ import {
     findRateRevision,
     approveContract,
     reverseApproveContract,
+    reverseUnlockContract,
 } from './contractAndRates'
 import type {
     SubmitContractArgsType,
@@ -70,6 +73,7 @@ import type {
     FindAllRatesWithHistoryBySubmitType,
     ApproveContractArgsType,
     ReverseApproveContractArgsType,
+    ReverseUnlockContractArgsType,
 } from './contractAndRates'
 import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
 import { unlockRate } from './contractAndRates/unlockRate'
@@ -222,6 +226,9 @@ type Store = {
     reverseApproveContract: (
         args: ReverseApproveContractArgsType
     ) => Promise<ContractType | Error>
+    reverseUnlockContract: (
+        args: ReverseUnlockContractArgsType
+    ) => Promise<ContractType | Error>
     withdrawContract: (
         args: WithdrawContractArgsType
     ) => Promise<WithdrawContractReturnType | Error>
@@ -261,6 +268,11 @@ type Store = {
     insertContractQuestionResponse: (
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
+    ) => Promise<ContractQuestionType | Error>
+    softDeleteContractQuestion: (
+        questionID: string,
+        user: AdminUserType,
+        reason: string
     ) => Promise<ContractQuestionType | Error>
     findAllQuestionsByContract: (
         pkgID: string
@@ -382,6 +394,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         unlockContract: (args) => unlockContract(client, args),
         approveContract: (args) => approveContract(client, args),
         reverseApproveContract: (args) => reverseApproveContract(client, args),
+        reverseUnlockContract: (args) => reverseUnlockContract(client, args),
         withdrawContract: (args) => withdrawContract(client, args),
         undoWithdrawContract: (args) => undoWithdrawContract(client, args),
 
@@ -404,6 +417,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             insertContractQuestion(client, questionInput, user),
         insertContractQuestionResponse: (questionInput, user) =>
             insertContractQuestionResponse(client, questionInput, user),
+        softDeleteContractQuestion: (questionID, user, reason) =>
+            softDeleteContractQuestion(client, { questionID, user, reason }),
         findAllQuestionsByContract: (pkgID) =>
             findAllQuestionsByContract(client, pkgID),
         insertRateQuestion: (questionInput, user) =>

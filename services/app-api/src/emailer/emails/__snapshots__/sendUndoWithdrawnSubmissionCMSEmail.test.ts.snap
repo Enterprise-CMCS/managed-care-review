@@ -1,5 +1,27 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`sendUndoWithdrawnSubmissionCMSEmail > renders EQRO email when undo withdraw returns to not subject to review 1`] = `
+"<h1 style="font-weight: normal;">Submission MCR-MN-0004-SNBC status was updated to 'Not subject to review' by CMS</h1>
+<b>Withdraw reversed by:</b> <a href="mailto:zuko@example.com">zuko@example.com</a><br />
+<b>Status:</b> Not subject to review<br />
+<b>Review decision:</b> Not subject to formal review and approval<br />
+<b>Reason for withdrawal reversal:</b> Test Undo Withdraw<br />
+<br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
+"
+`;
+
+exports[`sendUndoWithdrawnSubmissionCMSEmail > renders EQRO email when undo withdraw returns to subject to review 1`] = `
+"<h1 style="font-weight: normal;">Submission MCR-MN-0004-SNBC status was updated to 'Submitted' by CMS</h1>
+<b>Withdraw reversed by:</b> <a href="mailto:zuko@example.com">zuko@example.com</a><br />
+<b>Status:</b> Submitted<br />
+<b>Review decision:</b> Subject to formal review and approval<br />
+<b>Reason for withdrawal reversal:</b> Test Undo Withdraw<br />
+<br />
+<a href="http://localhost/submissions/eqro/test-contract-123">View submission</a><br />
+"
+`;
+
 exports[`sendUndoWithdrawnSubmissionCMSEmail > renders overall email for undo withdraw contract as expected 1`] = `
 "<h1 style="font-weight: normal;">Submission MCR-MN-0004-SNBC status was updated to 'Submitted' by CMS</h1>
 <b>Updated by:</b> zuko@example.com<br />

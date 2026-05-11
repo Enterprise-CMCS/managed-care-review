@@ -108,9 +108,10 @@ export const PageHeadingRow = ({
 }: PageHeadingProps): React.ReactElement | null => {
     if (!loggedInUser) {
         if (
+            route === 'RESOURCES' ||
             route === 'HELP' ||
             route === 'CONTACT_US' ||
-            route === 'RESOURCES'
+            route === 'RESOURCES_TRAINING'
         ) {
             return null
         } else {
