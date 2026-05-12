@@ -123,7 +123,7 @@ function rateOverridesToDomainModel(
                                       dateAdded: doc.dateAdded ?? undefined,
                                   })
                               ),
-                              supportingDocument:
+                              supportingDocuments:
                                   revisionOverride.supportingDocuments.map(
                                       (doc) => ({
                                           ...doc,
@@ -461,6 +461,7 @@ export {
     rateRevisionToDomainModel,
     rateWithHistoryToDomainModel,
     rateWithoutDraftContractsToDomainModel,
+    rateOverridesToDomainModel,
     parseStrippedRateWithHistory,
     strippedRateToDomainModel,
     strippedRateWithoutDraftContractsToDomainModel,
