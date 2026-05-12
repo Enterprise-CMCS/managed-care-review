@@ -243,10 +243,16 @@ const ReleasedToState = () => {
                                 >
                                     Date released to state
                                 </Label>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                <p
+                                    id="dateApprovalReleasedToState-required"
+                                    className="margin-bottom-0 margin-top-05 usa-hint"
+                                >
                                     Required
                                 </p>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                <p
+                                    id="dateApprovalReleasedToState-hint"
+                                    className="margin-bottom-0 margin-top-05 usa-hint"
+                                >
                                     mm/dd/yyyy
                                 </p>
                                 {showFieldErrors(
@@ -265,7 +271,8 @@ const ReleasedToState = () => {
                                             : undefined
                                     }
                                     aria-required
-                                    aria-describedby="dateApprovalReleasedToState"
+                                    aria-labelledby="dateApprovalReleasedToState-label"
+                                    aria-describedby="dateApprovalReleasedToState-required dateApprovalReleasedToState-hint"
                                     id="dateApprovalReleasedToState"
                                     name="dateApprovalReleasedToState"
                                     onChange={(val) =>
