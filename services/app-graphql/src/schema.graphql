@@ -447,14 +447,16 @@ type Mutation {
     submitContract(input: SubmitContractInput!): SubmitContractPayload!
 
     """
-    approveContract is a CMS user only action
+    approveContract is a CMS or Admin user action to mark a contract as approved.
+    Admin users must provide updatedReason. CMS and CMS Approver users may omit it.
 
     Errors:
     - ForbiddenError:
-        - A non CMS/CMS Approver user called this
+        - A non CMS/CMS Approver/Admin user called this
     - UserInputError:
         - A contract is not in the correct submission status: SUBMITTED or RESUBMITTED
         - A contract is not in the correct review status: UNDER_REVIEW
+        - An Admin user did not provide updatedReason
     - INTERNAL_SERVER_ERROR
         - DB_ERROR
             - A contract cannot be found by id
@@ -618,6 +620,8 @@ input ApproveContractInput {
     contractID: ID!
     "Manually entered date for when the approval was released to the state"
     dateApprovalReleasedToState: Date!
+    "Optional reason for approving the contract. Required when the caller is an Admin user."
+    updatedReason: String
 }
 
 type ReverseApproveContractPayload {
