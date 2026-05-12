@@ -119,7 +119,6 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                     packageStatus: 'SUBMITTED',
                 },
             ],
-            rateMedicaidPopulations: null,
             __typename: 'RateFormData',
         },
         __typename: 'RateRevision',
@@ -477,7 +476,6 @@ function mockRateSubmittedWithQuestions(
                 ],
                 actuaryCommunicationPreference: 'OACT_TO_ACTUARY',
                 packagesWithSharedRateCerts: [],
-                rateMedicaidPopulations: null,
             },
             ...partial,
         }
@@ -602,11 +600,6 @@ function mockRateSubmittedWithQuestions(
                             statutoryRegulatoryAttestation: true,
                             statutoryRegulatoryAttestationDescription:
                                 'everything meets regulatory attestation',
-                            eqroNewContractor: null,
-                            eqroProvisionMcoNewOptionalActivity: null,
-                            eqroProvisionNewMcoEqrRelatedActivities: null,
-                            eqroProvisionChipEqrRelatedActivities: null,
-                            eqroProvisionMcoEqrOrRelatedActivities: null,
                         },
                     },
                 ],
