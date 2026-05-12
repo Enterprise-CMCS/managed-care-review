@@ -107,19 +107,6 @@ Rate revision override support includes:
 - domain/read parsing through `rateOverrides[].overrides.revisionOverride`
 - effective rate document `dateAdded` override application in submitted API views
 
-## Current Gap
-
-Rate unlock does not fully preserve flattened rate revision overrides into the new unlocked draft.
-
-Current rate behavior:
-
-- submitted rate revisions can have revision-specific document overrides
-- those overrides can affect the submitted API view
-- unlock copies base revision data into a new unlocked revision
-- unlock does not merge the flattened document override result into that new unlocked revision
-
-So an unlocked rate draft can lose corrected document metadata that the submitted revision was showing.
-
 ## File Map
 
 Primary code paths:
