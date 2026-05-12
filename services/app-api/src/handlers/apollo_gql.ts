@@ -498,7 +498,12 @@ const gqlHandler: Handler = async (event, context) => {
     // Call handler async-style (Node.js 24 pattern) - callback param unused
     const response = await initializedHandler(event, context, () => {})
     // Flush spans before Lambda freezes — BatchSpanProcessor timer won't fire after handler returns
-    await flushTracer()
+    // Swallow flush errors so telemetry failures never affect API responses
+    try {
+        await flushTracer()
+    } catch (flushErr) {
+        console.warn('otel: flush failed', flushErr)
+    }
     const payloadSize = Buffer.from(event.body).length
 
     if (payloadSize > 5.5 * 1024 * 1024) {

@@ -29,6 +29,10 @@ function getDDHeaders() {
 }
 
 export function initTracer(serviceName: string) {
+    // Guard against re-registration on warm Lambda invocations — registering
+    // multiple providers causes duplicate spans and leaks span processors
+    if (tracerProvider) return
+
     console.info('-----Setting OTEL instrumentation-----')
 
     if (!process.env.stage) {
