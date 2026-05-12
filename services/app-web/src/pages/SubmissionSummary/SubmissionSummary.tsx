@@ -242,7 +242,7 @@ export const SubmissionSummary = (): React.ReactElement => {
     const latestContractAction = contract.reviewStatusActions?.[0]
 
     const showApprovalBtn =
-        hasCMSPermissions &&
+        (hasCMSPermissions || isAdminUser) &&
         ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
     const showUnlockBtn =
         hasCMSPermissions &&
@@ -260,7 +260,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         undoWithdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN'
     const showUndoUnlockBtn = isAdminUser && consolidatedStatus === 'UNLOCKED'
-    const showNoAdminActionsMsg = !showUndoUnlockBtn
+    const showNoAdminActionsMsg = !showUndoUnlockBtn && !showApprovalBtn
     const showNoCMSActionsMsg =
         !showApprovalBtn &&
         !showUnlockBtn &&
@@ -394,7 +394,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 Unlock submission
                             </ModalOpenButton>
                         )}
-                        {hasCMSPermissions && showApprovalBtn && (
+                        {showApprovalBtn && (
                             <NavLinkWithLogging
                                 className="usa-button bg-green"
                                 variant="unstyled"

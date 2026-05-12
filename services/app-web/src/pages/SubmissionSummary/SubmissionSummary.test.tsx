@@ -2207,8 +2207,8 @@ describe('SubmissionSummary', () => {
 
     describe.each(iterableAdminUsersMockData)(
         '$userRole submission tests',
-        ({ mockUser }) => {
-            it(`does not render released to state button`, async () => {
+        ({ userRole, mockUser }) => {
+            it(`${userRole === 'ADMIN_USER' ? 'renders' : 'does not render'} released to state button`, async () => {
                 const contract = mockContractPackageSubmittedWithQuestions(
                     'test-abc-123',
                     { contractSubmissionType: 'HEALTH_PLAN' }
@@ -2258,10 +2258,17 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
 
-                // expect submission released to state button to not exist
-                expect(
-                    screen.queryByRole('link', { name: 'Released to state' })
-                ).toBeNull()
+                if (userRole === 'ADMIN_USER') {
+                    expect(
+                        screen.getByRole('link', { name: 'Released to state' })
+                    ).toBeInTheDocument()
+                } else {
+                    expect(
+                        screen.queryByRole('link', {
+                            name: 'Released to state',
+                        })
+                    ).toBeNull()
+                }
             })
 
             it(`renders approval banner on approved submissions`, async () => {

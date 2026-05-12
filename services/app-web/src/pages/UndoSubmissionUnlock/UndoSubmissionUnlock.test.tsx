@@ -336,9 +336,7 @@ describe('UndoSubmissionUnlock', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText(
-                    'No action can be taken on this submission in its current status.'
-                )
+                screen.getByRole('link', { name: 'Released to state' })
             ).toBeInTheDocument()
         })
     })
