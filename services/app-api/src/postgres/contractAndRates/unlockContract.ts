@@ -46,6 +46,15 @@ async function unlockContractInsideTransaction(
                     position: 'asc',
                 },
             },
+            revisionOverrides: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                select: {
+                    contractRevisionID: true,
+                    contractType: true,
+                },
+            },
 
             relatedSubmisions: {
                 orderBy: {
@@ -170,6 +179,12 @@ async function unlockContractInsideTransaction(
         relatedRateIDs.push(ratePackage.rateRevision.rateID)
     }
 
+    const contractTypeOverride = currentRev.revisionOverrides.find(
+        (override) =>
+            override.contractRevisionID === currentRev.id &&
+            override.contractType !== null
+    )
+
     await tx.contractRevisionTable.create({
         data: {
             createdAt: manualCreatedAt ?? currentDateTime,
@@ -187,7 +202,8 @@ async function unlockContractInsideTransaction(
             riskBasedContract: currentRev.riskBasedContract,
             submissionType: currentRev.submissionType,
             submissionDescription: currentRev.submissionDescription,
-            contractType: currentRev.contractType,
+            contractType:
+                contractTypeOverride?.contractType ?? currentRev.contractType,
             dsnpContract: currentRev.dsnpContract,
             contractExecutionStatus: currentRev.contractExecutionStatus,
             contractDateStart: currentRev.contractDateStart,
