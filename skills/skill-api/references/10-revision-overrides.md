@@ -78,33 +78,53 @@ That means:
 
 At that point, the unlocked draft should behave like ordinary revision data. The override effect should not disappear during unlock.
 
-## Current Gap
-
-Today, the code does not fully implement this model for rate revision overrides.
-
-Current behavior:
-
-- submitted rate revisions can have revision-specific overrides
-- those overrides can affect the submitted API view
-- unlock copies base revision data into a new unlocked revision
-- unlock does not merge the flattened override result into that new unlocked revision
-
-So the unlocked draft can lose corrected metadata that the submitted revision was showing.
-
 ## Contract vs Rate Overrides
 
-Today the models are asymmetric:
+Contracts and rates both have parent-level override history:
 
 - contracts have `ContractOverrides` on `ContractTable`
 - rates have `RateOverrides` on `RateTable`
-- rates also have revision-specific `RateRevisionOverrides`
 
-Long-term, contract and rate revisions should support the same revision-specific override model.
+Both also have revision-specific override children, but the supported fields differ:
+
+- contract overrides can have optional `ContractRevisionOverrides`
+- rate overrides can have optional `RateRevisionOverrides`
+- `ContractRevisionOverrides` currently supports `contractType`
+- `RateRevisionOverrides` currently supports document-level `dateAdded` overrides for rate documents and rate supporting documents
+
+## Current Implementation Notes
+
+Contract revision override support now includes:
+
+- postgres write path in `overrideContractData`
+- domain/read parsing through `contractOverrides[].overrides.revisionOverride`
+- effective `contractType` override application in full and stripped contract revision form data
+- unlock preservation: `unlockContract` copies the effective overridden `contractType` into the new unlocked draft revision
+
+Rate revision override support includes:
+
+- postgres write path in `overrideRateData`
+- domain/read parsing through `rateOverrides[].overrides.revisionOverride`
+- effective rate document `dateAdded` override application in submitted API views
+
+## Current Gap
+
+Rate unlock does not fully preserve flattened rate revision overrides into the new unlocked draft.
+
+Current rate behavior:
+
+- submitted rate revisions can have revision-specific document overrides
+- those overrides can affect the submitted API view
+- unlock copies base revision data into a new unlocked revision
+- unlock does not merge the flattened document override result into that new unlocked revision
+
+So an unlocked rate draft can lose corrected document metadata that the submitted revision was showing.
 
 ## File Map
 
 Primary code paths:
 
+- `src/postgres/contractAndRates/overrideContractData.ts`
 - `src/postgres/contractAndRates/overrideRateData.ts`
 - `src/postgres/contractAndRates/prismaSharedContractRateHelpers.ts`
 - `src/postgres/contractAndRates/parseRateWithHistory.ts`
