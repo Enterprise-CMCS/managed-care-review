@@ -1,5 +1,8 @@
 import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
-import { resourceFromAttributes } from '@opentelemetry/resources'
+import {
+    resourceFromAttributes,
+    defaultResource,
+} from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
@@ -34,10 +37,12 @@ export function initTracer(serviceName: string) {
         )
     }
 
-    const resource = resourceFromAttributes({
-        [ATTR_SERVICE_NAME]: serviceName,
-        'deployment.environment': process.env.stage,
-    })
+    const resource = defaultResource().merge(
+        resourceFromAttributes({
+            [ATTR_SERVICE_NAME]: serviceName,
+            'deployment.environment': process.env.stage,
+        })
+    )
 
     const exporter = new OTLPTraceExporter({
         url: DD_TRACES_URL,
