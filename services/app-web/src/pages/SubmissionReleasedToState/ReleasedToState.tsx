@@ -290,7 +290,7 @@ const ReleasedToState = () => {
                                     data-testid="releasedToStateReason"
                                     name="releasedToStateReason"
                                     aria-required
-                                    hint="Admin users are required to input a reason for releasing the state."
+                                    hint="Admin users are required to input a reason for releasing to the state."
                                     showError={showFieldErrors(
                                         errors.releasedToStateReason
                                     )}
