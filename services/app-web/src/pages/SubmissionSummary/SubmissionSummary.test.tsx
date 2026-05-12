@@ -1549,6 +1549,100 @@ describe('SubmissionSummary', () => {
                     ).not.toBeInTheDocument()
                 })
             })
+
+            it('renders undo unlock button for admin users on unlocked submissions', async () => {
+                const contract = mockContractPackageUnlockedWithUnlockedType({
+                    id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
+                })
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockValidUser({
+                                        role: 'ADMIN_USER',
+                                    }),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/test-abc-123',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Undo unlock',
+                        })
+                    ).toBeInTheDocument()
+                })
+            })
+
+            it('does not render undo unlock button for non-admin CMS users on unlocked submissions', async () => {
+                const contract = mockContractPackageUnlockedWithUnlockedType({
+                    id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
+                })
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockValidCMSUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/test-abc-123',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.queryByRole('button', {
+                            name: 'Undo unlock',
+                        })
+                    ).not.toBeInTheDocument()
+                })
+            })
             it('renders status update banner on undo submission', async () => {
                 const contract = mockContractPackageSubmittedWithQuestions(
                     'test-abc-123',
