@@ -548,6 +548,9 @@ export class AppApiStack extends BaseStack {
         // Setup cleanup function cron schedule
         this.setupCleanupSchedule()
 
+        // Force cold-start on all DB-connected Lambdas after secret rotation
+        this.setupRotationNotifier()
+
         this.createOutputs()
     }
 
@@ -1094,6 +1097,107 @@ export class AppApiStack extends BaseStack {
 
         // Grant EventBridge permission to invoke the cleanup function
         // (This is handled automatically by the LambdaFunction target)
+    }
+
+    /**
+     * Create a Lambda + EventBridge rule that bumps ROTATION_TIMESTAMP on all
+     * DB-connected VPC Lambdas whenever the Aurora secret rotation succeeds,
+     * ensuring no warmed instance retains a stale database password.
+     */
+    private setupRotationNotifier(): void {
+        const dbConnectedFunctions = [
+            this.oauthTokenFunction,
+            this.migrateFunction,
+            this.regenerateZipsFunction,
+            this.migrateS3UrlsFunction,
+            this.graphqlFunction,
+        ]
+
+        // logicalDbManagerFunction lives in the postgres stack — reference by name
+        const logicalDbManagerFunctionName = `postgres-${this.stage}-dbManager-cdk`
+        const logicalDbManagerFunctionArn = `arn:aws:lambda:${this.region}:${this.account}:function:${logicalDbManagerFunctionName}`
+        const postgresStackName = ResourceNames.stackName(
+            'postgres',
+            this.stage
+        )
+
+        const allFunctionNames = [
+            ...dbConnectedFunctions.map((fn) => fn.functionName),
+            logicalDbManagerFunctionName,
+        ]
+
+        const notifier = new CdkFunction(this, 'RotationNotifier', {
+            functionName: `${ResourceNames.apiName('app-api', this.stage)}-rotation-notifier`,
+            runtime: Runtime.NODEJS_24_X,
+            handler: 'index.handler',
+            code: Code.fromInline(`
+const { LambdaClient, GetFunctionConfigurationCommand, UpdateFunctionConfigurationCommand } = require('@aws-sdk/client-lambda');
+const client = new LambdaClient({});
+exports.handler = async (event) => {
+    const secretId = event?.detail?.additionalEventData?.SecretId ?? '';
+    const dbSecretName = process.env.DB_SECRET_NAME;
+    if (!secretId.includes(dbSecretName)) {
+        console.log('Ignoring rotation event for unrelated secret:', secretId);
+        return;
+    }
+    const names = (process.env.LAMBDA_FUNCTION_NAMES || '').split(',').filter(Boolean);
+    const ts = new Date().toISOString();
+    await Promise.all(names.map(async name => {
+        const cfg = await client.send(new GetFunctionConfigurationCommand({ FunctionName: name }));
+        const vars = cfg.Environment?.Variables ?? {};
+        await client.send(new UpdateFunctionConfigurationCommand({
+            FunctionName: name,
+            Environment: { Variables: { ...vars, ROTATION_TIMESTAMP: ts } }
+        }));
+        console.log('Updated ROTATION_TIMESTAMP for', name);
+    }));
+};`),
+            environment: {
+                LAMBDA_FUNCTION_NAMES: allFunctionNames.join(','),
+                DB_SECRET_NAME: Fn.importValue(
+                    `${postgresStackName}-PostgresSecretName`
+                ),
+            },
+            timeout: Duration.seconds(60),
+        })
+
+        // Grant permission to read and update each target function's configuration
+        dbConnectedFunctions.forEach((fn) => {
+            notifier.addToRolePolicy(
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: [
+                        'lambda:GetFunctionConfiguration',
+                        'lambda:UpdateFunctionConfiguration',
+                    ],
+                    resources: [fn.functionArn],
+                })
+            )
+        })
+
+        notifier.addToRolePolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: [
+                    'lambda:GetFunctionConfiguration',
+                    'lambda:UpdateFunctionConfiguration',
+                ],
+                resources: [logicalDbManagerFunctionArn],
+            })
+        )
+
+        // Fire whenever Secrets Manager reports a successful rotation
+        new Rule(this, 'SecretRotationSucceededRule', {
+            eventPattern: {
+                source: ['aws.secretsmanager'],
+                detailType: ['AWS Service Event via CloudTrail'],
+                detail: {
+                    eventSource: ['secretsmanager.amazonaws.com'],
+                    eventName: ['RotationSucceeded'],
+                },
+            },
+            targets: [new LambdaFunction(notifier)],
+        })
     }
 
     private createOutputs(): void {
