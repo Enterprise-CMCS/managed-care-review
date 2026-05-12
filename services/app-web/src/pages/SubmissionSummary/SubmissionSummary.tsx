@@ -377,7 +377,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     contract.id
                                 )}
                             >
-                                Undo unlock
+                                Undo submission unlock
                             </ButtonWithLogging>
                         )}
                         {hasCMSPermissions && showUnlockBtn && (

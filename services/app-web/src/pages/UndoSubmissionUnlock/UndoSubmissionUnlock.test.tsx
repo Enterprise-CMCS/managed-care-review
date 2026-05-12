@@ -49,7 +49,7 @@ describe('UndoSubmissionUnlock', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/health-plan/test-abc-123/undo-unlock-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-submission-unlock',
                 },
             }
         )
@@ -57,7 +57,7 @@ describe('UndoSubmissionUnlock', () => {
         await waitFor(() => {
             expect(
                 screen.getByRole('heading', {
-                    name: 'Undo unlock',
+                    name: 'Undo submission unlock',
                     level: 1,
                 })
             ).toBeInTheDocument()
@@ -65,7 +65,7 @@ describe('UndoSubmissionUnlock', () => {
                 screen.getByText('Reason for undoing the submission unlock.')
             ).toBeInTheDocument()
             expect(
-                screen.getByRole('button', { name: 'Undo unlock' })
+                screen.getByRole('button', { name: 'Undo submission unlock' })
             ).toBeInTheDocument()
         })
     })
@@ -106,7 +106,7 @@ describe('UndoSubmissionUnlock', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/health-plan/test-abc-123/undo-unlock-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-submission-unlock',
                 },
                 navigate: (nav) => (testNavigate = nav),
                 location: (location) => (testLocation = location),
@@ -115,14 +115,14 @@ describe('UndoSubmissionUnlock', () => {
 
         await waitFor(() => {
             testNavigate(
-                '/submission-reviews/health-plan/test-abc-123/undo-unlock-submission'
+                '/submission-reviews/health-plan/test-abc-123/undo-submission-unlock'
             )
         })
 
         await waitFor(() => {
             expect(
                 screen.getByRole('heading', {
-                    name: /Undo unlock/,
+                    name: /Undo submission unlock/,
                     level: 1,
                 })
             ).toBeInTheDocument()
@@ -130,13 +130,13 @@ describe('UndoSubmissionUnlock', () => {
 
         await waitFor(() => {
             testNavigate(
-                '/submission-reviews/eqro/test-abc-123/undo-unlock-submission'
+                '/submission-reviews/eqro/test-abc-123/undo-submission-unlock'
             )
         })
 
         await waitFor(() => {
             expect(testLocation.pathname).toBe(
-                '/submission-reviews/eqro/test-abc-123/undo-unlock-submission'
+                '/submission-reviews/eqro/test-abc-123/undo-submission-unlock'
             )
             expect(screen.getByText('404 / Page not found')).toBeInTheDocument()
         })
@@ -175,14 +175,14 @@ describe('UndoSubmissionUnlock', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/health-plan/test-abc-123/undo-unlock-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-submission-unlock',
                 },
             }
         )
 
         await waitFor(() => {
             expect(
-                screen.getByRole('button', { name: 'Undo unlock' })
+                screen.getByRole('button', { name: 'Undo submission unlock' })
             ).toBeInTheDocument()
         })
 
@@ -190,7 +190,7 @@ describe('UndoSubmissionUnlock', () => {
             'undoSubmissionUnlockReason'
         )
         const undoUnlockBtn = screen.getByRole('button', {
-            name: 'Undo unlock',
+            name: 'Undo submission unlock',
         })
 
         await user.type(undoUnlockReasonInput, 'undo reason')
@@ -233,19 +233,19 @@ describe('UndoSubmissionUnlock', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/health-plan/test-abc-123/undo-unlock-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-submission-unlock',
                 },
             }
         )
 
         await waitFor(() => {
             expect(
-                screen.getByRole('button', { name: 'Undo unlock' })
+                screen.getByRole('button', { name: 'Undo submission unlock' })
             ).toBeInTheDocument()
         })
 
         const undoUnlockBtn = screen.getByRole('button', {
-            name: 'Undo unlock',
+            name: 'Undo submission unlock',
         })
 
         await user.click(undoUnlockBtn)
@@ -306,7 +306,7 @@ describe('UndoSubmissionUnlock', () => {
                     ],
                 },
                 routerProvider: {
-                    route: '/submission-reviews/health-plan/test-abc-123/undo-unlock-submission',
+                    route: '/submission-reviews/health-plan/test-abc-123/undo-submission-unlock',
                 },
                 location: (location) => (testLocation = location),
             }
@@ -314,7 +314,7 @@ describe('UndoSubmissionUnlock', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByRole('button', { name: 'Undo unlock' })
+                screen.getByRole('button', { name: 'Undo submission unlock' })
             ).toBeInTheDocument()
         })
 
@@ -322,7 +322,7 @@ describe('UndoSubmissionUnlock', () => {
             'undoSubmissionUnlockReason'
         )
         const undoUnlockBtn = screen.getByRole('button', {
-            name: 'Undo unlock',
+            name: 'Undo submission unlock',
         })
 
         await user.type(undoUnlockReasonInput, 'Undo submission unlock')

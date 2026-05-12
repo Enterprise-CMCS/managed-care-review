@@ -1592,7 +1592,7 @@ describe('SubmissionSummary', () => {
                 await waitFor(() => {
                     expect(
                         screen.getByRole('button', {
-                            name: 'Undo unlock',
+                            name: 'Undo submission unlock',
                         })
                     ).toBeInTheDocument()
                 })
@@ -1638,7 +1638,7 @@ describe('SubmissionSummary', () => {
                 await waitFor(() => {
                     expect(
                         screen.queryByRole('button', {
-                            name: 'Undo unlock',
+                            name: 'Undo submission unlock',
                         })
                     ).not.toBeInTheDocument()
                 })

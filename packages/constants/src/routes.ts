@@ -139,7 +139,7 @@ const RoutesRecord: Record<RouteT, string> = {
     UNDO_SUBMISSION_WITHDRAW:
         '/submission-reviews/:contractSubmissionType/:id/undo-withdraw-submission',
     UNDO_SUBMISSION_UNLOCK:
-        '/submission-reviews/:contractSubmissionType/:id/undo-unlock-submission',
+        '/submission-reviews/:contractSubmissionType/:id/undo-submission-unlock',
 }
 
 // Constants for releated descendant routes

@@ -109,8 +109,8 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
         values: UndoSubmissionUnlockValues
     ) => {
         logFormSubmitEvent({
-            heading: 'Undo unlock',
-            form_name: 'Undo unlock',
+            heading: 'Undo submission unlock',
+            form_name: 'Undo submission unlock',
             event_name: 'form_field_submit',
             link_type: 'link_other',
         })
@@ -152,11 +152,11 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
                                 contractSubmissionType,
                             }
                         ),
-                        text: 'Undo unlock',
+                        text: 'Undo submission unlock',
                     },
                 ]}
             />
-            <h1>Undo unlock</h1>
+            <h1>Undo submission unlock</h1>
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => undoUnlockSubmissionAction(values)}
@@ -214,7 +214,7 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
                                     )}
                                     loading={undoUnlockLoading}
                                 >
-                                    Undo unlock
+                                    Undo submission unlock
                                 </ActionButton>
                             </ButtonGroup>
                         </PageActionsContainer>

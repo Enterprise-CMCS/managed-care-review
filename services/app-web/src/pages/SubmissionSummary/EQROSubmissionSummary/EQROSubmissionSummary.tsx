@@ -321,7 +321,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                                     contract.id
                                 )}
                             >
-                                Undo unlock
+                                Undo submission unlock
                             </ButtonWithLogging>
                         )}
                         {showApprovalBtn && (

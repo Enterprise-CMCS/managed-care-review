@@ -1094,7 +1094,7 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
             await waitFor(() => {
                 expect(
                     screen.getByRole('button', {
-                        name: 'Undo unlock',
+                        name: 'Undo submission unlock',
                     })
                 ).toBeInTheDocument()
             })
@@ -1142,7 +1142,7 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
             await waitFor(() => {
                 expect(
                     screen.queryByRole('button', {
-                        name: 'Undo unlock',
+                        name: 'Undo submission unlock',
                     })
                 ).not.toBeInTheDocument()
             })
