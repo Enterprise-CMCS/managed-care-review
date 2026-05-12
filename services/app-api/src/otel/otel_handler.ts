@@ -1,10 +1,4 @@
-import opentelemetry, {
-    type Tracer,
-    SpanStatusCode,
-    diag,
-    DiagConsoleLogger,
-    DiagLogLevel,
-} from '@opentelemetry/api'
+import opentelemetry, { type Tracer, SpanStatusCode } from '@opentelemetry/api'
 import { trace } from '@opentelemetry/api'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
@@ -37,7 +31,6 @@ function getDDHeaders() {
 
 export function initTracer(serviceName: string) {
     console.info('-----Setting OTEL instrumentation-----')
-    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO)
 
     if (!process.env.stage) {
         throw new Error(
@@ -76,13 +69,7 @@ export function initTracer(serviceName: string) {
 // Call after each Lambda invocation to flush queued spans before Lambda freezes
 export async function flushTracer(): Promise<void> {
     if (tracerProvider) {
-        console.info('otel: flushing tracer')
         await tracerProvider.forceFlush()
-        console.info('otel: flush complete')
-    } else {
-        console.warn(
-            'otel: flushTracer called but tracerProvider not initialized'
-        )
     }
 }
 
