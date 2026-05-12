@@ -1,11 +1,7 @@
-import opentelemetry, { type Tracer, SpanStatusCode } from '@opentelemetry/api'
-import { trace } from '@opentelemetry/api'
+import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
 import { resourceFromAttributes } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
-import {
-    SimpleSpanProcessor,
-    BatchSpanProcessor,
-} from '@opentelemetry/sdk-trace-base'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { W3CTraceContextPropagator } from '@opentelemetry/core'
 import { PrismaInstrumentation } from '@prisma/instrumentation'
@@ -91,31 +87,4 @@ export function recordException(
     } finally {
         span.end()
     }
-}
-
-export function createTracer(serviceName: string): Tracer {
-    if (!process.env.stage) {
-        throw new Error(
-            'Configuration error: stage environment variable is required for OpenTelemetry'
-        )
-    }
-
-    const exporter = new OTLPTraceExporter({
-        url: DD_TRACES_URL,
-        headers: getDDHeaders(),
-    })
-
-    const provider = new NodeTracerProvider({
-        resource: resourceFromAttributes({
-            [ATTR_SERVICE_NAME]: serviceName,
-            'deployment.environment': process.env.stage,
-        }),
-        spanProcessors: [new SimpleSpanProcessor(exporter)],
-    })
-
-    provider.register({
-        propagator: new W3CTraceContextPropagator(),
-    })
-
-    return trace.getTracer(serviceName)
 }
