@@ -96,6 +96,26 @@ model ContractOverrides {
 
   // overrides
   initiallySubmittedAt DateTime?
+
+  // Optional 1-to-1 revision override
+  revisionOverride ContractRevisionOverrides?
+}
+
+// Record of contract revision form data overrides (1-to-1 child of ContractOverrides)
+model ContractRevisionOverrides {
+  id String @id @default(uuid())
+
+  // contract revision override metadata
+  createdAt          DateTime          @default(now())
+  contractOverrideID String            @unique
+  contractOverride   ContractOverrides @relation(fields: [contractOverrideID], references: [id], onDelete: Cascade)
+
+  // Which revision these overrides apply to
+  contractRevisionID String
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+
+  // Revision form data overrides
+  contractType ContractType?
 }
 
 model RateTable {
@@ -239,6 +259,8 @@ model ContractRevisionTable {
   eqroProvisionNewMcoEqrRelatedActivities Boolean?
   eqroProvisionChipEqrRelatedActivities   Boolean?
   eqroProvisionMcoEqrOrRelatedActivities  Boolean?
+
+  revisionOverrides ContractRevisionOverrides[]
 }
 
 model RateRevisionTable {
