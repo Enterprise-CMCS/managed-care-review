@@ -77,6 +77,17 @@ const includeContractFormData = {
             position: 'asc',
         },
     },
+    revisionOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            contractRevisionID: true,
+            contractType: true,
+        },
+    },
 } satisfies Prisma.ContractRevisionTableInclude
 
 // Lose type for validating revision state.
@@ -525,6 +536,17 @@ const includeStrippedContractFormData = {
     unlockInfo: includeUpdateInfo,
     reverseUnlockInfo: includeUpdateInfo,
     contract: true,
+    revisionOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            contractRevisionID: true,
+            contractType: true,
+        },
+    },
 } satisfies Prisma.ContractRevisionTableInclude
 
 type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
@@ -725,10 +747,17 @@ type ContractRevisionTableWithFormData =
 function contractFormDataToDomainModel(
     contractRevision: ContractRevisionTableWithFormData
 ): ContractFormDataType {
+    const revisionOverride = contractRevision.revisionOverrides?.find(
+        (override) =>
+            override.contractRevisionID === contractRevision.id &&
+            override.contractType !== null
+    )
+
     return {
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
-        contractType: contractRevision.contractType,
+        contractType:
+            revisionOverride?.contractType ?? contractRevision.contractType,
         programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
         riskBasedContract:

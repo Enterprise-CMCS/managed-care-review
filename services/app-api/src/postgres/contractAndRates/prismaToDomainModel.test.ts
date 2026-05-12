@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
-import { mockContractRevision } from '../../testHelpers'
+import { mockContractRevision } from '../../testHelpers/contractDataMocks'
 import {
     getContractRateStatus,
     contractFormDataToDomainModel,
@@ -37,6 +37,27 @@ describe('prismaToDomainModel', () => {
                     ]),
                 })
             )
+        })
+
+        it('applies the latest matching contract revision override', () => {
+            const contractRevisionID = uuidv4()
+            const contractRevision = mockContractRevision(undefined, {
+                id: contractRevisionID,
+                contractType: 'BASE',
+                revisionOverrides: [
+                    {
+                        id: uuidv4(),
+                        createdAt: new Date(),
+                        contractRevisionID,
+                        contractType: 'AMENDMENT',
+                    },
+                ],
+            })
+
+            const domainFormData =
+                contractFormDataToDomainModel(contractRevision)
+
+            expect(domainFormData.contractType).toBe('AMENDMENT')
         })
     })
 

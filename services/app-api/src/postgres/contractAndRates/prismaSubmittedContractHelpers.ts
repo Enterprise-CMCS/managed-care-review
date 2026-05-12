@@ -5,6 +5,13 @@ import {
     includeStrippedContractFormData,
 } from './prismaSharedContractRateHelpers'
 
+const selectContractRevisionOverrides = {
+    id: true,
+    createdAt: true,
+    contractRevisionID: true,
+    contractType: true,
+} satisfies Prisma.ContractRevisionOverridesSelect
+
 const includeLatestSubmittedRateRev = {
     revisions: {
         where: {
@@ -63,6 +70,9 @@ const includeContractWithoutDraftRates = {
     contractOverrides: {
         include: {
             updatedBy: true,
+            revisionOverride: {
+                select: selectContractRevisionOverrides,
+            },
         },
     },
 } satisfies Prisma.ContractTableInclude
@@ -95,6 +105,9 @@ const includeStrippedContractWithoutDraftRates = {
         },
         include: {
             updatedBy: true,
+            revisionOverride: {
+                select: selectContractRevisionOverrides,
+            },
         },
     },
 } satisfies Prisma.ContractTableInclude

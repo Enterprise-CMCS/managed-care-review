@@ -83,6 +83,7 @@ const mockContractRevision = (
         dsnpContract: null,
         unlockInfo: null,
         reverseUnlockInfo: null,
+        revisionOverrides: [],
         contractID: 'contractID',
         submitInfoID: null,
         unlockInfoID: null,

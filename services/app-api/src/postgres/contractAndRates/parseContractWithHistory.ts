@@ -105,27 +105,46 @@ function contractRevisionToDomainModel(
 }
 
 function contractOverridesToDomainModel(
-    contractOverrides: ContractTableWithoutDraftRates['contractOverrides']
+    contractOverrides:
+        | ContractTableWithoutDraftRates['contractOverrides']
+        | ContractTableStrippedPayload['contractOverrides']
 ): ContractDataOverrideType[] {
     return contractOverrides
-        .map((override) => ({
-            id: override.id,
-            createdAt: override.createdAt,
-            updatedBy: override.updatedBy
-                ? {
-                      id: override.updatedBy.id,
-                      role: override.updatedBy.role,
-                      email: override.updatedBy.email,
-                      givenName: override.updatedBy.givenName,
-                      familyName: override.updatedBy.familyName,
-                  }
-                : undefined,
-            description: override.description,
-            overrides: {
-                initiallySubmittedAt:
-                    override.initiallySubmittedAt ?? undefined,
-            },
-        }))
+        .map((override) => {
+            const revisionOverride =
+                'revisionOverride' in override
+                    ? override.revisionOverride
+                    : undefined
+
+            return {
+                id: override.id,
+                createdAt: override.createdAt,
+                updatedBy: override.updatedBy
+                    ? {
+                          id: override.updatedBy.id,
+                          role: override.updatedBy.role,
+                          email: override.updatedBy.email,
+                          givenName: override.updatedBy.givenName,
+                          familyName: override.updatedBy.familyName,
+                      }
+                    : undefined,
+                description: override.description,
+                overrides: {
+                    initiallySubmittedAt:
+                        override.initiallySubmittedAt ?? undefined,
+                    revisionOverride: revisionOverride
+                        ? {
+                              id: revisionOverride.id,
+                              createdAt: revisionOverride.createdAt,
+                              contractRevisionID:
+                                  revisionOverride.contractRevisionID,
+                              contractType:
+                                  revisionOverride.contractType ?? undefined,
+                          }
+                        : undefined,
+                },
+            }
+        })
         .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 }
 
@@ -314,12 +333,19 @@ function contractWithHistoryToDomainModel(
 function strippedContractFormDataToDomainModel(
     contractRevision: StrippedContractRevisionTableWithFormData
 ) {
+    const revisionOverride = contractRevision.revisionOverrides?.find(
+        (override) =>
+            override.contractRevisionID === contractRevision.id &&
+            override.contractType !== null
+    )
+
     return {
         programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
-        contractType: contractRevision.contractType,
+        contractType:
+            revisionOverride?.contractType ?? contractRevision.contractType,
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
         contractDateStart: contractRevision.contractDateStart ?? undefined,

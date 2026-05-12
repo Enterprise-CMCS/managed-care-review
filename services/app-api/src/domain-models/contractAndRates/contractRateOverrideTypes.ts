@@ -1,9 +1,19 @@
 import { z } from 'zod'
 import { baseUserSchema } from '../UserType'
-import { preprocessNulls } from './formDataTypes'
+import { contractTypeSchema, preprocessNulls } from './formDataTypes'
+
+const contractRevisionOverrideDataFragmentSchema = z.object({
+    id: z.uuid(),
+    createdAt: z.date(),
+    contractRevisionID: z.uuid(),
+    contractType: preprocessNulls(contractTypeSchema.optional()),
+})
 
 const contractOverrideDataFragmentSchema = z.object({
     initiallySubmittedAt: preprocessNulls(z.date().optional()),
+    revisionOverride: preprocessNulls(
+        contractRevisionOverrideDataFragmentSchema.optional()
+    ),
 })
 
 const contractDataOverrideSchema = z.object({
