@@ -18,14 +18,14 @@ describe('Admin user can undo an unlocked submission', () => {
 
                 cy.logInAsAdminUser({ initialURL: submissionSummaryUrl })
 
-                cy.findByRole('button', { name: 'Undo unlock' }).click()
-                cy.findByRole('heading', { name: 'Undo unlock' }).should(
-                    'exist'
-                )
+                cy.findByRole('button', { name: 'Undo submission unlock' }).click()
+                cy.findByRole('heading', {
+                    name: 'Undo submission unlock',
+                }).should('exist')
                 cy.findByTestId('undoSubmissionUnlockReason').type(
                     'Undo unlock reason.'
                 )
-                cy.findByRole('button', { name: 'Undo unlock' }).click()
+                cy.findByRole('button', { name: 'Undo submission unlock' }).click()
 
                 cy.url({ timeout: 20_000 }).should(
                     'include',
