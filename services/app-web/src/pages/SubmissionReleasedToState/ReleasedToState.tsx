@@ -283,7 +283,7 @@ const ReleasedToState = () => {
                                     data-testid="releasedToStateReason"
                                     name="releasedToStateReason"
                                     aria-required
-                                    hint="Admin users are required to input the reason for releasing the state."
+                                    hint="Admin users are required to input a reason for releasing the state."
                                     showError={showFieldErrors(
                                         errors.releasedToStateReason
                                     )}
@@ -311,12 +311,8 @@ const ReleasedToState = () => {
                                     type="submit"
                                     variant="default"
                                     disabled={
-                                        showFieldErrors(
-                                            errors.dateApprovalReleasedToState
-                                        ) ||
-                                        showFieldErrors(
-                                            errors.releasedToStateReason
-                                        )
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
                                     }
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
