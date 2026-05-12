@@ -82,7 +82,7 @@ model ContractTable {
   contractOverrides ContractOverrides[]
 }
 
-// Record of contract meta data overrides
+// Record of contract data overrides
 model ContractOverrides {
   id String @id @default(uuid())
 
@@ -97,7 +97,7 @@ model ContractOverrides {
   // overrides
   initiallySubmittedAt DateTime?
 
-  // Optional 1-to-1 revision override
+  // Optional 1-to-1 revision override can be used for formData
   revisionOverride ContractRevisionOverrides?
 }
 

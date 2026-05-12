@@ -1,127 +1,108 @@
-import type { ContractType } from '../../domain-models'
-import type { PrismaTransactionType } from '../prismaTypes'
-import { overrideContractDataInsideTransaction } from './overrideContractData'
+import { v4 as uuidv4 } from 'uuid'
+import { must } from '../../testHelpers/assertionHelpers'
+import { mockInsertContractArgs } from '../../testHelpers/contractDataMocks'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { insertDraftContract } from './insertContract'
+import { overrideContractData } from './overrideContractData'
+import { submitContract } from './submitContract'
 
-const { mockFindContractWithHistory } = vi.hoisted(() => ({
-    mockFindContractWithHistory: vi.fn(),
-}))
-
-vi.mock('./findContractWithHistory', () => ({
-    findContractWithHistory: mockFindContractWithHistory,
-}))
-
-const mockSubmittedContract = (
-    overrides?: Partial<ContractType>
-): ContractType =>
-    ({
-        id: 'contract-id',
-        consolidatedStatus: 'SUBMITTED',
-        packageSubmissions: [
-            {
-                contractRevision: {
-                    id: 'contract-revision-id',
-                },
-            },
-        ],
-        ...overrides,
-    }) as ContractType
-
-describe('overrideContractDataInsideTransaction', () => {
-    afterEach(() => {
-        vi.clearAllMocks()
-    })
-
+describe('overrideContractData', () => {
     it('creates contract metadata and revision overrides on the latest submitted revision', async () => {
-        const create = vi.fn()
-        const tx = {
-            contractOverrides: {
-                create,
+        const client = await sharedTestPrismaClient()
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'MN',
             },
-        } as unknown as PrismaTransactionType
-        const overriddenContract = mockSubmittedContract({
-            contractOverrides: [
-                {
-                    id: 'override-id',
-                    createdAt: new Date(),
-                    description: 'updated',
-                    overrides: {
-                        initiallySubmittedAt: new Date('2024-01-01'),
-                        revisionOverride: {
-                            id: 'revision-override-id',
-                            createdAt: new Date(),
-                            contractRevisionID: 'contract-revision-id',
-                            contractType: 'AMENDMENT',
-                        },
+        })
+        const cmsUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Zuko',
+                familyName: 'Hotman',
+                email: 'zuko@example.com',
+                role: 'CMS_USER',
+            },
+        })
+        const draftContract = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({ contractType: 'BASE' })
+            )
+        )
+        const submittedContract = must(
+            await submitContract(client, {
+                contractID: draftContract.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'initial submit',
+            })
+        )
+        const initiallySubmittedAt = new Date('2024-01-01')
+
+        const overriddenContract = must(
+            await overrideContractData(client, {
+                contractID: draftContract.id,
+                updatedByID: cmsUser.id,
+                description: 'Override contract metadata',
+                overrides: {
+                    initiallySubmittedAt,
+                    revisionOverride: {
+                        contractType: 'AMENDMENT',
                     },
                 },
-            ],
-        })
+            })
+        )
 
-        mockFindContractWithHistory
-            .mockResolvedValueOnce(mockSubmittedContract())
-            .mockResolvedValueOnce(overriddenContract)
-
-        const result = await overrideContractDataInsideTransaction(tx, {
-            contractID: 'contract-id',
-            updatedByID: 'user-id',
-            description: 'updated',
+        expect(overriddenContract.contractOverrides?.[0]).toMatchObject({
+            description: 'Override contract metadata',
             overrides: {
-                initiallySubmittedAt: new Date('2024-01-01'),
+                initiallySubmittedAt,
+                revisionOverride: {
+                    contractRevisionID:
+                        submittedContract.packageSubmissions[0].contractRevision
+                            .id,
+                    contractType: 'AMENDMENT',
+                },
+            },
+        })
+        expect(overriddenContract.revisions[0].formData.contractType).toBe(
+            'AMENDMENT'
+        )
+    })
+
+    it('rejects overrides unless the contract is submitted or resubmitted', async () => {
+        const client = await sharedTestPrismaClient()
+        const cmsUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Zuko',
+                familyName: 'Hotman',
+                email: 'zuko@example.com',
+                role: 'CMS_USER',
+            },
+        })
+        const draftContract = must(
+            await insertDraftContract(client, mockInsertContractArgs({}))
+        )
+
+        const result = await overrideContractData(client, {
+            contractID: draftContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override draft contract',
+            overrides: {
                 revisionOverride: {
                     contractType: 'AMENDMENT',
                 },
             },
         })
 
-        expect(result).toBe(overriddenContract)
-        expect(create).toHaveBeenCalledWith({
-            data: {
-                contractID: 'contract-id',
-                updatedByID: 'user-id',
-                description: 'updated',
-                initiallySubmittedAt: new Date('2024-01-01'),
-                revisionOverride: {
-                    create: {
-                        contractRevision: {
-                            connect: {
-                                id: 'contract-revision-id',
-                            },
-                        },
-                        contractType: 'AMENDMENT',
-                    },
-                },
-            },
-        })
-    })
-
-    it('rejects overrides unless the contract is submitted or resubmitted', async () => {
-        const tx = {
-            contractOverrides: {
-                create: vi.fn(),
-            },
-        } as unknown as PrismaTransactionType
-
-        mockFindContractWithHistory.mockResolvedValueOnce(
-            mockSubmittedContract({
-                consolidatedStatus: 'DRAFT',
-            })
+        expect(result).toBeInstanceOf(Error)
+        expect((result as Error).message).toContain(
+            'contract consolidated status must be SUBMITTED or RESUBMITTED'
         )
-
-        await expect(
-            overrideContractDataInsideTransaction(tx, {
-                contractID: 'contract-id',
-                updatedByID: 'user-id',
-                description: 'updated',
-                overrides: {
-                    revisionOverride: {
-                        contractType: 'AMENDMENT',
-                    },
-                },
-            })
-        ).rejects.toThrow(
-            'Cannot override data, contract consolidated status must be SUBMITTED or RESUBMITTED. Consolidated status: DRAFT'
-        )
-
-        expect(tx.contractOverrides.create).not.toHaveBeenCalled()
     })
 })
