@@ -362,6 +362,20 @@ export const SubmissionSummary = (): React.ReactElement => {
                             <ButtonWithLogging
                                 className="usa-button usa-button--outline"
                                 type="button"
+                                onClick={() =>
+                                    navigate(
+                                        getSubmissionPath(
+                                            'UNDO_SUBMISSION_UNLOCK',
+                                            contractSubmissionType,
+                                            contract.id
+                                        )
+                                    )
+                                }
+                                link_url={getSubmissionPath(
+                                    'UNDO_SUBMISSION_UNLOCK',
+                                    contractSubmissionType,
+                                    contract.id
+                                )}
                             >
                                 Undo unlock
                             </ButtonWithLogging>
