@@ -185,12 +185,14 @@ async function fetchTestContract(
 async function approveTestContract(
     server: ApolloServer,
     contractID: string,
-    dateApprovalReleasedToState?: string
+    dateApprovalReleasedToState?: string,
+    updatedReason?: string
 ): Promise<Contract> {
     const input = {
         contractID,
         dateApprovalReleasedToState:
             dateApprovalReleasedToState || '2024-11-11',
+        updatedReason,
     }
     const result = await executeGraphQLOperation(server, {
         query: ApproveContractDocument,

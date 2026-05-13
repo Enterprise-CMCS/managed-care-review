@@ -4,6 +4,7 @@ import {
     fetchContractWithQuestionsMockSuccess,
     fetchCurrentUserMock,
     mockContractPackageSubmittedWithQuestions,
+    mockValidAdminUser,
     mockValidCMSUser,
 } from '@mc-review/mocks'
 import { SubmissionSideNav } from '../SubmissionSideNav'
@@ -341,8 +342,9 @@ describe('ReleasedToState', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('You must select a date')
-            ).toBeInTheDocument()
+                screen.getAllByText('You must select a date').length
+            ).toBeGreaterThan(0)
+            expect(screen.getByTestId('error-summary')).toBeInTheDocument()
         })
     })
 
@@ -412,8 +414,9 @@ describe('ReleasedToState', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('You must enter a valid date')
-            ).toBeInTheDocument()
+                screen.getAllByText('You must enter a valid date').length
+            ).toBeGreaterThan(0)
+            expect(screen.getByTestId('error-summary')).toBeInTheDocument()
         })
     })
 
@@ -484,8 +487,261 @@ describe('ReleasedToState', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByText('Date must be in MM/DD/YYYY format')
-            ).toBeInTheDocument()
+                screen.getAllByText('Date must be in MM/DD/YYYY format').length
+            ).toBeGreaterThan(0)
+            expect(screen.getByTestId('error-summary')).toBeInTheDocument()
+        })
+    })
+
+    describe('Admin user', () => {
+        it('renders the reason textarea and CMS user does not', async () => {
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                {
+                    status: 'RESUBMITTED',
+                    reviewStatus: 'UNDER_REVIEW',
+                    consolidatedStatus: 'RESUBMITTED',
+                    reviewStatusActions: [],
+                    contractSubmissionType: 'HEALTH_PLAN',
+                }
+            )
+
+            const { unmount } = renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                            element={<ReleasedToState />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidAdminUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({ contract }),
+                            fetchContractMockSuccess({ contract }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/released-to-state',
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('releasedToStateReason')
+                ).toBeInTheDocument()
+            })
+
+            unmount()
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                            element={<ReleasedToState />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({ contract }),
+                            fetchContractMockSuccess({ contract }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/released-to-state',
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('button', { name: 'Released to state' })
+                ).toBeInTheDocument()
+            })
+            expect(
+                screen.queryByTestId('releasedToStateReason')
+            ).not.toBeInTheDocument()
+        })
+
+        it('shows required-reason validation error and lists both errors in the error summary', async () => {
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                {
+                    status: 'RESUBMITTED',
+                    reviewStatus: 'UNDER_REVIEW',
+                    consolidatedStatus: 'RESUBMITTED',
+                    reviewStatusActions: [],
+                    contractSubmissionType: 'HEALTH_PLAN',
+                }
+            )
+
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                            element={<ReleasedToState />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidAdminUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({ contract }),
+                            fetchContractMockSuccess({ contract }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/released-to-state',
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('button', { name: 'Released to state' })
+                ).toBeInTheDocument()
+            })
+
+            await user.click(
+                screen.getByRole('button', { name: 'Released to state' })
+            )
+
+            await waitFor(() => {
+                expect(screen.getByTestId('error-summary')).toBeInTheDocument()
+                expect(
+                    screen.getAllByText('You must select a date').length
+                ).toBeGreaterThan(0)
+                expect(
+                    screen.getAllByText(
+                        'Admin users must provide a reason for releasing to state.'
+                    ).length
+                ).toBeGreaterThan(0)
+            })
+        })
+
+        it('submits with updatedReason in the mutation payload', async () => {
+            const contract = mockContractPackageSubmittedWithQuestions(
+                'test-abc-123',
+                {
+                    status: 'RESUBMITTED',
+                    reviewStatus: 'UNDER_REVIEW',
+                    consolidatedStatus: 'RESUBMITTED',
+                    reviewStatusActions: [],
+                    contractSubmissionType: 'HEALTH_PLAN',
+                }
+            )
+
+            const approvedContract: Contract = {
+                ...contract,
+                status: 'RESUBMITTED',
+                reviewStatus: 'APPROVED',
+                consolidatedStatus: 'APPROVED',
+                reviewStatusActions: [
+                    {
+                        actionType: 'MARK_AS_APPROVED',
+                        contractID: 'test-abc-123',
+                        dateApprovalReleasedToState:
+                            formatUserInputDate('11/11/2024'),
+                        updatedAt: new Date(),
+                        updatedBy: {
+                            email: 'admin@example.com',
+                            familyName: 'Admin',
+                            givenName: 'Tester',
+                            role: 'ADMIN_USER',
+                        },
+                        updatedReason: 'Admin override reason',
+                    },
+                ],
+            }
+
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_RELEASED_TO_STATE}
+                            element={<ReleasedToState />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidAdminUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({ contract }),
+                            fetchContractMockSuccess({ contract }),
+                            approveContractMockSuccess({
+                                contractID: 'test-abc-123',
+                                contractData: approvedContract,
+                                dateApprovalReleasedToState:
+                                    formatUserInputDate('11/11/2024'),
+                                updatedReason: 'Admin override reason',
+                            }),
+                            fetchCurrentUserMock({
+                                user: mockValidAdminUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: approvedContract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: approvedContract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123/released-to-state',
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('button', { name: 'Released to state' })
+                ).toBeInTheDocument()
+            })
+
+            await user.type(
+                screen.getByTestId('date-picker-external-input'),
+                '11/11/2024'
+            )
+            await user.type(
+                screen.getByTestId('releasedToStateReason'),
+                'Admin override reason'
+            )
+            await user.click(
+                screen.getByRole('button', { name: 'Released to state' })
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submissionApprovedBanner')
+                ).toBeInTheDocument()
+            })
         })
     })
 })
