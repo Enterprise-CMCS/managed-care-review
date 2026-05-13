@@ -32,13 +32,15 @@ const overrideContractDataInsideTransaction = async (
         throw new Error(msg)
     }
 
+    const overridableContractStatuses = ['SUBMITTED', 'RESUBMITTED', 'APPROVED']
+
     if (
-        !['SUBMITTED', 'RESUBMITTED'].includes(
+        !overridableContractStatuses.includes(
             contractWithHistory.consolidatedStatus
         )
     ) {
         throw new Error(
-            `Cannot override data, contract consolidated status must be SUBMITTED or RESUBMITTED. Consolidated status: ${contractWithHistory.consolidatedStatus}`
+            `Cannot override data, contract consolidated status must be SUBMITTED, RESUBMITTED, or APPROVED. Consolidated status: ${contractWithHistory.consolidatedStatus}`
         )
     }
 

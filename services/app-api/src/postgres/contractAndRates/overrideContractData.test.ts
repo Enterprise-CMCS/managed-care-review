@@ -74,7 +74,7 @@ describe('overrideContractData', () => {
         )
     })
 
-    it('rejects overrides unless the contract is submitted or resubmitted', async () => {
+    it('rejects overrides unless the contract is submitted, resubmitted, or approved', async () => {
         const client = await sharedTestPrismaClient()
         const cmsUser = await client.user.create({
             data: {
@@ -102,7 +102,7 @@ describe('overrideContractData', () => {
 
         expect(result).toBeInstanceOf(Error)
         expect((result as Error).message).toContain(
-            'contract consolidated status must be SUBMITTED or RESUBMITTED'
+            'contract consolidated status must be SUBMITTED, RESUBMITTED, or APPROVED'
         )
     })
 })
