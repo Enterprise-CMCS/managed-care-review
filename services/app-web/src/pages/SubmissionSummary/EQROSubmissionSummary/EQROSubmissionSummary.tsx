@@ -24,6 +24,7 @@ import {
 import {
     EqroReviewDeterminationBanners,
     StatusUpdatedBanner,
+    SubmissionApprovedBanner,
     SubmissionUnlockedBanner,
     SubmissionWithdrawnBanner,
 } from '../../../components/Banner'
@@ -201,6 +202,8 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         withdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN' &&
         latestContractAction
+    const showApprovalBanner =
+        consolidatedStatus === 'APPROVED' && latestContractAction
 
     // Get the correct update info depending on the submission status
     let updateInfo: UpdateInformation | undefined = undefined
@@ -235,6 +238,19 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     }
 
     const renderStatusAlerts = () => {
+        if (showApprovalBanner && latestContractAction.updatedBy) {
+            return (
+                <SubmissionApprovedBanner
+                    className={styles.banner}
+                    updatedBy={latestContractAction.updatedBy}
+                    updatedAt={latestContractAction.updatedAt}
+                    dateReleasedToState={
+                        latestContractAction.dateApprovalReleasedToState
+                    }
+                />
+            )
+        }
+
         if (showTempUndoWithdrawBanner) {
             const status = isSubjectToReview
                 ? 'Submitted'
