@@ -74,20 +74,17 @@ export const ResourcesNavFooterContent = ({
 
     return (
         <>
-            <div className={styles.logosRow}>
+            <div className={styles.resourcesNavLogosRow}>
                 <GridContainer className={styles.resourcesNavContainer}>
-                    <Grid row className={styles.resourcesNavTopRow}>
-                        <div
-                            className={`${styles.cmsLogos} ${styles.resourcesNavCmsLogos}`}
-                        >
-                            <Logo
-                                src={medicaidLogo2026}
-                                alt="Medicaid.gov-Keeping America Healthy"
-                                className={styles.resourcesNavLogo}
-                            />
-                        </div>
-                        <div className={styles.resourcesNavFederalLogos}>
+                    <div className={styles.resourcesNavTopRow}>
+                        <Logo
+                            src={medicaidLogo2026}
+                            alt="Medicaid.gov-Keeping America Healthy"
+                            className={styles.resourcesNavLogo}
+                        />
+                        <div className={styles.resourcesNavFederalBlock}>
                             <HHSIcon2026
+                                className={styles.resourcesNavFederalIcon}
                                 role="img"
                                 aria-label="Department of Health & Human Services logo"
                             />
@@ -98,7 +95,7 @@ export const ResourcesNavFooterContent = ({
                                 21244
                             </p>
                         </div>
-                    </Grid>
+                    </div>
                 </GridContainer>
             </div>
             <div
