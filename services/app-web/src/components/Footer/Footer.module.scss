@@ -17,6 +17,26 @@
     flex-wrap: wrap;
 }
 
+.resourcesNavContainer {
+    box-sizing: border-box;
+    padding-left: uswds.units(2);
+    padding-right: uswds.units(2);
+    width: 100%;
+}
+
+.resourcesNavTopRow {
+    align-items: flex-start;
+    position: relative;
+}
+
+.resourcesNavCmsLogos {
+    margin-top: uswds.units(3);
+}
+
+.resourcesNavLogo {
+    margin: 0;
+}
+
 .federalLogos,
 .resourcesNavFederalLogos {
     display: flex;
@@ -33,14 +53,17 @@
 }
 
 .resourcesNavFederalLogos {
-    align-items: flex-start;
-    gap: uswds.units(3);
-    padding: uswds.units(3) 0 uswds.units(4);
+    display: block;
+    padding: 0;
+    width: 100%;
 
     > svg {
         flex-shrink: 0;
         height: 53px;
         padding-right: 0;
+        position: absolute;
+        right: 0;
+        top: uswds.units(3);
         width: 52px;
     }
 }
@@ -48,8 +71,8 @@
 .resourcesNavFederalText {
     @include custom.mcr-type-style(14px, 400, 1.5, 0);
     color: custom.$mcr-foundation-hint;
-    margin: 0;
-    max-width: 380px;
+    margin: uswds.units(4) 0 uswds.units(3);
+    max-width: none;
 }
 
 .contactRow {
@@ -73,20 +96,83 @@
 }
 
 .resourcesNavLinks {
-    align-items: center;
+    align-items: stretch;
+    flex-direction: column;
     justify-content: flex-start;
 }
 
 .footerNavLink {
     @include custom.mcr-type-style(16px, 700, normal);
     color: custom.$mcr-foundation-white;
-    display: inline-flex;
-    padding: uswds.units(2);
+    display: flex;
+    margin-left: calc(-1 * #{uswds.units(2)});
+    margin-right: calc(-1 * #{uswds.units(2)});
+    padding: uswds.units(2) uswds.units(2);
     text-decoration: underline;
     text-decoration-skip-ink: none;
     white-space: nowrap;
+    width: calc(100% + #{uswds.units(4)});
 
-    &:first-child {
-        padding-left: 0;
+    &:not(:last-child) {
+        border-bottom: 1px solid rgb(0 0 0 / 15%);
+    }
+}
+
+@include uswds.at-media('tablet') {
+    .resourcesNavCmsLogos {
+        margin-top: 0;
+        margin-left: 0;
+    }
+
+    .resourcesNavTopRow {
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .resourcesNavFederalLogos {
+        align-items: flex-start;
+        display: flex;
+        gap: uswds.units(3);
+        justify-content: flex-end;
+        padding: uswds.units(3) 0 uswds.units(4);
+        width: auto;
+
+        > svg {
+            position: static;
+        }
+    }
+
+    .resourcesNavFederalText {
+        margin: 0;
+        max-width: 380px;
+    }
+
+    .resourcesNavLinks {
+        align-items: center;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+    .footerNavLink {
+        display: inline-flex;
+        margin-left: 0;
+        margin-right: 0;
+        padding: uswds.units(2);
+        width: auto;
+
+        &:first-child {
+            padding-left: 0;
+        }
+
+        &:not(:last-child) {
+            border-bottom: 0;
+        }
+    }
+}
+
+@include uswds.at-media('desktop') {
+    .resourcesNavContainer {
+        padding-left: uswds.units(4);
+        padding-right: uswds.units(4);
     }
 }
