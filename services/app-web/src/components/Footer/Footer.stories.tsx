@@ -1,5 +1,5 @@
 import React from 'react'
-import { Footer } from './Footer'
+import { Footer, ResourcesNavFooterContent } from './Footer'
 import ProvidersDecorator from '../../../.storybook/providersDecorator'
 
 export default {
@@ -13,3 +13,9 @@ export default {
 }
 
 export const CMSFooter = (): React.ReactElement => <Footer />
+
+export const ResourcesNavFooter = (): React.ReactElement => (
+    <footer>
+        <ResourcesNavFooterContent route="CONTACT_US" />
+    </footer>
+)

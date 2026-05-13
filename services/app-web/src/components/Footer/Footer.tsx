@@ -64,7 +64,7 @@ type ResourcesNavFooterContentProps = {
     route: RouteT | 'UNKNOWN_ROUTE'
 }
 
-const ResourcesNavFooterContent = ({
+export const ResourcesNavFooterContent = ({
     route,
 }: ResourcesNavFooterContentProps): React.ReactElement => {
     const medicaidLogo2026 = new URL(
