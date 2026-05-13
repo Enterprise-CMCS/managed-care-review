@@ -931,7 +931,11 @@ export class AppApiStack extends BaseStack {
             PARAMETER_STORE_MODE: parameterStoreMode,
             APPLICATION_ENDPOINT: applicationEndpoint,
 
-            DD_API_KEY: process.env.DD_API_KEY || '',
+            DD_API_KEY: (() => {
+                if (!process.env.DD_API_KEY)
+                    throw new Error('DD_API_KEY is required')
+                return process.env.DD_API_KEY
+            })(),
             LD_SDK_KEY: ldSdkKey,
             JWT_SECRET: jwtSecret,
             MCREVIEW_OAUTH_ISSUER: mcreviewOauthIssuer,
