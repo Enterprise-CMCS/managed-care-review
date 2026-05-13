@@ -53,7 +53,7 @@ async function updateDraftContractRatesInsideTransaction(
                 take: 1,
                 where: {
                     submitInfoID: null,
-                    reverseUnlockInfoID: null,
+                    undoUnlockInfoID: null,
                 },
                 orderBy: {
                     createdAt: 'desc',
@@ -185,7 +185,7 @@ async function updateDraftContractRatesInsideTransaction(
             where: {
                 rateID: ru.rateID,
                 submitInfoID: null,
-                reverseUnlockInfoID: null,
+                undoUnlockInfoID: null,
             },
         })
 

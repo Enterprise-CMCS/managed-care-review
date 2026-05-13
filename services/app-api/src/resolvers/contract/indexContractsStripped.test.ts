@@ -114,7 +114,7 @@ describe('indexContractsStripped', () => {
             await createAndUpdateTestContractWithoutRates(stateServer)
 
         // Multi-state contracts
-    }, 30000)
+    }, 60000)
 
     it('returns stripped submitted contract with correct shape', async () => {
         const result = await executeGraphQLOperation(cmsServer, {

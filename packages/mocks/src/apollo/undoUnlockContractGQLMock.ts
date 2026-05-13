@@ -1,19 +1,19 @@
 import { MockLink } from '@apollo/client/testing'
 import {
     Contract,
-    ReverseUnlockContractDocument,
-    ReverseUnlockContractMutation,
+    UndoUnlockContractDocument,
+    UndoUnlockContractMutation,
 } from '../gen/gqlClient'
 import { mockContractPackageSubmittedWithQuestions } from './contractPackageDataMock'
 import { GraphQLError } from 'graphql/error'
 
-const reverseUnlockContractMockSuccess = (
+const undoUnlockContractMockSuccess = (
     params: {
         contractID?: string
         contractData?: Partial<Contract>
         updatedReason?: string
     } = {}
-): MockLink.MockedResponse<ReverseUnlockContractMutation> => {
+): MockLink.MockedResponse<UndoUnlockContractMutation> => {
     const {
         contractID = 'test-abc-123',
         contractData,
@@ -34,7 +34,7 @@ const reverseUnlockContractMockSuccess = (
 
     return {
         request: {
-            query: ReverseUnlockContractDocument,
+            query: UndoUnlockContractDocument,
             variables: {
                 input: {
                     contractID,
@@ -44,7 +44,7 @@ const reverseUnlockContractMockSuccess = (
         },
         result: {
             data: {
-                reverseUnlockContract: {
+                undoUnlockContract: {
                     contract,
                 },
             },
@@ -52,8 +52,8 @@ const reverseUnlockContractMockSuccess = (
     }
 }
 
-const reverseUnlockContractMockFailure =
-    (): MockLink.MockedResponse<ReverseUnlockContractMutation> => {
+const undoUnlockContractMockFailure =
+    (): MockLink.MockedResponse<UndoUnlockContractMutation> => {
         const graphQLError = new GraphQLError(
             'Issue undoing submission unlock',
             {
@@ -66,7 +66,7 @@ const reverseUnlockContractMockFailure =
 
         return {
             request: {
-                query: ReverseUnlockContractDocument,
+                query: UndoUnlockContractDocument,
                 variables: {
                     input: {
                         contractID: 'test-abc-123',
@@ -82,6 +82,6 @@ const reverseUnlockContractMockFailure =
     }
 
 export {
-    reverseUnlockContractMockSuccess,
-    reverseUnlockContractMockFailure,
+    undoUnlockContractMockSuccess,
+    undoUnlockContractMockFailure,
 }

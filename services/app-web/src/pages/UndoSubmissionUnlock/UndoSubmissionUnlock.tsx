@@ -6,7 +6,7 @@ import { usePage } from '../../contexts/PageContext'
 import { useMemoizedStateHeader, useRouteParams, useTealium } from '../../hooks'
 import {
     FetchContractDocument,
-    ReverseUnlockContractDocument,
+    UndoUnlockContractDocument,
 } from '../../gen/gqlClient'
 import { useMutation, useQuery } from '@apollo/client/react'
 import {
@@ -57,7 +57,7 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
     const [
         undoUnlockSubmission,
         { error: undoUnlockError, loading: undoUnlockLoading },
-    ] = useMutation(ReverseUnlockContractDocument)
+    ] = useMutation(UndoUnlockContractDocument)
 
     const formInitialValues: UndoSubmissionUnlockValues = {
         undoSubmissionUnlockReason: '',

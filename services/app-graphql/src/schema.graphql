@@ -479,7 +479,7 @@ type Mutation {
     reverseApproveContract(input: ReverseApproveContractInput!): ReverseApproveContractPayload
 
     """
-    reverseUnlockContract is a CMS user only action to discard an unlocked draft and restore the last submitted contract state
+    undoUnlockContract is a CMS user only action to discard an unlocked draft and restore the last submitted contract state
 
     Errors:
     - ForbiddenError:
@@ -491,7 +491,7 @@ type Mutation {
         - DB_ERROR
             - A contract cannot be found by id
     """
-    reverseUnlockContract(input: ReverseUnlockContractInput!): ReverseUnlockContractPayload
+    undoUnlockContract(input: UndoUnlockContractInput!): UndoUnlockContractPayload
 
     """
     withdrawRate is CMS user only action to withdraw a rate from review
@@ -635,14 +635,14 @@ input ReverseApproveContractInput {
     updatedReason: String!
 }
 
-type ReverseUnlockContractPayload {
+type UndoUnlockContractPayload {
     contract: Contract!
 }
 
-input ReverseUnlockContractInput {
-    "The ID of the contract to reverse unlock for"
+input UndoUnlockContractInput {
+    "The ID of the contract to undo unlock for"
     contractID: ID!
-    "The reason for reversing the unlock"
+    "The reason for undoing the unlock"
     updatedReason: String!
 }
 

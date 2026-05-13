@@ -25,7 +25,7 @@ async function unlockContractInsideTransaction(
     const currentRev = await tx.contractRevisionTable.findFirst({
         where: {
             contractID: contractID,
-            reverseUnlockInfoID: null,
+            undoUnlockInfoID: null,
         },
         orderBy: {
             createdAt: 'desc',

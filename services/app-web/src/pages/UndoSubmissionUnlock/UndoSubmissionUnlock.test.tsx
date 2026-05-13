@@ -5,8 +5,8 @@ import {
     mockContractPackageSubmitted,
     mockContractPackageUnlockedWithUnlockedType,
     mockValidAdminUser,
-    reverseUnlockContractMockFailure,
-    reverseUnlockContractMockSuccess,
+    undoUnlockContractMockFailure,
+    undoUnlockContractMockSuccess,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
@@ -171,7 +171,7 @@ describe('UndoSubmissionUnlock', () => {
                             contract,
                         }),
                         fetchContractMockSuccess({ contract }),
-                        reverseUnlockContractMockFailure(),
+                        undoUnlockContractMockFailure(),
                     ],
                 },
                 routerProvider: {
@@ -294,7 +294,7 @@ describe('UndoSubmissionUnlock', () => {
                         fetchContractMockSuccess({
                             contract: unlockedContract,
                         }),
-                        reverseUnlockContractMockSuccess({
+                        undoUnlockContractMockSuccess({
                             contractData: contract,
                         }),
                         fetchContractWithQuestionsMockSuccess({
