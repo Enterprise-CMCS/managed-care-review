@@ -145,6 +145,10 @@ const StateUserRoutes = ({
         featureFlags.EQRO_SUBMISSIONS.flag,
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
+    const showSdpSubmissions: boolean = ldClient?.variation(
+        featureFlags.SDP.flag,
+        featureFlags.SDP.defaultValue
+    )
 
     return (
         <AuthenticatedRouteWrapper>
@@ -169,7 +173,7 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
                 />
-                {showEqroSubmissions ? (
+                {showEqroSubmissions || showSdpSubmissions ? (
                     <>
                         <Route
                             path={RoutesRecord.SUBMISSIONS_NEW}
