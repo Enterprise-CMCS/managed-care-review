@@ -8,6 +8,8 @@ The `skills/` directory contains structured references that agents should load w
 
 - **`skills/skill-api/SKILL.md`** — context for building or modifying features in `services/app-api/`. Covers the contract/rate data model (two-tier schema, derived status, parent-vs-linked rates), the parse pipeline, submit/unlock/resubmit/withdraw mechanics, and authorization patterns. Read this before touching the API or data layer.
 
+- **`skills/skills-cypress/SKILL.md`** — context for working in `services/cypress/`. Covers Cypress workspace structure, integration test organization, custom commands, direct API seeding, fixture loading, GraphQL intercepts, and LaunchDarkly flag handling. Use this for Cypress E2E work, not for Vitest unit tests.
+
 ## How to use
 
 When given a task, check the `skills/` directory for a relevant skill and read its `SKILL.md`. The `SKILL.md` will indicate which `references/*.md` files to read for the specific subtask.
