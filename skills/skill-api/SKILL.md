@@ -43,7 +43,7 @@ For broad multi-area features (e.g. a new "reverse unlock contract" mutation): r
 - **`SubmissionPackageJoinTable`** is the immutable snapshot of contract↔rate at submit time, joining specific contract revision + specific rate revision + position. **`DraftRateJoinTable`** is the working set on a contract that's currently in draft, joining parent tables only.
 - **Form-data writes via `updateDraftContract` are full replaces, not merges.** Omitted fields are nulled (`nullify`) or emptied (`emptify`). Child collections (documents, contacts) are delete-and-recreate, so row IDs are not stable across updates.
 - **Reverse unlock is revision history, not a new submission event.** Read `09-reverse-unlock.md` if you touch `reverseUnlockInfo`, active-draft logic, or linked-rate cleanup.
-- **Overrides are sparse metadata patches on submitted revisions.** Read `10-revision-overrides.md` if you touch revision overrides, document overrides, or unlock behavior for overridden revisions.
+- **Overrides are sparse metadata patches on submitted revisions.** Read `10-revision-overrides.md` if you touch revision overrides, document overrides, or unlock behavior for overridden revisions. Rate unlock is currently contract-driven: child rates are unlocked through `unlockContract`, not treated as an independent workflow with parity requirements.
 - **Deprecated — do not include in new designs:**
   - `ContractTable.sharedRateRevisions` / `RateRevisionTable.contractsWithSharedRateRevision` (the `SharedRateRevisions` M:N) — not marked deprecated in the schema source, but confirmed deprecated 2026-05-04.
   - `HealthPlanPackageTable` / `HealthPlanRevisionTable` (proto legacy) — marked `deprecated Boolean @default(true)`.
@@ -57,7 +57,8 @@ For broad multi-area features (e.g. a new "reverse unlock contract" mutation): r
 |---|---|---|
 | `insertDraftContract` / `insertDraftRate` / `updateDraftContract` / `updateDraftContractRates` | State user matching the contract's `stateCode` | Resolver |
 | `submitContract` (initial submit + resubmit) | State user matching the contract's `stateCode` | Resolver |
-| `unlockContract` / `unlockRate` | CMS user (`hasCMSPermissions`) | Resolver |
+| `unlockContract` | CMS user (`hasCMSPermissions`) | Resolver |
+| `unlockRate` | CMS user (`hasCMSPermissions`), inactive standalone-rate path | Resolver |
 | `withdrawContract` / `withdrawRate` | CMS user | Resolver |
 | Edit a rate's form data via `UPDATE` | Only the rate's parent contract | Postgres + resolver enforce `parentContractID === contract.id` |
 | Link to a rate via `LINK` | Any contract (target must not be DRAFT or WITHDRAWN) | Resolver |
@@ -91,7 +92,7 @@ OAuth `canWrite` (or `canOauthWrite`) is required on every write. State-vs-CMS c
 | Unlock resolver | `services/app-api/src/resolvers/contract/unlockContract.ts` |
 | Unlock postgres (contract) | `services/app-api/src/postgres/contractAndRates/unlockContract.ts` |
 | Unlock postgres (rate engine) | `unlockRate.ts` (same dir) |
-| Standalone unlock rate resolver | `services/app-api/src/resolvers/rate/unlockRate.ts` |
+| Standalone unlock rate resolver | `services/app-api/src/resolvers/rate/unlockRate.ts` (standalone-rate scaffold; not expected to match `unlockContract` parity while rates submit with contracts only) |
 | Withdraw rate resolver | `services/app-api/src/resolvers/rate/withdrawRate.ts` |
 | Withdraw rate postgres | `services/app-api/src/postgres/contractAndRates/withdrawRate.ts` |
 | Withdraw contract resolver | `services/app-api/src/resolvers/contract/withdrawContract.ts` |

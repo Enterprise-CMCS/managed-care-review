@@ -106,6 +106,7 @@ Rate revision override support includes:
 - postgres write path in `overrideRateData`
 - domain/read parsing through `rateOverrides[].overrides.revisionOverride`
 - effective rate document `dateAdded` override application in submitted API views
+- unlock behavior is contract-driven in the current product: rates are unlocked through `unlockContract` with their associated contract, and the inactive standalone `unlockRate` resolver is not expected to have override-preservation parity unless standalone rate submissions are revived
 
 ## File Map
 

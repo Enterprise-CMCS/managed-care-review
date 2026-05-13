@@ -220,12 +220,14 @@ Result: `childRateIDs[]` — rates that are the contract's responsibility to unl
 
 For each rate in `childRateIDs`: call `unlockRateInDB(tx, childRateID, unlockInfo.id)`. **All child rates share the same `unlockInfo.id`** as the contract — the reason this is one transaction with one event row.
 
+Current product invariant: rates are not unlocked independently. They are submitted as part of a contract, and they are unlocked when their associated contract is unlocked. Treat `unlockRateInDB` here as the rate-side engine used by contract unlock, not evidence that the standalone `unlockRate` resolver must have feature parity with `unlockContract`.
+
 Detail: `unlockRateInDB` (`unlockRate.ts`) creates a new `RateRevisionTable` row that:
 - Connects to `unlockInfo: { id: unlockInfoID }` (the contract's unlock event).
 - Copies all rate form-data fields, documents, supporting documents, certifying + additional actuary contacts (each via `create` with new UUIDs — old IDs not preserved).
 - **`dateAdded` is NOT copied** on the new doc rows. They start without it; the next submit will rebuild it via the `prevRateDocs` walk in `submitContractAndOrRates`.
 - Re-connects the deprecated `contractsWithSharedRateRevision` M:N (still maintained even though deprecated).
-- Then writes `DraftRateJoinTable` rows from the rate's last submission package's contract revisions (`skipDuplicates: true`). Comment notes this is mainly for when `unlockRate` is called independently — under a contract unlock, the contract's step 7 also writes the same join rows.
+- Then writes `DraftRateJoinTable` rows from the rate's last submission package's contract revisions (`skipDuplicates: true`). Comment notes this is mainly for the inactive standalone `unlockRate` path — under a contract unlock, the contract's step 7 also writes the same join rows.
 
 Guards inside `unlockRateInDB`: programming error if no current revision found, or if its `submitInfoID` is already null.
 
@@ -264,15 +266,15 @@ tx.draftRateJoinTable.createMany({
 
 `findContractWithHistory(tx, contractID)` re-reads everything through the parse pipeline. Guards: `draftRevision` and `draftRates` must both exist on the result. Returns the contract spread with `status: 'UNLOCKED'` overridden — this works because the resolver-side type is `UnlockedContractType` (status narrowed to `DRAFT|UNLOCKED`).
 
-### `unlockRate` (top-level, independent rate unlock)
+### `unlockRate` (inactive standalone-rate path)
 
-`unlockRate(client, args)` is the standalone entry point used when unlocking a rate **not** under a contract unlock. It:
+`unlockRate(client, args)` is the standalone entry point from the earlier standalone rate submission design. In the current product, rates submit and unlock through their associated contract, so this path is not expected to maintain parity with `unlockContract`. It:
 - Accepts either `rateID` or `rateRevisionID` (the latter is a legacy hack noted in code: "this is a hack that should not outlive protobuf"). Resolves `rateRevisionID → rateID` if needed.
 - Creates its own `UpdateInfoTable` event row (no shared event in this path — only the rate moves).
 - Calls `unlockRateInDB(tx, rateID, unlockInfo.id)`.
 - Returns `findRateWithHistory(tx, rateID)`.
 
-Caveat: this path is rarely taken; child-rate unlocks happen via `unlockContractInsideTransaction` so the rate and its parent contract share the unlock event. Independent rate unlock is what the comment "we only need to set draft rates explicitly in that case" inside `unlockRateInDB` refers to.
+Caveat: child-rate unlocks happen via `unlockContractInsideTransaction` so the rate and its parent contract share the unlock event. Independent rate unlock is standalone-rate scaffold; only use it as a parity target if standalone rate submissions are revived.
 
 ### Key contrasts with submit
 
