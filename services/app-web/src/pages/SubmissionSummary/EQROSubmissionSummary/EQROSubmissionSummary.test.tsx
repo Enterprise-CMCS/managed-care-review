@@ -1374,4 +1374,72 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
             ).toBeInTheDocument()
         })
     })
+
+    describe('Submission approval banner', () => {
+        it('renders the approval banner on an approved EQRO submission', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'RESUBMITTED',
+                reviewStatus: 'APPROVED',
+                consolidatedStatus: 'APPROVED',
+                reviewStatusActions: [
+                    {
+                        actionType: 'MARK_AS_APPROVED',
+                        contractID: 'test-abc-123',
+                        updatedAt: new Date(),
+                        updatedBy: {
+                            email: 'cmsapprover@example.com',
+                            familyName: 'Smith',
+                            givenName: 'John',
+                            role: 'CMS_APPROVER_USER',
+                        },
+                        updatedReason: 'Some approval reason',
+                    },
+                ],
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByTestId('submissionApprovedBanner')
+                ).toBeInTheDocument()
+            })
+        })
+    })
 })
