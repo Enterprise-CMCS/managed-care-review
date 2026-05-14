@@ -1,5 +1,5 @@
-mutation reverseUnlockContract($input: ReverseUnlockContractInput!) {
-    reverseUnlockContract(input: $input) {
+mutation undoUnlockContract($input: UndoUnlockContractInput!) {
+    undoUnlockContract(input: $input) {
         contract {
             ...contractFieldsFragment
 

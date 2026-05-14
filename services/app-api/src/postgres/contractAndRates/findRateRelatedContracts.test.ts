@@ -8,7 +8,7 @@ import {
     approveTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
-    reverseUnlockTestContract,
+    undoUnlockTestContract,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -202,7 +202,7 @@ it('returns related contracts with correct status', async () => {
     )
 })
 
-it('preserves related contract status after reverse unlock', async () => {
+it('preserves related contract status after undo unlock', async () => {
     const client = await sharedTestPrismaClient()
 
     const stateServer = await constructTestPostgresServer({
@@ -249,10 +249,10 @@ it('preserves related contract status after reverse unlock', async () => {
     await submitTestContract(stateServer, contractB.id)
 
     await unlockTestContract(cmsServer, submittedContractA.id, 'unlock A')
-    await reverseUnlockTestContract(
+    await undoUnlockTestContract(
         cmsServer,
         submittedContractA.id,
-        'reverse unlock A'
+        'undo unlock A'
     )
 
     const rateARelatedStrippedContracts = must(

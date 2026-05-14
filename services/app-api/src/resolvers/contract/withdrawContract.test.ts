@@ -13,7 +13,7 @@ import {
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createAndUpdateTestEQROContract,
-    reverseUnlockTestContract,
+    undoUnlockTestContract,
     submitTestContract,
     unlockTestContract,
     withdrawTestContract,
@@ -355,7 +355,7 @@ describe('withdrawContract', () => {
         )
     })
 
-    it('can withdraw contract and reassigns parent contract after reverse unlock and resubmit', async () => {
+    it('can withdraw contract and reassigns parent contract after undo unlock and resubmit', async () => {
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -489,10 +489,10 @@ describe('withdrawContract', () => {
         await unlockTestContract(
             cmsServer,
             contractA.id,
-            'unlock before reverse unlock withdrawal path'
+            'unlock before undo unlock withdrawal path'
         )
 
-        const reversedContract = await reverseUnlockTestContract(
+        const reversedContract = await undoUnlockTestContract(
             cmsServer,
             contractA.id,
             'reverse accidental unlock before withdrawal path'
@@ -510,7 +510,7 @@ describe('withdrawContract', () => {
         const resubmittedContract = await submitTestContract(
             stateServer,
             contractA.id,
-            'resubmit after reverse unlock before withdrawal path'
+            'resubmit after undo unlock before withdrawal path'
         )
 
         expect(resubmittedContract.consolidatedStatus).toBe('RESUBMITTED')
@@ -518,7 +518,7 @@ describe('withdrawContract', () => {
         const withdrawnContract = await withdrawTestContract(
             cmsServer,
             contractA.id,
-            'withdraw contract A after reverse unlock'
+            'withdraw contract A after undo unlock'
         )
 
         const indexRatesStripped = await fetchTestIndexRatesStripped(
@@ -563,9 +563,9 @@ describe('withdrawContract', () => {
             expect.arrayContaining([
                 'Initial submission',
                 'unlock again before withdrawal path',
-                'resubmit after reverse unlock before withdrawal path',
-                'Withdraw submission. withdraw contract A after reverse unlock',
-                'CMS withdrew the submission from review. withdraw contract A after reverse unlock',
+                'resubmit after undo unlock before withdrawal path',
+                'Withdraw submission. withdraw contract A after undo unlock',
+                'CMS withdrew the submission from review. withdraw contract A after undo unlock',
             ])
         )
         expect(contractAHistory).not.toContain(

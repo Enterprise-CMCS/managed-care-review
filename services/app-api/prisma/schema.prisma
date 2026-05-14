@@ -183,12 +183,12 @@ model ContractRevisionTable {
   contractID String
   contract   ContractTable @relation(fields: [contractID], references: [id])
 
-  unlockInfoID        String?
-  unlockInfo          UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
-  reverseUnlockInfoID String?
-  reverseUnlockInfo   UpdateInfoTable? @relation("reverseUnlockContractInfo", fields: [reverseUnlockInfoID], references: [id])
-  submitInfoID        String?
-  submitInfo          UpdateInfoTable? @relation("submitContractInfo", fields: [submitInfoID], references: [id])
+  unlockInfoID     String?
+  unlockInfo       UpdateInfoTable? @relation("unlockContractInfo", fields: [unlockInfoID], references: [id])
+  undoUnlockInfoID String?
+  undoUnlockInfo   UpdateInfoTable? @relation("undoUnlockContractInfo", fields: [undoUnlockInfoID], references: [id])
+  submitInfoID     String?
+  submitInfo       UpdateInfoTable? @relation("submitContractInfo", fields: [submitInfoID], references: [id])
 
   relatedSubmisions  UpdateInfoTable[]
   submissionPackages SubmissionPackageJoinTable[] @relation("contractRevision")
@@ -246,14 +246,14 @@ model RateRevisionTable {
   rateID String
   rate   RateTable @relation(fields: [rateID], references: [id])
 
-  createdAt           DateTime         @default(now())
-  updatedAt           DateTime         @default(now()) @updatedAt
-  unlockInfoID        String?
-  unlockInfo          UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id], onDelete: Cascade)
-  reverseUnlockInfoID String?
-  reverseUnlockInfo   UpdateInfoTable? @relation("reverseUnlockRateInfo", fields: [reverseUnlockInfoID], references: [id], onDelete: Cascade)
-  submitInfoID        String?
-  submitInfo          UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id], onDelete: Cascade)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @default(now()) @updatedAt
+  unlockInfoID     String?
+  unlockInfo       UpdateInfoTable? @relation("unlockRateInfo", fields: [unlockInfoID], references: [id], onDelete: Cascade)
+  undoUnlockInfoID String?
+  undoUnlockInfo   UpdateInfoTable? @relation("undoUnlockRateInfo", fields: [undoUnlockInfoID], references: [id], onDelete: Cascade)
+  submitInfoID     String?
+  submitInfo       UpdateInfoTable? @relation("submitRateInfo", fields: [submitInfoID], references: [id], onDelete: Cascade)
 
   relatedSubmissions UpdateInfoTable[]
   submissionPackages SubmissionPackageJoinTable[] @relation("rateRevision")
@@ -319,8 +319,8 @@ model UpdateInfoTable {
   unlockedContracts ContractRevisionTable[] @relation("unlockContractInfo")
   unlockedRates     RateRevisionTable[]     @relation("unlockRateInfo")
 
-  reverseUnlockedContracts ContractRevisionTable[] @relation("reverseUnlockContractInfo")
-  reverseUnlockedRates     RateRevisionTable[]     @relation("reverseUnlockRateInfo")
+  undoUnlockedContracts ContractRevisionTable[] @relation("undoUnlockContractInfo")
+  undoUnlockedRates     RateRevisionTable[]     @relation("undoUnlockRateInfo")
 
   submissionPackages SubmissionPackageJoinTable[] @relation("submission")
 

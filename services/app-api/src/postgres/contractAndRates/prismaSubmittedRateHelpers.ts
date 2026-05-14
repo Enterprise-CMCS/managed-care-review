@@ -114,7 +114,7 @@ const includeSubmissionPackageContractRevision = {
             updatedReason: true,
         },
     },
-    reverseUnlockInfo: {
+    undoUnlockInfo: {
         select: {
             id: true,
             updatedAt: true,
@@ -153,7 +153,7 @@ const includeStrippedRateWithoutDraftContracts = {
                 },
             },
             unlockInfo: includeUpdateInfo,
-            reverseUnlockInfo: includeUpdateInfo,
+            undoUnlockInfo: includeUpdateInfo,
             relatedSubmissions: {
                 orderBy: {
                     updatedAt: 'asc',
@@ -199,7 +199,7 @@ const includeRateRevisionWithRelatedSubmissionContracts = {
             updatedReason: true,
         },
     },
-    reverseUnlockInfo: {
+    undoUnlockInfo: {
         select: {
             id: true,
             updatedAt: true,
@@ -221,7 +221,7 @@ const includeRateRevisionWithRelatedSubmissionContracts = {
                                     id: true,
                                     revisions: {
                                         where: {
-                                            reverseUnlockInfoID: null,
+                                            undoUnlockInfoID: null,
                                         },
                                         orderBy: {
                                             createdAt: 'desc',

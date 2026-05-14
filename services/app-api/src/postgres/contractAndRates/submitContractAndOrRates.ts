@@ -47,7 +47,7 @@ async function submitContractAndOrRates(
         const allRevisions = await tx.contractRevisionTable.findMany({
             where: {
                 contractID: contractID,
-                reverseUnlockInfoID: null,
+                undoUnlockInfoID: null,
             },
             include: includeContractRevWithOnlyDocs,
             orderBy: {
@@ -140,7 +140,7 @@ async function submitContractAndOrRates(
             submitInfo: {
                 is: null,
             },
-            reverseUnlockInfoID: null,
+            undoUnlockInfoID: null,
         },
         include: {
             rateDocuments: {
@@ -711,7 +711,7 @@ async function submitContractAndOrRates(
                     include: {
                         revisions: {
                             where: {
-                                reverseUnlockInfoID: null,
+                                undoUnlockInfoID: null,
                             },
                             orderBy: {
                                 createdAt: 'desc',
@@ -723,7 +723,7 @@ async function submitContractAndOrRates(
                     include: {
                         revisions: {
                             where: {
-                                reverseUnlockInfoID: null,
+                                undoUnlockInfoID: null,
                             },
                             orderBy: {
                                 createdAt: 'desc',

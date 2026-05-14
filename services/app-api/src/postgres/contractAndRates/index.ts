@@ -4,7 +4,7 @@ export type { ContractOrErrorArrayType } from './findAllContractsWithHistoryBySt
 export type { RateOrErrorArrayType } from './findAllRatesWithHistoryBySubmitInfo'
 export type { ApproveContractArgsType } from './approveContract'
 export type { ReverseApproveContractArgsType } from './reverseApproveContract'
-export type { ReverseUnlockContractArgsType } from './reverseUnlockContract'
+export type { UndoUnlockContractArgsType } from './undoUnlockContract'
 
 export type { UpdateMCCRSIDFormArgsType } from './updateMCCRSID'
 export type { SubmitContractArgsType } from './submitContract'
@@ -18,7 +18,7 @@ export {
 export { insertDraftContract } from './insertContract'
 export { approveContract } from './approveContract'
 export { reverseApproveContract } from './reverseApproveContract'
-export { reverseUnlockContract } from './reverseUnlockContract'
+export { undoUnlockContract } from './undoUnlockContract'
 export { findContractWithHistory } from './findContractWithHistory'
 export { updateDraftContractFormData as updateDraftContractWithRates } from './updateDraftContractWithRates'
 export { updateMCCRSID } from './updateMCCRSID'

@@ -57,7 +57,7 @@ import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { approveContract } from './contract/approveContract'
 import { reverseApproveContract } from './contract/reverseApproveContract'
-import { reverseUnlockContract } from './contract/reverseUnlockContract'
+import { undoUnlockContract } from './contract/undoUnlockContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
 import { updateEmailSettings } from './settings/updateEmailSettings'
@@ -117,7 +117,7 @@ export function configureResolvers(
             updateDraftContractRates: updateDraftContractRates(store),
             approveContract: approveContract(store),
             reverseApproveContract: reverseApproveContract(store),
-            reverseUnlockContract: reverseUnlockContract(store),
+            undoUnlockContract: undoUnlockContract(store),
             withdrawContract: withdrawContract(store, emailer, documentZip),
             undoWithdrawContract: undoWithdrawContract(
                 store,
