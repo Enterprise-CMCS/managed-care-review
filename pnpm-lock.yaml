@@ -1134,7 +1134,7 @@ importers:
         specifier: ^8.56.0
         version: 8.56.0(eslint@10.2.1(jiti@2.6.1))(typescript@5.9.3)
 
-  services/local-launch-darkly:
+  services/local-dev-console:
     dependencies:
       '@launchdarkly/node-server-sdk':
         specifier: 9.10.13
