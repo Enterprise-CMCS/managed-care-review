@@ -1,5 +1,5 @@
 {
-    "name": "local-launch-darkly",
+    "name": "local-dev-console",
     "version": "1.0.0",
     "type": "module",
     "private": true,
