@@ -60,4 +60,16 @@ export const handleUserInputPostgresError = (
     })
 }
 
+/**
+ * Prisma transaction write conflicts can surface as `P2034` from the standard
+ * engine or as a driver-adapter error whose `cause.kind` is
+ * `TransactionWriteConflict`.
+ */
+export const isRetryablePrismaWriteConflict = (error: unknown): boolean => {
+    const code = (error as { code?: string }).code
+    const cause = (error as { cause?: { kind?: string } }).cause
+
+    return code === 'P2034' || cause?.kind === 'TransactionWriteConflict'
+}
+
 export { NotFoundError, UserInputPostgresError }
