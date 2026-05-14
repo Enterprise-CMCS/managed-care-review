@@ -7,6 +7,8 @@ import type {
 interface OllamaValidationClientOptions {
   baseUrl?: string
   model?: string
+  contextLength?: number
+  keepAlive?: string
 }
 
 interface OllamaGenerateResponse {
@@ -31,10 +33,14 @@ function summarizeOllamaErrorBody(value: string): string {
 export class OllamaValidationClient implements ValidationLlmClient {
   private readonly baseUrl: string
   private readonly model: string
+  private readonly contextLength: number
+  private readonly keepAlive: string
 
   constructor(options: OllamaValidationClientOptions = {}) {
     this.baseUrl = options.baseUrl ?? 'http://127.0.0.1:11434'
     this.model = options.model ?? 'llama3.1:8b'
+    this.contextLength = options.contextLength ?? 4096
+    this.keepAlive = options.keepAlive ?? '30m'
   }
 
   async generateValidation(input: GenerateValidationInput): Promise<GenerateValidationResult> {
@@ -49,7 +55,11 @@ export class OllamaValidationClient implements ValidationLlmClient {
       body: JSON.stringify({
         model: this.model,
         prompt: input.prompt,
-        stream: false
+        stream: false,
+        keep_alive: this.keepAlive,
+        options: {
+          num_ctx: this.contextLength
+        }
       })
     })
 
