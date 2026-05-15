@@ -8,7 +8,9 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
 import * as crypto from 'crypto'
-import Archiver from 'archiver'
+// archiver v8 moved to named class exports; @types/archiver not yet updated for v8
+// @ts-ignore
+import { ZipArchive } from 'archiver'
 import { pipeline } from 'stream/promises'
 import { logError } from '../logger'
 import { parseErrorToError } from '@mc-review/helpers'
@@ -176,7 +178,7 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
 
         // Create zip file
         const zipStream = fs.createWriteStream(zipPath)
-        const archive = Archiver('zip', { zlib: { level: 0 } })
+        const archive = new ZipArchive({ zlib: { level: 0 } })
 
         archive.pipe(zipStream)
 
