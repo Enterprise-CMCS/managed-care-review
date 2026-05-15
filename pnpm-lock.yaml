@@ -9322,8 +9322,8 @@ packages:
     resolution: {integrity: sha512-AizQPcaofEtO11RZhPPHBOJRdo/20MKQF9mBLnVkBoyHi1/zXK8fzVdnEpSV9gxqtnh6Qomfp3F0xT5qP/vThw==}
     engines: {node: '>=0.8.0'}
 
-  immutable@4.1.0:
-    resolution: {integrity: sha512-oNkuqVTA8jqG1Q6c+UglTOD1xhC1BtjKI7XkCXRkZHrN5m18/XsnUp8Q89GkQO/z+0WjonSvl0FLhDYftp46nQ==}
+  immutable@4.3.8:
+    resolution: {integrity: sha512-d/Ld9aLbKpNwyl0KiM2CT1WYvkitQ1TSvmRtkcV8FKStiDoA7Slzgjmb/1G2yhKM1p0XeNOieaTbFZmU1d3Xuw==}
 
   immutable@5.1.5:
     resolution: {integrity: sha512-t7xcm2siw+hlUM68I+UEOK+z84RzmN59as9DZ7P1l0994DKUWV7UXBMQZVxaoMSRQ+PBZbHCOoBt7a2wxOMt+A==}
@@ -23962,7 +23962,7 @@ snapshots:
 
   immutable@3.7.6: {}
 
-  immutable@4.1.0: {}
+  immutable@4.3.8: {}
 
   immutable@5.1.5: {}
 
@@ -26792,7 +26792,7 @@ snapshots:
   sass@1.77.2:
     dependencies:
       chokidar: 3.6.0
-      immutable: 4.1.0
+      immutable: 4.3.8
       source-map-js: 1.2.1
 
   saxes@6.0.0:
