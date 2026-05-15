@@ -1,9 +1,12 @@
 import { findContractWithHistory } from './findContractWithHistory'
 import { NotFoundError } from '../postgresErrors'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
+import {
+    lockContractRowForUpdate,
+    runTransactionWithRowLock,
+} from '../prismaHelpers'
 
 async function reverseApproveContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -24,9 +27,9 @@ async function reverseApproveContractInsideTransaction(
     })
 
     if (!contract) {
-        const err = `PRISMA ERROR: Cannot find contract with id: ${contractID}`
-        console.error(err)
-        return new NotFoundError(err)
+        return new NotFoundError(
+            `PRISMA ERROR: Cannot find contract with id: ${contractID}`
+        )
     }
 
     const latestAction = contract.reviewStatusActions[0]
@@ -58,21 +61,13 @@ async function reverseApproveContract(
     client: ExtendedPrismaClient,
     args: ReverseApproveContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    try {
-        return await client.$transaction(async (tx) => {
-            const result = await reverseApproveContractInsideTransaction(
-                tx,
-                args
-            )
-            if (result instanceof Error) {
-                throw result
-            }
-            return result
-        })
-    } catch (err) {
-        console.error('Prisma error reversing contract approval', err)
-        return parseErrorToError(err)
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'reverseApproveContract',
+        lock: async (tx) => await lockContractRowForUpdate(tx, args.contractID),
+        transaction: async (tx) =>
+            await reverseApproveContractInsideTransaction(tx, args),
+    })
 }
 
 export { reverseApproveContract }

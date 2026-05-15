@@ -1,10 +1,13 @@
 import { findContractWithHistory } from './findContractWithHistory'
 import type { NotFoundError } from '../postgresErrors'
 
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models'
 import { nullify } from '../prismaDomainAdaptors'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
+import {
+    lockContractRowForUpdate,
+    runTransactionWithRowLock,
+} from '../prismaHelpers'
 
 type UpdateMCCRSIDFormArgsType = {
     contractID: string
@@ -18,8 +21,11 @@ async function updateMCCRSID(
 ): Promise<ContractType | NotFoundError | Error> {
     const { contractID, mccrsID } = args
 
-    try {
-        return await client.$transaction(async (tx) => {
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'updateMCCRSID',
+        lock: async (tx) => await lockContractRowForUpdate(tx, contractID),
+        transaction: async (tx) => {
             // Get the Contract associated with this given contract ID
             await tx.contractTable.update({
                 data: {
@@ -31,11 +37,8 @@ async function updateMCCRSID(
             })
 
             return findContractWithHistory(tx, contractID)
-        })
-    } catch (err) {
-        console.error('Prisma error updating contract', err)
-        return parseErrorToError(err)
-    }
+        },
+    })
 }
 
 export { updateMCCRSID }

@@ -8,7 +8,10 @@ import {
     eqroValidationAndReviewDetermination,
     healthPlanReviewDetermination,
 } from '@mc-review/submissions'
-import { parseErrorToError } from '@mc-review/helpers'
+import {
+    lockContractRowForUpdate,
+    runTransactionWithRowLock,
+} from '../prismaHelpers'
 
 async function submitContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -37,9 +40,9 @@ async function submitContractInsideTransaction(
     })
 
     if (!currentRev) {
-        const err = `PRISMA ERROR: Cannot find the current rev to submit with contract id: ${contractID}`
-        console.error(err)
-        return new NotFoundError(err)
+        return new NotFoundError(
+            `PRISMA ERROR: Cannot find the current rev to submit with contract id: ${contractID}`
+        )
     }
 
     const unsubmittedChildRevs = []
@@ -54,8 +57,9 @@ async function submitContractInsideTransaction(
                 )
                 const latestSubmittedRate = rate.revisions[0]
                 if (!latestSubmittedRate) {
-                    const msg = `Attempted to submit a contract connected to an unsubmitted child-rate. ContractID: ${contractID}`
-                    return new Error(msg)
+                    return new Error(
+                        `Attempted to submit a contract connected to an unsubmitted child-rate. ContractID: ${contractID}`
+                    )
                 }
                 linkedRateRevs.push(latestSubmittedRate)
             }
@@ -63,8 +67,9 @@ async function submitContractInsideTransaction(
             // non-child rate
             const latestSubmittedRate = rate.revisions[0]
             if (!latestSubmittedRate) {
-                const msg = `Attempted to submit a contract connected to an unsubmitted non-child-rate. ContractID: ${contractID}`
-                return new Error(msg)
+                return new Error(
+                    `Attempted to submit a contract connected to an unsubmitted non-child-rate. ContractID: ${contractID}`
+                )
             }
             linkedRateRevs.push(latestSubmittedRate)
         }
@@ -78,7 +83,7 @@ async function submitContractInsideTransaction(
         submittedReason
     )
     if (submissionResult instanceof Error) {
-        return submissionResult
+        throw submissionResult
     }
 
     return await findContractWithHistory(tx, contractID)
@@ -213,8 +218,11 @@ async function submitContract(
         chipSubmissionAutomationFlag,
     } = args
 
-    try {
-        return await client.$transaction(async (tx) => {
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'submitContract',
+        lock: async (tx) => await lockContractRowForUpdate(tx, contractID),
+        transaction: async (tx) => {
             const result = await submitContractInsideTransaction(tx, {
                 contractID,
                 submittedByUserID,
@@ -260,11 +268,8 @@ async function submitContract(
             }
 
             return result
-        })
-    } catch (err) {
-        console.error('Submit Prisma Error: ', err)
-        return parseErrorToError(err)
-    }
+        },
+    })
 }
 
 export {

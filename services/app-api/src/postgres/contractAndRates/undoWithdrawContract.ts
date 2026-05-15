@@ -5,11 +5,14 @@ import type { ExtendedPrismaClient } from '../prismaClient'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { submitContractInsideTransaction } from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
-import { parseErrorToError } from '@mc-review/helpers'
 import {
     eqroValidationAndReviewDetermination,
     healthPlanReviewDetermination,
 } from '@mc-review/submissions'
+import {
+    lockContractRowForUpdate,
+    runTransactionWithRowLock,
+} from '../prismaHelpers'
 
 export type UndoWithdrawContractArgsType = {
     contract: ContractType
@@ -206,19 +209,17 @@ const undoWithdrawContract = async (
     client: ExtendedPrismaClient,
     args: UndoWithdrawContractArgsType
 ): Promise<UndoWithdrawContractReturnType | Error> => {
-    try {
-        return await client.$transaction(
-            async (tx) => await undoWithdrawContractInsideTransaction(tx, args),
-            {
-                timeout: 30000,
-            }
-        )
-    } catch (err) {
-        const parsedError = parseErrorToError(err)
-        const msg = `PRISMA ERROR: Error undo withdraw contract: ${parsedError.message}`
-        console.error(msg)
-        return parsedError
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'undoWithdrawContract',
+        lock: async (tx) =>
+            await lockContractRowForUpdate(tx, args.contract.id),
+        transaction: async (tx) =>
+            await undoWithdrawContractInsideTransaction(tx, args),
+        transactionOptions: {
+            timeout: 30000,
+        },
+    })
 }
 
 export { undoWithdrawContract }

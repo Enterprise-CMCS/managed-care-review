@@ -16,7 +16,10 @@ import {
 import type { RatesToReassign } from './reassignParentContract'
 import { reassignParentContractInTransaction } from './reassignParentContract'
 import type { RateForDisplayType } from '../../emailer/templateHelpers'
-import { parseErrorToError } from '@mc-review/helpers'
+import {
+    lockContractRowForUpdate,
+    runTransactionWithRowLock,
+} from '../prismaHelpers'
 
 export type WithdrawContractArgsType = {
     contract: ContractType
@@ -275,19 +278,17 @@ const withdrawContract = async (
     client: ExtendedPrismaClient,
     args: WithdrawContractArgsType
 ): Promise<WithdrawContractReturnType | Error> => {
-    try {
-        return await client.$transaction(
-            async (tx) => await withdrawContractInsideTransaction(tx, args),
-            {
-                timeout: 30000,
-            }
-        )
-    } catch (err) {
-        const parsedError = parseErrorToError(err)
-        const msg = `PRISMA ERROR: Error withdrawing contract: ${parsedError.message}`
-        console.error(msg)
-        return parsedError
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'withdrawContract',
+        lock: async (tx) =>
+            await lockContractRowForUpdate(tx, args.contract.id),
+        transaction: async (tx) =>
+            await withdrawContractInsideTransaction(tx, args),
+        transactionOptions: {
+            timeout: 30000,
+        },
+    })
 }
 
 export { withdrawContractInsideTransaction, withdrawContract }

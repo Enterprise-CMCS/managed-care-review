@@ -1,17 +1,17 @@
 import { findContractWithHistory } from './findContractWithHistory'
 import { type NotFoundError, UserInputPostgresError } from '../postgresErrors'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
-import { Prisma } from '../../generated/client'
 import {
     getLatestActiveRevision,
     isSubmittedRevision,
     isUnlockedRevision,
 } from './prismaSharedContractRateHelpers'
-
-const MAX_SERIALIZATION_RETRIES = 2
+import {
+    lockContractRowForUpdate,
+    runTransactionWithRowLock,
+} from '../prismaHelpers'
 
 async function undoUnlockContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -193,43 +193,13 @@ async function undoUnlockContract(
     client: ExtendedPrismaClient,
     args: UndoUnlockContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    let attempt = 0
-    while (true) {
-        try {
-            return await client.$transaction(
-                async (tx) => {
-                    const result = await undoUnlockContractInsideTransaction(
-                        tx,
-                        args
-                    )
-                    if (result instanceof Error) {
-                        throw result
-                    }
-                    return result
-                },
-                {
-                    isolationLevel:
-                        Prisma.TransactionIsolationLevel.Serializable,
-                }
-            )
-        } catch (err) {
-            const code = (err as { code?: string }).code
-            const cause = (err as { cause?: { kind?: string } }).cause
-            const isWriteConflict =
-                code === 'P2034' || cause?.kind === 'TransactionWriteConflict'
-
-            if (isWriteConflict && attempt < MAX_SERIALIZATION_RETRIES - 1) {
-                console.warn(
-                    `undoUnlockContract: serialization conflict, retrying. contractID=${args.contractID} attempt=${attempt + 1}`
-                )
-                attempt++
-                continue
-            }
-
-            console.error('Prisma error undoing contract unlock', err)
-            return parseErrorToError(err)
-        }
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'undoUnlockContract',
+        lock: async (tx) => await lockContractRowForUpdate(tx, args.contractID),
+        transaction: async (tx) =>
+            await undoUnlockContractInsideTransaction(tx, args),
+    })
 }
 
 export { undoUnlockContract, undoUnlockContractInsideTransaction }
