@@ -75,6 +75,25 @@
         "url": "https://github.com/Enterprise-CMCS/managed-care-review/issues"
     },
     "homepage": "https://github.com/Enterprise-CMCS/managed-care-review#readme",
+    "pnpm": {
+        "overrides": {
+            "@babel/runtime": ">=7.29.2",
+            "@tootallnate/once": ">=2.0.1",
+            "brace-expansion": ">=5.0.6",
+            "fast-xml-builder": ">=1.2.0",
+            "glob": ">=13.0.6",
+            "hono": ">=4.12.18",
+            "immutable": ">=5.1.5",
+            "js-yaml": ">=4.1.1",
+            "lodash": ">=4.18.1",
+            "minimatch": ">=10.2.5",
+            "picomatch": ">=4.0.4",
+            "postcss": ">=8.5.14",
+            "rollup": ">=4.60.4",
+            "undici": ">=7.25.0",
+            "yaml": ">=2.9.0"
+        }
+    },
     "devDependencies": {
         "c8": "^11.0.0",
         "cypress": "^13.13.2",
