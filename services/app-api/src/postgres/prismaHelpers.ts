@@ -17,8 +17,8 @@ type RunTransactionWithRowLockArgs<T> = {
 }
 
 /**
- * Row-locks records before database writes so concurrent updates to the same
- * record cannot run before the other finishes.
+ * Helper function that row-locks records before database writes so concurrent
+ * updates to the same record cannot run before the other finishes.
  *
  * Callers must perform validation inside the transaction after the lock is
  * acquired, so a later transaction re-checks current state instead of
@@ -85,8 +85,27 @@ async function lockContractQuestionRowForUpdate(
     }
 }
 
+async function lockRateQuestionRowForUpdate(
+    tx: PrismaTransactionType,
+    questionID: string
+): Promise<void | Error> {
+    const lockedQuestionRows = await tx.$queryRaw<Array<{ id: string }>>`
+        SELECT id
+        FROM "RateQuestion"
+        WHERE id = ${questionID}
+        FOR UPDATE
+    `
+
+    if (lockedQuestionRows.length === 0) {
+        return new NotFoundError(
+            `Rate question with id ${questionID} was not found for row lock.`
+        )
+    }
+}
+
 export {
     runTransactionWithRowLock,
     lockContractRowForUpdate,
     lockContractQuestionRowForUpdate,
+    lockRateQuestionRowForUpdate,
 }
