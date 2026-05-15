@@ -176,9 +176,8 @@ export const SubmissionType = ({
         if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
             setDraftSaved(false)
         }
-        console.warn('PPPPPPPPPPPP')
+
         if (isNewSubmission) {
-            console.warn('HIIIIIIIII')
             const input: CreateContractInput = {
                 populationCovered: values.populationCovered!,
                 programIDs: values.programIDs,
