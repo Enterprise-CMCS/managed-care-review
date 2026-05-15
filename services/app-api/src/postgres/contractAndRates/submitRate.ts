@@ -9,7 +9,10 @@ import { NotFoundError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
+import {
+    lockRateRowForUpdate,
+    runTransactionWithRowLock,
+} from '../prismaHelpers'
 
 async function submitRateInsideTransaction(
     tx: PrismaTransactionType,
@@ -102,18 +105,12 @@ async function submitRate(
     client: ExtendedPrismaClient,
     args: SubmitRateArgsType
 ): Promise<RateType | NotFoundError | Error> {
-    try {
-        return await client.$transaction(async (tx) => {
-            const result = await submitRateInsideTransaction(tx, args)
-            if (result instanceof Error) {
-                throw result
-            }
-            return result
-        })
-    } catch (err) {
-        console.error('Prisma error submitting rate', err)
-        return parseErrorToError(err)
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'submitRate',
+        lock: async (tx) => await lockRateRowForUpdate(tx, args.rateID),
+        transaction: async (tx) => await submitRateInsideTransaction(tx, args),
+    })
 }
 
 export { submitRate, submitRateInsideTransaction }

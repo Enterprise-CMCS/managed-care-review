@@ -85,6 +85,24 @@ async function lockContractQuestionRowForUpdate(
     }
 }
 
+async function lockRateRowForUpdate(
+    tx: PrismaTransactionType,
+    rateID: string
+): Promise<void | Error> {
+    const lockedRateRows = await tx.$queryRaw<Array<{ id: string }>>`
+        SELECT id
+        FROM "RateTable"
+        WHERE id = ${rateID}
+        FOR UPDATE
+    `
+
+    if (lockedRateRows.length === 0) {
+        return new NotFoundError(
+            `Rate with id ${rateID} was not found for row lock.`
+        )
+    }
+}
+
 async function lockRateQuestionRowForUpdate(
     tx: PrismaTransactionType,
     questionID: string
@@ -106,6 +124,7 @@ async function lockRateQuestionRowForUpdate(
 export {
     runTransactionWithRowLock,
     lockContractRowForUpdate,
+    lockRateRowForUpdate,
     lockContractQuestionRowForUpdate,
     lockRateQuestionRowForUpdate,
 }

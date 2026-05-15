@@ -17,7 +17,10 @@ import { submitContractInsideTransaction } from './submitContract'
 import { submitRateInsideTransaction } from './submitRate'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
+import {
+    lockRateRowForUpdate,
+    runTransactionWithRowLock,
+} from '../prismaHelpers'
 
 type WithdrawRateArgsType = {
     rateID: string
@@ -329,17 +332,16 @@ const withdrawRate = async (
     client: ExtendedPrismaClient,
     args: WithdrawRateArgsType
 ): Promise<RateType | Error> => {
-    try {
-        return await client.$transaction(
-            async (tx) => await withdrawRateInsideTransaction(tx, args),
-            {
-                timeout: 30000,
-            }
-        )
-    } catch (err) {
-        console.error('PRISMA ERROR: Error withdrawing rate', err)
-        return parseErrorToError(err)
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'withdrawRate',
+        lock: async (tx) => await lockRateRowForUpdate(tx, args.rateID),
+        transaction: async (tx) =>
+            await withdrawRateInsideTransaction(tx, args),
+        transactionOptions: {
+            timeout: 30000,
+        },
+    })
 }
 
 export {
