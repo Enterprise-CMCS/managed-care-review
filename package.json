@@ -78,6 +78,7 @@
     "pnpm": {
         "overrides": {
             "@babel/runtime": ">=7.29.2",
+            "@hono/node-server": ">=2.0.2",
             "@tootallnate/once": ">=2.0.1",
             "brace-expansion": ">=5.0.6",
             "fast-xml-builder": ">=1.2.0",
