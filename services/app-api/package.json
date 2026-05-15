@@ -52,7 +52,7 @@
         "@prisma/adapter-pg": "^7.8.0",
         "@prisma/client": "^7.8.0",
         "@prisma/instrumentation": "^7.5.0",
-        "archiver": "^7.0.1",
+        "archiver": "^8.0.0",
         "axios": "^1.16.1",
         "eta": "^2.2.0",
         "express": "^5.2.1",
