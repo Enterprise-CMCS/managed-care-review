@@ -110,14 +110,19 @@ export const SubmissionType = ({
         featureFlags.EQRO_SUBMISSIONS.flag,
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
+    const showSDPSubmissions: boolean = ldClient?.variation(
+        featureFlags.SDP.flag,
+        featureFlags.SDP.defaultValue
+    )
 
-    //Toggle isNewSubmission condition based on EQRO feature flag
-    const isNewSubmission = showEqroSubmissions
-        ? matchPath(
-              RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
-              location.pathname
-          )
-        : location.pathname === '/submissions/new'
+    //Toggle isNewSubmission condition based if either EQRO or SDP feature flags are on
+    const isNewSubmission =
+        showEqroSubmissions || showSDPSubmissions
+            ? matchPath(
+                  RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
+                  location.pathname
+              )
+            : location.pathname === '/submissions/new'
 
     const {
         draftSubmission,
@@ -171,7 +176,9 @@ export const SubmissionType = ({
         if (options.type === 'SAVE_AS_DRAFT' && draftSaved) {
             setDraftSaved(false)
         }
+        console.warn('PPPPPPPPPPPP')
         if (isNewSubmission) {
+            console.warn('HIIIIIIIII')
             const input: CreateContractInput = {
                 populationCovered: values.populationCovered!,
                 programIDs: values.programIDs,
