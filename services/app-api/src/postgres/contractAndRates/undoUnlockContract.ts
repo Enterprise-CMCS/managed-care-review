@@ -1,5 +1,6 @@
 import { findContractWithHistory } from './findContractWithHistory'
-import { type NotFoundError, UserInputPostgresError } from '../postgresErrors'
+import { UserInputPostgresError } from '../postgresErrors'
+import type { NotFoundError } from '../postgresErrors'
 import type { ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
@@ -8,10 +9,7 @@ import {
     isSubmittedRevision,
     isUnlockedRevision,
 } from './prismaSharedContractRateHelpers'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 async function undoUnlockContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -196,7 +194,8 @@ async function undoUnlockContract(
     return runTransactionWithRowLock({
         client,
         operationName: 'undoUnlockContract',
-        lock: async (tx) => await lockContractRowForUpdate(tx, args.contractID),
+        table: 'ContractTable',
+        id: args.contractID,
         transaction: async (tx) =>
             await undoUnlockContractInsideTransaction(tx, args),
     })

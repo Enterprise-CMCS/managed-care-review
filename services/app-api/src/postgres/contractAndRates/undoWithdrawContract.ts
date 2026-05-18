@@ -9,10 +9,7 @@ import {
     eqroValidationAndReviewDetermination,
     healthPlanReviewDetermination,
 } from '@mc-review/submissions'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 export type UndoWithdrawContractArgsType = {
     contract: ContractType
@@ -212,8 +209,8 @@ const undoWithdrawContract = async (
     return runTransactionWithRowLock({
         client,
         operationName: 'undoWithdrawContract',
-        lock: async (tx) =>
-            await lockContractRowForUpdate(tx, args.contract.id),
+        table: 'ContractTable',
+        id: args.contract.id,
         transaction: async (tx) =>
             await undoWithdrawContractInsideTransaction(tx, args),
         transactionOptions: {

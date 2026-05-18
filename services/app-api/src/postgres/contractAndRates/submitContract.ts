@@ -8,10 +8,7 @@ import {
     eqroValidationAndReviewDetermination,
     healthPlanReviewDetermination,
 } from '@mc-review/submissions'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 async function submitContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -221,7 +218,8 @@ async function submitContract(
     return runTransactionWithRowLock({
         client,
         operationName: 'submitContract',
-        lock: async (tx) => await lockContractRowForUpdate(tx, contractID),
+        table: 'ContractTable',
+        id: contractID,
         transaction: async (tx) => {
             const result = await submitContractInsideTransaction(tx, {
                 contractID,

@@ -8,10 +8,7 @@ import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRate
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
 import type { SubmitContractArgsType } from './submitContract'
 import { submitContractInsideTransaction } from './submitContract'
-import {
-    lockRateRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type UndoWithdrawRateArgsType = {
     rateID: string
@@ -237,7 +234,8 @@ const undoWithdrawRate = async (
     return runTransactionWithRowLock({
         client,
         operationName: 'undoWithdrawRate',
-        lock: async (tx) => await lockRateRowForUpdate(tx, args.rateID),
+        table: 'RateTable',
+        id: args.rateID,
         transaction: async (tx) =>
             await undoWithdrawRateInsideTransaction(tx, args),
         transactionOptions: {

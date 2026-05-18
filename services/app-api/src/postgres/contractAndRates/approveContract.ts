@@ -3,10 +3,7 @@ import { NotFoundError } from '../postgresErrors'
 import type { ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 async function approveContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -73,7 +70,8 @@ async function approveContract(
     return runTransactionWithRowLock({
         client,
         operationName: 'approveContract',
-        lock: async (tx) => await lockContractRowForUpdate(tx, args.contractID),
+        table: 'ContractTable',
+        id: args.contractID,
         transaction: async (tx) =>
             await approveContractInsideTransaction(tx, args),
     })

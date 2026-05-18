@@ -10,10 +10,7 @@ import {
 } from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import {
-    lockContractQuestionRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 export async function insertContractQuestionResponse(
     client: ExtendedPrismaClient,
@@ -30,8 +27,8 @@ export async function insertContractQuestionResponse(
     return runTransactionWithRowLock({
         client,
         operationName: 'insertContractQuestionResponse',
-        lock: async (tx) =>
-            await lockContractQuestionRowForUpdate(tx, response.questionID),
+        table: 'ContractQuestion',
+        id: response.questionID,
         transaction: async (tx) => {
             const question = await tx.contractQuestion.findFirst({
                 where: {

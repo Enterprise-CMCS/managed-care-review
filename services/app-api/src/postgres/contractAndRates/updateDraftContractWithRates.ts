@@ -6,10 +6,7 @@ import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdap
 import { includeFullRate } from './prismaFullContractRateHelpers'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { UpdateContractArgsType } from './updateDraftContract'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 // Update the given draft
 // * can change the set of draftRates
@@ -23,7 +20,8 @@ async function updateDraftContractFormData(
     return runTransactionWithRowLock({
         client,
         operationName: 'updateDraftContractFormData',
-        lock: async (tx) => await lockContractRowForUpdate(tx, contractID),
+        table: 'ContractTable',
+        id: contractID,
         transaction: async (tx) => {
             // Given all the Contracts associated with this draft, find the most recent submitted
             const currentContractRev = await tx.contractRevisionTable.findFirst(

@@ -17,10 +17,7 @@ import { submitContractInsideTransaction } from './submitContract'
 import { submitRateInsideTransaction } from './submitRate'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import {
-    lockRateRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type WithdrawRateArgsType = {
     rateID: string
@@ -335,7 +332,8 @@ const withdrawRate = async (
     return runTransactionWithRowLock({
         client,
         operationName: 'withdrawRate',
-        lock: async (tx) => await lockRateRowForUpdate(tx, args.rateID),
+        table: 'RateTable',
+        id: args.rateID,
         transaction: async (tx) =>
             await withdrawRateInsideTransaction(tx, args),
         transactionOptions: {

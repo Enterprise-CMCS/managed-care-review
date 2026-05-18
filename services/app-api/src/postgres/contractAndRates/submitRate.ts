@@ -9,10 +9,7 @@ import { NotFoundError } from '../postgresErrors'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import {
-    lockRateRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 async function submitRateInsideTransaction(
     tx: PrismaTransactionType,
@@ -108,7 +105,8 @@ async function submitRate(
     return runTransactionWithRowLock({
         client,
         operationName: 'submitRate',
-        lock: async (tx) => await lockRateRowForUpdate(tx, args.rateID),
+        table: 'RateTable',
+        id: args.rateID,
         transaction: async (tx) => await submitRateInsideTransaction(tx, args),
     })
 }

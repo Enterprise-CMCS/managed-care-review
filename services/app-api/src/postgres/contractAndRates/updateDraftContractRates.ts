@@ -10,10 +10,7 @@ import {
     prismaRateCreateFormDataFromDomain,
     prismaUpdateRateFormDataFromDomain,
 } from './prismaContractRateAdaptors'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 interface UpdatedRatesType {
     create: {
@@ -233,7 +230,8 @@ async function updateDraftContractRates(
     return runTransactionWithRowLock({
         client,
         operationName: 'updateDraftContractRates',
-        lock: async (tx) => await lockContractRowForUpdate(tx, args.contractID),
+        table: 'ContractTable',
+        id: args.contractID,
         transaction: async (tx) => {
             const result = await updateDraftContractRatesInsideTransaction(
                 tx,

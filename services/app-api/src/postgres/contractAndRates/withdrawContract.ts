@@ -16,10 +16,7 @@ import {
 import type { RatesToReassign } from './reassignParentContract'
 import { reassignParentContractInTransaction } from './reassignParentContract'
 import type { RateForDisplayType } from '../../emailer/templateHelpers'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 export type WithdrawContractArgsType = {
     contract: ContractType
@@ -281,8 +278,8 @@ const withdrawContract = async (
     return runTransactionWithRowLock({
         client,
         operationName: 'withdrawContract',
-        lock: async (tx) =>
-            await lockContractRowForUpdate(tx, args.contract.id),
+        table: 'ContractTable',
+        id: args.contract.id,
         transaction: async (tx) =>
             await withdrawContractInsideTransaction(tx, args),
         transactionOptions: {

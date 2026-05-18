@@ -4,10 +4,7 @@ import type { NotFoundError } from '../postgresErrors'
 import type { ContractType } from '../../domain-models'
 import { nullify } from '../prismaDomainAdaptors'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type UpdateMCCRSIDFormArgsType = {
     contractID: string
@@ -24,7 +21,8 @@ async function updateMCCRSID(
     return runTransactionWithRowLock({
         client,
         operationName: 'updateMCCRSID',
-        lock: async (tx) => await lockContractRowForUpdate(tx, contractID),
+        table: 'ContractTable',
+        id: contractID,
         transaction: async (tx) => {
             // Get the Contract associated with this given contract ID
             await tx.contractTable.update({

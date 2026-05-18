@@ -2,10 +2,7 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { findRateWithHistory } from './findRateWithHistory'
-import {
-    lockRateRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type OverrideRateDataArgsType = {
     rateID: string
@@ -117,7 +114,8 @@ const overrideRateData = async (
     return runTransactionWithRowLock({
         client,
         operationName: 'overrideRateData',
-        lock: async (tx) => await lockRateRowForUpdate(tx, args.rateID),
+        table: 'RateTable',
+        id: args.rateID,
         transaction: async (tx) =>
             await overrideRateDataInsideTransaction(tx, args),
     })

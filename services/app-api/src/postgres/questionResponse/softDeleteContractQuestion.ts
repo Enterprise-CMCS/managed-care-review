@@ -7,10 +7,7 @@ import {
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
-import {
-    lockContractQuestionRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 export type SoftDeleteContractQuestionArgsType = {
     questionID: string
@@ -145,8 +142,8 @@ const softDeleteContractQuestion = async (
     return runTransactionWithRowLock({
         client,
         operationName: 'soft deleting contract question',
-        lock: async (tx) =>
-            await lockContractQuestionRowForUpdate(tx, args.questionID),
+        table: 'ContractQuestion',
+        id: args.questionID,
         transaction: async (tx) =>
             await softDeleteContractQuestionInsideTransaction(tx, args),
     })

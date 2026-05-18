@@ -2,10 +2,7 @@ import type { RateType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findRateWithHistory } from './findRateWithHistory'
-import {
-    lockRateRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type UnlockRateArgsType = {
     rateID: string
@@ -201,7 +198,8 @@ async function unlockRate(
     return runTransactionWithRowLock({
         client,
         operationName: 'unlockRate',
-        lock: async (tx) => await lockRateRowForUpdate(tx, rateID),
+        table: 'RateTable',
+        id: rateID,
         transaction: async (tx) => {
             const currentDateTime = new Date()
             // create the unlock info for unlockRateInDB. unlockRateInDB is used

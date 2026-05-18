@@ -4,10 +4,7 @@ import { NotFoundError } from '../postgresErrors'
 import { unlockRateInDB } from './unlockRate'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import {
-    lockContractRowForUpdate,
-    runTransactionWithRowLock,
-} from '../prismaHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 async function unlockContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -322,7 +319,8 @@ async function unlockContract(
     return runTransactionWithRowLock({
         client,
         operationName: 'unlockContract',
-        lock: async (tx) => await lockContractRowForUpdate(tx, args.contractID),
+        table: 'ContractTable',
+        id: args.contractID,
         transaction: async (tx) => {
             const result = await unlockContractInsideTransaction(tx, args)
             if (result instanceof Error) {
