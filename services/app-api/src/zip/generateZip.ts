@@ -8,8 +8,6 @@ import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
 import * as crypto from 'crypto'
-// archiver v8 moved to named class exports; @types/archiver not yet updated for v8
-// @ts-ignore
 import { ZipArchive } from 'archiver'
 import { pipeline } from 'stream/promises'
 import { logError } from '../logger'

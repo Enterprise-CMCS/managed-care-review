@@ -35,7 +35,6 @@ vi.mock('stream/promises', () => ({
 vi.mock('archiver', () => ({
     ZipArchive: vi.fn(),
 }))
-// @ts-expect-error ZipArchive not in @types/archiver v7; archiver v8 types pending
 import { ZipArchive } from 'archiver'
 const mockZipArchive = vi.mocked(ZipArchive)
 
@@ -104,7 +103,7 @@ describe('generateDocumentZip', () => {
             file: vi.fn(),
             finalize: vi.fn().mockResolvedValue(undefined),
         }
-        mockZipArchive.mockReturnValue(mockArchive)
+        mockZipArchive.mockReturnValue(mockArchive as unknown as ZipArchive)
 
         // Setup crypto mock
         const mockHashInstance = {
@@ -251,7 +250,7 @@ describe('generateDocumentZip', () => {
                 file: vi.fn(),
                 finalize: vi.fn().mockResolvedValue(undefined),
             }
-            mockZipArchive.mockReturnValue(mockArchive)
+            mockZipArchive.mockReturnValue(mockArchive as unknown as ZipArchive)
 
             // Setup crypto mock
             const mockHashInstance = {
