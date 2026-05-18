@@ -84,7 +84,9 @@ export const CMSQuestionResponseTable = ({
 }: CMSQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
     const canAddQuestions =
-        !['APPROVED', 'WITHDRAWN'].includes(consolidatedStatus!) && userDivision
+        !['APPROVED', 'WITHDRAWN'].includes(consolidatedStatus!) &&
+        userDivision &&
+        !['DMCP', 'OACT'].includes(userDivision)
 
     const { usersRounds, otherRounds } = sortQuestionRounds(
         indexQuestions,

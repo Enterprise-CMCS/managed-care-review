@@ -614,6 +614,96 @@ describe('ContractQuestionResponse', () => {
             expect(addQuestion).not.toBeInTheDocument()
         })
 
+        it('does not render an Add questions button for a DMCP user', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser({
+                                divisionAssignment: 'DMCP',
+                            }),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/health-plan/test-contract-id/question-and-answers`,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText("Your division's questions")
+                ).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryByRole('link', { name: 'Add questions' })
+            ).not.toBeInTheDocument()
+        })
+
+        it('does not render an Add questions button for an OACT user', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/health-plan/test-contract-id/question-and-answers`,
+                },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText("Your division's questions")
+                ).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryByRole('link', { name: 'Add questions' })
+            ).not.toBeInTheDocument()
+        })
+
         it('renders with question submit banner after question submitted', async () => {
             renderWithProviders(
                 <Routes>
