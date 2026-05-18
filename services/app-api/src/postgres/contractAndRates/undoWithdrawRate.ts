@@ -61,6 +61,10 @@ const undoWithdrawRateInsideTransaction = async (
     const latestRateRev = withdrawnRate.packageSubmissions[0].rateRevision
     const parentContractID = withdrawnRate.parentContractID
 
+    if (withdrawnRate.reviewStatusActions?.[0]?.actionType !== 'WITHDRAW') {
+        throw new Error('Rate to undo withdrawal is not currently withdrawn')
+    }
+
     if (
         !withdrawnRate.withdrawnFromContracts ||
         withdrawnRate.withdrawnFromContracts.length === 0

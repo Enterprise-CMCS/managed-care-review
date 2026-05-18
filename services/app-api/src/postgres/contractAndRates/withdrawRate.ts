@@ -72,6 +72,15 @@ const withdrawRateInsideTransaction = async (
                     },
                 },
             },
+            reviewStatusActions: {
+                orderBy: {
+                    updatedAt: 'desc',
+                },
+                take: 1,
+                select: {
+                    actionType: true,
+                },
+            },
         },
     })
 
@@ -79,6 +88,10 @@ const withdrawRateInsideTransaction = async (
         throw new NotFoundError(
             `PRISMA ERROR: Cannot find rate with id: ${rateID}`
         )
+    }
+
+    if (rate.reviewStatusActions[0]?.actionType === 'WITHDRAW') {
+        throw new Error('Cannot withdraw rate: rate is already withdrawn')
     }
 
     const latestRateRev = getLatestActiveRevision(rate.revisions)

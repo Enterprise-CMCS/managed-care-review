@@ -54,6 +54,38 @@ const withdrawContractInsideTransaction = async (
 ): Promise<WithdrawContractReturnType> => {
     const { contract, updatedReason, updatedByID } = args
 
+    const currentContractReviewStatus = await tx.contractTable.findUnique({
+        where: {
+            id: contract.id,
+        },
+        select: {
+            reviewStatusActions: {
+                orderBy: {
+                    updatedAt: 'desc',
+                },
+                take: 1,
+                select: {
+                    actionType: true,
+                },
+            },
+        },
+    })
+
+    if (!currentContractReviewStatus) {
+        throw new NotFoundError(
+            `Could not find contract ${contract.id} to withdraw.`
+        )
+    }
+
+    if (
+        currentContractReviewStatus.reviewStatusActions[0]?.actionType ===
+        'WITHDRAW'
+    ) {
+        throw new Error(
+            'Cannot withdraw contract: contract is already withdrawn'
+        )
+    }
+
     const latestSubmission = contract.packageSubmissions[0]
     const rateIDS = latestSubmission.rateRevisions.map((rr) => rr.rateID)
 
