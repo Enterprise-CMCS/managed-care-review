@@ -109,7 +109,7 @@ When run locally (with `VITE_APP_AUTH_MODE=LOCAL`), auth bypasses Cognito. The f
 Run whole app locally
 
 - `./dev local` to run the entire app and storybook
-- Available flags: `--web`, `--api`, `--s3`, `--postgres`, `--launch-darkly` for running services individually
+- Available flags: `--web`, `--api`, `--s3`, `--postgres`, `--local-dev-console` for running services individually
 - (you can also exclude services by using the yargs 'no' standard: `./dev local --no-web`)
 
 Run individual services locally
@@ -300,13 +300,13 @@ We currently use the CMS Federal (.us) install of Launch Darkly to manage our fe
 
 There are technical design docs about [when to add and remove feature flags](docs/technical-design/launch-darkly-feature-flag-lifecycles.md) and [how to test with feature flags](docs/technical-design/launch-darkly-testing-approach.md).
 
-### Local LaunchDarkly Service
+### Local Dev Console
 
-When running locally, a local LaunchDarkly service (`services/local-launch-darkly`) replaces the real LD endpoints. It starts automatically with `./dev local` and provides a UI at [http://localhost:3031](http://localhost:3031) for toggling feature flags during development.
+When running locally, the local dev console (`services/local-dev-console`) replaces the real LD endpoints and also hosts other local-only tooling such as the email inbox. It starts automatically with `./dev local` and provides a UI at [http://localhost:3031](http://localhost:3031) for toggling feature flags during development.
 
 On startup, the service can fetch initial flag values from real LaunchDarkly if `LD_SDK_KEY` is set to a valid key in `.envrc.local`. Otherwise it falls back to the defaults defined in `packages/common-code/src/featureFlags/flags.ts`.
 
-Both `app-web` (via Vite proxy) and `app-api` (via `LOCAL_LD_SERVICE_URL`) connect to this local service when `VITE_APP_AUTH_MODE=LOCAL`.
+Both `app-web` (via Vite proxy) and `app-api` (via `LOCAL_DEV_SERVICE_URL`) connect to this local service when `VITE_APP_AUTH_MODE=LOCAL`.
 
 ## Contributing
 

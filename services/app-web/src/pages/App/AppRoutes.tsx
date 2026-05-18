@@ -66,6 +66,7 @@ import { RateWithdraw } from '../RateWithdraw/RateWithdraw'
 import { UndoRateWithdraw } from '../UndoRateWithdraw/UndoRateWithdraw'
 import { SubmissionWithdraw } from '../SubmissionWithdraw/SubmissionWithdraw'
 import { UndoSubmissionWithdraw } from '../UndoSubmissionWithdraw/UndoSubmissionWithdraw'
+import { UndoSubmissionUnlock } from '../UndoSubmissionUnlock/UndoSubmissionUnlock'
 import { CreateOauthClient } from '../Settings/Oauth/CreateOauthClient'
 import { User } from '../../gen/gqlClient'
 import { AddLocalUser } from '../../localAuth/AddLocalUser'
@@ -144,6 +145,10 @@ const StateUserRoutes = ({
         featureFlags.EQRO_SUBMISSIONS.flag,
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
+    const showSdpSubmissions: boolean = ldClient?.variation(
+        featureFlags.SDP.flag,
+        featureFlags.SDP.defaultValue
+    )
 
     return (
         <AuthenticatedRouteWrapper>
@@ -168,7 +173,7 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
                 />
-                {showEqroSubmissions ? (
+                {showEqroSubmissions || showSdpSubmissions ? (
                     <>
                         <Route
                             path={RoutesRecord.SUBMISSIONS_NEW}
@@ -378,6 +383,13 @@ const CMSUserRoutes = ({
                     <Route
                         path={RoutesRecord.UNDO_SUBMISSION_WITHDRAW}
                         element={<UndoSubmissionWithdraw />}
+                    />
+                )}
+
+                {isAdminUser && (
+                    <Route
+                        path={RoutesRecord.UNDO_SUBMISSION_UNLOCK}
+                        element={<UndoSubmissionUnlock />}
                     />
                 )}
 

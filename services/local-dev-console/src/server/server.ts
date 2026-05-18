@@ -1,11 +1,13 @@
 import express from 'express'
 import { join } from 'path'
 import * as flagStore from './flagStore.js'
+import * as emailStore from './emailStore.js'
 import type { Response } from 'express'
 import rateLimit from 'express-rate-limit'
 
 const sseClients = new Set<Response>()
 const ldStreamClients = new Set<Response>()
+const emailClients = new Set<Response>()
 
 function safeSseWrite(clients: Set<Response>, event: string, data: string): void {
     for (const res of clients) {
@@ -20,6 +22,10 @@ function safeSseWrite(clients: Set<Response>, event: string, data: string): void
 function broadcastFlagUpdate(): void {
     safeSseWrite(sseClients, 'update', JSON.stringify(flagStore.getAll()))
     safeSseWrite(ldStreamClients, 'put', JSON.stringify(toLDFlagFormat()))
+}
+
+function broadcastEmailUpdate(): void {
+    safeSseWrite(emailClients, 'update', JSON.stringify(emailStore.list()))
 }
 
 type LDFlagEntry = {
@@ -39,17 +45,34 @@ function toLDFlagFormat(): Record<string, LDFlagEntry> {
 }
 
 const app = express()
-app.use(express.json({ limit: '10kb' }))
+app.use(express.json({ limit: '1mb' }))
 
-// CORS
-app.use((_req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
+// CORS — only allow loopback origins. Server-to-server callers (app-api)
+// send no Origin header and are unaffected. Blocks DNS-rebinding and
+// drive-by-website attacks against the local dev API.
+const ALLOWED_ORIGIN_HOSTS = new Set(['localhost', '127.0.0.1'])
+
+function isAllowedOrigin(origin: string | undefined): origin is string {
+    if (!origin) return false
+    try {
+        return ALLOWED_ORIGIN_HOSTS.has(new URL(origin).hostname)
+    } catch {
+        return false
+    }
+}
+
+app.use((req, res, next) => {
+    const origin = req.headers.origin
+    if (isAllowedOrigin(origin)) {
+        res.header('Access-Control-Allow-Origin', origin)
+        res.header('Vary', 'Origin')
+    }
     res.header('Access-Control-Allow-Headers', '*')
     res.header(
         'Access-Control-Allow-Methods',
         'GET, POST, PUT, DELETE, OPTIONS, REPORT, PATCH'
     )
-    if (_req.method === 'OPTIONS') {
+    if (req.method === 'OPTIONS') {
         res.status(200).end()
         return
     }
@@ -105,6 +128,44 @@ app.get('/flags/stream', (req, res) => {
     res.write(`event: update\ndata: ${data}\n\n`)
     sseClients.add(res)
     req.on('close', () => sseClients.delete(res))
+})
+
+// --- Local email API ---
+
+app.get('/emails', (_req, res) => {
+    res.json(emailStore.list())
+})
+
+app.post('/emails', (req, res) => {
+    if (!emailStore.isLocalEmailInput(req.body)) {
+        res.status(400).json({ error: 'Invalid email payload' })
+        return
+    }
+
+    const email = emailStore.add(req.body)
+    console.info(
+        `Local email received: ${email.subject} -> ${email.toAddresses.join(', ')}`
+    )
+    broadcastEmailUpdate()
+    res.status(201).json(email)
+})
+
+app.post('/emails/reset', (_req, res) => {
+    emailStore.clear()
+    console.info('Local email inbox cleared')
+    broadcastEmailUpdate()
+    res.json(emailStore.list())
+})
+
+app.get('/emails/stream', (req, res) => {
+    res.writeHead(200, {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        Connection: 'keep-alive',
+    })
+    res.write(`event: update\ndata: ${JSON.stringify(emailStore.list())}\n\n`)
+    emailClients.add(res)
+    req.on('close', () => emailClients.delete(res))
 })
 
 // --- LD Client SDK endpoints ---
@@ -167,7 +228,14 @@ app.get('/*splat', indexRateLimiter as unknown as express.RequestHandler, (_req,
     res.sendFile(join(distDir, 'index.html'))
 })
 
-const serviceUrl = new URL(process.env.LOCAL_LD_SERVICE_URL || 'http://127.0.0.1:3031')
+const rawServiceUrl = process.env.LOCAL_DEV_SERVICE_URL
+if (!rawServiceUrl) {
+    console.error(
+        'LOCAL_DEV_SERVICE_URL is not set. Add it to .envrc (or .envrc.local) and run `direnv allow`.'
+    )
+    process.exit(1)
+}
+const serviceUrl = new URL(rawServiceUrl)
 const PORT = parseInt(serviceUrl.port || '3031', 10)
 const HOST = serviceUrl.hostname
 
@@ -180,7 +248,7 @@ try {
 }
 
 const server = app.listen(PORT, HOST, () => {
-    console.info(`Local LaunchDarkly running at ${serviceUrl}`)
+    console.info(`Local Dev Console running at ${serviceUrl}`)
     console.info(`UI: ${serviceUrl}`)
     console.info(`Flags API: ${serviceUrl}/flags`)
     console.info(`Loaded ${Object.keys(flagStore.getAll()).length} flags`)
@@ -190,6 +258,7 @@ const server = app.listen(PORT, HOST, () => {
 function shutdown() {
     for (const res of sseClients) res.end()
     for (const res of ldStreamClients) res.end()
+    for (const res of emailClients) res.end()
     server.close(() => process.exit(0))
 }
 

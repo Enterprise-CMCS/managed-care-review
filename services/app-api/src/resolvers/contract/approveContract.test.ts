@@ -3,7 +3,7 @@ import {
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { ApproveContractDocument } from '../../gen/gqlClient'
-import { testCMSUser } from '../../testHelpers/userHelpers'
+import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
     createTestContract,
@@ -45,6 +45,99 @@ describe('approveContract', () => {
             'MARK_AS_APPROVED'
         )
         expect(approvedContract.reviewStatus).toBe('APPROVED')
+    })
+
+    it('stores approval reason when provided', async () => {
+        const cmsServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const approvedContract = await approveTestContract(
+            cmsServer,
+            contract.id,
+            '2024-11-11',
+            'Approval letter sent to state'
+        )
+
+        expect(approvedContract.reviewStatusActions?.[0]?.updatedReason).toBe(
+            'Approval letter sent to state'
+        )
+    })
+
+    it('allows admin users to approve when a reason is provided', async () => {
+        const adminServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            context: {
+                user: testAdminUser(),
+            },
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const approvedContract = await approveTestContract(
+            adminServer,
+            contract.id,
+            '2024-11-11',
+            'Admin approval override'
+        )
+
+        expect(approvedContract.reviewStatus).toBe('APPROVED')
+        expect(approvedContract.reviewStatusActions?.[0]?.updatedReason).toBe(
+            'Admin approval override'
+        )
+    })
+
+    it('errors if admin approves without a reason', async () => {
+        const adminServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            context: {
+                user: testAdminUser(),
+            },
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const approveContractResult = await executeGraphQLOperation(
+            adminServer,
+            {
+                query: ApproveContractDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        dateApprovalReleasedToState: '2024-12-12',
+                    },
+                },
+            }
+        )
+
+        expect(approveContractResult.errors).toBeDefined()
+        if (approveContractResult.errors === undefined) {
+            throw new Error('type narrow')
+        }
+
+        expect(approveContractResult.errors[0].extensions?.code).toBe(
+            'BAD_USER_INPUT'
+        )
+        expect(approveContractResult.errors[0].message).toBe(
+            'Approving a contract as an admin requires a reason'
+        )
     })
 
     it('errors if contract status is in DRAFT', async () => {
@@ -201,7 +294,7 @@ describe('approveContract', () => {
         )
     })
 
-    it('errors if a non CMS/CMS Approver user calls it', async () => {
+    it('errors if a non CMS/CMS Approver/Admin user calls it', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })

@@ -4,6 +4,7 @@ import { featureFlags } from '@mc-review/common-code'
 import {
     fetchCurrentUserMock,
     fetchContractWithQuestionsMockSuccess,
+    mockValidAdminUser,
     mockValidCMSUser,
     mockValidStateUser,
     mockContractPackageSubmitted,
@@ -90,6 +91,12 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
 
             // Expect Review decision to be visible for CMS users
             expect(screen.getByText('Review decision')).toBeInTheDocument()
+
+            expect(
+                screen.getByRole('link', {
+                    name: 'Released to state',
+                })
+            ).toBeInTheDocument()
 
             // Expect NEW tag to NOT be visible for initial submissions
             expect(screen.queryByText('NEW')).not.toBeInTheDocument()
@@ -1044,6 +1051,102 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                 })
             ).not.toBeInTheDocument()
         })
+
+        it('renders undo unlock button for admin users on unlocked EQRO submissions', async () => {
+            const contract = mockContractPackageUnlockedWithUnlockedType({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidAdminUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('button', {
+                        name: 'Undo submission unlock',
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('does not render undo unlock button for CMS users on unlocked EQRO submissions', async () => {
+            const contract = mockContractPackageUnlockedWithUnlockedType({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByRole('button', {
+                        name: 'Undo submission unlock',
+                    })
+                ).not.toBeInTheDocument()
+            })
+        })
     })
 
     describe('NEW tag on review determination change', () => {
@@ -1269,6 +1372,74 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
             expect(
                 within(reviewDecisionSection).queryByText('NEW')
             ).toBeInTheDocument()
+        })
+    })
+
+    describe('Submission approval banner', () => {
+        it('renders the approval banner on an approved EQRO submission', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'RESUBMITTED',
+                reviewStatus: 'APPROVED',
+                consolidatedStatus: 'APPROVED',
+                reviewStatusActions: [
+                    {
+                        actionType: 'MARK_AS_APPROVED',
+                        contractID: 'test-abc-123',
+                        updatedAt: new Date(),
+                        updatedBy: {
+                            email: 'cmsapprover@example.com',
+                            familyName: 'Smith',
+                            givenName: 'John',
+                            role: 'CMS_APPROVER_USER',
+                        },
+                        updatedReason: 'Some approval reason',
+                    },
+                ],
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByTestId('submission-summary')
+                ).toBeInTheDocument()
+                expect(
+                    screen.getByTestId('submissionApprovedBanner')
+                ).toBeInTheDocument()
+            })
         })
     })
 })

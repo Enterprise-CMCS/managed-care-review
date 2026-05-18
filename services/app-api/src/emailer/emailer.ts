@@ -768,7 +768,47 @@ function newSESEmailer(config: EmailConfiguration): Emailer {
 }
 
 const sendLocalEmails = async (emailData: EmailData): Promise<void | Error> => {
+    const localDevServiceUrl = process.env.LOCAL_DEV_SERVICE_URL
+
     localEmailerLogger(emailData)
+
+    if (localDevServiceUrl) {
+        try {
+            const response = await fetch(`${localDevServiceUrl}/emails`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sourceEmail: emailData.sourceEmail,
+                    subject: emailData.subject,
+                    toAddresses: emailData.toAddresses,
+                    ccAddresses: emailData.ccAddresses,
+                    bccAddresses: emailData.bccAddresses,
+                    replyToAddresses: emailData.replyToAddresses,
+                    bodyText: emailData.bodyText,
+                    bodyHTML: emailData.bodyHTML,
+                }),
+            })
+
+            if (!response.ok) {
+                console.warn(
+                    'Local email send failed, falling back to console logging:',
+                    response.status,
+                    response.statusText
+                )
+                return
+            }
+        } catch (err) {
+            console.warn(
+                'Local email send failed, falling back to console logging:',
+                err
+            )
+            return
+        }
+    } else {
+        console.warn(
+            'Local email send failed. LOCAL_DEV_SERVICE_URL env is not set.'
+        )
+    }
 }
 
 function newLocalEmailer(config: EmailConfiguration): Emailer {

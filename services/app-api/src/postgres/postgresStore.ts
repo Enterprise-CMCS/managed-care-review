@@ -60,7 +60,7 @@ import {
     findRateRevision,
     approveContract,
     reverseApproveContract,
-    reverseUnlockContract,
+    undoUnlockContract,
 } from './contractAndRates'
 import type {
     SubmitContractArgsType,
@@ -73,7 +73,7 @@ import type {
     FindAllRatesWithHistoryBySubmitType,
     ApproveContractArgsType,
     ReverseApproveContractArgsType,
-    ReverseUnlockContractArgsType,
+    UndoUnlockContractArgsType,
 } from './contractAndRates'
 import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
 import { unlockRate } from './contractAndRates/unlockRate'
@@ -226,8 +226,8 @@ type Store = {
     reverseApproveContract: (
         args: ReverseApproveContractArgsType
     ) => Promise<ContractType | Error>
-    reverseUnlockContract: (
-        args: ReverseUnlockContractArgsType
+    undoUnlockContract: (
+        args: UndoUnlockContractArgsType
     ) => Promise<ContractType | Error>
     withdrawContract: (
         args: WithdrawContractArgsType
@@ -394,7 +394,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         unlockContract: (args) => unlockContract(client, args),
         approveContract: (args) => approveContract(client, args),
         reverseApproveContract: (args) => reverseApproveContract(client, args),
-        reverseUnlockContract: (args) => reverseUnlockContract(client, args),
+        undoUnlockContract: (args) => undoUnlockContract(client, args),
         withdrawContract: (args) => withdrawContract(client, args),
         undoWithdrawContract: (args) => undoWithdrawContract(client, args),
 

@@ -13,9 +13,9 @@ import {
 
 const MAX_SERIALIZATION_RETRIES = 2
 
-async function reverseUnlockContractInsideTransaction(
+async function undoUnlockContractInsideTransaction(
     tx: PrismaTransactionType,
-    args: ReverseUnlockContractArgsType
+    args: UndoUnlockContractArgsType
 ): Promise<ContractType | Error> {
     const { contractID, updatedByID, updatedReason } = args
 
@@ -23,7 +23,7 @@ async function reverseUnlockContractInsideTransaction(
         where: {
             contractID,
             submitInfoID: null,
-            reverseUnlockInfoID: null,
+            undoUnlockInfoID: null,
         },
         orderBy: {
             createdAt: 'desc',
@@ -46,7 +46,7 @@ async function reverseUnlockContractInsideTransaction(
                     updatedReason: true,
                 },
             },
-            reverseUnlockInfo: {
+            undoUnlockInfo: {
                 select: {
                     id: true,
                     updatedAt: true,
@@ -58,18 +58,18 @@ async function reverseUnlockContractInsideTransaction(
 
     if (!currentRevision) {
         return new UserInputPostgresError(
-            `Cannot reverse unlock: contract ${contractID} is no longer in an unlocked state`
+            `Cannot undo unlock: contract ${contractID} is no longer in an unlocked state`
         )
     }
 
     if (!isUnlockedRevision(currentRevision)) {
         return new UserInputPostgresError(
-            'Cannot reverse unlock: latest contract revision is not an unlocked draft revision'
+            'Cannot undo unlock: latest contract revision is not an unlocked draft revision'
         )
     }
 
     const sharedUnlockInfoID = currentRevision.unlockInfoID
-    const reverseUnlockInfo = await tx.updateInfoTable.create({
+    const undoUnlockInfo = await tx.updateInfoTable.create({
         data: {
             updatedAt: new Date(),
             updatedByID,
@@ -83,7 +83,7 @@ async function reverseUnlockContractInsideTransaction(
                 some: {
                     unlockInfoID: sharedUnlockInfoID,
                     submitInfoID: null,
-                    reverseUnlockInfoID: null,
+                    undoUnlockInfoID: null,
                 },
             },
         },
@@ -98,7 +98,7 @@ async function reverseUnlockContractInsideTransaction(
                     createdAt: true,
                     submitInfoID: true,
                     unlockInfoID: true,
-                    reverseUnlockInfoID: true,
+                    undoUnlockInfoID: true,
                     submitInfo: {
                         select: {
                             id: true,
@@ -118,7 +118,7 @@ async function reverseUnlockContractInsideTransaction(
                             updatedReason: true,
                         },
                     },
-                    reverseUnlockInfo: {
+                    undoUnlockInfo: {
                         select: {
                             id: true,
                             updatedAt: true,
@@ -133,7 +133,7 @@ async function reverseUnlockContractInsideTransaction(
     const unlockedRateRevisionIDs = unlockedRates.flatMap((rate) => {
         const latestRevision = getLatestActiveRevision(rate.revisions)
         // We need the latest submitted revision across the full history, not just
-        // the latest couple of rows. After unlock -> reverse unlock -> unlock
+        // the latest couple of rows. After unlock -> undo unlock -> unlock
         // again, the top two rows are both unlocked variants.
         const latestSubmittedRevision = rate.revisions.find(isSubmittedRevision)
         const latestSubmittedParentContractID =
@@ -160,7 +160,7 @@ async function reverseUnlockContractInsideTransaction(
                 },
             },
             data: {
-                reverseUnlockInfoID: reverseUnlockInfo.id,
+                undoUnlockInfoID: undoUnlockInfo.id,
             },
         })
     }
@@ -170,7 +170,7 @@ async function reverseUnlockContractInsideTransaction(
             id: currentRevision.id,
         },
         data: {
-            reverseUnlockInfoID: reverseUnlockInfo.id,
+            undoUnlockInfoID: undoUnlockInfo.id,
         },
     })
 
@@ -183,22 +183,22 @@ async function reverseUnlockContractInsideTransaction(
     return findContractWithHistory(tx, contractID)
 }
 
-type ReverseUnlockContractArgsType = {
+type UndoUnlockContractArgsType = {
     contractID: string
     updatedByID: string
     updatedReason: string
 }
 
-async function reverseUnlockContract(
+async function undoUnlockContract(
     client: ExtendedPrismaClient,
-    args: ReverseUnlockContractArgsType
+    args: UndoUnlockContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
     let attempt = 0
     while (true) {
         try {
             return await client.$transaction(
                 async (tx) => {
-                    const result = await reverseUnlockContractInsideTransaction(
+                    const result = await undoUnlockContractInsideTransaction(
                         tx,
                         args
                     )
@@ -220,17 +220,17 @@ async function reverseUnlockContract(
 
             if (isWriteConflict && attempt < MAX_SERIALIZATION_RETRIES - 1) {
                 console.warn(
-                    `reverseUnlockContract: serialization conflict, retrying. contractID=${args.contractID} attempt=${attempt + 1}`
+                    `undoUnlockContract: serialization conflict, retrying. contractID=${args.contractID} attempt=${attempt + 1}`
                 )
                 attempt++
                 continue
             }
 
-            console.error('Prisma error reversing contract unlock', err)
+            console.error('Prisma error undoing contract unlock', err)
             return parseErrorToError(err)
         }
     }
 }
 
-export { reverseUnlockContract, reverseUnlockContractInsideTransaction }
-export type { ReverseUnlockContractArgsType }
+export { undoUnlockContract, undoUnlockContractInsideTransaction }
+export type { UndoUnlockContractArgsType }

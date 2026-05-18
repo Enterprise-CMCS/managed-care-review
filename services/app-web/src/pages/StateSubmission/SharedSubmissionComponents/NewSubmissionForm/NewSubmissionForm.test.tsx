@@ -78,6 +78,9 @@ it('routes to new EQRO url', async () => {
                 route: `/submissions/new`,
             },
             location: (location) => (testLocation = location),
+            featureFlags: {
+                ['eqro-submissions']: true,
+            },
         }
     )
 
@@ -218,6 +221,9 @@ it('renders inline errors', async () => {
         {
             routerProvider: {
                 route: `/submissions/new`,
+            },
+            featureFlags: {
+                ['eqro-submissions']: true,
             },
         }
     )

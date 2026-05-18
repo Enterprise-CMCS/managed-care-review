@@ -16,4 +16,4 @@ export {
 } from './web.js'
 
 export { runOtelLocally } from './otel.js'
-export { runLaunchDarklyLocally } from './launchdarkly.js'
+export { runLocalDevConsoleLocally } from './localDevConsole.js'

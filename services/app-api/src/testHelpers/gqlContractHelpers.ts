@@ -8,7 +8,7 @@ import {
     FetchContractWithQuestionsDocument,
     ApproveContractDocument,
     ReverseApproveContractDocument,
-    ReverseUnlockContractDocument,
+    UndoUnlockContractDocument,
     WithdrawContractDocument,
     UndoWithdrawContractDocument,
 } from '../gen/gqlClient'
@@ -185,12 +185,14 @@ async function fetchTestContract(
 async function approveTestContract(
     server: ApolloServer,
     contractID: string,
-    dateApprovalReleasedToState?: string
+    dateApprovalReleasedToState?: string,
+    updatedReason?: string
 ): Promise<Contract> {
     const input = {
         contractID,
         dateApprovalReleasedToState:
             dateApprovalReleasedToState || '2024-11-11',
+        updatedReason,
     }
     const result = await executeGraphQLOperation(server, {
         query: ApproveContractDocument,
@@ -237,31 +239,31 @@ async function reverseApproveTestContract(
     return result.data.reverseApproveContract.contract
 }
 
-async function reverseUnlockTestContract(
+async function undoUnlockTestContract(
     server: ApolloServer,
     contractID: string,
     updatedReason?: string
 ): Promise<Contract> {
     const input = {
         contractID,
-        updatedReason: updatedReason || 'Reversing unlock',
+        updatedReason: updatedReason || 'Undoing unlock',
     }
     const result = await executeGraphQLOperation(server, {
-        query: ReverseUnlockContractDocument,
+        query: UndoUnlockContractDocument,
         variables: { input },
     })
 
     if (result.errors) {
         throw new Error(
-            `reverseUnlockTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
+            `undoUnlockTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
-    if (!result.data.reverseUnlockContract.contract) {
-        throw new Error('reverseUnlockTestContract returned nothing')
+    if (!result.data.undoUnlockContract.contract) {
+        throw new Error('undoUnlockTestContract returned nothing')
     }
 
-    return result.data.reverseUnlockContract.contract
+    return result.data.undoUnlockContract.contract
 }
 
 const fetchTestContractWithQuestions = async (
@@ -721,7 +723,7 @@ export {
     createAndSubmitTestContract,
     approveTestContract,
     reverseApproveTestContract,
-    reverseUnlockTestContract,
+    undoUnlockTestContract,
     fetchTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,

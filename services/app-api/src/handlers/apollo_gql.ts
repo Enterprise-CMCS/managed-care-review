@@ -333,7 +333,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (authMode === 'LOCAL') {
         // Configure for local LD service if configured. Visit the UI using http://localhost:3031/
-        const launchDarklyLocalHost = process.env.LOCAL_LD_SERVICE_URL
+        const launchDarklyLocalHost = process.env.LOCAL_DEV_SERVICE_URL
         launchDarkly = launchDarklyLocalHost
             ? localLDService(launchDarklyLocalHost)
             : offlineLDService()
@@ -449,7 +449,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (authMode === 'LOCAL') {
         Object.assign(config, {
-            localLDServiceUrl: process.env.LOCAL_LD_SERVICE_URL,
+            localDevServiceUrl: process.env.LOCAL_DEV_SERVICE_URL,
         })
     }
 

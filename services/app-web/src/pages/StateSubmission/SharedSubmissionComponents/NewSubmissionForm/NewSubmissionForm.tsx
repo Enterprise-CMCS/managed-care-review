@@ -49,6 +49,10 @@ export const NewSubmission = () => {
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
     const ldClient = useLDClient()
+    const isEQROenabled = ldClient?.variation(
+        featureFlags.EQRO_SUBMISSIONS.flag,
+        featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
     const isSDPEnabled = ldClient?.variation(
         featureFlags.SDP.flag,
         featureFlags.SDP.defaultValue
@@ -68,7 +72,7 @@ export const NewSubmission = () => {
             values.contractSubmissionType ===
                 ContractSubmissionTypeRecord['SDP']
         ) {
-            //TODO: add new env urls to parameter store for val and prod once available
+            //TODO: add new env urls to prod once available
             window.location.href = import.meta.env.VITE_APP_SDP_PORTAL_URL
         } else {
             navigate(
@@ -151,20 +155,22 @@ export const NewSubmission = () => {
                                         labelDescription="Submit your Medicaid and CHIP managed care plans. This includes base contracts, amendments to base contracts, and rate certifications."
                                         tile
                                     />
-                                    <FieldRadio
-                                        id="eqro"
-                                        name="contractSubmissionType"
-                                        label="External Quality Review Organization (EQRO)"
-                                        data-testid="eqro"
-                                        aria-required
-                                        value="eqro"
-                                        list_position={2}
-                                        list_options={2}
-                                        parent_component_heading="Submission type"
-                                        radio_button_title="External Quality Review Organization (EQRO)"
-                                        labelDescription="Submit base contracts and amendments to base contracts between your state and an EQRO."
-                                        tile
-                                    />
+                                    {isEQROenabled && (
+                                        <FieldRadio
+                                            id="eqro"
+                                            name="contractSubmissionType"
+                                            label="External Quality Review Organization (EQRO)"
+                                            data-testid="eqro"
+                                            aria-required
+                                            value="eqro"
+                                            list_position={2}
+                                            list_options={isSDPEnabled ? 3 : 2} // adjust options if SDP is enabled
+                                            parent_component_heading="Submission type"
+                                            radio_button_title="External Quality Review Organization (EQRO)"
+                                            labelDescription="Submit base contracts and amendments to base contracts between your state and an EQRO."
+                                            tile
+                                        />
+                                    )}
                                     {isSDPEnabled && (
                                         <FieldRadio
                                             id="sdp"
@@ -173,8 +179,10 @@ export const NewSubmission = () => {
                                             data-testid="sdp"
                                             aria-required
                                             value="sdp"
-                                            list_position={3}
-                                            list_options={2}
+                                            list_position={
+                                                isEQROenabled ? 3 : 2 // adjust position if EQRO is enabled
+                                            }
+                                            list_options={isEQROenabled ? 3 : 2} // adjust options if EQRO is enabled
                                             parent_component_heading="Submission type"
                                             radio_button_title="State Directed Payment Preprint (SDP)"
                                             labelDescription="Submit preprints to get prior approval for state directed payments"

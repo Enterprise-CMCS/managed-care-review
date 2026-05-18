@@ -2,7 +2,7 @@ import {
     constructTestPostgresServer,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
-import { ReverseUnlockContractDocument } from '../../gen/gqlClient'
+import { UndoUnlockContractDocument } from '../../gen/gqlClient'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
@@ -11,7 +11,7 @@ import {
     createAndUpdateTestContractWithoutRates,
     createAndSubmitTestContractWithRate,
     fetchTestContract,
-    reverseUnlockTestContract,
+    undoUnlockTestContract,
     resubmitTestContract,
     submitTestContract,
     undoWithdrawTestContract,
@@ -27,7 +27,7 @@ import {
 import { testS3Client } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
-describe('reverseUnlockContract', () => {
+describe('undoUnlockContract', () => {
     const mockS3 = testS3Client()
     const mockEmailer = testEmailer(testEmailConfig())
 
@@ -48,7 +48,7 @@ describe('reverseUnlockContract', () => {
         const contract = await createAndSubmitTestContractWithRate(stateServer)
         await unlockTestContract(cmsServer, contract.id, 'Unlocking for edits')
 
-        const reversedContract = await reverseUnlockTestContract(
+        const reversedContract = await undoUnlockTestContract(
             cmsServer,
             contract.id,
             'Unlock was accidental'
@@ -80,7 +80,7 @@ describe('reverseUnlockContract', () => {
 
         await unlockTestContract(cmsServer, contract.id, 'Unlocking by mistake')
 
-        const reversedContract = await reverseUnlockTestContract(
+        const reversedContract = await undoUnlockTestContract(
             cmsServer,
             contract.id,
             'Unlock was accidental'
@@ -162,7 +162,7 @@ describe('reverseUnlockContract', () => {
             contract.id,
             'Temporary unlock before withdraw'
         )
-        const reversedContract = await reverseUnlockTestContract(
+        const reversedContract = await undoUnlockTestContract(
             cmsServer,
             contract.id,
             'Reverse before withdraw'
@@ -228,7 +228,7 @@ describe('reverseUnlockContract', () => {
         )
     })
 
-    it('preserves submission dates and derived date fields after reverse unlock', async () => {
+    it('preserves submission dates and derived date fields after undo unlock', async () => {
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             emailer: mockEmailer,
@@ -295,7 +295,7 @@ describe('reverseUnlockContract', () => {
 
         await unlockTestContract(cmsServer, contractID, 'Unlock by mistake')
 
-        const reversedContract = await reverseUnlockTestContract(
+        const reversedContract = await undoUnlockTestContract(
             cmsServer,
             contractID,
             'Reverse mistaken unlock'
@@ -350,7 +350,7 @@ describe('reverseUnlockContract', () => {
         const withdrawnContract = await withdrawTestContract(
             cmsServer,
             contractID,
-            'Withdraw after reverse unlock'
+            'Withdraw after undo unlock'
         )
 
         expect(withdrawnContract.reviewStatus).toBe('WITHDRAWN')
@@ -409,7 +409,7 @@ describe('reverseUnlockContract', () => {
             contractA.id
         )
 
-        const reversedContractB = await reverseUnlockTestContract(
+        const reversedContractB = await undoUnlockTestContract(
             cmsServer,
             contractB.id,
             'Reverse linked-rate unlock'
@@ -450,7 +450,7 @@ describe('reverseUnlockContract', () => {
         expect(fetchedLinkedRate.consolidatedStatus).toBe('SUBMITTED')
     })
 
-    it('restores child rates to their submitted state after reverse unlock', async () => {
+    it('restores child rates to their submitted state after undo unlock', async () => {
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             emailer: mockEmailer,
@@ -482,7 +482,7 @@ describe('reverseUnlockContract', () => {
             submittedContract.id
         )
 
-        const reversedContract = await reverseUnlockTestContract(
+        const reversedContract = await undoUnlockTestContract(
             cmsServer,
             submittedContract.id,
             'Reverse child rate unlock'
@@ -532,7 +532,7 @@ describe('reverseUnlockContract', () => {
             'First unlock of child rate contract'
         )
 
-        await reverseUnlockTestContract(
+        await undoUnlockTestContract(
             cmsServer,
             submittedContract.id,
             'First reverse of child rate contract'
@@ -551,7 +551,7 @@ describe('reverseUnlockContract', () => {
             submittedContract.id
         )
 
-        const reversedAgain = await reverseUnlockTestContract(
+        const reversedAgain = await undoUnlockTestContract(
             cmsServer,
             submittedContract.id,
             'Second reverse of child rate contract'
@@ -595,11 +595,11 @@ describe('reverseUnlockContract', () => {
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const result = await executeGraphQLOperation(cmsServer, {
-            query: ReverseUnlockContractDocument,
+            query: UndoUnlockContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
-                    updatedReason: 'Trying to reverse a submitted contract',
+                    updatedReason: 'Trying to undo unlock a submitted contract',
                 },
             },
         })
@@ -611,7 +611,7 @@ describe('reverseUnlockContract', () => {
 
         expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(result.errors[0].message).toBe(
-            'Attempted to reverse unlock for contract with wrong status: SUBMITTED'
+            'Attempted to undo unlock for contract with wrong status: SUBMITTED'
         )
     })
 
@@ -641,7 +641,7 @@ describe('reverseUnlockContract', () => {
         await unlockTestContract(cmsServer, contract.id, 'Unlocking for edits')
 
         const result = await executeGraphQLOperation(actingStateServer, {
-            query: ReverseUnlockContractDocument,
+            query: UndoUnlockContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
@@ -657,7 +657,7 @@ describe('reverseUnlockContract', () => {
 
         expect(result.errors[0].extensions?.code).toBe('FORBIDDEN')
         expect(result.errors[0].message).toBe(
-            'user not authorized to reverse unlock a contract'
+            'user not authorized to undo unlock a contract'
         )
     })
 })

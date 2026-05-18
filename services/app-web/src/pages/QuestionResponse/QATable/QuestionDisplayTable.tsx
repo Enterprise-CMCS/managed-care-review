@@ -14,12 +14,13 @@ type QuestionDisplayTablePropType = {
 export const QuestionDisplayTable = ({
     documents,
     user,
-    onlyDisplayInitial, // used when we only care about initial question
+    onlyDisplayInitial, // used when we only care about initial question documents
     ...rest
 }: QuestionDisplayTablePropType) => {
     const displayDocuments = onlyDisplayInitial
-        ? [documents[documents.length - 1]]
+        ? documents.filter((doc) => doc.addedBy.__typename !== 'StateUser')
         : documents
+
     return (
         <table
             className={`borderTopLinearGradient ${styles.qaDocumentTable}`}

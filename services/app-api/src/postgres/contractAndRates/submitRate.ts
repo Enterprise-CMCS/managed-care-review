@@ -40,7 +40,7 @@ async function submitRateInsideTransaction(
         where: {
             rateID,
             submitInfoID: null,
-            reverseUnlockInfoID: null,
+            undoUnlockInfoID: null,
         },
     })
 

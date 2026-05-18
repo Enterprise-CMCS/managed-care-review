@@ -58,7 +58,7 @@ const DRAFT_PARENT_PLACEHOLDER = 'DRAFT_PARENT_REPLACE_ME'
 
 const includeContractFormData = {
     unlockInfo: includeUpdateInfo,
-    reverseUnlockInfo: includeUpdateInfo,
+    undoUnlockInfo: includeUpdateInfo,
     submitInfo: includeUpdateInfo,
     contract: true,
 
@@ -84,7 +84,7 @@ interface RevisionWithStatusInfo {
     createdAt: Date
     submitInfo?: RevisionStatusInfo | null
     unlockInfo?: RevisionStatusInfo | null
-    reverseUnlockInfo?: RevisionStatusInfo | null
+    undoUnlockInfo?: RevisionStatusInfo | null
 }
 
 function convertUpdateInfoToDomainModel(
@@ -103,11 +103,11 @@ function convertUpdateInfoToDomainModel(
 
 // -----
 
-// A reversed unlock revision will have reverseUnlockInfo and unlockInfo
+// A reversed unlock revision will have undoUnlockInfo and unlockInfo
 function isReversedUnlockedRevision(revision: RevisionWithStatusInfo): boolean {
     return (
         revision.unlockInfo != null &&
-        revision.reverseUnlockInfo != null &&
+        revision.undoUnlockInfo != null &&
         revision.submitInfo == null
     )
 }
@@ -117,13 +117,13 @@ function isUnlockedRevision(revision: RevisionWithStatusInfo): boolean {
     return (
         revision.unlockInfo != null &&
         revision.submitInfo == null &&
-        revision.reverseUnlockInfo == null
+        revision.undoUnlockInfo == null
     )
 }
 
 // A draft revision can be either the initial draft or an unlocked draft.
 function isDraftRevision(revision: RevisionWithStatusInfo): boolean {
-    return revision.submitInfo == null && revision.reverseUnlockInfo == null
+    return revision.submitInfo == null && revision.undoUnlockInfo == null
 }
 
 // A submitted revision will always have a submit info.
@@ -133,7 +133,7 @@ function isSubmittedRevision(revision: RevisionWithStatusInfo): boolean {
 
 /**
  * Returns the latest revision that should be treated as current.
- * Revisions that were unlocked and then reverse unlocked are kept for history, but are not current.
+ * Revisions that were unlocked and then undo unlocked are kept for history, but are not current.
  */
 function getLatestActiveRevision<T extends RevisionWithStatusInfo>(
     revisions: T[]
@@ -276,7 +276,7 @@ interface RateRevisionWithSubmittedContracts {
             contractID: string
         }>
     } | null
-    reverseUnlockInfo?: unknown | null
+    undoUnlockInfo?: unknown | null
     relatedSubmissions: Array<unknown>
 }
 
@@ -467,7 +467,7 @@ const getRelatedContracts = (
 const includeRateFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
-    reverseUnlockInfo: includeUpdateInfo,
+    undoUnlockInfo: includeUpdateInfo,
     rate: true,
 
     rateDocuments: {
@@ -517,13 +517,13 @@ const includeRateFormData = {
 const includeStrippedRateFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
-    reverseUnlockInfo: includeUpdateInfo,
+    undoUnlockInfo: includeUpdateInfo,
 } satisfies Prisma.RateRevisionTableInclude
 
 const includeStrippedContractFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
-    reverseUnlockInfo: includeUpdateInfo,
+    undoUnlockInfo: includeUpdateInfo,
     contract: true,
 } satisfies Prisma.ContractRevisionTableInclude
 
