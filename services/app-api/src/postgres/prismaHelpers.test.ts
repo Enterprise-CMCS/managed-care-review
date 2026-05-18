@@ -17,7 +17,7 @@ describe('runTransactionWithRowLock', () => {
         vi.restoreAllMocks()
     })
 
-    it('serializes concurrent work on the same locked contract row', async () => {
+    it('prevents concurrent updates on the same locked contract row', async () => {
         const client = await sharedTestPrismaClient()
         const contract = must(
             await insertDraftContract(client, mockInsertContractArgs({}))
