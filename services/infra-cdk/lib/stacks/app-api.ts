@@ -865,13 +865,6 @@ export class AppApiStack extends BaseStack {
         )
 
         // Get values from environment variables with SSM/Secrets Manager fallbacks
-        const otelCollectorUrl =
-            process.env.API_APP_OTEL_COLLECTOR_URL ||
-            StringParameter.valueForStringParameter(
-                this,
-                '/configuration/api_app_otel_collector_url'
-            )
-
         const emailerMode =
             process.env.EMAILER_MODE ||
             StringParameter.valueForStringParameter(
@@ -923,7 +916,6 @@ export class AppApiStack extends BaseStack {
             // Database URL set to AWS_SM to fetch connection from Secrets Manager at runtime
             DATABASE_URL: process.env.DATABASE_URL || 'AWS_SM',
             VITE_APP_AUTH_MODE: process.env.VITE_APP_AUTH_MODE || 'AWS_COGNITO',
-            API_APP_OTEL_COLLECTOR_URL: otelCollectorUrl,
             SECRETS_MANAGER_SECRET: Fn.importValue(
                 `${postgresStackName}-PostgresSecretName`
             ),

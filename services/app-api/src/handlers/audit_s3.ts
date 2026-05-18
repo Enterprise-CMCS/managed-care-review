@@ -1,5 +1,5 @@
 import type { APIGatewayProxyResultV2, Handler } from 'aws-lambda'
-import { initTracer, recordException } from '../otel/otel_handler'
+import { initTracer, recordException, flushTracer } from '../otel/otel_handler'
 import { configurePostgres } from './configuration'
 import { NewPostgresStore, NotFoundError } from '../postgres'
 import type { Store } from '../postgres'
@@ -14,7 +14,18 @@ import type {
 const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     const serviceName = 'audit-s3'
     initTracer(serviceName)
+    try {
+        return await run(serviceName)
+    } finally {
+        try {
+            await flushTracer()
+        } catch (flushErr) {
+            console.warn('otel: flush failed', flushErr)
+        }
+    }
+}
 
+const run = async (serviceName: string): Promise<APIGatewayProxyResultV2> => {
     // get the relevant env vars and check that they exist.
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
