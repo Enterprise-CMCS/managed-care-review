@@ -410,6 +410,110 @@ describe('undoWithdrawRate', () => {
         )
     })
 
+    it('denies OAuth client without write permissions', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw before OAuth test')
+
+        const oauthServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: [],
+                    isDelegatedUser: false,
+                },
+            },
+        })
+
+        const undoWithdrawResult = await executeGraphQLOperation(oauthServer, {
+            query: UndoWithdrawnRateDocument,
+            variables: {
+                input: {
+                    rateID,
+                    updatedReason: 'OAuth undo withdraw attempt',
+                },
+            },
+        })
+
+        expect(undoWithdrawResult.errors).toBeDefined()
+        expect(undoWithdrawResult.errors?.[0].extensions?.code).toBe(
+            'FORBIDDEN'
+        )
+        expect(undoWithdrawResult.errors?.[0].message).toBe(
+            'OAuth client does not have write permissions'
+        )
+    })
+
+    it('allows delegated OAuth client with submission scope to undo withdraw a rate', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw before delegated OAuth test'
+        )
+
+        const oauthServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+                oauthClient: {
+                    clientId: 'test-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            },
+        })
+
+        const undoWithdrawResult = await executeGraphQLOperation(oauthServer, {
+            query: UndoWithdrawnRateDocument,
+            variables: {
+                input: {
+                    rateID,
+                    updatedReason: 'Delegated OAuth undo withdraw',
+                },
+            },
+        })
+
+        expect(undoWithdrawResult.errors).toBeUndefined()
+        expect(undoWithdrawResult.data?.undoWithdrawRate.rate).toEqual(
+            expect.objectContaining({
+                reviewStatus: 'UNDER_REVIEW',
+                consolidatedStatus: 'RESUBMITTED',
+            })
+        )
+    })
+
     it('sends emails to CMS and state contacts when a rate is unwithdrawn', async () => {
         const emailConfig = testEmailConfig()
         const mockEmailer = testEmailer(emailConfig)
