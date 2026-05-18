@@ -10,7 +10,7 @@ import {
 } from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { runTransactionWithRowLock } from '../prismaHelpers'
+import { parseErrorToError } from '@mc-review/helpers'
 
 export async function insertContractQuestionResponse(
     client: ExtendedPrismaClient,
@@ -24,58 +24,61 @@ export async function insertContractQuestionResponse(
         s3Key: document.s3Key,
     }))
 
-    return runTransactionWithRowLock({
-        client,
-        operationName: 'insertContractQuestionResponse',
-        table: 'ContractQuestion',
-        id: response.questionID,
-        transaction: async (tx) => {
-            const question = await tx.contractQuestion.findFirst({
-                where: {
-                    id: response.questionID,
-                },
-                include: {
-                    actions: {
-                        orderBy: {
-                            createdAt: 'desc',
-                        },
-                        take: 1,
+    try {
+        const question = await client.contractQuestion.findFirst({
+            where: {
+                id: response.questionID,
+            },
+            include: {
+                actions: {
+                    orderBy: {
+                        createdAt: 'desc',
                     },
+                    take: 1,
                 },
-            })
+            },
+        })
 
-            if (!question) {
-                return new NotFoundError('Question was not found to respond to')
-            }
+        if (!question) {
+            return new NotFoundError('Question was not found to respond to')
+        }
 
-            if (isDeleted(question)) {
-                return new Error(
-                    `Cannot create response for question with the ID: ${response.questionID}. Question was deleted.`
-                )
-            }
+        if (isDeleted(question)) {
+            return new Error(
+                `Cannot create response for question with the ID: ${response.questionID}. Question was deleted.`
+            )
+        }
 
-            const result = await tx.contractQuestion.update({
-                where: {
-                    id: response.questionID,
-                },
-                data: {
-                    responses: {
-                        create: {
-                            addedBy: {
-                                connect: {
-                                    id: user.id,
-                                },
+        const result = await client.contractQuestion.update({
+            where: {
+                id: response.questionID,
+            },
+            data: {
+                responses: {
+                    create: {
+                        addedBy: {
+                            connect: {
+                                id: user.id,
                             },
-                            documents: {
-                                create: documents,
-                            },
+                        },
+                        documents: {
+                            create: documents,
                         },
                     },
                 },
-                include: questionInclude,
-            })
+            },
+            include: questionInclude,
+        })
 
-            return contractQuestionPrismaToDomainType(result)
-        },
-    })
+        return contractQuestionPrismaToDomainType(result)
+    } catch (e) {
+        const parsedError = parseErrorToError(e)
+        // Return a NotFoundError if prisma fails on the primary key constraint
+        // An operation failed because it depends on one or more records
+        // that were required but not found.
+        if ((parsedError as unknown as { code?: string }).code === 'P2025') {
+            return new NotFoundError('Question was not found to respond to')
+        }
+        return parsedError
+    }
 }
