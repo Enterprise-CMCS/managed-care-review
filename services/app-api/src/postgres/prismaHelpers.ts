@@ -1,13 +1,20 @@
 import { parseErrorToError } from '@mc-review/helpers'
-import { NotFoundError } from './postgresErrors'
+import { NotFoundError, UserInputPostgresError } from './postgresErrors'
 import type { ExtendedPrismaClient } from './prismaClient'
-import type { Prisma } from '../generated/client'
+import { Prisma } from '../generated/client'
 import type { PrismaTransactionType } from './prismaTypes'
+
+type LockableTables =
+    | 'ContractTable'
+    | 'RateTable'
+    | 'ContractQuestion'
+    | 'RateQuestion'
 
 type RunTransactionWithRowLockArgs<T> = {
     client: ExtendedPrismaClient
     operationName: string
-    lock: (tx: PrismaTransactionType) => Promise<void | Error>
+    table: LockableTables
+    id: string
     transaction: (tx: PrismaTransactionType) => Promise<T | Error>
     transactionOptions?: {
         maxWait?: number
@@ -17,24 +24,28 @@ type RunTransactionWithRowLockArgs<T> = {
 }
 
 /**
- * Helper function that row-locks records before database writes so concurrent
- * updates to the same record cannot run before the other finishes.
+ * Row-locks a record before database writes so concurrent updates to the same
+ * record cannot run before the other finishes.
  *
  * Callers must perform validation inside the transaction after the lock is
  * acquired, so a later transaction re-checks current state instead of
  * overwriting changes made by the first one.
+ *
+ * @param args.client Prisma client used to run the transaction.
+ * @param args.operationName Operation name used in error logging.
+ * @param args.table Table containing the row to lock before writes begin.
+ * @param args.id Identifier of the row to lock.
+ * @param args.transaction Store write logic to run after the row lock is acquired.
+ * @param args.transactionOptions Optional Prisma transaction settings.
  */
 async function runTransactionWithRowLock<T>(
     args: RunTransactionWithRowLockArgs<T>
 ): Promise<T | Error> {
-    const { client, lock, transaction, transactionOptions } = args
+    const { client, table, id, transaction, transactionOptions } = args
 
     try {
         return await client.$transaction(async (tx) => {
-            const lockResult = await lock(tx)
-            if (lockResult instanceof Error) {
-                throw lockResult
-            }
+            await lockTableRowForUpdate(tx, table, id)
 
             const result = await transaction(tx)
             if (result instanceof Error) {
@@ -44,87 +55,44 @@ async function runTransactionWithRowLock<T>(
             return result
         }, transactionOptions)
     } catch (err) {
+        if (
+            err instanceof NotFoundError ||
+            err instanceof UserInputPostgresError
+        ) {
+            return err
+        }
+
         console.error(`Prisma error ${args.operationName}`, err)
         return parseErrorToError(err)
     }
 }
 
-async function lockContractRowForUpdate(
+async function lockTableRowForUpdate(
     tx: PrismaTransactionType,
-    contractID: string
-): Promise<void | Error> {
-    const lockedContractRows = await tx.$queryRaw<Array<{ id: string }>>`
-        SELECT id
-        FROM "ContractTable"
-        WHERE id = ${contractID}
-        FOR UPDATE
-    `
+    table: LockableTables,
+    id: string
+) {
+    const lockableTables = {
+        ContractTable: Prisma.raw('"ContractTable"'),
+        RateTable: Prisma.raw('"RateTable"'),
+        ContractQuestion: Prisma.raw('"ContractQuestion"'),
+        RateQuestion: Prisma.raw('"RateQuestion"'),
+    } as const
 
-    if (lockedContractRows.length === 0) {
-        return new NotFoundError(
-            `Contract with id ${contractID} was not found for row lock.`
+    const lockedRows = await tx.$queryRaw<Array<{ id: string }>>(
+        Prisma.sql`
+            SELECT id
+            FROM ${lockableTables[table]}
+            WHERE id = ${id}
+            FOR UPDATE
+        `
+    )
+
+    if (lockedRows.length === 0) {
+        throw new NotFoundError(
+            `${table} with id ${id} was not found for row lock.`
         )
     }
 }
 
-async function lockContractQuestionRowForUpdate(
-    tx: PrismaTransactionType,
-    questionID: string
-): Promise<void | Error> {
-    const lockedQuestionRows = await tx.$queryRaw<Array<{ id: string }>>`
-        SELECT id
-        FROM "ContractQuestion"
-        WHERE id = ${questionID}
-        FOR UPDATE
-    `
-
-    if (lockedQuestionRows.length === 0) {
-        return new NotFoundError(
-            `Question with id ${questionID} was not found for row lock.`
-        )
-    }
-}
-
-async function lockRateRowForUpdate(
-    tx: PrismaTransactionType,
-    rateID: string
-): Promise<void | Error> {
-    const lockedRateRows = await tx.$queryRaw<Array<{ id: string }>>`
-        SELECT id
-        FROM "RateTable"
-        WHERE id = ${rateID}
-        FOR UPDATE
-    `
-
-    if (lockedRateRows.length === 0) {
-        return new NotFoundError(
-            `Rate with id ${rateID} was not found for row lock.`
-        )
-    }
-}
-
-async function lockRateQuestionRowForUpdate(
-    tx: PrismaTransactionType,
-    questionID: string
-): Promise<void | Error> {
-    const lockedQuestionRows = await tx.$queryRaw<Array<{ id: string }>>`
-        SELECT id
-        FROM "RateQuestion"
-        WHERE id = ${questionID}
-        FOR UPDATE
-    `
-
-    if (lockedQuestionRows.length === 0) {
-        return new NotFoundError(
-            `Rate question with id ${questionID} was not found for row lock.`
-        )
-    }
-}
-
-export {
-    runTransactionWithRowLock,
-    lockContractRowForUpdate,
-    lockRateRowForUpdate,
-    lockContractQuestionRowForUpdate,
-    lockRateQuestionRowForUpdate,
-}
+export { runTransactionWithRowLock }
