@@ -31,16 +31,14 @@ async function approveContractInsideTransaction(
     })
 
     if (!contract) {
-        return new NotFoundError(
+        throw new NotFoundError(
             `PRISMA ERROR: Cannot find contract with id: ${contractID}`
         )
     }
 
     const latestReviewStatusAction = contract.reviewStatusActions[0]
     if (latestReviewStatusAction?.actionType === 'MARK_AS_APPROVED') {
-        return new Error(
-            'Cannot approve contract: contract is already approved'
-        )
+        throw new Error('Cannot approve contract: contract is already approved')
     }
 
     // generate approval notice info and update contract
