@@ -45,7 +45,7 @@ importers:
         version: 1.7.0(axe-core@4.11.4)(cypress@13.17.0)
       danger:
         specifier: ^13.0.4
-        version: 13.0.5(encoding@0.1.13)
+        version: 13.0.5
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -640,10 +640,10 @@ importers:
         version: 7.0.0(graphql@16.13.2)
       '@graphql-codegen/typescript':
         specifier: ^5.0.8
-        version: 5.0.8(encoding@0.1.13)(graphql@16.13.2)
+        version: 5.0.8(graphql@16.13.2)
       '@graphql-codegen/typescript-operations':
         specifier: ^4.2.1
-        version: 4.2.1(encoding@0.1.13)(graphql@16.13.2)
+        version: 4.2.1(graphql@16.13.2)
       '@graphql-codegen/typescript-resolvers':
         specifier: ^5.1.7
         version: 5.1.7(graphql@16.13.2)
@@ -733,10 +733,10 @@ importers:
         version: 5.0.4(vite@7.3.3(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.47.1)(tsx@4.21.0)(yaml@2.9.0))
       amazon-cognito-identity-js:
         specifier: ^6.3.12
-        version: 6.3.12(encoding@0.1.13)
+        version: 6.3.12
       aws-amplify:
         specifier: ^5.3.33
-        version: 5.3.33(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+        version: 5.3.33(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       axios:
         specifier: ^1.16.1
         version: 1.16.1
@@ -783,8 +783,8 @@ importers:
         specifier: ^5.7.2
         version: 5.7.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       react-router-dom:
-        specifier: ^6.23.1
-        version: 6.23.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+        specifier: ^7.15.1
+        version: 7.15.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       react-select:
         specifier: ^5.10.2
         version: 5.10.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -1064,25 +1064,25 @@ importers:
         version: 3.1047.0
       '@aws-solutions-constructs/aws-apigateway-lambda':
         specifier: 2.101.0
-        version: 2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+        version: 2.101.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-cloudfront-s3':
         specifier: 2.101.0
-        version: 2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+        version: 2.101.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.101.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-cognito-apigateway-lambda':
         specifier: 2.92.1
-        version: 2.92.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+        version: 2.92.1(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-eventbridge-lambda':
         specifier: 2.92.1
-        version: 2.92.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+        version: 2.92.1(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-lambda-secretsmanager':
         specifier: 2.98.0
-        version: 2.98.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+        version: 2.98.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-s3-lambda':
         specifier: 2.100.1
-        version: 2.100.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+        version: 2.100.1(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-wafwebacl-apigateway':
         specifier: 2.99.0
-        version: 2.99.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+        version: 2.99.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib:
         specifier: 2.254.0
         version: 2.254.0(constructs@10.5.1)
@@ -1486,13 +1486,6 @@ packages:
 
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.1':
     resolution: {integrity: sha512-We4bmHaowOPHr+IQR4/FyTGjRfjgBj4ICMjtqmJeBDWad3Q/6St12NT07leNtyuukv2qMhtSZJQorD8KpKTwRA==}
-
-  '@aws-cdk/cloud-assembly-schema@48.20.0':
-    resolution: {integrity: sha512-+eeiav9LY4wbF/EFuCt/vfvi/Zoxo8bf94PW5clbMraChEliq83w4TbRVy0jB9jE0v1ooFTtIjSQkowSPkfISg==}
-    engines: {node: '>= 18.0.0'}
-    bundledDependencies:
-      - jsonschema
-      - semver
 
   '@aws-cdk/cloud-assembly-schema@53.23.0':
     resolution: {integrity: sha512-/8bIjpLrr34pMMt+/wQo1bNssHS8squz2aXKz3TVWDKhZg7TxZK7boMY1WQND9APUEtavopIBsrPqwC4Z3qESw==}
@@ -2056,21 +2049,21 @@ packages:
       aws-cdk-lib: ^2.238.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/core@2.94.0':
-    resolution: {integrity: sha512-l/VerSUnTcBRrvb/unohLeWi1rsGrtN0TSHuGQrDlKTLoVQWvYquCwCY9Z/+PLymh+LHnxhy1WrSTXdY4Uru2g==}
+  '@aws-solutions-constructs/core@2.101.0':
+    resolution: {integrity: sha512-5pXH1WIGC/gAgq6cjoa5Xkjfi81QFfX9vS/vT1yJUa8mtoIuHmNtUsMgHGI4ReiBebQK5oIg428KhF+bjyI+og==}
     peerDependencies:
-      aws-cdk-lib: ^2.219.0
+      aws-cdk-lib: ^2.248.0
       constructs: ^10.0.0
     bundledDependencies:
       - deepmerge
       - npmlog
       - deep-diff
 
-  '@aws-solutions-constructs/resources@2.94.0':
-    resolution: {integrity: sha512-zARk3WIFcnSXZGN8OV/XqQtc3aJeH7CQFKetWBuXaYeX932LAk/R8ds0UOThzxe1s86LFExrxrkb9f4uFOi3tA==}
+  '@aws-solutions-constructs/resources@2.101.0':
+    resolution: {integrity: sha512-YjGOUx/KEqvEHCceoJ9H3xYBXwowzLyhYGML0UYDTkmhjONP06ayKc95GLpib4QltI9CWeOqpfPVKmdjYstq3w==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.94.0
-      aws-cdk-lib: ^2.219.0
+      '@aws-solutions-constructs/core': 2.101.0
+      aws-cdk-lib: ^2.248.0
       constructs: ^10.0.0
     bundledDependencies:
       - '@aws-sdk/client-kms'
@@ -5465,10 +5458,6 @@ packages:
       '@types/react':
         optional: true
 
-  '@remix-run/router@1.16.1':
-    resolution: {integrity: sha512-es2g3dq6Nb07iFxGk5GuHN20RwBZOsuDQN7izWIisUcv9r+d2C5jQxqmgkdebXgReWfiyUabcki6Fg77mSNrig==}
-    engines: {node: '>=14.0.0'}
-
   '@repeaterjs/repeater@3.0.6':
     resolution: {integrity: sha512-Javneu5lsuhwNCryN+pXH93VPQ8g0dBX7wItHFgYiwQmzE1sVdg5tWHiOgHywzL2W21XQopa7IwIEnNbmeUJYA==}
 
@@ -7700,6 +7689,10 @@ packages:
     resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
     engines: {node: '>= 0.6'}
 
+  cookie@1.1.1:
+    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
+    engines: {node: '>=18'}
+
   core-js-compat@3.49.0:
     resolution: {integrity: sha512-VQXt1jr9cBz03b331DFDCCP90b3fanciLkgiOoy8SBHy06gNf+vQ1A3WFLqG7I8TipYIKeYK9wxd0tUrvHcOZA==}
 
@@ -8139,9 +8132,6 @@ packages:
   encodeurl@2.0.0:
     resolution: {integrity: sha512-Q0n9HRi4m6JuGIV1eFlmvJB7ZEVxu93IrMyiMsGC0lrMJMWzRgx6WGquyfQgZVb31vhGgXnfmPNNXmxnOkRBrg==}
     engines: {node: '>= 0.8'}
-
-  encoding@0.1.13:
-    resolution: {integrity: sha512-ETBauow1T35Y/WZMkio9jiM0Z5xjHHmJ4XmjZOq1l/dXz3lr2sRn87nJy20RupqSh1F2m3HHPSp8ShIPQJrJ3A==}
 
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
@@ -9135,10 +9125,6 @@ packages:
   hyperlinker@1.0.0:
     resolution: {integrity: sha512-Ty8UblRWFEcfSuIaajM34LdPXIhbs1ajEX/BBPv24J+enSVaEVY63xQ6lTO9VRYS5LAoghIG0IDJ+p+IPzKUQQ==}
     engines: {node: '>=4'}
-
-  iconv-lite@0.6.3:
-    resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
-    engines: {node: '>=0.10.0'}
 
   iconv-lite@0.7.2:
     resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
@@ -11174,18 +11160,22 @@ packages:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
     engines: {node: '>=0.10.0'}
 
-  react-router-dom@6.23.1:
-    resolution: {integrity: sha512-utP+K+aSTtEdbWpC+4gxhdlPFwuEfDKq8ZrPFU65bbRJY+l706qjR7yaidBpo3MSeA/fzwbXWbKBI6ftOnP3OQ==}
-    engines: {node: '>=14.0.0'}
+  react-router-dom@7.15.1:
+    resolution: {integrity: sha512-AzF62gjY6U9rkMq4RfP/r2EVtQ7DMfNMjyOp/flLTCrtRylLiK4wT4pSq6O8rOXZ2eXdZYJPEYe+ifomiv+Igg==}
+    engines: {node: '>=20.0.0'}
     peerDependencies:
-      react: '>=16.8'
-      react-dom: '>=16.8'
+      react: '>=18'
+      react-dom: '>=18'
 
-  react-router@6.23.1:
-    resolution: {integrity: sha512-fzcOaRF69uvqbbM7OhvQyBTFDVrrGlsFdS3AL+1KfIBtGETibHzi3FkoTRyiDJnWNc2VxrfvR+657ROHjaNjqQ==}
-    engines: {node: '>=14.0.0'}
+  react-router@7.15.1:
+    resolution: {integrity: sha512-R8rl9HhgikFYoPJymnUtPXWbnDb3oget6lQnfIoupbt61aT9aOhRkDsY2XRhZRyX1Z/8a5sL74fXmFNm3NRK5A==}
+    engines: {node: '>=20.0.0'}
     peerDependencies:
-      react: '>=16.8'
+      react: '>=18'
+      react-dom: '>=18'
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
 
   react-select-event@5.5.1:
     resolution: {integrity: sha512-goAx28y0+iYrbqZA2FeRTreHHs/ZtSuKxtA+J5jpKT5RHPCbVZJ4MqACfPnWyFXsEec+3dP5bCrNTxIX8oYe9A==}
@@ -11531,6 +11521,9 @@ packages:
 
   set-blocking@2.0.0:
     resolution: {integrity: sha512-KiKBS8AnWGEyLzofFfmvKwpdPzqiy16LvQfK3yv/fVH7Bj13/wl3JSR1J+rfgRE9q7xUJK4qvgS8raSOeLUehw==}
+
+  set-cookie-parser@2.7.2:
+    resolution: {integrity: sha512-oeM1lpU/UvhTxw+g3cIfxXHyJRc/uidd3yK1P242gzHds0udQBYzs3y8j4gCCW+ZJ7ad0yctld8RYO+bdurlvw==}
 
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
@@ -13164,7 +13157,7 @@ snapshots:
 
   '@apollo/utils.withrequired@3.0.0': {}
 
-  '@ardatan/relay-compiler@12.0.0(encoding@0.1.13)(graphql@16.13.2)':
+  '@ardatan/relay-compiler@12.0.0(graphql@16.13.2)':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/generator': 7.29.1
@@ -13175,20 +13168,20 @@ snapshots:
       babel-preset-fbjs: 3.4.0(@babel/core@7.29.0)
       chalk: 4.1.2
       fb-watchman: 2.0.2
-      fbjs: 3.0.5(encoding@0.1.13)
+      fbjs: 3.0.5
       glob: 7.2.3
       graphql: 16.13.2
       immutable: 5.1.5
       invariant: 2.2.4
       nullthrows: 1.1.1
-      relay-runtime: 12.0.0(encoding@0.1.13)
+      relay-runtime: 12.0.0
       signedsource: 1.0.0
       yargs: 15.4.1
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  '@ardatan/relay-compiler@12.0.3(encoding@0.1.13)(graphql@16.13.2)':
+  '@ardatan/relay-compiler@12.0.3(graphql@16.13.2)':
     dependencies:
       '@babel/generator': 7.29.1
       '@babel/parser': 7.29.3
@@ -13199,7 +13192,7 @@ snapshots:
       immutable: 5.1.5
       invariant: 2.2.4
       nullthrows: 1.1.1
-      relay-runtime: 12.0.0(encoding@0.1.13)
+      relay-runtime: 12.0.0
       signedsource: 1.0.0
     transitivePeerDependencies:
       - encoding
@@ -13241,13 +13234,13 @@ snapshots:
 
   '@asamuzakjp/nwsapi@2.3.9': {}
 
-  '@aws-amplify/analytics@6.5.17(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/analytics@6.5.17(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/cache': 5.1.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-sdk/client-firehose': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-sdk/client-kinesis': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-sdk/client-personalize-events': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/cache': 5.1.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-sdk/client-firehose': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-sdk/client-kinesis': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-sdk/client-personalize-events': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/util-utf8-browser': 3.6.1
       lodash: 4.18.1
       tslib: 1.14.1
@@ -13256,13 +13249,13 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/api-graphql@3.4.27(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/api-graphql@3.4.27(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/api-rest': 3.5.18(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/auth': 5.6.19(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/cache': 5.1.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/pubsub': 5.6.6(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/api-rest': 3.5.18(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/auth': 5.6.19(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/cache': 5.1.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/pubsub': 5.6.6(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       graphql: 15.8.0
       tslib: 1.14.1
       uuid: 3.4.0
@@ -13272,9 +13265,9 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/api-rest@3.5.18(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/api-rest@3.5.18(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       axios: 1.13.6
       tslib: 1.14.1
       url: 0.11.0
@@ -13283,20 +13276,20 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/api@5.4.21(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/api@5.4.21(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/api-graphql': 3.4.27(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/api-rest': 3.5.18(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/api-graphql': 3.4.27(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/api-rest': 3.5.18(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       tslib: 1.14.1
     transitivePeerDependencies:
       - debug
       - encoding
       - react-native
 
-  '@aws-amplify/auth@5.6.19(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/auth@5.6.19(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      amazon-cognito-identity-js: 6.3.16(encoding@0.1.13)
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      amazon-cognito-identity-js: 6.3.16
       buffer: 4.9.2
       tslib: 1.14.1
       url: 0.11.0
@@ -13304,23 +13297,23 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/cache@5.1.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/cache@5.1.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       tslib: 1.14.1
     transitivePeerDependencies:
       - encoding
       - react-native
 
-  '@aws-amplify/core@5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/core@5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-js': 1.2.2
-      '@aws-sdk/client-cloudwatch-logs': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/client-cloudwatch-logs': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/types': 3.6.1
       '@aws-sdk/util-hex-encoding': 3.6.1
       '@types/node-fetch': 2.6.4
-      isomorphic-unfetch: 3.1.0(encoding@0.1.13)
-      react-native-url-polyfill: 1.3.0(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      isomorphic-unfetch: 3.1.0
+      react-native-url-polyfill: 1.3.0(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       tslib: 1.14.1
       universal-cookie: 7.2.2
       zen-observable-ts: 0.8.19
@@ -13328,13 +13321,13 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/datastore@4.7.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/datastore@4.7.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/api': 5.4.21(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/auth': 5.6.19(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/pubsub': 5.6.6(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      amazon-cognito-identity-js: 6.3.16(encoding@0.1.13)
+      '@aws-amplify/api': 5.4.21(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/auth': 5.6.19(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/pubsub': 5.6.6(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      amazon-cognito-identity-js: 6.3.16
       buffer: 4.9.2
       idb: 5.0.6
       immer: 9.0.6
@@ -13347,9 +13340,9 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/geo@2.3.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/geo@2.3.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/client-location': 3.982.0
       '@turf/boolean-clockwise': 6.5.0
       camelcase-keys: 6.2.2
@@ -13359,9 +13352,9 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/interactions@5.2.24(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/interactions@5.2.24(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/client-lex-runtime-service': 3.982.0
       '@aws-sdk/client-lex-runtime-v2': 3.982.0
       base-64: 1.0.0
@@ -13373,10 +13366,10 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/notifications@1.6.18(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/notifications@1.6.18(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/cache': 5.1.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/cache': 5.1.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-amplify/rtn-push-notification': 1.1.15
       lodash: 4.18.1
       uuid: 3.4.0
@@ -13384,15 +13377,15 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/predictions@5.5.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/predictions@5.5.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/storage': 5.9.20(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-sdk/client-comprehend': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-sdk/client-polly': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-sdk/client-rekognition': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-sdk/client-textract': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-sdk/client-translate': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/storage': 5.9.20(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-sdk/client-comprehend': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-sdk/client-polly': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-sdk/client-rekognition': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-sdk/client-textract': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-sdk/client-translate': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/eventstream-marshaller': 3.6.1
       '@aws-sdk/util-utf8-node': 3.6.1
       buffer: 4.9.2
@@ -13402,11 +13395,11 @@ snapshots:
       - encoding
       - react-native
 
-  '@aws-amplify/pubsub@5.6.6(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/pubsub@5.6.6(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/auth': 5.6.19(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/cache': 5.1.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/auth': 5.6.19(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/cache': 5.1.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       buffer: 4.9.2
       graphql: 15.8.0
       tslib: 1.14.1
@@ -13419,9 +13412,9 @@ snapshots:
 
   '@aws-amplify/rtn-push-notification@1.1.15': {}
 
-  '@aws-amplify/storage@5.9.20(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-amplify/storage@5.9.20(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/md5-js': 3.6.1
       '@aws-sdk/types': 3.6.1
       buffer: 4.9.2
@@ -13435,8 +13428,6 @@ snapshots:
   '@aws-cdk/asset-awscli-v1@2.2.273': {}
 
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.1': {}
-
-  '@aws-cdk/cloud-assembly-schema@48.20.0': {}
 
   '@aws-cdk/cloud-assembly-schema@53.23.0': {}
 
@@ -13609,7 +13600,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-cloudwatch-logs@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-cloudwatch-logs@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -13621,7 +13612,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -13691,7 +13682,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-comprehend@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-comprehend@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -13703,7 +13694,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -13752,7 +13743,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-firehose@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-firehose@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -13764,7 +13755,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -13788,7 +13779,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-kinesis@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-kinesis@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -13803,7 +13794,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -13991,7 +13982,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-personalize-events@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-personalize-events@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -14003,7 +13994,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -14027,7 +14018,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-polly@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-polly@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -14039,7 +14030,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -14087,7 +14078,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-rekognition@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-rekognition@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -14099,7 +14090,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -14224,7 +14215,7 @@ snapshots:
     transitivePeerDependencies:
       - aws-crt
 
-  '@aws-sdk/client-textract@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-textract@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -14236,7 +14227,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -14260,7 +14251,7 @@ snapshots:
     transitivePeerDependencies:
       - react-native
 
-  '@aws-sdk/client-translate@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/client-translate@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-crypto/sha256-browser': 1.2.2
       '@aws-crypto/sha256-js': 1.2.2
@@ -14272,7 +14263,7 @@ snapshots:
       '@aws-sdk/middleware-content-length': 3.6.1
       '@aws-sdk/middleware-host-header': 3.6.1
       '@aws-sdk/middleware-logger': 3.6.1
-      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-sdk/middleware-retry': 3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       '@aws-sdk/middleware-serde': 3.6.1
       '@aws-sdk/middleware-signing': 3.6.1
       '@aws-sdk/middleware-stack': 3.6.1
@@ -14605,12 +14596,12 @@ snapshots:
       '@smithy/types': 4.14.1
       tslib: 2.8.1
 
-  '@aws-sdk/middleware-retry@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))':
+  '@aws-sdk/middleware-retry@3.6.1(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))':
     dependencies:
       '@aws-sdk/protocol-http': 3.6.1
       '@aws-sdk/service-error-classification': 3.6.1
       '@aws-sdk/types': 3.6.1
-      react-native-get-random-values: 1.11.0(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      react-native-get-random-values: 1.11.0(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       tslib: 1.14.1
       uuid: 3.4.0
     transitivePeerDependencies:
@@ -14932,58 +14923,58 @@ snapshots:
       fast-xml-parser: 5.8.0
       tslib: 2.8.1
 
-  '@aws-solutions-constructs/aws-apigateway-lambda@2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-apigateway-lambda@2.101.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/core': 2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/aws-cloudfront-s3@2.101.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-cloudfront-s3@2.101.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(@aws-solutions-constructs/resources@2.101.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
-      '@aws-solutions-constructs/resources': 2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/core': 2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/resources': 2.101.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.92.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.92.1(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/core': 2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/aws-eventbridge-lambda@2.92.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-eventbridge-lambda@2.92.1(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/core': 2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.98.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.98.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/core': 2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/aws-s3-lambda@2.100.1(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-s3-lambda@2.100.1(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/core': 2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.99.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.99.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/core': 2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-cdk/cloud-assembly-schema': 48.20.0
+      '@aws-cdk/cloud-assembly-schema': 53.23.0
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/resources@2.94.0(@aws-solutions-constructs/core@2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/resources@2.101.0(@aws-solutions-constructs/core@2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-solutions-constructs/core': 2.94.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
+      '@aws-solutions-constructs/core': 2.101.0(aws-cdk-lib@2.254.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.254.0(constructs@10.5.1)
       constructs: 10.5.1
 
@@ -16974,11 +16965,11 @@ snapshots:
       graphql: 16.13.2
       tslib: 2.8.1
 
-  '@graphql-codegen/typescript-operations@4.2.1(encoding@0.1.13)(graphql@16.13.2)':
+  '@graphql-codegen/typescript-operations@4.2.1(graphql@16.13.2)':
     dependencies:
       '@graphql-codegen/plugin-helpers': 5.0.4(graphql@16.13.2)
       '@graphql-codegen/typescript': 4.1.6(graphql@16.13.2)
-      '@graphql-codegen/visitor-plugin-common': 5.2.0(encoding@0.1.13)(graphql@16.13.2)
+      '@graphql-codegen/visitor-plugin-common': 5.2.0(graphql@16.13.2)
       auto-bind: 4.0.0
       graphql: 16.13.2
       tslib: 2.6.3
@@ -17014,11 +17005,11 @@ snapshots:
       graphql: 16.13.2
       tslib: 2.6.3
 
-  '@graphql-codegen/typescript@5.0.8(encoding@0.1.13)(graphql@16.13.2)':
+  '@graphql-codegen/typescript@5.0.8(graphql@16.13.2)':
     dependencies:
       '@graphql-codegen/plugin-helpers': 6.1.0(graphql@16.13.2)
       '@graphql-codegen/schema-ast': 5.0.0(graphql@16.13.2)
-      '@graphql-codegen/visitor-plugin-common': 6.2.3(encoding@0.1.13)(graphql@16.13.2)
+      '@graphql-codegen/visitor-plugin-common': 6.2.3(graphql@16.13.2)
       auto-bind: 4.0.0
       graphql: 16.13.2
       tslib: 2.6.3
@@ -17034,11 +17025,11 @@ snapshots:
       graphql: 16.13.2
       tslib: 2.6.3
 
-  '@graphql-codegen/visitor-plugin-common@5.2.0(encoding@0.1.13)(graphql@16.13.2)':
+  '@graphql-codegen/visitor-plugin-common@5.2.0(graphql@16.13.2)':
     dependencies:
       '@graphql-codegen/plugin-helpers': 5.1.1(graphql@16.13.2)
       '@graphql-tools/optimize': 2.0.0(graphql@16.13.2)
-      '@graphql-tools/relay-operation-optimizer': 7.0.0(encoding@0.1.13)(graphql@16.13.2)
+      '@graphql-tools/relay-operation-optimizer': 7.0.0(graphql@16.13.2)
       '@graphql-tools/utils': 10.11.0(graphql@16.13.2)
       auto-bind: 4.0.0
       change-case-all: 1.0.15
@@ -17065,11 +17056,11 @@ snapshots:
       parse-filepath: 1.0.2
       tslib: 2.6.3
 
-  '@graphql-codegen/visitor-plugin-common@6.2.3(encoding@0.1.13)(graphql@16.13.2)':
+  '@graphql-codegen/visitor-plugin-common@6.2.3(graphql@16.13.2)':
     dependencies:
       '@graphql-codegen/plugin-helpers': 6.3.0(graphql@16.13.2)
       '@graphql-tools/optimize': 2.0.0(graphql@16.13.2)
-      '@graphql-tools/relay-operation-optimizer': 7.0.27(encoding@0.1.13)(graphql@16.13.2)
+      '@graphql-tools/relay-operation-optimizer': 7.0.27(graphql@16.13.2)
       '@graphql-tools/utils': 10.11.0(graphql@16.13.2)
       auto-bind: 4.0.0
       change-case-all: 1.0.15
@@ -17311,9 +17302,9 @@ snapshots:
       graphql: 16.13.2
       tslib: 2.8.1
 
-  '@graphql-tools/relay-operation-optimizer@7.0.0(encoding@0.1.13)(graphql@16.13.2)':
+  '@graphql-tools/relay-operation-optimizer@7.0.0(graphql@16.13.2)':
     dependencies:
-      '@ardatan/relay-compiler': 12.0.0(encoding@0.1.13)(graphql@16.13.2)
+      '@ardatan/relay-compiler': 12.0.0(graphql@16.13.2)
       '@graphql-tools/utils': 10.11.0(graphql@16.13.2)
       graphql: 16.13.2
       tslib: 2.8.1
@@ -17321,9 +17312,9 @@ snapshots:
       - encoding
       - supports-color
 
-  '@graphql-tools/relay-operation-optimizer@7.0.27(encoding@0.1.13)(graphql@16.13.2)':
+  '@graphql-tools/relay-operation-optimizer@7.0.27(graphql@16.13.2)':
     dependencies:
-      '@ardatan/relay-compiler': 12.0.3(encoding@0.1.13)(graphql@16.13.2)
+      '@ardatan/relay-compiler': 12.0.3(graphql@16.13.2)
       '@graphql-tools/utils': 11.1.0(graphql@16.13.2)
       graphql: 16.13.2
       tslib: 2.8.1
@@ -18716,18 +18707,18 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@react-native-community/cli-clean@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-clean@13.6.9':
     dependencies:
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-tools': 13.6.9
       chalk: 4.1.2
       execa: 5.1.1
       fast-glob: 3.3.3
     transitivePeerDependencies:
       - encoding
 
-  '@react-native-community/cli-config@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-config@13.6.9':
     dependencies:
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-tools': 13.6.9
       chalk: 4.1.2
       cosmiconfig: 5.2.1
       deepmerge: 4.3.1
@@ -18742,13 +18733,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@react-native-community/cli-doctor@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-doctor@13.6.9':
     dependencies:
-      '@react-native-community/cli-config': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-platform-android': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-platform-apple': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-platform-ios': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-config': 13.6.9
+      '@react-native-community/cli-platform-android': 13.6.9
+      '@react-native-community/cli-platform-apple': 13.6.9
+      '@react-native-community/cli-platform-ios': 13.6.9
+      '@react-native-community/cli-tools': 13.6.9
       chalk: 4.1.2
       command-exists: 1.2.9
       deepmerge: 4.3.1
@@ -18764,18 +18755,18 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@react-native-community/cli-hermes@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-hermes@13.6.9':
     dependencies:
-      '@react-native-community/cli-platform-android': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-platform-android': 13.6.9
+      '@react-native-community/cli-tools': 13.6.9
       chalk: 4.1.2
       hermes-profile-transformer: 0.0.6
     transitivePeerDependencies:
       - encoding
 
-  '@react-native-community/cli-platform-android@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-platform-android@13.6.9':
     dependencies:
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-tools': 13.6.9
       chalk: 4.1.2
       execa: 5.1.1
       fast-glob: 3.3.3
@@ -18784,9 +18775,9 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@react-native-community/cli-platform-apple@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-platform-apple@13.6.9':
     dependencies:
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-tools': 13.6.9
       chalk: 4.1.2
       execa: 5.1.1
       fast-glob: 3.3.3
@@ -18795,16 +18786,16 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  '@react-native-community/cli-platform-ios@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-platform-ios@13.6.9':
     dependencies:
-      '@react-native-community/cli-platform-apple': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-platform-apple': 13.6.9
     transitivePeerDependencies:
       - encoding
 
-  '@react-native-community/cli-server-api@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-server-api@13.6.9':
     dependencies:
       '@react-native-community/cli-debugger-ui': 13.6.9
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-tools': 13.6.9
       compression: 1.8.1
       connect: 3.7.0
       errorhandler: 1.5.2
@@ -18818,14 +18809,14 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@react-native-community/cli-tools@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli-tools@13.6.9':
     dependencies:
       appdirsjs: 1.2.7
       chalk: 4.1.2
       execa: 5.1.1
       find-up: 5.0.0
       mime: 2.6.0
-      node-fetch: 2.7.0(encoding@0.1.13)
+      node-fetch: 2.7.0
       open: 6.4.0
       ora: 5.4.1
       semver: 7.8.0
@@ -18838,15 +18829,15 @@ snapshots:
     dependencies:
       joi: 17.13.3
 
-  '@react-native-community/cli@13.6.9(encoding@0.1.13)':
+  '@react-native-community/cli@13.6.9':
     dependencies:
-      '@react-native-community/cli-clean': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-config': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-clean': 13.6.9
+      '@react-native-community/cli-config': 13.6.9
       '@react-native-community/cli-debugger-ui': 13.6.9
-      '@react-native-community/cli-doctor': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-hermes': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-server-api': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli-doctor': 13.6.9
+      '@react-native-community/cli-hermes': 13.6.9
+      '@react-native-community/cli-server-api': 13.6.9
+      '@react-native-community/cli-tools': 13.6.9
       '@react-native-community/cli-types': 13.6.9
       chalk: 4.1.2
       commander: 9.5.0
@@ -18934,18 +18925,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@react-native/community-cli-plugin@0.74.85(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(encoding@0.1.13)':
+  '@react-native/community-cli-plugin@0.74.85(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))':
     dependencies:
-      '@react-native-community/cli-server-api': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-tools': 13.6.9(encoding@0.1.13)
-      '@react-native/dev-middleware': 0.74.85(encoding@0.1.13)
+      '@react-native-community/cli-server-api': 13.6.9
+      '@react-native-community/cli-tools': 13.6.9
+      '@react-native/dev-middleware': 0.74.85
       '@react-native/metro-babel-transformer': 0.74.85(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))
       chalk: 4.1.2
       execa: 5.1.1
       metro: 0.80.12
       metro-config: 0.80.12
       metro-core: 0.80.12
-      node-fetch: 2.7.0(encoding@0.1.13)
+      node-fetch: 2.7.0
       querystring: 0.2.1
       readline: 1.3.0
     transitivePeerDependencies:
@@ -18958,7 +18949,7 @@ snapshots:
 
   '@react-native/debugger-frontend@0.74.85': {}
 
-  '@react-native/dev-middleware@0.74.85(encoding@0.1.13)':
+  '@react-native/dev-middleware@0.74.85':
     dependencies:
       '@isaacs/ttlcache': 1.4.1
       '@react-native/debugger-frontend': 0.74.85
@@ -18966,7 +18957,7 @@ snapshots:
       chrome-launcher: 0.15.2
       connect: 3.7.0
       debug: 2.6.9
-      node-fetch: 2.7.0(encoding@0.1.13)
+      node-fetch: 2.7.0
       nullthrows: 1.1.1
       open: 7.4.2
       selfsigned: 2.4.1
@@ -18995,16 +18986,14 @@ snapshots:
 
   '@react-native/normalize-colors@0.74.85': {}
 
-  '@react-native/virtualized-lists@0.74.85(@types/react@19.2.14)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))(react@19.2.5)':
+  '@react-native/virtualized-lists@0.74.85(@types/react@19.2.14)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))(react@19.2.5)':
     dependencies:
       invariant: 2.2.4
       nullthrows: 1.1.1
       react: 19.2.5
-      react-native: 0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5)
+      react-native: 0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5)
     optionalDependencies:
       '@types/react': 19.2.14
-
-  '@remix-run/router@1.16.1': {}
 
   '@repeaterjs/repeater@3.0.6': {}
 
@@ -20642,22 +20631,22 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  amazon-cognito-identity-js@6.3.12(encoding@0.1.13):
+  amazon-cognito-identity-js@6.3.12:
     dependencies:
       '@aws-crypto/sha256-js': 1.2.2
       buffer: 4.9.2
       fast-base64-decode: 1.0.0
-      isomorphic-unfetch: 3.1.0(encoding@0.1.13)
+      isomorphic-unfetch: 3.1.0
       js-cookie: 2.2.1
     transitivePeerDependencies:
       - encoding
 
-  amazon-cognito-identity-js@6.3.16(encoding@0.1.13):
+  amazon-cognito-identity-js@6.3.16:
     dependencies:
       '@aws-crypto/sha256-js': 1.2.2
       buffer: 4.9.2
       fast-base64-decode: 1.0.0
-      isomorphic-unfetch: 3.1.0(encoding@0.1.13)
+      isomorphic-unfetch: 3.1.0
       js-cookie: 2.2.1
     transitivePeerDependencies:
       - encoding
@@ -20884,20 +20873,20 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws-amplify@5.3.33(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5)):
+  aws-amplify@5.3.33(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5)):
     dependencies:
-      '@aws-amplify/analytics': 6.5.17(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/api': 5.4.21(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/auth': 5.6.19(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/cache': 5.1.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/core': 5.8.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/datastore': 4.7.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/geo': 2.3.16(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/interactions': 5.2.24(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/notifications': 1.6.18(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/predictions': 5.5.22(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/pubsub': 5.6.6(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
-      '@aws-amplify/storage': 5.9.20(encoding@0.1.13)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))
+      '@aws-amplify/analytics': 6.5.17(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/api': 5.4.21(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/auth': 5.6.19(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/cache': 5.1.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/datastore': 4.7.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/geo': 2.3.16(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/interactions': 5.2.24(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/notifications': 1.6.18(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/predictions': 5.5.22(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/pubsub': 5.6.6(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
+      '@aws-amplify/storage': 5.9.20(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))
       tslib: 2.8.1
     transitivePeerDependencies:
       - aws-crt
@@ -21656,6 +21645,8 @@ snapshots:
 
   cookie@0.7.2: {}
 
+  cookie@1.1.1: {}
+
   core-js-compat@3.49.0:
     dependencies:
       browserslist: 4.28.2
@@ -21732,9 +21723,9 @@ snapshots:
       - utf-8-validate
       - vite-plus
 
-  cross-fetch@3.2.0(encoding@0.1.13):
+  cross-fetch@3.2.0:
     dependencies:
-      node-fetch: 2.7.0(encoding@0.1.13)
+      node-fetch: 2.7.0
     transitivePeerDependencies:
       - encoding
 
@@ -21881,7 +21872,7 @@ snapshots:
 
   damerau-levenshtein@1.0.8: {}
 
-  danger@13.0.5(encoding@0.1.13):
+  danger@13.0.5:
     dependencies:
       '@gitbeaker/rest': 38.12.1
       '@octokit/rest': 20.1.2
@@ -21905,7 +21896,7 @@ snapshots:
       memfs-or-file-map-to-github-branch: 1.3.0
       micromatch: 4.0.8
       node-cleanup: 2.1.2
-      node-fetch: 2.7.0(encoding@0.1.13)
+      node-fetch: 2.7.0
       override-require: 1.1.1
       p-limit: 2.3.0
       parse-diff: 0.7.1
@@ -22162,11 +22153,6 @@ snapshots:
   encodeurl@1.0.2: {}
 
   encodeurl@2.0.0: {}
-
-  encoding@0.1.13:
-    dependencies:
-      iconv-lite: 0.6.3
-    optional: true
 
   end-of-stream@1.4.5:
     dependencies:
@@ -22966,9 +22952,9 @@ snapshots:
 
   fbjs-css-vars@1.0.2: {}
 
-  fbjs@3.0.5(encoding@0.1.13):
+  fbjs@3.0.5:
     dependencies:
-      cross-fetch: 3.2.0(encoding@0.1.13)
+      cross-fetch: 3.2.0
       fbjs-css-vars: 1.0.2
       loose-envify: 1.4.0
       object-assign: 4.1.1
@@ -23568,11 +23554,6 @@ snapshots:
 
   hyperlinker@1.0.0: {}
 
-  iconv-lite@0.6.3:
-    dependencies:
-      safer-buffer: 2.1.2
-    optional: true
-
   iconv-lite@0.7.2:
     dependencies:
       safer-buffer: 2.1.2
@@ -23930,9 +23911,9 @@ snapshots:
 
   isobject@3.0.1: {}
 
-  isomorphic-unfetch@3.1.0(encoding@0.1.13):
+  isomorphic-unfetch@3.1.0:
     dependencies:
-      node-fetch: 2.7.0(encoding@0.1.13)
+      node-fetch: 2.7.0
       unfetch: 4.2.0
     transitivePeerDependencies:
       - encoding
@@ -25231,11 +25212,9 @@ snapshots:
 
   node-fetch-native@1.6.7: {}
 
-  node-fetch@2.7.0(encoding@0.1.13):
+  node-fetch@2.7.0:
     dependencies:
       whatwg-url: 5.0.0
-    optionalDependencies:
-      encoding: 0.1.13
 
   node-fetch@3.3.2:
     dependencies:
@@ -25945,29 +25924,29 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  react-native-get-random-values@1.11.0(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5)):
+  react-native-get-random-values@1.11.0(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5)):
     dependencies:
       fast-base64-decode: 1.0.0
-      react-native: 0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5)
+      react-native: 0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5)
 
-  react-native-url-polyfill@1.3.0(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5)):
+  react-native-url-polyfill@1.3.0(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5)):
     dependencies:
-      react-native: 0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5)
+      react-native: 0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5)
       whatwg-url-without-unicode: 8.0.0-3
 
-  react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5):
+  react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5):
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
-      '@react-native-community/cli': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-platform-android': 13.6.9(encoding@0.1.13)
-      '@react-native-community/cli-platform-ios': 13.6.9(encoding@0.1.13)
+      '@react-native-community/cli': 13.6.9
+      '@react-native-community/cli-platform-android': 13.6.9
+      '@react-native-community/cli-platform-ios': 13.6.9
       '@react-native/assets-registry': 0.74.85
       '@react-native/codegen': 0.74.85(@babel/preset-env@7.24.8(@babel/core@7.29.0))
-      '@react-native/community-cli-plugin': 0.74.85(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(encoding@0.1.13)
+      '@react-native/community-cli-plugin': 0.74.85(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))
       '@react-native/gradle-plugin': 0.74.85
       '@react-native/js-polyfills': 0.74.85
       '@react-native/normalize-colors': 0.74.85
-      '@react-native/virtualized-lists': 0.74.85(@types/react@19.2.14)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(encoding@0.1.13)(react@19.2.5))(react@19.2.5)
+      '@react-native/virtualized-lists': 0.74.85(@types/react@19.2.14)(react-native@0.74.3(@babel/core@7.29.0)(@babel/preset-env@7.24.8(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.5))(react@19.2.5)
       abort-controller: 3.0.0
       anser: 1.4.10
       ansi-regex: 5.0.1
@@ -26009,17 +25988,19 @@ snapshots:
 
   react-refresh@0.17.0: {}
 
-  react-router-dom@6.23.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
+  react-router-dom@7.15.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
-      '@remix-run/router': 1.16.1
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
-      react-router: 6.23.1(react@19.2.5)
+      react-router: 7.15.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
 
-  react-router@6.23.1(react@19.2.5):
+  react-router@7.15.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
-      '@remix-run/router': 1.16.1
+      cookie: 1.1.1
       react: 19.2.5
+      set-cookie-parser: 2.7.2
+    optionalDependencies:
+      react-dom: 19.2.5(react@19.2.5)
 
   react-select-event@5.5.1:
     dependencies:
@@ -26169,10 +26150,10 @@ snapshots:
     dependencies:
       jsesc: 3.1.0
 
-  relay-runtime@12.0.0(encoding@0.1.13):
+  relay-runtime@12.0.0:
     dependencies:
       '@babel/runtime': 7.29.2
-      fbjs: 3.0.5(encoding@0.1.13)
+      fbjs: 3.0.5
       invariant: 2.2.4
     transitivePeerDependencies:
       - encoding
@@ -26468,6 +26449,8 @@ snapshots:
       - supports-color
 
   set-blocking@2.0.0: {}
+
+  set-cookie-parser@2.7.2: {}
 
   set-function-length@1.2.2:
     dependencies:
