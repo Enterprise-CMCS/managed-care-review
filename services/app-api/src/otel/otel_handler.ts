@@ -9,7 +9,10 @@ import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { W3CTraceContextPropagator } from '@opentelemetry/core'
 import { PrismaInstrumentation } from '@prisma/instrumentation'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
-import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
+import {
+    ATTR_SERVICE_NAME,
+    SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
+} from '@opentelemetry/semantic-conventions'
 
 const DD_TRACES_URL = 'https://otlp.ddog-gov.com/v1/traces'
 
@@ -44,7 +47,7 @@ export function initTracer(serviceName: string) {
     const resource = defaultResource().merge(
         resourceFromAttributes({
             [ATTR_SERVICE_NAME]: serviceName,
-            'deployment.environment': process.env.stage,
+            [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: process.env.stage,
         })
     )
 

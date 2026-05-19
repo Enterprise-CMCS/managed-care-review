@@ -6,10 +6,11 @@ const DD_TRACES_URL = 'https://otlp.ddog-gov.com/v1/traces'
 
 const main: APIGatewayProxyHandler = async (event) => {
     const bodyBytes = event.body?.length ?? 0
-    const contentType =
-        event.headers?.['content-type'] ||
-        event.headers?.['Content-Type'] ||
-        'application/json'
+    const contentType = event.isBase64Encoded
+        ? 'application/x-protobuf'
+        : event.headers?.['content-type'] ||
+          event.headers?.['Content-Type'] ||
+          'application/json'
 
     console.info(
         `otel_proxy: received trace payload, body=${bodyBytes} bytes, content-type=${contentType}`
