@@ -50,7 +50,7 @@
         "@prisma/adapter-pg": "^7.8.0",
         "@prisma/client": "^7.8.0",
         "@prisma/instrumentation": "^7.8.0",
-        "archiver": "^7.0.1",
+        "archiver": "^8.0.0",
         "axios": "^1.16.1",
         "eta": "^2.2.0",
         "express": "^5.2.1",
@@ -66,7 +66,6 @@
         "zod": "^4.3.6"
     },
     "devDependencies": {
-        "@types/archiver": "^7.0.0",
         "@types/aws-lambda": "^8.10.152",
         "@types/eslint": "^9.6.1",
         "@types/express": "^5.0.6",
