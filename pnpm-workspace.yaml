@@ -4,13 +4,14 @@ packages:
   - 'dev_tool'
   - 'scripts'
 allowBuilds:
-  '@apollo/protobufjs': true
+  '@apollo/protobufjs': false
   '@parcel/watcher': true
   '@prisma/engines': true
-  core-js: true
-  cpu-features: true
+  core-js: false
+  cpu-features: false
   cypress: true
   esbuild: true
   prisma: true
-  ssh2: true
+  protobufjs: false
+  ssh2: false
   unrs-resolver: true
