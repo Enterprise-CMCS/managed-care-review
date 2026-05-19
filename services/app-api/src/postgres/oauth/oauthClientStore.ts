@@ -150,6 +150,7 @@ export async function updateOAuthClient(
         clientSecret?: string
         grants?: string[]
         description?: string
+        scopes?: OAuthScope[]
     }
 ): Promise<OAuthClientWithUser | Error> {
     try {

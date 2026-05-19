@@ -2854,6 +2854,7 @@ input UpdateOauthClientInput {
     clientId: String!
     description: String
     grants: [String!]
+    scopes: [OAuthScope!]
 }
 
 type UpdateOauthClientPayload {

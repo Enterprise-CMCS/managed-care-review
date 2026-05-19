@@ -126,6 +126,7 @@ describe('OAuthClient Store', () => {
         const updateData = {
             description: 'Updated description',
             grants: ['client_credentials', 'password'],
+            scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
         }
 
         const updatedClient = await updateOAuthClient(
@@ -137,6 +138,7 @@ describe('OAuthClient Store', () => {
 
         expect(updatedClient.description).toBe(updateData.description)
         expect(updatedClient.grants).toEqual(updateData.grants)
+        expect(updatedClient.scopes).toEqual(updateData.scopes)
         expect(updatedClient.updatedAt).toBeDefined()
         expect(updatedClient.updatedAt.getTime()).toBeGreaterThan(
             createdClient.updatedAt.getTime()
