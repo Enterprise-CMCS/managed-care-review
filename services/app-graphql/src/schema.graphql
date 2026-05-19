@@ -2827,6 +2827,7 @@ input CreateOauthClientInput {
     description: String
     userID: String!
     grants: [String!]
+    scopes: [OAuthScope!]
 }
 
 type CreateOauthClientPayload {

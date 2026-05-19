@@ -76,6 +76,7 @@ export function createOauthClientResolver(
         const oauthClient = await store.createOAuthClient({
             grants: input.grants ?? undefined,
             description: input.description ?? undefined,
+            scopes: input.scopes ?? undefined,
             userID: input.userID,
         })
 

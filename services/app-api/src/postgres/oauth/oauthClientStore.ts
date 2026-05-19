@@ -1,5 +1,6 @@
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { Prisma } from '../../generated/client'
+import type { OAuthScope } from '../../generated/enums'
 import type { UserType } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
 import { randomBytes } from 'crypto'
@@ -20,6 +21,7 @@ export async function createOAuthClient(
     data: {
         grants?: string[]
         description?: string
+        scopes?: OAuthScope[]
         userID: string
     }
 ): Promise<OAuthClientWithUser | Error> {
@@ -37,6 +39,7 @@ export async function createOAuthClient(
                 grants,
                 description: data.description,
                 userID: data.userID,
+                scopes: data.scopes,
             },
             include: {
                 user: { include: { stateAssignments: true } },
