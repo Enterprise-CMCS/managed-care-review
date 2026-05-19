@@ -188,31 +188,33 @@ export function createContractQuestionResponseResolver(
             })
         }
 
-        const sendQuestionResponseStateEmailResult =
-            await emailer.sendQuestionResponseStateEmail(
-                contract.revisions[0],
-                contract.contractSubmissionType,
-                statePrograms,
-                submitterEmails,
-                createResponseResult,
-                questions
-            )
+        if (contract.contractSubmissionType !== 'EQRO') {
+            const sendQuestionResponseStateEmailResult =
+                await emailer.sendQuestionResponseStateEmail(
+                    contract.revisions[0],
+                    contract.contractSubmissionType,
+                    statePrograms,
+                    submitterEmails,
+                    createResponseResult,
+                    questions
+                )
 
-        if (sendQuestionResponseStateEmailResult instanceof Error) {
-            logError(
-                'sendQuestionResponseStateEmail - Send State email',
-                sendQuestionResponseStateEmailResult.message
-            )
-            setErrorAttributesOnActiveSpan(
-                `Send State email failed: ${sendQuestionResponseStateEmailResult.message}`,
-                span
-            )
-            throw new GraphQLError('Email failed', {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
-                },
-            })
+            if (sendQuestionResponseStateEmailResult instanceof Error) {
+                logError(
+                    'sendQuestionResponseStateEmail - Send State email',
+                    sendQuestionResponseStateEmailResult.message
+                )
+                setErrorAttributesOnActiveSpan(
+                    `Send State email failed: ${sendQuestionResponseStateEmailResult.message}`,
+                    span
+                )
+                throw new GraphQLError('Email failed', {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'EMAIL_ERROR',
+                    },
+                })
+            }
         }
 
         logSuccess('createContractQuestionResponse')
