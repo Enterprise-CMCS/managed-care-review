@@ -11,7 +11,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
-import { assertAnErrorCode } from '../../testHelpers/gqlAssertions'
+import { assertAnErrorCode } from '../../testHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
