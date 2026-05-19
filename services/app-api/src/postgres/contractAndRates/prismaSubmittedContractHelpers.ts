@@ -10,6 +10,32 @@ const selectContractRevisionOverrides = {
     createdAt: true,
     contractRevisionID: true,
     contractType: true,
+    contractDocuments: {
+        select: {
+            id: true,
+            createdAt: true,
+            documentID: true,
+            name: true,
+            sha256: true,
+            s3URL: true,
+            s3BucketName: true,
+            s3Key: true,
+            dateAdded: true,
+        },
+    },
+    supportingDocuments: {
+        select: {
+            id: true,
+            createdAt: true,
+            documentID: true,
+            name: true,
+            sha256: true,
+            s3URL: true,
+            s3BucketName: true,
+            s3Key: true,
+            dateAdded: true,
+        },
+    },
 } satisfies Prisma.ContractRevisionOverridesSelect
 
 const includeLatestSubmittedRateRev = {
