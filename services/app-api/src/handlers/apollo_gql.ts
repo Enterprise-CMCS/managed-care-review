@@ -12,7 +12,7 @@ import {
     startServerAndCreateLambdaHandler,
     handlers,
 } from '@as-integrations/aws-lambda'
-import { initTracer, recordException } from '../otel/otel_handler'
+import { initTracer, recordException, flushTracer } from '../otel/otel_handler'
 import type { APIGatewayProxyEvent, Handler } from 'aws-lambda'
 
 import typeDefs from '../../../app-graphql/src/schema.graphql'
@@ -375,7 +375,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailerMode = process.env.EMAILER_MODE
-    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
     const s3DocumentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
@@ -396,12 +395,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
-    }
-
-    if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
-        throw new Error(
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
-        )
     }
 
     if (parameterStoreMode !== 'LOCAL' && parameterStoreMode !== 'AWS') {
@@ -430,7 +423,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Initialize OpenTelemetry tracing once during cold start
     // This prevents duplicate provider registrations on every request
-    initTracer('app-api-' + stageName, otelCollectorUrl)
+    initTracer('app-api-' + stageName)
     console.info('OpenTelemetry tracer initialized for app-api-' + stageName)
 
     const pgResult = await configurePostgres(
@@ -561,7 +554,6 @@ async function initializeGQLHandler(): Promise<Handler> {
         applicationEndpoint,
         emailSource: emailer.config.emailSource,
         emailerMode,
-        otelCollectorUrl,
         parameterStoreMode,
     }
 
@@ -615,6 +607,13 @@ const gqlHandler: Handler = async (event, context) => {
 
     // Call handler async-style (Node.js 24 pattern) - callback param unused
     const response = await initializedHandler(event, context, () => {})
+    // Flush spans before Lambda freezes — BatchSpanProcessor timer won't fire after handler returns
+    // Swallow flush errors so telemetry failures never affect API responses
+    try {
+        await flushTracer()
+    } catch (flushErr) {
+        console.warn('otel: flush failed', flushErr)
+    }
     const payloadSize = Buffer.from(event.body).length
 
     if (payloadSize > 5.5 * 1024 * 1024) {

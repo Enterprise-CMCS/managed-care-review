@@ -2,7 +2,7 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { findRateWithHistory } from './findRateWithHistory'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type OverrideRateDataArgsType = {
     rateID: string
@@ -111,14 +111,14 @@ const overrideRateData = async (
     client: ExtendedPrismaClient,
     args: OverrideRateDataArgsType
 ): Promise<RateType | Error> => {
-    try {
-        return await client.$transaction(
-            async (tx) => await overrideRateDataInsideTransaction(tx, args)
-        )
-    } catch (err) {
-        console.error('PRISMA ERROR: Error overriding rate data', err)
-        return parseErrorToError(err)
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'overrideRateData',
+        table: 'RateTable',
+        id: args.rateID,
+        transaction: async (tx) =>
+            await overrideRateDataInsideTransaction(tx, args),
+    })
 }
 
 export {

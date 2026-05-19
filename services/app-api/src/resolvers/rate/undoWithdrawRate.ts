@@ -12,7 +12,7 @@ import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
 export function undoWithdrawRate(
     store: Store,
@@ -26,8 +26,8 @@ export function undoWithdrawRate(
         const { rateID, updatedReason } = input
         span?.setAttribute('mcreview.package_id', rateID)
 
-        // Check OAuth client read permissions
-        if (!canWrite(context)) {
+        // Check OAuth client write permissions
+        if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
             logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)

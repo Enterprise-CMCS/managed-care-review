@@ -80,7 +80,34 @@ export default tseslint.config([
                     allowTaggedTemplates: true,
                 },
             ],
-            '@typescript-eslint/no-floating-promises': 'error',
+            // react-router v7 typed NavigateFunction as `void | Promise<void>`
+            // to cover both declarative (<BrowserRouter>) and data-router modes.
+            // We use <BrowserRouter> (see src/pages/App/App.tsx), so navigate()
+            // is synchronous at runtime and the Promise half of the union never
+            // materializes. allowForKnownSafeCalls silences this rule for any
+            // value typed NavigateFunction (covers both `navigate` from
+            // useNavigate() and the `testNavigate: NavigateFunction` bindings
+            // used in tests). NavigateFunction is declared in the `react-router`
+            // package; `react-router-dom` only re-exports it in v7.
+            // Refs:
+            //   Root cause (v7 union return type):
+            //     https://github.com/remix-run/react-router/issues/12348
+            //   This exact eslint config (credit qsoo):
+            //     https://github.com/remix-run/react-router/issues/12348#issuecomment-3022478918
+            //   Rule option docs:
+            //     https://typescript-eslint.io/rules/no-floating-promises/#allowforknownsafecalls
+            '@typescript-eslint/no-floating-promises': [
+                'error',
+                {
+                    allowForKnownSafeCalls: [
+                        {
+                            from: 'package',
+                            name: 'NavigateFunction',
+                            package: 'react-router',
+                        },
+                    ],
+                },
+            ],
 
             // Jest rules
             'jest/no-focused-tests': 'error',

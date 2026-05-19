@@ -7,16 +7,13 @@ import {
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
-import { parseErrorToError } from '@mc-review/helpers'
-import { Prisma } from '../../generated/client'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 export type SoftDeleteContractQuestionArgsType = {
     questionID: string
     user: AdminUserType
     reason: string
 }
-
-const MAX_SERIALIZATION_RETRIES = 2
 
 /**
  * Soft-deletes a contract question and cascades the delete to its responses
@@ -62,7 +59,7 @@ const softDeleteContractQuestionInsideTransaction = async (
 
     if (!existing) {
         return new NotFoundError(
-            `Question with id ${questionID} was not found to delete`
+            `Question with id ${questionID} was not found for deletion`
         )
     }
 
@@ -138,54 +135,18 @@ const softDeleteContractQuestionInsideTransaction = async (
     return contractQuestionPrismaToDomainType(result)
 }
 
-/**
- * Wrapper around `softDeleteContractQuestionInsideTransaction` that owns the
- * transaction lifecycle.
- *
- * Race-condition protection follows Prisma's recommendation for write-write
- * conflicts: run the transaction at Serializable isolation and retry on
- * serialization failures. Depending on which engine is active, Prisma surfaces
- * these as either `P2034` (standard engine) or a DriverAdapterError with
- * `cause.kind === 'TransactionWriteConflict'` (driver adapters).
- */
 const softDeleteContractQuestion = async (
     client: ExtendedPrismaClient,
     args: SoftDeleteContractQuestionArgsType
 ): Promise<ContractQuestionType | Error> => {
-    let attempt = 0
-    while (true) {
-        try {
-            return await client.$transaction(
-                async (tx) =>
-                    await softDeleteContractQuestionInsideTransaction(tx, args),
-                {
-                    isolationLevel:
-                        Prisma.TransactionIsolationLevel.Serializable,
-                }
-            )
-        } catch (err) {
-            // Serialization conflicts surface two ways depending on the
-            // engine in use: as `code: 'P2034'` from the standard Prisma
-            // engine, or as a DriverAdapterError whose `cause.kind` is
-            // `'TransactionWriteConflict'` from driver adapters. Match both.
-            const code = (err as { code?: string }).code
-            const cause = (err as { cause?: { kind?: string } }).cause
-            const isWriteConflict =
-                code === 'P2034' || cause?.kind === 'TransactionWriteConflict'
-            if (isWriteConflict && attempt < MAX_SERIALIZATION_RETRIES - 1) {
-                console.warn(
-                    `softDeleteContractQuestion: serialization conflict, retrying. questionID=${args.questionID} attempt=${attempt + 1}`
-                )
-                attempt++
-                continue
-            }
-            const parsedError = parseErrorToError(err)
-            console.error(
-                `PRISMA ERROR: Error soft deleting contract question: ${parsedError.message}`
-            )
-            return parsedError
-        }
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'soft deleting contract question',
+        table: 'ContractQuestion',
+        id: args.questionID,
+        transaction: async (tx) =>
+            await softDeleteContractQuestionInsideTransaction(tx, args),
+    })
 }
 
 export {
