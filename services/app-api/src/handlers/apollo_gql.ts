@@ -52,6 +52,7 @@ import {
 } from '../zip'
 import { configureCorsHeaders } from '../cors/configureCorsHelpers'
 import { logError } from '../logger'
+import { OAuthScope } from '../generated/enums'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -139,44 +140,90 @@ function contextForRequestForFetcher(
                     const oauthGrants =
                         authorizerContext?.grants?.split(',') || []
 
+                    // oauth client data
+                    const oauthClient: Context['oauthClient'] = {
+                        clientId: oauthClientId,
+                        iss: tokenIssuer,
+                        grants: oauthGrants,
+                        scopes: [], // leave this empty until fetch and validation
+                        isDelegatedUser: !!delegatedUser,
+                    }
+
+                    // extra context for logging
+                    const oauthContext = {
+                        operation: 'contextForRequestForFetcher',
+                        authMethod: 'OAuth 2.0',
+                        principalId,
+                        path: event.path,
+                        requestId: event.requestContext.requestId,
+                        ['x-acting-as-user']: delegatedUser,
+                    }
+
+                    const clientOauth =
+                        await store.getOAuthClientByClientId(oauthClientId)
+
+                    if (clientOauth instanceof Error) {
+                        console.error({
+                            message: `Failed to get oauth with client id, ${oauthClientId}`,
+                            ...oauthContext,
+                            ...oauthClient,
+                        })
+                        throw new Error(
+                            `Failed to get oauth with client id, ${oauthClientId}`
+                        )
+                    }
+
+                    if (!clientOauth) {
+                        console.error({
+                            message: `OAuth client not found`,
+                            ...oauthContext,
+                            ...oauthClient,
+                        })
+                        throw new Error('OAuth client not found')
+                    }
+
+                    // set scopes after validation
+                    oauthClient.scopes = clientOauth.scopes.map(
+                        (scope) => scope
+                    )
+
+                    // check if client is authorized for delegated requests
+                    if (
+                        !oauthClient?.scopes?.includes(
+                            OAuthScope.CMS_SUBMISSION_ACTIONS
+                        ) &&
+                        delegatedUser
+                    ) {
+                        console.error({
+                            message:
+                                'Client is not authorized to make delegated requests',
+                            ...oauthContext,
+                            ...oauthClient,
+                        })
+                        throw new Error(
+                            'Client is not authorized to make delegated requests'
+                        )
+                    }
+
+                    // Get user data
                     const userResult = await userFromThirdPartyAuthorizer(
                         store,
                         principalId,
                         delegatedUser
                     )
 
-                    const clientOauth =
-                        await store.getOAuthClientByClientId(oauthClientId)
-
-                    if (clientOauth instanceof Error) {
-                        throw new Error(
-                            `Log: failed to get oauth with client id`
-                        )
-                    }
-
-                    if (!clientOauth) {
-                        throw new Error('Log: OAuth client not found')
-                    }
-
                     if (userResult instanceof Error) {
+                        console.error({
+                            message: userResult.message,
+                            ...oauthContext,
+                            ...oauthClient,
+                        })
                         throw new Error(userResult.message)
                     }
 
-                    if (userResult === undefined) {
-                        throw new Error(`User not found.`)
-                    }
-
-                    const oauthClient = {
-                        clientId: oauthClientId,
-                        iss: tokenIssuer,
-                        grants: oauthGrants,
-                        scopes: clientOauth.scopes.map((scope) => scope),
-                        isDelegatedUser: !!delegatedUser,
-                    }
-
                     console.info({
-                        message: 'OAuth client context',
-                        ['x-acting-as-user']: delegatedUser,
+                        message: 'OAuth client context fetch successful',
+                        ...oauthContext,
                         ...oauthClient,
                     })
 
@@ -191,14 +238,38 @@ function contextForRequestForFetcher(
                     const userResult = await userFetcher(authProvider!, store)
 
                     if (userResult === undefined) {
+                        console.error({
+                            message: 'User not found',
+                            operation: 'contextForRequestForFetcher',
+                            authMethod: 'Cognito',
+                            path: event.path,
+                            requestId: event.requestContext.requestId,
+                            sourceIp: event.requestContext.identity.sourceIp,
+                        })
                         throw new Error(`User not found.`)
                     }
 
                     if (userResult instanceof Error) {
+                        console.error({
+                            ...userResult,
+                            message: `Error fetching user: ${userResult.message}`,
+                            operation: 'contextForRequestForFetcher',
+                            authMethod: 'Cognito',
+                            path: event.path,
+                            requestId: event.requestContext.requestId,
+                        })
                         throw new Error(
                             `Error fetching user: ${userResult.message}`
                         )
                     }
+
+                    console.info({
+                        message: 'Cognito client context fetch successful',
+                        operation: 'contextForRequestForFetcher',
+                        authMethod: 'OAuth 2.0',
+                        principalId: userResult.id,
+                        path: event.path,
+                    })
 
                     const context: Context = {
                         user: userResult,
