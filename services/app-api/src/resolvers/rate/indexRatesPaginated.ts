@@ -74,9 +74,14 @@ function encodeRateCursor(cursor: RateCursor): string {
 }
 
 function decodeRateCursor(encodedCursor: string): RateCursor | Error {
-    const decodedCursor = JSON.parse(
-        Buffer.from(encodedCursor, 'base64').toString('utf8')
-    ) as Partial<RateCursor>
+    let decodedCursor: Partial<RateCursor>
+    try {
+        decodedCursor = JSON.parse(
+            Buffer.from(encodedCursor, 'base64').toString('utf8')
+        ) as Partial<RateCursor>
+    } catch {
+        return new Error('Cursor is not a valid rate pagination cursor')
+    }
 
     if (
         typeof decodedCursor.rateID !== 'string' ||
