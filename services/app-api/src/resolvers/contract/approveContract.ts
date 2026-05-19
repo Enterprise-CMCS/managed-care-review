@@ -9,7 +9,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { hasCMSPermissions } from '../../domain-models/user'
+import { hasCMSPermissions, isAdminUser } from '../../domain-models/user'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
 export function approveContract(
@@ -34,14 +34,22 @@ export function approveContract(
             })
         }
 
-        const { contractID, dateApprovalReleasedToState } = input
+        const { contractID, dateApprovalReleasedToState, updatedReason } = input
         span?.setAttribute('mcreview.package_id', contractID)
 
-        if (!hasCMSPermissions(user)) {
+        if (!hasCMSPermissions(user) && !isAdminUser(user)) {
             const message = 'user not authorized to approve a contract'
             logError('approveContract', message)
             setErrorAttributesOnActiveSpan(message, span)
             throw createForbiddenError(message)
+        }
+
+        if (isAdminUser(user) && !updatedReason?.trim()) {
+            const errMessage =
+                'Approving a contract as an admin requires a reason'
+            logError('approveContract', errMessage)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw createUserInputError(errMessage, 'updatedReason')
         }
 
         const contractWithHistory =
@@ -92,6 +100,7 @@ export function approveContract(
             contractID: contractID,
             updatedByID: user.id,
             dateApprovalReleasedToState: dateApprovalReleasedToState,
+            updatedReason,
         })
 
         if (approveContractResult instanceof Error) {

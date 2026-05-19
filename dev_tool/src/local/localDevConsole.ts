@@ -29,34 +29,39 @@ function killProcessOnPort(port: number): void {
     }
 }
 
-export async function runLaunchDarklyLocally(runner: LabeledProcessRunner) {
-    // Kill any existing process on the LaunchDarkly port before starting
-    const serviceUrl = new URL(
-        process.env.LOCAL_LD_SERVICE_URL || 'http://127.0.0.1:3031'
-    )
+export async function runLocalDevConsoleLocally(runner: LabeledProcessRunner) {
+    const rawServiceUrl = process.env.LOCAL_DEV_SERVICE_URL
+    if (!rawServiceUrl) {
+        console.error(
+            'LOCAL_DEV_SERVICE_URL is not set. Add it to .envrc and run `direnv allow`.'
+        )
+        process.exit(1)
+    }
+    // Kill any existing process on the dev console port before starting
+    const serviceUrl = new URL(rawServiceUrl)
     const port = parseInt(serviceUrl.port || '3031', 10)
     killProcessOnPort(port)
 
     // Build the React client
     await runner.runCommandAndOutput(
-        'build launch-darkly',
+        'build local-dev-console',
         ['pnpm', 'build:client'],
-        'services/local-launch-darkly'
+        'services/local-dev-console'
     )
 
     // Run with nodemon for hot reload
     await runner.runCommandAndOutput(
-        'launch-darkly',
+        'local-dev-console',
         ['pnpm', 'exec', 'nodemon'],
-        'services/local-launch-darkly',
-        { awaitFor: 'Local LaunchDarkly running' }
+        'services/local-dev-console',
+        { awaitFor: 'Local Dev Console running' }
     )
 
     // Only open Chrome if an app window for this URL isn't already open
     const url = serviceUrl.href
     if (!isChromeWindowOpen(url)) {
         exec(
-            `open -na "Google Chrome" --args --app=${url} --window-size=650,750`
+            `open -na "Google Chrome" --args --app=${url} --window-size=1000,750`
         )
     }
 }

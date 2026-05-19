@@ -18,12 +18,14 @@ const approveContractMockSuccess = (
         contractID?: string
         contractData?: Partial<Contract>
         dateApprovalReleasedToState?: string
+        updatedReason?: string
     } = {}
 ): MockLink.MockedResponse<ApproveContractMutation> => {
     const {
         contractID = 'test-abc-123',
         contractData,
         dateApprovalReleasedToState = '10/10/2024',
+        updatedReason = '',
     } = params
     const contract = mockContractPackageSubmittedWithQuestions(contractID, {
         __typename: 'Contract',
@@ -56,6 +58,7 @@ const approveContractMockSuccess = (
                 input: {
                     contractID: 'test-abc-123',
                     dateApprovalReleasedToState,
+                    updatedReason,
                 },
             },
         },
@@ -96,6 +99,7 @@ const approveContractMockFailure = ({
                     contractID: 'test-abc-123',
                     dateApprovalReleasedToState:
                         formatUserInputDate('12/12/2024'),
+                    updatedReason: '',
                 },
             },
         },

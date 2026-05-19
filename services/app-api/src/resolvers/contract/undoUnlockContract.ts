@@ -12,23 +12,23 @@ import { GraphQLError } from 'graphql'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
-export function reverseUnlockContract(
+export function undoUnlockContract(
     store: Store
-): MutationResolvers['reverseUnlockContract'] {
+): MutationResolvers['undoUnlockContract'] {
     return async (_parent, { input }, context) => {
         const { user } = context
         const { contractID, updatedReason } = input
 
         return withResolverSpan(
             context,
-            'reverseUnlockContract',
+            'undoUnlockContract',
             { 'contract.id': contractID },
             async (span) => {
                 setResolverDetails(span, user)
 
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('reverseUnlockContract', errMessage)
+                    logError('undoUnlockContract', errMessage)
 
                     throw new GraphQLError(errMessage, {
                         extensions: {
@@ -40,8 +40,8 @@ export function reverseUnlockContract(
 
                 if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
                     const message =
-                        'user not authorized to reverse unlock a contract'
-                    logError('reverseUnlockContract', message)
+                        'user not authorized to undo unlock a contract'
+                    logError('undoUnlockContract', message)
                     throw createForbiddenError(message)
                 }
 
@@ -69,8 +69,8 @@ export function reverseUnlockContract(
                 }
 
                 if (contractWithHistory.status !== 'UNLOCKED') {
-                    const errMessage = `Attempted to reverse unlock for contract with wrong status: ${contractWithHistory.status}`
-                    logError('reverseUnlockContract', errMessage)
+                    const errMessage = `Attempted to undo unlock for contract with wrong status: ${contractWithHistory.status}`
+                    logError('undoUnlockContract', errMessage)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -79,12 +79,12 @@ export function reverseUnlockContract(
                     contractWithHistory.draftRevision.submitInfo
                 ) {
                     const errMessage =
-                        'Cannot reverse unlock: latest contract revision is not an unlocked draft revision'
-                    logError('reverseUnlockContract', errMessage)
+                        'Cannot undo unlock: latest contract revision is not an unlocked draft revision'
+                    logError('undoUnlockContract', errMessage)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
-                const reverseResult = await store.reverseUnlockContract({
+                const reverseResult = await store.undoUnlockContract({
                     contractID,
                     updatedByID: user.id,
                     updatedReason,
@@ -92,7 +92,7 @@ export function reverseUnlockContract(
 
                 if (reverseResult instanceof Error) {
                     if (reverseResult instanceof UserInputPostgresError) {
-                        logError('reverseUnlockContract', reverseResult.message)
+                        logError('undoUnlockContract', reverseResult.message)
                         throw handleUserInputPostgresError(
                             reverseResult,
                             'contractID',
@@ -101,7 +101,7 @@ export function reverseUnlockContract(
                     }
 
                     if (reverseResult instanceof NotFoundError) {
-                        logError('reverseUnlockContract', reverseResult.message)
+                        logError('undoUnlockContract', reverseResult.message)
                         throw new GraphQLError(reverseResult.message, {
                             extensions: {
                                 code: 'NOT_FOUND',
@@ -110,8 +110,8 @@ export function reverseUnlockContract(
                         })
                     }
 
-                    const errMessage = `Failed to reverse unlock for contract ID:${contractID}`
-                    logError('reverseUnlockContract', errMessage)
+                    const errMessage = `Failed to undo unlock for contract ID:${contractID}`
+                    logError('undoUnlockContract', errMessage)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -120,7 +120,7 @@ export function reverseUnlockContract(
                     })
                 }
 
-                logSuccess('reverseUnlockContract')
+                logSuccess('undoUnlockContract')
 
                 return { contract: reverseResult }
             }

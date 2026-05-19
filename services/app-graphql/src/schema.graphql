@@ -447,14 +447,16 @@ type Mutation {
     submitContract(input: SubmitContractInput!): SubmitContractPayload!
 
     """
-    approveContract is a CMS user only action
+    approveContract is a CMS or Admin user action to mark a contract as approved.
+    Admin users must provide updatedReason. CMS and CMS Approver users may omit it.
 
     Errors:
     - ForbiddenError:
-        - A non CMS/CMS Approver user called this
+        - A non CMS/CMS Approver/Admin user called this
     - UserInputError:
         - A contract is not in the correct submission status: SUBMITTED or RESUBMITTED
         - A contract is not in the correct review status: UNDER_REVIEW
+        - An Admin user did not provide updatedReason
     - INTERNAL_SERVER_ERROR
         - DB_ERROR
             - A contract cannot be found by id
@@ -477,7 +479,7 @@ type Mutation {
     reverseApproveContract(input: ReverseApproveContractInput!): ReverseApproveContractPayload
 
     """
-    reverseUnlockContract is a CMS user only action to discard an unlocked draft and restore the last submitted contract state
+    undoUnlockContract is a CMS user only action to discard an unlocked draft and restore the last submitted contract state
 
     Errors:
     - ForbiddenError:
@@ -489,7 +491,7 @@ type Mutation {
         - DB_ERROR
             - A contract cannot be found by id
     """
-    reverseUnlockContract(input: ReverseUnlockContractInput!): ReverseUnlockContractPayload
+    undoUnlockContract(input: UndoUnlockContractInput!): UndoUnlockContractPayload
 
     """
     withdrawRate is CMS user only action to withdraw a rate from review
@@ -618,6 +620,8 @@ input ApproveContractInput {
     contractID: ID!
     "Manually entered date for when the approval was released to the state"
     dateApprovalReleasedToState: Date!
+    "Optional reason for approving the contract. Required when the caller is an Admin user."
+    updatedReason: String
 }
 
 type ReverseApproveContractPayload {
@@ -631,14 +635,14 @@ input ReverseApproveContractInput {
     updatedReason: String!
 }
 
-type ReverseUnlockContractPayload {
+type UndoUnlockContractPayload {
     contract: Contract!
 }
 
-input ReverseUnlockContractInput {
-    "The ID of the contract to reverse unlock for"
+input UndoUnlockContractInput {
+    "The ID of the contract to undo unlock for"
     contractID: ID!
-    "The reason for reversing the unlock"
+    "The reason for undoing the unlock"
     updatedReason: String!
 }
 

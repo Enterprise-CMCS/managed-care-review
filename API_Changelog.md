@@ -1,6 +1,15 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### May 13, 2026
+#### Updated
+- Renamed mutation `reverseUnlockContract` to `undoUnlockContract`
+    - This is an API-surface terminology update only. Behavior is unchanged.
+    - Renamed associated GraphQL types:
+        - `ReverseUnlockContractInput` -> `UndoUnlockContractInput`
+        - `ReverseUnlockContractPayload` -> `UndoUnlockContractPayload`
+    - The mutation still restores an unlocked contract submission to its prior submitted or resubmitted state without creating a new `packageSubmission`.
+
 ### May 8, 2026
 #### Added
 - New mutation `reverseUnlockContract` added to the API

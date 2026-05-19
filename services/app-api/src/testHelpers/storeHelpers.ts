@@ -162,7 +162,7 @@ function mockStoreThatErrors(): Store {
         reverseApproveContract: async (_ID) => {
             return genericError
         },
-        reverseUnlockContract: async (_ID) => {
+        undoUnlockContract: async (_ID) => {
             return genericError
         },
         withdrawContract: async (_ID) => {

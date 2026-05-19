@@ -1,14 +1,14 @@
-# Reverse Unlock
+# Undo Unlock
 
-Reference for the internal reverse-unlock model in `services/app-api/`.
+Reference for the internal undo-unlock model in `services/app-api/`.
 
 ## Purpose
 
-Reverse unlock exists to restore a contract or rate package from `UNLOCKED` back to its prior submitted state without losing internal audit history of the unlock that was reversed.
+Undo unlock exists to restore a contract or rate package from `UNLOCKED` back to its prior submitted state without losing internal audit history of the unlock that was undone.
 
 In the current design:
 
-- reverse unlock is stored on revisions through `reverseUnlockInfo`
+- undo unlock is stored on revisions through `undoUnlockInfo`
 - reversed unlocked revisions remain in the database
 - reversed unlocked revisions are historical only
 - current state is determined by the latest non-reversed revision
@@ -23,7 +23,7 @@ An active unlocked draft revision is:
 
 - `unlockInfo != null`
 - `submitInfo == null`
-- `reverseUnlockInfo == null`
+- `undoUnlockInfo == null`
 
 ### Reversed unlocked revision
 
@@ -31,7 +31,7 @@ A reversed unlocked revision is:
 
 - `unlockInfo != null`
 - `submitInfo == null`
-- `reverseUnlockInfo != null`
+- `undoUnlockInfo != null`
 
 These revisions remain in revision history for internal audit, but must not:
 
@@ -42,11 +42,11 @@ These revisions remain in revision history for internal audit, but must not:
 Note:
 
 - the parser still has to recognize an initial draft revision separately
-- reverse unlock specifically cares about unlocked draft revisions versus reversed unlocked revisions
+- undo unlock specifically cares about unlocked draft revisions versus reversed unlocked revisions
 
-### Current state after reverse unlock
+### Current state after undo unlock
 
-Reverse unlock restores submitted state by changing which revision is treated as current.
+Undo unlock restores submitted state by changing which revision is treated as current.
 
 It does not:
 
@@ -54,14 +54,14 @@ It does not:
 - add a `packageSubmission`
 - append a new revision row just to represent the reversal
 
-After reverse unlock, state should fall back to the latest non-reversed revision:
+After undo unlock, state should fall back to the latest non-reversed revision:
 
 - `SUBMITTED` if the prior current revision was the initial submit
 - `RESUBMITTED` if the prior current revision had both `submitInfo` and `unlockInfo`
 
 ## Child Rates And Linked Rates
 
-Reverse unlock must handle both child rates and linked rates correctly.
+Undo unlock must handle both child rates and linked rates correctly.
 
 ### Child rates
 
@@ -76,7 +76,7 @@ Linked rates are different:
 - they may appear in the unlocked contract working set
 - they are not necessarily unlocked by that contract
 
-So reverse unlock must also clear `DraftRateJoinTable` rows for the contract so linked rates do not remain in the unlocked draft working set after the contract is restored.
+So undo unlock must also clear `DraftRateJoinTable` rows for the contract so linked rates do not remain in the unlocked draft working set after the contract is restored.
 
 ## Parser / Query Expectations
 
@@ -84,10 +84,10 @@ Any code path that means “current revision” or “editable draft” must ign
 
 Important expectations:
 
-- active draft lookups must require `reverseUnlockInfoID: null`
+- active draft lookups must require `undoUnlockInfoID: null`
 - current-state helpers must not treat reversed unlocked revisions as current
 - parsers must keep reversed unlocked revisions out of `draftRevision`
-- `packageSubmissions` must remain unchanged by reverse unlock
+- `packageSubmissions` must remain unchanged by undo unlock
 
 ### Draft vs unlocked helpers
 
@@ -107,15 +107,15 @@ They are not interchangeable.
 
 - `unlockInfo != null`
 - `submitInfo == null`
-- `reverseUnlockInfo == null`
+- `undoUnlockInfo == null`
 
-This distinction matters because reverse unlock specifically changes how unlocked revisions are treated, while the API still needs to preserve ordinary initial draft behavior.
+This distinction matters because undo unlock specifically changes how unlocked revisions are treated, while the API still needs to preserve ordinary initial draft behavior.
 
 ## File Map
 
 Primary implementation areas:
 
-- `src/postgres/contractAndRates/reverseUnlockContract.ts`
+- `src/postgres/contractAndRates/undoUnlockContract.ts`
 - `src/postgres/contractAndRates/unlockContract.ts`
 - `src/postgres/contractAndRates/unlockRate.ts`
 - `src/postgres/contractAndRates/parseContractWithHistory.ts`
@@ -140,6 +140,6 @@ Important downstream flows:
 
 - treating `submitInfo == null` as enough to mean “active draft”
 - letting reversed unlocked revisions determine current status
-- leaving linked rates in `DraftRateJoinTable` after reverse unlock
+- leaving linked rates in `DraftRateJoinTable` after undo unlock
 - creating a fake reverse-unlock `packageSubmission`
-- assuming reverse unlock is a review-status action instead of a revision-history concern
+- assuming undo unlock is a revision-history concern rather than a review-status action

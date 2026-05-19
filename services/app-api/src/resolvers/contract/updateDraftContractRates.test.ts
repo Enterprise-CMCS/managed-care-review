@@ -15,7 +15,7 @@ import {
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContract,
-    reverseUnlockTestContract,
+    undoUnlockTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
@@ -129,7 +129,7 @@ describe('updateDraftContractRates', () => {
         expect(result.errors[0].extensions?.code).toBe('FORBIDDEN')
     })
 
-    it('rejects updates to submitted contract, including after reverse unlock', async () => {
+    it('rejects updates to submitted contract, including after undo unlock', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
         })
@@ -201,13 +201,13 @@ describe('updateDraftContractRates', () => {
         const unlockedContract = await unlockTestContract(
             cmsServer,
             draft.id,
-            'unlock before reverse unlock updateDraftContractRates test'
+            'unlock before undo unlock updateDraftContractRates test'
         )
 
-        const reversedContract = await reverseUnlockTestContract(
+        const reversedContract = await undoUnlockTestContract(
             cmsServer,
             draft.id,
-            'reverse unlock before updateDraftContractRates test'
+            'undo unlock before updateDraftContractRates test'
         )
 
         expect(unlockedContract.consolidatedStatus).toBe('UNLOCKED')

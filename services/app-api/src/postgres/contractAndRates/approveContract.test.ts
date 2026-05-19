@@ -62,4 +62,54 @@ describe('approveContract', () => {
             'MARK_AS_APPROVED'
         )
     })
+
+    it('stores updatedReason when provided', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const cmsUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'CMS_USER',
+            },
+        })
+
+        const contractData = mockInsertContractArgs({})
+        const draftContract = must(
+            await insertDraftContract(client, contractData)
+        )
+        const submittedContract = must(
+            await submitContract(client, {
+                contractID: draftContract.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'submit contract',
+            })
+        )
+
+        const approvedContract = must(
+            await approveContract(client, {
+                contractID: submittedContract.id,
+                updatedByID: cmsUser.id,
+                dateApprovalReleasedToState: new Date('12/12/2024'),
+                updatedReason: 'Approval letter sent to state',
+            })
+        )
+
+        expect(approvedContract.reviewStatusActions?.[0].updatedReason).toBe(
+            'Approval letter sent to state'
+        )
+    })
 })

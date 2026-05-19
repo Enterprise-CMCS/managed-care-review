@@ -13,7 +13,7 @@ import {
     runWebAgainstDocker,
     runWebLocally,
     installPrismaDeps,
-    runLaunchDarklyLocally,
+    runLocalDevConsoleLocally,
 } from './local/index.js'
 import { commandMustSucceedSync } from './localProcess.js'
 import LabeledProcessRunner from './runner.js'
@@ -70,7 +70,7 @@ type runLocalFlags = {
     runPostgres: boolean
     runOtel: boolean
     runS3: boolean
-    runLaunchDarkly: boolean
+    runLocalDevConsole: boolean
 }
 async function runAllLocally({
     runAPI,
@@ -78,7 +78,7 @@ async function runAllLocally({
     runPostgres,
     runOtel,
     runS3,
-    runLaunchDarkly,
+    runLocalDevConsole,
 }: runLocalFlags) {
     const runner = new LabeledProcessRunner()
 
@@ -86,7 +86,7 @@ async function runAllLocally({
         runPostgres && runPostgresLocally(runner),
         runOtel && runOtelLocally(runner),
         runS3 && runS3Locally(runner),
-        runLaunchDarkly && runLaunchDarklyLocally(runner),
+        runLocalDevConsole && runLocalDevConsoleLocally(runner),
         runAPI && runAPILocally(runner),
         runWeb && runWebLocally(runner),
     ])
@@ -202,10 +202,9 @@ async function main() {
                                     type: 'boolean',
                                     describe: 'run otel locally',
                                 })
-                                .option('launch-darkly', {
+                                .option('local-dev-console', {
                                     type: 'boolean',
-                                    describe:
-                                        'run local LaunchDarkly feature flag service',
+                                    describe: 'run local dev console service',
                                 })
                                 .example([
                                     ['$0 local', 'run all local services'],
@@ -226,7 +225,7 @@ async function main() {
                                 runPostgres: args.postgres,
                                 runOtel: args.otel,
                                 runS3: args.s3,
-                                runLaunchDarkly: args.launchDarkly,
+                                runLocalDevConsole: args.localDevConsole,
                             }
 
                             const parsedFlags = parseRunFlags(inputFlags)

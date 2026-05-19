@@ -329,6 +329,11 @@ function mockContractRevision(
             statutoryRegulatoryAttestation: true,
             statutoryRegulatoryAttestationDescription:
                 'everything meets regulatory attestation',
+            eqroNewContractor: null,
+            eqroProvisionMcoNewOptionalActivity: null,
+            eqroProvisionNewMcoEqrRelatedActivities: null,
+            eqroProvisionChipEqrRelatedActivities: null,
+            eqroProvisionMcoEqrOrRelatedActivities: null,
         },
         ...partial,
     }
@@ -682,6 +687,11 @@ function mockContractPackageSubmittedWithQuestions(
                         statutoryRegulatoryAttestation: true,
                         statutoryRegulatoryAttestationDescription:
                             'everything meets regulatory attestation',
+                        eqroNewContractor: null,
+                        eqroProvisionMcoNewOptionalActivity: null,
+                        eqroProvisionNewMcoEqrRelatedActivities: null,
+                        eqroProvisionChipEqrRelatedActivities: null,
+                        eqroProvisionMcoEqrOrRelatedActivities: null,
                     },
                 },
                 rateRevisions: [
@@ -842,6 +852,11 @@ function mockContractWithLinkedRateDraft(
                 statutoryRegulatoryAttestation: true,
                 statutoryRegulatoryAttestationDescription:
                     'everything meets regulatory attestation',
+                eqroNewContractor: null,
+                eqroProvisionMcoNewOptionalActivity: null,
+                eqroProvisionNewMcoEqrRelatedActivities: null,
+                eqroProvisionChipEqrRelatedActivities: null,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
             },
         },
 
@@ -1111,6 +1126,11 @@ function mockContractWithLinkedRateSubmitted(
                         statutoryRegulatoryAttestation: true,
                         statutoryRegulatoryAttestationDescription:
                             'everything meets regulatory attestation',
+                        eqroNewContractor: null,
+                        eqroProvisionMcoNewOptionalActivity: null,
+                        eqroProvisionNewMcoEqrRelatedActivities: null,
+                        eqroProvisionChipEqrRelatedActivities: null,
+                        eqroProvisionMcoEqrOrRelatedActivities: null,
                     },
                 },
                 rateRevisions: [
@@ -1307,6 +1327,11 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                         statutoryRegulatoryAttestation: true,
                         statutoryRegulatoryAttestationDescription:
                             'everything meets regulatory attestation',
+                        eqroNewContractor: null,
+                        eqroProvisionMcoNewOptionalActivity: null,
+                        eqroProvisionNewMcoEqrRelatedActivities: null,
+                        eqroProvisionChipEqrRelatedActivities: null,
+                        eqroProvisionMcoEqrOrRelatedActivities: null,
                     },
                 },
                 rateRevisions: [
@@ -1341,7 +1366,8 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                         ],
                         formData: {
                             __typename: 'RateFormData',
-                            rateCertificationName: 'MCR-MN-0003-PMAP-RATE-20240301-20250301-AMENDMENT-20240301',
+                            rateCertificationName:
+                                'MCR-MN-0003-PMAP-RATE-20240301-20250301-AMENDMENT-20240301',
                             rateType: 'AMENDMENT',
                             rateCapitationType: 'RATE_CELL',
                             rateDocuments: [
@@ -1560,6 +1586,11 @@ function mockContractPackageApproved(
                         statutoryRegulatoryAttestation: true,
                         statutoryRegulatoryAttestationDescription:
                             'everything meets regulatory attestation',
+                        eqroNewContractor: null,
+                        eqroProvisionMcoNewOptionalActivity: null,
+                        eqroProvisionNewMcoEqrRelatedActivities: null,
+                        eqroProvisionChipEqrRelatedActivities: null,
+                        eqroProvisionMcoEqrOrRelatedActivities: null,
                     },
                 },
                 rateRevisions: [
@@ -2297,6 +2328,11 @@ function mockContractPackageUnlockedWithUnlockedType(
                 statutoryRegulatoryAttestation: true,
                 statutoryRegulatoryAttestationDescription:
                     'everything meets regulatory attestation',
+                eqroNewContractor: null,
+                eqroProvisionMcoNewOptionalActivity: null,
+                eqroProvisionNewMcoEqrRelatedActivities: null,
+                eqroProvisionChipEqrRelatedActivities: null,
+                eqroProvisionMcoEqrOrRelatedActivities: null,
             },
         },
 
@@ -2467,6 +2503,11 @@ function mockContractPackageUnlockedWithUnlockedType(
                             statutoryRegulatoryAttestation: true,
                             statutoryRegulatoryAttestationDescription:
                                 'everything meets regulatory attestation',
+                            eqroNewContractor: null,
+                            eqroProvisionMcoNewOptionalActivity: null,
+                            eqroProvisionNewMcoEqrRelatedActivities: null,
+                            eqroProvisionChipEqrRelatedActivities: null,
+                            eqroProvisionMcoEqrOrRelatedActivities: null,
                         },
                     },
                 ],
@@ -2535,6 +2576,11 @@ function mockContractPackageUnlockedWithUnlockedType(
                         statutoryRegulatoryAttestation: true,
                         statutoryRegulatoryAttestationDescription:
                             'everything meets regulatory attestation',
+                        eqroNewContractor: null,
+                        eqroProvisionMcoNewOptionalActivity: null,
+                        eqroProvisionNewMcoEqrRelatedActivities: null,
+                        eqroProvisionChipEqrRelatedActivities: null,
+                        eqroProvisionMcoEqrOrRelatedActivities: null,
                     },
                 },
                 rateRevisions: [
@@ -4131,83 +4177,85 @@ const mockContractStripped = (
 
 const mockEQROContractStripped = (
     partial?: Partial<ContractStripped>
-): ContractStripped => mockContractStripped({
-    id: 'test-stripped-eqro-123',
-    contractSubmissionType: 'EQRO',
-    latestSubmittedRevision: {
-        __typename: 'ContractRevisionStripped',
-        id: 'test-stripped-eqro-revision-123',
-        contractID: 'test-stripped-eqro-123',
-        createdAt: new Date('2024-01-15'),
-        updatedAt: new Date('2024-01-15'),
-        contractName: 'MCR-MN-0005-SNBC',
-        submitInfo: {
-            __typename: 'UpdateInformation',
-            updatedAt: '2024-01-15T00:00:00.000Z',
-            updatedBy: {
-                __typename: 'UpdatedBy',
-                email: 'example@state.com',
-                role: 'STATE_USER',
-                givenName: 'John',
-                familyName: 'Vila',
+): ContractStripped =>
+    mockContractStripped({
+        id: 'test-stripped-eqro-123',
+        contractSubmissionType: 'EQRO',
+        latestSubmittedRevision: {
+            __typename: 'ContractRevisionStripped',
+            id: 'test-stripped-eqro-revision-123',
+            contractID: 'test-stripped-eqro-123',
+            createdAt: new Date('2024-01-15'),
+            updatedAt: new Date('2024-01-15'),
+            contractName: 'MCR-MN-0005-SNBC',
+            submitInfo: {
+                __typename: 'UpdateInformation',
+                updatedAt: '2024-01-15T00:00:00.000Z',
+                updatedBy: {
+                    __typename: 'UpdatedBy',
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila',
+                },
+                updatedReason: 'Initial EQRO submission',
             },
-            updatedReason: 'Initial EQRO submission',
+            unlockInfo: null,
+            formData: {
+                __typename: 'ContractFormDataStripped',
+                programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+                populationCovered: 'MEDICAID_AND_CHIP',
+                submissionType: 'CONTRACT_ONLY',
+                contractType: 'BASE',
+                contractDateStart: new Date('2024-01-01'),
+                contractDateEnd: new Date('2025-01-01'),
+                managedCareEntities: ['MCO'],
+            },
         },
-        unlockInfo: null,
-        formData: {
-            __typename: 'ContractFormDataStripped',
-            programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
-            populationCovered: 'MEDICAID_AND_CHIP',
-            submissionType: 'CONTRACT_ONLY',
-            contractType: 'BASE',
-            contractDateStart: new Date('2024-01-01'),
-            contractDateEnd: new Date('2025-01-01'),
-            managedCareEntities: ['MCO'],
-        },
-    },
-    ...partial,
-})
+        ...partial,
+    })
 
 const mockUnlockedContractStripped = (
     partial?: Partial<ContractStripped>
-): ContractStripped => mockContractStripped({
-    id: 'test-stripped-unlocked-123',
-    status: 'UNLOCKED',
-    stateNumber: 1,
-    consolidatedStatus: 'UNLOCKED',
-    draftRevision: {
-        __typename: 'ContractRevisionStripped',
-        id: 'test-stripped-draft-revision-123',
-        contractID: 'test-stripped-unlocked-123',
-        createdAt: new Date('2024-02-01'),
-        updatedAt: new Date('2024-02-01'),
-        contractName: 'MCR-MN-0005-SNBC',
-        submitInfo: null,
-        unlockInfo: {
-            __typename: 'UpdateInformation',
-            updatedAt: '2024-02-01T00:00:00.000Z',
-            updatedBy: {
-                __typename: 'UpdatedBy',
-                email: 'cms@example.com',
-                role: 'CMS_USER',
-                givenName: 'Jane',
-                familyName: 'CMS',
+): ContractStripped =>
+    mockContractStripped({
+        id: 'test-stripped-unlocked-123',
+        status: 'UNLOCKED',
+        stateNumber: 1,
+        consolidatedStatus: 'UNLOCKED',
+        draftRevision: {
+            __typename: 'ContractRevisionStripped',
+            id: 'test-stripped-draft-revision-123',
+            contractID: 'test-stripped-unlocked-123',
+            createdAt: new Date('2024-02-01'),
+            updatedAt: new Date('2024-02-01'),
+            contractName: 'MCR-MN-0005-SNBC',
+            submitInfo: null,
+            unlockInfo: {
+                __typename: 'UpdateInformation',
+                updatedAt: '2024-02-01T00:00:00.000Z',
+                updatedBy: {
+                    __typename: 'UpdatedBy',
+                    email: 'cms@example.com',
+                    role: 'CMS_USER',
+                    givenName: 'Jane',
+                    familyName: 'CMS',
+                },
+                updatedReason: 'Unlocked for corrections',
             },
-            updatedReason: 'Unlocked for corrections',
+            formData: {
+                __typename: 'ContractFormDataStripped',
+                programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+                populationCovered: 'MEDICAID',
+                submissionType: 'CONTRACT_AND_RATES',
+                contractType: 'BASE',
+                contractDateStart: new Date('2024-01-01'),
+                contractDateEnd: new Date('2025-01-01'),
+                managedCareEntities: ['MCO'],
+            },
         },
-        formData: {
-            __typename: 'ContractFormDataStripped',
-            programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
-            populationCovered: 'MEDICAID',
-            submissionType: 'CONTRACT_AND_RATES',
-            contractType: 'BASE',
-            contractDateStart: new Date('2024-01-01'),
-            contractDateEnd: new Date('2025-01-01'),
-            managedCareEntities: ['MCO'],
-        },
-    },
-    ...partial,
-})
+        ...partial,
+    })
 
 export {
     mockContractRevision,

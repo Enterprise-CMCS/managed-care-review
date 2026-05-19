@@ -4,12 +4,12 @@ import { insertDraftContract } from './insertContract'
 import { insertDraftRate } from './insertRate'
 import { submitContract } from './submitContract'
 import { unlockContract } from './unlockContract'
-import { reverseUnlockContract } from './reverseUnlockContract'
+import { undoUnlockContract } from './undoUnlockContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import { findRateWithHistory } from './findRateWithHistory'
 import { must, mockInsertContractArgs } from '../../testHelpers'
 
-describe('reverseUnlockContract', () => {
+describe('undoUnlockContract', () => {
     it('removes the unlocked draft contract and child rate revisions', async () => {
         const client = await sharedTestPrismaClient()
 
@@ -72,7 +72,7 @@ describe('reverseUnlockContract', () => {
         expect(unlockedContract.draftRates[0].draftRevision).toBeDefined()
 
         const reversedContract = must(
-            await reverseUnlockContract(client, {
+            await undoUnlockContract(client, {
                 contractID: contract.id,
                 updatedByID: cmsUser.id,
                 updatedReason: 'Unlock was accidental',
@@ -155,7 +155,7 @@ describe('reverseUnlockContract', () => {
         )
 
         const reversedContract = must(
-            await reverseUnlockContract(client, {
+            await undoUnlockContract(client, {
                 contractID: contract.id,
                 updatedByID: cmsUser.id,
                 updatedReason: 'Second unlock was accidental',

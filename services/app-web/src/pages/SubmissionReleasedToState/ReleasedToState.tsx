@@ -3,11 +3,15 @@ import styles from './ReleasedToState.module.scss'
 import {
     ActionButton,
     Breadcrumbs,
+    ErrorSummary,
+    FieldTextarea,
     GenericApiErrorBanner,
     PoliteErrorMessage,
     PageActionsContainer,
     SectionHeader,
 } from '../../components'
+import { useAuth } from '../../contexts/AuthContext'
+import { useErrorSummary } from '../../hooks/useErrorSummary'
 import {
     ContractSubmissionTypeRecord,
     RoutesRecord,
@@ -39,20 +43,27 @@ import { Error404 } from '../Errors/Error404Page'
 
 type ReleasedToStateValues = {
     dateApprovalReleasedToState: string
+    releasedToStateReason: string
 }
 
 const today = new Date()
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
-const ReleaseToStateSchema = Yup.object().shape({
-    dateApprovalReleasedToState: Yup.date()
-        .required('You must select a date')
-        .max(today.toString(), 'You must enter a valid date')
+const buildReleaseToStateSchema = (isAdminUser: boolean) =>
+    Yup.object().shape({
+        dateApprovalReleasedToState: Yup.date()
+            .required('You must select a date')
+            .max(today.toString(), 'You must enter a valid date')
 
-        // @ts-ignore-next-line
-        .validateDateFormat('YYYY-MM-DD', true)
-        .typeError('Date must be in MM/DD/YYYY format'),
-})
+            // @ts-ignore-next-line
+            .validateDateFormat('YYYY-MM-DD', true)
+            .typeError('Date must be in MM/DD/YYYY format'),
+        releasedToStateReason: isAdminUser
+            ? Yup.string().required(
+                  'Admin users must provide a reason for releasing to state.'
+              )
+            : Yup.string(),
+    })
 
 type FormError =
     FormikErrors<ReleasedToStateValues>[keyof FormikErrors<ReleasedToStateValues>]
@@ -61,10 +72,14 @@ const ReleasedToState = () => {
     const { id, contractSubmissionType } = useRouteParams()
     const { updateHeading, updateActiveMainContent } = usePage()
     const { logFormSubmitEvent } = useTealium()
+    const { loggedInUser } = useAuth()
+    const isAdminUser = loggedInUser?.role === 'ADMIN_USER'
     const navigate = useNavigate()
     const [shouldValidate, setShouldValidate] = React.useState(false)
+    const { setFocusErrorSummaryHeading, errorSummaryHeadingRef } =
+        useErrorSummary()
 
-    const showFieldErrors = (error?: FormError): boolean | undefined =>
+    const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
 
     const [approveContract, { error: approveError, loading: approveLoading }] =
@@ -83,6 +98,7 @@ const ReleasedToState = () => {
 
     const formInitialValues: ReleasedToStateValues = {
         dateApprovalReleasedToState: '',
+        releasedToStateReason: '',
     }
 
     const contract = fetchContractData?.fetchContract.contract
@@ -144,6 +160,7 @@ const ReleasedToState = () => {
                         contractID: contract.id,
                         dateApprovalReleasedToState:
                             values.dateApprovalReleasedToState,
+                        updatedReason: values.releasedToStateReason,
                     },
                 },
             })
@@ -178,18 +195,25 @@ const ReleasedToState = () => {
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => approveContractAction(values)}
-                validationSchema={ReleaseToStateSchema}
+                validationSchema={buildReleaseToStateSchema(isAdminUser)}
             >
-                {({ handleSubmit, errors, setFieldValue }) => (
+                {({ handleSubmit, handleChange, errors, setFieldValue }) => (
                     <Form
                         id="ReleasedToStateForm"
                         className={styles.formContainer}
                         onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                             setShouldValidate(true)
+                            setFocusErrorSummaryHeading(true)
                             return handleSubmit(e)
                         }}
                     >
                         {approveError && <GenericApiErrorBanner />}
+                        {shouldValidate && (
+                            <ErrorSummary
+                                errors={errors as { [field: string]: string }}
+                                headingRef={errorSummaryHeadingRef}
+                            />
+                        )}
                         <fieldset className="usa-fieldset">
                             <SectionHeader
                                 headerId={'releaseToStateHeader'}
@@ -213,14 +237,22 @@ const ReleasedToState = () => {
                             >
                                 <Label
                                     htmlFor="dateApprovalReleasedToState"
+                                    id="dateApprovalReleasedToState-label"
+                                    tabIndex={-1}
                                     className="margin-bottom-0 text-bold"
                                 >
                                     Date released to state
                                 </Label>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                <p
+                                    id="dateApprovalReleasedToState-required"
+                                    className="margin-bottom-0 margin-top-05 usa-hint"
+                                >
                                     Required
                                 </p>
-                                <p className="margin-bottom-0 margin-top-05 usa-hint">
+                                <p
+                                    id="dateApprovalReleasedToState-hint"
+                                    className="margin-bottom-0 margin-top-05 usa-hint"
+                                >
                                     mm/dd/yyyy
                                 </p>
                                 {showFieldErrors(
@@ -231,8 +263,16 @@ const ReleasedToState = () => {
                                     </PoliteErrorMessage>
                                 )}
                                 <DatePicker
+                                    validationStatus={
+                                        showFieldErrors(
+                                            errors.dateApprovalReleasedToState
+                                        )
+                                            ? 'error'
+                                            : undefined
+                                    }
                                     aria-required
-                                    aria-describedby="dateApprovalReleasedToState"
+                                    aria-labelledby="dateApprovalReleasedToState-label"
+                                    aria-describedby="dateApprovalReleasedToState-required dateApprovalReleasedToState-hint"
                                     id="dateApprovalReleasedToState"
                                     name="dateApprovalReleasedToState"
                                     onChange={(val) =>
@@ -243,6 +283,20 @@ const ReleasedToState = () => {
                                     }
                                 />
                             </FormGroup>
+                            {isAdminUser && (
+                                <FieldTextarea
+                                    label="Reason for releasing this submission to the state."
+                                    id="releasedToStateReason"
+                                    data-testid="releasedToStateReason"
+                                    name="releasedToStateReason"
+                                    aria-required
+                                    hint="Admin users are required to input a reason for releasing to the state."
+                                    showError={showFieldErrors(
+                                        errors.releasedToStateReason
+                                    )}
+                                    onChange={handleChange}
+                                />
+                            )}
                         </fieldset>
                         <PageActionsContainer>
                             <ButtonGroup type="default">
@@ -263,9 +317,10 @@ const ReleasedToState = () => {
                                 <ActionButton
                                     type="submit"
                                     variant="default"
-                                    disabled={showFieldErrors(
-                                        errors.dateApprovalReleasedToState
-                                    )}
+                                    disabled={
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
+                                    }
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
                                     link_url={`/submissions/${contractSubmissionType}/${id}`}

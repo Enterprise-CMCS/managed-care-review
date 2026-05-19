@@ -17,24 +17,71 @@
     flex-wrap: wrap;
 }
 
+.resourcesNavLogosRow {
+    background-color: custom.$mcr-cmsblue-lightest;
+    padding: uswds.units(3) 0;
+}
+
+.resourcesNavContainer {
+    box-sizing: border-box;
+    padding-left: uswds.units(2);
+    padding-right: uswds.units(2);
+    width: 100%;
+}
+
+.resourcesNavTopRow {
+    position: relative;
+}
+
+.resourcesNavLogo {
+    display: block;
+    margin: 0;
+
+    img {
+        display: block;
+        height: 50px;
+        padding-right: 0;
+        width: auto;
+    }
+}
+
 .federalLogos {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
-    padding: uswds.units(2);
     justify-content: flex-end;
+    padding: uswds.units(2);
     > span {
         max-width: 300px;
     }
+}
+
+.resourcesNavFederalBlock {
+    width: 100%;
+}
+
+.resourcesNavFederalIcon {
+    height: 53px;
+    padding-right: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 52px;
+}
+
+.resourcesNavFederalText {
+    @include custom.mcr-type-style(14px, 400, 1.5, 0);
+    color: custom.$mcr-foundation-hint;
+    margin: uswds.units(4) 0 0;
+    max-width: 363px;
+    width: 100%;
 }
 
 .contactRow {
     background-color: custom.$mcr-cmsblue-base;
     color: custom.$mcr-foundation-white;
     padding: uswds.units(3) 0;
-    > span {
-        margin: uswds.units(1);
-    }
+
     a {
         color: custom.$mcr-foundation-white;
 
@@ -43,5 +90,97 @@
         &:visited {
             color: custom.$mcr-foundation-white;
         }
+    }
+}
+
+.resourcesNavContactRow {
+    padding: 0;
+}
+
+.resourcesNavLinks {
+    align-items: stretch;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.footerNavLink {
+    @include custom.mcr-type-style(16px, 700, normal);
+    color: custom.$mcr-foundation-white;
+    display: flex;
+    margin-left: calc(-1 * #{uswds.units(2)});
+    margin-right: calc(-1 * #{uswds.units(2)});
+    padding: uswds.units(2) uswds.units(2);
+    text-decoration: underline;
+    text-decoration-skip-ink: none;
+    white-space: nowrap;
+    width: calc(100% + #{uswds.units(4)});
+
+    &:not(:last-child) {
+        border-bottom: 1px solid rgb(0 0 0 / 15%);
+    }
+}
+
+@include uswds.at-media('tablet') {
+    .resourcesNavLogosRow {
+        padding: 0;
+    }
+
+    .resourcesNavTopRow {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .resourcesNavLogo {
+        margin: 0;
+    }
+
+    .resourcesNavFederalBlock {
+        align-items: flex-start;
+        display: flex;
+        gap: uswds.units(3);
+        justify-content: flex-end;
+        padding: uswds.units(3) 0 uswds.units(4);
+        width: auto;
+    }
+
+    .resourcesNavFederalIcon {
+        flex-shrink: 0;
+        position: static;
+    }
+
+    .resourcesNavFederalText {
+        margin: 0;
+        max-width: 380px;
+        width: 380px;
+    }
+
+    .resourcesNavLinks {
+        align-items: center;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+    .footerNavLink {
+        display: inline-flex;
+        margin-left: 0;
+        margin-right: 0;
+        padding: uswds.units(2);
+        width: auto;
+
+        &:first-child {
+            padding-left: 0;
+        }
+
+        &:not(:last-child) {
+            border-bottom: 0;
+        }
+    }
+}
+
+@include uswds.at-media('desktop') {
+    .resourcesNavContainer {
+        padding-left: uswds.units(4);
+        padding-right: uswds.units(4);
     }
 }

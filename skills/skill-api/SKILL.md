@@ -28,10 +28,10 @@ If the task only involves UI/frontend without touching the data layer, you proba
 | Anything involving rates that span multiple contracts (linking, parent reassignment, withdraw rate fallout) | `references/06-linked-rates.md` |
 | Withdraw contract specifically | `references/07-withdraw.md` |
 | Working out what status a contract or rate ends up in; computing parent contract; resolving cause on `packageSubmissions`; recursion in domain types | `references/08-derived-state.md` |
-| Reverse unlock, reversed revisions, active-draft rules, linked-rate cleanup | `references/09-reverse-unlock.md` |
+| Undo unlock, reversed revisions, active-draft rules, linked-rate cleanup | `references/09-undo-unlock.md` |
 | Revision overrides, flatten/merge behavior, document overrides, unlock expectations | `references/10-revision-overrides.md` |
 
-For broad multi-area features (e.g. a new "reverse unlock contract" mutation): read `01`, `02`, `05`, and `08` first; pull in `06` and `07` if rates cross contract boundaries.
+For broad multi-area features (e.g. a new "undo unlock contract" mutation): read `01`, `02`, `05`, and `08` first; pull in `06` and `07` if rates cross contract boundaries.
 
 ## Cheat sheet — facts to keep in mind
 
@@ -42,8 +42,13 @@ For broad multi-area features (e.g. a new "reverse unlock contract" mutation): r
 - **One `UpdateInfoTable` event row per submit-or-unlock; shared across the contract and every child rate touched in that transaction.** This is what lets the parser later detect "these were submitted/unlocked together."
 - **`SubmissionPackageJoinTable`** is the immutable snapshot of contract↔rate at submit time, joining specific contract revision + specific rate revision + position. **`DraftRateJoinTable`** is the working set on a contract that's currently in draft, joining parent tables only.
 - **Form-data writes via `updateDraftContract` are full replaces, not merges.** Omitted fields are nulled (`nullify`) or emptied (`emptify`). Child collections (documents, contacts) are delete-and-recreate, so row IDs are not stable across updates.
+<<<<<<< HEAD
 - **Reverse unlock is revision history, not a new submission event.** Read `09-reverse-unlock.md` if you touch `reverseUnlockInfo`, active-draft logic, or linked-rate cleanup.
 - **Overrides are sparse metadata patches on submitted revisions.** Read `10-revision-overrides.md` if you touch revision overrides, document overrides, or unlock behavior for overridden revisions. Rate unlock is currently contract-driven: child rates are unlocked through `unlockContract`, not treated as an independent workflow with parity requirements.
+=======
+- **Undo unlock is revision history, not a new submission event.** Read `09-undo-unlock.md` if you touch `undoUnlockInfo`, active-draft logic, or linked-rate cleanup.
+- **Overrides are sparse metadata patches on submitted revisions.** Read `10-revision-overrides.md` if you touch revision overrides, document overrides, or unlock behavior for overridden revisions.
+>>>>>>> 001d9e2e5624848638fdc53f0d97f875d50a4363
 - **Deprecated — do not include in new designs:**
   - `ContractTable.sharedRateRevisions` / `RateRevisionTable.contractsWithSharedRateRevision` (the `SharedRateRevisions` M:N) — not marked deprecated in the schema source, but confirmed deprecated 2026-05-04.
   - `HealthPlanPackageTable` / `HealthPlanRevisionTable` (proto legacy) — marked `deprecated Boolean @default(true)`.
@@ -147,5 +152,7 @@ The repo's `docs/` directory has broader architecture and conventions docs that 
 6. **Watch for `DRAFT_PARENT_PLACEHOLDER`** if the change involves draft rates without a submitted parent yet — the placeholder needs the outer parser to patch.
 7. **Verify file paths and code shapes against the current state of the repo** before depending on specifics. This reference was synthesized at a point in time; it can drift.
 8. **Never hand-write Prisma migrations.** If a schema change needs a migration, generate it with the Prisma CLI and review the generated SQL rather than manually creating `migration.sql` files.
-9. **Never assume this skill is up-to-date.** Scan the relevant code areas during work and check if the skill is out of date with the codebase.
-10. **Prompt to update skill.** If the skill is out of date with the codebase, prompt the human user on if they want to update the skill.
+9. **Sandbox limitation for Prisma CLI.** In the Codex sandbox, Prisma CLI commands that need database access may fail because the sandbox cannot connect to local Postgres (for example `localhost:5432`). If a task requires `prisma migrate`, `prisma db push`, `prisma migrate reset`, or similar DB-connected Prisma commands, the human user should run them in their own shell and provide the results back for review.
+10. **Migration transaction wrapper.** When reviewing or adjusting generated Prisma migration SQL in this repo, make sure the migration statements are wrapped in an explicit `BEGIN;` / `COMMIT;` transaction block.
+11. **Never assume this skill is up-to-date.** Scan the relevant code areas during work and check if the skill is out of date with the codebase.
+12. **Prompt to update skill.** If the skill is out of date with the codebase, prompt the human user on if they want to update the skill.
