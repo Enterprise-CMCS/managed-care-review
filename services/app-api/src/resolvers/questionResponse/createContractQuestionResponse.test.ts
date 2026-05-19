@@ -17,8 +17,13 @@ import {
 } from '../../testHelpers/userHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { findStatePrograms } from '../../postgres'
-import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
+import {
+    createAndSubmitTestContractWithRate,
+    createAndUpdateTestEQROContract,
+    submitTestContract,
+} from '../../testHelpers/gqlContractHelpers'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import { testS3Client } from '../../testHelpers/s3Helpers'
 
 describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -234,6 +239,88 @@ describe('createContractQuestionResponse', () => {
                 ),
                 bodyHTML: expect.stringContaining(
                     `<a href="http://localhost/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/${contract.id}/question-and-answers">View submission Q&A</a>`
+                ),
+            })
+        )
+    })
+
+    it('sends CMS-only email for EQRO submissions (no state email)', async () => {
+        const emailConfig = testEmailConfig()
+        const mockEmailer = testEmailer(emailConfig)
+        const dmcoCMS = testCMSUser({
+            divisionAssignment: 'DMCO' as const,
+        })
+        const mockS3 = testS3Client()
+        const stateServer = await constructTestPostgresServer({
+            emailer: mockEmailer,
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: dmcoCMS,
+            },
+            emailer: mockEmailer,
+            s3Client: mockS3,
+        })
+
+        const assignedUserIDs = assignedUsers.map((u) => u.id)
+        await updateTestStateAssignments(cmsServer, 'FL', assignedUserIDs)
+        const assignedUserEmails = assignedUsers.map((u) => u.email)
+
+        const draft = await createAndUpdateTestEQROContract(stateServer, 'FL')
+        const contract = await submitTestContract(stateServer, draft.id)
+
+        const createdQuestion = await createTestQuestion(cmsServer, contract.id)
+        await createTestQuestionResponse(stateServer, createdQuestion?.id)
+
+        const contractName =
+            contract.packageSubmissions[0].contractRevision.contractName
+
+        // CMS response email was sent with EQRO recipient policy:
+        // devReviewTeamEmails + dmcoEmails only — no state analysts, no division-specific.
+        expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `New Responses for ${contractName}`
+                ),
+                toAddresses: expect.arrayContaining([
+                    ...emailConfig.devReviewTeamEmails,
+                    ...emailConfig.dmcoEmails,
+                ]),
+            })
+        )
+        expect(mockEmailer.sendEmail).not.toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `New Responses for ${contractName}`
+                ),
+                toAddresses: expect.arrayContaining(assignedUserEmails),
+            })
+        )
+        expect(mockEmailer.sendEmail).not.toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `New Responses for ${contractName}`
+                ),
+                toAddresses: expect.arrayContaining(
+                    emailConfig.dmcpReviewEmails
+                ),
+            })
+        )
+        expect(mockEmailer.sendEmail).not.toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `New Responses for ${contractName}`
+                ),
+                toAddresses: expect.arrayContaining(emailConfig.oactEmails),
+            })
+        )
+
+        // No state-side response confirmation email was sent for EQRO.
+        expect(mockEmailer.sendEmail).not.toHaveBeenCalledWith(
+            expect.objectContaining({
+                subject: expect.stringContaining(
+                    `Response submitted to CMS for ${contractName}`
                 ),
             })
         )

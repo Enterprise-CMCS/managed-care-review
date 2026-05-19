@@ -299,7 +299,6 @@ jobs:
           SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
           SUBNET_PUBLIC_A_ID: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
           VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
           GUARDDUTY_DETECTOR_ID: ${{ secrets.DEV_GUARDDUTY_DETECTOR_ID }}
         run: |
@@ -350,7 +349,14 @@ jobs:
             --require-approval never
 
   deploy-cdk-app-dev:
-    needs: [begin-deployment, deploy-cdk-infrastructure-dev, web-unit-tests, api-unit-tests, packages-unit-tests]
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure-dev,
+        web-unit-tests,
+        api-unit-tests,
+        packages-unit-tests,
+      ]
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-dev.result == 'success' &&

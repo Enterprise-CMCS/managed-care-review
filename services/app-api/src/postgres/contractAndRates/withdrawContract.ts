@@ -16,7 +16,7 @@ import {
 import type { RatesToReassign } from './reassignParentContract'
 import { reassignParentContractInTransaction } from './reassignParentContract'
 import type { RateForDisplayType } from '../../emailer/templateHelpers'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 export type WithdrawContractArgsType = {
     contract: ContractType
@@ -53,6 +53,38 @@ const withdrawContractInsideTransaction = async (
     args: WithdrawContractArgsType
 ): Promise<WithdrawContractReturnType> => {
     const { contract, updatedReason, updatedByID } = args
+
+    const currentContractReviewStatus = await tx.contractTable.findUnique({
+        where: {
+            id: contract.id,
+        },
+        select: {
+            reviewStatusActions: {
+                orderBy: {
+                    updatedAt: 'desc',
+                },
+                take: 1,
+                select: {
+                    actionType: true,
+                },
+            },
+        },
+    })
+
+    if (!currentContractReviewStatus) {
+        throw new NotFoundError(
+            `Could not find contract ${contract.id} to withdraw.`
+        )
+    }
+
+    if (
+        currentContractReviewStatus.reviewStatusActions[0]?.actionType ===
+        'WITHDRAW'
+    ) {
+        throw new Error(
+            'Cannot withdraw contract: contract is already withdrawn'
+        )
+    }
 
     const latestSubmission = contract.packageSubmissions[0]
     const rateIDS = latestSubmission.rateRevisions.map((rr) => rr.rateID)
@@ -275,19 +307,17 @@ const withdrawContract = async (
     client: ExtendedPrismaClient,
     args: WithdrawContractArgsType
 ): Promise<WithdrawContractReturnType | Error> => {
-    try {
-        return await client.$transaction(
-            async (tx) => await withdrawContractInsideTransaction(tx, args),
-            {
-                timeout: 30000,
-            }
-        )
-    } catch (err) {
-        const parsedError = parseErrorToError(err)
-        const msg = `PRISMA ERROR: Error withdrawing contract: ${parsedError.message}`
-        console.error(msg)
-        return parsedError
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'withdrawContract',
+        table: 'ContractTable',
+        id: args.contract.id,
+        transaction: async (tx) =>
+            await withdrawContractInsideTransaction(tx, args),
+        transactionOptions: {
+            timeout: 30000,
+        },
+    })
 }
 
 export { withdrawContractInsideTransaction, withdrawContract }

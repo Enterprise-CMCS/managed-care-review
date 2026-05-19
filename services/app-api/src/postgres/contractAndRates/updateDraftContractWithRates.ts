@@ -6,7 +6,7 @@ import { prismaUpdateContractFormDataFromDomain } from './prismaContractRateAdap
 import { includeFullRate } from './prismaFullContractRateHelpers'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { UpdateContractArgsType } from './updateDraftContract'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 // Update the given draft
 // * can change the set of draftRates
@@ -17,8 +17,12 @@ async function updateDraftContractFormData(
 ): Promise<ContractType | NotFoundError | Error> {
     const { contractID, formData } = args
 
-    try {
-        return await client.$transaction(async (tx) => {
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'updateDraftContractFormData',
+        table: 'ContractTable',
+        id: contractID,
+        transaction: async (tx) => {
             // Given all the Contracts associated with this draft, find the most recent submitted
             const currentContractRev = await tx.contractRevisionTable.findFirst(
                 {
@@ -46,9 +50,9 @@ async function updateDraftContractFormData(
                 }
             )
             if (!currentContractRev) {
-                const err = `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
-                console.error(err)
-                return new NotFoundError(err)
+                return new NotFoundError(
+                    `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
+                )
             }
 
             // Then update the contractRevision, adjusting all simple fields
@@ -62,11 +66,8 @@ async function updateDraftContractFormData(
             })
 
             return findContractWithHistory(tx, contractID)
-        })
-    } catch (err) {
-        console.error('Prisma error updating contract', err)
-        return parseErrorToError(err)
-    }
+        },
+    })
 }
 
 export { updateDraftContractFormData }

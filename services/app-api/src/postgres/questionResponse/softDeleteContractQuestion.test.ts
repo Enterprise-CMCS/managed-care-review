@@ -18,7 +18,7 @@ describe('softDeleteContractQuestion', () => {
     const mockS3 = testS3Client()
 
     // Test race conditions, but not reliability. There is complexity in trying to truly test the race condition in js.
-    it('serializes concurrent deletes — no duplicate action rows under a race', async () => {
+    it('locks concurrent deletes on the same question — no duplicate action rows under a race', async () => {
         const cmsUser = testCMSUser()
         const adminUser = testAdminUser()
         await createDBUsersWithFullData([cmsUser, adminUser])
@@ -51,11 +51,10 @@ describe('softDeleteContractQuestion', () => {
         const prismaClient = await sharedTestPrismaClient()
 
         // Fire two store-level deletes in parallel. Going straight to the
-        // store cuts out the resolver/auth overhead so the two transactions
-        // open close together, giving Postgres a real shot at overlapping
-        // their snapshots and triggering P2034 → retry. If one transaction
-        // commits first, the other hits the idempotency branch instead.
-        // Either way we should never see duplicate action rows.
+        // store cuts out the resolver/auth overhead so both transactions can
+        // contend on the same question row lock. One delete wins; the other
+        // waits, rereads fresh state, and lands in the "already deleted"
+        // branch. Either way we should never see duplicate action rows.
         const [r1, r2] = await Promise.all([
             softDeleteContractQuestion(prismaClient, {
                 questionID: question.id,
