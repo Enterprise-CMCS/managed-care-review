@@ -2,7 +2,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -21,7 +21,7 @@ export function createOauthClientResolver(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('createOauthClient', errMessage)
+            logResolverError('createOauthClient', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -34,7 +34,7 @@ export function createOauthClientResolver(
 
         if (!user || user.role !== 'ADMIN_USER') {
             const msg = 'Only ADMIN users can create OAuth clients'
-            logError('createOauthClient', msg)
+            logResolverError('createOauthClient', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createForbiddenError(msg)
         }
@@ -42,7 +42,7 @@ export function createOauthClientResolver(
         // Validate that the provided userID exists and is a valid CMS user
         const targetUser = await store.findUser(input.userID)
         if (targetUser instanceof Error) {
-            logError('createOauthClient', targetUser.message)
+            logResolverError('createOauthClient', targetUser.message, context)
             setErrorAttributesOnActiveSpan(targetUser.message, span)
             throw new GraphQLError(targetUser.message, {
                 extensions: {
@@ -54,7 +54,7 @@ export function createOauthClientResolver(
 
         if (!targetUser) {
             const msg = `User with ID ${input.userID} does not exist`
-            logError('createOauthClient', msg)
+            logResolverError('createOauthClient', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createUserInputError(
                 `User with ID ${input.userID} does not exist`,
@@ -68,7 +68,7 @@ export function createOauthClientResolver(
             targetUser.role !== 'CMS_APPROVER_USER'
         ) {
             const msg = `OAuth clients can only be associated with CMS users`
-            logError('createOauthClient', msg)
+            logResolverError('createOauthClient', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createUserInputError(msg, 'userID')
         }
@@ -81,7 +81,7 @@ export function createOauthClientResolver(
         })
 
         if (oauthClient instanceof Error) {
-            logError('createOauthClient', oauthClient.message)
+            logResolverError('createOauthClient', oauthClient.message, context)
             setErrorAttributesOnActiveSpan(oauthClient.message, span)
             throw new GraphQLError(oauthClient.message, {
                 extensions: {

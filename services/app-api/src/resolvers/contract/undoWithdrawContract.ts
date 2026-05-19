@@ -6,7 +6,7 @@ import {
     recordResolverError,
 } from '../attributeHelper'
 import { NotFoundError } from '../../postgres'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import { hasCMSPermissions } from '../../domain-models'
@@ -34,7 +34,11 @@ export function undoWithdrawContract(
                 // Check OAuth client read permissions
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('undoWithdrawContract', errMessage)
+                    logResolverError(
+                        'undoWithdrawContract',
+                        errMessage,
+                        context
+                    )
 
                     throw new GraphQLError(errMessage, {
                         extensions: {
@@ -47,7 +51,7 @@ export function undoWithdrawContract(
                 if (!hasCMSPermissions(user)) {
                     const message =
                         'user not authorized to undo a submission withdrawal'
-                    logError('undoWithdrawContract', message)
+                    logResolverError('undoWithdrawContract', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -57,12 +61,20 @@ export function undoWithdrawContract(
                 if (contractWithHistory instanceof Error) {
                     if (contractWithHistory instanceof NotFoundError) {
                         const errMessage = `A contract must exist to undo a submission withdrawal: ${contractID}`
-                        logError('undoWithdrawContract', errMessage)
+                        logResolverError(
+                            'undoWithdrawContract',
+                            errMessage,
+                            context
+                        )
                         throw createUserInputError(errMessage, 'contractID')
                     }
 
                     const errMessage = `Issue finding a contract. Message: ${contractWithHistory.message}`
-                    logError('undoWithdrawContract', errMessage)
+                    logResolverError(
+                        'undoWithdrawContract',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -73,7 +85,11 @@ export function undoWithdrawContract(
 
                 if (contractWithHistory.consolidatedStatus !== 'WITHDRAWN') {
                     const errMessage = `Attempted to undo a submission withdrawal with invalid contract status of ${contractWithHistory.consolidatedStatus}`
-                    logError('undoWithdrawContract', errMessage)
+                    logResolverError(
+                        'undoWithdrawContract',
+                        errMessage,
+                        context
+                    )
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -85,7 +101,11 @@ export function undoWithdrawContract(
 
                 if (undoWithdrawResult instanceof Error) {
                     const errMessage = `Failed to undo a submission withdrawal. ${undoWithdrawResult.message}`
-                    logError('undoWithdrawContract', errMessage)
+                    logResolverError(
+                        'undoWithdrawContract',
+                        errMessage,
+                        context
+                    )
 
                     if (undoWithdrawResult instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -112,7 +132,11 @@ export function undoWithdrawContract(
                 )
                 if (contractZipRes instanceof Error) {
                     const errMessage = `Failed to zip files for contract revision with ID: ${contract.id}: ${contractZipRes.message}`
-                    logError('undoWithdrawContract', errMessage)
+                    logResolverError(
+                        'undoWithdrawContract',
+                        errMessage,
+                        context
+                    )
                     recordResolverError(span, errMessage)
                 }
                 const rateZipRes = await documentZip.createRateZips(
@@ -121,13 +145,18 @@ export function undoWithdrawContract(
                 )
                 if (rateZipRes instanceof Array) {
                     const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${contract.id}`
-                    logError('undoWithdrawContract', errorMessage)
+                    logResolverError(
+                        'undoWithdrawContract',
+                        errorMessage,
+                        context
+                    )
                     recordResolverError(span, errorMessage)
 
                     rateZipRes.forEach((error, index) => {
-                        logError(
+                        logResolverError(
                             'undoWithdrawContract',
-                            `Rate zip error ${index + 1}: ${error.message}`
+                            `Rate zip error ${index + 1}: ${error.message}`,
+                            context
                         )
                     })
                 }
@@ -138,9 +167,10 @@ export function undoWithdrawContract(
                     )
 
                 if (stateAnalystsEmailsResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message
+                        stateAnalystsEmailsResult.message,
+                        context
                     )
                     recordResolverError(span, stateAnalystsEmailsResult)
                 } else {
@@ -176,7 +206,11 @@ export function undoWithdrawContract(
                         errMessage = `State Email failed: ${sendUndoWithdrawStateEmail.message}`
                     }
 
-                    logError('undoWithdrawContract', errMessage)
+                    logResolverError(
+                        'undoWithdrawContract',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

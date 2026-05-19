@@ -5,7 +5,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { createForbiddenError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
@@ -25,14 +25,14 @@ export function fetchMcReviewSettings(
         // MCR-5894 block off this api from oauth
         if (context.oauthClient) {
             const oauthErr = 'oauth clients cannot access this functionality'
-            logError('fetchMcReviewSettings', oauthErr)
+            logResolverError('fetchMcReviewSettings', oauthErr, context)
             setErrorAttributesOnActiveSpan(oauthErr, span)
             throw createForbiddenError(oauthErr)
         }
 
         if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
             const msg = 'user not authorized to fetch mc review settings'
-            logError('fetchMcReviewSettings', msg)
+            logResolverError('fetchMcReviewSettings', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createForbiddenError(msg)
         }
@@ -44,7 +44,7 @@ export function fetchMcReviewSettings(
 
         if (stateAssignments instanceof Error) {
             const msg = `Issue finding stateAssignments: ${stateAssignments.message}`
-            logError('fetchMcReviewSettings', msg)
+            logResolverError('fetchMcReviewSettings', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw new GraphQLError(msg, {
                 extensions: {

@@ -5,7 +5,7 @@ import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { isValidStateCode } from '@mc-review/submissions'
@@ -33,7 +33,11 @@ export function updateStateAssignmentsByState(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('updateStateAssignmentsByState', errMessage)
+            logResolverError(
+                'updateStateAssignmentsByState',
+                errMessage,
+                context
+            )
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -50,7 +54,7 @@ export function updateStateAssignmentsByState(
             !hasCMSPermissions(currentUser)
         ) {
             const msg = 'user not authorized to modify assignments'
-            logError('updateStateAssignmentsByState', msg)
+            logResolverError('updateStateAssignmentsByState', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createForbiddenError(msg)
         }
@@ -59,14 +63,14 @@ export function updateStateAssignmentsByState(
 
         if (!isValidStateCode(stateCode)) {
             const errMsg = 'cannot update state assignments for invalid state'
-            logError('updateStateAssignmentsByState', errMsg)
+            logResolverError('updateStateAssignmentsByState', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createUserInputError(errMsg, 'stateCode', stateCode)
         }
 
         if (assignedUsers.length === 0) {
             const msg = 'cannot update state assignments with no assignments'
-            logError('updateStateAssignmentsByState', msg)
+            logResolverError('updateStateAssignmentsByState', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createUserInputError(msg, 'assignedUsers', assignedUsers)
         }
@@ -80,14 +84,22 @@ export function updateStateAssignmentsByState(
         if (result instanceof Error) {
             if (result instanceof NotFoundError) {
                 const errMsg = 'state does not exist'
-                logError('updateStateAssignmentsByState', errMsg)
+                logResolverError(
+                    'updateStateAssignmentsByState',
+                    errMsg,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw handleNotFoundError(result)
             }
 
             if (result instanceof UserInputPostgresError) {
                 const errMsg = result.message
-                logError('updateStateAssignmentsByState', errMsg)
+                logResolverError(
+                    'updateStateAssignmentsByState',
+                    errMsg,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw handleUserInputPostgresError(
                     result,
@@ -97,7 +109,7 @@ export function updateStateAssignmentsByState(
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`
-            logError('updateStateAssignmentsByState', errMsg)
+            logResolverError('updateStateAssignmentsByState', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new GraphQLError(errMsg, {
                 extensions: {

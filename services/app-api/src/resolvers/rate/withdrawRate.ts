@@ -1,5 +1,5 @@
 import type { Store } from '../../postgres'
-import { NotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import {
@@ -8,7 +8,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
@@ -29,7 +29,7 @@ export function withdrawRate(
         // Check OAuth client read permissions
         if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('withdrawRate', errMessage)
+            logResolverError('withdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -42,7 +42,7 @@ export function withdrawRate(
 
         if (!hasCMSPermissions(user)) {
             const message = 'user not authorized to withdraw a rate'
-            logError('withdrawRate', message)
+            logResolverError('withdrawRate', message, context)
             setErrorAttributesOnActiveSpan(message, span)
             throw createForbiddenError(message)
         }
@@ -51,7 +51,7 @@ export function withdrawRate(
 
         if (rateWithHistory instanceof Error) {
             const errMessage = `Issue finding rate message: ${rateWithHistory.message}`
-            logError('withdrawRate', errMessage)
+            logResolverError('withdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (rateWithHistory instanceof NotFoundError) {
@@ -78,7 +78,7 @@ export function withdrawRate(
 
         if (parentContract instanceof Error) {
             const errMessage = `Issue finding contract message: ${parentContract.message}`
-            logError('withdrawRate', errMessage)
+            logResolverError('withdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (parentContract instanceof NotFoundError) {
@@ -114,7 +114,7 @@ export function withdrawRate(
 
         if (!allowedRateStatus || !allowedParentContractStatus) {
             const errMessage = `Attempted to withdraw rate with wrong status. Rate: ${rateWithHistory.consolidatedStatus}, Parent contract: ${parentContract.consolidatedStatus}`
-            logError('withdrawRate', errMessage)
+            logResolverError('withdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'rateID')
         }
@@ -127,7 +127,7 @@ export function withdrawRate(
 
         if (withdrawnRate instanceof Error) {
             const errMessage = `Failed to withdraw rate message: ${withdrawnRate.message}`
-            logError('withdrawRate', errMessage)
+            logResolverError('withdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (withdrawnRate instanceof NotFoundError) {
@@ -155,7 +155,7 @@ export function withdrawRate(
 
         if (statePrograms instanceof Error) {
             const errMessage = `Email failed: ${statePrograms.message}`
-            logError('withdrawRate', errMessage)
+            logResolverError('withdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -172,9 +172,10 @@ export function withdrawRate(
         )
 
         if (stateAnalystsEmailsResult instanceof Error) {
-            logError(
+            logResolverError(
                 'getStateAnalystsEmails',
-                stateAnalystsEmailsResult.message
+                stateAnalystsEmailsResult.message,
+                context
             )
             setErrorAttributesOnActiveSpan(
                 stateAnalystsEmailsResult.message,
@@ -209,7 +210,7 @@ export function withdrawRate(
                 errMessage = `CMS Email failed: ${sendWithdrawCMSEmail.message}`
             }
 
-            logError('withdrawRate', errMessage)
+            logResolverError('withdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {

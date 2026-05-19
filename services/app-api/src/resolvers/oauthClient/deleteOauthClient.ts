@@ -1,7 +1,7 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
-import { logSuccess, logError } from '../../logger'
+import { logSuccess, logResolverError } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import {
     setSuccessAttributesOnActiveSpan,
@@ -26,7 +26,7 @@ export function deleteOauthClientResolver(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('deleteOauthClient', errMessage)
+            logResolverError('deleteOauthClient', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -39,7 +39,7 @@ export function deleteOauthClientResolver(
 
         if (!user || user.role !== 'ADMIN_USER') {
             const message = 'user not authorized to delete OAuth clients'
-            logError('deleteOauthClient', message)
+            logResolverError('deleteOauthClient', message, context)
             setErrorAttributesOnActiveSpan(message, span)
             throw createForbiddenError(message)
         }
@@ -48,7 +48,7 @@ export function deleteOauthClientResolver(
         const deleted = await store.deleteOAuthClient(input.clientId)
         if (deleted instanceof Error) {
             const message = `Failed to delete OAuth client. ${deleted.message}`
-            logError('deleteOauthClient', message)
+            logResolverError('deleteOauthClient', message, context)
             setErrorAttributesOnActiveSpan(message, span)
             throw new GraphQLError(message, {
                 extensions: {

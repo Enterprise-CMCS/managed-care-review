@@ -2,7 +2,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
 import type { OAuthScope } from '../../generated/enums'
-import { logSuccess, logError } from '../../logger'
+import { logSuccess, logResolverError } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import {
     setSuccessAttributesOnActiveSpan,
@@ -23,7 +23,7 @@ export function updateOauthClientResolver(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('updateOauthClient', errMessage)
+            logResolverError('updateOauthClient', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -36,7 +36,7 @@ export function updateOauthClientResolver(
 
         if (!user || user.role !== 'ADMIN_USER') {
             const message = 'user not authorized to update OAuth clients'
-            logError('updateOauthClient', message)
+            logResolverError('updateOauthClient', message, context)
             setErrorAttributesOnActiveSpan(message, span)
             throw createForbiddenError(message)
         }
@@ -66,7 +66,7 @@ export function updateOauthClientResolver(
 
         if (updated instanceof Error) {
             const message = `Failed to update OAuth client: ${updated.message}`
-            logError('updateOauthClient', message)
+            logResolverError('updateOauthClient', message, context)
             setErrorAttributesOnActiveSpan(message, span)
 
             // Check if this is a "not found" error

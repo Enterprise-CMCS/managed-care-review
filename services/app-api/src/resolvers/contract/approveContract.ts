@@ -1,6 +1,6 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 
 import {
@@ -23,7 +23,7 @@ export function approveContract(
         // Check OAuth client read permissions
         if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('approveContract', errMessage)
+            logResolverError('approveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -39,7 +39,7 @@ export function approveContract(
 
         if (!hasCMSPermissions(user) && !isAdminUser(user)) {
             const message = 'user not authorized to approve a contract'
-            logError('approveContract', message)
+            logResolverError('approveContract', message, context)
             setErrorAttributesOnActiveSpan(message, span)
             throw createForbiddenError(message)
         }
@@ -47,7 +47,7 @@ export function approveContract(
         if (isAdminUser(user) && !updatedReason?.trim()) {
             const errMessage =
                 'Approving a contract as an admin requires a reason'
-            logError('approveContract', errMessage)
+            logResolverError('approveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'updatedReason')
         }
@@ -57,7 +57,7 @@ export function approveContract(
 
         if (contractWithHistory instanceof Error) {
             const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
-            logError('approveContract', errMessage)
+            logResolverError('approveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (contractWithHistory instanceof NotFoundError) {
@@ -82,7 +82,7 @@ export function approveContract(
 
         if (!allowedStatus) {
             const errMessage = `Attempted to approve contract with wrong status: ${contractWithHistory.consolidatedStatus}`
-            logError('approveContract', errMessage)
+            logResolverError('approveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'contractID')
         }
@@ -93,7 +93,7 @@ export function approveContract(
 
         if (dateApprovalReleasedToStateAsDate > today) {
             const errMessage = `Attempted to approve contract with invalid approval release date: ${dateApprovalReleasedToState}`
-            logError('approveContract', errMessage)
+            logResolverError('approveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage)
         }
@@ -106,7 +106,11 @@ export function approveContract(
 
         if (approveContractResult instanceof Error) {
             if (approveContractResult instanceof NotFoundError) {
-                logError('approveContract', approveContractResult.message)
+                logResolverError(
+                    'approveContract',
+                    approveContractResult.message,
+                    context
+                )
                 throw new GraphQLError(approveContractResult.message, {
                     extensions: {
                         code: 'NOT_FOUND',
@@ -116,7 +120,7 @@ export function approveContract(
             }
 
             const errMessage = `Failed to approve contract ID:${contractID}`
-            logError('approveContract', errMessage)
+            logResolverError('approveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {

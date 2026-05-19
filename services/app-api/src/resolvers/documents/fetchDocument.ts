@@ -7,7 +7,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { canRead } from '../../authorization/oauthAuthorization'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import type { S3ClientT } from '../../s3'
 import { getS3Key } from '../../s3'
 import type { SharedDocument } from '../../domain-models/DocumentType'
@@ -26,7 +26,7 @@ export function fetchDocumentResolver(
         // Check OAuth client read permissions
         if (!canRead(context)) {
             const errMessage = `OAuth client does not have read permissions`
-            logError('fetchDocument', errMessage)
+            logResolverError('fetchDocument', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -44,7 +44,7 @@ export function fetchDocumentResolver(
 
         if (fetchedDocument instanceof Error) {
             const errMessage = `Issue finding document message: ${fetchedDocument.message}`
-            logError('fetchDocument', errMessage)
+            logResolverError('fetchDocument', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (fetchedDocument instanceof NotFoundError) {
@@ -67,7 +67,7 @@ export function fetchDocumentResolver(
         const key = getS3Key(fetchedDocument)
         if (key instanceof Error) {
             const errMsg = `Document missing valid s3Key. Invalid for docID: ${input.documentID}: ${key.message}`
-            logError('fetchDocument', errMsg)
+            logResolverError('fetchDocument', errMsg, context)
             throw new GraphQLError(errMsg, {
                 extensions: {
                     code: 'NOT_FOUND',
@@ -81,7 +81,7 @@ export function fetchDocumentResolver(
                 : input.expiresIn
         if (expiresIn > 604800 || expiresIn <= 0) {
             const errMessage = `expiresIn field must be in range: 1 - 604,800 seconds (1 week). currently set to ${input.expiresIn}`
-            logError('fetchDocument', errMessage)
+            logResolverError('fetchDocument', errMessage, context)
             throw createUserInputError(errMessage, 'expiresIn')
         }
         const qaDocs = [
@@ -98,7 +98,7 @@ export function fetchDocumentResolver(
         const url = await s3Client.getURL(key, bucketName, expiresIn)
         if (!url) {
             const errMessage = 'error getting download url from S3'
-            logError('fetchDocument', errMessage)
+            logResolverError('fetchDocument', errMessage, context)
             throw new GraphQLError(errMessage, {
                 extensions: {
                     code: 'NOT_FOUND',

@@ -3,7 +3,7 @@ import type { ContractRevisionType } from '../../domain-models'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
-import { logError } from '../../logger'
+import { logError, logResolverError } from '../../logger'
 import type { DocumentZipPackageType } from '../../domain-models/ZipType'
 import type { Context } from '../../handlers/apollo_gql'
 import { parseErrorToError } from '@mc-review/helpers'
@@ -57,7 +57,11 @@ export function contractRevisionResolver(
 
                 if (documentZipPackages instanceof Error) {
                     const errMessage = `Error fetching document zip packages for contract revision ${parent.id}: ${documentZipPackages.message}`
-                    logError('contractRevision.documentZipPackages', errMessage)
+                    logResolverError(
+                        'contractRevision.documentZipPackages',
+                        errMessage,
+                        context
+                    )
                     setErrorAttributesOnActiveSpan(errMessage, span)
                     return []
                 }
@@ -65,7 +69,11 @@ export function contractRevisionResolver(
             } catch (error) {
                 const errorMessage = parseErrorToError(error).message
                 const errMessage = `Unexpected error fetching document zip packages: ${errorMessage}`
-                logError('contractRevision.documentZipPackages', errMessage)
+                logResolverError(
+                    'contractRevision.documentZipPackages',
+                    errMessage,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 return []
             } finally {

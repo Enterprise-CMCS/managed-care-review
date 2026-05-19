@@ -1,7 +1,7 @@
 import { createForbiddenError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import type { QueryResolvers } from '../../gen/gqlServer'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -20,7 +20,7 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
             !hasCMSPermissions(currentUser)
         ) {
             const errMsg = 'user not authorized to fetch users'
-            logError('indexUsers', errMsg)
+            logResolverError('indexUsers', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)
         }
@@ -28,7 +28,7 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
         const findResult = await store.findAllUsers()
         if (findResult instanceof Error) {
             const errMessage = `Error querying users. ${findResult.message}`
-            logError('indexUsers', errMessage)
+            logResolverError('indexUsers', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {

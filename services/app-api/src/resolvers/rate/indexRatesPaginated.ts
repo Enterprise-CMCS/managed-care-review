@@ -13,7 +13,7 @@ import {
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
-import { logError, logSuccess } from '../../logger'
+import { logError, logResolverError, logSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { canRead } from '../../authorization/oauthAuthorization'
@@ -139,7 +139,7 @@ export function indexRatesPaginatedResolver(
 
                 if (!canRead(context)) {
                     const errMessage = `OAuth client does not have read permissions`
-                    logError('indexRatesPaginated', errMessage)
+                    logResolverError('indexRatesPaginated', errMessage, context)
                     throw createForbiddenError(errMessage)
                 }
 
@@ -154,7 +154,7 @@ export function indexRatesPaginatedResolver(
 
                     if (pageSize instanceof Error) {
                         const errMsg = `normalizeIndexRatesPageSize failed. ${pageSize.message}`
-                        logError('indexRatesPaginated', errMsg)
+                        logResolverError('indexRatesPaginated', errMsg, context)
                         throw createUserInputError(
                             errMsg,
                             'pageSize',
@@ -187,7 +187,11 @@ export function indexRatesPaginatedResolver(
 
                     if (ratesWithHistory instanceof Error) {
                         const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
-                        logError('indexRatesPaginated', errMessage)
+                        logResolverError(
+                            'indexRatesPaginated',
+                            errMessage,
+                            context
+                        )
                         if (ratesWithHistory instanceof NotFoundError) {
                             throw new GraphQLError(errMessage, {
                                 extensions: {
@@ -214,7 +218,7 @@ export function indexRatesPaginatedResolver(
 
                     if (decodedAfter instanceof Error) {
                         const errMsg = `normalizeAfterCursor failed. ${decodedAfter.message}`
-                        logError('indexRatesPaginated', errMsg)
+                        logResolverError('indexRatesPaginated', errMsg, context)
                         throw createUserInputError(errMsg, 'after', after)
                     }
 
@@ -231,7 +235,11 @@ export function indexRatesPaginatedResolver(
                     if (decodedAfter && startIndex === 0) {
                         const errMessage =
                             'after cursor does not match any rate in this result set'
-                        logError('indexRatesPaginated', errMessage)
+                        logResolverError(
+                            'indexRatesPaginated',
+                            errMessage,
+                            context
+                        )
                         throw createUserInputError(errMessage, 'after', after)
                     }
 
@@ -272,7 +280,7 @@ export function indexRatesPaginatedResolver(
                     const errMsg = authInfo
                         ? `OAuth client not authorized to fetch rate reviews data`
                         : 'user not authorized to fetch rate reviews data'
-                    logError('indexRatesPaginated', errMsg)
+                    logResolverError('indexRatesPaginated', errMsg, context)
                     throw createForbiddenError(errMsg)
                 }
             }

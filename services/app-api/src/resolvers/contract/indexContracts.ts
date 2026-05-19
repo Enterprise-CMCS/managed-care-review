@@ -10,7 +10,7 @@ import type {
     QueryResolvers,
     ConsolidatedContractStatus,
 } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logError, logResolverError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import {
@@ -95,7 +95,7 @@ export function indexContractsResolver(
         // Check OAuth client read permissions
         if (!canRead(context)) {
             const errMessage = `OAuth client does not have read permissions`
-            logError('indexContracts', errMessage)
+            logResolverError('indexContracts', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createForbiddenError(errMessage)
         }
@@ -107,7 +107,7 @@ export function indexContractsResolver(
 
             if (contractsWithHistory instanceof Error) {
                 const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
-                logError('indexContracts', errMessage)
+                logResolverError('indexContracts', errMessage, context)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (contractsWithHistory instanceof NotFoundError) {
@@ -144,7 +144,7 @@ export function indexContractsResolver(
 
             if (contractsWithHistory instanceof Error) {
                 const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
-                logError('indexContracts', errMessage)
+                logResolverError('indexContracts', errMessage, context)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (contractsWithHistory instanceof NotFoundError) {
@@ -186,7 +186,7 @@ export function indexContractsResolver(
             const errMsg = authInfo
                 ? `OAuth client not authorized to fetch contract data`
                 : 'user not authorized to fetch state data'
-            logError('indexContracts', errMsg)
+            logResolverError('indexContracts', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)
         }

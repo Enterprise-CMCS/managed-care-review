@@ -1,5 +1,5 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import { NotFoundError, handleNotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
@@ -59,7 +59,7 @@ function updateDraftContractRates(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('updateDraftContractRates', errMessage)
+            logResolverError('updateDraftContractRates', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -119,7 +119,7 @@ function updateDraftContractRates(
 
         if (!parsedRatesResult.success) {
             const errMsg = `updatedRates not correctly formatted: ${parsedRatesResult.error}`
-            logError('updateDraftContractRates', errMsg)
+            logResolverError('updateDraftContractRates', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createUserInputError(errMsg)
         }
@@ -132,7 +132,7 @@ function updateDraftContractRates(
                 throw handleNotFoundError(contract)
             }
             const errMessage = `Issue finding a contract with history with id ${contractID}. Message: ${contract.message}`
-            logError('updateDraftContractRates', errMessage)
+            logResolverError('updateDraftContractRates', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -146,7 +146,7 @@ function updateDraftContractRates(
         const statePrograms = store.findStatePrograms(contract.stateCode)
         if (statePrograms instanceof Error) {
             const errMessage = `Couldn't find programs for state ${contract.stateCode}. Message: ${statePrograms.message}`
-            logError('updateDraftContractRates', errMessage)
+            logResolverError('updateDraftContractRates', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -162,9 +162,10 @@ function updateDraftContractRates(
         if (isStateUser(user)) {
             const stateFromCurrentUser = user.stateCode
             if (contract.stateCode !== stateFromCurrentUser) {
-                logError(
+                logResolverError(
                     'updateDraftContractRates',
-                    'user not authorized to update a draft from a different state'
+                    'user not authorized to update a draft from a different state',
+                    context
                 )
                 setErrorAttributesOnActiveSpan(
                     'user not authorized to update a draft from a different state',
@@ -177,9 +178,10 @@ function updateDraftContractRates(
             // this is a valid state user
         } else {
             // any other user type is invalid
-            logError(
+            logResolverError(
                 'updateDraftContractRates',
-                'user not authorized to update a draft'
+                'user not authorized to update a draft',
+                context
             )
             setErrorAttributesOnActiveSpan(
                 'user not authorized to update a draft',
@@ -198,7 +200,7 @@ function updateDraftContractRates(
         ) {
             const errMsg =
                 'you cannot update a contract that is not DRAFT or UNLOCKED'
-            logError('updateDraftContractRates', errMsg)
+            logResolverError('updateDraftContractRates', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createUserInputError(errMsg)
         }
@@ -209,7 +211,7 @@ function updateDraftContractRates(
             lastSeenUpdatedAt.getTime()
         ) {
             const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
-            logError('updateDraftContractRates', errMessage)
+            logResolverError('updateDraftContractRates', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage)
         }
@@ -255,7 +257,11 @@ function updateDraftContractRates(
                     const errmsg =
                         'Attempted to update a rate not associated with this contract: ' +
                         rateUpdate.rateID
-                    logError('updateDraftContractRates', errmsg)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errmsg,
+                        context
+                    )
                     setErrorAttributesOnActiveSpan(errmsg, span)
                     throw createUserInputError(errmsg)
                 }
@@ -269,7 +275,11 @@ function updateDraftContractRates(
                     const errmsg =
                         'Programming Error: Rate did not exist in input data. ID: ' +
                         rateUpdate.rateID
-                    logError('updateDraftContractRates', errmsg)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errmsg,
+                        context
+                    )
                     setErrorAttributesOnActiveSpan(errmsg, span)
                     throw createUserInputError(errmsg)
                 }
@@ -281,7 +291,11 @@ function updateDraftContractRates(
                     const errmsg =
                         'Attempted to update a rate that is not editable: ' +
                         rateUpdate.rateID
-                    logError('updateDraftContractRates', errmsg)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errmsg,
+                        context
+                    )
                     setErrorAttributesOnActiveSpan(errmsg, span)
                     throw createUserInputError(errmsg)
                 }
@@ -290,7 +304,11 @@ function updateDraftContractRates(
                     const errmsg =
                         'Attempted to update a rate that is not a child of this contract: ' +
                         rateUpdate.rateID
-                    logError('updateDraftContractRates', errmsg)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errmsg,
+                        context
+                    )
                     setErrorAttributesOnActiveSpan(errmsg, span)
                     throw createUserInputError(errmsg)
                 }
@@ -334,7 +352,11 @@ function updateDraftContractRates(
                         const errmsg =
                             "Unexpected Error: couldn't fetch the linking rate: " +
                             rateUpdate.rateID
-                        logError('updateDraftContractRates', errmsg)
+                        logResolverError(
+                            'updateDraftContractRates',
+                            errmsg,
+                            context
+                        )
                         setErrorAttributesOnActiveSpan(errmsg, span)
                         throw new GraphQLError(errmsg, {
                             extensions: {
@@ -350,7 +372,11 @@ function updateDraftContractRates(
                         )
                     ) {
                         const errmsg = `Attempted to link a rate with an invalid status. Status: ${rateToLink.consolidatedStatus}. RateID: ${rateUpdate.rateID}`
-                        logError('updateDraftContractRates', errmsg)
+                        logResolverError(
+                            'updateDraftContractRates',
+                            errmsg,
+                            context
+                        )
                         setErrorAttributesOnActiveSpan(errmsg, span)
                         throw createUserInputError(errmsg)
                     }
@@ -372,7 +398,7 @@ function updateDraftContractRates(
 
             if (!removedRate) {
                 const errMsg = `Rates to be removed not found in associated rates to contract. RateID: ${removedRateID}`
-                logError('updateDraftContractRates', errMsg)
+                logResolverError('updateDraftContractRates', errMsg, context)
                 throw new GraphQLError(errMsg, {
                     extensions: {
                         code: 'NOT_FOUND',
@@ -397,7 +423,7 @@ function updateDraftContractRates(
 
         if (result instanceof Error) {
             const errMsg = `Failed to update draft contract rates. ${result.message}`
-            logError('updateDraftContractRates', errMsg)
+            logResolverError('updateDraftContractRates', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new GraphQLError(errMsg, {
                 extensions: {

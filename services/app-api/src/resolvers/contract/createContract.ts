@@ -6,7 +6,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { State } from '../../gen/gqlServer'
 import { pluralize } from '@mc-review/common-code'
@@ -25,7 +25,7 @@ export function createContract(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('createContract', errMessage)
+            logResolverError('createContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -38,9 +38,10 @@ export function createContract(
 
         // This resolver is only callable by state users
         if (!isStateUser(user)) {
-            logError(
+            logResolverError(
                 'createContract',
-                'user not authorized to create state data'
+                'user not authorized to create state data',
+                context
             )
             setErrorAttributesOnActiveSpan(
                 'user not authorized to create state data',
@@ -67,7 +68,7 @@ export function createContract(
                 'does',
                 count
             )} not exist in state ${stateFromCurrentUser}`
-            logError('createContract', errMessage)
+            logResolverError('createContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(
                 errMessage,
@@ -91,7 +92,7 @@ export function createContract(
         const contractResult = await store.insertDraftContract(insertArgs)
         if (contractResult instanceof Error) {
             const errMessage = `Error creating a draft contract. Message: ${contractResult.message}`
-            logError('createContract', errMessage)
+            logResolverError('createContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {

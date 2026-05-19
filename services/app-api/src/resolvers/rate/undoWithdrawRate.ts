@@ -8,7 +8,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
@@ -29,7 +29,7 @@ export function undoWithdrawRate(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -42,7 +42,7 @@ export function undoWithdrawRate(
 
         if (!hasCMSPermissions(user)) {
             const message = 'user not authorized to undo withdraw rate'
-            logError('undoWithdrawRate', message)
+            logResolverError('undoWithdrawRate', message, context)
             setErrorAttributesOnActiveSpan(message, span)
             throw createForbiddenError(message)
         }
@@ -51,7 +51,7 @@ export function undoWithdrawRate(
 
         if (rateWithHistory instanceof Error) {
             const errMessage = `Issue finding rate: ${rateWithHistory.message}`
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (rateWithHistory instanceof NotFoundError) {
@@ -73,7 +73,7 @@ export function undoWithdrawRate(
 
         if (!['WITHDRAWN'].includes(rateWithHistory.consolidatedStatus)) {
             const errMessage = `Attempted to undo rate withdrawal with wrong status. Rate: ${rateWithHistory.consolidatedStatus}`
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'rateID')
         }
@@ -83,7 +83,7 @@ export function undoWithdrawRate(
         if (!withdrawnFromContracts?.length) {
             const errMessage =
                 'Cannot undo withdraw rate with no associated contracts'
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             throw new GraphQLError(errMessage, {
                 extensions: {
                     code: 'NOT_FOUND',
@@ -98,7 +98,7 @@ export function undoWithdrawRate(
 
         if (!parentContract) {
             const errMessage = `Attempted to undo rate withdrawal without a parent contract`
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -116,7 +116,7 @@ export function undoWithdrawRate(
             )
         ) {
             const errMessage = `Attempted to undo rate withdrawal with parent contract in an invalid state: ${parentContract.consolidatedStatus}`
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'rateID')
         }
@@ -131,7 +131,7 @@ export function undoWithdrawRate(
 
         if (invalidLinkedContractStatus.length > 0) {
             const errMessage = `Attempted to undo rate withdrawal with contract(s) that are in an invalid state. Invalid contract IDs: ${invalidLinkedContractStatus.map((contract) => contract.id)}`
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'rateID')
         }
@@ -144,7 +144,7 @@ export function undoWithdrawRate(
 
         if (undoWithdrawRate instanceof Error) {
             const errMessage = `Failed to undo withdraw rate: ${undoWithdrawRate.message}`
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (undoWithdrawRate instanceof NotFoundError) {
@@ -173,7 +173,7 @@ export function undoWithdrawRate(
 
         if (statePrograms instanceof Error) {
             const errMessage = `Email failed: ${statePrograms.message}`
-            logError('undoWithdrawRate', errMessage)
+            logResolverError('undoWithdrawRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -189,7 +189,11 @@ export function undoWithdrawRate(
         )
 
         if (stateAnalystEmailsResult instanceof Error) {
-            logError('getStateAnalystEmails', stateAnalystEmailsResult.message)
+            logResolverError(
+                'getStateAnalystEmails',
+                stateAnalystEmailsResult.message,
+                context
+            )
             setErrorAttributesOnActiveSpan(
                 stateAnalystEmailsResult.message,
                 span
@@ -230,7 +234,7 @@ export function undoWithdrawRate(
                 errMessage = `CMS email failed: ${sendUndoWithdrawnRateCMSEmail.message}`
             }
 
-            logError('undoWithdrawnRate', errMessage)
+            logResolverError('undoWithdrawnRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {

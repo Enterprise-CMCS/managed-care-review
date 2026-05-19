@@ -2,7 +2,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison, hasAdminPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
@@ -26,7 +26,7 @@ export function updateDivisionAssignment(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('updateDivisionAssignment', errMessage)
+            logResolverError('updateDivisionAssignment', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -39,9 +39,10 @@ export function updateDivisionAssignment(
 
         // This resolver is only callable by admin users
         if (!hasAdminPermissions(currentUser)) {
-            logError(
+            logResolverError(
                 'updateDivisionAssignment',
-                'user not authorized to modify assignments'
+                'user not authorized to modify assignments',
+                context
             )
             setErrorAttributesOnActiveSpan(
                 'user not authorized to modify assignments',
@@ -61,7 +62,7 @@ export function updateDivisionAssignment(
         if (divisionAssignment) {
             if (!isValidCmsDivison(divisionAssignment)) {
                 const errMsg = 'Invalid division assignment'
-                logError('updateDivisionAssignment', errMsg)
+                logResolverError('updateDivisionAssignment', errMsg, context)
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw createUserInputError(
                     errMsg,
@@ -81,13 +82,13 @@ export function updateDivisionAssignment(
         if (result instanceof Error) {
             if (result instanceof NotFoundError) {
                 const errMsg = 'cmsUserID does not exist'
-                logError('updateDivisionAssignment', errMsg)
+                logResolverError('updateDivisionAssignment', errMsg, context)
                 setErrorAttributesOnActiveSpan(errMsg, span)
                 throw createUserInputError(errMsg, 'cmsUserID', cmsUserID)
             }
 
             const errMsg = `Issue assigning states to user. Message: ${result.message}`
-            logError('updateDivisionAssignment', errMsg)
+            logResolverError('updateDivisionAssignment', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new GraphQLError(errMsg, {
                 extensions: {
@@ -98,7 +99,7 @@ export function updateDivisionAssignment(
         }
         if (!result) {
             const errMsg = 'Failed to update user'
-            logError('updateDivisionAssignment', errMsg)
+            logResolverError('updateDivisionAssignment', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw new GraphQLError(errMsg, {
                 extensions: {
