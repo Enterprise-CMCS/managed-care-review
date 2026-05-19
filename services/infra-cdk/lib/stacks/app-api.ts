@@ -366,6 +366,12 @@ export class AppApiStack extends BaseStack {
                 bundling: {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
+                    // CDK stages a synthetic package for nodeModules installs with an empty
+                    // pnpm-workspace.yaml, so pnpm cannot see the repo's allowBuilds config.
+                    // This bundling install only contains prisma and its transitive deps.
+                    environment: {
+                        PNPM_CONFIG_DANGEROUSLY_ALLOW_ALL_BUILDS: 'true',
+                    },
                     // CRITICAL: Keep prisma CLI as node module (not bundled) so it can be executed via spawnSync
                     nodeModules: ['prisma'],
                     ...this.createBundling(
