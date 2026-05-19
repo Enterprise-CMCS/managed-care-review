@@ -3,10 +3,10 @@ name: Promote (CDK)
 on:
   push:
     branches:
-      - "main"
+      - 'main'
   workflow_dispatch:
 
-# Prevent concurrent dev deployments
+    # Prevent concurrent dev deployments
 concurrency:
   group: deploy-cdk-dev
   cancel-in-progress: false
@@ -46,7 +46,7 @@ jobs:
         name: Create GitHub deployment
         id: ghdeployment
         with:
-          token: "${{ github.token }}"
+          token: '${{ github.token }}'
           environment: dev-cdk
           description: CDK dev environment deployment
           initial-status: in_progress
@@ -108,9 +108,7 @@ jobs:
           VITE_APP_AUTH_MODE: IDM
           POSTGRES_PASSWORD: shhhsecret #pragma: allowlist secret
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
         ports:
           - 5432:5432
@@ -209,8 +207,8 @@ jobs:
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           # Use dev CDK role for bootstrapping - this role is persistent across deployments
           stage-name: dev
-          changed-services: "github-oidc"
-          use-cdk-role: "true"
+          changed-services: 'github-oidc'
+          use-cdk-role: 'true'
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
@@ -255,7 +253,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: dev
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Deploy Network stack
         working-directory: services/infra-cdk
@@ -292,7 +290,6 @@ jobs:
           SUBNET_PRIVATE_B_ID: ${{ secrets.DEV_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.DEV_SUBNET_PRIVATE_C_ID }}
           SUBNET_PUBLIC_A_ID: ${{ secrets.DEV_SUBNET_PUBLIC_A_ID }}
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
           VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
           GUARDDUTY_DETECTOR_ID: ${{ secrets.DEV_GUARDDUTY_DETECTOR_ID }}
         run: |
@@ -383,7 +380,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: dev
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Get CDK configuration for app-web build
         env:
@@ -468,7 +465,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: dev
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
@@ -476,6 +473,7 @@ jobs:
           STAGE_NAME: dev
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-dev-cdk \
@@ -514,16 +512,17 @@ jobs:
         if: failure() && needs.begin-deployment.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: "${{ github.token }}"
-          state: "failure"
+          token: '${{ github.token }}'
+          state: 'failure'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-dev.result == 'success' && needs.deploy-frontend-app-dev.result == 'success'
+        if: needs.deploy-cdk-app-dev.result == 'success' &&
+          needs.deploy-frontend-app-dev.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: "${{ github.token }}"
-          state: "success"
+          token: '${{ github.token }}'
+          state: 'success'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
   # ============================================
@@ -556,8 +555,8 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
           stage-name: val
-          changed-services: "github-oidc"
-          use-cdk-role: "true"
+          changed-services: 'github-oidc'
+          use-cdk-role: 'true'
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
@@ -602,7 +601,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
           stage-name: val
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Deploy Network stack
         working-directory: services/infra-cdk
@@ -639,7 +638,6 @@ jobs:
           SUBNET_PRIVATE_B_ID: ${{ secrets.VAL_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.VAL_SUBNET_PRIVATE_C_ID }}
           SUBNET_PUBLIC_A_ID: ${{ secrets.VAL_SUBNET_PUBLIC_A_ID }}
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
           VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
           GUARDDUTY_DETECTOR_ID: ${{ secrets.VAL_GUARDDUTY_DETECTOR_ID }}
         run: |
@@ -728,7 +726,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
           stage-name: val
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
@@ -736,7 +734,7 @@ jobs:
           STAGE_NAME: val
           VPC_ID: ${{ secrets.VAL_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.VAL_INTERNAL_ALLOWED_ORIGINS }}
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-val-cdk \
@@ -793,7 +791,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
           stage-name: val
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Get CDK configuration for app-web build
         env:
@@ -853,16 +851,17 @@ jobs:
         if: failure() && needs.begin-deployment.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: "${{ github.token }}"
-          state: "failure"
+          token: '${{ github.token }}'
+          state: 'failure'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-val.result == 'success' && needs.deploy-frontend-app-val.result == 'success'
+        if: needs.deploy-cdk-app-val.result == 'success' &&
+          needs.deploy-frontend-app-val.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: "${{ github.token }}"
-          state: "success"
+          token: '${{ github.token }}'
+          state: 'success'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
   # ============================================
@@ -895,8 +894,8 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
-          changed-services: "github-oidc"
-          use-cdk-role: "true"
+          changed-services: 'github-oidc'
+          use-cdk-role: 'true'
 
       - name: deploy github-oidc with CDK
         id: deploy-github-oidc-cdk
@@ -941,7 +940,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Deploy Network stack
         working-directory: services/infra-cdk
@@ -978,7 +977,6 @@ jobs:
           SUBNET_PRIVATE_B_ID: ${{ secrets.PROD_SUBNET_PRIVATE_B_ID }}
           SUBNET_PRIVATE_C_ID: ${{ secrets.PROD_SUBNET_PRIVATE_C_ID }}
           SUBNET_PUBLIC_A_ID: ${{ secrets.PROD_SUBNET_PUBLIC_A_ID }}
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
           VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
           GUARDDUTY_DETECTOR_ID: ${{ secrets.PROD_GUARDDUTY_DETECTOR_ID }}
         run: |
@@ -1067,7 +1065,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
@@ -1075,7 +1073,7 @@ jobs:
           STAGE_NAME: prod
           VPC_ID: ${{ secrets.PROD_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.PROD_INTERNAL_ALLOWED_ORIGINS }}
-          NR_LICENSE_KEY: ${{ secrets.NR_LICENSE_KEY }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-prod-cdk \
@@ -1132,7 +1130,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: Get CDK configuration for app-web build
         env:
@@ -1199,7 +1197,7 @@ jobs:
           region: ${{ vars.AWS_DEFAULT_REGION }}
           account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
           stage-name: prod
-          use-cdk-role: "true"
+          use-cdk-role: 'true'
 
       - name: get application endpoint
         id: save-app-endpoint
@@ -1266,7 +1264,7 @@ jobs:
           record: true
           parallel: false
           browser: chrome
-          group: "Chrome - prod CDK"
+          group: 'Chrome - prod CDK'
           ci-build-id: ${{ steps.uuid.outputs.value }}
           config-file: services/cypress/cypress.config.ts
         env:
@@ -1313,16 +1311,18 @@ jobs:
         if: failure() && needs.begin-deployment.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: "${{ github.token }}"
-          state: "failure"
+          token: '${{ github.token }}'
+          state: 'failure'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
       - name: Update deployment status (success)
-        if: needs.deploy-cdk-app-prod.result == 'success' && needs.deploy-frontend-app-prod.result == 'success' && needs.cypress-prod.result == 'success'
+        if: needs.deploy-cdk-app-prod.result == 'success' &&
+          needs.deploy-frontend-app-prod.result == 'success' &&
+          needs.cypress-prod.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
-          token: "${{ github.token }}"
-          state: "success"
+          token: '${{ github.token }}'
+          state: 'success'
           deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
 
   slack:
@@ -1341,7 +1341,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_USERNAME: Promote CDK Alerts
-          SLACK_ICON_EMOJI: ":bell:"
+          SLACK_ICON_EMOJI: ':bell:'
           SLACK_COLOR: ${{ job.status }}
-          SLACK_FOOTER: ""
+          SLACK_FOOTER: ''
           MSG_MINIMAL: actions url,commit,ref

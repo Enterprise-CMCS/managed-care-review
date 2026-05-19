@@ -1,6 +1,6 @@
 import { ApolloServer } from '@apollo/server'
 import { gql } from '@apollo/client'
-import { createTracer } from '../../otel/otel_handler'
+import { trace } from '@opentelemetry/api'
 import { recordException } from '../../otel/otel_handler'
 import { GraphQLError } from 'graphql'
 import { vi } from 'vitest'
@@ -87,7 +87,7 @@ describe('OTEL Error Logging', () => {
         })
 
         it('verifies OTEL tracer span creation works', () => {
-            const tracer = createTracer('test-service')
+            const tracer = trace.getTracer('test-service')
 
             // Create a span and record an exception
             const span = tracer.startSpan('test-operation')
@@ -202,7 +202,7 @@ describe('OTEL Error Logging', () => {
         })
 
         it('simulates setErrorAttributesOnActiveSpan functionality', () => {
-            const tracer = createTracer('test-service')
+            const tracer = trace.getTracer('test-service')
             const span = tracer.startSpan('test-resolver')
 
             // Simulate setErrorAttributesOnActiveSpan behavior

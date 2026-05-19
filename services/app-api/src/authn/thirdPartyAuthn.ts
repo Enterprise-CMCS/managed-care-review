@@ -8,16 +8,8 @@ export async function userFromThirdPartyAuthorizer(
     userId: string,
     delegatedUserId: string | null
 ): Promise<UserType | Error> {
-    // setup otel tracing
-    const otelCollectorURL = process.env.API_APP_OTEL_COLLECTOR_URL
-    if (!otelCollectorURL || otelCollectorURL === '') {
-        const errMsg =
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL must be set'
-        throw errMsg
-    }
-
     const serviceName = 'third-party-authorizer'
-    initTracer(serviceName, otelCollectorURL)
+    initTracer(serviceName)
 
     try {
         // if delegatedUser is non-null, validate this user and return as context
