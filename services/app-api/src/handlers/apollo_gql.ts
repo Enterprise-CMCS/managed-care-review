@@ -26,7 +26,7 @@ import {
 } from '../authn'
 import type { Store } from '../postgres'
 import { NewPostgresStore } from '../postgres'
-import { parseErrorToError } from '@mc-review/helpers'
+import { parseErrorToError, serializeError } from '@mc-review/helpers'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres, configureEmailer } from './configuration'
 import {
@@ -69,6 +69,44 @@ export interface Context {
         grants: string[]
         scopes: string[]
         isDelegatedUser: boolean
+    }
+}
+
+// Extract the GraphQL operation name from the request body for log correlation.
+// Returns undefined for anonymous queries, batched requests we can't parse, or malformed bodies.
+function extractOperationName(event: APIGatewayProxyEvent): string | undefined {
+    if (!event.body) return undefined
+    try {
+        const raw = event.isBase64Encoded
+            ? Buffer.from(event.body, 'base64').toString('utf-8')
+            : event.body
+        const parsed = JSON.parse(raw)
+        const op = Array.isArray(parsed) ? parsed[0] : parsed
+        return typeof op?.operationName === 'string'
+            ? op.operationName
+            : undefined
+    } catch {
+        return undefined
+    }
+}
+
+// OAuth/server-to-server clients typically omit the `operationName` JSON field
+// and send only the raw `query` string, so parse the name out of the query body.
+function extractOAuthOperationName(
+    event: APIGatewayProxyEvent
+): string | undefined {
+    if (!event.body) return undefined
+    try {
+        const raw = event.isBase64Encoded
+            ? Buffer.from(event.body, 'base64').toString('utf-8')
+            : event.body
+        const parsed = JSON.parse(raw)
+        const op = Array.isArray(parsed) ? parsed[0] : parsed
+        if (typeof op?.query !== 'string') return undefined
+        const match = /\b(?:query|mutation|subscription)\s+(\w+)/.exec(op.query)
+        return match?.[1]
+    } catch {
+        return undefined
     }
 }
 
@@ -156,24 +194,26 @@ function contextForRequestForFetcher(
                         principalId,
                         path: event.path,
                         requestId: event.requestContext.requestId,
+                        queryName: extractOAuthOperationName(event),
                         ['x-acting-as-user']: delegatedUser,
                     }
 
-                    const clientOauth =
+                    const storedOauthClient =
                         await store.getOAuthClientByClientId(oauthClientId)
 
-                    if (clientOauth instanceof Error) {
+                    if (storedOauthClient instanceof Error) {
                         console.error({
-                            message: `Failed to get oauth with client id, ${oauthClientId}`,
+                            message: `Failed to fetch OAuth client. ${storedOauthClient.message}`,
+                            error: serializeError(storedOauthClient),
                             ...oauthContext,
                             ...oauthClient,
                         })
                         throw new Error(
-                            `Failed to get oauth with client id, ${oauthClientId}`
+                            `Failed to fetch OAuth client. $${storedOauthClient.message}`
                         )
                     }
 
-                    if (!clientOauth) {
+                    if (!storedOauthClient) {
                         console.error({
                             message: `OAuth client not found`,
                             ...oauthContext,
@@ -183,7 +223,7 @@ function contextForRequestForFetcher(
                     }
 
                     // set scopes after validation
-                    oauthClient.scopes = clientOauth.scopes.map(
+                    oauthClient.scopes = storedOauthClient.scopes.map(
                         (scope) => scope
                     )
 
@@ -214,7 +254,8 @@ function contextForRequestForFetcher(
 
                     if (userResult instanceof Error) {
                         console.error({
-                            message: userResult.message,
+                            message: `Failed to fetch user from OAuth client. ${userResult.message}`,
+                            error: serializeError(userResult),
                             ...oauthContext,
                             ...oauthClient,
                         })
@@ -236,27 +277,27 @@ function contextForRequestForFetcher(
                     }
                 } else {
                     const userResult = await userFetcher(authProvider!, store)
+                    const cognitoContext = {
+                        operation: 'contextForRequestForFetcher',
+                        authMethod: 'Cognito',
+                        path: event.path,
+                        requestId: event.requestContext.requestId,
+                        queryName: extractOperationName(event),
+                    }
 
                     if (userResult === undefined) {
                         console.error({
                             message: 'User not found',
-                            operation: 'contextForRequestForFetcher',
-                            authMethod: 'Cognito',
-                            path: event.path,
-                            requestId: event.requestContext.requestId,
-                            sourceIp: event.requestContext.identity.sourceIp,
+                            ...cognitoContext,
                         })
                         throw new Error(`User not found.`)
                     }
 
                     if (userResult instanceof Error) {
                         console.error({
-                            ...userResult,
                             message: `Error fetching user: ${userResult.message}`,
-                            operation: 'contextForRequestForFetcher',
-                            authMethod: 'Cognito',
-                            path: event.path,
-                            requestId: event.requestContext.requestId,
+                            error: serializeError(userResult),
+                            ...cognitoContext,
                         })
                         throw new Error(
                             `Error fetching user: ${userResult.message}`
@@ -265,10 +306,8 @@ function contextForRequestForFetcher(
 
                     console.info({
                         message: 'Cognito client context fetch successful',
-                        operation: 'contextForRequestForFetcher',
-                        authMethod: 'OAuth 2.0',
-                        principalId: userResult.id,
-                        path: event.path,
+                        userId: userResult.id,
+                        ...cognitoContext,
                     })
 
                     const context: Context = {
