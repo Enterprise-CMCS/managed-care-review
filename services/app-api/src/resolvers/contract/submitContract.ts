@@ -159,9 +159,15 @@ export function submitContract(
                 )
 
                 if (!contractWithHistory.draftRevision) {
-                    throw new Error(
-                        'PROGRAMMING ERROR: Status should not be submittable without a draft revision'
-                    )
+                    const errMsg =
+                        'Submission should not be submittable without a draft revision'
+                    logError('submitContract', errMsg)
+                    throw new GraphQLError(errMsg, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
                 }
 
                 const initialFormData = {
@@ -269,14 +275,20 @@ export function submitContract(
                             if (
                                 draftRate.parentContractID !== parsedContract.id
                             ) {
+                                const errMessage =
+                                    'This never submitted rate is not parented to this contract'
+                                logError('submitContract', errMessage)
                                 console.error(
-                                    'This never submitted rate is not parented to this contract',
+                                    errMessage,
                                     parsedContract.id,
                                     draftRate.id
                                 )
-                                throw new Error(
-                                    'This never submitted rate is not parented to this contract'
-                                )
+                                throw new GraphQLError(errMessage, {
+                                    extensions: {
+                                        code: 'INTERNAL_SERVER_ERROR',
+                                        cause: 'DB_ERROR',
+                                    },
+                                })
                             }
 
                             // this is a child draft rate, delete it
@@ -296,7 +308,12 @@ export function submitContract(
                         const errMessage =
                             'Error while attempting to clean up rates from a now CONTRACT_ONLY submission'
                         logError('submitContract', errMessage)
-                        throw new Error(errMessage)
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
                     }
                 }
 
@@ -434,7 +451,7 @@ export function submitContract(
                     },
                 })
                 if (updateResult instanceof Error) {
-                    const errMessage = `Failed to update submitted contract info with ID: ${contractRevisionID}; ${updateResult.message}`
+                    const errMessage = `Failed to update to be submitted contact with ID: ${contractRevisionID}; ${updateResult.message}`
                     logError('submitContract', errMessage)
                     throw new GraphQLError(errMessage, {
                         extensions: {
@@ -444,11 +461,6 @@ export function submitContract(
                     })
                 }
 
-                if (!updateResult.draftRevision) {
-                    throw new Error(
-                        'PROGRAMMING ERROR: draft contract does not contain a draft revision'
-                    )
-                }
                 // From this point forward we use updateResult instead of contractWithHistory because it is now old data.
 
                 // then submit the contract!

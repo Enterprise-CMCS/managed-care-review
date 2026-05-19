@@ -71,6 +71,7 @@ export function indexRatesStripped(
             }
             if (ratesWithHistory instanceof Error) {
                 const errMessage = `Issue finding rates: ${ratesWithHistory.message}`
+                logError('indexRatesStripped', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (ratesWithHistory instanceof NotFoundError) {
@@ -118,6 +119,7 @@ export function indexRatesStripped(
             return { totalCount: edges.length, edges }
         } else {
             const errMsg = 'user not authorized to fetch rate reviews data'
+            logError('indexRatesStripped', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)
         }

@@ -71,7 +71,7 @@ export function updateOauthClientResolver(
 
             // Check if this is a "not found" error
             if (updated.message.includes('not found')) {
-                throw new GraphQLError('OAuth client not found', {
+                throw new GraphQLError(message, {
                     extensions: {
                         code: 'NOT_FOUND',
                         cause: 'CLIENT_NOT_FOUND',

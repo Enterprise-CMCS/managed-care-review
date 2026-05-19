@@ -42,6 +42,7 @@ export function fetchContractResolver(
 
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
+                    logError('fetchContract', errMessage)
 
                     if (contractWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {

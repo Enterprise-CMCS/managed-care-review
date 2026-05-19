@@ -33,6 +33,7 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
         const rateWithHistory = await store.findRateWithHistory(input.rateID)
         if (rateWithHistory instanceof Error) {
             const errMessage = `Issue finding rate message: ${rateWithHistory.message}`
+            logError('fetchRate', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (rateWithHistory instanceof NotFoundError) {

@@ -46,9 +46,6 @@ export function updateContract(
         const contractWithHistory = await store.findContractWithHistory(
             input.id
         )
-        if (contractWithHistory instanceof Error) {
-            throw contractWithHistory
-        }
 
         if (contractWithHistory instanceof Error) {
             const errMessage = `Issue finding a contract with history with id ${input.id}. Message: ${contractWithHistory.message}`

@@ -46,8 +46,8 @@ export function deleteOauthClientResolver(
 
         // Delete from DB
         const deleted = await store.deleteOAuthClient(input.clientId)
-        if (!deleted || deleted instanceof Error) {
-            const message = 'Failed to delete OAuth client'
+        if (deleted instanceof Error) {
+            const message = `Failed to delete OAuth client. ${deleted.message}`
             logError('deleteOauthClient', message)
             setErrorAttributesOnActiveSpan(message, span)
             throw new GraphQLError(message, {

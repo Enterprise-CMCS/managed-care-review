@@ -9,14 +9,14 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-} from '../../domain-models/user'
-import { NotFoundError } from '../../postgres/postgresErrors'
+} from '../../domain-models'
+import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
 import { logError, logSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
-import type { RateType } from '../../domain-models/contractAndRates'
+import type { RateType } from '../../domain-models'
 import { canRead } from '../../authorization/oauthAuthorization'
 
 const validateAndReturnRates = (
@@ -89,6 +89,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
             }
             if (ratesWithHistory instanceof Error) {
                 const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
+                logError('indexRates', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (ratesWithHistory instanceof NotFoundError) {
@@ -141,6 +142,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
             const errMsg = authInfo
                 ? `OAuth client not authorized to fetch rate reviews data`
                 : 'user not authorized to fetch rate reviews data'
+            logError('indexRatesResolver', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)
         }

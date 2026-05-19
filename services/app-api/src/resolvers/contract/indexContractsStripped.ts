@@ -74,6 +74,7 @@ export function indexContractsStripped(
             }
             if (contractsWithHistory instanceof Error) {
                 const errMessage = `Issue finding contracts: ${contractsWithHistory.message}`
+                logError('indexContractsStripped', errMessage)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (contractsWithHistory instanceof NotFoundError) {
@@ -119,6 +120,7 @@ export function indexContractsStripped(
             return { totalCount: edges.length, edges }
         } else {
             const errMsg = 'user not authorized to fetch contract reviews data'
+            logError('indexContractsStripped', errMsg)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)
         }

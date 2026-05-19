@@ -79,7 +79,12 @@ export function createContractQuestionResponseResolver(
             const errMessage = `Issue creating question response for contract question ${input.questionID}. Message: ${createResponseResult.message}`
             logError('createContractQuestionResponse', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         const questions = await store.findAllQuestionsByContract(

@@ -113,7 +113,12 @@ export function createRateQuestionResolver(
             const errMessage = `Issue creating question for rate. Message: ${questionResult.message}`
             logError('createRateQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         const allQuestions = await store.findAllQuestionsByRate(rate.id)
@@ -122,7 +127,12 @@ export function createRateQuestionResolver(
             const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
             logError('createRateQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'NOT_FOUND',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         let stateAnalystsEmails: string[] = []

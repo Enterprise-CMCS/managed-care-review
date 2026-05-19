@@ -267,11 +267,11 @@ function updateDraftContractRates(
                 )
                 if (!rateToUpdate) {
                     const errmsg =
-                        'Programming Error: this rate should exist, we had its ID: ' +
+                        'Programming Error: Rate did not exist in input data. ID: ' +
                         rateUpdate.rateID
                     logError('updateDraftContractRates', errmsg)
                     setErrorAttributesOnActiveSpan(errmsg, span)
-                    throw new Error(errmsg)
+                    throw createUserInputError(errmsg)
                 }
 
                 if (
@@ -332,11 +332,16 @@ function updateDraftContractRates(
                         }
 
                         const errmsg =
-                            'Unexpected Error: couldnt fetch the linking rate: ' +
+                            "Unexpected Error: couldn't fetch the linking rate: " +
                             rateUpdate.rateID
                         logError('updateDraftContractRates', errmsg)
                         setErrorAttributesOnActiveSpan(errmsg, span)
-                        throw new Error(errmsg)
+                        throw new GraphQLError(errmsg, {
+                            extensions: {
+                                code: 'NOT_FOUND',
+                                cause: 'DB_ERROR',
+                            },
+                        })
                     }
 
                     if (
@@ -366,9 +371,14 @@ function updateDraftContractRates(
             const removedRate = draftRates.find((r) => r.id === removedRateID)
 
             if (!removedRate) {
-                throw new Error(
-                    'Programming Error this should be impossible, these IDs came from the draft rates'
-                )
+                const errMsg = `Rates to be removed not found in associated rates to contract. RateID: ${removedRateID}`
+                logError('updateDraftContractRates', errMsg)
+                throw new GraphQLError(errMsg, {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
 
             // if removedRate is a draft, mark for deletion
@@ -386,9 +396,15 @@ function updateDraftContractRates(
         })
 
         if (result instanceof Error) {
-            logError('updateDraftContractRates', result.message)
-            setErrorAttributesOnActiveSpan(result.message, span)
-            throw result
+            const errMsg = `Failed to update draft contract rates. ${result.message}`
+            logError('updateDraftContractRates', errMsg)
+            setErrorAttributesOnActiveSpan(errMsg, span)
+            throw new GraphQLError(errMsg, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         logSuccess('updateDraftContractRates')

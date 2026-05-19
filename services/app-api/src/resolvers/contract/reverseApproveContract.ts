@@ -47,6 +47,7 @@ export function reverseApproveContract(
 
         if (contractWithHistory instanceof Error) {
             const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
+            logError('reverseApproveContract', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (contractWithHistory instanceof NotFoundError) {

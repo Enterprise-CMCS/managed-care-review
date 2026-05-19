@@ -73,7 +73,7 @@ function encodeRateCursor(cursor: RateCursor): string {
     return Buffer.from(JSON.stringify(cursor), 'utf8').toString('base64')
 }
 
-function decodeRateCursor(encodedCursor: string): RateCursor {
+function decodeRateCursor(encodedCursor: string): RateCursor | Error {
     const decodedCursor = JSON.parse(
         Buffer.from(encodedCursor, 'base64').toString('utf8')
     ) as Partial<RateCursor>
@@ -83,7 +83,7 @@ function decodeRateCursor(encodedCursor: string): RateCursor {
         typeof decodedCursor.updatedAt !== 'string' ||
         Number.isNaN(Date.parse(decodedCursor.updatedAt))
     ) {
-        throw new Error('Cursor is not a valid rate pagination cursor')
+        return new Error('Cursor is not a valid rate pagination cursor')
     }
 
     return {
@@ -92,34 +92,26 @@ function decodeRateCursor(encodedCursor: string): RateCursor {
     }
 }
 
-function normalizeIndexRatesPageSize(requestedPageSize?: number): number {
+function normalizeIndexRatesPageSize(
+    requestedPageSize?: number
+): number | Error {
     const pageSize = requestedPageSize ?? DEFAULT_INDEX_RATES_PAGE_SIZE
 
     if (pageSize < 1 || pageSize > MAX_INDEX_RATES_PAGE_SIZE) {
-        throw createUserInputError(
-            `pageSize must be between 1 and ${MAX_INDEX_RATES_PAGE_SIZE}`,
-            'pageSize',
-            requestedPageSize
+        return new Error(
+            `pageSize must be between 1 and ${MAX_INDEX_RATES_PAGE_SIZE}`
         )
     }
 
     return pageSize
 }
 
-function normalizeAfterCursor(after?: string) {
+function normalizeAfterCursor(after?: string): RateCursor | Error | undefined {
     if (!after) {
         return undefined
     }
 
-    try {
-        return decodeRateCursor(after)
-    } catch {
-        throw createUserInputError(
-            'after must be a valid rate pagination cursor',
-            'after',
-            after
-        )
-    }
+    return decodeRateCursor(after)
 }
 
 export function indexRatesPaginatedResolver(
@@ -159,6 +151,17 @@ export function indexRatesPaginatedResolver(
                     const pageSize = normalizeIndexRatesPageSize(
                         pageSizeInput ?? undefined
                     )
+
+                    if (pageSize instanceof Error) {
+                        const errMsg = `normalizeIndexRatesPageSize failed. ${pageSize.message}`
+                        logError('indexRatesPaginated', errMsg)
+                        throw createUserInputError(
+                            errMsg,
+                            'pageSize',
+                            pageSizeInput
+                        )
+                    }
+
                     let ratesWithHistory
                     if (stateUser) {
                         ratesWithHistory =
@@ -184,7 +187,7 @@ export function indexRatesPaginatedResolver(
 
                     if (ratesWithHistory instanceof Error) {
                         const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
-
+                        logError('indexRatesPaginated', errMessage)
                         if (ratesWithHistory instanceof NotFoundError) {
                             throw new GraphQLError(errMessage, {
                                 extensions: {
@@ -208,6 +211,13 @@ export function indexRatesPaginatedResolver(
                     const decodedAfter = normalizeAfterCursor(
                         after ?? undefined
                     )
+
+                    if (decodedAfter instanceof Error) {
+                        const errMsg = `normalizeAfterCursor failed. ${decodedAfter.message}`
+                        logError('indexRatesPaginated', errMsg)
+                        throw createUserInputError(errMsg, 'after', after)
+                    }
+
                     const startIndex = decodedAfter
                         ? sortedRates.findIndex(
                               (rate) =>
@@ -219,11 +229,10 @@ export function indexRatesPaginatedResolver(
                         : 0
 
                     if (decodedAfter && startIndex === 0) {
-                        throw createUserInputError(
-                            'after cursor does not match any rate in this result set',
-                            'after',
-                            after
-                        )
+                        const errMessage =
+                            'after cursor does not match any rate in this result set'
+                        logError('indexRatesPaginated', errMessage)
+                        throw createUserInputError(errMessage, 'after', after)
                     }
 
                     const pageRates = sortedRates.slice(

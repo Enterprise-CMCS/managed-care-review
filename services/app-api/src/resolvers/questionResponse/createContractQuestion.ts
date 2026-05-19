@@ -120,7 +120,12 @@ export function createContractQuestionResolver(
             const errMessage = `Issue finding all questions associated with the contract: ${contractResult.id}`
             logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'NOT_FOUND',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
         // Parse and validate document s3URLs at API boundary
         const docs = parseAndValidateDocuments(
@@ -143,7 +148,12 @@ export function createContractQuestionResolver(
             const errMessage = `Issue creating question for package. Message: ${questionResult.message}`
             logError('createContractQuestion', errMessage)
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         allQuestions.push(questionResult)

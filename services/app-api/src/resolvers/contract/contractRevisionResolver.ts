@@ -7,6 +7,7 @@ import { logError } from '../../logger'
 import type { DocumentZipPackageType } from '../../domain-models/ZipType'
 import type { Context } from '../../handlers/apollo_gql'
 import { parseErrorToError } from '@mc-review/helpers'
+import { GraphQLError } from 'graphql/index'
 
 export function contractRevisionResolver(
     store: Store
@@ -19,7 +20,14 @@ export function contractRevisionResolver(
             const stateCode = parent.contract.stateCode
             const programsForContractState = store.findStatePrograms(stateCode)
             if (programsForContractState instanceof Error) {
-                throw programsForContractState
+                const errMessage = `Failed to fetch state programs. ${programsForContractState.message}`
+                logError('contractRevisionStrippedResolver', errMessage)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
             const contractName = packageName(
                 stateCode,
@@ -78,7 +86,14 @@ export function contractRevisionStrippedResolver(
             const stateCode = parent.contract.stateCode
             const programsForContractState = store.findStatePrograms(stateCode)
             if (programsForContractState instanceof Error) {
-                throw programsForContractState
+                const errMessage = `Failed to fetch state programs. ${programsForContractState.message}`
+                logError('contractRevisionStrippedResolver', errMessage)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'NOT_FOUND',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
             return packageName(
                 stateCode,

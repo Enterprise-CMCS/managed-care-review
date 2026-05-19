@@ -81,15 +81,15 @@ export function undoWithdrawRate(
         // There must be one contract rate was withdrawn from and all must be in a submitted state.
         const withdrawnFromContracts = rateWithHistory.withdrawnFromContracts
         if (!withdrawnFromContracts?.length) {
-            throw new GraphQLError(
-                'Cannot undo withdraw rate with no associated contracts',
-                {
-                    extensions: {
-                        code: 'NOT_FOUND',
-                        cause: 'DB_ERROR',
-                    },
-                }
-            )
+            const errMessage =
+                'Cannot undo withdraw rate with no associated contracts'
+            logError('undoWithdrawRate', errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'NOT_FOUND',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         const parentContract = withdrawnFromContracts.find(
