@@ -1,8 +1,4 @@
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-    setSuccessAttributesOnActiveSpan,
-} from '../attributeHelper'
+import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
@@ -18,62 +14,69 @@ import { canRead } from '../../authorization/oauthAuthorization'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {
-        const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('fetchRate', {}, ctx)
-        setResolverDetailsOnActiveSpan('fetchRate', user, span)
+        const { user } = context
 
-        // Check OAuth client read permissions
-        if (!canRead(context)) {
-            const errMessage = `OAuth client does not have read permissions`
-            logError('fetchRate', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createForbiddenError(errMessage)
-        }
+        return withResolverSpan(
+            context,
+            'fetchRate',
+            { 'rate.id': input.rateID },
+            async (span) => {
+                setResolverDetails(span, user)
 
-        const rateWithHistory = await store.findRateWithHistory(input.rateID)
-        if (rateWithHistory instanceof Error) {
-            const errMessage = `Issue finding rate message: ${rateWithHistory.message}`
-            setErrorAttributesOnActiveSpan(errMessage, span)
+                if (!canRead(context)) {
+                    const errMessage = `OAuth client does not have read permissions`
+                    logError('fetchRate', errMessage)
+                    throw createForbiddenError(errMessage)
+                }
 
-            if (rateWithHistory instanceof NotFoundError) {
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'NOT_FOUND',
-                        cause: 'DB_ERROR',
-                    },
-                })
+                const rateWithHistory = await store.findRateWithHistory(
+                    input.rateID
+                )
+                if (rateWithHistory instanceof Error) {
+                    const errMessage = `Issue finding rate message: ${rateWithHistory.message}`
+
+                    if (rateWithHistory instanceof NotFoundError) {
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'NOT_FOUND',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                if (isStateUser(user)) {
+                    if (user.stateCode !== rateWithHistory.stateCode) {
+                        const authInfo = !!context.oauthClient
+                        const errMessage = authInfo
+                            ? `OAuth client not authorized to fetch rate data from ${rateWithHistory.stateCode}`
+                            : 'State users are not authorized to fetch rate data from a different state.'
+                        logError('fetchRate', errMessage)
+                        throw createForbiddenError(errMessage)
+                    }
+                } else if (
+                    !hasCMSPermissions(user) &&
+                    !hasAdminPermissions(user)
+                ) {
+                    const errMessage = 'User not authorized to fetch rate data'
+                    logError('fetchRate', errMessage)
+                    throw createForbiddenError(errMessage)
+                }
+
+                logSuccess(
+                    context.oauthClient
+                        ? 'fetchRate - oauthClient'
+                        : 'fetchRate'
+                )
+                return { rate: rateWithHistory }
             }
-
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        // Authorization check (same for both OAuth clients and regular users)
-        if (isStateUser(user)) {
-            if (user.stateCode !== rateWithHistory.stateCode) {
-                const authInfo = !!context.oauthClient
-                const errMessage = authInfo
-                    ? `OAuth client not authorized to fetch rate data from ${rateWithHistory.stateCode}`
-                    : 'State users are not authorized to fetch rate data from a different state.'
-                logError('fetchRate', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw createForbiddenError(errMessage)
-            }
-        } else if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
-            const errMessage = 'User not authorized to fetch rate data'
-            logError('fetchRate', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createForbiddenError(errMessage)
-        }
-
-        logSuccess(
-            context.oauthClient ? 'fetchRate - oauthClient' : 'fetchRate'
         )
-        setSuccessAttributesOnActiveSpan(span)
-        return { rate: rateWithHistory }
     }
 }

@@ -14,9 +14,9 @@ import { logError, logSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-    setSuccessAttributesOnActiveSpan,
+    recordResolverError,
+    setResolverDetails,
+    withResolverSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
@@ -46,7 +46,7 @@ const parseContracts = (
             '\n'
         )}`
         logError('indexContractsResolver', errMessage)
-        setErrorAttributesOnActiveSpan(errMessage, span)
+        recordResolverError(span, errMessage)
     }
 
     return parsedContracts
@@ -88,107 +88,120 @@ export function indexContractsResolver(
     store: Store
 ): QueryResolvers['indexContracts'] {
     return async (_parent, { input }, context) => {
-        const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('indexContracts', {}, ctx)
-        setResolverDetailsOnActiveSpan('indexContracts', user, span)
+        const { user } = context
 
-        // Check OAuth client read permissions
-        if (!canRead(context)) {
-            const errMessage = `OAuth client does not have read permissions`
-            logError('indexContracts', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createForbiddenError(errMessage)
-        }
+        return withResolverSpan(
+            context,
+            'indexContracts',
+            {
+                'mcreview.updated_within': input?.updatedWithin ?? 0,
+                'mcreview.statuses_to_exclude_count':
+                    input?.statusesToExclude?.length ?? 0,
+            },
+            async (span) => {
+                setResolverDetails(span, user)
 
-        // Authorization check (same for both OAuth clients and regular users)
-        if (isStateUser(user)) {
-            const contractsWithHistory =
-                await store.findAllContractsWithHistoryByState(user.stateCode)
-
-            if (contractsWithHistory instanceof Error) {
-                const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
-                logError('indexContracts', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-
-                if (contractsWithHistory instanceof NotFoundError) {
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'NOT_FOUND',
-                            cause: 'DB_ERROR',
-                        },
-                    })
+                if (!canRead(context)) {
+                    const errMessage = `OAuth client does not have read permissions`
+                    logError('indexContracts', errMessage)
+                    throw createForbiddenError(errMessage)
                 }
 
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-            logSuccess(
-                context.oauthClient
-                    ? 'indexContracts - oauthClient'
-                    : 'indexContracts'
-            )
-            setSuccessAttributesOnActiveSpan(span)
-            const parsedContracts = parseContracts(contractsWithHistory, span)
-            return formatContracts(parsedContracts)
-        } else if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
-            const skipFindingLatest = !!input?.updatedWithin
-            const contractsWithHistory =
-                await store.findAllContractsWithHistoryBySubmitInfo(
-                    false,
-                    skipFindingLatest
-                )
+                if (isStateUser(user)) {
+                    const contractsWithHistory =
+                        await store.findAllContractsWithHistoryByState(
+                            user.stateCode
+                        )
 
-            if (contractsWithHistory instanceof Error) {
-                const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
-                logError('indexContracts', errMessage)
-                setErrorAttributesOnActiveSpan(errMessage, span)
+                    if (contractsWithHistory instanceof Error) {
+                        const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
+                        logError('indexContracts', errMessage)
 
-                if (contractsWithHistory instanceof NotFoundError) {
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'NOT_FOUND',
-                            cause: 'DB_ERROR',
-                        },
-                    })
+                        if (contractsWithHistory instanceof NotFoundError) {
+                            throw new GraphQLError(errMessage, {
+                                extensions: {
+                                    code: 'NOT_FOUND',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
+                        }
+
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+                    logSuccess(
+                        context.oauthClient
+                            ? 'indexContracts - oauthClient'
+                            : 'indexContracts'
+                    )
+                    const parsedContracts = parseContracts(
+                        contractsWithHistory,
+                        span
+                    )
+                    return formatContracts(parsedContracts)
+                } else if (
+                    hasAdminPermissions(user) ||
+                    hasCMSPermissions(user)
+                ) {
+                    const skipFindingLatest = !!input?.updatedWithin
+                    const contractsWithHistory =
+                        await store.findAllContractsWithHistoryBySubmitInfo(
+                            false,
+                            skipFindingLatest
+                        )
+
+                    if (contractsWithHistory instanceof Error) {
+                        const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
+                        logError('indexContracts', errMessage)
+
+                        if (contractsWithHistory instanceof NotFoundError) {
+                            throw new GraphQLError(errMessage, {
+                                extensions: {
+                                    code: 'NOT_FOUND',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
+                        }
+
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+                    logSuccess(
+                        context.oauthClient
+                            ? 'indexContracts - oauthClient'
+                            : 'indexContracts'
+                    )
+
+                    const parsedContracts = parseContracts(
+                        contractsWithHistory,
+                        span
+                    )
+                    const cleanedStatuses =
+                        input?.statusesToExclude?.filter(
+                            (s): s is ConsolidatedContractStatus => s != null
+                        ) ?? null
+                    return formatContracts(
+                        parsedContracts,
+                        input?.updatedWithin,
+                        cleanedStatuses
+                    )
+                } else {
+                    const authInfo = !!context.oauthClient
+                    const errMsg = authInfo
+                        ? `OAuth client not authorized to fetch contract data`
+                        : 'user not authorized to fetch state data'
+                    logError('indexContracts', errMsg)
+                    throw createForbiddenError(errMsg)
                 }
-
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
             }
-            logSuccess(
-                context.oauthClient
-                    ? 'indexContracts - oauthClient'
-                    : 'indexContracts'
-            )
-            setSuccessAttributesOnActiveSpan(span)
-            let contracts: any = contractsWithHistory
-
-            const parsedContracts = parseContracts(contracts, span)
-            const cleanedStatuses =
-                input?.statusesToExclude?.filter(
-                    (s): s is ConsolidatedContractStatus => s != null
-                ) ?? null
-            return formatContracts(
-                parsedContracts,
-                input?.updatedWithin,
-                cleanedStatuses
-            )
-        } else {
-            const authInfo = !!context.oauthClient
-            const errMsg = authInfo
-                ? `OAuth client not authorized to fetch contract data`
-                : 'user not authorized to fetch state data'
-            logError('indexContracts', errMsg)
-            setErrorAttributesOnActiveSpan(errMsg, span)
-            throw createForbiddenError(errMsg)
-        }
+        )
     }
 }
