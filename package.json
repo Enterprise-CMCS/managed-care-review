@@ -5,6 +5,7 @@
     "description": "",
     "main": "index.js",
     "private": true,
+    "packageManager": "pnpm@11.1.3",
     "workspaces": [
         "packages/**",
         "services/**"
