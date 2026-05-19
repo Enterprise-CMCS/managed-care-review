@@ -142,10 +142,19 @@ type ContractTableStrippedPayload = Prisma.ContractTableGetPayload<{
     include: typeof includeStrippedContractWithoutDraftRates
 }>
 
+type ContractRevisionOverridesTablePayload =
+    Prisma.ContractRevisionOverridesGetPayload<{
+        select: typeof selectContractRevisionOverrides
+    }>
+
 export {
     includeContractWithoutDraftRates,
     includeLatestSubmittedRateRev,
     includeStrippedContractWithoutDraftRates,
 }
 
-export type { ContractTableWithoutDraftRates, ContractTableStrippedPayload }
+export type {
+    ContractTableWithoutDraftRates,
+    ContractTableStrippedPayload,
+    ContractRevisionOverridesTablePayload,
+}

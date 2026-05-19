@@ -1,5 +1,7 @@
 import type {
     Prisma,
+    ContractDocument,
+    ContractSupportingDocument,
     RateDocument,
     RateSupportingDocument,
 } from '../../generated/client'
@@ -20,7 +22,10 @@ import type {
     ContractReviewStatusType,
     RateReviewStatusType,
 } from '../../domain-models/contractAndRates/baseContractRateTypes'
-import type { ContractTableWithoutDraftRates } from './prismaSubmittedContractHelpers'
+import type {
+    ContractTableWithoutDraftRates,
+    ContractRevisionOverridesTablePayload,
+} from './prismaSubmittedContractHelpers'
 import type {
     HealthPlanPackageStatus,
     ContractReviewStatus,
@@ -86,6 +91,8 @@ const includeContractFormData = {
             createdAt: true,
             contractRevisionID: true,
             contractType: true,
+            contractDocuments: true,
+            supportingDocuments: true,
         },
     },
 } satisfies Prisma.ContractRevisionTableInclude
@@ -563,28 +570,126 @@ type StrippedContractRevisionTableWithFormData =
         include: typeof includeStrippedContractFormData
     }>
 
+// Merges contract document overrides into the original document list for a
+// single revision. Two override modes:
+//   - update (documentID != null): sparse-patch the matching original doc with
+//     non-null override fields, accumulated across all overrides on the
+//     revision in createdAt-asc order (newer overrides win per field).
+//   - add (documentID == null): synthesize as a new doc and append after the
+//     existing list, ordered by override-row createdAt-asc.
+//
+// Add-rows are expected to have been validated upstream in overrideContractData
+// such that name, sha256, s3URL are non-null.
+const mergeContractDocumentOverrides = <
+    T extends ContractDocument | ContractSupportingDocument,
+>(
+    originalDocs: T[],
+    overrideRows: (
+        | ContractRevisionOverridesTablePayload['contractDocuments'][number]
+        | ContractRevisionOverridesTablePayload['supportingDocuments'][number]
+    )[],
+    contractRevisionID: string
+): T[] => {
+    // Process all overrides in createdAt-asc order so that newer overrides
+    // override older ones on the same field (last write wins, per the skill's
+    // sparse-patch convention).
+    const ordered = [...overrideRows].sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    )
+
+    // Accumulate update-patches by documentID; collect add-rows separately.
+    const updatePatches = new Map<string, { dateAdded?: Date | null }>()
+    const addRows: typeof ordered = []
+    for (const row of ordered) {
+        if (row.documentID == null) {
+            addRows.push(row)
+            continue
+        }
+        const patch = updatePatches.get(row.documentID) ?? {}
+        if (row.dateAdded != null) {
+            patch.dateAdded = row.dateAdded
+        }
+        // (Future overrideable fields would merge in here.)
+        updatePatches.set(row.documentID, patch)
+    }
+
+    // Apply update-patches to the original docs, preserving order/position.
+    const mergedOriginals: T[] = originalDocs.map((doc) => {
+        const patch = updatePatches.get(doc.id)
+        if (!patch) {
+            return doc
+        }
+        return {
+            ...doc,
+            dateAdded: patch.dateAdded ?? doc.dateAdded,
+        }
+    })
+
+    // Synthesize add-rows as new domain docs appended at the end. Position is
+    // not exposed in the domain shape; only array order matters here. Position
+    // is computed at unlock-time materialization, not at read time.
+    const synthesized: T[] = addRows.map((row) => {
+        const stamp = row.createdAt ?? new Date()
+        return {
+            id: row.id,
+            createdAt: stamp,
+            updatedAt: stamp,
+            // position is required on the Prisma row type but not exposed in
+            // the domain shape; assign a sentinel so the shape type-checks.
+            position: -1,
+            name: row.name as string,
+            s3URL: row.s3URL as string,
+            sha256: row.sha256 as string,
+            s3BucketName: row.s3BucketName ?? null,
+            s3Key: row.s3Key ?? null,
+            dateAdded: row.dateAdded ?? null,
+            contractRevisionID,
+        } as T
+    })
+
+    return [...mergedOriginals, ...synthesized]
+}
+
+// Builds an effective per-document override patch map by sparse-merging all
+// rate revision overrides on a revision in createdAt-asc order (newer wins
+// per field). Keyed by documentID. Rate overrides are update-only (documentID
+// is required on RateDocumentOverride), so no add-synthesis is needed.
+//
+// Ordering basis is the parent RateRevisionOverrides row's createdAt because
+// the doc-override sub-rows don't carry their own createdAt in the select.
+const mergeRateDocumentOverridePatches = (
+    overrideRows: RateRevisionOverridesTablePayload[]
+): Map<string, { dateAdded?: Date | null }> => {
+    const ordered = [...overrideRows].sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    )
+    const patches = new Map<string, { dateAdded?: Date | null }>()
+    for (const ro of ordered) {
+        for (const docOverride of [
+            ...(ro.rateDocuments ?? []),
+            ...(ro.supportingDocuments ?? []),
+        ]) {
+            const patch = patches.get(docOverride.documentID) ?? {}
+            if (docOverride.dateAdded != null) {
+                patch.dateAdded = docOverride.dateAdded
+            }
+            patches.set(docOverride.documentID, patch)
+        }
+    }
+    return patches
+}
+
 // Function to take in original document and look for override dateAdded
 // returns original doc data and applies override to dateAdded.
 const documentDataToDomainModel = (
     originalDoc: RateDocument | RateSupportingDocument,
-    revisionOverrides?: RateRevisionOverridesTablePayload
+    overridePatches?: Map<string, { dateAdded?: Date | null }>
 ): DocumentType => {
     let dateAdded = originalDoc.dateAdded
 
-    // Override document data
-    if (revisionOverrides) {
-        const overrideDocs = [
-            ...revisionOverrides.rateDocuments,
-            ...revisionOverrides.supportingDocuments,
-        ]
-
-        const overrideDoc =
-            overrideDocs &&
-            overrideDocs.find((doc) => doc.documentID === originalDoc.id)
-
-        if (overrideDoc?.dateAdded) {
-            dateAdded = overrideDoc.dateAdded
-        }
+    const patch = overridePatches?.get(originalDoc.id)
+    if (patch?.dateAdded) {
+        dateAdded = patch.dateAdded
     }
 
     return {
@@ -631,13 +736,15 @@ function rateFormDataToDomainModel(
         })
     }
 
-    // Get any rate overrides to override rate revision data.
-    const latestOverride = rateRevision.revisionOverrides?.[0]
-
-    const revisionOverrides =
-        latestOverride && latestOverride.rateRevisionID === rateRevision.id
-            ? latestOverride
-            : undefined
+    // Full-merge across all rate revision overrides on this revision: collect
+    // every override row that targets this revision, sparse-merge their
+    // document patches in createdAt-asc order. Matches the contract-side
+    // semantics and the skill's "merge overrides in order, newer wins per
+    // field" convention.
+    const relevantOverrides = (rateRevision.revisionOverrides ?? []).filter(
+        (o) => o.rateRevisionID === rateRevision.id
+    )
+    const overridePatches = mergeRateDocumentOverridePatches(relevantOverrides)
 
     return {
         id: rateRevision.rateID,
@@ -646,12 +753,12 @@ function rateFormDataToDomainModel(
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
         rateDocuments: rateRevision.rateDocuments
             ? rateRevision.rateDocuments.map((doc) =>
-                  documentDataToDomainModel(doc, revisionOverrides)
+                  documentDataToDomainModel(doc, overridePatches)
               )
             : [],
         supportingDocuments: rateRevision.supportingDocuments
             ? rateRevision.supportingDocuments.map((doc) =>
-                  documentDataToDomainModel(doc, revisionOverrides)
+                  documentDataToDomainModel(doc, overridePatches)
               )
             : [],
         rateDateStart: rateRevision.rateDateStart ?? undefined,
@@ -753,6 +860,30 @@ function contractFormDataToDomainModel(
             override.contractType !== null
     )
 
+    // Collect all document override rows across all overrides that target this
+    // revision. Used for the doc-level merge below (sparse-patch updates +
+    // append-at-end add-overrides).
+    const revisionDocOverrides = (
+        contractRevision.revisionOverrides ?? []
+    ).filter((o) => o.contractRevisionID === contractRevision.id)
+    const allContractDocumentOverrides = revisionDocOverrides.flatMap(
+        (o) => o.contractDocuments ?? []
+    )
+    const allSupportingDocumentOverrides = revisionDocOverrides.flatMap(
+        (o) => o.supportingDocuments ?? []
+    )
+
+    const mergedContractDocuments = mergeContractDocumentOverrides(
+        contractRevision.contractDocuments ?? [],
+        allContractDocumentOverrides,
+        contractRevision.id
+    )
+    const mergedSupportingDocuments = mergeContractDocumentOverrides(
+        contractRevision.supportingDocuments ?? [],
+        allSupportingDocumentOverrides,
+        contractRevision.id
+    )
+
     return {
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
@@ -775,24 +906,20 @@ function contractFormDataToDomainModel(
                   email: contact.email ?? undefined,
               }))
             : [],
-        supportingDocuments: contractRevision.supportingDocuments
-            ? contractRevision.supportingDocuments.map((doc) => ({
-                  ...doc,
-                  dateAdded: doc.dateAdded ?? undefined,
-                  s3BucketName: doc.s3BucketName ?? undefined,
-                  s3Key: doc.s3Key ?? undefined,
-              }))
-            : [],
+        supportingDocuments: mergedSupportingDocuments.map((doc) => ({
+            ...doc,
+            dateAdded: doc.dateAdded ?? undefined,
+            s3BucketName: doc.s3BucketName ?? undefined,
+            s3Key: doc.s3Key ?? undefined,
+        })),
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
-        contractDocuments: contractRevision.contractDocuments
-            ? contractRevision.contractDocuments.map((doc) => ({
-                  ...doc,
-                  dateAdded: doc.dateAdded ?? undefined,
-                  s3BucketName: doc.s3BucketName ?? undefined,
-                  s3Key: doc.s3Key ?? undefined,
-              }))
-            : [],
+        contractDocuments: mergedContractDocuments.map((doc) => ({
+            ...doc,
+            dateAdded: doc.dateAdded ?? undefined,
+            s3BucketName: doc.s3BucketName ?? undefined,
+            s3Key: doc.s3Key ?? undefined,
+        })),
         contractDateStart: contractRevision.contractDateStart ?? undefined,
         contractDateEnd: contractRevision.contractDateEnd ?? undefined,
         managedCareEntities: contractRevision.managedCareEntities ?? undefined,
