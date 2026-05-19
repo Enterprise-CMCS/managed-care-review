@@ -129,6 +129,80 @@ test.each([
     }
 )
 
+test('EQRO Q&A response email contains only devReviewTeam + DMCO recipients', async () => {
+    const currentQuestion = mockQuestionAndResponses({
+        id: 'test-question-id-2',
+        createdAt: new Date('02/03/2024'),
+        contractID: contractRev.id,
+        addedBy: dmcpUser,
+        division: 'DMCO',
+    })
+
+    const result = await sendQuestionResponseCMSEmail(
+        contractRev,
+        'EQRO',
+        testEmailConfig(),
+        defaultMNStatePrograms,
+        stateAnalysts,
+        currentQuestion,
+        questions
+    )
+
+    if (result instanceof Error) {
+        throw new Error(`Unexpect error: ${result.message}`)
+    }
+
+    const expectedRecipients = [
+        ...testEmailConfig().devReviewTeamEmails,
+        ...testEmailConfig().dmcoEmails,
+    ]
+    expect(result).toEqual(
+        expect.objectContaining({
+            toAddresses: expect.arrayContaining(expectedRecipients),
+        })
+    )
+    expect(result.toAddresses).toEqual(
+        expect.not.arrayContaining(stateAnalysts)
+    )
+    expect(result.toAddresses).toEqual(
+        expect.not.arrayContaining(testEmailConfig().dmcpReviewEmails)
+    )
+    expect(result.toAddresses).toEqual(
+        expect.not.arrayContaining(testEmailConfig().oactEmails)
+    )
+})
+
+test('EQRO Q&A response email ignores division-specific recipient rules even for OACT risk-based contracts', async () => {
+    const currentQuestion = mockQuestionAndResponses({
+        id: 'test-question-id-4',
+        createdAt: new Date('02/03/2024'),
+        contractID: contractRev.id,
+        addedBy: oactCMSUser,
+        division: 'OACT',
+    })
+
+    const result = await sendQuestionResponseCMSEmail(
+        contractRev,
+        'EQRO',
+        testEmailConfig(),
+        defaultMNStatePrograms,
+        stateAnalysts,
+        currentQuestion,
+        questions
+    )
+
+    if (result instanceof Error) {
+        throw new Error(`Unexpect error: ${result.message}`)
+    }
+
+    expect(result.toAddresses).toEqual(
+        expect.not.arrayContaining(testEmailConfig().oactEmails)
+    )
+    expect(result.toAddresses).toEqual(
+        expect.not.arrayContaining(stateAnalysts)
+    )
+})
+
 test('renders overall CMS email for a new state response as expected', async () => {
     const currentQuestion = questions[0]
 

@@ -38,15 +38,23 @@ export const sendQuestionResponseCMSEmail = async (
         return questionRound
     }
 
-    let receiverEmails = [
-        ...stateAnalystsEmails,
-        ...config.devReviewTeamEmails,
-        ...config.dmcoEmails,
-    ]
-    if (division === 'DMCP') {
-        receiverEmails.push(...config.dmcpReviewEmails)
-    } else if (division === 'OACT' && contractRev.formData.riskBasedContract) {
-        receiverEmails.push(...config.oactEmails)
+    let receiverEmails: string[]
+    if (contractSubmissionType === 'EQRO') {
+        receiverEmails = [...config.devReviewTeamEmails, ...config.dmcoEmails]
+    } else {
+        receiverEmails = [
+            ...stateAnalystsEmails,
+            ...config.devReviewTeamEmails,
+            ...config.dmcoEmails,
+        ]
+        if (division === 'DMCP') {
+            receiverEmails.push(...config.dmcpReviewEmails)
+        } else if (
+            division === 'OACT' &&
+            contractRev.formData.riskBasedContract
+        ) {
+            receiverEmails.push(...config.oactEmails)
+        }
     }
     receiverEmails = pruneDuplicateEmails(receiverEmails)
 
