@@ -76,10 +76,11 @@ export function unlockContractResolver(
         }
 
         if (
-            contractResult.draftRevision ||
-            contractResult.consolidatedStatus === 'APPROVED'
+            !['SUBMITTED', 'RESUBMITTED', 'NOT_SUBJECT_TO_REVIEW'].includes(
+                contractResult.consolidatedStatus
+            )
         ) {
-            const errMessage = `Attempted to unlock contract with wrong status`
+            const errMessage = `Attempted to unlock contract with wrong status: ${contractResult.consolidatedStatus}`
             logResolverError('unlockContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'contractID')
