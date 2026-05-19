@@ -10,7 +10,7 @@ import {
     prismaRateCreateFormDataFromDomain,
     prismaUpdateRateFormDataFromDomain,
 } from './prismaContractRateAdaptors'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 interface UpdatedRatesType {
     create: {
@@ -227,19 +227,23 @@ async function updateDraftContractRates(
     client: ExtendedPrismaClient,
     args: UpdateDraftContractRatesArgsType
 ): Promise<ContractType | Error> {
-    try {
-        return await client.$transaction(async (tx) => {
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'updateDraftContractRates',
+        table: 'ContractTable',
+        id: args.contractID,
+        transaction: async (tx) => {
             const result = await updateDraftContractRatesInsideTransaction(
                 tx,
                 args
             )
+            if (result instanceof Error) {
+                throw result
+            }
 
             return result
-        })
-    } catch (err) {
-        console.error('PRISMA ERR', err)
-        return parseErrorToError(err)
-    }
+        },
+    })
 }
 
 export type { UpdateDraftContractRatesArgsType }
