@@ -29,13 +29,13 @@ export function contractRevisionResolver(
                     },
                 })
             }
-            const contractName = packageName(
+
+            return packageName(
                 stateCode,
                 parent.contract.stateNumber,
                 parent.formData.programIDs,
                 programsForContractState ?? []
             )
-            return contractName
         },
         documentZipPackages: async (
             parent: ContractRevisionType,

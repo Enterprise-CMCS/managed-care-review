@@ -9,15 +9,15 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-} from '../../domain-models/user'
+} from '../../domain-models'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
 import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
-import type { RateType } from '../../domain-models/contractAndRates'
+import type { RateType } from '../../domain-models'
 import { canRead } from '../../authorization/oauthAuthorization'
-import { NotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError } from '../../postgres'
 import { getRateLastUpdatedForDisplay } from '../helpers'
 
 const DEFAULT_INDEX_RATES_PAGE_SIZE = 10

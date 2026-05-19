@@ -8,7 +8,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { hasCMSPermissions, isAdminUser } from '../../domain-models/user'
+import { hasCMSPermissions, isAdminUser } from '../../domain-models'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
 export function reverseApproveContract(

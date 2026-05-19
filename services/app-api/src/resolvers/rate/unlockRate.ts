@@ -2,7 +2,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { RateType } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logResolverError, logResolverSuccess } from '../../logger'
-import { NotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,

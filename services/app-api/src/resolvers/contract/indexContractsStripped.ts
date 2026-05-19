@@ -9,13 +9,13 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-} from '../../domain-models/user'
-import { NotFoundError } from '../../postgres/postgresErrors'
+} from '../../domain-models'
+import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { logError, logResolverError } from '../../logger'
 import { GraphQLError } from 'graphql'
-import type { StrippedContractType } from '../../domain-models/contractAndRates/contractTypes'
+import type { StrippedContractType } from '../../domain-models'
 import type { StrippedContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsStripped'
 
 const validateAndReturnContracts = (

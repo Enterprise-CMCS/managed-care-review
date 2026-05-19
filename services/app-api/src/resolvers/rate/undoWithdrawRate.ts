@@ -10,7 +10,7 @@ import {
 import { hasCMSPermissions } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import { canWrite } from '../../authorization/oauthAuthorization'
 
