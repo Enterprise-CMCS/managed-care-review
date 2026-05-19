@@ -1,10 +1,7 @@
 import type { Store } from '../../postgres'
 import { UserInputPostgresError } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-} from '../attributeHelper'
+import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { logError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
@@ -22,94 +19,95 @@ export function updateStateAssignmentsByState(
     store: Store
 ): MutationResolvers['updateStateAssignmentsByState'] {
     return async (_parent, { input }, context) => {
-        const { user: currentUser, ctx, tracer } = context
-        const span = tracer?.startSpan('updateStateAssignmentsByState', {}, ctx)
-        setResolverDetailsOnActiveSpan(
+        const { user: currentUser } = context
+
+        return withResolverSpan(
+            context,
             'updateStateAssignmentsByState',
-            currentUser,
-            span
-        )
+            undefined,
+            async (span) => {
+                setResolverDetails(span, currentUser)
 
-        // Check OAuth client read permissions
-        if (!canWrite(context)) {
-            const errMessage = `OAuth client does not have write permissions`
-            logError('updateStateAssignmentsByState', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
+                // Check OAuth client read permissions
+                if (!canWrite(context)) {
+                    const errMessage = `OAuth client does not have write permissions`
+                    logError('updateStateAssignmentsByState', errMessage)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'FORBIDDEN',
+                            cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                        },
+                    })
+                }
 
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'FORBIDDEN',
-                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
-                },
-            })
-        }
+                // Only Admin and all CMS users can call this resolver
+                if (
+                    !hasAdminPermissions(currentUser) &&
+                    !hasCMSPermissions(currentUser)
+                ) {
+                    const msg = 'user not authorized to modify assignments'
+                    logError('updateStateAssignmentsByState', msg)
+                    throw createForbiddenError(msg)
+                }
 
-        // Only Admin and all CMS users can call this resolver
-        if (
-            !hasAdminPermissions(currentUser) &&
-            !hasCMSPermissions(currentUser)
-        ) {
-            const msg = 'user not authorized to modify assignments'
-            logError('updateStateAssignmentsByState', msg)
-            setErrorAttributesOnActiveSpan(msg, span)
-            throw createForbiddenError(msg)
-        }
+                const { stateCode, assignedUsers } = input
 
-        const { stateCode, assignedUsers } = input
+                if (!isValidStateCode(stateCode)) {
+                    const errMsg =
+                        'cannot update state assignments for invalid state'
+                    logError('updateStateAssignmentsByState', errMsg)
+                    throw createUserInputError(errMsg, 'stateCode', stateCode)
+                }
 
-        if (!isValidStateCode(stateCode)) {
-            const errMsg = 'cannot update state assignments for invalid state'
-            logError('updateStateAssignmentsByState', errMsg)
-            setErrorAttributesOnActiveSpan(errMsg, span)
-            throw createUserInputError(errMsg, 'stateCode', stateCode)
-        }
+                if (assignedUsers.length === 0) {
+                    const msg =
+                        'cannot update state assignments with no assignments'
+                    logError('updateStateAssignmentsByState', msg)
+                    throw createUserInputError(
+                        msg,
+                        'assignedUsers',
+                        assignedUsers
+                    )
+                }
 
-        if (assignedUsers.length === 0) {
-            const msg = 'cannot update state assignments with no assignments'
-            logError('updateStateAssignmentsByState', msg)
-            setErrorAttributesOnActiveSpan(msg, span)
-            throw createUserInputError(msg, 'assignedUsers', assignedUsers)
-        }
-
-        const result = await store.updateStateAssignedUsers(
-            currentUser.id,
-            stateCode,
-            assignedUsers
-        )
-
-        if (result instanceof Error) {
-            if (result instanceof NotFoundError) {
-                const errMsg = 'state does not exist'
-                logError('updateStateAssignmentsByState', errMsg)
-                setErrorAttributesOnActiveSpan(errMsg, span)
-                throw handleNotFoundError(result)
-            }
-
-            if (result instanceof UserInputPostgresError) {
-                const errMsg = result.message
-                logError('updateStateAssignmentsByState', errMsg)
-                setErrorAttributesOnActiveSpan(errMsg, span)
-                throw handleUserInputPostgresError(
-                    result,
-                    'assignedUsers',
+                const result = await store.updateStateAssignedUsers(
+                    currentUser.id,
+                    stateCode,
                     assignedUsers
                 )
+
+                if (result instanceof Error) {
+                    if (result instanceof NotFoundError) {
+                        const errMsg = 'state does not exist'
+                        logError('updateStateAssignmentsByState', errMsg)
+                        throw handleNotFoundError(result)
+                    }
+
+                    if (result instanceof UserInputPostgresError) {
+                        const errMsg = result.message
+                        logError('updateStateAssignmentsByState', errMsg)
+                        throw handleUserInputPostgresError(
+                            result,
+                            'assignedUsers',
+                            assignedUsers
+                        )
+                    }
+
+                    const errMsg = `Issue assigning states to user. Message: ${result.message}`
+                    logError('updateStateAssignmentsByState', errMsg)
+                    throw new GraphQLError(errMsg, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                return {
+                    stateCode,
+                    assignedUsers: result,
+                }
             }
-
-            const errMsg = `Issue assigning states to user. Message: ${result.message}`
-            logError('updateStateAssignmentsByState', errMsg)
-            setErrorAttributesOnActiveSpan(errMsg, span)
-            throw new GraphQLError(errMsg, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
-
-        return {
-            stateCode,
-            assignedUsers: result,
-        }
+        )
     }
 }
