@@ -2,7 +2,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
@@ -91,7 +91,7 @@ export function createOauthClientResolver(
             })
         }
 
-        logSuccess('createOauthClient')
+        logResolverSuccess('createOauthClient', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

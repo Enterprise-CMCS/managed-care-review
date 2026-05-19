@@ -2,7 +2,7 @@ import type { Emailer } from '../../emailer'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
-import { logError, logResolverError, logSuccess } from '../../logger'
+import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import { isStateUser, contractSubmitters } from '../../domain-models'
 import {
     type CHIPFederalAuthority,
@@ -650,7 +650,7 @@ export function submitContract(
                     })
                 }
 
-                logSuccess('submitContract')
+                logResolverSuccess('submitContract', context)
                 return { contract: submitContractResult }
             }
         )

@@ -3,7 +3,7 @@ import type { UpdateInfoType } from '../../domain-models'
 import { contractSubmitters, hasCMSPermissions } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 
@@ -194,7 +194,7 @@ export function unlockContractResolver(
             })
         }
 
-        logSuccess('unlockContract')
+        logResolverSuccess('unlockContract', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return { contract: unlockContractResult }

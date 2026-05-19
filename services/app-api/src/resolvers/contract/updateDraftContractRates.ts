@@ -1,5 +1,5 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError, handleNotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
@@ -433,7 +433,7 @@ function updateDraftContractRates(
             })
         }
 
-        logSuccess('updateDraftContractRates')
+        logResolverSuccess('updateDraftContractRates', context)
         setSuccessAttributesOnActiveSpan(span)
         // return result.
         return { contract: result }

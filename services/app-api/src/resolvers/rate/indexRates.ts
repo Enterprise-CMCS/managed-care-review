@@ -14,7 +14,7 @@ import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
-import { logError, logResolverError, logSuccess } from '../../logger'
+import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models'
 import { canRead } from '../../authorization/oauthAuthorization'
@@ -132,8 +132,9 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                     })
                 })
             }
-            logSuccess(
-                context.oauthClient ? 'indexRates - oauthClient' : 'indexRates'
+            logResolverSuccess(
+                context.oauthClient ? 'indexRates - oauthClient' : 'indexRates',
+                context
             )
             setSuccessAttributesOnActiveSpan(span)
             return { totalCount: edges.length, edges }

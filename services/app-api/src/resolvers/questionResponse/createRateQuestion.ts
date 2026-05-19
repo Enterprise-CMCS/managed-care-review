@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { hasCMSPermissions, isValidCmsDivison } from '../../domain-models'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
@@ -216,7 +216,7 @@ export function createRateQuestionResolver(
             })
         }
 
-        logSuccess('createRateQuestion')
+        logResolverSuccess('createRateQuestion', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

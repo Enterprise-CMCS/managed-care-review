@@ -8,7 +8,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
@@ -163,7 +163,7 @@ export function undoWithdrawRate(
                 },
             })
         }
-        logSuccess('undoWithdrawRate')
+        logResolverSuccess('undoWithdrawRate', context)
         setSuccessAttributesOnActiveSpan(span)
 
         //Send emails upon success

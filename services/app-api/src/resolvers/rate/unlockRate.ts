@@ -1,7 +1,7 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { RateType } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres/postgresErrors'
 import type { Store } from '../../postgres'
 import {
@@ -131,7 +131,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
             })
         }
 
-        logSuccess('unlockRate')
+        logResolverSuccess('unlockRate', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return { rate: unlockRateResult }

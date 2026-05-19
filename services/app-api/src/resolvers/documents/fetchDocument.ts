@@ -7,7 +7,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { canRead } from '../../authorization/oauthAuthorization'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { S3ClientT } from '../../s3'
 import { getS3Key } from '../../s3'
 import type { SharedDocument } from '../../domain-models/DocumentType'
@@ -114,10 +114,11 @@ export function fetchDocumentResolver(
             downloadURL: url,
         }
 
-        logSuccess(
+        logResolverSuccess(
             context.oauthClient
                 ? 'fetchDocument - oauthClient'
-                : 'fetchDocument'
+                : 'fetchDocument',
+            context
         )
         setSuccessAttributesOnActiveSpan(span)
         return { document: doc }

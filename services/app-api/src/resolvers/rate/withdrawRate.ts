@@ -8,7 +8,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
@@ -147,7 +147,7 @@ export function withdrawRate(
             })
         }
 
-        logSuccess('withdrawRate')
+        logResolverSuccess('withdrawRate', context)
         setSuccessAttributesOnActiveSpan(span)
 
         // Send out email to state contacts

@@ -1,5 +1,5 @@
 import type { QueryResolvers } from '../../gen/gqlServer'
-import { logSuccess } from '../../logger'
+import { logResolverSuccess } from '../../logger'
 import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
@@ -12,7 +12,7 @@ export function fetchCurrentUserResolver(): QueryResolvers['fetchCurrentUser'] {
         const span = tracer?.startSpan('fetchCurrentUser', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchCurrentUser', user, span)
         setSuccessAttributesOnActiveSpan(span)
-        logSuccess('fetchCurrentUser')
+        logResolverSuccess('fetchCurrentUser', context)
         return context.user
     }
 }

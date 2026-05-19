@@ -2,7 +2,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
 import type { OAuthScope } from '../../generated/enums'
-import { logSuccess, logResolverError } from '../../logger'
+import { logResolverSuccess, logResolverError } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import {
     setSuccessAttributesOnActiveSpan,
@@ -87,7 +87,7 @@ export function updateOauthClientResolver(
             })
         }
 
-        logSuccess('updateOauthClient')
+        logResolverSuccess('updateOauthClient', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

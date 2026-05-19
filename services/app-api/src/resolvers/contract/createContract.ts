@@ -6,7 +6,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { State } from '../../gen/gqlServer'
 import { pluralize } from '@mc-review/common-code'
@@ -102,7 +102,7 @@ export function createContract(
             })
         }
 
-        logSuccess('createContract')
+        logResolverSuccess('createContract', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

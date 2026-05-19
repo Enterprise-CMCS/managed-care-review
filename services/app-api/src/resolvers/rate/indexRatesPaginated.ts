@@ -13,7 +13,7 @@ import {
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
-import { logError, logResolverError, logSuccess } from '../../logger'
+import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models/contractAndRates'
 import { canRead } from '../../authorization/oauthAuthorization'
@@ -258,10 +258,11 @@ export function indexRatesPaginatedResolver(
                         },
                     }))
 
-                    logSuccess(
+                    logResolverSuccess(
                         context.oauthClient
                             ? 'indexRatesPaginated - oauthClient'
-                            : 'indexRatesPaginated'
+                            : 'indexRatesPaginated',
+                        context
                     )
                     const totalCount = rates.length
                     const totalPages = Math.ceil(totalCount / pageSize)

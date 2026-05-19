@@ -1,4 +1,4 @@
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import {
@@ -74,7 +74,7 @@ export function fetchOauthClientsResolver(
                 return true
             })
         }
-        logSuccess('fetchOauthClients')
+        logResolverSuccess('fetchOauthClients', context)
         setSuccessAttributesOnActiveSpan(span)
         return {
             oauthClients,

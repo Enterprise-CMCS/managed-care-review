@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { isAdminUser } from '../../domain-models'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError } from '../errorUtils'
 import {
@@ -100,10 +100,11 @@ export function deleteContractQuestionResolver(
                     })
                 }
 
-                logSuccess(
+                logResolverSuccess(
                     context.oauthClient
                         ? 'deleteContractQuestion - oauthClient'
-                        : 'deleteContractQuestion'
+                        : 'deleteContractQuestion',
+                    context
                 )
                 return { question: result }
             }

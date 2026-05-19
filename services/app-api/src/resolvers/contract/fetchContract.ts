@@ -8,7 +8,7 @@ import {
     hasAdminPermissions,
 } from '../../domain-models'
 import { canRead } from '../../authorization/oauthAuthorization'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 
 export function fetchContractResolver(
     store: Store
@@ -90,10 +90,11 @@ export function fetchContractResolver(
                     })
                 }
 
-                logSuccess(
+                logResolverSuccess(
                     context.oauthClient
                         ? 'fetchContract - oauthClient'
-                        : 'fetchContract'
+                        : 'fetchContract',
+                    context
                 )
                 return { contract: contractWithHistory }
             }

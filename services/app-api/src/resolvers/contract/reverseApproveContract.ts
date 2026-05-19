@@ -1,6 +1,6 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -114,7 +114,7 @@ export function reverseApproveContract(
             })
         }
 
-        logSuccess('reverseApproveContract')
+        logResolverSuccess('reverseApproveContract', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return { contract: reverseResult }

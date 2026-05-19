@@ -12,7 +12,7 @@ import {
     hasCMSPermissions,
     hasAdminPermissions,
 } from '../../domain-models'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import { canRead } from '../../authorization/oauthAuthorization'
 
@@ -71,8 +71,9 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
             throw createForbiddenError(errMessage)
         }
 
-        logSuccess(
-            context.oauthClient ? 'fetchRate - oauthClient' : 'fetchRate'
+        logResolverSuccess(
+            context.oauthClient ? 'fetchRate - oauthClient' : 'fetchRate',
+            context
         )
         setSuccessAttributesOnActiveSpan(span)
         return { rate: rateWithHistory }

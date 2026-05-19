@@ -1,7 +1,7 @@
 import { NotFoundError, type Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { isStateUser } from '../../domain-models'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { GraphQLError } from 'graphql/index'
 import {
     setErrorAttributesOnActiveSpan,
@@ -215,7 +215,7 @@ export function createRateQuestionResponseResolver(
             })
         }
 
-        logSuccess('createRateQuestionResponse')
+        logResolverSuccess('createRateQuestionResponse', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

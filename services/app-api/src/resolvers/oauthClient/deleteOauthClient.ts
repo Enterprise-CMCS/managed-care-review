@@ -1,7 +1,7 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
-import { logSuccess, logResolverError } from '../../logger'
+import { logResolverSuccess, logResolverError } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import {
     setSuccessAttributesOnActiveSpan,
@@ -58,7 +58,7 @@ export function deleteOauthClientResolver(
             })
         }
 
-        logSuccess('deleteOauthClient')
+        logResolverSuccess('deleteOauthClient', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

@@ -6,7 +6,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import type { S3ClientT } from '../../s3'
 import { v4 as uuidv4 } from 'uuid'
@@ -81,7 +81,7 @@ export function generateUploadURLResolver(
 
         const s3URL = await s3Client.getS3URL(s3Key, fileName, bucketName)
 
-        logSuccess('generateUploadURL')
+        logResolverSuccess('generateUploadURL', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

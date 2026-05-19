@@ -2,7 +2,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison, hasAdminPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import {
@@ -109,7 +109,7 @@ export function updateDivisionAssignment(
             })
         }
 
-        logSuccess('updateDivisionAssignment')
+        logResolverSuccess('updateDivisionAssignment', context)
 
         // return updated user
         return {

@@ -5,7 +5,7 @@ import {
     setResolverDetailsOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { createForbiddenError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
@@ -20,7 +20,7 @@ export function fetchMcReviewSettings(
         const span = tracer?.startSpan('fetchMcReviewSettings', {}, ctx)
         setResolverDetailsOnActiveSpan('fetchMcReviewSettings', user, span)
         setSuccessAttributesOnActiveSpan(span)
-        logSuccess('fetchMcReviewSettings')
+        logResolverSuccess('fetchMcReviewSettings', context)
 
         // MCR-5894 block off this api from oauth
         if (context.oauthClient) {

@@ -6,7 +6,7 @@ import {
     recordResolverError,
 } from '../attributeHelper'
 import { NotFoundError } from '../../postgres'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import { hasCMSPermissions } from '../../domain-models'
@@ -219,7 +219,7 @@ export function undoWithdrawContract(
                     })
                 }
 
-                logSuccess('undoWithdrawContract')
+                logResolverSuccess('undoWithdrawContract', context)
 
                 return {
                     contract: contract,

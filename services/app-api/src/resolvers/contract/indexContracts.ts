@@ -10,7 +10,7 @@ import type {
     QueryResolvers,
     ConsolidatedContractStatus,
 } from '../../gen/gqlServer'
-import { logError, logResolverError, logSuccess } from '../../logger'
+import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import {
@@ -126,10 +126,11 @@ export function indexContractsResolver(
                     },
                 })
             }
-            logSuccess(
+            logResolverSuccess(
                 context.oauthClient
                     ? 'indexContracts - oauthClient'
-                    : 'indexContracts'
+                    : 'indexContracts',
+                context
             )
             setSuccessAttributesOnActiveSpan(span)
             const parsedContracts = parseContracts(contractsWithHistory, span)
@@ -163,10 +164,11 @@ export function indexContractsResolver(
                     },
                 })
             }
-            logSuccess(
+            logResolverSuccess(
                 context.oauthClient
                     ? 'indexContracts - oauthClient'
-                    : 'indexContracts'
+                    : 'indexContracts',
+                context
             )
             setSuccessAttributesOnActiveSpan(span)
             let contracts: any = contractsWithHistory

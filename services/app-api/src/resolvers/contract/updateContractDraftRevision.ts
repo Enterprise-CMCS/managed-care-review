@@ -1,7 +1,7 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { isStateUser } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import {
@@ -194,7 +194,7 @@ export function updateContractDraftRevision(
             })
         }
 
-        logSuccess('updateContractDraftRevision')
+        logResolverSuccess('updateContractDraftRevision', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

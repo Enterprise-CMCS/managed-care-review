@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { isStateUser, contractSubmitters } from '../../domain-models'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
@@ -255,7 +255,7 @@ export function createContractQuestionResponseResolver(
             })
         }
 
-        logSuccess('createContractQuestionResponse')
+        logResolverSuccess('createContractQuestionResponse', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

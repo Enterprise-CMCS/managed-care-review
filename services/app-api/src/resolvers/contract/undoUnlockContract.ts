@@ -1,6 +1,6 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logResolverError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import {
     NotFoundError,
     UserInputPostgresError,
@@ -128,7 +128,7 @@ export function undoUnlockContract(
                     })
                 }
 
-                logSuccess('undoUnlockContract')
+                logResolverSuccess('undoUnlockContract', context)
 
                 return { contract: reverseResult }
             }
