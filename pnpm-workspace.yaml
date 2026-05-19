@@ -1,5 +1,16 @@
 packages:
-    - 'services/**'
-    - 'packages/**'
-    - 'dev_tool'
-    - 'scripts'
+  - 'services/**'
+  - 'packages/**'
+  - 'dev_tool'
+  - 'scripts'
+allowBuilds:
+  '@apollo/protobufjs': true
+  '@parcel/watcher': true
+  '@prisma/engines': true
+  core-js: true
+  cpu-features: true
+  cypress: true
+  esbuild: true
+  prisma: true
+  ssh2: true
+  unrs-resolver: true
