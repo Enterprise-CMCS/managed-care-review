@@ -1,17 +1,19 @@
+# yaml-language-server: $schema=none
+# SchemaStore's pnpm-workspace schema can lag pnpm; pnpm 11 supports gitPreferHttps.
 packages:
-  - 'services/**'
-  - 'packages/**'
-  - 'dev_tool'
-  - 'scripts'
+    - 'services/**'
+    - 'packages/**'
+    - 'dev_tool'
+    - 'scripts'
+gitPreferHttps: true
 allowBuilds:
-  '@apollo/protobufjs': false
-  '@parcel/watcher': true
-  '@prisma/engines': true
-  core-js: false
-  cpu-features: false
-  cypress: true
-  esbuild: true
-  prisma: true
-  protobufjs: false
-  ssh2: false
-  unrs-resolver: true
+    '@apollo/protobufjs': false
+    '@parcel/watcher': true
+    '@prisma/engines': true
+    core-js: false
+    cpu-features: false
+    cypress: true
+    esbuild: true
+    prisma: true
+    ssh2: false
+    unrs-resolver: true

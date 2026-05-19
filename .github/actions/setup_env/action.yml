@@ -9,10 +9,6 @@ runs:
       with:
         run_install: false
 
-    - name: Configure pnpm to use HTTPS
-      shell: bash
-      run: pnpm config set git-prefer-https true
-
     # We need this override until pnpm fixes this as we use CMSGov repos:
     # https://github.com/pnpm/pnpm/issues/3948
     - name: Configure git
