@@ -86,7 +86,7 @@ export const CMSQuestionResponseTable = ({
     const canAddQuestions =
         !['APPROVED', 'WITHDRAWN'].includes(consolidatedStatus!) &&
         userDivision &&
-        !['DMCP', 'OACT'].includes(userDivision)
+        userDivision === 'DMCO'
 
     const { usersRounds, otherRounds } = sortQuestionRounds(
         indexQuestions,
