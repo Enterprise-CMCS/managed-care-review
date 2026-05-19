@@ -15,9 +15,6 @@ import { useTracing, setGlobalTracingContext } from '@mc-review/otel'
 import { AuthModeType } from '@mc-review/common-code'
 import { S3Provider } from '../../contexts/S3Context'
 import type { S3ClientT } from '../../s3'
-import { useScript } from '../../hooks'
-import { generateNRScriptContent } from '../../newRelic'
-import { getEnv } from '../../configHelpers/envHelpers'
 import { getTealiumEnv, tealiumClient, devTealiumClient } from '../../tealium'
 
 interface TracingInitializerProps {
@@ -46,20 +43,7 @@ function App({
     s3Client,
 }: AppProps): React.ReactElement {
     const environmentName = import.meta.env.VITE_APP_STAGE_NAME || ''
-    const isHigherEnv = ['prod', 'val', 'main'].includes(environmentName)
     const isLocal = environmentName == 'local'
-    const nrSnippet = generateNRScriptContent({
-        accountID: getEnv('VITE_APP_NR_ACCOUNT_ID'),
-        trustKey: getEnv('VITE_APP_NR_TRUST_KEY'),
-        applicationID: getEnv('VITE_APP_NR_AGENT_ID'),
-        licenseKey: getEnv('VITE_APP_NR_LICENSE_KEY'),
-    })
-    useScript({
-        inlineScriptAsString: nrSnippet,
-        src: '',
-        id: 'newrelic',
-        showScript: isHigherEnv,
-    })
     const tealiumEnv = getTealiumEnv(environmentName)
     const newTealiumClient =
         tealiumEnv === 'dev'
