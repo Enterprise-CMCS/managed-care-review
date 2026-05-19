@@ -1,10 +1,39 @@
 import type { Context } from '../handlers/apollo_gql'
 
+function createRequestContext(context: Pick<Context, 'user' | 'oauthClient'>) {
+    return {
+        userId: context.user?.id,
+        role: context.user?.role,
+        oauthClient: context.oauthClient,
+    }
+}
+
 function logSuccess(operation: string) {
     console.info({
         message: `${operation} succeeded`,
         operation: operation,
         status: 'SUCCESS',
+    })
+}
+
+/**
+ * Logs a resolver success with structured request metadata from the GraphQL context.
+ *
+ * Use this in GraphQL resolvers when caller details should be attached to the log entry.
+ * For non-resolver code, use `logSuccess()` instead.
+ *
+ * @param operation - Resolver or operation name associated with the success.
+ * @param context - Resolver context containing the authenticated user and OAuth client, if present.
+ */
+function logResolverSuccess(
+    operation: string,
+    context: Pick<Context, 'user' | 'oauthClient'>
+) {
+    console.info({
+        message: `${operation} succeeded`,
+        operation: operation,
+        status: 'SUCCESS',
+        requestContext: createRequestContext(context),
     })
 }
 
@@ -37,12 +66,8 @@ function logResolverError(
         operation: operation,
         status: 'ERROR',
         error: error,
-        requestContext: {
-            userId: context.user?.id,
-            role: context.user?.role,
-            oauthClient: context.oauthClient,
-        },
+        requestContext: createRequestContext(context),
     })
 }
 
-export { logSuccess, logError, logResolverError }
+export { logSuccess, logResolverSuccess, logError, logResolverError }
