@@ -17,12 +17,14 @@ import {
     ContractProgramsSummary,
     ContractTypeSummary,
     PopulationCoverageSummary,
+    ReviewDecisionSummary,
     RiskBasedContractSummary,
     SubmissionDescriptionSummary,
     SubmissionTypeSummary,
     SubmittedAtSummary,
 } from '../SummarySectionFields'
 import { formattedProgramNames } from '../../../formHelpers'
+import { getConsolidatedContractStatusText } from '../../ContractTable'
 
 export type SubmissionTypeSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -81,13 +83,27 @@ export const SubmissionTypeSummarySection = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {initiallySubmittedAt &&
-                    (isSubmitted || (!isStateUser && isUnlocked)) && (
-                        <SubmittedAtSummary
-                            initiallySubmittedAt={initiallySubmittedAt}
+                {(contract.consolidatedStatus || !isSubmitted) && (
+                    <ReviewDecisionSummary
+                        reviewDecision={
+                            contract.consolidatedStatus ===
+                                'NOT_SUBJECT_TO_REVIEW' &&
+                            contractFormData.populationCovered === 'CHIP'
+                                ? 'Not subject to DMCO review and validation'
+                                : getConsolidatedContractStatusText(
+                                      contract.consolidatedStatus
+                                  )
+                        }
+                        explainMissingData={explainMissingData}
+                    />
+                )}
+                <MultiColumnGrid columns={2}>
+                    {(contractFormData.populationCovered || !isSubmitted) && (
+                        <PopulationCoverageSummary
+                            contractFormData={contractFormData}
+                            explainMissingData={explainMissingData}
                         />
                     )}
-                <MultiColumnGrid columns={2}>
                     {(programIDs.length > 0 || !isSubmitted) && (
                         <ContractProgramsSummary
                             programNames={programNames}
@@ -114,12 +130,12 @@ export const SubmissionTypeSummarySection = ({
                             explainMissingData={explainMissingData}
                         />
                     )}
-                    {(contractFormData.populationCovered || !isSubmitted) && (
-                        <PopulationCoverageSummary
-                            contractFormData={contractFormData}
-                            explainMissingData={explainMissingData}
-                        />
-                    )}
+                    {initiallySubmittedAt &&
+                        (isSubmitted || (!isStateUser && isUnlocked)) && (
+                            <SubmittedAtSummary
+                                initiallySubmittedAt={initiallySubmittedAt}
+                            />
+                        )}
                 </MultiColumnGrid>
 
                 <Grid row gap>

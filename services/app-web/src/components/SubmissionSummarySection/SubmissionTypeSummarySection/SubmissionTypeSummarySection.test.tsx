@@ -436,6 +436,49 @@ describe('SubmissionTypeSummarySection', () => {
         expect(screen.queryByText(/\(retired\)/)).not.toBeInTheDocument()
     })
 
+    it('renders CHIP-only Review decision with DMCO override text when NOT_SUBJECT_TO_REVIEW', () => {
+        const contract = mockContractPackageSubmitted({
+            consolidatedStatus: 'NOT_SUBJECT_TO_REVIEW',
+            reviewStatus: 'NOT_SUBJECT_TO_REVIEW',
+        })
+        contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+            'CHIP'
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={contract}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={true}
+                initiallySubmittedAt={contract.initiallySubmittedAt}
+            />
+        )
+        const reviewDecision = screen.getByRole('definition', {
+            name: 'Review decision',
+        })
+        expect(reviewDecision).toHaveTextContent(
+            'Not subject to DMCO review and validation'
+        )
+    })
+
+    it('renders Review decision with normalized status text when not CHIP-only', () => {
+        const contract = mockContractPackageSubmitted({
+            consolidatedStatus: 'SUBMITTED',
+        })
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={contract}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={true}
+                initiallySubmittedAt={contract.initiallySubmittedAt}
+            />
+        )
+        const reviewDecision = screen.getByRole('definition', {
+            name: 'Review decision',
+        })
+        expect(reviewDecision).toHaveTextContent('Submitted')
+    })
+
     it('does not render fields with missing fields for submitted package on submission summary', () => {
         const stateSubmission = mockContractPackageSubmitted()
         const submittedPackage = stateSubmission.packageSubmissions[0]

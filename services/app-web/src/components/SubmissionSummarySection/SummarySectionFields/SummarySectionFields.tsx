@@ -41,8 +41,24 @@ import { NewTag } from '../../InfoTag'
 
 type SummaryDetailProps = {
     contractFormData: ContractFormData
+    reviewDecision?: string
     explainMissingData?: boolean
     label?: string
+}
+
+export const ReviewDecisionSummary = ({
+    reviewDecision,
+    explainMissingData,
+    label,
+}: Omit<SummaryDetailProps, 'contractFormData'>) => {
+    return (
+        <DataDetail
+            id="reviewDecision"
+            label={label ?? 'Review decision'}
+            explainMissingData={explainMissingData}
+            children={reviewDecision}
+        />
+    )
 }
 
 export const PopulationCoverageSummary = ({
