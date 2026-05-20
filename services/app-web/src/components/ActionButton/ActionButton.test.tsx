@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, act } from '@testing-library/react'
 import { ActionButton } from './ActionButton'
 import { renderWithProviders } from '../../testHelpers'
 
@@ -106,14 +106,14 @@ describe('ActionButton', () => {
                     name: /Loading/,
                 })
                 expect(loadingButton.className).toContain('usa-button--active')
-
                 expect(loadingButton.className).toContain('_disabledCursor_')
-                await waitFor(() => {
-                    expect(screen.getByRole('progressbar')).toBeInTheDocument()
-                    expect(screen.getByRole('progressbar').className).toContain(
-                        '_ds-c-spinner_'
-                    )
+                await act(async () => {
+                    await vi.advanceTimersByTimeAsync(0)
                 })
+                expect(screen.getByRole('progressbar')).toBeInTheDocument()
+                expect(screen.getByRole('progressbar').className).toContain(
+                    '_ds-c-spinner_'
+                )
             })
 
             it('by default, wait 750 ms before displaying loading spinner', async () => {
@@ -126,18 +126,18 @@ describe('ActionButton', () => {
                 expect(
                     screen.queryByRole('progressbar')
                 ).not.toBeInTheDocument()
-                vi.advanceTimersByTime(749)
+                await vi.advanceTimersByTimeAsync(749)
                 expect(
                     screen.queryByRole('progressbar')
                 ).not.toBeInTheDocument()
 
-                vi.advanceTimersByTime(1)
-                await waitFor(() => {
-                    expect(
-                        screen.getByRole('button', { name: 'Loading' })
-                    ).toBeInTheDocument()
-                    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+                await act(async () => {
+                    await vi.advanceTimersByTimeAsync(1)
                 })
+                expect(
+                    screen.getByRole('button', { name: 'Loading' })
+                ).toBeInTheDocument()
+                expect(screen.getByRole('progressbar')).toBeInTheDocument()
             })
         })
     })

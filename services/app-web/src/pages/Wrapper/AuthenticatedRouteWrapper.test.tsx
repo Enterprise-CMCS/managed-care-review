@@ -7,12 +7,13 @@ import { dayjs } from '@mc-review/dates'
 
 describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     beforeAll(() => {
-        vi.useFakeTimers()
+        vi.useFakeTimers({ shouldAdvanceTime: true })
         createMocks()
     })
 
     afterAll(() => {
         vi.runOnlyPendingTimers()
+        vi.useRealTimers()
         vi.clearAllMocks()
     })
 
