@@ -1,5 +1,11 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
-import { Route, Routes, useLocation, Navigate } from 'react-router-dom'
+import {
+    Route,
+    Routes,
+    useLocation,
+    Navigate,
+    useParams,
+} from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '@mc-review/common-code'
@@ -70,6 +76,26 @@ import { UndoSubmissionUnlock } from '../UndoSubmissionUnlock/UndoSubmissionUnlo
 import { CreateOauthClient } from '../Settings/Oauth/CreateOauthClient'
 import { User } from '../../gen/gqlClient'
 import { AddLocalUser } from '../../localAuth/AddLocalUser'
+
+const CMSUploadQuestionsRoute = ({
+    loggedInUser,
+    children,
+}: {
+    loggedInUser: User
+    children: React.ReactElement
+}): React.ReactElement => {
+    const { division } = useParams<{ division: string }>()
+    const userDivision =
+        loggedInUser.__typename === 'CMSUser' ||
+        loggedInUser.__typename === 'CMSApproverUser'
+            ? loggedInUser.divisionAssignment
+            : undefined
+
+    const canAccessUploadQuestionsRoute =
+        userDivision === 'DMCO' && division?.toUpperCase() === userDivision
+
+    return canAccessUploadQuestionsRoute ? children : <Error404 />
+}
 
 function componentForAuthMode(
     authMode: AuthModeType
@@ -321,7 +347,13 @@ const CMSUserRoutes = ({
                     />
                     <Route
                         path={RoutesRecord.SUBMISSIONS_UPLOAD_CONTRACT_QUESTION}
-                        element={<UploadContractQuestions />}
+                        element={
+                            <CMSUploadQuestionsRoute
+                                loggedInUser={loggedInUser}
+                            >
+                                <UploadContractQuestions />
+                            </CMSUploadQuestionsRoute>
+                        }
                     />
                     {isAdminUser && (
                         <Route
@@ -352,7 +384,13 @@ const CMSUserRoutes = ({
                     />
                     <Route
                         path={RoutesRecord.RATES_UPLOAD_QUESTION}
-                        element={<UploadRateQuestions />}
+                        element={
+                            <CMSUploadQuestionsRoute
+                                loggedInUser={loggedInUser}
+                            >
+                                <UploadRateQuestions />
+                            </CMSUploadQuestionsRoute>
+                        }
                     />
                     {/*This route will cause the RateSummarySideNav to redirect to rate summary Q&A page*/}
                     <Route

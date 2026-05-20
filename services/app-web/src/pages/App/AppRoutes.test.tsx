@@ -4,6 +4,8 @@ import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AppRoutes } from './AppRoutes'
 import {
     fetchCurrentUserMock,
+    fetchContractWithQuestionsMockSuccess,
+    fetchRateWithQuestionsMockSuccess,
     mockValidCMSUser,
     indexContractsStrippedMockSuccess,
 } from '@mc-review/mocks'
@@ -115,6 +117,15 @@ describe('AppRoutes and routing configuration', () => {
             'href',
             'https://www.medicaid.gov/medicaid/managed-care/mc-rvw-state-wbnr-sprng-2024.pdf'
         )
+    }
+
+    const expect404Page = () => {
+        expect(
+            screen.getByRole('heading', {
+                name: /Page not found/i,
+                level: 1,
+            })
+        ).toBeInTheDocument()
     }
 
     describe('/[root]', () => {
@@ -377,6 +388,80 @@ describe('AppRoutes and routing configuration', () => {
                         level: 1,
                     })
                 ).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('CMS upload question routes', () => {
+        it('shows 404 page when a DMCP user enters the contract upload questions URL', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123/question-and-answers/dmcp/upload-questions',
+                },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser({
+                                divisionAssignment: 'DMCP',
+                            }),
+                        }),
+                        fetchContractWithQuestionsMockSuccess({}),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
+
+            await waitFor(() => {
+                expect404Page()
+            })
+        })
+
+        it('shows 404 page when an OACT user enters the contract upload questions URL', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123/question-and-answers/dmco/upload-questions',
+                },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }),
+                        }),
+                        fetchContractWithQuestionsMockSuccess({}),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
+
+            await waitFor(() => {
+                expect404Page()
+            })
+        })
+
+        it('shows 404 page when a DMCO user enters the rate upload questions URL with a non-DMCO division', async () => {
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: {
+                    route: '/rates/rate-123/question-and-answers/dmcp/upload-questions',
+                },
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            statusCode: 200,
+                            user: mockValidCMSUser({
+                                divisionAssignment: 'DMCO',
+                            }),
+                        }),
+                        fetchRateWithQuestionsMockSuccess({}),
+                    ],
+                },
+                featureFlags: { 'session-expiring-modal': false },
+            })
+
+            await waitFor(() => {
+                expect404Page()
             })
         })
     })
