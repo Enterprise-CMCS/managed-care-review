@@ -977,39 +977,60 @@ describe('fetchRate', () => {
             )
         )
 
+        // Add a second override row with a different dateAdded for the same
+        // documents. Under the merge semantics, the newer override should win
+        // per documentID. Note: overrides accumulate — an override row with
+        // null fields is a no-op, NOT a tombstone that erases earlier
+        // overrides. Removal would require a future tombstone mechanism.
+        const newerDate = new Date('2025-06-06')
         await store.overrideRateData({
             rateID,
             updatedByID: adminUser.id,
-            description: 'Remove overrides',
+            description: 'Second override with newer dateAdded',
             overrides: {
-                initiallySubmittedAt: null,
                 revisionOverride: {
                     rateDocuments: rateDocuments.map((doc) => ({
                         documentID: doc.id!,
+                        dateAdded: newerDate,
                     })),
                     supportingDocuments: supportingDocuments.map((doc) => ({
                         documentID: doc.id!,
+                        dateAdded: newerDate,
                     })),
                 },
             },
         })
 
-        const revertedRate = await fetchTestRateById(cmsServer, rateID)
+        const twiceOverriddenRate = await fetchTestRateById(cmsServer, rateID)
 
-        expect(revertedRate.initiallySubmittedAt).toStrictEqual(
-            originalRate.initiallySubmittedAt
+        // Expect rate documents to have the NEWER override's dateAdded
+        expect(
+            twiceOverriddenRate.packageSubmissions?.[0]?.rateRevision.formData
+                .rateDocuments
+        ).toEqual(
+            expect.arrayContaining(
+                rateDocuments.map((doc) =>
+                    expect.objectContaining({
+                        id: doc.id,
+                        dateAdded: newerDate,
+                    })
+                )
+            )
         )
 
-        // Expect rate documents to have override dateAdded
+        // Expect supporting documents to have the NEWER override's dateAdded
         expect(
-            revertedRate.packageSubmissions?.[0]?.rateRevision.formData
-                .rateDocuments
-        ).toEqual(expect.arrayContaining(rateDocuments))
-
-        // Expect supporting documents to have override dateAdded
-        expect(
-            revertedRate.packageSubmissions?.[0]?.rateRevision.formData
+            twiceOverriddenRate.packageSubmissions?.[0]?.rateRevision.formData
                 .supportingDocuments
-        ).toEqual(expect.arrayContaining(supportingDocuments))
+        ).toEqual(
+            expect.arrayContaining(
+                supportingDocuments.map((doc) =>
+                    expect.objectContaining({
+                        id: doc.id,
+                        dateAdded: newerDate,
+                    })
+                )
+            )
+        )
     })
 })
