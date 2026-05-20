@@ -33,6 +33,7 @@ type ModalTypes =
     | 'RESUBMIT_EQRO_CONTRACT'
     | 'UNLOCK_RATE'
     | 'SUBMIT_CONTRACT'
+    | 'SUBMIT_CHIP_ONLY'
     | 'RESUBMIT_CONTRACT'
     | 'UNLOCK_CONTRACT'
     | 'SUBMIT_EQRO_CONTRACT'
@@ -119,6 +120,33 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
         errorHeading: ERROR_MESSAGES.submit_error_heading,
         errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
     },
+    SUBMIT_CHIP_ONLY: {
+        modalHeading: 'Ready to submit?',
+        onSubmitText: 'Submit',
+        modalDescription: (
+            <>
+                <p>
+                    Once you submit, your submission will be locked. CMS must
+                    unlock it before you can edit your responses.
+                </p>
+                <p style={{ marginBottom: 0, marginTop: 0 }}>
+                    We will send an email with the following information:
+                </p>
+                <ul style={{ marginTop: 0 }}>
+                    <li>
+                        <strong>Confirmation of receipt:</strong> Confirms CMS
+                        has received your submission.
+                    </li>
+                    <li>
+                        <strong>What comes next:</strong> Your submission status
+                        and next steps.
+                    </li>
+                </ul>
+            </>
+        ),
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+    },
     SUBMIT_EQRO_CONTRACT: {
         modalHeading: 'Ready to submit?',
         onSubmitText: 'Submit',
@@ -174,6 +202,7 @@ export const UnlockSubmitModal = ({
     const isSubmitting = mutationLoading || formik.isSubmitting
     const includesFormInput = ![
         'SUBMIT_CONTRACT',
+        'SUBMIT_CHIP_ONLY',
         'SUBMIT_RATE',
         'SUBMIT_EQRO_CONTRACT',
     ].includes(modalType)
@@ -211,6 +240,7 @@ export const UnlockSubmitModal = ({
                 console.info('submit rate not implemented yet')
                 break
             case 'SUBMIT_CONTRACT':
+            case 'SUBMIT_CHIP_ONLY':
             case 'SUBMIT_EQRO_CONTRACT':
                 result = await submitMutationWrapper(
                     submitContract,
@@ -274,6 +304,7 @@ export const UnlockSubmitModal = ({
                     'RESUBMIT_CONTRACT',
                     'RESUBMIT_EQRO_CONTRACT',
                     'SUBMIT_CONTRACT',
+                    'SUBMIT_CHIP_ONLY',
                     'SUBMIT_EQRO_CONTRACT',
                 ].includes(modalType) &&
                 submissionName &&

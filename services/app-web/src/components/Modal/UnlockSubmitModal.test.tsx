@@ -199,6 +199,93 @@ describe('UnlockSubmitModal', () => {
         })
     })
 
+    describe('CHIP-only initial submission modal', () => {
+        it('displays correct modal when submitting CHIP-only submission', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    submissionData={mockContractPackageDraft()}
+                    submissionName="Test-Submission"
+                    modalType="SUBMIT_CHIP_ONLY"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Once you submit, your submission will be locked. CMS must unlock it before you can edit your responses.'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'We will send an email with the following information:'
+                )
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByTestId('unlockSubmitModalInput')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.getByTestId('submit_chip_only-modal-submit')
+            ).toHaveTextContent('Submit')
+        })
+
+        it('redirects to dashboard if CHIP-only submission succeeds', async () => {
+            let testLocation: Location
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    submissionData={mockContractPackageDraft()}
+                    submissionName="Test-Submission"
+                    modalType="SUBMIT_CHIP_ONLY"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            submitContractMockSuccess({
+                                id: mockContractPackageDraft().id,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/${
+                            mockContractPackageDraft().id
+                        }/review-and-submit`,
+                    },
+                    location: (location) => (testLocation = location),
+                }
+            )
+
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            await userEvent.click(
+                screen.getByTestId('submit_chip_only-modal-submit')
+            )
+
+            await waitFor(() =>
+                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
+            )
+
+            await waitFor(() =>
+                expect(testLocation.search).toBe(
+                    `?justSubmitted=Test-Submission&contractType=HEALTH_PLAN&id=${mockContractPackageDraft().id}`
+                )
+            )
+        })
+    })
+
     describe('unlock submission modal', () => {
         it('displays correct modal when unlocking submission', async () => {
             const modalRef = createRef<ModalRef>()
