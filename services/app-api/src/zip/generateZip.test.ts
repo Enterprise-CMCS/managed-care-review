@@ -11,15 +11,15 @@ vi.mock('../logger', () => ({
 vi.mock('@aws-sdk/client-s3', () => {
     const mockSendFn = vi.fn()
     return {
-        S3Client: vi.fn(() => ({ send: mockSendFn })),
-        GetObjectCommand: vi.fn((params) => ({
-            commandType: 'GetObject',
-            ...params,
-        })),
-        PutObjectCommand: vi.fn((params) => ({
-            commandType: 'PutObject',
-            ...params,
-        })),
+        S3Client: vi.fn(function () {
+            return { send: mockSendFn }
+        }),
+        GetObjectCommand: vi.fn(function (params) {
+            return { commandType: 'GetObject', ...params }
+        }),
+        PutObjectCommand: vi.fn(function (params) {
+            return { commandType: 'PutObject', ...params }
+        }),
         __mockSendFn: mockSendFn,
     }
 })
@@ -103,7 +103,9 @@ describe('generateDocumentZip', () => {
             file: vi.fn(),
             finalize: vi.fn().mockResolvedValue(undefined),
         }
-        mockZipArchive.mockReturnValue(mockArchive as unknown as ZipArchive)
+        mockZipArchive.mockImplementation(function () {
+            return mockArchive as unknown as ZipArchive
+        })
 
         // Setup crypto mock
         const mockHashInstance = {
@@ -250,7 +252,9 @@ describe('generateDocumentZip', () => {
                 file: vi.fn(),
                 finalize: vi.fn().mockResolvedValue(undefined),
             }
-            mockZipArchive.mockReturnValue(mockArchive as unknown as ZipArchive)
+            mockZipArchive.mockImplementation(function () {
+                return mockArchive as unknown as ZipArchive
+            })
 
             // Setup crypto mock
             const mockHashInstance = {
