@@ -53,6 +53,11 @@ export const ReviewSubmit = (): React.ReactElement => {
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
 
+    const chipSubmissionAutomation = ldClient?.variation(
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.flag,
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.defaultValue
+    )
+
     const getPath = (route: RouteT) => {
         return generatePath(RoutesRecord[route], {
             id,
@@ -186,9 +191,12 @@ export const ReviewSubmit = (): React.ReactElement => {
                     submissionData={contract}
                     submissionName={submissionName}
                     modalType={
-                        contract.status === 'UNLOCKED'
-                            ? 'RESUBMIT_CONTRACT'
-                            : 'SUBMIT_CONTRACT'
+                        chipSubmissionAutomation &&
+                        contractFormData.populationCovered === 'CHIP'
+                            ? 'SUBMIT_CHIP_ONLY'
+                            : contract.status === 'UNLOCKED'
+                              ? 'RESUBMIT_CONTRACT'
+                              : 'SUBMIT_CONTRACT'
                     }
                     modalRef={modalRef}
                     setIsSubmitting={setIsSubmitting}

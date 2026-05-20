@@ -260,6 +260,53 @@ describe('ReviewSubmit', () => {
         await user.click(screen.getAllByText('Submit')[0])
     })
 
+    it('uses SUBMIT_CHIP_ONLY modal for CHIP-only draft when flag is on', async () => {
+        const chipDraft = mockContractPackageDraft()
+        if (!chipDraft.draftRevision)
+            throw Error('Unexpected error: no draftRevision')
+        chipDraft.draftRevision.formData.populationCovered = 'CHIP'
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmit />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...chipDraft,
+                                id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'chip-submission-automation': true,
+                },
+            }
+        )
+
+        // SUBMIT_CHIP_ONLY modal description is rendered (hidden) on mount
+        expect(
+            await screen.findByText(
+                'Once you submit, your submission will be locked. CMS must unlock it before you can edit your responses.'
+            )
+        ).toBeInTheDocument()
+        // SUBMIT_CHIP_ONLY has no reason textarea
+        expect(
+            screen.queryByTestId('unlockSubmitModalInput')
+        ).not.toBeInTheDocument()
+    })
+
     it('pulls the right version of UNLOCKED data for state users', async () => {
         renderWithProviders(
             <Routes>
