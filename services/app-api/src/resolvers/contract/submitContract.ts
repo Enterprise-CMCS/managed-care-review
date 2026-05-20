@@ -465,7 +465,7 @@ export function submitContract(
                     },
                 })
                 if (updateResult instanceof Error) {
-                    const errMessage = `Failed to update to be submitted contact with ID: ${contractRevisionID}; ${updateResult.message}`
+                    const errMessage = `Failed to update to be submitted contract with ID: ${contractRevisionID}; ${updateResult.message}`
                     logResolverError('submitContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {

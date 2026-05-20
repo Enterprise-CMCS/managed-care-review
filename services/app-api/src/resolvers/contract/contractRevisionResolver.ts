@@ -1,9 +1,12 @@
 import { packageName } from '@mc-review/submissions'
-import type { ContractRevisionType } from '../../domain-models'
+import type {
+    ContractRevisionType,
+    StrippedContractRevisionType,
+} from '../../domain-models'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
-import { logError, logResolverError } from '../../logger'
+import { logResolverError } from '../../logger'
 import type { DocumentZipPackageType } from '../../domain-models/ZipType'
 import type { Context } from '../../handlers/apollo_gql'
 import { parseErrorToError } from '@mc-review/helpers'
@@ -16,15 +19,23 @@ export function contractRevisionResolver(
         contractID: (parent) => {
             return parent.contract.id
         },
-        contractName(parent: ContractRevisionType): string {
+        contractName(
+            parent: ContractRevisionType,
+            _args: Record<string, never>,
+            context: Context
+        ): string {
             const stateCode = parent.contract.stateCode
             const programsForContractState = store.findStatePrograms(stateCode)
             if (programsForContractState instanceof Error) {
                 const errMessage = `Failed to fetch state programs. ${programsForContractState.message}`
-                logError('contractRevisionStrippedResolver', errMessage)
+                logResolverError(
+                    'contractRevisionResolver.contractName',
+                    errMessage,
+                    context
+                )
                 throw new GraphQLError(errMessage, {
                     extensions: {
-                        code: 'NOT_FOUND',
+                        code: 'INTERNAL_SERVER_ERROR',
                         cause: 'DB_ERROR',
                     },
                 })
@@ -90,15 +101,23 @@ export function contractRevisionStrippedResolver(
         contractID: (parent) => {
             return parent.contract.id
         },
-        contractName(parent) {
+        contractName(
+            parent: StrippedContractRevisionType,
+            _args: Record<string, never>,
+            context: Context
+        ) {
             const stateCode = parent.contract.stateCode
             const programsForContractState = store.findStatePrograms(stateCode)
             if (programsForContractState instanceof Error) {
                 const errMessage = `Failed to fetch state programs. ${programsForContractState.message}`
-                logError('contractRevisionStrippedResolver', errMessage)
+                logResolverError(
+                    'contractRevisionStrippedResolver.contractName',
+                    errMessage,
+                    context
+                )
                 throw new GraphQLError(errMessage, {
                     extensions: {
-                        code: 'NOT_FOUND',
+                        code: 'INTERNAL_SERVER_ERROR',
                         cause: 'DB_ERROR',
                     },
                 })

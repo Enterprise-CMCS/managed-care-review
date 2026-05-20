@@ -32,7 +32,7 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
-                    code: 'NOT_FOUND',
+                    code: 'INTERNAL_SERVER_ERROR',
                     cause: 'DB_ERROR',
                 },
             })
