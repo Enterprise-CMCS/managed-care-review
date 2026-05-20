@@ -20,7 +20,10 @@ import {
     ContractSubmissionTypeRecord,
     ReviewDecisionRecord,
 } from '@mc-review/constants'
-import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
+import {
+    eqroValidationAndReviewDetermination,
+    healthPlanReviewDetermination,
+} from '@mc-review/submissions'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -273,11 +276,17 @@ export const ChangeHistory = ({
                         newSubmit.updatedAt = r.submitInfo.updatedAt
                         newSubmit.updatedBy = r.submitInfo.updatedBy
                         newSubmit.updatedReason = r.submitInfo.updatedReason
-                        newSubmit.kind =
+                        const isEQRO =
                             contract.contractSubmissionType === 'EQRO'
+                        const isHealthPlanCHIPOnly =
+                            contract.contractSubmissionType === 'HEALTH_PLAN' &&
+                            r.contractRevision.formData.populationCovered ===
+                                'CHIP'
+                        newSubmit.kind =
+                            isEQRO || isHealthPlanCHIPOnly
                                 ? 'submit_with_review'
                                 : 'submit'
-                        if (contract.contractSubmissionType === 'EQRO') {
+                        if (isEQRO) {
                             const determination =
                                 eqroValidationAndReviewDetermination(
                                     contract.id,
@@ -290,6 +299,13 @@ export const ChangeHistory = ({
                                 newSubmit.reviewDecision =
                                     'NOT_SUBJECT_TO_REVIEW'
                             }
+                        } else if (isHealthPlanCHIPOnly) {
+                            newSubmit.reviewDecision =
+                                healthPlanReviewDetermination(
+                                    r.contractRevision.formData
+                                )
+                                    ? 'UNDER_REVIEW'
+                                    : 'NOT_SUBJECT_TO_REVIEW'
                         }
 
                         newSubmit.revisionVersion = revisionVersion
