@@ -5,6 +5,7 @@ import type {
     APIGatewayTokenAuthorizerHandler,
 } from 'aws-lambda'
 import { decode } from 'jsonwebtoken'
+import { parseErrorToError } from '@mc-review/helpers'
 import { newJWTLib } from '../jwt'
 
 const stageName = process.env.stage
@@ -30,7 +31,7 @@ if (mcreviewOauthIssuer === undefined || mcreviewOauthIssuer === '') {
 const oauthJwtLib = newJWTLib({
     issuer: mcreviewOauthIssuer,
     signingKey: Buffer.from(jwtSecret, 'hex'),
-    expirationDurationS: 90 * 24 * 60 * 60, // 90 days
+    expirationDurationS: 30 * 60, // 30 minutes
 })
 
 type ValidatedTokenData = {
@@ -38,6 +39,40 @@ type ValidatedTokenData = {
     iss: string
     user_id: string
     grants: string[]
+}
+
+function getTokenAuditContext(token: string): {
+    clientId?: string
+    iss?: string
+} {
+    const decodedToken = decode(token)
+
+    if (!decodedToken || typeof decodedToken === 'string') {
+        return {}
+    }
+
+    return {
+        clientId:
+            typeof decodedToken.client_id === 'string'
+                ? decodedToken.client_id
+                : undefined,
+        iss:
+            typeof decodedToken.iss === 'string' ? decodedToken.iss : undefined,
+    }
+}
+
+function extractBearerToken(
+    authorizationToken: APIGatewayTokenAuthorizerEvent['authorizationToken']
+): string | Error {
+    if (typeof authorizationToken !== 'string') {
+        return new Error('Authorization token is missing or invalid')
+    }
+
+    if (!authorizationToken.startsWith('Bearer ')) {
+        return new Error('Authorization token is not a Bearer token')
+    }
+
+    return authorizationToken.replace('Bearer ', '')
 }
 
 function validateMcReviewToken(token: string): ValidatedTokenData | Error {
@@ -80,14 +115,34 @@ function validateToken(token: string): ValidatedTokenData | Error {
 export const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
-    const authToken = event.authorizationToken.replace('Bearer ', '')
     const denyToken = () => generatePolicy(undefined, event)
+    const extractedToken = extractBearerToken(event.authorizationToken)
+
+    if (extractedToken instanceof Error) {
+        console.error({
+            message: 'Bearer token extraction failed',
+            operation: 'third_party_API_authorizer',
+            status: 'ERROR',
+            error: extractedToken,
+        })
+        return denyToken()
+    }
+
+    const authToken = extractedToken
 
     try {
         const validatedToken = validateToken(authToken)
 
         if (validatedToken instanceof Error) {
-            console.error('Token validation failed', validatedToken.message)
+            const tokenAuditContext = getTokenAuditContext(authToken)
+            console.error({
+                message: 'Token validation failed',
+                operation: 'third_party_API_authorizer',
+                status: 'ERROR',
+                error: validatedToken,
+                clientId: tokenAuditContext.clientId,
+                iss: tokenAuditContext.iss,
+            })
             return denyToken()
         }
 
@@ -96,6 +151,7 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             operation: 'third_party_API_authorizer',
             status: 'SUCCESS',
             clientId: validatedToken.clientId,
+            iss: validatedToken.iss,
         })
 
         return generatePolicy(validatedToken.user_id, event, {
@@ -104,10 +160,16 @@ export const main: APIGatewayTokenAuthorizerHandler = async (
             grants: validatedToken.grants.join(','),
         })
     } catch (err) {
-        console.error(
-            'unexpected exception attempting to validate authorization',
-            err
-        )
+        const tokenAuditContext = getTokenAuditContext(authToken)
+        console.error({
+            message:
+                'unexpected exception attempting to validate authorization',
+            operation: 'third_party_API_authorizer',
+            status: 'ERROR',
+            error: parseErrorToError(err),
+            clientId: tokenAuditContext.clientId,
+            iss: tokenAuditContext.iss,
+        })
         return denyToken()
     }
 }

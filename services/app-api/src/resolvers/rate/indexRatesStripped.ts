@@ -9,13 +9,13 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-} from '../../domain-models/user'
-import { NotFoundError } from '../../postgres/postgresErrors'
+} from '../../domain-models'
+import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { logError } from '../../logger'
+import { logError, logResolverError } from '../../logger'
 import { GraphQLError } from 'graphql'
-import type { StrippedRateType } from '../../domain-models/contractAndRates'
+import type { StrippedRateType } from '../../domain-models'
 import type { StrippedRateOrErrorArrayType } from '../../postgres/contractAndRates/findAllRatesStripped'
 
 const validateAndReturnRates = (
@@ -71,6 +71,7 @@ export function indexRatesStripped(
             }
             if (ratesWithHistory instanceof Error) {
                 const errMessage = `Issue finding rates: ${ratesWithHistory.message}`
+                logResolverError('indexRatesStripped', errMessage, context)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (ratesWithHistory instanceof NotFoundError) {
@@ -118,6 +119,7 @@ export function indexRatesStripped(
             return { totalCount: edges.length, edges }
         } else {
             const errMsg = 'user not authorized to fetch rate reviews data'
+            logResolverError('indexRatesStripped', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)
         }

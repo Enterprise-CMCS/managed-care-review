@@ -5,10 +5,16 @@ import type {
 } from '../../domain-models'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
+import type { Context } from '../../handlers/apollo_gql'
+import { logResolverError } from '../../logger'
 
 export function questionResolver(store: Store): Resolvers['QuestionResolver'] {
     return {
-        round: async (parent: ContractQuestionType | RateQuestionType) => {
+        round: async (
+            parent: ContractQuestionType | RateQuestionType,
+            _args: Record<string, never>,
+            context: Context
+        ) => {
             const isContractQuestion = 'contractID' in parent
             const type = isContractQuestion ? 'contract' : 'rate'
             const id = isContractQuestion ? parent.contractID : parent.rateID
@@ -21,12 +27,19 @@ export function questionResolver(store: Store): Resolvers['QuestionResolver'] {
                 | Error = await storeMethod(id)
 
             if (!questions) {
-                throw new Error(`Questions not found for ${type}: ${id}`)
+                const errMessage = `Questions not found for ${type}: ${id}`
+                logResolverError('questionResolver.round', errMessage, context)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
             }
 
             if (questions instanceof Error) {
                 const errMessage = `Issue return questions for ${type} message: ${questions.message}`
-
+                logResolverError('questionResolver.round', errMessage, context)
                 throw new GraphQLError(errMessage, {
                     extensions: {
                         code: 'INTERNAL_SERVER_ERROR',

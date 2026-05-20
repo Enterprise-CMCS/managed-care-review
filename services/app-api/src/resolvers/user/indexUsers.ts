@@ -1,13 +1,13 @@
 import { createForbiddenError } from '../errorUtils'
-import type { UserType } from '../../domain-models'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import type { QueryResolvers } from '../../gen/gqlServer'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import type { Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
+import { GraphQLError } from 'graphql/index'
 
 export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
     return async (_parent, _args, context) => {
@@ -20,20 +20,25 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
             !hasCMSPermissions(currentUser)
         ) {
             const errMsg = 'user not authorized to fetch users'
-            logError('indexUsers', errMsg)
+            logResolverError('indexUsers', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)
         }
 
         const findResult = await store.findAllUsers()
         if (findResult instanceof Error) {
-            logError('indexUsers', findResult.message)
-            setErrorAttributesOnActiveSpan(findResult.message, span)
-            throw new Error('Unexpected Error Querying Users')
+            const errMessage = `Error querying users. ${findResult.message}`
+            logResolverError('indexUsers', errMessage, context)
+            setErrorAttributesOnActiveSpan(errMessage, span)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
-        const users: UserType[] = findResult
-        const userEdges = users.map((user) => {
+        const userEdges = findResult.map((user) => {
             return {
                 node: {
                     ...user,

@@ -14,7 +14,8 @@ import {
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { convertToIndexRateQuestionsPayload } from '../../postgres/questionResponse'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
+import type { Context } from '../../handlers/apollo_gql'
 
 // Return the date of the first submission for a rate
 // This method relies on revisions always being presented in most-recent-first order
@@ -39,7 +40,7 @@ export function rateResolver(
             const urlPath = path.join('/rates/', parent.id)
             return new URL(urlPath, applicationEndpoint).href
         },
-        state(parent) {
+        state(parent, _args: Record<string, never>, context: Context) {
             const packageState = parent.stateCode
             const state = typedStatePrograms.states.find(
                 (st) => st.code === packageState
@@ -48,6 +49,7 @@ export function rateResolver(
             if (state === undefined) {
                 const errMessage =
                     'State not found in database: ' + packageState
+                logResolverError('rateResolver.state', errMessage, context)
                 throw new GraphQLError(errMessage, {
                     extensions: {
                         code: 'INTERNAL_SERVER_ERROR',
@@ -57,7 +59,11 @@ export function rateResolver(
             }
             return state
         },
-        packageSubmissions(parent) {
+        packageSubmissions(
+            parent,
+            _args: Record<string, never>,
+            context: Context
+        ) {
             const gqlSubs: RatePackageSubmissionWithCauseType[] = []
             for (let i = 0; i < parent.packageSubmissions.length; i++) {
                 const thisSub = parent.packageSubmissions[i]
@@ -87,9 +93,19 @@ export function rateResolver(
                         const thisSubmittedContract =
                             submittedContract as ContractRevisionType
                         if (!prevSub) {
-                            throw new Error(
-                                'Programming Error: a non-rate submission must have a previous rate submission'
+                            const errorMsg =
+                                'Cannot determine rate package submission cause: non-rate package submission is missing a previous package submission'
+                            logResolverError(
+                                'rateResolver.packageSubmissions',
+                                errorMsg,
+                                context
                             )
+                            throw new GraphQLError(errorMsg, {
+                                extensions: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
                         }
                         const previousContractRevisionIDs =
                             prevSub.contractRevisions.map((r) => r.contract.id)
@@ -134,6 +150,7 @@ export function rateResolver(
 
             if (questionsForRate instanceof Error) {
                 const errMessage = `Issue finding questions for rate. Message: ${questionsForRate.message}`
+                logResolverError('rateResolver.questions', errMessage, context)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (questionsForRate instanceof NotFoundError) {
@@ -167,7 +184,7 @@ export function rateStrippedResolver(
             const urlPath = path.join('/rates/', parent.id)
             return new URL(urlPath, applicationEndpoint).href
         },
-        state(parent) {
+        state(parent, _args, context) {
             const packageState = parent.stateCode
             const state = typedStatePrograms.states.find(
                 (st) => st.code === packageState
@@ -176,6 +193,11 @@ export function rateStrippedResolver(
             if (state === undefined) {
                 const errMessage =
                     'State not found in database: ' + packageState
+                logResolverError(
+                    'rateStrippedResolver.state',
+                    errMessage,
+                    context
+                )
                 throw new GraphQLError(errMessage, {
                     extensions: {
                         code: 'INTERNAL_SERVER_ERROR',
@@ -198,7 +220,11 @@ export function rateStrippedResolver(
 
             if (relatedContracts instanceof Error) {
                 const msg = `Issue finding related contracts for rate with id: ${parent.id}. Message: ${relatedContracts.message}`
-                logError('rateStrippedResolver.relatedContracts', msg)
+                logResolverError(
+                    'rateStrippedResolver.relatedContracts',
+                    msg,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(msg, span)
                 throw new GraphQLError(msg, {
                     extensions: {

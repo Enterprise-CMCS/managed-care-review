@@ -12,7 +12,7 @@ import {
     hasCMSPermissions,
     hasAdminPermissions,
 } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import { canRead } from '../../authorization/oauthAuthorization'
 
@@ -25,7 +25,7 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
         // Check OAuth client read permissions
         if (!canRead(context)) {
             const errMessage = `OAuth client does not have read permissions`
-            logError('fetchRate', errMessage)
+            logResolverError('fetchRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createForbiddenError(errMessage)
         }
@@ -33,6 +33,7 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
         const rateWithHistory = await store.findRateWithHistory(input.rateID)
         if (rateWithHistory instanceof Error) {
             const errMessage = `Issue finding rate message: ${rateWithHistory.message}`
+            logResolverError('fetchRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (rateWithHistory instanceof NotFoundError) {
@@ -59,19 +60,20 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
                 const errMessage = authInfo
                     ? `OAuth client not authorized to fetch rate data from ${rateWithHistory.stateCode}`
                     : 'State users are not authorized to fetch rate data from a different state.'
-                logError('fetchRate', errMessage)
+                logResolverError('fetchRate', errMessage, context)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw createForbiddenError(errMessage)
             }
         } else if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
             const errMessage = 'User not authorized to fetch rate data'
-            logError('fetchRate', errMessage)
+            logResolverError('fetchRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createForbiddenError(errMessage)
         }
 
-        logSuccess(
-            context.oauthClient ? 'fetchRate - oauthClient' : 'fetchRate'
+        logResolverSuccess(
+            context.oauthClient ? 'fetchRate - oauthClient' : 'fetchRate',
+            context
         )
         setSuccessAttributesOnActiveSpan(span)
         return { rate: rateWithHistory }

@@ -1,4 +1,4 @@
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import {
@@ -20,14 +20,14 @@ export function fetchOauthClientsResolver(
         // MCR-5894 block off admin apis from oauth
         if (context.oauthClient) {
             const oauthErr = 'oauth clients cannot access admin functions'
-            logError('fetchOauthClients', oauthErr)
+            logResolverError('fetchOauthClients', oauthErr, context)
             setErrorAttributesOnActiveSpan(oauthErr, span)
             throw createForbiddenError(oauthErr)
         }
 
         if (!user || user.role !== 'ADMIN_USER') {
             const msg = 'User not authorized to fetch OAuth clients'
-            logError('fetchOauthClients', msg)
+            logResolverError('fetchOauthClients', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createForbiddenError(msg)
         }
@@ -39,7 +39,7 @@ export function fetchOauthClientsResolver(
             const all = await store.listOAuthClients()
             if (all instanceof Error) {
                 const errMessage = `Error fetching all OAuth clients. Message: ${all.message}`
-                logError('fetchOauthClients', errMessage)
+                logResolverError('fetchOauthClients', errMessage, context)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: {
@@ -55,7 +55,7 @@ export function fetchOauthClientsResolver(
                 const client = await store.getOAuthClientByClientId(clientId)
                 if (client instanceof Error) {
                     const errMessage = `Error fetching OAuth client by clientId: ${clientId}. Message: ${client.message}`
-                    logError('fetchOauthClients', errMessage)
+                    logResolverError('fetchOauthClients', errMessage, context)
                     setErrorAttributesOnActiveSpan(errMessage, span)
                     throw new GraphQLError(errMessage, {
                         extensions: {
@@ -74,7 +74,7 @@ export function fetchOauthClientsResolver(
                 return true
             })
         }
-        logSuccess('fetchOauthClients')
+        logResolverSuccess('fetchOauthClients', context)
         setSuccessAttributesOnActiveSpan(span)
         return {
             oauthClients,

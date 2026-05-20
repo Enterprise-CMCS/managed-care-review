@@ -4,7 +4,7 @@ import {
     setResolverDetailsOnActiveSpan,
 } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
@@ -39,7 +39,7 @@ export function submitRate(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('submitRate', errMessage)
+            logResolverError('submitRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -53,14 +53,14 @@ export function submitRate(
         // throw error if the feature flag is off
         if (!featureFlags?.['rate-edit-unlock']) {
             const errMessage = `Not authorized to edit and submit a rate independently, the feature is disabled`
-            logError('submitRate', errMessage)
+            logResolverError('submitRate', errMessage, context)
             throw createForbiddenError(errMessage)
         }
 
         // This resolver is only callable by State users
         if (!isStateUser(user)) {
             const errMessage = 'user not authorized to submit rate'
-            logError('submitRate', errMessage)
+            logResolverError('submitRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createForbiddenError(errMessage)
         }
@@ -71,12 +71,12 @@ export function submitRate(
         if (unsubmittedRate instanceof Error) {
             if (unsubmittedRate instanceof NotFoundError) {
                 const errMessage = `A rate must exist to be submitted: ${rateID}`
-                logError('submitRate', errMessage)
+                logResolverError('submitRate', errMessage, context)
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw createUserInputError(errMessage, 'rateID')
             }
 
-            logError('submitRate', unsubmittedRate.message)
+            logResolverError('submitRate', unsubmittedRate.message, context)
             setErrorAttributesOnActiveSpan(unsubmittedRate.message, span)
             throw new GraphQLError(unsubmittedRate.message, {
                 extensions: {
@@ -90,7 +90,7 @@ export function submitRate(
             !['UNLOCKED', 'DRAFT'].includes(unsubmittedRate.consolidatedStatus)
         ) {
             const errMessage = `Attempted to submit a rate with invalid status: ${unsubmittedRate.consolidatedStatus}`
-            logError('submitRate', errMessage)
+            logResolverError('submitRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'rateID')
         }
@@ -98,9 +98,14 @@ export function submitRate(
         const draftRateRevision = unsubmittedRate.draftRevision
 
         if (!draftRateRevision) {
-            throw new Error(
-                'PROGRAMMING ERROR: Status should not be submittable without a draft rate revision'
-            )
+            const errMsg = `Submission should not be submittable without a draft rate revision`
+            logResolverError('submitRate', errMsg, context)
+            throw new GraphQLError(errMsg, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         // prepare to generate rate cert name - either use new form data coming down on submit or unsubmitted submission data already in database
@@ -221,7 +226,7 @@ export function submitRate(
 
         if (submittedRate instanceof Error) {
             const errMessage = `Failed to submit rate with ID: ${rateID}; ${submittedRate.message}`
-            logError('submitRate', errMessage)
+            logResolverError('submitRate', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -238,9 +243,10 @@ export function submitRate(
                 await documentZip.generateRateDocumentsZip(rateRevision)
             if (zipResult instanceof Error) {
                 // Log the error but don't fail the submission
-                logError(
+                logResolverError(
                     'submitRate - rate documents zip generation failed',
-                    zipResult
+                    zipResult,
+                    context
                 )
                 setErrorAttributesOnActiveSpan(
                     'rate documents zip generation failed',

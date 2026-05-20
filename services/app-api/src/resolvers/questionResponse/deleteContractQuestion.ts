@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { isAdminUser } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError } from '../errorUtils'
 import {
@@ -27,7 +27,11 @@ export function deleteContractQuestionResolver(
 
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('deleteContractQuestion', errMessage)
+                    logResolverError(
+                        'deleteContractQuestion',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -39,7 +43,11 @@ export function deleteContractQuestionResolver(
                 if (!isAdminUser(user)) {
                     const errMessage =
                         'user not authorized to delete a question'
-                    logError('deleteContractQuestion', errMessage)
+                    logResolverError(
+                        'deleteContractQuestion',
+                        errMessage,
+                        context
+                    )
                     throw createForbiddenError(errMessage)
                 }
 
@@ -52,7 +60,11 @@ export function deleteContractQuestionResolver(
                 if (result instanceof Error) {
                     if (result instanceof NotFoundError) {
                         const errMessage = `Question with id ${input.questionID} does not exist`
-                        logError('deleteContractQuestion', errMessage)
+                        logResolverError(
+                            'deleteContractQuestion',
+                            errMessage,
+                            context
+                        )
                         throw new GraphQLError(errMessage, {
                             extensions: {
                                 code: 'NOT_FOUND',
@@ -62,7 +74,11 @@ export function deleteContractQuestionResolver(
                     }
 
                     if (result instanceof UserInputPostgresError) {
-                        logError('deleteContractQuestion', result.message)
+                        logResolverError(
+                            'deleteContractQuestion',
+                            result.message,
+                            context
+                        )
                         throw handleUserInputPostgresError(
                             result,
                             'questionID',
@@ -71,7 +87,11 @@ export function deleteContractQuestionResolver(
                     }
 
                     const errMessage = `Issue soft deleting contract question. Message: ${result.message}`
-                    logError('deleteContractQuestion', errMessage)
+                    logResolverError(
+                        'deleteContractQuestion',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -80,10 +100,11 @@ export function deleteContractQuestionResolver(
                     })
                 }
 
-                logSuccess(
+                logResolverSuccess(
                     context.oauthClient
                         ? 'deleteContractQuestion - oauthClient'
-                        : 'deleteContractQuestion'
+                        : 'deleteContractQuestion',
+                    context
                 )
                 return { question: result }
             }

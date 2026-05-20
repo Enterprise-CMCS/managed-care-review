@@ -9,13 +9,13 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-} from '../../domain-models/user'
-import { NotFoundError } from '../../postgres/postgresErrors'
+} from '../../domain-models'
+import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { logError } from '../../logger'
+import { logError, logResolverError } from '../../logger'
 import { GraphQLError } from 'graphql'
-import type { StrippedContractType } from '../../domain-models/contractAndRates/contractTypes'
+import type { StrippedContractType } from '../../domain-models'
 import type { StrippedContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsStripped'
 
 const validateAndReturnContracts = (
@@ -74,6 +74,7 @@ export function indexContractsStripped(
             }
             if (contractsWithHistory instanceof Error) {
                 const errMessage = `Issue finding contracts: ${contractsWithHistory.message}`
+                logResolverError('indexContractsStripped', errMessage, context)
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (contractsWithHistory instanceof NotFoundError) {
@@ -119,6 +120,7 @@ export function indexContractsStripped(
             return { totalCount: edges.length, edges }
         } else {
             const errMsg = 'user not authorized to fetch contract reviews data'
+            logResolverError('indexContractsStripped', errMsg, context)
             setErrorAttributesOnActiveSpan(errMsg, span)
             throw createForbiddenError(errMsg)
         }
