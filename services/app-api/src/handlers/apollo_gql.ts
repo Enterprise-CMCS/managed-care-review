@@ -209,7 +209,7 @@ function contextForRequestForFetcher(
                             ...oauthClient,
                         })
                         throw new Error(
-                            `Failed to fetch OAuth client. $${storedOauthClient.message}`
+                            `Failed to fetch OAuth client. ${storedOauthClient.message}`
                         )
                     }
 
