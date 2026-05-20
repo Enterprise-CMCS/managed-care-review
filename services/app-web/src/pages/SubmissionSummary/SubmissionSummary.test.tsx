@@ -2203,6 +2203,51 @@ describe('SubmissionSummary', () => {
             // expect submission updated banner to not be on screen.
             expect(screen.queryByTestId('updatedSubmissionBanner')).toBeNull()
         })
+
+        it('renders ChipOnlySubmissionBanner and Not subject to review status tag for CHIP-only NOT_SUBJECT_TO_REVIEW submission', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'HEALTH_PLAN',
+                reviewStatus: 'NOT_SUBJECT_TO_REVIEW',
+                consolidatedStatus: 'NOT_SUBJECT_TO_REVIEW',
+            })
+            contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+                'CHIP'
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidStateUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({ contract }),
+                            fetchContractWithQuestionsMockSuccess({ contract }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123',
+                    },
+                    featureFlags: {},
+                }
+            )
+
+            expect(
+                await screen.findByTestId('chipOnlySubmissionBanner')
+            ).toBeInTheDocument()
+            expect(
+                screen.getAllByText('Not subject to review').length
+            ).toBeGreaterThan(0)
+        })
     })
 
     describe.each(iterableAdminUsersMockData)(

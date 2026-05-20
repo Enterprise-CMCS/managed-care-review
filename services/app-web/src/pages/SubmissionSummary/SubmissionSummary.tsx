@@ -52,6 +52,8 @@ import {
     StatusUpdatedBanner,
 } from '../../components/Banner'
 import { getSubmissionPath } from '../../routeHelpers'
+import { StatusTag } from '../../components/ContractTable'
+import { ChipOnlySubmissionBanner } from '../../components/Banner/ChipOnlySubmissionBanner/ChipOnlySubmissionBanner'
 
 export const SubmissionSummary = (): React.ReactElement => {
     // Page level state
@@ -219,6 +221,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const isContractActionAndRateCertification =
         contractFormData?.submissionType === 'CONTRACT_AND_RATES'
+    const isCHIPOnly = contractFormData?.populationCovered === 'CHIP'
 
     const rateRevisions = getVisibleLatestRateRevisions(contract, false) || []
 
@@ -277,6 +280,8 @@ export const SubmissionSummary = (): React.ReactElement => {
         contract.reviewStatusActions?.[1]?.actionType === 'WITHDRAW'
     const showPermUndoWithdrawBanner =
         undoWithdrawAction && undoWithdrawSubmissionFlag && isStateUser
+    const showChipOnlyBanner =
+        consolidatedStatus === 'NOT_SUBJECT_TO_REVIEW' && isCHIPOnly
 
     const renderStatusAlerts = () => {
         if (showApprovalBanner && latestContractAction.updatedBy) {
@@ -336,6 +341,10 @@ export const SubmissionSummary = (): React.ReactElement => {
                     updateInfo={updateInfo}
                 />
             )
+        }
+
+        if (showChipOnlyBanner) {
+            return <ChipOnlySubmissionBanner className={styles.banner} />
         }
     }
 
@@ -462,6 +471,11 @@ export const SubmissionSummary = (): React.ReactElement => {
                 data-testid="submission-summary"
                 className={styles.container}
             >
+                <StatusTag
+                    status={consolidatedStatus}
+                    notStateUser={!isStateUser}
+                />
+
                 <h1 className={styles.eqroSummaryNameHeader}>
                     Submission summary
                 </h1>
