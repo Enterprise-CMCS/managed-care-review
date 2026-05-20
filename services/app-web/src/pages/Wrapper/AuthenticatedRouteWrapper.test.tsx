@@ -1,31 +1,37 @@
-import { screen, waitFor, act } from '@testing-library/react'
+import { screen, act } from '@testing-library/react'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AuthenticatedRouteWrapper } from './AuthenticatedRouteWrapper'
 import { createMocks } from 'react-idle-timer'
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
 import { dayjs } from '@mc-review/dates'
 
+// Preserve real clearInterval before any fake timer setup — vitest 4 removes
+// it from the global during environment teardown, but jsdom's window.close()
+// needs it. Re-assigning it manually (outside vitest's timer tracking) survives
+// the cleanup and prevents the "clearInterval is not defined" teardown error.
+const realClearInterval = globalThis.clearInterval
+
 describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     beforeAll(() => {
-        vi.useFakeTimers({ shouldAdvanceTime: true })
+        vi.useFakeTimers()
         createMocks()
     })
 
     afterAll(() => {
-        vi.runOnlyPendingTimers()
+        vi.clearAllTimers()
         vi.useRealTimers()
-        vi.clearAllMocks()
+        vi.restoreAllMocks()
+        globalThis.clearInterval = realClearInterval
     })
 
-    it('renders without errors', async () => {
+    it('renders without errors', () => {
         renderWithProviders(
             <AuthenticatedRouteWrapper children={<div>children go here</div>} />
         )
-        const kids = await screen.findByText('children go here')
-        expect(kids).toBeInTheDocument()
+        expect(screen.getByText('children go here')).toBeInTheDocument()
     })
 
-    it('hides the session timeout modal by default', async () => {
+    it('hides the session timeout modal by default', () => {
         renderWithProviders(
             <AuthenticatedRouteWrapper
                 children={<div>children go here</div>}
@@ -37,9 +43,7 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
                 },
             }
         )
-        const dialog = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
+        const dialog = screen.getByRole('dialog', { name: 'Session Expiring' })
         expect(dialog).toBeInTheDocument()
         expect(dialog).toHaveClass('is-hidden')
     })
@@ -57,15 +61,10 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             }
         )
 
-        const dialogOnLoad = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
-        expect(dialogOnLoad).toHaveClass('is-hidden')
+        const dialog = screen.getByRole('dialog', { name: 'Session Expiring' })
+        expect(dialog).toHaveClass('is-hidden')
         await vi.advanceTimersByTimeAsync(500)
-        const dialogAfterIdle = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
-        expect(dialogAfterIdle).toHaveClass('is-hidden')
+        expect(dialog).toHaveClass('is-hidden')
     })
 
     it('renders session timeout modal after idle prompt period is exceeded', async () => {
@@ -80,20 +79,13 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
                 },
             }
         )
-        const dialogOnLoad = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
-        expect(dialogOnLoad).toBeInTheDocument()
-        expect(dialogOnLoad).toHaveClass('is-hidden')
+        const dialog = screen.getByRole('dialog', { name: 'Session Expiring' })
+        expect(dialog).toBeInTheDocument()
+        expect(dialog).toHaveClass('is-hidden')
 
         await vi.advanceTimersByTimeAsync(1000)
 
-        const dialogAfterIdle = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
-        await waitFor(() => {
-            expect(dialogAfterIdle).toHaveClass('is-visible')
-        })
+        expect(dialog).toHaveClass('is-visible')
     })
 
     it('renders session timeout modal and if countdown elapses and user does nothing, calls sign out', async () => {
@@ -115,19 +107,12 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
             }
         )
 
-        const dialogOnLoad = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
-        expect(dialogOnLoad).toBeInTheDocument()
-        expect(dialogOnLoad).toHaveClass('is-hidden')
+        const dialog = screen.getByRole('dialog', { name: 'Session Expiring' })
+        expect(dialog).toBeInTheDocument()
+        expect(dialog).toHaveClass('is-hidden')
 
         await vi.advanceTimersByTimeAsync(1000)
-        const dialogAfterIdle = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
-        await waitFor(() => {
-            expect(dialogAfterIdle).toHaveClass('is-visible')
-        })
+        expect(dialog).toHaveClass('is-visible')
 
         await vi.advanceTimersByTimeAsync(120100)
         expect(logoutSpy).toHaveBeenCalled()
@@ -147,7 +132,7 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
                 },
             }
         )
-        await screen.findByRole('dialog', { name: 'Session Expiring' })
+        screen.getByRole('dialog', { name: 'Session Expiring' })
 
         await act(async () => {
             await vi.advanceTimersByTimeAsync(1000)
@@ -184,19 +169,12 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
                 },
             }
         )
-        await screen.findByRole('dialog', { name: 'Session Expiring' })
+        const dialog = screen.getByRole('dialog', { name: 'Session Expiring' })
         await vi.advanceTimersByTimeAsync(1000)
-        const dialogAfterIdle = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
-        await waitFor(() => {
-            expect(dialogAfterIdle).toHaveClass('is-visible')
-        })
-        ;(await screen.findByText('Continue Session')).click()
-        await screen.findByRole('dialog', { name: 'Session Expiring' })
-        await waitFor(() => {
-            expect(dialogAfterIdle).not.toHaveClass('is-visible')
-        })
+        expect(dialog).toHaveClass('is-visible')
+        screen.getByText('Continue Session').click()
+        await vi.advanceTimersByTimeAsync(0)
+        expect(dialog).not.toHaveClass('is-visible')
         expect(refreshSpy).toHaveBeenCalled()
     })
 
@@ -218,15 +196,10 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
                 },
             }
         )
-        await screen.findByRole('dialog', { name: 'Session Expiring' })
+        const dialog = screen.getByRole('dialog', { name: 'Session Expiring' })
         await vi.advanceTimersByTimeAsync(1000)
-        const dialogAfterIdle = await screen.findByRole('dialog', {
-            name: 'Session Expiring',
-        })
-        await waitFor(() => {
-            expect(dialogAfterIdle).toHaveClass('is-visible')
-        })
-        ;(await screen.findByText('Logout')).click()
+        expect(dialog).toHaveClass('is-visible')
+        screen.getByText('Logout').click()
         expect(logoutSpy).toHaveBeenCalled()
     })
 })
