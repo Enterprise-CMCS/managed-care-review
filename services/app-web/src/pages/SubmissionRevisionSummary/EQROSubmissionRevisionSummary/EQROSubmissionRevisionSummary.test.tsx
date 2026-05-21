@@ -157,6 +157,47 @@ describe('EQROSubmissionRevisionSummary', () => {
                 }
             )
 
+            it('returns 404 when the contract is not an EQRO submission', async () => {
+                renderWithProviders(
+                    <Routes>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_REVISION}
+                            element={<EQROSubmissionRevisionSummary />}
+                        />
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractMockSuccess({
+                                    contract:
+                                        mockContractPackageSubmittedWithRevisions(
+                                            {
+                                                id: '15',
+                                                contractSubmissionType:
+                                                    'HEALTH_PLAN',
+                                            }
+                                        ),
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/eqro/15/revisions/2',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                expect(
+                    await screen.findByRole('heading', {
+                        name: '404 / Page not found',
+                    })
+                ).toBeInTheDocument()
+            })
+
             it('returns 404 when the requested revision does not exist', async () => {
                 renderWithProviders(
                     <Routes>

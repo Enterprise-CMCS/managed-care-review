@@ -91,7 +91,12 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         )
     }
 
-    if (!contract || !targetPreviousSubmission || !name) {
+    if (
+        !contract ||
+        contract.contractSubmissionType !== 'HEALTH_PLAN' ||
+        !targetPreviousSubmission ||
+        !name
+    ) {
         return <Error404 />
     }
 

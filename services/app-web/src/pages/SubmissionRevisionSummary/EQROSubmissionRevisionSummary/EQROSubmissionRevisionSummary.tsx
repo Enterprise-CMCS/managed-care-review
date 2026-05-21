@@ -86,7 +86,12 @@ export const EQROSubmissionRevisionSummary = (): React.ReactElement => {
         )
     }
 
-    if (!contract || !targetPreviousSubmission || !name) {
+    if (
+        !contract ||
+        contract.contractSubmissionType !== 'EQRO' ||
+        !targetPreviousSubmission ||
+        !name
+    ) {
         return <Error404 />
     }
 
