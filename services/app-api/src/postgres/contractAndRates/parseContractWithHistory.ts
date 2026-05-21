@@ -140,6 +140,20 @@ function contractOverridesToDomainModel(
                                   revisionOverride.contractRevisionID,
                               contractType:
                                   revisionOverride.contractType ?? undefined,
+                              contractDocuments:
+                                  revisionOverride.contractDocuments.map(
+                                      (doc) => ({
+                                          ...doc,
+                                          dateAdded: doc.dateAdded ?? undefined,
+                                      })
+                                  ),
+                              supportingDocuments:
+                                  revisionOverride.supportingDocuments.map(
+                                      (doc) => ({
+                                          ...doc,
+                                          dateAdded: doc.dateAdded ?? undefined,
+                                      })
+                                  ),
                           }
                         : undefined,
                 },
