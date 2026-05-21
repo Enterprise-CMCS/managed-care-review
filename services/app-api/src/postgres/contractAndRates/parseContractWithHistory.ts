@@ -25,6 +25,7 @@ import {
     DRAFT_PARENT_PLACEHOLDER,
     isDraftRevision,
     isSubmittedRevision,
+    mergeContractRevisionOverrides,
 } from './prismaSharedContractRateHelpers'
 import type {
     ContractTableWithoutDraftRates,
@@ -347,11 +348,10 @@ function contractWithHistoryToDomainModel(
 function strippedContractFormDataToDomainModel(
     contractRevision: StrippedContractRevisionTableWithFormData
 ) {
-    const revisionOverride = contractRevision.revisionOverrides?.find(
-        (override) =>
-            override.contractRevisionID === contractRevision.id &&
-            override.contractType !== null
+    const relevantOverrides = (contractRevision.revisionOverrides ?? []).filter(
+        (o) => o.contractRevisionID === contractRevision.id
     )
+    const mergedOverride = mergeContractRevisionOverrides(relevantOverrides)
 
     return {
         programIDs: contractRevision.programIDs ?? [],
@@ -359,7 +359,7 @@ function strippedContractFormDataToDomainModel(
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
         contractType:
-            revisionOverride?.contractType ?? contractRevision.contractType,
+            mergedOverride.contractType ?? contractRevision.contractType,
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
         contractDateStart: contractRevision.contractDateStart ?? undefined,

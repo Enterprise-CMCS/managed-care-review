@@ -1,5 +1,6 @@
 import type {
     Prisma,
+    ContractType,
     ContractDocument,
     ContractSupportingDocument,
     RateDocument,
@@ -552,6 +553,10 @@ const includeStrippedContractFormData = {
             createdAt: true,
             contractRevisionID: true,
             contractType: true,
+            // Selected so mergeContractRevisionOverrides has the expected
+            // shape, even though the stripped view doesn't expose docs.
+            contractDocuments: true,
+            supportingDocuments: true,
         },
     },
 } satisfies Prisma.ContractRevisionTableInclude
@@ -650,31 +655,95 @@ const mergeContractDocumentOverrides = <
     return [...mergedOriginals, ...synthesized]
 }
 
-// Builds an effective per-document override patch map by sparse-merging all
-// rate revision overrides on a revision in createdAt-asc order (newer wins
-// per field). Keyed by documentID. Rate overrides are update-only (documentID
-// is required on RateDocumentOverride), so no add-synthesis is needed.
+// Output of mergeContractRevisionOverrides: the effective merged result of
+// all ContractRevisionOverrides rows on a single revision. Doc arrays are
+// the raw override rows flat-mapped across all overrides; downstream
+// helpers (mergeContractDocumentOverrides) handle per-documentID
+// sparse-merging.
+type MergedContractRevisionOverride = {
+    contractType: ContractType | null
+    contractDocuments: ContractRevisionOverridesTablePayload['contractDocuments']
+    supportingDocuments: ContractRevisionOverridesTablePayload['supportingDocuments']
+}
+
+// Merges all ContractRevisionOverrides rows for a single revision into one
+// effective result. Callers must pre-filter rows to the relevant revisionID.
+//   - contractType: newer-wins (last non-null in createdAt-asc order)
+//   - contractDocuments / supportingDocuments: raw override rows
+//     flat-mapped across all overrides on the revision
+const mergeContractRevisionOverrides = (
+    revisionOverrideRows: ContractRevisionOverridesTablePayload[]
+): MergedContractRevisionOverride => {
+    const ordered = [...revisionOverrideRows].sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    )
+
+    let contractType: ContractType | null = null
+    const contractDocuments: MergedContractRevisionOverride['contractDocuments'] =
+        []
+    const supportingDocuments: MergedContractRevisionOverride['supportingDocuments'] =
+        []
+
+    for (const row of ordered) {
+        if (row.contractType !== null) {
+            contractType = row.contractType
+        }
+        contractDocuments.push(...row.contractDocuments)
+        supportingDocuments.push(...row.supportingDocuments)
+    }
+
+    return { contractType, contractDocuments, supportingDocuments }
+}
+
+// Output of mergeRateRevisionOverrides: rate-side parallel. No top-level
+// overrideable fields on RateRevisionOverrides today, just the doc arrays.
+type MergedRateRevisionOverride = {
+    rateDocuments: RateRevisionOverridesTablePayload['rateDocuments']
+    supportingDocuments: RateRevisionOverridesTablePayload['supportingDocuments']
+}
+
+// Merges all RateRevisionOverrides rows for a single revision into one
+// effective result. Callers must pre-filter rows to the relevant revisionID.
+// Doc arrays are flat-mapped raw rows; downstream helpers handle per-
+// documentID sparse-merging.
+const mergeRateRevisionOverrides = (
+    revisionOverrideRows: RateRevisionOverridesTablePayload[]
+): MergedRateRevisionOverride => {
+    const rateDocuments: MergedRateRevisionOverride['rateDocuments'] = []
+    const supportingDocuments: MergedRateRevisionOverride['supportingDocuments'] =
+        []
+
+    for (const row of revisionOverrideRows) {
+        rateDocuments.push(...row.rateDocuments)
+        supportingDocuments.push(...row.supportingDocuments)
+    }
+
+    return { rateDocuments, supportingDocuments }
+}
+
+// Builds an effective per-document override patch map by sparse-merging
+// rate document override rows in createdAt-asc order (newer wins per field).
+// Keyed by documentID. Rate overrides are update-only (documentID is
+// required on RateDocumentOverride), so no add-synthesis is needed.
 //
-// Ordering basis is the parent RateRevisionOverrides row's createdAt because
-// the doc-override sub-rows don't carry their own createdAt in the select.
+// Takes already-flat-mapped doc rows; ordering uses each row's own
+// createdAt.
 const mergeRateDocumentOverridePatches = (
-    overrideRows: RateRevisionOverridesTablePayload[]
+    docOverrideRows: Array<
+        | RateRevisionOverridesTablePayload['rateDocuments'][number]
+        | RateRevisionOverridesTablePayload['supportingDocuments'][number]
+    >
 ): Map<string, { dateAdded?: Date | null }> => {
-    const ordered = [...overrideRows].sort(
+    const ordered = [...docOverrideRows].sort(
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     )
     const patches = new Map<string, { dateAdded?: Date | null }>()
-    for (const ro of ordered) {
-        for (const docOverride of [
-            ...(ro.rateDocuments ?? []),
-            ...(ro.supportingDocuments ?? []),
-        ]) {
-            const patch = patches.get(docOverride.documentID) ?? {}
-            if (docOverride.dateAdded != null) {
-                patch.dateAdded = docOverride.dateAdded
-            }
-            patches.set(docOverride.documentID, patch)
+    for (const docOverride of ordered) {
+        const patch = patches.get(docOverride.documentID) ?? {}
+        if (docOverride.dateAdded != null) {
+            patch.dateAdded = docOverride.dateAdded
         }
+        patches.set(docOverride.documentID, patch)
     }
     return patches
 }
@@ -736,15 +805,16 @@ function rateFormDataToDomainModel(
         })
     }
 
-    // Full-merge across all rate revision overrides on this revision: collect
-    // every override row that targets this revision, sparse-merge their
-    // document patches in createdAt-asc order. Matches the contract-side
-    // semantics and the skill's "merge overrides in order, newer wins per
-    // field" convention.
+    // Single entry point for revision-level override application: filter
+    // first, merge once, then derive doc patches from the flat-mapped rows.
     const relevantOverrides = (rateRevision.revisionOverrides ?? []).filter(
         (o) => o.rateRevisionID === rateRevision.id
     )
-    const overridePatches = mergeRateDocumentOverridePatches(relevantOverrides)
+    const mergedOverride = mergeRateRevisionOverrides(relevantOverrides)
+    const overridePatches = mergeRateDocumentOverridePatches([
+        ...mergedOverride.rateDocuments,
+        ...mergedOverride.supportingDocuments,
+    ])
 
     return {
         id: rateRevision.rateID,
@@ -854,33 +924,21 @@ type ContractRevisionTableWithFormData =
 function contractFormDataToDomainModel(
     contractRevision: ContractRevisionTableWithFormData
 ): ContractFormDataType {
-    const revisionOverride = contractRevision.revisionOverrides?.find(
-        (override) =>
-            override.contractRevisionID === contractRevision.id &&
-            override.contractType !== null
+    // Single entry point for revision-level override application: filter
+    // first, merge once, then read effective values per field below.
+    const relevantOverrides = (contractRevision.revisionOverrides ?? []).filter(
+        (o) => o.contractRevisionID === contractRevision.id
     )
-
-    // Collect all document override rows across all overrides that target this
-    // revision. Used for the doc-level merge below (sparse-patch updates +
-    // append-at-end add-overrides).
-    const revisionDocOverrides = (
-        contractRevision.revisionOverrides ?? []
-    ).filter((o) => o.contractRevisionID === contractRevision.id)
-    const allContractDocumentOverrides = revisionDocOverrides.flatMap(
-        (o) => o.contractDocuments ?? []
-    )
-    const allSupportingDocumentOverrides = revisionDocOverrides.flatMap(
-        (o) => o.supportingDocuments ?? []
-    )
+    const mergedOverride = mergeContractRevisionOverrides(relevantOverrides)
 
     const mergedContractDocuments = mergeContractDocumentOverrides(
         contractRevision.contractDocuments ?? [],
-        allContractDocumentOverrides,
+        mergedOverride.contractDocuments,
         contractRevision.id
     )
     const mergedSupportingDocuments = mergeContractDocumentOverrides(
         contractRevision.supportingDocuments ?? [],
-        allSupportingDocumentOverrides,
+        mergedOverride.supportingDocuments,
         contractRevision.id
     )
 
@@ -888,7 +946,7 @@ function contractFormDataToDomainModel(
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
         contractType:
-            revisionOverride?.contractType ?? contractRevision.contractType,
+            mergedOverride.contractType ?? contractRevision.contractType,
         programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
         riskBasedContract:
@@ -1015,4 +1073,6 @@ export {
     getRelatedContracts,
     DRAFT_PARENT_PLACEHOLDER,
     getNewParentContract,
+    mergeContractRevisionOverrides,
+    mergeRateRevisionOverrides,
 }

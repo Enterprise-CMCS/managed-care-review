@@ -4,7 +4,10 @@ import type {
     ContractRevisionTable,
     RateRevisionTable,
 } from '../../generated/client'
-import { getLatestActiveRevision } from './prismaSharedContractRateHelpers'
+import {
+    getLatestActiveRevision,
+    mergeRateRevisionOverrides,
+} from './prismaSharedContractRateHelpers'
 
 const includeContractRevWithOnlyDocs = {
     submitInfo: true,
@@ -208,15 +211,15 @@ async function submitContractAndOrRates(
     for (const rev of previousSubmissions) {
         const allRevDocs = [...rev.rateDocuments, ...rev.supportingDocuments]
 
-        //Gather all rate document overrides
-        const rateDocumentOverrides =
-            rev.revisionOverrides?.[0]?.rateDocuments ?? []
-        const supportingDocumentOverrides =
-            rev.revisionOverrides?.[0]?.supportingDocuments ?? []
-
+        // Full-merge across all rate revision overrides on this revision
+        // (newer wins per documentID for dateAdded). Replaces the prior
+        // single-latest `revisionOverrides?.[0]` access.
+        const mergedRateOverride = mergeRateRevisionOverrides(
+            rev.revisionOverrides ?? []
+        )
         const overrideDocs = [
-            ...rateDocumentOverrides,
-            ...supportingDocumentOverrides,
+            ...mergedRateOverride.rateDocuments,
+            ...mergedRateOverride.supportingDocuments,
         ]
 
         allRevDocs.forEach((doc) => {

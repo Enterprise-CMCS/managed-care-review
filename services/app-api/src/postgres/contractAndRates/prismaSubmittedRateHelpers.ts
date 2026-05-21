@@ -24,6 +24,7 @@ const selectRateRevisionOverrides = {
     rateDocuments: {
         select: {
             id: true,
+            createdAt: true,
             documentID: true,
             dateAdded: true,
         },
@@ -31,6 +32,7 @@ const selectRateRevisionOverrides = {
     supportingDocuments: {
         select: {
             id: true,
+            createdAt: true,
             documentID: true,
             dateAdded: true,
         },

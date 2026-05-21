@@ -5,6 +5,7 @@ import { unlockRateInDB } from './unlockRate'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { runTransactionWithRowLock } from '../prismaHelpers'
+import { mergeContractRevisionOverrides } from './prismaSharedContractRateHelpers'
 
 async function unlockContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -51,8 +52,15 @@ async function unlockContractInsideTransaction(
                     createdAt: 'desc',
                 },
                 select: {
+                    id: true,
+                    createdAt: true,
                     contractRevisionID: true,
                     contractType: true,
+                    // Needed so mergeContractRevisionOverrides has the
+                    // expected shape, even though unlock only reads
+                    // contractType today.
+                    contractDocuments: true,
+                    supportingDocuments: true,
                 },
             },
 
@@ -176,11 +184,10 @@ async function unlockContractInsideTransaction(
         relatedRateIDs.push(ratePackage.rateRevision.rateID)
     }
 
-    const contractTypeOverride = currentRev.revisionOverrides.find(
-        (override) =>
-            override.contractRevisionID === currentRev.id &&
-            override.contractType !== null
+    const relevantOverrides = currentRev.revisionOverrides.filter(
+        (o) => o.contractRevisionID === currentRev.id
     )
+    const mergedOverride = mergeContractRevisionOverrides(relevantOverrides)
 
     await tx.contractRevisionTable.create({
         data: {
@@ -200,7 +207,7 @@ async function unlockContractInsideTransaction(
             submissionType: currentRev.submissionType,
             submissionDescription: currentRev.submissionDescription,
             contractType:
-                contractTypeOverride?.contractType ?? currentRev.contractType,
+                mergedOverride.contractType ?? currentRev.contractType,
             dsnpContract: currentRev.dsnpContract,
             contractExecutionStatus: currentRev.contractExecutionStatus,
             contractDateStart: currentRev.contractDateStart,

@@ -23,6 +23,7 @@ describe('rateOverridesToDomainModel', () => {
                     supportingDocuments: [
                         {
                             id: '55555555-5555-5555-5555-555555555555',
+                            createdAt: new Date('2024-01-01'),
                             documentID: supportingDocumentID,
                             dateAdded: new Date('2024-02-01'),
                         },
@@ -38,6 +39,7 @@ describe('rateOverridesToDomainModel', () => {
         ).toEqual([
             {
                 id: '55555555-5555-5555-5555-555555555555',
+                createdAt: new Date('2024-01-01'),
                 documentID: supportingDocumentID,
                 dateAdded: new Date('2024-02-01'),
             },
