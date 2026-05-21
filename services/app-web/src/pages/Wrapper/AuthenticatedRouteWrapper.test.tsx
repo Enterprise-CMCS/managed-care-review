@@ -5,12 +5,6 @@ import { createMocks } from 'react-idle-timer'
 import * as CognitoAuthApi from '../Auth/cognitoAuth'
 import { dayjs } from '@mc-review/dates'
 
-// Preserve real clearInterval before any fake timer setup — vitest 4 removes
-// it from the global during environment teardown, but jsdom's window.close()
-// needs it. Re-assigning it manually (outside vitest's timer tracking) survives
-// the cleanup and prevents the "clearInterval is not defined" teardown error.
-const realClearInterval = globalThis.clearInterval
-
 describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
     beforeAll(() => {
         vi.useFakeTimers()
@@ -21,7 +15,6 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
         vi.clearAllTimers()
         vi.useRealTimers()
         vi.restoreAllMocks()
-        globalThis.clearInterval = realClearInterval
     })
 
     it('renders without errors', () => {
