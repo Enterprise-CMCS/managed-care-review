@@ -1079,5 +1079,6 @@ export {
     DRAFT_PARENT_PLACEHOLDER,
     getNewParentContract,
     mergeContractRevisionOverrides,
+    mergeContractDocumentOverrides,
     mergeRateRevisionOverrides,
 }

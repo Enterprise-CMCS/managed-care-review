@@ -6,6 +6,7 @@ import type {
 } from '../../generated/client'
 import {
     getLatestActiveRevision,
+    mergeContractRevisionOverrides,
     mergeRateRevisionOverrides,
 } from './prismaSharedContractRateHelpers'
 
@@ -19,6 +20,19 @@ const includeContractRevWithOnlyDocs = {
     supportingDocuments: {
         orderBy: {
             position: 'asc',
+        },
+    },
+    revisionOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            contractRevisionID: true,
+            contractType: true,
+            contractDocuments: true,
+            supportingDocuments: true,
         },
     },
 } satisfies Prisma.ContractRevisionTableInclude
@@ -76,24 +90,66 @@ async function submitContractAndOrRates(
         // order. We need to find the first time docs are submitted.
         const previousRevisions = allRevisions.slice(1).reverse()
 
-        // Collect first date added for our documents from previous submissions
+        // Collect first date added for our documents from previous submissions.
+        // For each previous revision, apply any ContractRevisionOverrides on
+        // dateAdded before falling back to the doc's raw dateAdded or the
+        // revision's submitInfo.updatedAt. Doc kinds are processed
+        // separately so a (hypothetical) documentID collision between a
+        // contract doc and a supporting doc cannot match the wrong override.
+        // Mirrors the rate-side handling in this same file.
         const prevDocs: { [key: string]: Date | undefined } = {}
         for (const rev of previousRevisions) {
-            const allRevDocs = [
-                ...rev.contractDocuments,
-                ...rev.supportingDocuments,
+            const mergedRevOverride = mergeContractRevisionOverrides(
+                rev.revisionOverrides ?? []
+            )
+            const docKinds = [
+                {
+                    docs: rev.contractDocuments,
+                    overrides: mergedRevOverride.contractDocuments,
+                },
+                {
+                    docs: rev.supportingDocuments,
+                    overrides: mergedRevOverride.supportingDocuments,
+                },
             ]
-            allRevDocs.forEach((doc) => {
-                if (!prevDocs[doc.sha256]) {
-                    if (!doc.dateAdded && !rev.submitInfo?.updatedAt) {
-                        return new Error(
-                            'error attempting to set contracts document date added. A previous submission document has no date added or submitted date.'
-                        )
+            for (const { docs, overrides } of docKinds) {
+                // Raw docs on this revision, with update-mode overrides
+                // applied by documentID.
+                for (const doc of docs) {
+                    if (prevDocs[doc.sha256]) continue
+                    const docOverride = overrides.find(
+                        (o) => o.documentID === doc.id
+                    )
+                    const effective =
+                        docOverride?.dateAdded ??
+                        doc.dateAdded ??
+                        rev.submitInfo?.updatedAt
+                    if (!effective) {
+                        // Preserve pre-existing behavior: skip docs with no
+                        // dateAdded source. Final update step will fall back
+                        // to currentDateTime.
+                        continue
                     }
-                    prevDocs[doc.sha256] =
-                        doc.dateAdded ?? rev.submitInfo?.updatedAt
+                    prevDocs[doc.sha256] = effective
                 }
-            })
+                // Add-mode override rows on this revision act as ghost docs
+                // for the prevDocs trace: their sha256 is what the
+                // materialized doc on the next draft will carry. Honoring
+                // the admin-supplied dateAdded here is what lets an
+                // add-override's dateAdded survive a resubmit cycle.
+                for (const addOverride of overrides.filter(
+                    (o) => o.documentID == null
+                )) {
+                    if (!addOverride.sha256 || prevDocs[addOverride.sha256]) {
+                        continue
+                    }
+                    const effective =
+                        addOverride.dateAdded ?? rev.submitInfo?.updatedAt
+                    if (effective) {
+                        prevDocs[addOverride.sha256] = effective
+                    }
+                }
+            }
         }
 
         // Update the contract to include the submitInfo ID and set date added.
