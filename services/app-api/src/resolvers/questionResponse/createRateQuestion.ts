@@ -85,7 +85,7 @@ export function createRateQuestionResolver(
                 }
 
                 if (['DRAFT', 'WITHDRAWN'].includes(rate.consolidatedStatus)) {
-                    const errMessage = `Issue creating question for rate. Message: Rate is in a invalid statius: ${rate.consolidatedStatus}`
+                    const errMessage = `Issue creating question for rate. Message: Rate is in an invalid status: ${rate.consolidatedStatus}`
                     logResolverError('createRateQuestion', errMessage, context)
                     throw createUserInputError(errMessage)
                 }

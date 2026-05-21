@@ -68,7 +68,7 @@ export function unlockContractResolver(
                     contractResult.draftRevision ||
                     contractResult.consolidatedStatus === 'APPROVED'
                 ) {
-                    const errMessage = `Attempted to unlock contract with wrong status`
+                    const errMessage = `Attempted to unlock contract with wrong status: ${contractResult.consolidatedStatus}`
                     logResolverError('unlockContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
