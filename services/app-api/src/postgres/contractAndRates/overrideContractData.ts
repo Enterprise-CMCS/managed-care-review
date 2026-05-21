@@ -4,6 +4,22 @@ import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findContractWithHistory } from './findContractWithHistory'
 
+// NOTE on DocumentZipPackage: override creation does NOT regenerate or
+// invalidate the stored zip for the submitted contract revision. Zips are
+// only produced at lifecycle events (submit/resubmit, withdraw,
+// undo-withdraw, or the standalone regenerate_zips handler).
+//
+// - Update-mode overrides (dateAdded only) don't change zip contents — no
+//   issue.
+// - Add-mode contractDocuments overrides introduce a doc that is NOT in
+//   the stored zip. The merged form-data view includes it; the zip
+//   download does not. This window-staleness is accepted in the current
+//   implementation and resolves on the next unlock + resubmit cycle, when
+//   overrides are materialized into real ContractDocument rows.
+//
+// See skills/skill-api/references/10-revision-overrides.md
+// (Document Zip Packages And Overrides) for the full context.
+
 // Input shape for a single contract document override (used for both
 // contractDocuments and supportingDocuments arrays).
 //

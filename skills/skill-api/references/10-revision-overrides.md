@@ -108,6 +108,36 @@ Rate revision override support includes:
 - effective rate document `dateAdded` override application in submitted API views
 - unlock behavior is contract-driven in the current product: rates are unlocked through `unlockContract` with their associated contract, and the inactive standalone `unlockRate` resolver is not expected to have override-preservation parity unless standalone rate submissions are revived
 
+## Document Zip Packages And Overrides
+
+`DocumentZipPackage` rows are produced only at contract/rate lifecycle events:
+- contract submit/resubmit, 
+- rate submit,
+- withdraw,
+- undo-withdraw,
+- and via the standalone `regenerate_zips` batch handler. 
+**Override creation does not
+regenerate or invalidate any zip.** The read path
+(`contractRevisionResolver.documentZipPackages`) returns whatever is stored,
+with no staleness check.
+
+Implications:
+
+- **Update-mode document overrides** (changing only `dateAdded`) do not
+  affect zip contents — `dateAdded` is display metadata, not part of the
+  zipped files. No staleness in practice.
+- **Add-mode contract document overrides** introduce documents that are
+  **not** present in the stored zip. The merged read view of
+  `formData.contractDocuments` includes them; the zip download does not.
+  This discrepancy persists until the next unlock + resubmit cycle, at which
+  point overrides materialize into real `ContractDocument` rows and the
+  resubmit regenerates the zip naturally.
+
+This window-staleness is a known gap accepted in the current implementation.
+A future tightening would either regenerate the zip when an override is
+created (would require moving this override code into the API layer), or include zip regeneration in a read-time check on contract/rate fetch. This case has been added to 
+the zip regenration discovery ticket: MCR-5928
+
 ## File Map
 
 Primary code paths:
@@ -129,3 +159,4 @@ Primary code paths:
 - forgetting document-level overrides
 - dropping override effects during unlock
 - reapplying override logic only on resubmit instead of preserving effective draft data
+- assuming `DocumentZipPackage` reflects override effects — it doesn't (see Document Zip Packages And Overrides above)
