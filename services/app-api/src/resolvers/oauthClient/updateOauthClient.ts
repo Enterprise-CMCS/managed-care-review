@@ -1,6 +1,7 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
+import type { OAuthScope } from '../../generated/enums'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
@@ -43,6 +44,7 @@ export function updateOauthClientResolver(
                 const updateData: {
                     description?: string
                     grants?: string[]
+                    scopes?: OAuthScope[]
                 } = {}
 
                 if (input.description) {
@@ -50,6 +52,9 @@ export function updateOauthClientResolver(
                 }
                 if (input.grants && input.grants.length > 0) {
                     updateData.grants = input.grants
+                }
+                if (input.scopes && input.scopes.length > 0) {
+                    updateData.scopes = input.scopes
                 }
 
                 // Update the client
