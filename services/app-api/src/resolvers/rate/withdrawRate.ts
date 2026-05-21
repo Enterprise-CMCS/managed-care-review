@@ -4,7 +4,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
@@ -29,7 +29,7 @@ export function withdrawRate(
                 // Check OAuth client read permissions
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('withdrawRate', errMessage)
+                    logResolverError('withdrawRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -40,7 +40,7 @@ export function withdrawRate(
 
                 if (!hasCMSPermissions(user)) {
                     const message = 'user not authorized to withdraw a rate'
-                    logError('withdrawRate', message)
+                    logResolverError('withdrawRate', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -48,7 +48,7 @@ export function withdrawRate(
 
                 if (rateWithHistory instanceof Error) {
                     const errMessage = `Issue finding rate message: ${rateWithHistory.message}`
-                    logError('withdrawRate', errMessage)
+                    logResolverError('withdrawRate', errMessage, context)
 
                     if (rateWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -74,7 +74,7 @@ export function withdrawRate(
 
                 if (parentContract instanceof Error) {
                     const errMessage = `Issue finding contract message: ${parentContract.message}`
-                    logError('withdrawRate', errMessage)
+                    logResolverError('withdrawRate', errMessage, context)
 
                     if (parentContract instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -109,7 +109,7 @@ export function withdrawRate(
 
                 if (!allowedRateStatus || !allowedParentContractStatus) {
                     const errMessage = `Attempted to withdraw rate with wrong status. Rate: ${rateWithHistory.consolidatedStatus}, Parent contract: ${parentContract.consolidatedStatus}`
-                    logError('withdrawRate', errMessage)
+                    logResolverError('withdrawRate', errMessage, context)
                     throw createUserInputError(errMessage, 'rateID')
                 }
 
@@ -121,7 +121,7 @@ export function withdrawRate(
 
                 if (withdrawnRate instanceof Error) {
                     const errMessage = `Failed to withdraw rate message: ${withdrawnRate.message}`
-                    logError('withdrawRate', errMessage)
+                    logResolverError('withdrawRate', errMessage, context)
 
                     if (withdrawnRate instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -140,7 +140,7 @@ export function withdrawRate(
                     })
                 }
 
-                logSuccess('withdrawRate')
+                logResolverSuccess('withdrawRate', context)
 
                 // Send out email to state contacts
                 const statePrograms = store.findStatePrograms(
@@ -149,7 +149,7 @@ export function withdrawRate(
 
                 if (statePrograms instanceof Error) {
                     const errMessage = `Email failed: ${statePrograms.message}`
-                    logError('withdrawRate', errMessage)
+                    logResolverError('withdrawRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -166,9 +166,10 @@ export function withdrawRate(
                     )
 
                 if (stateAnalystsEmailsResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message
+                        stateAnalystsEmailsResult.message,
+                        context
                     )
                 } else {
                     stateAnalystsEmails = stateAnalystsEmailsResult.map(
@@ -202,7 +203,7 @@ export function withdrawRate(
                         errMessage = `CMS Email failed: ${sendWithdrawCMSEmail.message}`
                     }
 
-                    logError('withdrawRate', errMessage)
+                    logResolverError('withdrawRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

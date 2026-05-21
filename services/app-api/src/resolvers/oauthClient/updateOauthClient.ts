@@ -1,7 +1,7 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
-import { logSuccess, logError } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
@@ -23,7 +23,7 @@ export function updateOauthClientResolver(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('updateOauthClient', errMessage)
+                    logResolverError('updateOauthClient', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -35,7 +35,7 @@ export function updateOauthClientResolver(
                 if (!user || user.role !== 'ADMIN_USER') {
                     const message =
                         'user not authorized to update OAuth clients'
-                    logError('updateOauthClient', message)
+                    logResolverError('updateOauthClient', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -60,7 +60,7 @@ export function updateOauthClientResolver(
 
                 if (updated instanceof Error) {
                     const message = `Failed to update OAuth client: ${updated.message}`
-                    logError('updateOauthClient', message)
+                    logResolverError('updateOauthClient', message, context)
 
                     // Check if this is a "not found" error
                     if (updated.message.includes('not found')) {
@@ -80,7 +80,7 @@ export function updateOauthClientResolver(
                     })
                 }
 
-                logSuccess('updateOauthClient')
+                logResolverSuccess('updateOauthClient', context)
 
                 return {
                     oauthClient: updated,

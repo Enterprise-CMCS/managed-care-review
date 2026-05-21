@@ -4,7 +4,7 @@ import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError } from '../../postgres/postgresErrors'
 import { GraphQLError } from 'graphql/index'
@@ -29,7 +29,7 @@ export function undoWithdrawRate(
                 // Check OAuth client write permissions
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('undoWithdrawRate', errMessage)
+                    logResolverError('undoWithdrawRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -40,7 +40,7 @@ export function undoWithdrawRate(
 
                 if (!hasCMSPermissions(user)) {
                     const message = 'user not authorized to undo withdraw rate'
-                    logError('undoWithdrawRate', message)
+                    logResolverError('undoWithdrawRate', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -48,7 +48,7 @@ export function undoWithdrawRate(
 
                 if (rateWithHistory instanceof Error) {
                     const errMessage = `Issue finding rate: ${rateWithHistory.message}`
-                    logError('undoWithdrawRate', errMessage)
+                    logResolverError('undoWithdrawRate', errMessage, context)
 
                     if (rateWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -71,7 +71,7 @@ export function undoWithdrawRate(
                     !['WITHDRAWN'].includes(rateWithHistory.consolidatedStatus)
                 ) {
                     const errMessage = `Attempted to undo rate withdrawal with wrong status. Rate: ${rateWithHistory.consolidatedStatus}`
-                    logError('undoWithdrawRate', errMessage)
+                    logResolverError('undoWithdrawRate', errMessage, context)
                     throw createUserInputError(errMessage, 'rateID')
                 }
 
@@ -97,7 +97,7 @@ export function undoWithdrawRate(
 
                 if (!parentContract) {
                     const errMessage = `Attempted to undo rate withdrawal without a parent contract`
-                    logError('undoWithdrawRate', errMessage)
+                    logResolverError('undoWithdrawRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'NOT_FOUND',
@@ -114,7 +114,7 @@ export function undoWithdrawRate(
                     )
                 ) {
                     const errMessage = `Attempted to undo rate withdrawal with parent contract in an invalid state: ${parentContract.consolidatedStatus}`
-                    logError('undoWithdrawRate', errMessage)
+                    logResolverError('undoWithdrawRate', errMessage, context)
                     throw createUserInputError(errMessage, 'rateID')
                 }
 
@@ -129,7 +129,7 @@ export function undoWithdrawRate(
 
                 if (invalidLinkedContractStatus.length > 0) {
                     const errMessage = `Attempted to undo rate withdrawal with contract(s) that are in an invalid state. Invalid contract IDs: ${invalidLinkedContractStatus.map((contract) => contract.id)}`
-                    logError('undoWithdrawRate', errMessage)
+                    logResolverError('undoWithdrawRate', errMessage, context)
                     throw createUserInputError(errMessage, 'rateID')
                 }
 
@@ -141,7 +141,7 @@ export function undoWithdrawRate(
 
                 if (undoWithdrawRateResult instanceof Error) {
                     const errMessage = `Failed to undo withdraw rate: ${undoWithdrawRateResult.message}`
-                    logError('undoWithdrawRate', errMessage)
+                    logResolverError('undoWithdrawRate', errMessage, context)
 
                     if (undoWithdrawRateResult instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -160,7 +160,7 @@ export function undoWithdrawRate(
                     })
                 }
 
-                logSuccess('undoWithdrawRate')
+                logResolverSuccess('undoWithdrawRate', context)
 
                 //Send emails upon success
                 const statePrograms = store.findStatePrograms(
@@ -169,7 +169,7 @@ export function undoWithdrawRate(
 
                 if (statePrograms instanceof Error) {
                     const errMessage = `Email failed: ${statePrograms.message}`
-                    logError('undoWithdrawRate', errMessage)
+                    logResolverError('undoWithdrawRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -185,9 +185,10 @@ export function undoWithdrawRate(
                     )
 
                 if (stateAnalystEmailsResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'getStateAnalystEmails',
-                        stateAnalystEmailsResult.message
+                        stateAnalystEmailsResult.message,
+                        context
                     )
                 } else {
                     stateAnalystEmails = stateAnalystEmailsResult.map(
@@ -227,7 +228,7 @@ export function undoWithdrawRate(
                         errMessage = `CMS email failed: ${sendUndoWithdrawnRateCMSEmail.message}`
                     }
 
-                    logError('undoWithdrawnRate', errMessage)
+                    logResolverError('undoWithdrawnRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

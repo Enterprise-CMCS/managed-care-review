@@ -2,7 +2,7 @@ import { GraphQLError } from 'graphql'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import type { S3ClientT } from '../../s3'
 import { v4 as uuidv4 } from 'uuid'
@@ -26,7 +26,7 @@ export function generateUploadURLResolver(
                 // Check OAuth client write permissions
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('generateUploadURL', errMessage)
+                    logResolverError('generateUploadURL', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -40,7 +40,7 @@ export function generateUploadURLResolver(
 
                 if (!fileName) {
                     const fileNameErr = 'file name cannot be blank'
-                    logError('generateUploadURL', fileNameErr)
+                    logResolverError('generateUploadURL', fileNameErr, context)
                     throw new GraphQLError(fileNameErr, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -59,7 +59,7 @@ export function generateUploadURLResolver(
 
                 if (extension !== fileType.toLowerCase()) {
                     const extenErr = `File extension ".${extension}" does not match fileType "${fileType}"`
-                    logError('generateUploadURL', extenErr)
+                    logResolverError('generateUploadURL', extenErr, context)
                     throw new GraphQLError(extenErr, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -83,7 +83,7 @@ export function generateUploadURLResolver(
                     bucketName
                 )
 
-                logSuccess('generateUploadURL')
+                logResolverSuccess('generateUploadURL', context)
 
                 return {
                     uploadURL,

@@ -2,7 +2,7 @@ import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { State } from '../../gen/gqlServer'
 import { pluralize } from '@mc-review/common-code'
@@ -26,7 +26,7 @@ export function createContract(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('createContract', errMessage)
+                    logResolverError('createContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -39,7 +39,7 @@ export function createContract(
                 if (!isStateUser(user)) {
                     const errMessage =
                         'user not authorized to create state data'
-                    logError('createContract', errMessage)
+                    logResolverError('createContract', errMessage, context)
                     throw createForbiddenError(errMessage)
                 }
 
@@ -59,7 +59,7 @@ export function createContract(
                         'does',
                         count
                     )} not exist in state ${stateFromCurrentUser}`
-                    logError('createContract', errMessage)
+                    logResolverError('createContract', errMessage, context)
                     throw createUserInputError(
                         errMessage,
                         'programIDs',
@@ -83,7 +83,7 @@ export function createContract(
                     await store.insertDraftContract(insertArgs)
                 if (contractResult instanceof Error) {
                     const errMessage = `Error creating a draft contract. Message: ${contractResult.message}`
-                    logError('createContract', errMessage)
+                    logResolverError('createContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -92,7 +92,7 @@ export function createContract(
                     })
                 }
 
-                logSuccess('createContract')
+                logResolverSuccess('createContract', context)
 
                 return {
                     contract: contractResult,

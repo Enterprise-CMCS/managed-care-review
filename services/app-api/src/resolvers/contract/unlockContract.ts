@@ -3,7 +3,7 @@ import type { UpdateInfoType } from '../../domain-models'
 import { contractSubmitters, hasCMSPermissions } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
@@ -29,7 +29,7 @@ export function unlockContractResolver(
 
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('unlockContract', errMessage)
+                    logResolverError('unlockContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -41,7 +41,7 @@ export function unlockContractResolver(
                 // This resolver is only callable by CMS users
                 if (!hasCMSPermissions(user)) {
                     const errMessage = 'user not authorized to unlock contract'
-                    logError('unlockContract', errMessage)
+                    logResolverError('unlockContract', errMessage, context)
                     throw createForbiddenError(errMessage)
                 }
 
@@ -50,12 +50,12 @@ export function unlockContractResolver(
                 if (contractResult instanceof Error) {
                     if (contractResult instanceof NotFoundError) {
                         const errMessage = `A contract must exist to be unlocked: ${contractID}`
-                        logError('unlockContract', errMessage)
+                        logResolverError('unlockContract', errMessage, context)
                         throw createUserInputError(errMessage, 'contractID')
                     }
 
                     const errMessage = `Issue finding a contract. Message: ${contractResult.message}`
-                    logError('unlockContract', errMessage)
+                    logResolverError('unlockContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -69,7 +69,7 @@ export function unlockContractResolver(
                     contractResult.consolidatedStatus === 'APPROVED'
                 ) {
                     const errMessage = `Attempted to unlock contract with wrong status`
-                    logError('unlockContract', errMessage)
+                    logResolverError('unlockContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -80,7 +80,7 @@ export function unlockContractResolver(
                 })
                 if (unlockContractResult instanceof Error) {
                     const errMessage = `Failed to unlock contract revision with ID: ${contractResult.id}; ${unlockContractResult.message}`
-                    logError('unlockContract', errMessage)
+                    logResolverError('unlockContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -97,9 +97,10 @@ export function unlockContractResolver(
                     )
 
                 if (stateAnalystsEmailsResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message
+                        stateAnalystsEmailsResult.message,
+                        context
                     )
                 } else {
                     stateAnalystsEmails = stateAnalystsEmailsResult.map(
@@ -115,7 +116,11 @@ export function unlockContractResolver(
                 )
 
                 if (statePrograms instanceof Error) {
-                    logError('findStatePrograms', statePrograms.message)
+                    logResolverError(
+                        'findStatePrograms',
+                        statePrograms.message,
+                        context
+                    )
                     throw new GraphQLError(statePrograms.message, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -151,15 +156,17 @@ export function unlockContractResolver(
                     unlockContractStateEmailResult instanceof Error
                 ) {
                     if (unlockContractCMSEmailResult instanceof Error) {
-                        logError(
+                        logResolverError(
                             'unlockContractCMSEmail - CMS email failed',
-                            unlockContractCMSEmailResult
+                            unlockContractCMSEmailResult,
+                            context
                         )
                     }
                     if (unlockContractStateEmailResult instanceof Error) {
-                        logError(
+                        logResolverError(
                             'unlockContractStateEmail - state email failed',
-                            unlockContractStateEmailResult
+                            unlockContractStateEmailResult,
+                            context
                         )
                     }
                     throw new GraphQLError('Email failed.', {
@@ -170,7 +177,7 @@ export function unlockContractResolver(
                     })
                 }
 
-                logSuccess('unlockContract')
+                logResolverSuccess('unlockContract', context)
 
                 return { contract: unlockContractResult }
             }

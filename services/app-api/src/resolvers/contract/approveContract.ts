@@ -1,6 +1,6 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
@@ -23,7 +23,7 @@ export function approveContract(
                 // Check OAuth client read permissions
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('approveContract', errMessage)
+                    logResolverError('approveContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -40,14 +40,14 @@ export function approveContract(
 
                 if (!hasCMSPermissions(user) && !isAdminUser(user)) {
                     const message = 'user not authorized to approve a contract'
-                    logError('approveContract', message)
+                    logResolverError('approveContract', message, context)
                     throw createForbiddenError(message)
                 }
 
                 if (isAdminUser(user) && !updatedReason?.trim()) {
                     const errMessage =
                         'Approving a contract as an admin requires a reason'
-                    logError('approveContract', errMessage)
+                    logResolverError('approveContract', errMessage, context)
                     throw createUserInputError(errMessage, 'updatedReason')
                 }
 
@@ -80,7 +80,7 @@ export function approveContract(
 
                 if (!allowedStatus) {
                     const errMessage = `Attempted to approve contract with wrong status: ${contractWithHistory.consolidatedStatus}`
-                    logError('approveContract', errMessage)
+                    logResolverError('approveContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -91,7 +91,7 @@ export function approveContract(
 
                 if (dateApprovalReleasedToStateAsDate > today) {
                     const errMessage = `Attempted to approve contract with invalid approval release date: ${dateApprovalReleasedToState}`
-                    logError('approveContract', errMessage)
+                    logResolverError('approveContract', errMessage, context)
                     throw createUserInputError(errMessage)
                 }
 
@@ -104,9 +104,10 @@ export function approveContract(
 
                 if (approveContractResult instanceof Error) {
                     if (approveContractResult instanceof NotFoundError) {
-                        logError(
+                        logResolverError(
                             'approveContract',
-                            approveContractResult.message
+                            approveContractResult.message,
+                            context
                         )
                         throw new GraphQLError(approveContractResult.message, {
                             extensions: {
@@ -117,7 +118,7 @@ export function approveContract(
                     }
 
                     const errMessage = `Failed to approve contract ID:${contractID}`
-                    logError('approveContract', errMessage)
+                    logResolverError('approveContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -126,7 +127,7 @@ export function approveContract(
                     })
                 }
 
-                logSuccess('approveContract')
+                logResolverSuccess('approveContract', context)
 
                 return { contract: approveContractResult }
             }

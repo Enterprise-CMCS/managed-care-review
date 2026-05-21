@@ -1,7 +1,7 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
-import { logSuccess, logError } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
@@ -27,7 +27,7 @@ export function deleteOauthClientResolver(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('deleteOauthClient', errMessage)
+                    logResolverError('deleteOauthClient', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -39,7 +39,7 @@ export function deleteOauthClientResolver(
                 if (!user || user.role !== 'ADMIN_USER') {
                     const message =
                         'user not authorized to delete OAuth clients'
-                    logError('deleteOauthClient', message)
+                    logResolverError('deleteOauthClient', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -47,7 +47,7 @@ export function deleteOauthClientResolver(
                 const deleted = await store.deleteOAuthClient(input.clientId)
                 if (!deleted || deleted instanceof Error) {
                     const message = 'Failed to delete OAuth client'
-                    logError('deleteOauthClient', message)
+                    logResolverError('deleteOauthClient', message, context)
                     throw new GraphQLError(message, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -56,7 +56,7 @@ export function deleteOauthClientResolver(
                     })
                 }
 
-                logSuccess('deleteOauthClient')
+                logResolverSuccess('deleteOauthClient', context)
 
                 return {
                     oauthClient: deleted,

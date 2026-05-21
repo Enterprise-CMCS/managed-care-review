@@ -2,7 +2,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison, hasAdminPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
@@ -24,7 +24,11 @@ export function updateDivisionAssignment(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('updateDivisionAssignment', errMessage)
+                    logResolverError(
+                        'updateDivisionAssignment',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -37,7 +41,11 @@ export function updateDivisionAssignment(
                 if (!hasAdminPermissions(currentUser)) {
                     const errMessage =
                         'user not authorized to modify assignments'
-                    logError('updateDivisionAssignment', errMessage)
+                    logResolverError(
+                        'updateDivisionAssignment',
+                        errMessage,
+                        context
+                    )
                     throw createForbiddenError(errMessage)
                 }
 
@@ -51,7 +59,11 @@ export function updateDivisionAssignment(
                 if (divisionAssignment) {
                     if (!isValidCmsDivison(divisionAssignment)) {
                         const errMsg = 'Invalid division assignment'
-                        logError('updateDivisionAssignment', errMsg)
+                        logResolverError(
+                            'updateDivisionAssignment',
+                            errMsg,
+                            context
+                        )
                         throw createUserInputError(
                             errMsg,
                             'divisionAssignment',
@@ -71,7 +83,11 @@ export function updateDivisionAssignment(
                 if (result instanceof Error) {
                     if (result instanceof NotFoundError) {
                         const errMsg = 'cmsUserID does not exist'
-                        logError('updateDivisionAssignment', errMsg)
+                        logResolverError(
+                            'updateDivisionAssignment',
+                            errMsg,
+                            context
+                        )
                         throw createUserInputError(
                             errMsg,
                             'cmsUserID',
@@ -80,7 +96,11 @@ export function updateDivisionAssignment(
                     }
 
                     const errMsg = `Issue assigning states to user. Message: ${result.message}`
-                    logError('updateDivisionAssignment', errMsg)
+                    logResolverError(
+                        'updateDivisionAssignment',
+                        errMsg,
+                        context
+                    )
                     throw new GraphQLError(errMsg, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -91,7 +111,11 @@ export function updateDivisionAssignment(
 
                 if (!result) {
                     const errMsg = 'Failed to update user'
-                    logError('updateDivisionAssignment', errMsg)
+                    logResolverError(
+                        'updateDivisionAssignment',
+                        errMsg,
+                        context
+                    )
                     throw new GraphQLError(errMsg, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -100,7 +124,7 @@ export function updateDivisionAssignment(
                     })
                 }
 
-                logSuccess('updateDivisionAssignment')
+                logResolverSuccess('updateDivisionAssignment', context)
 
                 // return updated user
                 return {

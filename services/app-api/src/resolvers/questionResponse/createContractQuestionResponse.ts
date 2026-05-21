@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { isStateUser, contractSubmitters } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError, type Store } from '../../postgres'
@@ -27,7 +27,11 @@ export function createContractQuestionResponseResolver(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('createContractQuestionResponse', errMessage)
+                    logResolverError(
+                        'createContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -39,13 +43,21 @@ export function createContractQuestionResponseResolver(
                 if (!isStateUser(user)) {
                     const msg =
                         'user not authorized to create a question response'
-                    logError('createContractQuestionResponse', msg)
+                    logResolverError(
+                        'createContractQuestionResponse',
+                        msg,
+                        context
+                    )
                     throw createForbiddenError(msg)
                 }
 
                 if (input.documents.length === 0) {
                     const msg = 'question response documents are required'
-                    logError('createContractQuestionResponse', msg)
+                    logResolverError(
+                        'createContractQuestionResponse',
+                        msg,
+                        context
+                    )
                     throw createUserInputError(msg)
                 }
 
@@ -69,12 +81,20 @@ export function createContractQuestionResponseResolver(
                 if (createResponseResult instanceof Error) {
                     if (createResponseResult instanceof NotFoundError) {
                         const errMessage = `Contract question with ID: ${input.questionID} not found to attach response to`
-                        logError('createContractQuestionResponse', errMessage)
+                        logResolverError(
+                            'createContractQuestionResponse',
+                            errMessage,
+                            context
+                        )
                         throw createUserInputError(errMessage)
                     }
 
                     const errMessage = `Issue creating question response for contract question ${input.questionID}. Message: ${createResponseResult.message}`
-                    logError('createContractQuestionResponse', errMessage)
+                    logResolverError(
+                        'createContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
                     throw new Error(errMessage)
                 }
 
@@ -83,7 +103,11 @@ export function createContractQuestionResponseResolver(
                 )
                 if (questions instanceof Error) {
                     const errMessage = `Issue finding all questions for contract with ID ${createResponseResult.contractID}. Message: ${questions.message}`
-                    logError('createContractQuestionResponse', errMessage)
+                    logResolverError(
+                        'createContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -98,14 +122,22 @@ export function createContractQuestionResponseResolver(
                 if (contract instanceof Error) {
                     if (contract instanceof NotFoundError) {
                         const errMessage = `Package with id ${createResponseResult.contractID} does not exist`
-                        logError('createContractQuestionResponse', errMessage)
+                        logResolverError(
+                            'createContractQuestionResponse',
+                            errMessage,
+                            context
+                        )
                         throw new GraphQLError(errMessage, {
                             extensions: { code: 'NOT_FOUND' },
                         })
                     }
 
                     const errMessage = `Issue finding a package. Message: ${contract.message}`
-                    logError('createContractQuestionResponse', errMessage)
+                    logResolverError(
+                        'createContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -117,7 +149,11 @@ export function createContractQuestionResponseResolver(
                 // Return error if contract has been approved
                 if (contract.consolidatedStatus === 'APPROVED') {
                     const errMessage = `Issue creating response for contract. Message: Cannot create response for contract in ${contract.consolidatedStatus} status`
-                    logError('createContractQuestionResponse', errMessage)
+                    logResolverError(
+                        'createContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
                     throw createUserInputError(errMessage)
                 }
 
@@ -125,9 +161,10 @@ export function createContractQuestionResponseResolver(
                     contract.stateCode
                 )
                 if (statePrograms instanceof Error) {
-                    logError(
+                    logResolverError(
                         'createContractQuestionResponse',
-                        statePrograms.message
+                        statePrograms.message,
+                        context
                     )
                     throw new GraphQLError(statePrograms.message, {
                         extensions: {
@@ -147,9 +184,10 @@ export function createContractQuestionResponseResolver(
                     )
 
                 if (stateAnalystsEmailsResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message
+                        stateAnalystsEmailsResult.message,
+                        context
                     )
                 } else {
                     stateAnalystsEmails = stateAnalystsEmailsResult.map(
@@ -168,9 +206,10 @@ export function createContractQuestionResponseResolver(
                     )
 
                 if (sendQuestionResponseCMSEmailResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'sendQuestionResponseCMSEmail - Send CMS email',
-                        sendQuestionResponseCMSEmailResult.message
+                        sendQuestionResponseCMSEmailResult.message,
+                        context
                     )
                     throw new GraphQLError('Email failed', {
                         extensions: {
@@ -192,9 +231,10 @@ export function createContractQuestionResponseResolver(
                         )
 
                     if (sendQuestionResponseStateEmailResult instanceof Error) {
-                        logError(
+                        logResolverError(
                             'sendQuestionResponseStateEmail - Send State email',
-                            sendQuestionResponseStateEmailResult.message
+                            sendQuestionResponseStateEmailResult.message,
+                            context
                         )
                         throw new GraphQLError('Email failed', {
                             extensions: {
@@ -205,7 +245,7 @@ export function createContractQuestionResponseResolver(
                     }
                 }
 
-                logSuccess('createContractQuestionResponse')
+                logResolverSuccess('createContractQuestionResponse', context)
 
                 return {
                     question: createResponseResult,

@@ -1,7 +1,7 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { isStateUser } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
@@ -35,7 +35,11 @@ export function updateContractDraftRevision(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('updateContractDraftRevision', errMessage)
+                    logResolverError(
+                        'updateContractDraftRevision',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -80,7 +84,11 @@ export function updateContractDraftRevision(
                     const msg = !isStateUser(context.user)
                         ? 'User not authorized to modify state data'
                         : 'User not authorized to fetch data from a different state'
-                    logError('updateContractDraftRevision', msg)
+                    logResolverError(
+                        'updateContractDraftRevision',
+                        msg,
+                        context
+                    )
                     throw createForbiddenError(msg)
                 }
 
@@ -90,7 +98,11 @@ export function updateContractDraftRevision(
                     contractWithHistory.status === 'RESUBMITTED'
                 ) {
                     const errMessage = `Contract is not in editable state. Contract: ${contractID} Status: ${contractWithHistory.status}`
-                    logError('updateContractDraftRevision', errMessage)
+                    logResolverError(
+                        'updateContractDraftRevision',
+                        errMessage,
+                        context
+                    )
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -100,7 +112,11 @@ export function updateContractDraftRevision(
                     lastSeenUpdatedAt.getTime()
                 ) {
                     const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
-                    logError('updateContractDraftRevision', errMessage)
+                    logResolverError(
+                        'updateContractDraftRevision',
+                        errMessage,
+                        context
+                    )
                     throw createUserInputError(errMessage)
                 }
 
@@ -158,7 +174,11 @@ export function updateContractDraftRevision(
 
                 if (parsedFormData instanceof Error) {
                     const errMessage = parsedFormData.message
-                    logError('updateContractDraftRevision', errMessage)
+                    logResolverError(
+                        'updateContractDraftRevision',
+                        errMessage,
+                        context
+                    )
                     throw createUserInputError(errMessage)
                 }
 
@@ -178,7 +198,11 @@ export function updateContractDraftRevision(
 
                 if (updateResult instanceof Error) {
                     const errMessage = `Error updating form data: ${contractID}:: ${updateResult.message}`
-                    logError('updateContractDraftRevision', errMessage)
+                    logResolverError(
+                        'updateContractDraftRevision',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -187,7 +211,7 @@ export function updateContractDraftRevision(
                     })
                 }
 
-                logSuccess('updateContractDraftRevision')
+                logResolverSuccess('updateContractDraftRevision', context)
 
                 return {
                     contract: updateResult,

@@ -1,5 +1,5 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError, handleNotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
@@ -60,7 +60,11 @@ function updateDraftContractRates(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('updateDraftContractRates', errMessage)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -125,7 +129,11 @@ function updateDraftContractRates(
 
                 if (!parsedRatesResult.success) {
                     const errMsg = `updatedRates not correctly formatted: ${parsedRatesResult.error}`
-                    logError('updateDraftContractRates', errMsg)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errMsg,
+                        context
+                    )
                     throw createUserInputError(errMsg)
                 }
 
@@ -137,7 +145,11 @@ function updateDraftContractRates(
                         throw handleNotFoundError(contract)
                     }
                     const errMessage = `Issue finding a contract with history with id ${contractID}. Message: ${contract.message}`
-                    logError('updateDraftContractRates', errMessage)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -151,7 +163,11 @@ function updateDraftContractRates(
                 )
                 if (statePrograms instanceof Error) {
                     const errMessage = `Couldn't find programs for state ${contract.stateCode}. Message: ${statePrograms.message}`
-                    logError('updateDraftContractRates', errMessage)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -167,14 +183,22 @@ function updateDraftContractRates(
                     if (contract.stateCode !== stateFromCurrentUser) {
                         const errMessage =
                             'user not authorized to update a draft from a different state'
-                        logError('updateDraftContractRates', errMessage)
+                        logResolverError(
+                            'updateDraftContractRates',
+                            errMessage,
+                            context
+                        )
                         throw createForbiddenError(errMessage)
                     }
                     // this is a valid state user
                 } else {
                     // any other user type is invalid
                     const errMessage = 'user not authorized to update a draft'
-                    logError('updateDraftContractRates', errMessage)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errMessage,
+                        context
+                    )
                     throw createForbiddenError(errMessage)
                 }
                 // state user is authorized
@@ -188,7 +212,11 @@ function updateDraftContractRates(
                 ) {
                     const errMsg =
                         'you cannot update a contract that is not DRAFT or UNLOCKED'
-                    logError('updateDraftContractRates', errMsg)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errMsg,
+                        context
+                    )
                     throw createUserInputError(errMsg)
                 }
 
@@ -198,7 +226,11 @@ function updateDraftContractRates(
                     lastSeenUpdatedAt.getTime()
                 ) {
                     const errMessage = `Concurrent update error: The data you are trying to modify has changed since you last retrieved it. Please refresh the page to continue.`
-                    logError('updateDraftContractRates', errMessage)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        errMessage,
+                        context
+                    )
                     throw createUserInputError(errMessage)
                 }
 
@@ -246,7 +278,11 @@ function updateDraftContractRates(
                             const errmsg =
                                 'Attempted to update a rate not associated with this contract: ' +
                                 rateUpdate.rateID
-                            logError('updateDraftContractRates', errmsg)
+                            logResolverError(
+                                'updateDraftContractRates',
+                                errmsg,
+                                context
+                            )
                             throw createUserInputError(errmsg)
                         }
                         knownRateIDs.splice(knownRateIDX, 1)
@@ -259,7 +295,11 @@ function updateDraftContractRates(
                             const errmsg =
                                 'Programming Error: this rate should exist, we had its ID: ' +
                                 rateUpdate.rateID
-                            logError('updateDraftContractRates', errmsg)
+                            logResolverError(
+                                'updateDraftContractRates',
+                                errmsg,
+                                context
+                            )
                             throw new Error(errmsg)
                         }
 
@@ -272,7 +312,11 @@ function updateDraftContractRates(
                             const errmsg =
                                 'Attempted to update a rate that is not editable: ' +
                                 rateUpdate.rateID
-                            logError('updateDraftContractRates', errmsg)
+                            logResolverError(
+                                'updateDraftContractRates',
+                                errmsg,
+                                context
+                            )
                             throw createUserInputError(errmsg)
                         }
 
@@ -280,7 +324,11 @@ function updateDraftContractRates(
                             const errmsg =
                                 'Attempted to update a rate that is not a child of this contract: ' +
                                 rateUpdate.rateID
-                            logError('updateDraftContractRates', errmsg)
+                            logResolverError(
+                                'updateDraftContractRates',
+                                errmsg,
+                                context
+                            )
                             throw createUserInputError(errmsg)
                         }
 
@@ -325,7 +373,11 @@ function updateDraftContractRates(
                                 const errmsg =
                                     'Unexpected Error: couldnt fetch the linking rate: ' +
                                     rateUpdate.rateID
-                                logError('updateDraftContractRates', errmsg)
+                                logResolverError(
+                                    'updateDraftContractRates',
+                                    errmsg,
+                                    context
+                                )
                                 throw new Error(errmsg)
                             }
 
@@ -335,7 +387,11 @@ function updateDraftContractRates(
                                 )
                             ) {
                                 const errmsg = `Attempted to link a rate with an invalid status. Status: ${rateToLink.consolidatedStatus}. RateID: ${rateUpdate.rateID}`
-                                logError('updateDraftContractRates', errmsg)
+                                logResolverError(
+                                    'updateDraftContractRates',
+                                    errmsg,
+                                    context
+                                )
                                 throw createUserInputError(errmsg)
                             }
 
@@ -377,11 +433,15 @@ function updateDraftContractRates(
                 })
 
                 if (result instanceof Error) {
-                    logError('updateDraftContractRates', result.message)
+                    logResolverError(
+                        'updateDraftContractRates',
+                        result.message,
+                        context
+                    )
                     throw result
                 }
 
-                logSuccess('updateDraftContractRates')
+                logResolverSuccess('updateDraftContractRates', context)
 
                 // return result.
                 return { contract: result }

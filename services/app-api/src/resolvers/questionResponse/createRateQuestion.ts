@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { hasCMSPermissions, isValidCmsDivison } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError, type Store } from '../../postgres'
@@ -27,7 +27,7 @@ export function createRateQuestionResolver(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('createRateQuestion', errMessage)
+                    logResolverError('createRateQuestion', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -38,7 +38,7 @@ export function createRateQuestionResolver(
 
                 if (!hasCMSPermissions(user)) {
                     const msg = 'user not authorized to create a question'
-                    logError('createRateQuestion', msg)
+                    logResolverError('createRateQuestion', msg, context)
                     throw createForbiddenError(msg)
                 }
 
@@ -49,13 +49,13 @@ export function createRateQuestionResolver(
                 ) {
                     const msg =
                         'users without an assigned division are not authorized to create a question'
-                    logError('createRateQuestion', msg)
+                    logResolverError('createRateQuestion', msg, context)
                     throw createForbiddenError(msg)
                 }
 
                 if (input.documents.length === 0) {
                     const msg = 'question documents are required'
-                    logError('createRateQuestion', msg)
+                    logResolverError('createRateQuestion', msg, context)
                     throw createUserInputError(msg)
                 }
 
@@ -64,14 +64,18 @@ export function createRateQuestionResolver(
                 if (rate instanceof Error) {
                     if (rate instanceof NotFoundError) {
                         const errMessage = `Rate with id ${input.rateID} does not exist`
-                        logError('createRateQuestion', errMessage)
+                        logResolverError(
+                            'createRateQuestion',
+                            errMessage,
+                            context
+                        )
                         throw new GraphQLError(errMessage, {
                             extensions: { code: 'NOT_FOUND' },
                         })
                     }
 
                     const errMessage = `Issue finding a rate. Message: ${rate.message}`
-                    logError('createRateQuestion', errMessage)
+                    logResolverError('createRateQuestion', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -82,7 +86,7 @@ export function createRateQuestionResolver(
 
                 if (['DRAFT', 'WITHDRAWN'].includes(rate.consolidatedStatus)) {
                     const errMessage = `Issue creating question for rate. Message: Rate is in a invalid statius: ${rate.consolidatedStatus}`
-                    logError('createRateQuestion', errMessage)
+                    logResolverError('createRateQuestion', errMessage, context)
                     throw createUserInputError(errMessage)
                 }
 
@@ -106,7 +110,7 @@ export function createRateQuestionResolver(
 
                 if (questionResult instanceof Error) {
                     const errMessage = `Issue creating question for rate. Message: ${questionResult.message}`
-                    logError('createRateQuestion', errMessage)
+                    logResolverError('createRateQuestion', errMessage, context)
                     throw new Error(errMessage)
                 }
 
@@ -114,7 +118,7 @@ export function createRateQuestionResolver(
 
                 if (allQuestions instanceof Error) {
                     const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
-                    logError('createRateQuestion', errMessage)
+                    logResolverError('createRateQuestion', errMessage, context)
                     throw new Error(errMessage)
                 }
 
@@ -127,9 +131,10 @@ export function createRateQuestionResolver(
                     )
 
                 if (stateAnalystsEmailsResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message
+                        stateAnalystsEmailsResult.message,
+                        context
                     )
                 } else {
                     stateAnalystsEmails = stateAnalystsEmailsResult.map(
@@ -144,7 +149,7 @@ export function createRateQuestionResolver(
 
                 if (!contractSubmissionType) {
                     const errMessage = `Issue creating question for rate. Message: Parent contract missing contract type. Parent contract ID: ${rate.parentContractID}`
-                    logError('createRateQuestion', errMessage)
+                    logResolverError('createRateQuestion', errMessage, context)
                     throw createUserInputError(errMessage)
                 }
 
@@ -156,9 +161,10 @@ export function createRateQuestionResolver(
                     )
 
                 if (sendRateQuestionStateEmailResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'sendRateQuestionsStateEmail - state email failed',
-                        sendRateQuestionStateEmailResult
+                        sendRateQuestionStateEmailResult,
+                        context
                     )
                     const errMessage = `Error sending a state email for
                 questionID: ${questionResult.id} and rate: ${rate.id}`
@@ -179,9 +185,10 @@ export function createRateQuestionResolver(
                     )
 
                 if (sendRateQuestionCMSEmailResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'sendRateQuestionsCMSEmail - CMS email failed',
-                        sendRateQuestionCMSEmailResult
+                        sendRateQuestionCMSEmailResult,
+                        context
                     )
                     const errMessage = `Error sending a CMS email for
                 questionID: ${questionResult.id} and contractID: ${rate.id}`
@@ -193,7 +200,7 @@ export function createRateQuestionResolver(
                     })
                 }
 
-                logSuccess('createRateQuestion')
+                logResolverSuccess('createRateQuestion', context)
 
                 return {
                     question: questionResult,

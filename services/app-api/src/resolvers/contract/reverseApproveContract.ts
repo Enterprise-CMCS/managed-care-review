@@ -1,6 +1,6 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
@@ -25,7 +25,11 @@ export function reverseApproveContract(
                 // Check OAuth client write permissions
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('reverseApproveContract', errMessage)
+                    logResolverError(
+                        'reverseApproveContract',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -37,7 +41,7 @@ export function reverseApproveContract(
                 if (!hasCMSPermissions(user) && !isAdminUser(user)) {
                     const message =
                         'user not authorized to reverse approve a contract'
-                    logError('reverseApproveContract', message)
+                    logResolverError('reverseApproveContract', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -66,7 +70,11 @@ export function reverseApproveContract(
 
                 if (contractWithHistory.consolidatedStatus !== 'APPROVED') {
                     const errMessage = `Attempted to reverse approval for contract with wrong status: ${contractWithHistory.consolidatedStatus}`
-                    logError('reverseApproveContract', errMessage)
+                    logResolverError(
+                        'reverseApproveContract',
+                        errMessage,
+                        context
+                    )
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -77,7 +85,11 @@ export function reverseApproveContract(
                     latestAction.actionType !== 'MARK_AS_APPROVED'
                 ) {
                     const errMessage = `Cannot reverse approval: latest review action is not MARK_AS_APPROVED`
-                    logError('reverseApproveContract', errMessage)
+                    logResolverError(
+                        'reverseApproveContract',
+                        errMessage,
+                        context
+                    )
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -89,9 +101,10 @@ export function reverseApproveContract(
 
                 if (reverseResult instanceof Error) {
                     if (reverseResult instanceof NotFoundError) {
-                        logError(
+                        logResolverError(
                             'reverseApproveContract',
-                            reverseResult.message
+                            reverseResult.message,
+                            context
                         )
                         throw new GraphQLError(reverseResult.message, {
                             extensions: {
@@ -102,7 +115,11 @@ export function reverseApproveContract(
                     }
 
                     const errMessage = `Failed to reverse approval for contract ID:${contractID}`
-                    logError('reverseApproveContract', errMessage)
+                    logResolverError(
+                        'reverseApproveContract',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -111,7 +128,7 @@ export function reverseApproveContract(
                     })
                 }
 
-                logSuccess('reverseApproveContract')
+                logResolverSuccess('reverseApproveContract', context)
 
                 return { contract: reverseResult }
             }

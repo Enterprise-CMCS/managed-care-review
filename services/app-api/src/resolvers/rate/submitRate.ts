@@ -1,7 +1,7 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
@@ -39,7 +39,7 @@ export function submitRate(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('submitRate', errMessage)
+                    logResolverError('submitRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -51,14 +51,14 @@ export function submitRate(
                 // throw error if the feature flag is off
                 if (!featureFlags?.['rate-edit-unlock']) {
                     const errMessage = `Not authorized to edit and submit a rate independently, the feature is disabled`
-                    logError('submitRate', errMessage)
+                    logResolverError('submitRate', errMessage, context)
                     throw createForbiddenError(errMessage)
                 }
 
                 // This resolver is only callable by State users
                 if (!isStateUser(user)) {
                     const errMessage = 'user not authorized to submit rate'
-                    logError('submitRate', errMessage)
+                    logResolverError('submitRate', errMessage, context)
                     throw createForbiddenError(errMessage)
                 }
 
@@ -68,11 +68,15 @@ export function submitRate(
                 if (unsubmittedRate instanceof Error) {
                     if (unsubmittedRate instanceof NotFoundError) {
                         const errMessage = `A rate must exist to be submitted: ${rateID}`
-                        logError('submitRate', errMessage)
+                        logResolverError('submitRate', errMessage, context)
                         throw createUserInputError(errMessage, 'rateID')
                     }
 
-                    logError('submitRate', unsubmittedRate.message)
+                    logResolverError(
+                        'submitRate',
+                        unsubmittedRate.message,
+                        context
+                    )
                     throw new GraphQLError(unsubmittedRate.message, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -87,7 +91,7 @@ export function submitRate(
                     )
                 ) {
                     const errMessage = `Attempted to submit a rate with invalid status: ${unsubmittedRate.consolidatedStatus}`
-                    logError('submitRate', errMessage)
+                    logResolverError('submitRate', errMessage, context)
                     throw createUserInputError(errMessage, 'rateID')
                 }
 
@@ -233,7 +237,7 @@ export function submitRate(
 
                 if (submittedRate instanceof Error) {
                     const errMessage = `Failed to submit rate with ID: ${rateID}; ${submittedRate.message}`
-                    logError('submitRate', errMessage)
+                    logResolverError('submitRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -249,9 +253,10 @@ export function submitRate(
                         await documentZip.generateRateDocumentsZip(rateRevision)
                     if (zipResult instanceof Error) {
                         // Log the error but don't fail the submission
-                        logError(
+                        logResolverError(
                             'submitRate - rate documents zip generation failed',
-                            zipResult
+                            zipResult,
+                            context
                         )
                         console.warn(
                             `Rate document zip generation failed for revision ${rateRevision.id}, but continuing with submission process`

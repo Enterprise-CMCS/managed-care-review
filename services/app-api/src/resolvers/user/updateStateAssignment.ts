@@ -1,7 +1,7 @@
 import type { Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { isValidStateCode, type StateCodeType } from '@mc-review/submissions'
@@ -25,7 +25,11 @@ export function updateStateAssignment(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('updateStateAssignment', errMessage)
+                    logResolverError(
+                        'updateStateAssignment',
+                        errMessage,
+                        context
+                    )
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -40,7 +44,7 @@ export function updateStateAssignment(
                     !hasCMSPermissions(currentUser)
                 ) {
                     const msg = 'user not authorized to modify assignments'
-                    logError('updateStateAssignment', msg)
+                    logResolverError('updateStateAssignment', msg, context)
                     throw createForbiddenError(msg)
                 }
 
@@ -67,7 +71,11 @@ export function updateStateAssignment(
 
                         const errMsg =
                             'cannot update state assignments with invalid assignments'
-                        logError('updateStateAssignment', errMsg)
+                        logResolverError(
+                            'updateStateAssignment',
+                            errMsg,
+                            context
+                        )
                         throw createUserInputError(
                             errMsg,
                             'stateAssignments',
@@ -77,7 +85,7 @@ export function updateStateAssignment(
                 } else {
                     const msg =
                         'cannot update state assignments with no assignments'
-                    logError('updateStateAssignment', msg)
+                    logResolverError('updateStateAssignment', msg, context)
                     throw createUserInputError(
                         msg,
                         'stateAssignments',
@@ -96,7 +104,11 @@ export function updateStateAssignment(
                 if (result instanceof Error) {
                     if (result instanceof NotFoundError) {
                         const errMsg = 'cmsUserID does not exist'
-                        logError('updateStateAssignment', errMsg)
+                        logResolverError(
+                            'updateStateAssignment',
+                            errMsg,
+                            context
+                        )
                         throw createUserInputError(
                             errMsg,
                             'cmsUserID',
@@ -105,7 +117,7 @@ export function updateStateAssignment(
                     }
 
                     const errMsg = `Issue assigning states to user. Message: ${result.message}`
-                    logError('updateStateAssignment', errMsg)
+                    logResolverError('updateStateAssignment', errMsg, context)
                     throw new GraphQLError(errMsg, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -116,7 +128,7 @@ export function updateStateAssignment(
 
                 if (!result) {
                     const errMsg = 'Failed to update user'
-                    logError('updateStateAssignment', errMsg)
+                    logResolverError('updateStateAssignment', errMsg, context)
                     throw new GraphQLError(errMsg, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

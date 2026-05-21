@@ -4,7 +4,7 @@ import {
     isAdminUser,
 } from '../../domain-models'
 import type { MutationResolvers, EmailConfiguration } from '../../gen/gqlServer'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
@@ -63,7 +63,7 @@ export function updateEmailSettings(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('updateEmailSettings', errMessage)
+                    logResolverError('updateEmailSettings', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -75,7 +75,7 @@ export function updateEmailSettings(
                 // Only users with the role ADMIN_USER can update email settings, excluding the help desk user
                 if (!isAdminUser(user)) {
                     const msg = 'user not authorized to update email settings'
-                    logError('updateEmailSettings', msg)
+                    logResolverError('updateEmailSettings', msg, context)
                     throw createForbiddenError(msg)
                 }
 
@@ -86,7 +86,7 @@ export function updateEmailSettings(
 
                 if (!validatedEmailSettings.success) {
                     const msg = `Invalid email settings: ${validatedEmailSettings.error}`
-                    logError('updateEmailSettings', msg)
+                    logResolverError('updateEmailSettings', msg, context)
                     throw createUserInputError(
                         msg,
                         'emailConfiguration',
@@ -99,7 +99,7 @@ export function updateEmailSettings(
 
                 if (updatedEmailSettings instanceof Error) {
                     const msg = `Issue updating email settings: ${updatedEmailSettings.message}`
-                    logError('updateEmailSettings', msg)
+                    logResolverError('updateEmailSettings', msg, context)
                     throw new GraphQLError(msg, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

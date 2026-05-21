@@ -1,7 +1,7 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { RateType } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError } from '../../postgres/postgresErrors'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
@@ -25,7 +25,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('unlockRate', errMessage)
+                    logResolverError('unlockRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -37,7 +37,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                 // This resolver is only callable by CMS users
                 if (!hasCMSPermissions(user)) {
                     const errMessage = 'user not authorized to unlock rate'
-                    logError('unlockRate', errMessage)
+                    logResolverError('unlockRate', errMessage, context)
                     throw createForbiddenError(errMessage)
                 }
 
@@ -47,12 +47,12 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                 if (initialRateResult instanceof Error) {
                     if (initialRateResult instanceof NotFoundError) {
                         const errMessage = `A rate must exist to be unlocked: ${rateID}`
-                        logError('unlockRate', errMessage)
+                        logResolverError('unlockRate', errMessage, context)
                         throw createUserInputError(errMessage, 'rateID')
                     }
 
                     const errMessage = `Issue finding a rate. Message: ${initialRateResult.message}`
-                    logError('unlockRate', errMessage)
+                    logResolverError('unlockRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -69,7 +69,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                     )
                 ) {
                     const errMessage = `Attempted to unlock rate with wrong status: ${rate.consolidatedStatus}`
-                    logError('unlockRate', errMessage)
+                    logResolverError('unlockRate', errMessage, context)
                     throw createUserInputError(errMessage, 'rateID')
                 }
 
@@ -79,12 +79,12 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                 if (contractResult instanceof Error) {
                     if (contractResult instanceof NotFoundError) {
                         const errMessage = `A contract must exist that is associated with the rate: ${rate.id}`
-                        logError('unlockRate', errMessage)
+                        logResolverError('unlockRate', errMessage, context)
                         throw createUserInputError(errMessage, 'rateID')
                     }
 
                     const errMessage = `Issue finding a contract. Message: ${contractResult.message}`
-                    logError('unlockRate', errMessage)
+                    logResolverError('unlockRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -99,7 +99,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                     )
                 ) {
                     const errMessage = `Attempted to unlock a rate that is associated with a contract with wrong status: ${contractResult.consolidatedStatus}`
-                    logError('unlockRate', errMessage)
+                    logResolverError('unlockRate', errMessage, context)
                     throw createUserInputError(errMessage, 'rateID')
                 }
 
@@ -111,7 +111,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
 
                 if (unlockRateResult instanceof Error) {
                     const errMessage = `Failed to unlock rate revision with ID: ${rate.id}; ${unlockRateResult.message}`
-                    logError('unlockRate', errMessage)
+                    logResolverError('unlockRate', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -120,7 +120,7 @@ export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
                     })
                 }
 
-                logSuccess('unlockRate')
+                logResolverSuccess('unlockRate', context)
 
                 return { rate: unlockRateResult }
             }

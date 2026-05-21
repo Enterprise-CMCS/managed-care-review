@@ -544,6 +544,7 @@ const createOAuthClient = async (
             input: {
                 description: 'Cypress integration test',
                 userID: apiUser.id,
+                scopes: ['CMS_SUBMISSION_ACTIONS']
             },
         },
     })
