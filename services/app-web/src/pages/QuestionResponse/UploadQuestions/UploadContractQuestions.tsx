@@ -6,6 +6,7 @@ import {
     ContractSubmissionType,
     CreateContractQuestionInput,
     CreateContractQuestionDocument,
+    Division,
     FetchContractWithQuestionsDocument,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
@@ -18,8 +19,6 @@ import { FileItemT } from '../../../components'
 import { getNextCMSRoundNumber } from '../QuestionResponseHelpers'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
 import { handleAndReturnErrorState } from '../../StateSubmission/SharedSubmissionComponents'
-import { isValidCmsDivison } from '../QuestionResponseHelpers/questionResponseHelpers'
-import { Error404 } from '../../Errors/Error404Page'
 import { useMemoizedStateHeader } from '../../../hooks'
 
 export const UploadContractQuestions = () => {
@@ -116,16 +115,7 @@ export const UploadContractQuestions = () => {
         }
     }
 
-    // confirm division is valid
-    const realDivision = division?.toUpperCase()
-
-    if (!realDivision || !isValidCmsDivison(realDivision)) {
-        console.error(
-            'Upload Questions called with bogus division in URL: ',
-            division
-        )
-        return <Error404 />
-    }
+    const realDivision = division.toUpperCase() as Division
 
     const nextRoundNumber = getNextCMSRoundNumber(
         contract.questions,
