@@ -11,10 +11,13 @@ describe('AuthenticatedRouteWrapper and SessionTimeoutModal', () => {
         createMocks()
     })
 
+    afterEach(() => {
+        vi.clearAllMocks()
+    })
+
     afterAll(() => {
         vi.clearAllTimers()
         vi.useRealTimers()
-        vi.restoreAllMocks()
     })
 
     it('renders without errors', () => {
