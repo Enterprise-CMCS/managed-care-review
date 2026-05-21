@@ -9,20 +9,19 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-} from '../../domain-models/user'
-import { NotFoundError } from '../../postgres/postgresErrors'
+} from '../../domain-models'
+import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { logError } from '../../logger'
+import { logError, logResolverError } from '../../logger'
 import { GraphQLError } from 'graphql'
-import type { StrippedRateType } from '../../domain-models/contractAndRates'
+import type { StrippedRateType } from '../../domain-models'
 import type { StrippedRateOrErrorArrayType } from '../../postgres/contractAndRates/findAllRatesStripped'
 
 const validateAndReturnRates = (
     results: StrippedRateOrErrorArrayType,
     span?: Span
 ): StrippedRateType[] => {
-    // separate valid rates and errors
     const parsedRates: StrippedRateType[] = []
     const errorParseRates: string[] = []
     results.forEach((parsed) => {
@@ -33,7 +32,6 @@ const validateAndReturnRates = (
         }
     })
 
-    // log all rates that failed
     if (errorParseRates.length > 0) {
         const errMessage = `Failed to parse the following rates:\n${errorParseRates.join(
             '\n'
@@ -81,6 +79,7 @@ export function indexRatesStripped(
                     }
                     if (ratesWithHistory instanceof Error) {
                         const errMessage = `Issue finding rates: ${ratesWithHistory.message}`
+                        logResolverError('indexRatesStripped', errMessage, context)
 
                         if (ratesWithHistory instanceof NotFoundError) {
                             throw new GraphQLError(errMessage, {
@@ -126,9 +125,9 @@ export function indexRatesStripped(
                     return { totalCount: edges.length, edges }
                 }
 
-                throw createForbiddenError(
-                    'user not authorized to fetch rate reviews data'
-                )
+                const errMsg = 'user not authorized to fetch rate reviews data'
+                logResolverError('indexRatesStripped', errMsg, context)
+                throw createForbiddenError(errMsg)
             }
         )
     }

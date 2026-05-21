@@ -10,7 +10,7 @@ import type {
     QueryResolvers,
     ConsolidatedContractStatus,
 } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import {
@@ -27,7 +27,6 @@ const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
     span?: Span
 ): ContractType[] => {
-    // separate valid contracts and errors
     const parsedContracts: ContractType[] = []
     const errorParseContracts: string[] = []
     contractsWithHistory.forEach((parsed) => {
@@ -40,7 +39,6 @@ const parseContracts = (
         }
     })
 
-    // log all contracts that failed parsing to otel.
     if (errorParseContracts.length > 0) {
         const errMessage = `Failed to parse the following contracts:\n${errorParseContracts.join(
             '\n'
@@ -65,7 +63,7 @@ const formatContracts = (
     }
     if (updatedWithin) {
         const now = new Date()
-        const cutoff = new Date(now.getTime() - updatedWithin! * 1000)
+        const cutoff = new Date(now.getTime() - updatedWithin * 1000)
 
         contracts = contracts.filter((contract: ContractType) => {
             const lastUpdated = getLastUpdatedForDisplay(contract)
@@ -103,7 +101,7 @@ export function indexContractsResolver(
 
                 if (!canRead(context)) {
                     const errMessage = `OAuth client does not have read permissions`
-                    logError('indexContracts', errMessage)
+                    logResolverError('indexContracts', errMessage, context)
                     throw createForbiddenError(errMessage)
                 }
 
@@ -115,7 +113,7 @@ export function indexContractsResolver(
 
                     if (contractsWithHistory instanceof Error) {
                         const errMessage = `Issue finding contracts with history by stateCode: ${user.stateCode}. Message: ${contractsWithHistory.message}`
-                        logError('indexContracts', errMessage)
+                        logResolverError('indexContracts', errMessage, context)
 
                         if (contractsWithHistory instanceof NotFoundError) {
                             throw new GraphQLError(errMessage, {
@@ -133,20 +131,18 @@ export function indexContractsResolver(
                             },
                         })
                     }
-                    logSuccess(
+                    logResolverSuccess(
                         context.oauthClient
                             ? 'indexContracts - oauthClient'
-                            : 'indexContracts'
+                            : 'indexContracts',
+                        context
                     )
                     const parsedContracts = parseContracts(
                         contractsWithHistory,
                         span
                     )
                     return formatContracts(parsedContracts)
-                } else if (
-                    hasAdminPermissions(user) ||
-                    hasCMSPermissions(user)
-                ) {
+                } else if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
                     const skipFindingLatest = !!input?.updatedWithin
                     const contractsWithHistory =
                         await store.findAllContractsWithHistoryBySubmitInfo(
@@ -156,7 +152,7 @@ export function indexContractsResolver(
 
                     if (contractsWithHistory instanceof Error) {
                         const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
-                        logError('indexContracts', errMessage)
+                        logResolverError('indexContracts', errMessage, context)
 
                         if (contractsWithHistory instanceof NotFoundError) {
                             throw new GraphQLError(errMessage, {
@@ -174,10 +170,11 @@ export function indexContractsResolver(
                             },
                         })
                     }
-                    logSuccess(
+                    logResolverSuccess(
                         context.oauthClient
                             ? 'indexContracts - oauthClient'
-                            : 'indexContracts'
+                            : 'indexContracts',
+                        context
                     )
 
                     const parsedContracts = parseContracts(
@@ -198,7 +195,7 @@ export function indexContractsResolver(
                     const errMsg = authInfo
                         ? `OAuth client not authorized to fetch contract data`
                         : 'user not authorized to fetch state data'
-                    logError('indexContracts', errMsg)
+                    logResolverError('indexContracts', errMsg, context)
                     throw createForbiddenError(errMsg)
                 }
             }

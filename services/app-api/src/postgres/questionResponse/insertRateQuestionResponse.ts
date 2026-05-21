@@ -4,6 +4,7 @@ import type {
     StateUserType,
 } from '../../domain-models'
 import {
+    isDeleted,
     questionInclude,
     rateQuestionPrismaToDomainType,
 } from './questionHelpers'
@@ -38,7 +39,11 @@ export async function insertRateQuestionResponse(
             },
         })
 
-        if (question?.actions?.[0]?.action === 'DELETE') {
+        if (!question) {
+            return new NotFoundError('Question was not found to respond to')
+        }
+
+        if (isDeleted(question)) {
             return new Error(
                 `Cannot create response for question with the ID: ${response.questionID}. Question was deleted.`
             )

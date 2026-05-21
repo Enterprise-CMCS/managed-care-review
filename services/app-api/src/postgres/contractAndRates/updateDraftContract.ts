@@ -26,9 +26,9 @@ async function updateDraftContractInsideTransaction(
     })
 
     if (!currentContractRev) {
-        const err = `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
-        console.error(err)
-        return new NotFoundError(err)
+        return new NotFoundError(
+            `PRISMA ERROR: Cannot find the current rev to update with contract id: ${contractID}`
+        )
     }
 
     // Then update the contractRevision, adjusting all simple fields

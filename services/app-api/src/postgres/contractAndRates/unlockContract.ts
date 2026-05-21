@@ -4,7 +4,7 @@ import { NotFoundError } from '../postgresErrors'
 import { unlockRateInDB } from './unlockRate'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 async function unlockContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -66,15 +66,12 @@ async function unlockContractInsideTransaction(
         },
     })
     if (!currentRev) {
-        const err = `PRISMA ERROR: Cannot find the current revision to unlock with contract id: ${contractID}`
-        console.error(err)
-        return new NotFoundError(err)
+        return new NotFoundError(
+            `PRISMA ERROR: Cannot find the current revision to unlock with contract id: ${contractID}`
+        )
     }
 
     if (!currentRev.submitInfoID) {
-        console.error(
-            'Programming Error: cannot unlock a already unlocked contract'
-        )
         return new Error(
             'Programming Error: cannot unlock a already unlocked contract'
         )
@@ -319,19 +316,20 @@ async function unlockContract(
     client: ExtendedPrismaClient,
     args: UnlockContractArgsType
 ): Promise<UnlockedContractType | NotFoundError | Error> {
-    try {
-        return await client.$transaction(async (tx) => {
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'unlockContract',
+        table: 'ContractTable',
+        id: args.contractID,
+        transaction: async (tx) => {
             const result = await unlockContractInsideTransaction(tx, args)
             if (result instanceof Error) {
                 throw result
             }
 
             return result
-        })
-    } catch (err) {
-        console.error('UNLOCK PRISMA CONTRACT ERR', err)
-        return parseErrorToError(err)
-    }
+        },
+    })
 }
 
 export { unlockContract, unlockContractInsideTransaction }

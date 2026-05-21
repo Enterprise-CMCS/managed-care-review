@@ -12,6 +12,7 @@ import {
     CreateOauthClientDocument,
     UpdateOauthClientDocument,
 } from '../../gen/gqlClient'
+import { OAuthScope } from '../../generated/client'
 
 describe('updateOauthClient', () => {
     it('updates an OAuth client as ADMIN', async () => {
@@ -52,6 +53,7 @@ describe('updateOauthClient', () => {
             clientId,
             description: 'Updated description',
             grants: ['client_credentials', 'refresh_token'],
+            scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
         }
 
         const res = await executeGraphQLOperation(server, {
@@ -68,6 +70,7 @@ describe('updateOauthClient', () => {
         expect(oauthClient.grants).toEqual(
             expect.arrayContaining(updateInput.grants)
         )
+        expect(oauthClient.scopes).toEqual(updateInput.scopes)
     })
 
     it('ignores empty string values', async () => {
@@ -96,6 +99,7 @@ describe('updateOauthClient', () => {
                 input: {
                     description: 'Initial description',
                     grants: ['client_credentials'],
+                    scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
                     userID: cmsUser.id,
                 },
             },
@@ -121,6 +125,7 @@ describe('updateOauthClient', () => {
         expect(oauthClient.description).toBe('Initial description')
         expect(oauthClient.user.email).toContain('@example.com')
         expect(oauthClient.grants).toEqual(['client_credentials'])
+        expect(oauthClient.scopes).toEqual([OAuthScope.CMS_SUBMISSION_ACTIONS])
     })
 
     it('errors if not ADMIN', async () => {

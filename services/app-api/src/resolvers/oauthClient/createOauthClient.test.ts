@@ -8,6 +8,7 @@ import {
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { CreateOauthClientDocument } from '../../gen/gqlClient'
+import { OAuthScope } from '../../generated/client'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createOauthClient', () => {
@@ -32,6 +33,7 @@ describe('createOauthClient', () => {
         })
         const input = {
             grants: ['client_credentials', 'refresh_token'],
+            scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
             description: 'Test client',
             userID: cmsUser.id,
         }
@@ -45,6 +47,7 @@ describe('createOauthClient', () => {
         expect(oauthClient.clientId).toMatch(/^oauth-client-/)
         expect(oauthClient.clientSecret).toHaveLength(86) // 64 bytes base64url
         expect(oauthClient.grants).toEqual(expect.arrayContaining(input.grants))
+        expect(oauthClient.scopes).toEqual(input.scopes)
         expect(oauthClient.description).toBe(input.description)
         expect(oauthClient.user).toBeDefined()
         expect(oauthClient.user.id).toBe(cmsUser.id)

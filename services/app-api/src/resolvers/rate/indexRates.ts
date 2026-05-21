@@ -9,21 +9,20 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-} from '../../domain-models/user'
-import { NotFoundError } from '../../postgres/postgresErrors'
+} from '../../domain-models'
+import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
-import { logError, logSuccess } from '../../logger'
+import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
-import type { RateType } from '../../domain-models/contractAndRates'
+import type { RateType } from '../../domain-models'
 import { canRead } from '../../authorization/oauthAuthorization'
 
 const validateAndReturnRates = (
     results: RateOrErrorArrayType,
     span?: Span
 ): RateType[] => {
-    // separate valid rates and errors
     const parsedRates: RateType[] = []
     const errorParseRates: string[] = []
     results.forEach((parsed) => {
@@ -34,7 +33,6 @@ const validateAndReturnRates = (
         }
     })
 
-    // log all rates that failed
     if (errorParseRates.length > 0) {
         const errMessage = `Failed to parse the following rates:\n${errorParseRates.join(
             '\n'
@@ -63,7 +61,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
 
                 if (!canRead(context)) {
                     const errMessage = `OAuth client does not have read permissions`
-                    logError('indexRates', errMessage)
+                    logResolverError('indexRates', errMessage, context)
                     throw createForbiddenError(errMessage)
                 }
 
@@ -96,6 +94,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                     }
                     if (ratesWithHistory instanceof Error) {
                         const errMessage = `Issue finding rates with history Message: ${ratesWithHistory.message}`
+                        logResolverError('indexRates', errMessage, context)
 
                         if (ratesWithHistory instanceof NotFoundError) {
                             throw new GraphQLError(errMessage, {
@@ -137,10 +136,11 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                             })
                         })
                     }
-                    logSuccess(
+                    logResolverSuccess(
                         context.oauthClient
                             ? 'indexRates - oauthClient'
-                            : 'indexRates'
+                            : 'indexRates',
+                        context
                     )
                     return { totalCount: edges.length, edges }
                 }
@@ -149,6 +149,7 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                 const errMsg = authInfo
                     ? `OAuth client not authorized to fetch rate reviews data`
                     : 'user not authorized to fetch rate reviews data'
+                logResolverError('indexRatesResolver', errMsg, context)
                 throw createForbiddenError(errMsg)
             }
         )

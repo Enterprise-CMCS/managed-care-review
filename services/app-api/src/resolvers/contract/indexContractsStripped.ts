@@ -9,20 +9,19 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-} from '../../domain-models/user'
-import { NotFoundError } from '../../postgres/postgresErrors'
+} from '../../domain-models'
+import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { logError } from '../../logger'
+import { logError, logResolverError } from '../../logger'
 import { GraphQLError } from 'graphql'
-import type { StrippedContractType } from '../../domain-models/contractAndRates/contractTypes'
+import type { StrippedContractType } from '../../domain-models'
 import type { StrippedContractOrErrorArrayType } from '../../postgres/contractAndRates/findAllContractsStripped'
 
 const validateAndReturnContracts = (
     results: StrippedContractOrErrorArrayType,
     span?: Span
 ): StrippedContractType[] => {
-    // separate valid contracts and errors
     const parsedContracts: StrippedContractType[] = []
     const errorParseContracts: string[] = []
     results.forEach((parsed) => {
@@ -35,7 +34,6 @@ const validateAndReturnContracts = (
         }
     })
 
-    // log all contracts that failed
     if (errorParseContracts.length > 0) {
         const errMessage = `Failed to parse the following contracts:\n${errorParseContracts.join(
             '\n'
@@ -86,6 +84,11 @@ export function indexContractsStripped(
                     }
                     if (contractsWithHistory instanceof Error) {
                         const errMessage = `Issue finding contracts: ${contractsWithHistory.message}`
+                        logResolverError(
+                            'indexContractsStripped',
+                            errMessage,
+                            context
+                        )
 
                         if (contractsWithHistory instanceof NotFoundError) {
                             throw new GraphQLError(errMessage, {
@@ -129,9 +132,9 @@ export function indexContractsStripped(
                     return { totalCount: edges.length, edges }
                 }
 
-                throw createForbiddenError(
-                    'user not authorized to fetch contract reviews data'
-                )
+                const errMsg = 'user not authorized to fetch contract reviews data'
+                logResolverError('indexContractsStripped', errMsg, context)
+                throw createForbiddenError(errMsg)
             }
         )
     }

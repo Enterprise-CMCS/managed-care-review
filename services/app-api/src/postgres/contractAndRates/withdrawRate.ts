@@ -17,7 +17,7 @@ import { submitContractInsideTransaction } from './submitContract'
 import { submitRateInsideTransaction } from './submitRate'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type WithdrawRateArgsType = {
     rateID: string
@@ -72,6 +72,15 @@ const withdrawRateInsideTransaction = async (
                     },
                 },
             },
+            reviewStatusActions: {
+                orderBy: {
+                    updatedAt: 'desc',
+                },
+                take: 1,
+                select: {
+                    actionType: true,
+                },
+            },
         },
     })
 
@@ -79,6 +88,10 @@ const withdrawRateInsideTransaction = async (
         throw new NotFoundError(
             `PRISMA ERROR: Cannot find rate with id: ${rateID}`
         )
+    }
+
+    if (rate.reviewStatusActions[0]?.actionType === 'WITHDRAW') {
+        throw new Error('Cannot withdraw rate: rate is already withdrawn')
     }
 
     const latestRateRev = getLatestActiveRevision(rate.revisions)
@@ -329,17 +342,17 @@ const withdrawRate = async (
     client: ExtendedPrismaClient,
     args: WithdrawRateArgsType
 ): Promise<RateType | Error> => {
-    try {
-        return await client.$transaction(
-            async (tx) => await withdrawRateInsideTransaction(tx, args),
-            {
-                timeout: 30000,
-            }
-        )
-    } catch (err) {
-        console.error('PRISMA ERROR: Error withdrawing rate', err)
-        return parseErrorToError(err)
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'withdrawRate',
+        table: 'RateTable',
+        id: args.rateID,
+        transaction: async (tx) =>
+            await withdrawRateInsideTransaction(tx, args),
+        transactionOptions: {
+            timeout: 30000,
+        },
+    })
 }
 
 export {

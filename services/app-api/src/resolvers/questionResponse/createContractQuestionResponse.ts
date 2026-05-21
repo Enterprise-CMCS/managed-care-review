@@ -1,6 +1,6 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { isStateUser, contractSubmitters } from '../../domain-models'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import {
     setErrorAttributesOnActiveSpan,
     setSuccessAttributesOnActiveSpan,
@@ -28,7 +28,11 @@ export function createContractQuestionResponseResolver(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('createContractQuestionResponse', errMessage)
+            logResolverError(
+                'createContractQuestionResponse',
+                errMessage,
+                context
+            )
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -41,14 +45,14 @@ export function createContractQuestionResponseResolver(
 
         if (!isStateUser(user)) {
             const msg = 'user not authorized to create a question response'
-            logError('createContractQuestionResponse', msg)
+            logResolverError('createContractQuestionResponse', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createForbiddenError(msg)
         }
 
         if (input.documents.length === 0) {
             const msg = 'question response documents are required'
-            logError('createContractQuestionResponse', msg)
+            logResolverError('createContractQuestionResponse', msg, context)
             setErrorAttributesOnActiveSpan(msg, span)
             throw createUserInputError(msg)
         }
@@ -71,15 +75,28 @@ export function createContractQuestionResponseResolver(
         if (createResponseResult instanceof Error) {
             if (createResponseResult instanceof NotFoundError) {
                 const errMessage = `Contract question with ID: ${input.questionID} not found to attach response to`
-                logError('createContractQuestionResponse', errMessage)
+                logResolverError(
+                    'createContractQuestionResponse',
+                    errMessage,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw createUserInputError(errMessage)
             }
 
             const errMessage = `Issue creating question response for contract question ${input.questionID}. Message: ${createResponseResult.message}`
-            logError('createContractQuestionResponse', errMessage)
+            logResolverError(
+                'createContractQuestionResponse',
+                errMessage,
+                context
+            )
             setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new Error(errMessage)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
         }
 
         const questions = await store.findAllQuestionsByContract(
@@ -87,7 +104,11 @@ export function createContractQuestionResponseResolver(
         )
         if (questions instanceof Error) {
             const errMessage = `Issue finding all questions for contract with ID ${createResponseResult.contractID}. Message: ${questions.message}`
-            logError('createContractQuestionResponse', errMessage)
+            logResolverError(
+                'createContractQuestionResponse',
+                errMessage,
+                context
+            )
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -103,7 +124,11 @@ export function createContractQuestionResponseResolver(
         if (contract instanceof Error) {
             if (contract instanceof NotFoundError) {
                 const errMessage = `Package with id ${createResponseResult.contractID} does not exist`
-                logError('createContractQuestionResponse', errMessage)
+                logResolverError(
+                    'createContractQuestionResponse',
+                    errMessage,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: { code: 'NOT_FOUND' },
@@ -111,7 +136,11 @@ export function createContractQuestionResponseResolver(
             }
 
             const errMessage = `Issue finding a package. Message: ${contract.message}`
-            logError('createContractQuestionResponse', errMessage)
+            logResolverError(
+                'createContractQuestionResponse',
+                errMessage,
+                context
+            )
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -124,14 +153,22 @@ export function createContractQuestionResponseResolver(
         // Return error if contract has been approved
         if (contract.consolidatedStatus === 'APPROVED') {
             const errMessage = `Issue creating response for contract. Message: Cannot create response for contract in ${contract.consolidatedStatus} status`
-            logError('createContractQuestionResponse', errMessage)
+            logResolverError(
+                'createContractQuestionResponse',
+                errMessage,
+                context
+            )
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage)
         }
 
         const statePrograms = store.findStatePrograms(contract.stateCode)
         if (statePrograms instanceof Error) {
-            logError('createContractQuestionResponse', statePrograms.message)
+            logResolverError(
+                'createContractQuestionResponse',
+                statePrograms.message,
+                context
+            )
             setErrorAttributesOnActiveSpan(statePrograms.message, span)
             throw new GraphQLError(statePrograms.message, {
                 extensions: {
@@ -149,9 +186,10 @@ export function createContractQuestionResponseResolver(
         )
 
         if (stateAnalystsEmailsResult instanceof Error) {
-            logError(
+            logResolverError(
                 'getStateAnalystsEmails',
-                stateAnalystsEmailsResult.message
+                stateAnalystsEmailsResult.message,
+                context
             )
             setErrorAttributesOnActiveSpan(
                 stateAnalystsEmailsResult.message,
@@ -172,9 +210,10 @@ export function createContractQuestionResponseResolver(
             )
 
         if (sendQuestionResponseCMSEmailResult instanceof Error) {
-            logError(
+            logResolverError(
                 'sendQuestionResponseCMSEmail - Send CMS email',
-                sendQuestionResponseCMSEmailResult.message
+                sendQuestionResponseCMSEmailResult.message,
+                context
             )
             setErrorAttributesOnActiveSpan(
                 `Send CMS email failed: ${sendQuestionResponseCMSEmailResult.message}`,
@@ -188,34 +227,37 @@ export function createContractQuestionResponseResolver(
             })
         }
 
-        const sendQuestionResponseStateEmailResult =
-            await emailer.sendQuestionResponseStateEmail(
-                contract.revisions[0],
-                contract.contractSubmissionType,
-                statePrograms,
-                submitterEmails,
-                createResponseResult,
-                questions
-            )
+        if (contract.contractSubmissionType !== 'EQRO') {
+            const sendQuestionResponseStateEmailResult =
+                await emailer.sendQuestionResponseStateEmail(
+                    contract.revisions[0],
+                    contract.contractSubmissionType,
+                    statePrograms,
+                    submitterEmails,
+                    createResponseResult,
+                    questions
+                )
 
-        if (sendQuestionResponseStateEmailResult instanceof Error) {
-            logError(
-                'sendQuestionResponseStateEmail - Send State email',
-                sendQuestionResponseStateEmailResult.message
-            )
-            setErrorAttributesOnActiveSpan(
-                `Send State email failed: ${sendQuestionResponseStateEmailResult.message}`,
-                span
-            )
-            throw new GraphQLError('Email failed', {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
-                },
-            })
+            if (sendQuestionResponseStateEmailResult instanceof Error) {
+                logResolverError(
+                    'sendQuestionResponseStateEmail - Send State email',
+                    sendQuestionResponseStateEmailResult.message,
+                    context
+                )
+                setErrorAttributesOnActiveSpan(
+                    `Send State email failed: ${sendQuestionResponseStateEmailResult.message}`,
+                    span
+                )
+                throw new GraphQLError('Email failed', {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'EMAIL_ERROR',
+                    },
+                })
+            }
         }
 
-        logSuccess('createContractQuestionResponse')
+        logResolverSuccess('createContractQuestionResponse', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

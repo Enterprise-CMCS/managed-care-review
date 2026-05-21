@@ -1,7 +1,7 @@
 import type { Store } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { createForbiddenError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
@@ -20,19 +20,17 @@ export function fetchMcReviewSettings(
             undefined,
             async (span) => {
                 setResolverDetails(span, user)
-                logSuccess('fetchMcReviewSettings')
+                logResolverSuccess('fetchMcReviewSettings', context)
 
                 if (context.oauthClient) {
-                    const oauthErr =
-                        'oauth clients cannot access this functionality'
-                    logError('fetchMcReviewSettings', oauthErr)
+                    const oauthErr = 'oauth clients cannot access this functionality'
+                    logResolverError('fetchMcReviewSettings', oauthErr, context)
                     throw createForbiddenError(oauthErr)
                 }
 
                 if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
-                    const msg =
-                        'user not authorized to fetch mc review settings'
-                    logError('fetchMcReviewSettings', msg)
+                    const msg = 'user not authorized to fetch mc review settings'
+                    logResolverError('fetchMcReviewSettings', msg, context)
                     throw createForbiddenError(msg)
                 }
 
@@ -41,7 +39,7 @@ export function fetchMcReviewSettings(
 
                 if (stateAssignments instanceof Error) {
                     const msg = `Issue finding stateAssignments: ${stateAssignments.message}`
-                    logError('fetchMcReviewSettings', msg)
+                    logResolverError('fetchMcReviewSettings', msg, context)
                     throw new GraphQLError(msg, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

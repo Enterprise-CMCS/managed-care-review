@@ -11,7 +11,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import { createAndSubmitTestContractWithRate } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
-import { assertAnErrorCode } from '../../testHelpers/gqlAssertions'
+import { assertAnErrorCode } from '../../testHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
@@ -156,7 +156,7 @@ describe('indexRatesPaginated', () => {
 
                 expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
                 expect(result.errors?.[0].message).toContain(
-                    'after must be a valid rate pagination cursor'
+                    'normalizeAfterCursor failed. Cursor is not a valid rate pagination cursor'
                 )
             })
         }

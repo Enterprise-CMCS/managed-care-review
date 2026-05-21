@@ -12,7 +12,7 @@ import {
     startServerAndCreateLambdaHandler,
     handlers,
 } from '@as-integrations/aws-lambda'
-import { initTracer, recordException } from '../otel/otel_handler'
+import { initTracer, recordException, flushTracer } from '../otel/otel_handler'
 import type { APIGatewayProxyEvent, Handler } from 'aws-lambda'
 
 import typeDefs from '../../../app-graphql/src/schema.graphql'
@@ -26,7 +26,7 @@ import {
 } from '../authn'
 import type { Store } from '../postgres'
 import { NewPostgresStore } from '../postgres'
-import { parseErrorToError } from '@mc-review/helpers'
+import { parseErrorToError, serializeError } from '@mc-review/helpers'
 import { configureResolvers } from '../resolvers'
 import { configurePostgres, configureEmailer } from './configuration'
 import {
@@ -52,6 +52,7 @@ import {
 } from '../zip'
 import { configureCorsHeaders } from '../cors/configureCorsHelpers'
 import { logError } from '../logger'
+import { OAuthScope } from '../generated/enums'
 
 let ldClient: LDClient
 let s3Client: S3ClientT
@@ -68,6 +69,44 @@ export interface Context {
         grants: string[]
         scopes: string[]
         isDelegatedUser: boolean
+    }
+}
+
+// Extract the GraphQL operation name from the request body for log correlation.
+// Returns undefined for anonymous queries, batched requests we can't parse, or malformed bodies.
+function extractOperationName(event: APIGatewayProxyEvent): string | undefined {
+    if (!event.body) return undefined
+    try {
+        const raw = event.isBase64Encoded
+            ? Buffer.from(event.body, 'base64').toString('utf-8')
+            : event.body
+        const parsed = JSON.parse(raw)
+        const op = Array.isArray(parsed) ? parsed[0] : parsed
+        return typeof op?.operationName === 'string'
+            ? op.operationName
+            : undefined
+    } catch {
+        return undefined
+    }
+}
+
+// OAuth/server-to-server clients typically omit the `operationName` JSON field
+// and send only the raw `query` string, so parse the name out of the query body.
+function extractOAuthOperationName(
+    event: APIGatewayProxyEvent
+): string | undefined {
+    if (!event.body) return undefined
+    try {
+        const raw = event.isBase64Encoded
+            ? Buffer.from(event.body, 'base64').toString('utf-8')
+            : event.body
+        const parsed = JSON.parse(raw)
+        const op = Array.isArray(parsed) ? parsed[0] : parsed
+        if (typeof op?.query !== 'string') return undefined
+        const match = /\b(?:query|mutation|subscription)\s+(\w+)/.exec(op.query)
+        return match?.[1]
+    } catch {
+        return undefined
     }
 }
 
@@ -139,44 +178,93 @@ function contextForRequestForFetcher(
                     const oauthGrants =
                         authorizerContext?.grants?.split(',') || []
 
+                    // oauth client data
+                    const oauthClient: Context['oauthClient'] = {
+                        clientId: oauthClientId,
+                        iss: tokenIssuer,
+                        grants: oauthGrants,
+                        scopes: [], // leave this empty until fetch and validation
+                        isDelegatedUser: !!delegatedUser,
+                    }
+
+                    // extra context for logging
+                    const oauthContext = {
+                        operation: 'contextForRequestForFetcher',
+                        authMethod: 'OAuth 2.0',
+                        principalId,
+                        path: event.path,
+                        requestId: event.requestContext.requestId,
+                        queryName: extractOAuthOperationName(event),
+                        ['x-acting-as-user']: delegatedUser,
+                    }
+
+                    const storedOauthClient =
+                        await store.getOAuthClientByClientId(oauthClientId)
+
+                    if (storedOauthClient instanceof Error) {
+                        console.error({
+                            message: `Failed to fetch OAuth client. ${storedOauthClient.message}`,
+                            error: serializeError(storedOauthClient),
+                            ...oauthContext,
+                            ...oauthClient,
+                        })
+                        throw new Error(
+                            `Failed to fetch OAuth client. ${storedOauthClient.message}`
+                        )
+                    }
+
+                    if (!storedOauthClient) {
+                        console.error({
+                            message: `OAuth client not found`,
+                            ...oauthContext,
+                            ...oauthClient,
+                        })
+                        throw new Error('OAuth client not found')
+                    }
+
+                    // set scopes after validation
+                    oauthClient.scopes = storedOauthClient.scopes.map(
+                        (scope) => scope
+                    )
+
+                    // check if client is authorized for delegated requests
+                    if (
+                        !oauthClient?.scopes?.includes(
+                            OAuthScope.CMS_SUBMISSION_ACTIONS
+                        ) &&
+                        delegatedUser
+                    ) {
+                        console.error({
+                            message:
+                                'Client is not authorized to make delegated requests',
+                            ...oauthContext,
+                            ...oauthClient,
+                        })
+                        throw new Error(
+                            'Client is not authorized to make delegated requests'
+                        )
+                    }
+
+                    // Get user data
                     const userResult = await userFromThirdPartyAuthorizer(
                         store,
                         principalId,
                         delegatedUser
                     )
 
-                    const clientOauth =
-                        await store.getOAuthClientByClientId(oauthClientId)
-
-                    if (clientOauth instanceof Error) {
-                        throw new Error(
-                            `Log: failed to get oauth with client id`
-                        )
-                    }
-
-                    if (!clientOauth) {
-                        throw new Error('Log: OAuth client not found')
-                    }
-
                     if (userResult instanceof Error) {
+                        console.error({
+                            message: `Failed to fetch user from OAuth client. ${userResult.message}`,
+                            error: serializeError(userResult),
+                            ...oauthContext,
+                            ...oauthClient,
+                        })
                         throw new Error(userResult.message)
                     }
 
-                    if (userResult === undefined) {
-                        throw new Error(`User not found.`)
-                    }
-
-                    const oauthClient = {
-                        clientId: oauthClientId,
-                        iss: tokenIssuer,
-                        grants: oauthGrants,
-                        scopes: clientOauth.scopes.map((scope) => scope),
-                        isDelegatedUser: !!delegatedUser,
-                    }
-
                     console.info({
-                        message: 'OAuth client context',
-                        ['x-acting-as-user']: delegatedUser,
+                        message: 'OAuth client context fetch successful',
+                        ...oauthContext,
                         ...oauthClient,
                     })
 
@@ -189,16 +277,38 @@ function contextForRequestForFetcher(
                     }
                 } else {
                     const userResult = await userFetcher(authProvider!, store)
+                    const cognitoContext = {
+                        operation: 'contextForRequestForFetcher',
+                        authMethod: 'Cognito',
+                        path: event.path,
+                        requestId: event.requestContext.requestId,
+                        queryName: extractOperationName(event),
+                    }
 
                     if (userResult === undefined) {
+                        console.error({
+                            message: 'User not found',
+                            ...cognitoContext,
+                        })
                         throw new Error(`User not found.`)
                     }
 
                     if (userResult instanceof Error) {
+                        console.error({
+                            message: `Error fetching user: ${userResult.message}`,
+                            error: serializeError(userResult),
+                            ...cognitoContext,
+                        })
                         throw new Error(
                             `Error fetching user: ${userResult.message}`
                         )
                     }
+
+                    console.info({
+                        message: 'Cognito client context fetch successful',
+                        userId: userResult.id,
+                        ...cognitoContext,
+                    })
 
                     const context: Context = {
                         user: userResult,
@@ -265,7 +375,6 @@ async function initializeGQLHandler(): Promise<Handler> {
     const stageName = process.env.stage
     const applicationEndpoint = process.env.APPLICATION_ENDPOINT
     const emailerMode = process.env.EMAILER_MODE
-    const otelCollectorUrl = process.env.API_APP_OTEL_COLLECTOR_URL
     const parameterStoreMode = process.env.PARAMETER_STORE_MODE
     const ldSDKKey = process.env.LD_SDK_KEY
     const s3DocumentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
@@ -286,12 +395,6 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required to run app-api')
-    }
-
-    if (otelCollectorUrl === undefined || otelCollectorUrl === '') {
-        throw new Error(
-            'Configuration Error: API_APP_OTEL_COLLECTOR_URL is required to run app-api'
-        )
     }
 
     if (parameterStoreMode !== 'LOCAL' && parameterStoreMode !== 'AWS') {
@@ -320,7 +423,7 @@ async function initializeGQLHandler(): Promise<Handler> {
 
     // Initialize OpenTelemetry tracing once during cold start
     // This prevents duplicate provider registrations on every request
-    initTracer('app-api-' + stageName, otelCollectorUrl)
+    initTracer('app-api-' + stageName)
     console.info('OpenTelemetry tracer initialized for app-api-' + stageName)
 
     const pgResult = await configurePostgres(
@@ -451,7 +554,6 @@ async function initializeGQLHandler(): Promise<Handler> {
         applicationEndpoint,
         emailSource: emailer.config.emailSource,
         emailerMode,
-        otelCollectorUrl,
         parameterStoreMode,
     }
 
@@ -505,6 +607,13 @@ const gqlHandler: Handler = async (event, context) => {
 
     // Call handler async-style (Node.js 24 pattern) - callback param unused
     const response = await initializedHandler(event, context, () => {})
+    // Flush spans before Lambda freezes — BatchSpanProcessor timer won't fire after handler returns
+    // Swallow flush errors so telemetry failures never affect API responses
+    try {
+        await flushTracer()
+    } catch (flushErr) {
+        console.warn('otel: flush failed', flushErr)
+    }
     const payloadSize = Buffer.from(event.body).length
 
     if (payloadSize > 5.5 * 1024 * 1024) {
