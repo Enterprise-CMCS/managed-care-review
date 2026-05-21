@@ -45,7 +45,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 contractID: id ?? 'unknown-contract',
             },
         },
-        fetchPolicy: 'network-only',
+        fetchPolicy: 'cache-and-network',
     })
     const contract = fetchContractData?.fetchContract.contract
 
@@ -79,11 +79,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     }, [stateHeader, updateHeading])
 
     // Display any full page interim state resulting from the initial fetch API requests
-    if (fetchContractLoading) {
+    if (!fetchContractData && fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
     }
 
-    if (fetchContractError) {
+    if (!fetchContractData && fetchContractError) {
         return (
             <ErrorOrLoadingPage
                 state={handleAndReturnErrorState(fetchContractError)}
@@ -115,6 +115,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                 className={styles.container}
             >
                 <PreviousSubmissionBanner
+                    className={styles.banner}
                     link={getSubmissionPath(
                         'SUBMISSIONS_SUMMARY',
                         contract.contractSubmissionType,
