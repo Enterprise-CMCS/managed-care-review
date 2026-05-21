@@ -132,7 +132,8 @@ export function indexContractsStripped(
                     return { totalCount: edges.length, edges }
                 }
 
-                const errMsg = 'user not authorized to fetch contract reviews data'
+                const errMsg =
+                    'user not authorized to fetch contract reviews data'
                 logResolverError('indexContractsStripped', errMsg, context)
                 throw createForbiddenError(errMsg)
             }

@@ -72,7 +72,9 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
                 }
 
                 logResolverSuccess(
-                    context.oauthClient ? 'fetchRate - oauthClient' : 'fetchRate',
+                    context.oauthClient
+                        ? 'fetchRate - oauthClient'
+                        : 'fetchRate',
                     context
                 )
                 return { rate: rateWithHistory }

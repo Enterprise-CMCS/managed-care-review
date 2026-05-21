@@ -23,13 +23,15 @@ export function fetchMcReviewSettings(
                 logResolverSuccess('fetchMcReviewSettings', context)
 
                 if (context.oauthClient) {
-                    const oauthErr = 'oauth clients cannot access this functionality'
+                    const oauthErr =
+                        'oauth clients cannot access this functionality'
                     logResolverError('fetchMcReviewSettings', oauthErr, context)
                     throw createForbiddenError(oauthErr)
                 }
 
                 if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
-                    const msg = 'user not authorized to fetch mc review settings'
+                    const msg =
+                        'user not authorized to fetch mc review settings'
                     logResolverError('fetchMcReviewSettings', msg, context)
                     throw createForbiddenError(msg)
                 }

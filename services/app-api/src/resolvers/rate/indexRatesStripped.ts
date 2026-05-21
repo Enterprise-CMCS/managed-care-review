@@ -79,7 +79,11 @@ export function indexRatesStripped(
                     }
                     if (ratesWithHistory instanceof Error) {
                         const errMessage = `Issue finding rates: ${ratesWithHistory.message}`
-                        logResolverError('indexRatesStripped', errMessage, context)
+                        logResolverError(
+                            'indexRatesStripped',
+                            errMessage,
+                            context
+                        )
 
                         if (ratesWithHistory instanceof NotFoundError) {
                             throw new GraphQLError(errMessage, {

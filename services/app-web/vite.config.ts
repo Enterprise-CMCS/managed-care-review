@@ -76,7 +76,7 @@ export default defineConfig(() => ({
     },
     build: {
         outDir: './build',
-        sourcemap: true,
+        sourcemap: false,
     },
     resolve: {
         alias: {
@@ -139,6 +139,7 @@ export default defineConfig(() => ({
         environment: 'jsdom',
         setupFiles: 'src/setupTests.ts',
         globals: true,
+        reporters: ['default'],
         // Inline-transform react-uswds so vi.mock('focus-trap-react') in test
         // files also intercepts uswds' internal imports (pnpm gives uswds its
         // own resolution path that escapes mocks otherwise).

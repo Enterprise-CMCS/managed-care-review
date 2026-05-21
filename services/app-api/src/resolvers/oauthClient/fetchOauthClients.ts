@@ -14,12 +14,16 @@ export function fetchOauthClientsResolver(
         return withResolverSpan(
             context,
             'fetchOauthClients',
-            { 'mcreview.oauth_client_ids_count': input?.clientIds?.length ?? 0 },
+            {
+                'mcreview.oauth_client_ids_count':
+                    input?.clientIds?.length ?? 0,
+            },
             async (span) => {
                 setResolverDetails(span, user)
 
                 if (context.oauthClient) {
-                    const oauthErr = 'oauth clients cannot access admin functions'
+                    const oauthErr =
+                        'oauth clients cannot access admin functions'
                     logResolverError('fetchOauthClients', oauthErr, context)
                     throw createForbiddenError(oauthErr)
                 }
@@ -32,7 +36,11 @@ export function fetchOauthClientsResolver(
 
                 let oauthClients = []
 
-                if (!input || !input.clientIds || input.clientIds.length === 0) {
+                if (
+                    !input ||
+                    !input.clientIds ||
+                    input.clientIds.length === 0
+                ) {
                     const all = await store.listOAuthClients()
                     if (all instanceof Error) {
                         const errMessage = `Error fetching all OAuth clients. Message: ${all.message}`

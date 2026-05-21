@@ -142,7 +142,10 @@ export function indexContractsResolver(
                         span
                     )
                     return formatContracts(parsedContracts)
-                } else if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
+                } else if (
+                    hasAdminPermissions(user) ||
+                    hasCMSPermissions(user)
+                ) {
                     const skipFindingLatest = !!input?.updatedWithin
                     const contractsWithHistory =
                         await store.findAllContractsWithHistoryBySubmitInfo(
