@@ -1,7 +1,7 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { hasCMSPermissions } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import type { Store } from '../../postgres'
 import {
     setResolverDetailsOnActiveSpan,
@@ -22,7 +22,7 @@ export function updateContract(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('updateContract', errMessage)
+            logResolverError('updateContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -35,7 +35,11 @@ export function updateContract(
 
         // This resolver is only callable by CMS users
         if (!hasCMSPermissions(user)) {
-            logError('updateContract', 'user not authorized to update contract')
+            logResolverError(
+                'updateContract',
+                'user not authorized to update contract',
+                context
+            )
             setErrorAttributesOnActiveSpan(
                 'user not authorized to update contract',
                 span
@@ -46,13 +50,10 @@ export function updateContract(
         const contractWithHistory = await store.findContractWithHistory(
             input.id
         )
-        if (contractWithHistory instanceof Error) {
-            throw contractWithHistory
-        }
 
         if (contractWithHistory instanceof Error) {
             const errMessage = `Issue finding a contract with history with id ${input.id}. Message: ${contractWithHistory.message}`
-            logError('updateContract', errMessage)
+            logResolverError('updateContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (contractWithHistory instanceof NotFoundError) {
@@ -79,7 +80,7 @@ export function updateContract(
 
         if (!isSubmittedOrUnlocked) {
             const errMessage = `Can not update a contract has not been submitted or unlocked. Fails for contract with ID: ${contractWithHistory.id}`
-            logError('updateContract', errMessage)
+            logResolverError('updateContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'contractID')
         }
@@ -91,7 +92,7 @@ export function updateContract(
 
         if (updatedContract instanceof Error) {
             const errMessage = `Failed to update contract with ID: ${input.id}. Message: ${updatedContract.message}`
-            logError('updateContract', errMessage)
+            logResolverError('updateContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {

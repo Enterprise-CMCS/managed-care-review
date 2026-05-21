@@ -1,6 +1,6 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import {
     setErrorAttributesOnActiveSpan,
@@ -8,7 +8,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { hasCMSPermissions, isAdminUser } from '../../domain-models/user'
+import { hasCMSPermissions, isAdminUser } from '../../domain-models'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
 
 export function reverseApproveContract(
@@ -24,7 +24,7 @@ export function reverseApproveContract(
         // Check OAuth client write permissions
         if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('reverseApproveContract', errMessage)
+            logResolverError('reverseApproveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -37,7 +37,7 @@ export function reverseApproveContract(
 
         if (!hasCMSPermissions(user) && !isAdminUser(user)) {
             const message = 'user not authorized to reverse approve a contract'
-            logError('reverseApproveContract', message)
+            logResolverError('reverseApproveContract', message, context)
             setErrorAttributesOnActiveSpan(message, span)
             throw createForbiddenError(message)
         }
@@ -47,6 +47,7 @@ export function reverseApproveContract(
 
         if (contractWithHistory instanceof Error) {
             const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
+            logResolverError('reverseApproveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             if (contractWithHistory instanceof NotFoundError) {
@@ -68,7 +69,7 @@ export function reverseApproveContract(
 
         if (contractWithHistory.consolidatedStatus !== 'APPROVED') {
             const errMessage = `Attempted to reverse approval for contract with wrong status: ${contractWithHistory.consolidatedStatus}`
-            logError('reverseApproveContract', errMessage)
+            logResolverError('reverseApproveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'contractID')
         }
@@ -76,7 +77,7 @@ export function reverseApproveContract(
         const latestAction = contractWithHistory.reviewStatusActions?.[0]
         if (!latestAction || latestAction.actionType !== 'MARK_AS_APPROVED') {
             const errMessage = `Cannot reverse approval: latest review action is not MARK_AS_APPROVED`
-            logError('reverseApproveContract', errMessage)
+            logResolverError('reverseApproveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw createUserInputError(errMessage, 'contractID')
         }
@@ -89,7 +90,11 @@ export function reverseApproveContract(
 
         if (reverseResult instanceof Error) {
             if (reverseResult instanceof NotFoundError) {
-                logError('reverseApproveContract', reverseResult.message)
+                logResolverError(
+                    'reverseApproveContract',
+                    reverseResult.message,
+                    context
+                )
                 throw new GraphQLError(reverseResult.message, {
                     extensions: {
                         code: 'NOT_FOUND',
@@ -99,7 +104,7 @@ export function reverseApproveContract(
             }
 
             const errMessage = `Failed to reverse approval for contract ID:${contractID}`
-            logError('reverseApproveContract', errMessage)
+            logResolverError('reverseApproveContract', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -109,7 +114,7 @@ export function reverseApproveContract(
             })
         }
 
-        logSuccess('reverseApproveContract')
+        logResolverSuccess('reverseApproveContract', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return { contract: reverseResult }

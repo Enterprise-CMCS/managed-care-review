@@ -1,5 +1,6 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
+import { OAuthScope } from '../../generated/client'
 import {
     createOAuthClient,
     getOAuthClientById,
@@ -16,6 +17,7 @@ describe('OAuthClient Store', () => {
     let testClientData: {
         grants: string[]
         description: string
+        scopes?: OAuthScope[]
         userID: string
     }
 
@@ -52,6 +54,16 @@ describe('OAuthClient Store', () => {
         expect(oauthClient.clientSecret).toHaveLength(86)
         expect(oauthClient.description).toBe(testClientData.description)
         expect(oauthClient.grants).toEqual(testClientData.grants)
+    })
+
+    it('persists scopes when provided on create', async () => {
+        const oauthClient = await createOAuthClient(client, {
+            ...testClientData,
+            scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
+        })
+        if (oauthClient instanceof Error) throw oauthClient
+
+        expect(oauthClient.scopes).toEqual([OAuthScope.CMS_SUBMISSION_ACTIONS])
     })
 
     it('retrieves an OAuth client by ID', async () => {
@@ -114,6 +126,7 @@ describe('OAuthClient Store', () => {
         const updateData = {
             description: 'Updated description',
             grants: ['client_credentials', 'password'],
+            scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
         }
 
         const updatedClient = await updateOAuthClient(
@@ -125,6 +138,7 @@ describe('OAuthClient Store', () => {
 
         expect(updatedClient.description).toBe(updateData.description)
         expect(updatedClient.grants).toEqual(updateData.grants)
+        expect(updatedClient.scopes).toEqual(updateData.scopes)
         expect(updatedClient.updatedAt).toBeDefined()
         expect(updatedClient.updatedAt.getTime()).toBeGreaterThan(
             createdClient.updatedAt.getTime()

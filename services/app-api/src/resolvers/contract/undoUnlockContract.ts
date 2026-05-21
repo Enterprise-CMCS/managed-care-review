@@ -1,6 +1,6 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import {
     NotFoundError,
     UserInputPostgresError,
@@ -28,7 +28,7 @@ export function undoUnlockContract(
 
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('undoUnlockContract', errMessage)
+                    logResolverError('undoUnlockContract', errMessage, context)
 
                     throw new GraphQLError(errMessage, {
                         extensions: {
@@ -41,7 +41,7 @@ export function undoUnlockContract(
                 if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
                     const message =
                         'user not authorized to undo unlock a contract'
-                    logError('undoUnlockContract', message)
+                    logResolverError('undoUnlockContract', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -70,7 +70,7 @@ export function undoUnlockContract(
 
                 if (contractWithHistory.status !== 'UNLOCKED') {
                     const errMessage = `Attempted to undo unlock for contract with wrong status: ${contractWithHistory.status}`
-                    logError('undoUnlockContract', errMessage)
+                    logResolverError('undoUnlockContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -80,7 +80,7 @@ export function undoUnlockContract(
                 ) {
                     const errMessage =
                         'Cannot undo unlock: latest contract revision is not an unlocked draft revision'
-                    logError('undoUnlockContract', errMessage)
+                    logResolverError('undoUnlockContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -92,7 +92,11 @@ export function undoUnlockContract(
 
                 if (reverseResult instanceof Error) {
                     if (reverseResult instanceof UserInputPostgresError) {
-                        logError('undoUnlockContract', reverseResult.message)
+                        logResolverError(
+                            'undoUnlockContract',
+                            reverseResult.message,
+                            context
+                        )
                         throw handleUserInputPostgresError(
                             reverseResult,
                             'contractID',
@@ -101,7 +105,11 @@ export function undoUnlockContract(
                     }
 
                     if (reverseResult instanceof NotFoundError) {
-                        logError('undoUnlockContract', reverseResult.message)
+                        logResolverError(
+                            'undoUnlockContract',
+                            reverseResult.message,
+                            context
+                        )
                         throw new GraphQLError(reverseResult.message, {
                             extensions: {
                                 code: 'NOT_FOUND',
@@ -111,7 +119,7 @@ export function undoUnlockContract(
                     }
 
                     const errMessage = `Failed to undo unlock for contract ID:${contractID}`
-                    logError('undoUnlockContract', errMessage)
+                    logResolverError('undoUnlockContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -120,7 +128,7 @@ export function undoUnlockContract(
                     })
                 }
 
-                logSuccess('undoUnlockContract')
+                logResolverSuccess('undoUnlockContract', context)
 
                 return { contract: reverseResult }
             }

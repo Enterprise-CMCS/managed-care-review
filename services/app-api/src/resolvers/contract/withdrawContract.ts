@@ -7,7 +7,7 @@ import {
     recordResolverError,
 } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
@@ -34,7 +34,7 @@ export function withdrawContract(
                 // Check OAuth client read permissions
                 if (!canOauthWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('withdrawContract', errMessage)
+                    logResolverError('withdrawContract', errMessage, context)
 
                     throw new GraphQLError(errMessage, {
                         extensions: {
@@ -46,7 +46,7 @@ export function withdrawContract(
 
                 if (!hasCMSPermissions(user)) {
                     const message = 'user not authorized to withdraw a contract'
-                    logError('withdrawContract', message)
+                    logResolverError('withdrawContract', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -56,12 +56,16 @@ export function withdrawContract(
                 if (contractWithHistory instanceof Error) {
                     if (contractWithHistory instanceof NotFoundError) {
                         const errMessage = `A contract must exist to be withdrawn: ${contractID}`
-                        logError('withdrawContract', errMessage)
+                        logResolverError(
+                            'withdrawContract',
+                            errMessage,
+                            context
+                        )
                         throw createUserInputError(errMessage, 'contractID')
                     }
 
                     const errMessage = `Issue finding a contract. Message: ${contractWithHistory.message}`
-                    logError('withdrawContract', errMessage)
+                    logResolverError('withdrawContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -78,7 +82,7 @@ export function withdrawContract(
                     ].includes(contractWithHistory.consolidatedStatus)
                 ) {
                     const errMessage = `Attempted to withdraw submission with invalid contract status of ${contractWithHistory.consolidatedStatus}`
-                    logError('withdrawContract', errMessage)
+                    logResolverError('withdrawContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -90,7 +94,7 @@ export function withdrawContract(
 
                 if (withdrawResult instanceof Error) {
                     const errMessage = `Failed to withdraw contract. ${withdrawResult.message}`
-                    logError('withdrawContract', errMessage)
+                    logResolverError('withdrawContract', errMessage, context)
 
                     if (withdrawResult instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -118,7 +122,7 @@ export function withdrawContract(
                 )
                 if (contractZipRes instanceof Error) {
                     const errMessage = `Failed to zip files for contract revision with ID: ${withdrawnContract.id}: ${contractZipRes.message}`
-                    logError('withdrawContract', errMessage)
+                    logResolverError('withdrawContract', errMessage, context)
                     recordResolverError(span, errMessage)
                 }
                 const rateZipRes = await documentZip.createRateZips(
@@ -127,13 +131,14 @@ export function withdrawContract(
                 )
                 if (rateZipRes instanceof Array) {
                     const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${withdrawnContract.id}`
-                    logError('withdrawContract', errorMessage)
+                    logResolverError('withdrawContract', errorMessage, context)
                     recordResolverError(span, errorMessage)
 
                     rateZipRes.forEach((error, index) => {
-                        logError(
+                        logResolverError(
                             'withdrawContract',
-                            `Rate zip error ${index + 1}: ${error.message}`
+                            `Rate zip error ${index + 1}: ${error.message}`,
+                            context
                         )
                     })
                 }
@@ -144,9 +149,10 @@ export function withdrawContract(
                     )
 
                 if (stateAnalystsEmailsResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message
+                        stateAnalystsEmailsResult.message,
+                        context
                     )
                     recordResolverError(span, stateAnalystsEmailsResult)
                 } else {
@@ -182,7 +188,7 @@ export function withdrawContract(
                         errMessage = `State Email failed: ${sendWithdrawStateEmail.message}`
                     }
 
-                    logError('withdrawContract', errMessage)
+                    logResolverError('withdrawContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

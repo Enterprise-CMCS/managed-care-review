@@ -1,7 +1,8 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
-import { logSuccess, logError } from '../../logger'
+import type { OAuthScope } from '../../generated/enums'
+import { logResolverSuccess, logResolverError } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import {
     setSuccessAttributesOnActiveSpan,
@@ -22,7 +23,7 @@ export function updateOauthClientResolver(
         // Check OAuth client read permissions
         if (!canWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('updateOauthClient', errMessage)
+            logResolverError('updateOauthClient', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
 
             throw new GraphQLError(errMessage, {
@@ -35,7 +36,7 @@ export function updateOauthClientResolver(
 
         if (!user || user.role !== 'ADMIN_USER') {
             const message = 'user not authorized to update OAuth clients'
-            logError('updateOauthClient', message)
+            logResolverError('updateOauthClient', message, context)
             setErrorAttributesOnActiveSpan(message, span)
             throw createForbiddenError(message)
         }
@@ -44,6 +45,7 @@ export function updateOauthClientResolver(
         const updateData: {
             description?: string
             grants?: string[]
+            scopes?: OAuthScope[]
         } = {}
 
         if (input.description) {
@@ -51,6 +53,9 @@ export function updateOauthClientResolver(
         }
         if (input.grants && input.grants.length > 0) {
             updateData.grants = input.grants
+        }
+        if (input.scopes && input.scopes.length > 0) {
+            updateData.scopes = input.scopes
         }
 
         // Update the client
@@ -61,12 +66,12 @@ export function updateOauthClientResolver(
 
         if (updated instanceof Error) {
             const message = `Failed to update OAuth client: ${updated.message}`
-            logError('updateOauthClient', message)
+            logResolverError('updateOauthClient', message, context)
             setErrorAttributesOnActiveSpan(message, span)
 
             // Check if this is a "not found" error
             if (updated.message.includes('not found')) {
-                throw new GraphQLError('OAuth client not found', {
+                throw new GraphQLError(message, {
                     extensions: {
                         code: 'NOT_FOUND',
                         cause: 'CLIENT_NOT_FOUND',
@@ -82,7 +87,7 @@ export function updateOauthClientResolver(
             })
         }
 
-        logSuccess('updateOauthClient')
+        logResolverSuccess('updateOauthClient', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {

@@ -171,10 +171,11 @@ Unlock is the inverse direction of submit, but with a critically different DB sh
 1. **OAuth `canOauthWrite`** — write grant required.
 2. **CMS-only** (`hasCMSPermissions(user)`). State users **cannot** unlock — symmetric with submit, which is state-only.
 3. **Fetch contract** via `findContractWithHistory`. NotFoundError → `userInputError`.
-4. **Status guard**: reject if `contractResult.draftRevision` exists OR `consolidatedStatus === 'APPROVED'`. Implication:
-   - Cannot unlock something that already has a draft revision (i.e. is already DRAFT or UNLOCKED).
-   - Cannot unlock an APPROVED contract.
-   - Eligible: SUBMITTED, RESUBMITTED, plus other consolidatedStatuses where the latest revision has `submitInfo` set and no live draft revision (e.g. WITHDRAWN, NOT_SUBJECT_TO_REVIEW, UNDER_REVIEW).
+4. **Status guard**: resolver-level allowlist on `consolidatedStatus`.
+   - Allowed: `SUBMITTED`, `RESUBMITTED`, `NOT_SUBJECT_TO_REVIEW`.
+   - Rejected: `DRAFT`, `UNLOCKED`, `APPROVED`, `WITHDRAWN`.
+   - Why `NOT_SUBJECT_TO_REVIEW` is allowed: it is a review-status overlay on a still-submitted package, not a draft/unlocked state. The package still has no `draftRevision`.
+   - This rule intentionally lives in the resolver. The store does **not** re-check review/consolidated status; it only enforces revision-shape invariants after the row lock is acquired.
 5. **`store.unlockContract({ contractID, unlockReason: unlockedReason, unlockedByUserID })`** — the postgres call (described below).
 6. **Post-unlock side-effects**:
    - `findStateAssignedUsers(stateCode)` for state analyst recipients (best-effort; logs and continues).
@@ -204,7 +205,9 @@ Returns `{ contract: unlockContractResult }`.
 
 Guards:
 - NotFoundError if no current revision.
-- Programming error if `currentRev.submitInfoID` is null (already unlocked).
+- Programming error if `currentRev.submitInfoID` is null (already unlocked, because the latest active revision is not currently submitted).
+
+Important distinction: the store-level guard is narrower than the resolver-level rule. The resolver decides whether a contract **should be allowed** to unlock based on domain status (`consolidatedStatus`). The store only verifies that the latest active revision is still a submitted revision that can be copied into a new unlocked draft. That means store callers still cannot unlock an already-unlocked contract, even though the resolver may allow `NOT_SUBJECT_TO_REVIEW` as an eligible submitted state.
 
 #### Step 3 — Identify child rates to unlock alongside
 
@@ -227,7 +230,7 @@ Detail: `unlockRateInDB` (`unlockRate.ts`) creates a new `RateRevisionTable` row
 - Re-connects the deprecated `contractsWithSharedRateRevision` M:N (still maintained even though deprecated).
 - Then writes `DraftRateJoinTable` rows from the rate's last submission package's contract revisions (`skipDuplicates: true`). Comment notes this is mainly for when `unlockRate` is called independently — under a contract unlock, the contract's step 7 also writes the same join rows.
 
-Guards inside `unlockRateInDB`: programming error if no current revision found, or if its `submitInfoID` is already null.
+Guards inside `unlockRateInDB`: programming error if no current revision found, or if its `submitInfoID` is already null (already unlocked).
 
 #### Step 5 — Compute `relatedRateIDs` for the new draft join
 

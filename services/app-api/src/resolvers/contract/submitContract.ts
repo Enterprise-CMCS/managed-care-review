@@ -2,7 +2,7 @@ import type { Emailer } from '../../emailer'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
-import { logError, logSuccess } from '../../logger'
+import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import { isStateUser, contractSubmitters } from '../../domain-models'
 import {
     type CHIPFederalAuthority,
@@ -81,7 +81,7 @@ export function submitContract(
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logError('submitContract', errMessage)
+                    logResolverError('submitContract', errMessage, context)
 
                     throw new GraphQLError(errMessage, {
                         extensions: {
@@ -101,9 +101,10 @@ export function submitContract(
 
                 // This resolver is only callable by state users
                 if (!isStateUser(user)) {
-                    logError(
+                    logResolverError(
                         'submitContract',
-                        'user not authorized to fetch state data'
+                        'user not authorized to fetch state data',
+                        context
                     )
                     throw createForbiddenError(
                         'user not authorized to fetch state data'
@@ -119,7 +120,7 @@ export function submitContract(
 
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding a contract with history with id ${input.contractID}. Message: ${contractWithHistory.message}`
-                    logError('fetchContract', errMessage)
+                    logResolverError('fetchContract', errMessage, context)
 
                     if (contractWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -143,9 +144,10 @@ export function submitContract(
 
                 // Validate user authorized to fetch state
                 if (contractWithHistory.stateCode !== stateFromCurrentUser) {
-                    logError(
+                    logResolverError(
                         'submitContract',
-                        'user not authorized to fetch data from a different state'
+                        'user not authorized to fetch data from a different state',
+                        context
                     )
                     throw createForbiddenError(
                         'user not authorized to fetch data from a different state'
@@ -159,9 +161,15 @@ export function submitContract(
                 )
 
                 if (!contractWithHistory.draftRevision) {
-                    throw new Error(
-                        'PROGRAMMING ERROR: Status should not be submittable without a draft revision'
-                    )
+                    const errMsg =
+                        'Submission should not be submittable without a draft revision'
+                    logResolverError('submitContract', errMsg, context)
+                    throw new GraphQLError(errMsg, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
                 }
 
                 const initialFormData = {
@@ -234,7 +242,7 @@ export function submitContract(
 
                 if (parsedContract instanceof Error) {
                     const errMessage = parsedContract.message
-                    logError('submitContract', errMessage)
+                    logResolverError('submitContract', errMessage, context)
                     throw createUserInputError(
                         errMessage,
                         'contractID',
@@ -269,14 +277,24 @@ export function submitContract(
                             if (
                                 draftRate.parentContractID !== parsedContract.id
                             ) {
+                                const errMessage =
+                                    'This never submitted rate is not parented to this contract'
+                                logResolverError(
+                                    'submitContract',
+                                    errMessage,
+                                    context
+                                )
                                 console.error(
-                                    'This never submitted rate is not parented to this contract',
+                                    errMessage,
                                     parsedContract.id,
                                     draftRate.id
                                 )
-                                throw new Error(
-                                    'This never submitted rate is not parented to this contract'
-                                )
+                                throw new GraphQLError(errMessage, {
+                                    extensions: {
+                                        code: 'INTERNAL_SERVER_ERROR',
+                                        cause: 'DB_ERROR',
+                                    },
+                                })
                             }
 
                             // this is a child draft rate, delete it
@@ -295,8 +313,13 @@ export function submitContract(
                     if (rateResult instanceof Error) {
                         const errMessage =
                             'Error while attempting to clean up rates from a now CONTRACT_ONLY submission'
-                        logError('submitContract', errMessage)
-                        throw new Error(errMessage)
+                        logResolverError('submitContract', errMessage, context)
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
                     }
                 }
 
@@ -308,7 +331,7 @@ export function submitContract(
                         parsedContract.draftRates.length === 0
                     ) {
                         const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
-                        logError('submitContract', errMessage)
+                        logResolverError('submitContract', errMessage, context)
                         throw createUserInputError(
                             errMessage,
                             'contractID',
@@ -328,7 +351,11 @@ export function submitContract(
                                 )
                             ) {
                                 const errMessage = `Attempted to submit a contract with a withdrawn rate. Rate id: ${draftRate.id}`
-                                logError('submitContract', errMessage)
+                                logResolverError(
+                                    'submitContract',
+                                    errMessage,
+                                    context
+                                )
                                 throw createUserInputError(
                                     errMessage,
                                     'rateID',
@@ -393,7 +420,11 @@ export function submitContract(
                             await store.updateDraftContractRates(rateUpdates)
                         if (rateUpdateResult instanceof Error) {
                             const errMessage = `Failed to update rates on a child rate when dsnp false with ID: ${parsedContract.id}; ${rateUpdateResult.message}`
-                            logError('submitContract', errMessage)
+                            logResolverError(
+                                'submitContract',
+                                errMessage,
+                                context
+                            )
                             throw new GraphQLError(errMessage, {
                                 extensions: {
                                     code: 'INTERNAL_SERVER_ERROR',
@@ -434,8 +465,8 @@ export function submitContract(
                     },
                 })
                 if (updateResult instanceof Error) {
-                    const errMessage = `Failed to update submitted contract info with ID: ${contractRevisionID}; ${updateResult.message}`
-                    logError('submitContract', errMessage)
+                    const errMessage = `Failed to update to be submitted contract with ID: ${contractRevisionID}; ${updateResult.message}`
+                    logResolverError('submitContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -444,11 +475,6 @@ export function submitContract(
                     })
                 }
 
-                if (!updateResult.draftRevision) {
-                    throw new Error(
-                        'PROGRAMMING ERROR: draft contract does not contain a draft revision'
-                    )
-                }
                 // From this point forward we use updateResult instead of contractWithHistory because it is now old data.
 
                 // then submit the contract!
@@ -463,7 +489,7 @@ export function submitContract(
                 })
                 if (submitContractResult instanceof Error) {
                     const errMessage = `Failed to submit contract revision with ID: ${contractRevisionID}; ${submitContractResult.message}`
-                    logError('submitContract', errMessage)
+                    logResolverError('submitContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -479,7 +505,7 @@ export function submitContract(
                 )
                 if (contractZipRes instanceof Error) {
                     const errMessage = `Failed to zip files for contract revision with ID: ${contractRevisionID}: ${contractZipRes.message}`
-                    logError('submitContract', errMessage)
+                    logResolverError('submitContract', errMessage, context)
                     recordResolverError(span, errMessage)
                 }
 
@@ -489,13 +515,14 @@ export function submitContract(
                 )
                 if (rateZipRes instanceof Array) {
                     const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${contractRevisionID}`
-                    logError('submitContract', errorMessage)
+                    logResolverError('submitContract', errorMessage, context)
                     recordResolverError(span, errorMessage)
 
                     rateZipRes.forEach((error, index) => {
-                        logError(
+                        logResolverError(
                             'submitContract',
-                            `Rate zip error ${index + 1}: ${error.message}`
+                            `Rate zip error ${index + 1}: ${error.message}`,
+                            context
                         )
                     })
                 }
@@ -511,9 +538,10 @@ export function submitContract(
                     )
 
                 if (stateAnalystsEmailsResult instanceof Error) {
-                    logError(
+                    logResolverError(
                         'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message
+                        stateAnalystsEmailsResult.message,
+                        context
                     )
                     recordResolverError(span, stateAnalystsEmailsResult)
                 } else {
@@ -530,7 +558,11 @@ export function submitContract(
                 )
 
                 if (statePrograms instanceof Error) {
-                    logError('findStatePrograms', statePrograms.message)
+                    logResolverError(
+                        'findStatePrograms',
+                        statePrograms.message,
+                        context
+                    )
                     throw new GraphQLError(statePrograms.message, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -597,15 +629,17 @@ export function submitContract(
                     stateContractEmailResult instanceof Error
                 ) {
                     if (cmsContractEmailResult instanceof Error) {
-                        logError(
+                        logResolverError(
                             'submitContract - CMS email failed',
-                            cmsContractEmailResult
+                            cmsContractEmailResult,
+                            context
                         )
                     }
                     if (stateContractEmailResult instanceof Error) {
-                        logError(
+                        logResolverError(
                             'submitContract - state email failed',
-                            stateContractEmailResult
+                            stateContractEmailResult,
+                            context
                         )
                     }
                     throw new GraphQLError('Email failed', {
@@ -616,7 +650,7 @@ export function submitContract(
                     })
                 }
 
-                logSuccess('submitContract')
+                logResolverSuccess('submitContract', context)
                 return { contract: submitContractResult }
             }
         )

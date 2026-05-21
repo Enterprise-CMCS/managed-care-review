@@ -1,6 +1,6 @@
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { logError } from '../../logger'
+import { logResolverError } from '../../logger'
 import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import type { DocumentZipPackageType } from '../../domain-models/ZipType'
@@ -17,7 +17,11 @@ export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
             const rate = await store.findRateWithHistory(parent.rateID)
             if (rate instanceof Error) {
                 const errMessage = `Issue finding rate with id: ${parent.rateID}. Message: ${rate.message}`
-                logError('rateRevisionResolver.rate', errMessage)
+                logResolverError(
+                    'rateRevisionResolver.rate',
+                    errMessage,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 throw new GraphQLError(errMessage, {
                     extensions: {
@@ -46,7 +50,11 @@ export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
 
                 if (documentZipPackages instanceof Error) {
                     const errMessage = `Error fetching document zip packages for rate revision ${parent.id}: ${documentZipPackages.message}`
-                    logError('rateRevision.documentZipPackages', errMessage)
+                    logResolverError(
+                        'rateRevision.documentZipPackages',
+                        errMessage,
+                        context
+                    )
                     setErrorAttributesOnActiveSpan(errMessage, span)
                     return []
                 }
@@ -55,7 +63,11 @@ export function rateRevisionResolver(store: Store): Resolvers['RateRevision'] {
             } catch (error) {
                 const errorMessage = parseErrorToError(error).message
                 const errMessage = `Unexpected error fetching document zip packages: ${errorMessage}`
-                logError('rateRevision.documentZipPackages', errMessage)
+                logResolverError(
+                    'rateRevision.documentZipPackages',
+                    errMessage,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(errMessage, span)
                 return []
             } finally {

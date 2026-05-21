@@ -1,1 +1,6 @@
-export { logSuccess, logError } from './logger'
+export {
+    logSuccess,
+    logResolverSuccess,
+    logError,
+    logResolverError,
+} from './logger'

@@ -8,7 +8,7 @@ import {
     hasAdminPermissions,
 } from '../../domain-models'
 import { canRead } from '../../authorization/oauthAuthorization'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 
 export function fetchContractResolver(
     store: Store
@@ -27,7 +27,7 @@ export function fetchContractResolver(
                 // Check OAuth client read permissions
                 if (!canRead(context)) {
                     const errMessage = `OAuth client does not have read permissions`
-                    logError('fetchContract', errMessage)
+                    logResolverError('fetchContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -42,6 +42,7 @@ export function fetchContractResolver(
 
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
+                    logResolverError('fetchContract', errMessage, context)
 
                     if (contractWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -67,7 +68,7 @@ export function fetchContractResolver(
                         const errMessage = authInfo
                             ? `OAuth client not allowed to access contract from ${contractWithHistory.stateCode}`
                             : `User from state ${user.stateCode} not allowed to access contract from ${contractWithHistory.stateCode}`
-                        logError('fetchContract', errMessage)
+                        logResolverError('fetchContract', errMessage, context)
                         throw new GraphQLError(errMessage, {
                             extensions: {
                                 code: 'FORBIDDEN',
@@ -80,7 +81,7 @@ export function fetchContractResolver(
                     !hasAdminPermissions(user)
                 ) {
                     const errMessage = 'User not allowed to access contract'
-                    logError('fetchContract', errMessage)
+                    logResolverError('fetchContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -89,10 +90,11 @@ export function fetchContractResolver(
                     })
                 }
 
-                logSuccess(
+                logResolverSuccess(
                     context.oauthClient
                         ? 'fetchContract - oauthClient'
-                        : 'fetchContract'
+                        : 'fetchContract',
+                    context
                 )
                 return { contract: contractWithHistory }
             }

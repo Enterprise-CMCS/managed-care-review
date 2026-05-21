@@ -6,7 +6,7 @@ import {
     setSuccessAttributesOnActiveSpan,
 } from '../attributeHelper'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import type { S3ClientT } from '../../s3'
 import { v4 as uuidv4 } from 'uuid'
@@ -25,7 +25,7 @@ export function generateUploadURLResolver(
         // Check OAuth client write permissions
         if (!canOauthWrite(context)) {
             const errMessage = `OAuth client does not have write permissions`
-            logError('generateUploadURL', errMessage)
+            logResolverError('generateUploadURL', errMessage, context)
             setErrorAttributesOnActiveSpan(errMessage, span)
             throw new GraphQLError(errMessage, {
                 extensions: {
@@ -40,7 +40,7 @@ export function generateUploadURLResolver(
 
         if (!fileName) {
             const fileNameErr = 'file name cannot be blank'
-            logError('generateUploadURL', fileNameErr)
+            logResolverError('generateUploadURL', fileNameErr, context)
             setErrorAttributesOnActiveSpan(fileNameErr, span)
             throw new GraphQLError(fileNameErr, {
                 extensions: {
@@ -60,7 +60,7 @@ export function generateUploadURLResolver(
 
         if (extension !== fileType.toLowerCase()) {
             const extenErr = `File extension ".${extension}" does not match fileType "${fileType}"`
-            logError('generateUploadURL', extenErr)
+            logResolverError('generateUploadURL', extenErr, context)
             setErrorAttributesOnActiveSpan(extenErr, span)
             throw new GraphQLError(extenErr, {
                 extensions: {
@@ -81,7 +81,7 @@ export function generateUploadURLResolver(
 
         const s3URL = await s3Client.getS3URL(s3Key, fileName, bucketName)
 
-        logSuccess('generateUploadURL')
+        logResolverSuccess('generateUploadURL', context)
         setSuccessAttributesOnActiveSpan(span)
 
         return {
