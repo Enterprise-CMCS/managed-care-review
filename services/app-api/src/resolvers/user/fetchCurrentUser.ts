@@ -1,18 +1,20 @@
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logResolverSuccess } from '../../logger'
-import {
-    setResolverDetailsOnActiveSpan,
-    setSuccessAttributesOnActiveSpan,
-} from '../attributeHelper'
+import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 
 export function fetchCurrentUserResolver(): QueryResolvers['fetchCurrentUser'] {
     return async (_parent, _args, context) => {
-        const { user, ctx, tracer } = context
+        const { user } = context
 
-        const span = tracer?.startSpan('fetchCurrentUser', {}, ctx)
-        setResolverDetailsOnActiveSpan('fetchCurrentUser', user, span)
-        setSuccessAttributesOnActiveSpan(span)
-        logResolverSuccess('fetchCurrentUser', context)
-        return context.user
+        return withResolverSpan(
+            context,
+            'fetchCurrentUser',
+            undefined,
+            async (span) => {
+                setResolverDetails(span, user)
+                logResolverSuccess('fetchCurrentUser', context)
+                return context.user
+            }
+        )
     }
 }

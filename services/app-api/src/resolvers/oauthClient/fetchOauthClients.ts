@@ -1,11 +1,7 @@
 import { logResolverError, logResolverSuccess } from '../../logger'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-    setSuccessAttributesOnActiveSpan,
-} from '../attributeHelper'
+import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { createForbiddenError } from '../errorUtils'
 
@@ -13,71 +9,79 @@ export function fetchOauthClientsResolver(
     store: Store
 ): QueryResolvers['fetchOauthClients'] {
     return async (_parent, { input }, context) => {
-        const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('fetchOauthClients', {}, ctx)
-        setResolverDetailsOnActiveSpan('fetchOauthClients', user, span)
+        const { user } = context
 
-        // MCR-5894 block off admin apis from oauth
-        if (context.oauthClient) {
-            const oauthErr = 'oauth clients cannot access admin functions'
-            logResolverError('fetchOauthClients', oauthErr, context)
-            setErrorAttributesOnActiveSpan(oauthErr, span)
-            throw createForbiddenError(oauthErr)
-        }
+        return withResolverSpan(
+            context,
+            'fetchOauthClients',
+            { 'mcreview.oauth_client_ids_count': input?.clientIds?.length ?? 0 },
+            async (span) => {
+                setResolverDetails(span, user)
 
-        if (!user || user.role !== 'ADMIN_USER') {
-            const msg = 'User not authorized to fetch OAuth clients'
-            logResolverError('fetchOauthClients', msg, context)
-            setErrorAttributesOnActiveSpan(msg, span)
-            throw createForbiddenError(msg)
-        }
+                if (context.oauthClient) {
+                    const oauthErr = 'oauth clients cannot access admin functions'
+                    logResolverError('fetchOauthClients', oauthErr, context)
+                    throw createForbiddenError(oauthErr)
+                }
 
-        let oauthClients = []
+                if (!user || user.role !== 'ADMIN_USER') {
+                    const msg = 'User not authorized to fetch OAuth clients'
+                    logResolverError('fetchOauthClients', msg, context)
+                    throw createForbiddenError(msg)
+                }
 
-        // If input is omitted or empty, fetch all
-        if (!input || !input.clientIds || input.clientIds.length === 0) {
-            const all = await store.listOAuthClients()
-            if (all instanceof Error) {
-                const errMessage = `Error fetching all OAuth clients. Message: ${all.message}`
-                logResolverError('fetchOauthClients', errMessage, context)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-            oauthClients = all
-        } else {
-            // Fetch by clientIds
-            for (const clientId of input.clientIds) {
-                const client = await store.getOAuthClientByClientId(clientId)
-                if (client instanceof Error) {
-                    const errMessage = `Error fetching OAuth client by clientId: ${clientId}. Message: ${client.message}`
-                    logResolverError('fetchOauthClients', errMessage, context)
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
+                let oauthClients = []
+
+                if (!input || !input.clientIds || input.clientIds.length === 0) {
+                    const all = await store.listOAuthClients()
+                    if (all instanceof Error) {
+                        const errMessage = `Error fetching all OAuth clients. Message: ${all.message}`
+                        logResolverError(
+                            'fetchOauthClients',
+                            errMessage,
+                            context
+                        )
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+                    oauthClients = all
+                } else {
+                    for (const clientId of input.clientIds) {
+                        const client =
+                            await store.getOAuthClientByClientId(clientId)
+                        if (client instanceof Error) {
+                            const errMessage = `Error fetching OAuth client by clientId: ${clientId}. Message: ${client.message}`
+                            logResolverError(
+                                'fetchOauthClients',
+                                errMessage,
+                                context
+                            )
+                            throw new GraphQLError(errMessage, {
+                                extensions: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
+                        }
+                        if (client) oauthClients.push(client)
+                    }
+
+                    const seen = new Set()
+                    oauthClients = oauthClients.filter((c) => {
+                        if (seen.has(c.id)) return false
+                        seen.add(c.id)
+                        return true
                     })
                 }
-                if (client) oauthClients.push(client)
+                logResolverSuccess('fetchOauthClients', context)
+                return {
+                    oauthClients,
+                }
             }
-            // Remove duplicates by id
-            const seen = new Set()
-            oauthClients = oauthClients.filter((c) => {
-                if (seen.has(c.id)) return false
-                seen.add(c.id)
-                return true
-            })
-        }
-        logResolverSuccess('fetchOauthClients', context)
-        setSuccessAttributesOnActiveSpan(span)
-        return {
-            oauthClients,
-        }
+        )
     }
 }

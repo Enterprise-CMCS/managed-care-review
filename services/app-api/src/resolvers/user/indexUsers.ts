@@ -3,52 +3,54 @@ import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logResolverError } from '../../logger'
 import type { Store } from '../../postgres'
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-} from '../attributeHelper'
+import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 
 export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
     return async (_parent, _args, context) => {
-        const { user: currentUser, ctx, tracer } = context
-        const span = tracer?.startSpan('indexUser', {}, ctx)
-        setResolverDetailsOnActiveSpan('indexUsers', currentUser, span)
+        const { user: currentUser } = context
 
-        if (
-            !hasAdminPermissions(currentUser) &&
-            !hasCMSPermissions(currentUser)
-        ) {
-            const errMsg = 'user not authorized to fetch users'
-            logResolverError('indexUsers', errMsg, context)
-            setErrorAttributesOnActiveSpan(errMsg, span)
-            throw createForbiddenError(errMsg)
-        }
+        return withResolverSpan(
+            context,
+            'indexUsers',
+            undefined,
+            async (span) => {
+                setResolverDetails(span, currentUser)
 
-        const findResult = await store.findAllUsers()
-        if (findResult instanceof Error) {
-            const errMessage = `Error querying users. ${findResult.message}`
-            logResolverError('indexUsers', errMessage, context)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+                if (
+                    !hasAdminPermissions(currentUser) &&
+                    !hasCMSPermissions(currentUser)
+                ) {
+                    const errMsg = 'user not authorized to fetch users'
+                    logResolverError('indexUsers', errMsg, context)
+                    throw createForbiddenError(errMsg)
+                }
 
-        const userEdges = findResult.map((user) => {
-            return {
-                node: {
-                    ...user,
-                },
+                const findResult = await store.findAllUsers()
+                if (findResult instanceof Error) {
+                    const errMessage = `Error querying users. ${findResult.message}`
+                    logResolverError('indexUsers', errMessage, context)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                const userEdges = findResult.map((user) => {
+                    return {
+                        node: {
+                            ...user,
+                        },
+                    }
+                })
+
+                return {
+                    totalCount: userEdges.length,
+                    edges: userEdges,
+                }
             }
-        })
-
-        return {
-            totalCount: userEdges.length,
-            edges: userEdges,
-        }
+        )
     }
 }
