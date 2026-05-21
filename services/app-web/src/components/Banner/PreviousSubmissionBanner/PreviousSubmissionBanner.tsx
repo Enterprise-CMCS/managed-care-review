@@ -1,5 +1,5 @@
 import React from 'react'
-import { LinkWithLogging } from '../../TealiumLogging/Link'
+import { LinkWithLogging } from '../../TealiumLogging'
 import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type UnlockedProps = {
