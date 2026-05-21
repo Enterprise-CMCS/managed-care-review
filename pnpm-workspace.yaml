@@ -1,5 +1,6 @@
 packages:
     - 'services/**'
+    - '!services/**/cdk.out/**'
     - 'packages/**'
     - 'dev_tool'
     - 'scripts'
