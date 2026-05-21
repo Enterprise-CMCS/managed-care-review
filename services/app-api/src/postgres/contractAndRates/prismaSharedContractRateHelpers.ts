@@ -807,14 +807,19 @@ function rateFormDataToDomainModel(
 
     // Single entry point for revision-level override application: filter
     // first, merge once, then derive doc patches from the flat-mapped rows.
+    // Patches are kept in separate maps per doc kind so a (hypothetical)
+    // documentID collision between a rate doc and a supporting doc cannot
+    // cross-contaminate the merge.
     const relevantOverrides = (rateRevision.revisionOverrides ?? []).filter(
         (o) => o.rateRevisionID === rateRevision.id
     )
     const mergedOverride = mergeRateRevisionOverrides(relevantOverrides)
-    const overridePatches = mergeRateDocumentOverridePatches([
-        ...mergedOverride.rateDocuments,
-        ...mergedOverride.supportingDocuments,
-    ])
+    const rateDocOverridePatches = mergeRateDocumentOverridePatches(
+        mergedOverride.rateDocuments
+    )
+    const supportingDocOverridePatches = mergeRateDocumentOverridePatches(
+        mergedOverride.supportingDocuments
+    )
 
     return {
         id: rateRevision.rateID,
@@ -823,12 +828,12 @@ function rateFormDataToDomainModel(
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
         rateDocuments: rateRevision.rateDocuments
             ? rateRevision.rateDocuments.map((doc) =>
-                  documentDataToDomainModel(doc, overridePatches)
+                  documentDataToDomainModel(doc, rateDocOverridePatches)
               )
             : [],
         supportingDocuments: rateRevision.supportingDocuments
             ? rateRevision.supportingDocuments.map((doc) =>
-                  documentDataToDomainModel(doc, overridePatches)
+                  documentDataToDomainModel(doc, supportingDocOverridePatches)
               )
             : [],
         rateDateStart: rateRevision.rateDateStart ?? undefined,
