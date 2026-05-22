@@ -54,7 +54,7 @@
         "axios": "^1.16.1",
         "eta": "^2.2.0",
         "express": "^5.2.1",
-        "graphql": "^16.13.2",
+        "graphql": "^16.14.0",
         "graphql-scalars": "^1.25.0",
         "jsonwebtoken": "^9.0.3",
         "path-to-regexp": "^8.4.2",
