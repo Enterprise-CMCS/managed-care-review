@@ -1132,40 +1132,18 @@ export class AppApiStack extends BaseStack {
             logicalDbManagerFunctionName,
         ]
 
-        const notifier = new CdkFunction(this, 'RotationNotifier', {
-            functionName: `${ResourceNames.apiName('app-api', this.stage)}-rotation-notifier`,
-            runtime: Runtime.NODEJS_24_X,
-            handler: 'index.handler',
-            code: Code.fromInline(`
-const { LambdaClient, GetFunctionConfigurationCommand, UpdateFunctionConfigurationCommand } = require('@aws-sdk/client-lambda');
-const client = new LambdaClient({});
-exports.handler = async (event) => {
-    const secretId = event?.detail?.additionalEventData?.SecretId ?? '';
-    const dbSecretName = process.env.DB_SECRET_NAME;
-    if (!secretId.includes(dbSecretName)) {
-        console.log('Ignoring rotation event for unrelated secret:', secretId);
-        return;
-    }
-    const names = (process.env.LAMBDA_FUNCTION_NAMES || '').split(',').filter(Boolean);
-    const ts = new Date().toISOString();
-    await Promise.all(names.map(async name => {
-        const cfg = await client.send(new GetFunctionConfigurationCommand({ FunctionName: name }));
-        const vars = cfg.Environment?.Variables ?? {};
-        await client.send(new UpdateFunctionConfigurationCommand({
-            FunctionName: name,
-            Environment: { Variables: { ...vars, ROTATION_TIMESTAMP: ts } }
-        }));
-        console.log('Updated ROTATION_TIMESTAMP for', name);
-    }));
-};`),
-            environment: {
-                LAMBDA_FUNCTION_NAMES: allFunctionNames.join(','),
-                DB_SECRET_NAME: Fn.importValue(
-                    `${postgresStackName}-PostgresSecretName`
-                ),
-            },
-            timeout: Duration.seconds(60),
-        })
+        const notifier = this.createLambdaFunction(
+            'rotation-notifier',
+            'rotation_notifier',
+            'main',
+            {
+                timeout: Duration.seconds(60),
+                environment: {
+                    LAMBDA_FUNCTION_NAMES: allFunctionNames.join(','),
+                    DB_SECRET_NAME: dbSecretName,
+                },
+            }
+        )
 
         // Grant permission to read and update each target function's configuration
         dbConnectedFunctions.forEach((fn) => {
