@@ -25,8 +25,9 @@ import {
     type ICertificate,
     Certificate,
 } from 'aws-cdk-lib/aws-certificatemanager'
-import { CfnOutput } from 'aws-cdk-lib'
+import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib'
 import { ResourceNames } from '../config/shared'
+import { isReviewEnvironment } from '../config/environments'
 
 /**
  * Frontend infrastructure stack - S3 + CloudFront + WAF for both main app and storybook
@@ -78,6 +79,8 @@ export class FrontendInfraStack extends BaseStack {
             )
         }
 
+        const isReview = isReviewEnvironment(this.stage)
+
         // Create S3 bucket
         this.bucket = new Bucket(this, 'S3Bucket', {
             bucketName: ResourceNames.resourceName('ui', 'bucket', this.stage),
@@ -87,6 +90,10 @@ export class FrontendInfraStack extends BaseStack {
             blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
             objectOwnership: ObjectOwnership.OBJECT_WRITER,
             enforceSSL: true,
+            removalPolicy: isReview
+                ? RemovalPolicy.DESTROY
+                : RemovalPolicy.RETAIN,
+            autoDeleteObjects: isReview,
         })
 
         // Create Origin Access Identity
@@ -218,6 +225,10 @@ function handler(event) {
             blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
             objectOwnership: ObjectOwnership.OBJECT_WRITER,
             enforceSSL: true,
+            removalPolicy: isReview
+                ? RemovalPolicy.DESTROY
+                : RemovalPolicy.RETAIN,
+            autoDeleteObjects: isReview,
         })
 
         // Create storybook Origin Access Identity
