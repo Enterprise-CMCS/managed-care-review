@@ -201,10 +201,13 @@ function handler(event) {
             // Security: Enforce TLS 1.2 as minimum protocol version (Security Hub compliance)
             minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
 
-            // Logging to same bucket
-            enableLogging: true,
-            logBucket: this.bucket,
-            logFilePrefix: `${this.stage}-ui-cloudfront-logs/`,
+            // Logging disabled for review environments to avoid race condition on destroy
+            // (CloudFront continues writing logs after bucket is emptied, blocking deletion)
+            enableLogging: !isReview,
+            logBucket: isReview ? undefined : this.bucket,
+            logFilePrefix: isReview
+                ? undefined
+                : `${this.stage}-ui-cloudfront-logs/`,
         })
 
         // Set application URL - use custom domain if configured, otherwise CloudFront URL
@@ -294,10 +297,13 @@ function handler(event) {
                 // Security: Enforce TLS 1.2 as minimum protocol version (Security Hub compliance)
                 minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
 
-                // Logging to same bucket
-                enableLogging: true,
-                logBucket: this.storybookBucket,
-                logFilePrefix: `${this.stage}-storybook-cloudfront-logs/`,
+                // Logging disabled for review environments to avoid race condition on destroy
+                // (CloudFront continues writing logs after bucket is emptied, blocking deletion)
+                enableLogging: !isReview,
+                logBucket: isReview ? undefined : this.storybookBucket,
+                logFilePrefix: isReview
+                    ? undefined
+                    : `${this.stage}-storybook-cloudfront-logs/`,
             }
         )
 
