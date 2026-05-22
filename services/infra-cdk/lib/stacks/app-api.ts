@@ -33,7 +33,7 @@ import { isReviewEnvironment } from '../config/environments'
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
-import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
+import { Match, Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
@@ -1113,12 +1113,18 @@ export class AppApiStack extends BaseStack {
             this.graphqlFunction,
         ]
 
-        // logicalDbManagerFunction lives in the postgres stack — reference by name
-        const logicalDbManagerFunctionName = `postgres-${this.stage}-dbManager-cdk`
-        const logicalDbManagerFunctionArn = `arn:aws:lambda:${this.region}:${this.account}:function:${logicalDbManagerFunctionName}`
         const postgresStackName = ResourceNames.stackName(
             'postgres',
             this.stage
+        )
+        const logicalDbManagerFunctionName = Fn.importValue(
+            `${postgresStackName}-LogicalDbManagerFunctionName`
+        )
+        const logicalDbManagerFunctionArn = Fn.importValue(
+            `${postgresStackName}-LogicalDbManagerFunctionArn`
+        )
+        const dbSecretName = Fn.importValue(
+            `${postgresStackName}-PostgresSecretName`
         )
 
         const allFunctionNames = [
@@ -1194,6 +1200,9 @@ exports.handler = async (event) => {
                 detail: {
                     eventSource: ['secretsmanager.amazonaws.com'],
                     eventName: ['RotationSucceeded'],
+                    additionalEventData: {
+                        SecretId: Match.wildcard(`*${dbSecretName}*`),
+                    },
                 },
             },
             targets: [new LambdaFunction(notifier)],
