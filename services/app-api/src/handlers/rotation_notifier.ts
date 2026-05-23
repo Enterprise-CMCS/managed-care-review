@@ -35,28 +35,53 @@ export const main: Handler = async (
         .filter(Boolean)
     const rotationTimestamp = new Date().toISOString()
 
-    await Promise.all(
-        functionNames.map(async (functionName) => {
-            const config = await client.send(
-                new GetFunctionConfigurationCommand({
-                    FunctionName: functionName,
-                })
-            )
-            const variables = config.Environment?.Variables ?? {}
+    const results = await Promise.allSettled(
+        functionNames.map(async (functionName) =>
+            updateRotationTimestamp(functionName, rotationTimestamp)
+        )
+    )
 
-            await client.send(
-                new UpdateFunctionConfigurationCommand({
-                    FunctionName: functionName,
-                    Environment: {
-                        Variables: {
-                            ...variables,
-                            ROTATION_TIMESTAMP: rotationTimestamp,
-                        },
-                    },
-                })
-            )
+    const failedFunctionNames: string[] = []
 
-            console.info('Updated ROTATION_TIMESTAMP for', functionName)
+    results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+            const functionName = functionNames[index]
+            failedFunctionNames.push(functionName)
+            console.error(
+                'Failed to update ROTATION_TIMESTAMP',
+                functionName,
+                result.reason
+            )
+        }
+    })
+
+    if (failedFunctionNames.length === functionNames.length) {
+        throw new Error('Failed to update ROTATION_TIMESTAMP on every function')
+    }
+}
+
+async function updateRotationTimestamp(
+    functionName: string,
+    rotationTimestamp: string
+): Promise<void> {
+    const config = await client.send(
+        new GetFunctionConfigurationCommand({
+            FunctionName: functionName,
         })
     )
+    const variables = config.Environment?.Variables ?? {}
+
+    await client.send(
+        new UpdateFunctionConfigurationCommand({
+            FunctionName: functionName,
+            Environment: {
+                Variables: {
+                    ...variables,
+                    ROTATION_TIMESTAMP: rotationTimestamp,
+                },
+            },
+        })
+    )
+
+    console.info('Updated ROTATION_TIMESTAMP for', functionName)
 }
