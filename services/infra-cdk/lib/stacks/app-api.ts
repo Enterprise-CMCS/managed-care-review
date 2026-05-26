@@ -33,7 +33,7 @@ import { isReviewEnvironment } from '../config/environments'
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
-import { Rule, Schedule } from 'aws-cdk-lib/aws-events'
+import { Match, Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
@@ -547,6 +547,9 @@ export class AppApiStack extends BaseStack {
 
         // Setup cleanup function cron schedule
         this.setupCleanupSchedule()
+
+        // Force cold-start on all DB-connected Lambdas after secret rotation
+        this.setupRotationNotifier()
 
         this.createOutputs()
     }
@@ -1094,6 +1097,94 @@ export class AppApiStack extends BaseStack {
 
         // Grant EventBridge permission to invoke the cleanup function
         // (This is handled automatically by the LambdaFunction target)
+    }
+
+    /**
+     * Create a Lambda + EventBridge rule that bumps ROTATION_TIMESTAMP on all
+     * DB-connected VPC Lambdas whenever the Aurora secret rotation succeeds,
+     * ensuring no warmed instance retains a stale database password.
+     */
+    private setupRotationNotifier(): void {
+        const dbConnectedFunctions = [
+            this.oauthTokenFunction,
+            this.migrateFunction,
+            this.regenerateZipsFunction,
+            this.migrateS3UrlsFunction,
+            this.graphqlFunction,
+        ]
+
+        const postgresStackName = ResourceNames.stackName(
+            'postgres',
+            this.stage
+        )
+        const logicalDbManagerFunctionName = Fn.importValue(
+            `${postgresStackName}-LogicalDbManagerFunctionName`
+        )
+        const logicalDbManagerFunctionArn = Fn.importValue(
+            `${postgresStackName}-LogicalDbManagerFunctionArn`
+        )
+        const dbSecretName = Fn.importValue(
+            `${postgresStackName}-PostgresSecretName`
+        )
+
+        const allFunctionNames = [
+            ...dbConnectedFunctions.map((fn) => fn.functionName),
+            logicalDbManagerFunctionName,
+        ]
+
+        const notifier = this.createLambdaFunction(
+            'rotation-notifier',
+            'rotation_notifier',
+            'main',
+            {
+                timeout: Duration.seconds(60),
+                environment: {
+                    LAMBDA_FUNCTION_NAMES: allFunctionNames.join(','),
+                    DB_SECRET_NAME: dbSecretName,
+                },
+            }
+        )
+
+        // Grant permission to read and update each target function's configuration
+        dbConnectedFunctions.forEach((fn) => {
+            notifier.addToRolePolicy(
+                new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: [
+                        'lambda:GetFunctionConfiguration',
+                        'lambda:UpdateFunctionConfiguration',
+                    ],
+                    resources: [fn.functionArn],
+                })
+            )
+        })
+
+        notifier.addToRolePolicy(
+            new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: [
+                    'lambda:GetFunctionConfiguration',
+                    'lambda:UpdateFunctionConfiguration',
+                ],
+                resources: [logicalDbManagerFunctionArn],
+            })
+        )
+
+        // Fire whenever Secrets Manager reports a successful rotation
+        new Rule(this, 'SecretRotationSucceededRule', {
+            eventPattern: {
+                source: ['aws.secretsmanager'],
+                detailType: ['AWS Service Event via CloudTrail'],
+                detail: {
+                    eventSource: ['secretsmanager.amazonaws.com'],
+                    eventName: ['RotationSucceeded'],
+                    additionalEventData: {
+                        SecretId: Match.wildcard(`*${dbSecretName}*`),
+                    },
+                },
+            },
+            targets: [new LambdaFunction(notifier)],
+        })
     }
 
     private createOutputs(): void {
