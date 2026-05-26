@@ -56,6 +56,7 @@ export function approveContract(
 
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
+                    logResolverError('approveContract', errMessage, context)
 
                     if (contractWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {

@@ -50,6 +50,11 @@ export function reverseApproveContract(
 
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
+                    logResolverError(
+                        'reverseApproveContract',
+                        errMessage,
+                        context
+                    )
 
                     if (contractWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {

@@ -58,6 +58,11 @@ export function updateContractDraftRevision(
 
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
+                    logResolverError(
+                        'updateContractDraftRevision',
+                        errMessage,
+                        context
+                    )
 
                     if (contractWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
