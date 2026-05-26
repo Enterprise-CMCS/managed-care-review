@@ -1,10 +1,7 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { hasCMSPermissions, isValidCmsDivison } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
-import {
-    setErrorAttributesOnActiveSpan,
-    setSuccessAttributesOnActiveSpan,
-} from '../attributeHelper'
+import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
@@ -18,209 +15,197 @@ export function createRateQuestionResolver(
     emailer: Emailer
 ): MutationResolvers['createRateQuestion'] {
     return async (_parent, { input }, context) => {
-        const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('createRateQuestion', {}, ctx)
+        const { user } = context
 
-        // Check OAuth client read permissions
-        if (!canWrite(context)) {
-            const errMessage = `OAuth client does not have write permissions`
-            logResolverError('createRateQuestion', errMessage, context)
-            setErrorAttributesOnActiveSpan(errMessage, span)
+        return withResolverSpan(
+            context,
+            'createRateQuestion',
+            { 'rate.id': input.rateID },
+            async (span) => {
+                setResolverDetails(span, user)
 
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'FORBIDDEN',
-                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
-                },
-            })
-        }
+                // Check OAuth client read permissions
+                if (!canWrite(context)) {
+                    const errMessage = `OAuth client does not have write permissions`
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'FORBIDDEN',
+                            cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                        },
+                    })
+                }
 
-        if (!hasCMSPermissions(user)) {
-            const msg = 'user not authorized to create a question'
-            logResolverError('createRateQuestion', msg, context)
-            setErrorAttributesOnActiveSpan(msg, span)
-            throw createForbiddenError(msg)
-        }
+                if (!hasCMSPermissions(user)) {
+                    const msg = 'user not authorized to create a question'
+                    logResolverError('createRateQuestion', msg, context)
+                    throw createForbiddenError(msg)
+                }
 
-        if (
-            !user.divisionAssignment ||
-            (user.divisionAssignment &&
-                !isValidCmsDivison(user.divisionAssignment))
-        ) {
-            const msg =
-                'users without an assigned division are not authorized to create a question'
-            logResolverError('createRateQuestion', msg, context)
-            setErrorAttributesOnActiveSpan(msg, span)
-            throw createForbiddenError(msg)
-        }
+                if (
+                    !user.divisionAssignment ||
+                    (user.divisionAssignment &&
+                        !isValidCmsDivison(user.divisionAssignment))
+                ) {
+                    const msg =
+                        'users without an assigned division are not authorized to create a question'
+                    logResolverError('createRateQuestion', msg, context)
+                    throw createForbiddenError(msg)
+                }
 
-        if (input.documents.length === 0) {
-            const msg = 'question documents are required'
-            logResolverError('createRateQuestion', msg, context)
-            setErrorAttributesOnActiveSpan(msg, span)
-            throw createUserInputError(msg)
-        }
+                if (input.documents.length === 0) {
+                    const msg = 'question documents are required'
+                    logResolverError('createRateQuestion', msg, context)
+                    throw createUserInputError(msg)
+                }
 
-        const rate = await store.findRateWithHistory(input.rateID)
+                const rate = await store.findRateWithHistory(input.rateID)
 
-        if (rate instanceof Error) {
-            if (rate instanceof NotFoundError) {
-                const errMessage = `Rate with id ${input.rateID} does not exist`
-                logResolverError('createRateQuestion', errMessage, context)
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                throw new GraphQLError(errMessage, {
-                    extensions: { code: 'NOT_FOUND' },
-                })
-            }
+                if (rate instanceof Error) {
+                    if (rate instanceof NotFoundError) {
+                        const errMessage = `Rate with id ${input.rateID} does not exist`
+                        logResolverError(
+                            'createRateQuestion',
+                            errMessage,
+                            context
+                        )
+                        throw new GraphQLError(errMessage, {
+                            extensions: { code: 'NOT_FOUND' },
+                        })
+                    }
 
-            const errMessage = `Issue finding a rate. Message: ${rate.message}`
-            logResolverError('createRateQuestion', errMessage, context)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+                    const errMessage = `Issue finding a rate. Message: ${rate.message}`
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
 
-        if (['DRAFT', 'WITHDRAWN'].includes(rate.consolidatedStatus)) {
-            const errMessage = `Issue creating question for rate. Message: Rate is in an invalid status: ${rate.consolidatedStatus}`
-            logResolverError('createRateQuestion', errMessage, context)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createUserInputError(errMessage)
-        }
+                if (['DRAFT', 'WITHDRAWN'].includes(rate.consolidatedStatus)) {
+                    const errMessage = `Issue creating question for rate. Message: Rate is in an invalid status: ${rate.consolidatedStatus}`
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw createUserInputError(errMessage)
+                }
 
-        // Parse and validate document s3URLs
-        const docs = parseAndValidateDocuments(
-            input.documents.map((d) => ({
-                name: d.name,
-                s3URL: d.s3URL,
-            }))
-        )
+                // Parse and validate document s3URLs
+                const docs = parseAndValidateDocuments(
+                    input.documents.map((d) => ({
+                        name: d.name,
+                        s3URL: d.s3URL,
+                    }))
+                )
 
-        const inputFormatted = {
-            ...input,
-            documents: docs,
-        }
+                const inputFormatted = {
+                    ...input,
+                    documents: docs,
+                }
 
-        const questionResult = await store.insertRateQuestion(
-            inputFormatted,
-            user
-        )
+                const questionResult = await store.insertRateQuestion(
+                    inputFormatted,
+                    user
+                )
 
-        if (questionResult instanceof Error) {
-            const errMessage = `Issue creating question for rate. Message: ${questionResult.message}`
-            logResolverError('createRateQuestion', errMessage, context)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+                if (questionResult instanceof Error) {
+                    const errMessage = `Issue creating question for rate. Message: ${questionResult.message}`
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw new Error(errMessage)
+                }
 
-        const allQuestions = await store.findAllQuestionsByRate(rate.id)
+                const allQuestions = await store.findAllQuestionsByRate(rate.id)
 
-        if (allQuestions instanceof Error) {
-            const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
-            logResolverError('createRateQuestion', errMessage, context)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'NOT_FOUND',
-                    cause: 'DB_ERROR',
-                },
-            })
-        }
+                if (allQuestions instanceof Error) {
+                    const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw new Error(errMessage)
+                }
 
-        let stateAnalystsEmails: string[] = []
+                let stateAnalystsEmails: string[] = []
 
-        // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-        const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
-            rate.stateCode as StateCodeType
-        )
+                // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
+                const stateAnalystsEmailsResult =
+                    await store.findStateAssignedUsers(
+                        rate.stateCode as StateCodeType
+                    )
 
-        if (stateAnalystsEmailsResult instanceof Error) {
-            logResolverError(
-                'getStateAnalystsEmails',
-                stateAnalystsEmailsResult.message,
-                context
-            )
-            setErrorAttributesOnActiveSpan(
-                stateAnalystsEmailsResult.message,
-                span
-            )
-        } else {
-            stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
-        }
+                if (stateAnalystsEmailsResult instanceof Error) {
+                    logResolverError(
+                        'getStateAnalystsEmails',
+                        stateAnalystsEmailsResult.message,
+                        context
+                    )
+                } else {
+                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
+                        (u) => u.email
+                    )
+                }
 
-        const contractSubmissionType = rate.packageSubmissions
-            .flatMap((pkg) => pkg.contractRevisions)
-            .find((cr) => cr.contract.id === rate.parentContractID)
-            ?.contract.contractSubmissionType
+                const contractSubmissionType = rate.packageSubmissions
+                    .flatMap((pkg) => pkg.contractRevisions)
+                    .find((cr) => cr.contract.id === rate.parentContractID)
+                    ?.contract.contractSubmissionType
 
-        if (!contractSubmissionType) {
-            const errMessage = `Issue creating question for rate. Message: Parent contract missing contract type. Parent contract ID: ${rate.parentContractID}`
-            logResolverError('createRateQuestion', errMessage, context)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw createUserInputError(errMessage)
-        }
-        const sendRateQuestionStateEmailResult =
-            await emailer.sendRateQuestionStateEmail(
-                rate,
-                contractSubmissionType,
-                questionResult
-            )
+                if (!contractSubmissionType) {
+                    const errMessage = `Issue creating question for rate. Message: Parent contract missing contract type. Parent contract ID: ${rate.parentContractID}`
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw createUserInputError(errMessage)
+                }
 
-        if (sendRateQuestionStateEmailResult instanceof Error) {
-            logResolverError(
-                'sendRateQuestionsStateEmail - state email failed',
-                sendRateQuestionStateEmailResult,
-                context
-            )
-            setErrorAttributesOnActiveSpan('state email failed', span)
-            const errMessage = `Error sending a state email for 
+                const sendRateQuestionStateEmailResult =
+                    await emailer.sendRateQuestionStateEmail(
+                        rate,
+                        contractSubmissionType,
+                        questionResult
+                    )
+
+                if (sendRateQuestionStateEmailResult instanceof Error) {
+                    logResolverError(
+                        'sendRateQuestionsStateEmail - state email failed',
+                        sendRateQuestionStateEmailResult,
+                        context
+                    )
+                    const errMessage = `Error sending a state email for
                 questionID: ${questionResult.id} and rate: ${rate.id}`
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
-                },
-            })
-        }
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'EMAIL_ERROR',
+                        },
+                    })
+                }
 
-        const sendRateQuestionCMSEmailResult =
-            await emailer.sendRateQuestionCMSEmail(
-                rate,
-                stateAnalystsEmails,
-                allQuestions,
-                questionResult
-            )
+                const sendRateQuestionCMSEmailResult =
+                    await emailer.sendRateQuestionCMSEmail(
+                        rate,
+                        stateAnalystsEmails,
+                        allQuestions,
+                        questionResult
+                    )
 
-        if (sendRateQuestionCMSEmailResult instanceof Error) {
-            logResolverError(
-                'sendRateQuestionsCMSEmail - CMS email failed',
-                sendRateQuestionCMSEmailResult,
-                context
-            )
-            setErrorAttributesOnActiveSpan('CMS email failed', span)
-            const errMessage = `Error sending a CMS email for 
+                if (sendRateQuestionCMSEmailResult instanceof Error) {
+                    logResolverError(
+                        'sendRateQuestionsCMSEmail - CMS email failed',
+                        sendRateQuestionCMSEmailResult,
+                        context
+                    )
+                    const errMessage = `Error sending a CMS email for
                 questionID: ${questionResult.id} and contractID: ${rate.id}`
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'EMAIL_ERROR',
-                },
-            })
-        }
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'EMAIL_ERROR',
+                        },
+                    })
+                }
 
-        logResolverSuccess('createRateQuestion', context)
-        setSuccessAttributesOnActiveSpan(span)
+                logResolverSuccess('createRateQuestion', context)
 
-        return {
-            question: questionResult,
-        }
+                return {
+                    question: questionResult,
+                }
+            }
+        )
     }
 }
