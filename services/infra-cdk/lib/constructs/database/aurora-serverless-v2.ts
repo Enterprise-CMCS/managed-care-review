@@ -7,6 +7,7 @@ import {
     ClusterInstance,
 } from 'aws-cdk-lib/aws-rds'
 import type { IVpc, SubnetSelection, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import type { ISecret } from 'aws-cdk-lib/aws-secretsmanager'
 import { Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import type { DatabaseConfig } from '../../config/environments'
@@ -14,6 +15,7 @@ import { ResourceNames } from '../../config/shared'
 
 export interface AuroraServerlessV2Props {
     databaseName: string
+    databaseSecretName: string
     stage: string
     vpc: IVpc
     vpcSubnets: SubnetSelection
@@ -60,16 +62,21 @@ export class AuroraServerlessV2 extends Construct {
         }
 
         // Create the Aurora Serverless v2 cluster.
-        // fromGeneratedSecret creates a DatabaseSecret in the format the rotation Lambda expects:
-        // { engine, host, port, dbname, username, password } — auto-attached to the cluster.
+        // Use the existing, stable database secret so exported secret names do not change.
+        const databaseSecret = Secret.fromSecretNameV2(
+            this,
+            'DatabaseSecret',
+            props.databaseSecretName
+        )
+
         this.cluster = new DatabaseCluster(this, 'Cluster', {
             engine: DatabaseClusterEngine.auroraPostgres({
                 version: AuroraPostgresEngineVersion.VER_16_9,
             }),
-            credentials: Credentials.fromGeneratedSecret('mcreviewadmin', {
-                secretName: `aurora-postgres-${props.stage}-cdk-rotating`, // pragma: allowlist secret
-                excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
-            }),
+            credentials: Credentials.fromSecret(
+                databaseSecret,
+                'mcreviewadmin'
+            ),
             clusterIdentifier: ResourceNames.resourceName(
                 'postgres',
                 'cluster',
@@ -103,12 +110,14 @@ export class AuroraServerlessV2 extends Construct {
             }),
         })
 
-        // cluster.secret is the auto-generated DatabaseSecret with all connection fields populated
+        // cluster.secret is the attached database secret with connection fields populated.
         this.secret = this.cluster.secret!
 
-        // Rotate the admin password every 30 days via the Secrets Manager hosted rotation Lambda
+        // Rotate the admin password via the Secrets Manager hosted rotation Lambda.
         this.cluster.addRotationSingleUser({
-            automaticallyAfter: Duration.days(1),
+            automaticallyAfter: Duration.days(
+                props.databaseConfig.passwordRotationDays
+            ),
             vpcSubnets: props.vpcSubnets,
             securityGroup: props.securityGroup,
             excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',

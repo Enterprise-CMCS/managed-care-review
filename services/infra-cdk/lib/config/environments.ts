@@ -11,6 +11,7 @@ export interface DatabaseConfig {
     minCapacity: number
     maxCapacity: number
     backupRetentionDays: number
+    passwordRotationDays: number
     deletionProtection: boolean
     enableDataApi: boolean
 }
@@ -45,6 +46,7 @@ const BASE_CONFIG = {
     database: {
         minCapacity: 1,
         maxCapacity: 16,
+        passwordRotationDays: 90,
         enableDataApi: true,
     },
     lambda: {
