@@ -98,9 +98,15 @@ export function submitRate(
                 const draftRateRevision = unsubmittedRate.draftRevision
 
                 if (!draftRateRevision) {
-                    throw new Error(
+                    const errMessage =
                         'PROGRAMMING ERROR: Status should not be submittable without a draft rate revision'
-                    )
+                    logResolverError('submitRate', errMessage, context)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
                 }
 
                 // prepare to generate rate cert name - either use new form data coming down on submit or unsubmitted submission data already in database
