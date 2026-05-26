@@ -44,10 +44,6 @@ export function updateContract(
                     input.id
                 )
                 if (contractWithHistory instanceof Error) {
-                    throw contractWithHistory
-                }
-
-                if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding a contract with history with id ${input.id}. Message: ${contractWithHistory.message}`
                     logResolverError('updateContract', errMessage, context)
 

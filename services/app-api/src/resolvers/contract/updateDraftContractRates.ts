@@ -300,7 +300,7 @@ function updateDraftContractRates(
                                 errmsg,
                                 context
                             )
-                            throw new Error(errmsg)
+                            throw createUserInputError(errmsg)
                         }
 
                         if (
@@ -378,7 +378,12 @@ function updateDraftContractRates(
                                     errmsg,
                                     context
                                 )
-                                throw new Error(errmsg)
+                                throw new GraphQLError(errmsg, {
+                                    extensions: {
+                                        code: 'INTERNAL_SERVER_ERROR',
+                                        cause: 'DB_ERROR',
+                                    },
+                                })
                             }
 
                             if (
