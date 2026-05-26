@@ -59,5 +59,7 @@ fragment rateRevisionFragment on RateRevision {
         documentType
         createdAt
         downloadUrl
+        s3BucketName
+        s3Key
     }
 }

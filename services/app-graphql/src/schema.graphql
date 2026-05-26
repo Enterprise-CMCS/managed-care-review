@@ -1191,27 +1191,31 @@ enum ContractType {
 }
 
 """
-Document represents a document that has been uploaded to S3. It can be retrieved at the s3URL
-by an authenticated user.
+Document represents a document that has been uploaded to S3. Use s3Key and s3BucketName to locate
+the document; s3URL is deprecated.
 """
 type Document {
     id: ID
     name: String!
-    s3URL: String!
+    s3URL: String! @deprecated(reason: "Use s3Key and s3BucketName instead")
     downloadURL: String
+    s3BucketName: String
+    s3Key: String
 }
 
 """
-SharedDocument represents a document that has been uploaded to S3. It can be retrieved at the s3URL
-by an authenticated user. Can be used to represent either QA or state submission docs
+SharedDocument represents a document that has been uploaded to S3. Use s3Key and s3BucketName to
+locate the document; s3URL is deprecated. Can be used to represent either QA or state submission docs.
 """
 type SharedDocument {
     id: String!
     name: String!
-    s3URL: String!
+    s3URL: String! @deprecated(reason: "Use s3Key and s3BucketName instead")
     sha256: String
     type: String
     downloadURL: String
+    s3BucketName: String
+    s3Key: String
 }
 
 """
@@ -1331,7 +1335,7 @@ type GenericDocument {
     "The user created name of the document"
     name: String!
     "The S3 URL of the document, generated on the FE currently in the FileUpload component"
-    s3URL: String!
+    s3URL: String! @deprecated(reason: "Use s3Key and s3BucketName instead")
     "The sha256 is a unique string representing the file, generated on the FE currently in the FileUpload component"
     sha256: String!
     "URL received from S3 for downloading the document"
@@ -2759,7 +2763,7 @@ type DocumentZipPackage {
     """
     S3 URL where the zip file is stored
     """
-    s3URL: String!
+    s3URL: String! @deprecated(reason: "Use s3Key and s3BucketName instead")
 
     """
     SHA256 hash of the zip file for validation
