@@ -215,7 +215,9 @@ describe('cognitoAuthn', () => {
 // Mock the Cognito SDK
 const { mockSend } = vi.hoisted(() => ({ mockSend: vi.fn() }))
 vi.mock('@aws-sdk/client-cognito-identity-provider', () => ({
-    CognitoIdentityProviderClient: vi.fn(() => ({ send: mockSend })),
+    CognitoIdentityProviderClient: vi.fn(function () {
+        return { send: mockSend }
+    }),
     ListUsersCommand: vi.fn(),
 }))
 

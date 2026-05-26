@@ -39,6 +39,10 @@ const successfulAuthMock = {
 }
 
 describe('Cognito Login', () => {
+    afterEach(() => {
+        vi.restoreAllMocks()
+    })
+
     const userLogin = async (screen: Screen<typeof queries>) => {
         const loginEmail = screen.getByTestId('loginEmail')
         const loginPassword = screen.getByTestId('loginPassword')
