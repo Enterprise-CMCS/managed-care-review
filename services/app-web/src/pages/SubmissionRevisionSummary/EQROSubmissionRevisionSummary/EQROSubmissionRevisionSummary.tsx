@@ -1,29 +1,27 @@
 import React, { useLayoutEffect } from 'react'
 import { GridContainer } from '@trussworks/react-uswds'
 import { useParams } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../../contexts/AuthContext'
 import {
-    ContractDetailsSummarySection,
     ContactsSummarySection,
-    RateDetailsSummarySection,
-    SubmissionTypeSummarySection,
-} from '../../components/SubmissionSummarySection'
-import { usePage } from '../../contexts/PageContext'
+    EQROContractDetailsSummarySection,
+    EQROSubmissionTypeSummarySection,
+} from '../../../components/SubmissionSummarySection'
+import { usePage } from '../../../contexts/PageContext'
 import { formatToPacificTime } from '@mc-review/dates'
-import styles from './SubmissionRevisionSummary.module.scss'
-import { PreviousSubmissionBanner } from '../../components'
-import { FetchContractDocument } from '../../gen/gqlClient'
+import styles from '../SubmissionRevisionSummary.module.scss'
+import { PreviousSubmissionBanner } from '../../../components'
+import { FetchContractDocument } from '../../../gen/gqlClient'
 import { useQuery } from '@apollo/client/react'
 import {
     ErrorOrLoadingPage,
     handleAndReturnErrorState,
-} from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
-import { Error404 } from '../Errors/Error404Page'
-import { getSubmissionPath } from '../../routeHelpers'
-import { useMemoizedStateHeader } from '../../hooks'
+} from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { Error404 } from '../../Errors/Error404Page'
+import { getSubmissionPath } from '../../../routeHelpers'
+import { useMemoizedStateHeader } from '../../../hooks'
 
-export const SubmissionRevisionSummary = (): React.ReactElement => {
-    // Page level state
+export const EQROSubmissionRevisionSummary = (): React.ReactElement => {
     const { id, revisionVersion } = useParams()
     if (!id) {
         throw new Error(
@@ -49,10 +47,8 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     })
     const contract = fetchContractData?.fetchContract.contract
 
-    // Offset version by +1 of index, remove offset to find target previous submission in the history list
     const revisionIndex = Number(revisionVersion) - 1
 
-    // Reverse revisions to get correct submission order
     const packageSubmissions = contract
         ? [...contract.packageSubmissions]
               .filter((submission) => {
@@ -78,7 +74,6 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
         updateHeading({ customHeading: stateHeader })
     }, [stateHeader, updateHeading])
 
-    // Display any full page interim state resulting from the initial fetch API requests
     if (!fetchContractData && fetchContractLoading) {
         return <ErrorOrLoadingPage state="LOADING" />
     }
@@ -93,7 +88,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
 
     if (
         !contract ||
-        contract.contractSubmissionType !== 'HEALTH_PLAN' ||
+        contract.contractSubmissionType !== 'EQRO' ||
         !targetPreviousSubmission ||
         !name
     ) {
@@ -101,17 +96,7 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     }
 
     const revision = targetPreviousSubmission.contractRevision
-    const rateRevisions = targetPreviousSubmission.rateRevisions.map((rrev) => {
-        return {
-            ...rrev,
-            isLinked: false, // just ignore isLinked, we are on revision summary for submitted rate and don't care at this point UI wise
-        }
-    })
-    const contractData = revision.formData
-    const statePrograms = contract.state.programs
     const submitInfo = revision.submitInfo || undefined
-    const isContractActionAndRateCertification =
-        contractData.submissionType === 'CONTRACT_AND_RATES'
 
     return (
         <div className={styles.background}>
@@ -127,11 +112,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                         contract.id
                     )}
                 />
-                <SubmissionTypeSummarySection
+                <EQROSubmissionTypeSummarySection
                     contract={contract}
                     contractRev={revision}
                     isStateUser={isStateUser}
-                    submissionName={name}
+                    headerText="Submission details"
                     initiallySubmittedAt={contract.initiallySubmittedAt}
                     headerChildComponent={
                         submitInfo && (
@@ -145,21 +130,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                     }
                 />
 
-                <ContractDetailsSummarySection
+                <EQROContractDetailsSummarySection
                     contract={contract}
-                    isStateUser={isStateUser}
                     contractRev={revision}
                 />
 
-                {isContractActionAndRateCertification && (
-                    <RateDetailsSummarySection
-                        contract={contract}
-                        contractRev={revision}
-                        submissionName={name}
-                        statePrograms={statePrograms}
-                        rateRevisions={rateRevisions}
-                    />
-                )}
                 <ContactsSummarySection
                     contract={contract}
                     contractRev={revision}
@@ -168,10 +143,4 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
             </GridContainer>
         </div>
     )
-}
-
-export type SectionHeaderProps = {
-    header: string
-    submissionName?: boolean
-    href: string
 }

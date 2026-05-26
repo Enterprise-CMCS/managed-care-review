@@ -1,13 +1,14 @@
 import React from 'react'
-import { LinkWithLogging } from '../../TealiumLogging/Link'
+import { LinkWithLogging } from '../../TealiumLogging'
 import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertBanner'
 
 export type UnlockedProps = {
     link: string
-}
+} & React.HTMLAttributes<HTMLDivElement>
 
 export const PreviousSubmissionBanner = ({
     link,
+    className,
 }: UnlockedProps): React.ReactElement => {
     return (
         <AccessibleAlertBanner
@@ -17,6 +18,7 @@ export const PreviousSubmissionBanner = ({
             headingLevel="h4"
             data-testid="previousSubmissionBanner"
             validation
+            className={className}
         >
             <p
                 className="usa-alert__text"
