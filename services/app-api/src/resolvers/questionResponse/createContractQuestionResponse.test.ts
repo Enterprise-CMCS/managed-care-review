@@ -73,6 +73,8 @@ describe('createContractQuestionResponse', () => {
                                 name: 'Test Question Response',
                                 s3URL: 's3://bucketname/key/test1',
                                 downloadURL: expect.any(String),
+                                s3BucketName: 'bucketname',
+                                s3Key: 'allusers/key',
                             },
                         ],
                         addedBy: expect.objectContaining({
