@@ -286,6 +286,69 @@ describe('UnlockSubmitModal', () => {
         })
     })
 
+    describe('CHIP-only resubmission modal', () => {
+        it('displays the CHIP-only description plus a summary-of-changes textarea', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    submissionData={mockContractPackageDraft()}
+                    submissionName="Test-Submission"
+                    modalType="RESUBMIT_CHIP_ONLY"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            // Reuses the SUBMIT_CHIP_ONLY description verbatim
+            expect(screen.getByText('Ready to submit?')).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Once you submit, your submission will be locked. CMS must unlock it before you can edit your responses.'
+                )
+            ).toBeInTheDocument()
+            // The only material difference: input is shown for the change summary
+            expect(
+                screen.getByTestId('unlockSubmitModalInput')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByText(
+                    'Provide summary of all changes made to this contract'
+                )
+            ).toBeInTheDocument()
+        })
+
+        it('shows a validation error when resubmitting without a change summary', async () => {
+            const modalRef = createRef<ModalRef>()
+            const handleOpen = () =>
+                modalRef.current?.toggleModal(undefined, true)
+            renderWithProviders(
+                <UnlockSubmitModal
+                    submissionData={mockContractPackageDraft()}
+                    submissionName="Test-Submission"
+                    modalType="RESUBMIT_CHIP_ONLY"
+                    modalRef={modalRef}
+                    setIsSubmitting={mockSetIsSubmitting}
+                />
+            )
+            await waitFor(() => handleOpen())
+            const dialog = screen.getByRole('dialog')
+            await waitFor(() => expect(dialog).toHaveClass('is-visible'))
+
+            await userEvent.click(
+                screen.getByTestId('resubmit_chip_only-modal-submit')
+            )
+
+            expect(
+                await screen.findByText('You must provide a summary of changes')
+            ).toBeInTheDocument()
+        })
+    })
+
     describe('unlock submission modal', () => {
         it('displays correct modal when unlocking submission', async () => {
             const modalRef = createRef<ModalRef>()
