@@ -510,6 +510,34 @@ describe('Change History', () => {
             within(submissionItem).getAllByText('Not subject to review')
         ).toHaveLength(2)
     })
+    it('renders CHIP-only EQRO initial submission not subject to review', async () => {
+        // mockEqroContractSubmittedUnderReview would normally show "Subject to review";
+        // overriding populationCovered to CHIP must force NOT_SUBJECT_TO_REVIEW.
+        const contract = mockEqroContractSubmittedUnderReview()
+        contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+            'CHIP'
+
+        renderWithProviders(<ChangeHistory contract={contract} />)
+
+        const submissionRow = screen.getByRole('button', {
+            name: `${formatToPacificTime(
+                contract.packageSubmissions[0].submitInfo.updatedAt
+            )} - Submission`,
+        })
+        await userEvent.click(submissionRow)
+
+        const submissionItem = screen.getByTestId(
+            `accordionItem_${contract.packageSubmissions[0].submitInfo.updatedAt}`
+        )
+
+        expect(within(submissionItem).getByText('Status:')).toBeInTheDocument()
+        expect(
+            within(submissionItem).getByText('Review decision:')
+        ).toBeInTheDocument()
+        expect(
+            within(submissionItem).getAllByText('Not subject to review')
+        ).toHaveLength(2)
+    })
     it('preserves historical review decisions across EQRO resubmissions', async () => {
         const contract = mockEqroContractResubmittedWithReviewStatusChange()
 
