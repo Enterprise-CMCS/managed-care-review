@@ -22,6 +22,7 @@ import {
     SubmissionDescriptionSummary,
     SubmissionTypeSummary,
     SubmittedAtSummary,
+    UpdatedAtSummary,
 } from '../SummarySectionFields'
 import { formattedProgramNames } from '../../../formHelpers'
 import { getConsolidatedContractStatusText } from '../../ContractTable'
@@ -67,6 +68,8 @@ export const SubmissionTypeSummarySection = ({
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
 
+    const lastUpdated = contract.lastUpdatedForDisplay || contract.updatedAt
+
     return (
         <SectionCard
             id="submissionTypeSection"
@@ -83,7 +86,7 @@ export const SubmissionTypeSummarySection = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {(contract.consolidatedStatus || !isSubmitted) && (
+                {contract.consolidatedStatus && isSubmitted && (
                     <ReviewDecisionSummary
                         reviewDecision={
                             contract.consolidatedStatus ===
@@ -98,6 +101,15 @@ export const SubmissionTypeSummarySection = ({
                     />
                 )}
                 <MultiColumnGrid columns={2}>
+                    {initiallySubmittedAt &&
+                        (isSubmitted || (!isStateUser && isUnlocked)) && (
+                            <SubmittedAtSummary
+                                initiallySubmittedAt={initiallySubmittedAt}
+                            />
+                        )}
+                    {lastUpdated && isSubmitted && (
+                        <UpdatedAtSummary updatedAt={lastUpdated} />
+                    )}
                     {(contractFormData.populationCovered || !isSubmitted) && (
                         <PopulationCoverageSummary
                             contractFormData={contractFormData}
@@ -130,12 +142,6 @@ export const SubmissionTypeSummarySection = ({
                             explainMissingData={explainMissingData}
                         />
                     )}
-                    {initiallySubmittedAt &&
-                        (isSubmitted || (!isStateUser && isUnlocked)) && (
-                            <SubmittedAtSummary
-                                initiallySubmittedAt={initiallySubmittedAt}
-                            />
-                        )}
                 </MultiColumnGrid>
 
                 <Grid row gap>

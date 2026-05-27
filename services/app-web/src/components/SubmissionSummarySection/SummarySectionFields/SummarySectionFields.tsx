@@ -214,14 +214,34 @@ export const SubmittedAtSummary = ({
 }) => {
     return (
         <DataDetail
-            id="submitted"
-            label={label ?? 'Submitted'}
+            id="submissionDate"
+            label={label ?? 'Submission date'}
             children={
                 <span>
                     {formatCalendarDate(
                         initiallySubmittedAt,
                         'America/Los_Angeles'
                     )}
+                </span>
+            }
+        />
+    )
+}
+
+export const UpdatedAtSummary = ({
+    updatedAt,
+    label,
+}: {
+    updatedAt: Date
+    label?: string
+}) => {
+    return (
+        <DataDetail
+            id="lastUpdated"
+            label={label ?? 'Last updated'}
+            children={
+                <span>
+                    {formatCalendarDate(updatedAt, 'America/Los_Angeles')}
                 </span>
             }
         />
