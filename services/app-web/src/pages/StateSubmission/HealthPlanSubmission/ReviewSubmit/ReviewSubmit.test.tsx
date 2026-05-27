@@ -307,6 +307,48 @@ describe('ReviewSubmit', () => {
         ).not.toBeInTheDocument()
     })
 
+    it('uses RESUBMIT_CHIP_ONLY modal for unlocked CHIP-only HEALTH_PLAN when flag is on', async () => {
+        const chipUnlocked = mockContractPackageUnlockedWithUnlockedType()
+        chipUnlocked.draftRevision.formData.populationCovered = 'CHIP'
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmit />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: {
+                                ...chipUnlocked,
+                                id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: {
+                    'chip-submission-automation': true,
+                },
+            }
+        )
+
+        // RESUBMIT_CHIP_ONLY reuses the CHIP-only description and adds the textarea
+        expect(
+            await screen.findByText(
+                'Once you submit, your submission will be locked. CMS must unlock it before you can edit your responses.'
+            )
+        ).toBeInTheDocument()
+        expect(screen.getByTestId('unlockSubmitModalInput')).toBeInTheDocument()
+    })
+
     it('pulls the right version of UNLOCKED data for state users', async () => {
         renderWithProviders(
             <Routes>

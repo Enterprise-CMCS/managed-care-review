@@ -193,7 +193,9 @@ export const ReviewSubmit = (): React.ReactElement => {
                     modalType={
                         chipSubmissionAutomation &&
                         contractFormData.populationCovered === 'CHIP'
-                            ? 'SUBMIT_CHIP_ONLY'
+                            ? contract.status === 'UNLOCKED'
+                                ? 'RESUBMIT_CHIP_ONLY'
+                                : 'SUBMIT_CHIP_ONLY'
                             : contract.status === 'UNLOCKED'
                               ? 'RESUBMIT_CONTRACT'
                               : 'SUBMIT_CONTRACT'
