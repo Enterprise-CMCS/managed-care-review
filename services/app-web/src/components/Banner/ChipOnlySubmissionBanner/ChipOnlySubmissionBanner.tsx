@@ -22,28 +22,28 @@ export const ChipOnlySubmissionBanner = ({
                         DMCO won't validate that it meets federal requirements.
                     </p>
                     <strong>
-                        For all CHIP-only contracts, you must still:
+                        For all CHIP-only contracts, you’re still required to:
                     </strong>
                     <ul className={styles.listItems}>
                         <li>
-                            Meet all applicable requirements at 42 CFR Part 457,
-                            Subpart L.
+                            Submit base contracts, amendments, and extensions to
+                            CMS, as required at 42 CFR 457.1201(a).
                         </li>
                         <li>
-                            Submit base contracts, amendments, and extensions to
-                            CMS, as specified at 42 CFR § 457.1201(a).
+                            Meet all applicable requirements at 42 CFR Part 457
+                            Subpart L.
                         </li>
                     </ul>
                     <strong>What comes next:</strong>
                     <ul className={styles.listItems}>
                         <li>
                             Recordkeeping: CMS will keep your submission on
-                            file. DMCO doesn’t issue formal communication for
+                            file. DMCO doesn't issue formal validation for
                             CHIP-only contracts.
                         </li>
                         <li>
-                            Questions: Other CMS components may email you with
-                            questions.
+                            Questions: You may receive questions by email from
+                            other CMS components.
                         </li>
                     </ul>
                 </ExpandableText>
