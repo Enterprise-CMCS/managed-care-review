@@ -1,0 +1,35 @@
+Submission <%= it.packageName %> is not subject to DMCO review and validation.<br />
+<br />
+<b>Contract type</b>: <%= it.contractSubmissionType %><br />
+<b><%= it.contractDatesLabel %></b>: <%= it.contractDatesStart %> to <%= it.contractDatesEnd %><br />
+<b>Which populations does this contract action cover?</b>: CHIP-only<br />
+<br />
+<b>Submission description</b>: <%= it.submissionDescription %><br />
+<br />
+<a href="<%= it.submissionURL%>">View submission</a><br />
+<br />
+<strong>What comes next:</strong>
+<ul style="margin-top: 0;">
+    <li>
+        Record keeping: This submission will be filed for record keeping. DMCO will not issue formal communication validating that this CHIP-only contract submission meets federal requirements.
+    </li>
+    <li>
+        Questions: You may receive questions via email from other CMS components.
+    </li>
+</ul>
+
+<strong>As a reminder, all CHIP-only contracts must:</strong>
+<ul style="margin-top: 0;">
+    <li>
+        Be submitted to CMS as required at 42 CFR 457.1201(a). This includes base contracts, amendments to base contracts, and extensions.
+    </li>
+    <li>
+        Comply with all applicable requirements specified at 42 CFR Part 457 Subpart L.
+    </li>
+</ul>
+
+<strong>If you need assistance or have any questions:</strong>
+<ul style="margin-top: 0;">
+  <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:MCGDMCOactions@cms.hhs.gov">MCGDMCOactions@cms.hhs.gov</a> and/or your CMS primary contact.</li>
+  <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:MC_Review_HelpDesk@cms.hhs.gov">MC_Review_HelpDesk@cms.hhs.gov</a>.</li>
+</ul>
