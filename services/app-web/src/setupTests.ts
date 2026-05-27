@@ -36,6 +36,16 @@ Object.assign(global, { TextDecoder, TextEncoder })
 
 // This is a fix for userEvents and fireEvents not resolving promises and causing issues with apollo mocks.
 // Found this fix in https://github.com/testing-library/react-testing-library/issues/1197#issuecomment-2076120296
+//
+// Capture the native clearInterval before fake timers replace it. vitest 4
+// removes it from the global during environment teardown (after afterAll hooks
+// run), which causes jsdom's window.close() → stopAllTimers() to throw
+// "clearInterval is not defined". Restoring it in afterAll keeps teardown clean.
+const _nativeClearInterval = globalThis.clearInterval
+afterAll(() => {
+    globalThis.clearInterval = _nativeClearInterval
+})
+
 vi.useFakeTimers({
     shouldAdvanceTime: true,
 })

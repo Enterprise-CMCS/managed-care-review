@@ -135,7 +135,7 @@ describe('unlockContract', () => {
 
                     expectToBeDefined(unlockResult2.errors)
                     expect(unlockResult2.errors[0].message).toBe(
-                        'Attempted to unlock contract with wrong status'
+                        'Attempted to unlock contract with wrong status: UNLOCKED'
                     )
                 })
 
@@ -275,7 +275,7 @@ describe('unlockContract', () => {
 
                     expectToBeDefined(unlockResult.errors)
                     expect(unlockResult.errors[0].message).toBe(
-                        'Attempted to unlock contract with wrong status'
+                        'Attempted to unlock contract with wrong status: APPROVED'
                     )
                 })
             }

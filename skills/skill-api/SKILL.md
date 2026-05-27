@@ -40,6 +40,10 @@ For broad multi-area features (e.g. a new "undo unlock contract" mutation): read
 - **Two-tier pattern**: parent table (identity) + revision table (form data). Form data lives only on revisions; parents are stable anchors.
 - **Submit stamps an existing draft revision in place. Unlock CREATES a new revision row.** Both flip status by setting `submitInfoID` / `unlockInfoID` on a row.
 - **Status is never stored.** It's derived in the parser from the latest revision's `submitInfo`/`unlockInfo` pair, plus the latest `*ActionTable` row, plus a few special-case rules.
+- **There are two different kinds of GraphQL resolvers in this codebase.**
+  - **Top-level Query/Mutation resolvers** are operation entrypoints such as `submitContract`, `unlockContract`, `fetchRate`, `createContractQuestion`. These handle auth, user-input validation, orchestration, store writes/reads, and error formatting for client-initiated operations.
+  - **Schema object-field resolvers** are the per-type resolver objects registered under keys like `Rate`, `Contract`, `RateRevision`, `ContractQuestion`, `GenericDocument`, `DocumentZipPackage` in `services/app-api/src/resolvers/configureResolvers.ts`. These run when GraphQL resolves selected fields on already-fetched objects. They usually compute derived fields (`webURL`, `state`, `initiallySubmittedAt`, `packageSubmissions`, `downloadURL`, `round`) or do secondary lookups, but they are not top-level workflow entrypoints.
+  - Treat these categories differently when changing behavior: operation resolvers are where business-action eligibility, authorization, and mutation orchestration usually belong; object-field resolvers are where type hydration/derivation logic belongs.
 - **Parent contract is never stored.** It's derived per rate as "the contract whose latest submission stamped this rate's latest submitted revision."
 - **One `UpdateInfoTable` event row per submit-or-unlock; shared across the contract and every child rate touched in that transaction.** This is what lets the parser later detect "these were submitted/unlocked together."
 - **`SubmissionPackageJoinTable`** is the immutable snapshot of contract↔rate at submit time, joining specific contract revision + specific rate revision + position. **`DraftRateJoinTable`** is the working set on a contract that's currently in draft, joining parent tables only.
@@ -100,6 +104,7 @@ OAuth `canWrite` (or `canOauthWrite`) is required on every write. State-vs-CMS c
 | Submit resolver | `services/app-api/src/resolvers/contract/submitContract.ts` |
 | Submit postgres outer | `services/app-api/src/postgres/contractAndRates/submitContract.ts` |
 | Submit core engine | `submitContractAndOrRates.ts` (same dir) |
+| Resolver registration map (top-level + object-field resolvers) | `services/app-api/src/resolvers/configureResolvers.ts` |
 | Unlock resolver | `services/app-api/src/resolvers/contract/unlockContract.ts` |
 | Unlock postgres (contract) | `services/app-api/src/postgres/contractAndRates/unlockContract.ts` |
 | Unlock postgres (rate engine) | `unlockRate.ts` (same dir) |
@@ -152,14 +157,17 @@ The repo's `docs/` directory has broader architecture and conventions docs that 
 
 1. **Start at the schema** (reference 01) to confirm what's actually stored vs derived. Most "states" are derived in the parse layer.
 2. **Read the parser** (reference 03) to understand how the change will surface in the domain output. A status change usually means flipping `submitInfo`/`unlockInfo` on the latest revision, adding a new revision, or appending an action row.
-3. **Trace the relevant mutation** (references 04–07) end-to-end. The resolver does authorization, validation, and formatting; the postgres layer does the actual DB work — they often have important guards in different places.
-4. **If the resolver calls a store function that writes a row in `ContractTable`, `RateTable`, `ContractQuestion`, or `RateQuestion`, default to `runTransactionWithRowLock`.** Only skip it when last-write-wins behavior is intentional and acceptable for that path.
-5. **Check `packageSubmissions` and cause impact** (reference 08) if the change involves an `UpdateInfoTable` event. The change may append entries to the package history from both contract and rate perspectives.
-6. **Don't include `sharedRateRevisions`** in any new design — deprecated.
-7. **Watch for `DRAFT_PARENT_PLACEHOLDER`** if the change involves draft rates without a submitted parent yet — the placeholder needs the outer parser to patch.
-8. **Verify file paths and code shapes against the current state of the repo** before depending on specifics. This reference was synthesized at a point in time; it can drift.
-9. **Never hand-write Prisma migrations.** If a schema change needs a migration, generate it with the Prisma CLI and review the generated SQL rather than manually creating `migration.sql` files.
-10. **Sandbox limitation for Prisma CLI.** In the Codex sandbox, Prisma CLI commands that need database access may fail because the sandbox cannot connect to local Postgres (for example `localhost:5432`). If a task requires `prisma migrate`, `prisma db push`, `prisma migrate reset`, or similar DB-connected Prisma commands, the human user should run them in their own shell and provide the results back for review.
-11. **Migration transaction wrapper.** When reviewing or adjusting generated Prisma migration SQL in this repo, make sure the migration statements are wrapped in an explicit `BEGIN;` / `COMMIT;` transaction block.
-12. **Never assume this skill is up-to-date.** Scan the relevant code areas during work and check if the skill is out of date with the codebase.
-13. **Prompt to update skill.** If the skill is out of date with the codebase, prompt the human user on if they want to update the skill.
+3. **Decide whether the work belongs in an operation resolver or an object-field resolver.** Check `services/app-api/src/resolvers/configureResolvers.ts` first if you're unsure which kind you're looking at.
+   - Query/Mutation resolver: operation boundary, auth, mutation orchestration, user-facing error shaping.
+   - Object-field resolver: per-type field hydration/derivation after the parent object already exists.
+4. **Trace the relevant mutation** (references 04–07) end-to-end if the task is an operation change. The resolver does authorization, validation, and formatting; the postgres layer does the actual DB work — they often have important guards in different places.
+5. **If the resolver calls a store function that writes a row in `ContractTable`, `RateTable`, `ContractQuestion`, or `RateQuestion`, default to `runTransactionWithRowLock`.** Only skip it when last-write-wins behavior is intentional and acceptable for that path.
+6. **Check `packageSubmissions` and cause impact** (reference 08) if the change involves an `UpdateInfoTable` event. The change may append entries to the package history from both contract and rate perspectives.
+7. **Don't include `sharedRateRevisions`** in any new design — deprecated.
+8. **Watch for `DRAFT_PARENT_PLACEHOLDER`** if the change involves draft rates without a submitted parent yet — the placeholder needs the outer parser to patch.
+9. **Verify file paths and code shapes against the current state of the repo** before depending on specifics. This reference was synthesized at a point in time; it can drift.
+10. **Never hand-write Prisma migrations.** If a schema change needs a migration, generate it with the Prisma CLI and review the generated SQL rather than manually creating `migration.sql` files.
+11. **Sandbox limitation for Prisma CLI.** In the Codex sandbox, Prisma CLI commands that need database access may fail because the sandbox cannot connect to local Postgres (for example `localhost:5432`). If a task requires `prisma migrate`, `prisma db push`, `prisma migrate reset`, or similar DB-connected Prisma commands, the human user should run them in their own shell and provide the results back for review.
+12. **Migration transaction wrapper.** When reviewing or adjusting generated Prisma migration SQL in this repo, make sure the migration statements are wrapped in an explicit `BEGIN;` / `COMMIT;` transaction block.
+13. **Never assume this skill is up-to-date.** Scan the relevant code areas during work and check if the skill is out of date with the codebase.
+14. **Prompt to update skill.** If the skill is out of date with the codebase, prompt the human user on if they want to update the skill.

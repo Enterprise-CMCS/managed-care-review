@@ -14,6 +14,9 @@ const clearDocMetadata = (documents?: GenericDocument[]): GenericDocument[] => {
         // it is not needed on the BE.
         delete doc['id']
         delete doc['dateAdded']
+        // s3BucketName and s3Key are output-only fields not present in GenericDocumentInput
+        delete doc['s3BucketName']
+        delete doc['s3Key']
         return doc
     })
 }

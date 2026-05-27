@@ -7,7 +7,7 @@ import type {
     RateRevisionType,
     UnlockedContractType,
 } from '../../domain-models'
-import type { StrippedContractType } from '../../domain-models/contractAndRates/contractTypes'
+import type { StrippedContractType } from '../../domain-models'
 import path from 'path'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
@@ -18,6 +18,7 @@ import {
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import type { Context } from '../../handlers/apollo_gql'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import { logResolverError } from '../../logger'
 
 // this is probably a little delicate type-wise. But seems worth it not to be duplicating the same resolver in two places.
 function genericContractResolver<
@@ -67,7 +68,11 @@ function genericContractResolver<
 
             return null
         },
-        state(parent: ParentType) {
+        state(
+            parent: ParentType,
+            _args: Record<string, never>,
+            context: Context
+        ) {
             const packageState = parent.stateCode
             const state = typedStatePrograms.states.find(
                 (st) => st.code === packageState
@@ -76,6 +81,11 @@ function genericContractResolver<
             if (state === undefined) {
                 const errMessage =
                     'State not found in database: ' + packageState
+                logResolverError(
+                    'genericContractResolver.state',
+                    errMessage,
+                    context
+                )
                 throw new GraphQLError(errMessage, {
                     extensions: {
                         code: 'INTERNAL_SERVER_ERROR',
@@ -108,7 +118,11 @@ function genericContractResolver<
             )
             return new URL(urlPath, applicationEndpoint).href
         },
-        packageSubmissions(parent: ParentType) {
+        packageSubmissions(
+            parent: ParentType,
+            _args: Record<string, never>,
+            context: Context
+        ) {
             const gqlSubs: ContractPackageSubmissionWithCauseType[] = []
             for (let i = 0; i < parent.packageSubmissions.length; i++) {
                 const thisSub = parent.packageSubmissions[i]
@@ -139,9 +153,19 @@ function genericContractResolver<
                         const thisSubmittedRate =
                             submittedRate as RateRevisionType
                         if (!prevSub) {
-                            throw new Error(
-                                'Programming Error: a non-contract submission must have a previous contract submission'
+                            const errorMsg =
+                                'Cannot determine contract package submission cause: non-contract package submission is missing a previous package submission'
+                            logResolverError(
+                                'genericContractResolver.packageSubmissions',
+                                errorMsg,
+                                context
                             )
+                            throw new GraphQLError(errorMsg, {
+                                extensions: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
                         }
                         const previousRateRevisionIDs =
                             prevSub.rateRevisions.map((r) => r.rateID)
@@ -171,7 +195,11 @@ function genericContractResolver<
             return gqlSubs
         },
 
-        questions: async (parent: ParentType, _args: any, context: Context) => {
+        questions: async (
+            parent: ParentType,
+            _args: Record<string, never>,
+            context: Context
+        ) => {
             const { user, ctx, tracer } = context
             // add a span to OTEL
             const span = tracer?.startSpan(
@@ -191,6 +219,11 @@ function genericContractResolver<
 
             if (questionsForContract instanceof Error) {
                 const errMessage = `Issue finding contract message: ${questionsForContract.message}`
+                logResolverError(
+                    'genericContractResolver.questions',
+                    errMessage,
+                    context
+                )
                 setErrorAttributesOnActiveSpan(errMessage, span)
 
                 if (questionsForContract instanceof NotFoundError) {
@@ -242,7 +275,11 @@ export function contractStrippedResolver(): Resolvers['ContractStripped'] {
         initiallySubmittedAt(parent: StrippedContractType) {
             return parent.initiallySubmittedAt || null
         },
-        state(parent: StrippedContractType) {
+        state(
+            parent: StrippedContractType,
+            _args: Record<string, never>,
+            context: Context
+        ) {
             const packageState = parent.stateCode
             const state = typedStatePrograms.states.find(
                 (st) => st.code === packageState
@@ -251,6 +288,12 @@ export function contractStrippedResolver(): Resolvers['ContractStripped'] {
             if (state === undefined) {
                 const errMessage =
                     'State not found in database: ' + packageState
+                logResolverError(
+                    'contractStrippedResolver.state',
+                    errMessage,
+                    context
+                )
+
                 throw new GraphQLError(errMessage, {
                     extensions: {
                         code: 'INTERNAL_SERVER_ERROR',
