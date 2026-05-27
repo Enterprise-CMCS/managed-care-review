@@ -66,6 +66,45 @@ export const newEqroContractStateEmail = async (
         config.baseUrl
     )
 
+    const isChipOnly = formData.populationCovered === 'CHIP'
+
+    if (isChipOnly) {
+        const chipData = {
+            packageName: pkgName,
+            contractSubmissionType:
+                'External Quality Review Organization (EQRO)',
+            contractDatesLabel:
+                formData.contractType === 'AMENDMENT'
+                    ? 'Contract amendment effective dates'
+                    : 'Contract effective dates',
+            contractDatesStart: formatCalendarDate(
+                formData.contractDateStart,
+                'UTC'
+            ),
+            contractDatesEnd: formatCalendarDate(
+                formData.contractDateEnd,
+                'UTC'
+            ),
+            submissionDescription: formData.submissionDescription,
+            submissionURL,
+        }
+        const chipTemplate = await renderTemplate<typeof chipData>(
+            'newChipOnlyStateEmail',
+            chipData
+        )
+        if (chipTemplate instanceof Error) {
+            return chipTemplate
+        }
+        return {
+            toAddresses,
+            replyToAddresses: [],
+            sourceEmail: config.emailSource,
+            subject: `${config.stage !== 'prod' ? `[${config.stage}] ` : ''}${pkgName} is not subject to DMCO review and validation.`,
+            bodyText: stripHTMLFromTemplate(chipTemplate),
+            bodyHTML: chipTemplate,
+        }
+    }
+
     const subjectToReview = eqroValidationAndReviewDetermination(
         contract.id,
         formData

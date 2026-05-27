@@ -31,20 +31,7 @@ export const newEQROContractCMSEmail = async (
 
     const contractRev = contract.packageSubmissions[0].contractRevision
     const contractFormData = contractRev.formData
-
-    const isSubjectToReview = eqroValidationAndReviewDetermination(
-        contract.id,
-        contractFormData
-    )
-
-    if (isSubjectToReview instanceof Error) {
-        return isSubjectToReview
-    }
-
-    const reviewerEmails = [
-        ...devReviewTeamEmails,
-        ...(isSubjectToReview ? dmcoEmails : []),
-    ]
+    const isChipOnly = contractFormData.populationCovered === 'CHIP'
 
     const packagePrograms = findContractPrograms(contractRev, statePrograms)
 
@@ -64,6 +51,61 @@ export const newEQROContractCMSEmail = async (
         contract.contractSubmissionType,
         config.baseUrl
     )
+
+    if (isChipOnly) {
+        const chipData = {
+            packageName,
+            contractSubmissionType:
+                'External Quality Review Organization (EQRO)',
+            contractActionType:
+                contractFormData.contractType === 'BASE'
+                    ? 'Base contract'
+                    : 'Amendment to base contract',
+            contractDatesLabel:
+                contractFormData.contractType === 'AMENDMENT'
+                    ? 'Contract amendment effective dates'
+                    : 'Contract effective dates',
+            contractDatesStart: formatCalendarDate(
+                contractFormData.contractDateStart,
+                'UTC'
+            ),
+            contractDatesEnd: formatCalendarDate(
+                contractFormData.contractDateEnd,
+                'UTC'
+            ),
+            submissionDescription: contractFormData.submissionDescription,
+            submissionURL: packageURL,
+        }
+        const chipTemplate = await renderTemplate<typeof chipData>(
+            'newChipOnlyCMSEmail',
+            chipData
+        )
+        if (chipTemplate instanceof Error) {
+            return chipTemplate
+        }
+        return {
+            toAddresses: devReviewTeamEmails,
+            replyToAddresses: [],
+            sourceEmail: config.emailSource,
+            subject: `${isTestEnvironment ? `[${config.stage}] ` : ''}${packageName} is not subject to DMCO review and validation.`,
+            bodyText: stripHTMLFromTemplate(chipTemplate),
+            bodyHTML: chipTemplate,
+        }
+    }
+
+    const isSubjectToReview = eqroValidationAndReviewDetermination(
+        contract.id,
+        contractFormData
+    )
+
+    if (isSubjectToReview instanceof Error) {
+        return isSubjectToReview
+    }
+
+    const reviewerEmails = [
+        ...devReviewTeamEmails,
+        ...(isSubjectToReview ? dmcoEmails : []),
+    ]
 
     const {
         eqroNewContractor,

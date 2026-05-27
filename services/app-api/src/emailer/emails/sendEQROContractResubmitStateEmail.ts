@@ -95,6 +95,36 @@ export const sendEQROContractResubmitStateEmail = async (
         config.baseUrl
     )
 
+    const isChipOnly = formData.populationCovered === 'CHIP'
+
+    if (isChipOnly) {
+        const chipData = {
+            packageName: pkgName,
+            resubmittedBy: updateInfo.updatedBy.email,
+            resubmittedOn: formatCalendarDate(
+                updateInfo.updatedAt,
+                'America/Los_Angeles'
+            ),
+            resubmissionReason: updateInfo.updatedReason,
+            submissionURL,
+        }
+        const chipTemplate = await renderTemplate<typeof chipData>(
+            'resubmitChipOnlyStateEmail',
+            chipData
+        )
+        if (chipTemplate instanceof Error) {
+            return chipTemplate
+        }
+        return {
+            toAddresses,
+            replyToAddresses: [],
+            sourceEmail: config.emailSource,
+            subject: `${isTestEnvironment ? `[${config.stage}] ` : ''}${pkgName} is not subject to DMCO review and validation.`,
+            bodyText: stripHTMLFromTemplate(chipTemplate),
+            bodyHTML: chipTemplate,
+        }
+    }
+
     const subjectToReview = eqroValidationAndReviewDetermination(
         contract.id,
         formData
