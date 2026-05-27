@@ -1,0 +1,108 @@
+name: Deploy Datadog Monitors
+
+on:
+  workflow_run:
+    workflows: ["Promote (CDK)"]
+    types: [completed]
+    branches: [main]
+
+# No concurrency group needed — jobs run sequentially and only trigger
+# after a full promote-cdk run, so overlapping runs are not possible.
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-monitors-dev:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: deploy - Datadog monitors (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Get AWS credentials (dev)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: 'true'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.9.0"
+
+      - name: Apply monitors (dev)
+        working-directory: infra/datadog
+        env:
+          TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
+          TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
+        run: |
+          tofu init -backend-config="bucket=datadog-tf-state-dev-bucket-cdk"
+          tofu apply -var-file=environments/dev.tfvars -auto-approve
+
+  deploy-monitors-val:
+    needs: [deploy-monitors-dev]
+    name: deploy - Datadog monitors (val)
+    runs-on: ubuntu-24.04
+    environment: val
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Get AWS credentials (val)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
+          stage-name: val
+          use-cdk-role: 'true'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.9.0"
+
+      - name: Apply monitors (val)
+        working-directory: infra/datadog
+        env:
+          TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
+          TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
+        run: |
+          tofu init -backend-config="bucket=datadog-tf-state-val-bucket-cdk"
+          tofu apply -var-file=environments/val.tfvars -auto-approve
+
+  deploy-monitors-prod:
+    needs: [deploy-monitors-val]
+    name: deploy - Datadog monitors (prod)
+    runs-on: ubuntu-24.04
+    environment: prod
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Get AWS credentials (prod)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+          use-cdk-role: 'true'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.9.0"
+
+      - name: Apply monitors (prod)
+        working-directory: infra/datadog
+        env:
+          TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
+          TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
+        run: |
+          tofu init -backend-config="bucket=datadog-tf-state-prod-bucket-cdk"
+          tofu apply -var-file=environments/prod.tfvars -auto-approve
