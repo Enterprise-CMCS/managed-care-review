@@ -80,7 +80,7 @@ describe('SubmissionTypeSummarySection', () => {
             screen.queryByText(/You must provide this information/)
         ).toBeNull()
         // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
-        expect(screen.getByLabelText('Submitted')).toHaveTextContent(
+        expect(screen.getByLabelText('Submission date')).toHaveTextContent(
             '11/26/2024'
         )
     })
@@ -227,7 +227,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         await waitFor(() => {
             expect(
-                screen.getByRole('definition', { name: 'Submitted' })
+                screen.getByRole('definition', { name: 'Submission date' })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', { name: 'Program(s)' })
@@ -241,7 +241,7 @@ describe('SubmissionTypeSummarySection', () => {
                 })
             ).toBeInTheDocument()
             expect(
-                screen.queryByRole('definition', { name: 'Submitted' })
+                screen.queryByRole('definition', { name: 'Submission date' })
             ).toBeInTheDocument()
         })
     })
@@ -269,7 +269,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         await waitFor(() => {
             expect(
-                screen.getByRole('definition', { name: 'Submitted' })
+                screen.getByRole('definition', { name: 'Submission date' })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', { name: 'Program(s)' })
@@ -306,7 +306,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         await waitFor(() => {
             expect(
-                screen.getByRole('definition', { name: 'Submitted' })
+                screen.getByRole('definition', { name: 'Submission date' })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', { name: 'Program(s)' })
@@ -342,7 +342,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         await waitFor(() => {
             expect(
-                screen.queryByRole('definition', { name: 'Submitted' })
+                screen.queryByRole('definition', { name: 'Submission date' })
             ).not.toBeInTheDocument()
             expect(
                 screen.getByRole('definition', { name: 'Program(s)' })
@@ -368,7 +368,7 @@ describe('SubmissionTypeSummarySection', () => {
             />
         )
         expect(
-            screen.queryByRole('definition', { name: 'Submitted' })
+            screen.queryByRole('definition', { name: 'Submission date' })
         ).not.toBeInTheDocument()
     })
 

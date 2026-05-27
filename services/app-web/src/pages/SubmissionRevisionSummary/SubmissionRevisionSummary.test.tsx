@@ -167,7 +167,7 @@ describe('SubmissionRevisionSummary', () => {
                 ).toBeInTheDocument()
                 // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                 expect(
-                    await screen.findByLabelText('Submitted')
+                    await screen.findByLabelText('Submission date')
                 ).toHaveTextContent('12/31/2023')
             })
 

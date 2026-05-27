@@ -642,7 +642,7 @@ describe('SubmissionSummary', () => {
                     )
 
                     expect(
-                        await screen.findByLabelText('Submitted')
+                        await screen.findByLabelText('Submission date')
                     ).toHaveTextContent(ptDateFormatted)
                 })
 
