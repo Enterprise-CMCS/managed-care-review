@@ -84,6 +84,26 @@ async function submitContractInsideTransaction(
     return await findContractWithHistory(tx, contractID)
 }
 
+async function chipOnlyNotSubjectToReviewAction(
+    tx: PrismaTransactionType,
+    contract: ContractType
+): Promise<ContractType | Error> {
+    await tx.contractActionTable.create({
+        data: {
+            updatedByID: undefined,
+            actionType: 'NOT_SUBJECT_TO_REVIEW',
+            contractID: contract.id,
+        },
+    })
+
+    const updatedContract = await findContractWithHistory(tx, contract.id)
+    if (updatedContract instanceof Error) {
+        return updatedContract
+    }
+
+    return updatedContract
+}
+
 async function eqroContractReviewDeterminationAction(
     tx: PrismaTransactionType,
     contract: ContractType
@@ -196,7 +216,8 @@ type SubmitContractArgsType = {
     submittedByUserID: string
     submittedReason: UpdateInfoType['updatedReason']
     // Value of the `chip-submission-automation` LaunchDarkly flag, plumbed
-    // through from the resolver. Gates HEALTH_PLAN CHIP review determination.
+    // through from the resolver. Gates CHIP-only review determination for
+    // both HEALTH_PLAN and EQRO submissions.
     chipSubmissionAutomationFlag?: boolean
 }
 // Update the given revision
@@ -227,6 +248,23 @@ async function submitContract(
                 throw result
             }
 
+            // CHIP-only submissions (HEALTH_PLAN or EQRO) are not subject to
+            // review. Short-circuits before submission-type-specific logic.
+            // Gated behind the `chip-submission-automation` LaunchDarkly flag.
+            const isChipOnly =
+                result.packageSubmissions[0]?.contractRevision.formData
+                    .populationCovered === 'CHIP'
+            if (chipSubmissionAutomationFlag && isChipOnly) {
+                const chipOnlyReviewUpdate =
+                    await chipOnlyNotSubjectToReviewAction(tx, result)
+
+                if (chipOnlyReviewUpdate instanceof Error) {
+                    throw chipOnlyReviewUpdate
+                }
+
+                return chipOnlyReviewUpdate
+            }
+
             // If EQRO submission insert review status action for review determination.
             if (result.contractSubmissionType === 'EQRO') {
                 const eqroReviewUpdate =
@@ -240,8 +278,6 @@ async function submitContract(
                 return eqroReviewUpdate
             }
 
-            // HEALTH_PLAN CHIP-only submissions are not subject to review.
-            // Gated behind the `chip-submission-automation` LaunchDarkly flag.
             if (
                 chipSubmissionAutomationFlag &&
                 result.contractSubmissionType === 'HEALTH_PLAN'
