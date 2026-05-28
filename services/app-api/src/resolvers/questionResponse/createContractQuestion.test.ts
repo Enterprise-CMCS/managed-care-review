@@ -382,7 +382,7 @@ describe('createQuestion', () => {
         expect(createdQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
         expect(assertAnError(createdQuestion).message).toBe(
-            'users not assigned to the DMCO division are not authorized to create EQRO contract questions'
+            'only users assigned to the DMCO division are authorized to create EQRO contract questions'
         )
     })
     it('allows a non-DMCO CMS user to create a question for a health plan submission', async () => {
