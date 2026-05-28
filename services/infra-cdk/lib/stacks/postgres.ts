@@ -105,7 +105,6 @@ export class Postgres extends BaseStack {
 
             const auroraCluster = new AuroraServerlessV2(this, 'Aurora', {
                 databaseName,
-                databaseSecretName: `aurora-postgres-${this.stage}-cdk`, // pragma: allowlist secret
                 stage: this.stage,
                 vpc: this.vpc,
                 vpcSubnets: {
