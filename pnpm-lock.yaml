@@ -1108,8 +1108,8 @@ importers:
         specifier: ^8.58.1
         version: 8.58.2(eslint@10.4.0(jiti@2.6.1))(typescript@5.9.3)
       aws-cdk:
-        specifier: ^2.1124.1
-        version: 2.1124.1
+        specifier: ^2.1125.0
+        version: 2.1125.0
       esbuild:
         specifier: ^0.25.5
         version: 0.25.8
@@ -1484,6 +1484,13 @@ packages:
 
   '@aws-cdk/cloud-assembly-schema@53.27.0':
     resolution: {integrity: sha512-OTxe/L2Vc60r2nYih7kFaFpn93sa7shJu9T0tQZsryeDE3HHOAuazKNmS6tLInOjJjVx/dvM5XGyUA+lZAiKxA==}
+    engines: {node: '>= 18.0.0'}
+    bundledDependencies:
+      - jsonschema
+      - semver
+
+  '@aws-cdk/cloud-assembly-schema@53.28.0':
+    resolution: {integrity: sha512-pZS+9bLGv2tCqcgxfA0WD3XjcqT3yE4ICvKeJEicw6aTdCxBl8FQ/AUsorY/6f2JrMS3kUQgvhXxA30MWcji0A==}
     engines: {node: '>= 18.0.0'}
     bundledDependencies:
       - jsonschema
@@ -7213,8 +7220,8 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1124.1:
-    resolution: {integrity: sha512-sRYdPMdkX+02EHaT946AFV0w0CMfbHKWpLZPv525xTCkaVu1eYu6DzHFuTdimxdSN0uGQ2D4LHrD1sr94tRhow==}
+  aws-cdk@2.1125.0:
+    resolution: {integrity: sha512-QAvsE2XQMcyNOjMMqAS7eDADR9t6vcFcMQvhOmtLfDqgfJXSyTkHvzM5zgwZCdJ4FNqWr5Y/zXvL1Cv5ECKXwQ==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
 
@@ -8227,8 +8234,8 @@ packages:
   electron-to-chromium@1.5.321:
     resolution: {integrity: sha512-L2C7Q279W2D/J4PLZLk7sebOILDSWos7bMsMNN06rK482umHUrh/3lM8G7IlHFOYip2oAg5nha1rCMxr/rs6ZQ==}
 
-  electron-to-chromium@1.5.362:
-    resolution: {integrity: sha512-PUY2DrLvkjkUuWqq+KPL2iWshrJsZOcIojzRQ7eXFacc9dWga7MGMJAa15VbiejSZB1PAXaRLAiKgruHP8LB1w==}
+  electron-to-chromium@1.5.363:
+    resolution: {integrity: sha512-VjUKPyWzGnT1fujlkEGC/BvN70Hh70KXtAqcmniXviYlJC/ivcT+BWGPyxWVbJZLfvtKR6dqg1L7T7pgAMBtWA==}
 
   element-closest@2.0.2:
     resolution: {integrity: sha512-QCqAWP3kwj8Gz9UXncVXQGdrhnWxD8SQBSeZp5pOsyCcQ6RpL738L1/tfuwBiMi6F1fYkxqPnBrFBR4L+f49Cg==}
@@ -8266,8 +8273,8 @@ packages:
   end-of-stream@1.4.5:
     resolution: {integrity: sha512-ooEGc6HP26xXq/N+GCGOT0JKCLDGrq2bQUZrQ7gyrJiZANJ/8YDTxTpQBXGMn+WbIQXNVpyWymm7KYVICQnyOg==}
 
-  enhanced-resolve@5.22.0:
-    resolution: {integrity: sha512-xYcDWrpELkFzz9SpZ3PlI6Eu6eD93Yf0WLDRxikGhWJ3MAir2SNZTIVCVZqZ/NUyx8AdMc2gT9C0gPiw18kG+A==}
+  enhanced-resolve@5.22.1:
+    resolution: {integrity: sha512-6QEuw3zoX1SJQc7b87aBXke/no+mG2bTBgw29gWMQonLmpEkWoCAVkl+M49e48AZlWzxiDzDZzYdp6kobcyLww==}
     engines: {node: '>=10.13.0'}
 
   enquirer@2.4.1:
@@ -12083,8 +12090,8 @@ packages:
     resolution: {integrity: sha512-s0ZZzd0BzYv5tLSptZooSjK8oj6C+c19p7Vqta9+6NPOf7r+fxq0cJe6/oN4LTC79sy5NY8ucOJNgwsKCSbfqg==}
     engines: {node: '>=6.0.0'}
 
-  terser-webpack-plugin@5.6.0:
-    resolution: {integrity: sha512-Eum+5ajkaOhf5KbM26osvv21kLD7BaGqQ1UA4Ami4arYwylmGUQTgHFpHDdmJod1q4QXa66p0to/FBKID+J1vA==}
+  terser-webpack-plugin@5.6.1:
+    resolution: {integrity: sha512-201R5j+sJpK8nFWwKVyNfZot8FaJbLZDq5evriVzbV1wDtSXDjRUDRfJzHpAaxFDMEhsZL1QkeqM61wgsS3KaQ==}
     engines: {node: '>= 10.13.0'}
     peerDependencies:
       '@minify-html/node': '*'
@@ -13458,6 +13465,8 @@ snapshots:
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.2': {}
 
   '@aws-cdk/cloud-assembly-schema@53.27.0': {}
+
+  '@aws-cdk/cloud-assembly-schema@53.28.0': {}
 
   '@aws-crypto/crc32@1.2.2':
     dependencies:
@@ -14856,7 +14865,7 @@ snapshots:
 
   '@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.257.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
-      '@aws-cdk/cloud-assembly-schema': 53.27.0
+      '@aws-cdk/cloud-assembly-schema': 53.28.0
       aws-cdk-lib: 2.257.0(constructs@10.5.1)
       constructs: 10.5.1
 
@@ -20973,7 +20982,7 @@ snapshots:
       '@aws-cdk/cloud-assembly-schema': 53.27.0
       constructs: 10.5.1
 
-  aws-cdk@2.1124.1: {}
+  aws-cdk@2.1125.0: {}
 
   aws-sign2@0.7.0: {}
 
@@ -21253,7 +21262,7 @@ snapshots:
     dependencies:
       baseline-browser-mapping: 2.10.32
       caniuse-lite: 1.0.30001793
-      electron-to-chromium: 1.5.362
+      electron-to-chromium: 1.5.363
       node-releases: 2.0.46
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
@@ -22185,7 +22194,7 @@ snapshots:
 
   electron-to-chromium@1.5.321: {}
 
-  electron-to-chromium@1.5.362: {}
+  electron-to-chromium@1.5.363: {}
 
   element-closest@2.0.2: {}
 
@@ -22209,7 +22218,7 @@ snapshots:
     dependencies:
       once: 1.4.0
 
-  enhanced-resolve@5.22.0:
+  enhanced-resolve@5.22.1:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.3
@@ -27030,7 +27039,7 @@ snapshots:
     dependencies:
       rimraf: 2.6.3
 
-  terser-webpack-plugin@5.6.0(esbuild@0.27.7)(postcss@8.5.14)(webpack@5.93.0(esbuild@0.27.7)(postcss@8.5.14)):
+  terser-webpack-plugin@5.6.1(esbuild@0.27.7)(postcss@8.5.14)(webpack@5.93.0(esbuild@0.27.7)(postcss@8.5.14)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
@@ -27041,7 +27050,7 @@ snapshots:
       esbuild: 0.27.7
       postcss: 8.5.14
 
-  terser-webpack-plugin@5.6.0(esbuild@0.27.7)(webpack@5.93.0(esbuild@0.27.7)):
+  terser-webpack-plugin@5.6.1(esbuild@0.27.7)(webpack@5.93.0(esbuild@0.27.7)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       jest-worker: 27.5.1
@@ -27679,7 +27688,7 @@ snapshots:
       acorn-import-attributes: 1.9.5(acorn@8.16.0)
       browserslist: 4.28.2
       chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.22.0
+      enhanced-resolve: 5.22.1
       es-module-lexer: 1.7.0
       eslint-scope: 5.1.1
       events: 3.3.0
@@ -27691,7 +27700,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.0(esbuild@0.27.7)(webpack@5.93.0(esbuild@0.27.7))
+      terser-webpack-plugin: 5.6.1(esbuild@0.27.7)(webpack@5.93.0(esbuild@0.27.7))
       watchpack: 2.5.1
       webpack-sources: 3.5.0
     transitivePeerDependencies:
@@ -27719,7 +27728,7 @@ snapshots:
       acorn-import-attributes: 1.9.5(acorn@8.16.0)
       browserslist: 4.28.2
       chrome-trace-event: 1.0.4
-      enhanced-resolve: 5.22.0
+      enhanced-resolve: 5.22.1
       es-module-lexer: 1.7.0
       eslint-scope: 5.1.1
       events: 3.3.0
@@ -27731,7 +27740,7 @@ snapshots:
       neo-async: 2.6.2
       schema-utils: 3.3.0
       tapable: 2.3.3
-      terser-webpack-plugin: 5.6.0(esbuild@0.27.7)(postcss@8.5.14)(webpack@5.93.0(esbuild@0.27.7)(postcss@8.5.14))
+      terser-webpack-plugin: 5.6.1(esbuild@0.27.7)(postcss@8.5.14)(webpack@5.93.0(esbuild@0.27.7)(postcss@8.5.14))
       watchpack: 2.5.1
       webpack-sources: 3.5.0
     transitivePeerDependencies:
