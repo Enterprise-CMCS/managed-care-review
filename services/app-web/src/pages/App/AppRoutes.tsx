@@ -77,6 +77,24 @@ import { CreateOauthClient } from '../Settings/Oauth/CreateOauthClient'
 import { User } from '../../gen/gqlClient'
 import { AddLocalUser } from '../../localAuth/AddLocalUser'
 
+const RedirectPreservingHash = ({
+    pathname,
+}: {
+    pathname: string
+}): React.ReactElement => {
+    const location = useLocation()
+
+    return (
+        <Navigate
+            to={{
+                pathname,
+                hash: location.hash,
+            }}
+            replace
+        />
+    )
+}
+
 const CMSUploadQuestionsRoute = ({
     loggedInUser,
     children,
@@ -123,13 +141,15 @@ const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
         />
         <Route
             path="/help"
-            element={<Navigate to={RoutesRecord.HELP} replace />}
+            element={<RedirectPreservingHash pathname={RoutesRecord.HELP} />}
         />
         <Route
             path="/training"
             element={
                 showResourcesNavPages ? (
-                    <Navigate to={RoutesRecord.RESOURCES_TRAINING} replace />
+                    <RedirectPreservingHash
+                        pathname={RoutesRecord.RESOURCES_TRAINING}
+                    />
                 ) : (
                     <Error404 />
                 )
