@@ -312,9 +312,10 @@ jobs:
         run: |
           SECRET_NAME="aurora-postgres-dev-cdk"
 
+          # || true: non-fatal — secret may not exist yet
           SECRET_ARN=$(aws secretsmanager describe-secret \
             --secret-id "$SECRET_NAME" \
-            --query 'ARN' --output text 2>/dev/null)
+            --query 'ARN' --output text 2>/dev/null) || true
 
           if [ -z "$SECRET_ARN" ] || [ "$SECRET_ARN" = "None" ]; then
             echo "Secret $SECRET_NAME does not exist — nothing to clean up"
@@ -323,13 +324,13 @@ jobs:
 
           echo "Found secret: $SECRET_ARN"
 
-          # Check if the stack exists before querying its resources
+          # || true: non-fatal — stack may not exist yet; --output text returns "None" when missing
           STACK_STATUS=$(aws cloudformation describe-stacks \
             --stack-name postgres-dev-cdk \
             --query 'Stacks[0].StackStatus' \
-            --output text 2>/dev/null)
+            --output text 2>/dev/null) || true
 
-          if [ -z "$STACK_STATUS" ]; then
+          if [ -z "$STACK_STATUS" ] || [ "$STACK_STATUS" = "None" ]; then
             echo "Stack postgres-dev-cdk does not exist — secret is an orphan, deleting"
             aws secretsmanager delete-secret \
               --secret-id "$SECRET_ARN" \
@@ -337,13 +338,15 @@ jobs:
             exit 0
           fi
 
-          # CF uses the secret ARN (not name) as PhysicalResourceId
+          # CF uses the secret ARN (not name) as PhysicalResourceId.
+          # No || true here — if this call fails we abort rather than risk deleting a tracked secret.
+          # --output text returns "None" (not empty) when the filter matches nothing.
           TRACKED=$(aws cloudformation describe-stack-resources \
             --stack-name postgres-dev-cdk \
             --query "StackResources[?ResourceType=='AWS::SecretsManager::Secret'&&PhysicalResourceId=='$SECRET_ARN'].LogicalResourceId" \
             --output text)
 
-          if [ -z "$TRACKED" ]; then
+          if [ -z "$TRACKED" ] || [ "$TRACKED" = "None" ]; then
             echo "Secret $SECRET_ARN is not tracked by postgres-dev-cdk — deleting orphan"
             aws secretsmanager delete-secret \
               --secret-id "$SECRET_ARN" \
