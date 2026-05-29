@@ -311,26 +311,45 @@ jobs:
       - name: Clean up orphaned Postgres secrets
         run: |
           SECRET_NAME="aurora-postgres-dev-cdk"
+
           SECRET_ARN=$(aws secretsmanager describe-secret \
             --secret-id "$SECRET_NAME" \
-            --query 'ARN' --output text 2>/dev/null) || true
+            --query 'ARN' --output text 2>/dev/null)
 
-          if [ -n "$SECRET_ARN" ] && [ "$SECRET_ARN" != "None" ]; then
-            TRACKED=$(aws cloudformation describe-stack-resources \
-              --stack-name postgres-dev-cdk \
-              --query "StackResources[?ResourceType=='AWS::SecretsManager::Secret'&&PhysicalResourceId=='$SECRET_NAME'].LogicalResourceId" \
-              --output text 2>/dev/null) || true
-
-            if [ -z "$TRACKED" ]; then
-              echo "Secret $SECRET_NAME exists but is not tracked by postgres-dev-cdk stack — deleting orphan"
-              aws secretsmanager delete-secret \
-                --secret-id "$SECRET_NAME" \
-                --force-delete-without-recovery
-            else
-              echo "Secret $SECRET_NAME is tracked by CloudFormation (logical ID: $TRACKED) — skipping"
-            fi
-          else
+          if [ -z "$SECRET_ARN" ] || [ "$SECRET_ARN" = "None" ]; then
             echo "Secret $SECRET_NAME does not exist — nothing to clean up"
+            exit 0
+          fi
+
+          echo "Found secret: $SECRET_ARN"
+
+          # Check if the stack exists before querying its resources
+          STACK_STATUS=$(aws cloudformation describe-stacks \
+            --stack-name postgres-dev-cdk \
+            --query 'Stacks[0].StackStatus' \
+            --output text 2>/dev/null)
+
+          if [ -z "$STACK_STATUS" ]; then
+            echo "Stack postgres-dev-cdk does not exist — secret is an orphan, deleting"
+            aws secretsmanager delete-secret \
+              --secret-id "$SECRET_ARN" \
+              --force-delete-without-recovery
+            exit 0
+          fi
+
+          # CF uses the secret ARN (not name) as PhysicalResourceId
+          TRACKED=$(aws cloudformation describe-stack-resources \
+            --stack-name postgres-dev-cdk \
+            --query "StackResources[?ResourceType=='AWS::SecretsManager::Secret'&&PhysicalResourceId=='$SECRET_ARN'].LogicalResourceId" \
+            --output text)
+
+          if [ -z "$TRACKED" ]; then
+            echo "Secret $SECRET_ARN is not tracked by postgres-dev-cdk — deleting orphan"
+            aws secretsmanager delete-secret \
+              --secret-id "$SECRET_ARN" \
+              --force-delete-without-recovery
+          else
+            echo "Secret is tracked by CloudFormation (logical ID: $TRACKED) — skipping"
           fi
 
       - name: Deploy Postgres stack
