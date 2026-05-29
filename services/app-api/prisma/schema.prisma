@@ -95,7 +95,8 @@ model ContractOverrides {
   description String
 
   // overrides
-  initiallySubmittedAt DateTime?
+  initiallySubmittedAt   DateTime?
+  initiallySubmittedAtOp ScalarFieldOverrideOperation?
 
   // Optional 1-to-1 revision override can be used for formData
   revisionOverride ContractRevisionOverrides?
@@ -115,7 +116,8 @@ model ContractRevisionOverrides {
   contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 
   // Revision form data overrides
-  contractType ContractType?
+  contractType   ContractType?
+  contractTypeOp ScalarFieldOverrideOperation?
 
   // Revision document overrides
   contractDocuments   ContractDocumentOverride[]
@@ -155,7 +157,8 @@ model RateOverrides {
   description String
 
   // Rate meta data
-  initiallySubmittedAt DateTime?
+  initiallySubmittedAt   DateTime?
+  initiallySubmittedAtOp ScalarFieldOverrideOperation?
 
   // Optional 1-to-1 revision override
   revisionOverride RateRevisionOverrides?
@@ -386,10 +389,10 @@ model ActuaryContact {
 }
 
 model ContractDocument {
-  id                 String                @id @default(uuid())
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @default(now()) @updatedAt
-  position           Int                   @default(-1)
+  id                 String                     @id @default(uuid())
+  createdAt          DateTime                   @default(now())
+  updatedAt          DateTime                   @default(now()) @updatedAt
+  position           Int                        @default(-1)
   name               String // Original filename from user upload
   s3URL              String // DEPRECATED: Use s3BucketName + s3Key instead
   s3BucketName       String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
@@ -397,15 +400,15 @@ model ContractDocument {
   sha256             String
   dateAdded          DateTime?
   contractRevisionID String
-  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+  contractRevision   ContractRevisionTable      @relation(fields: [contractRevisionID], references: [id])
   overrides          ContractDocumentOverride[]
 }
 
 model ContractSupportingDocument {
-  id                 String                @id @default(uuid())
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @default(now()) @updatedAt
-  position           Int                   @default(-1)
+  id                 String                               @id @default(uuid())
+  createdAt          DateTime                             @default(now())
+  updatedAt          DateTime                             @default(now()) @updatedAt
+  position           Int                                  @default(-1)
   name               String // Original filename from user upload
   s3URL              String // DEPRECATED: Use s3BucketName + s3Key instead
   s3BucketName       String? // S3 bucket name (e.g., "uploads-documents-prod-bucket-cdk")
@@ -413,7 +416,7 @@ model ContractSupportingDocument {
   sha256             String
   dateAdded          DateTime?
   contractRevisionID String
-  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+  contractRevision   ContractRevisionTable                @relation(fields: [contractRevisionID], references: [id])
   overrides          ContractSupportingDocumentOverride[]
 }
 
@@ -910,42 +913,77 @@ enum OAuthScope {
   CMS_SUBMISSION_ACTIONS
 }
 
+enum ScalarFieldOverrideOperation {
+  OVERRIDE
+  CLEAR_OVERRIDE
+}
+
+enum ArrayFieldOverrideOperation {
+  OVERRIDE
+  ADD
+  DELETE
+}
+
 model RateDocumentOverride {
-  id                     String                @id @default(uuid())
-  createdAt              DateTime              @default(now())
+  id                     String                      @id @default(uuid())
+  createdAt              DateTime                    @default(now())
   rateRevisionOverrideID String
-  rateRevisionOverride   RateRevisionOverrides @relation(fields: [rateRevisionOverrideID], references: [id], onDelete: Cascade)
-  documentID             String
-  document               RateDocument          @relation(fields: [documentID], references: [id])
+  rateRevisionOverride   RateRevisionOverrides       @relation(fields: [rateRevisionOverrideID], references: [id], onDelete: Cascade)
+  documentOp             ArrayFieldOverrideOperation
+  documentSha256         String
+  documentID             String?
+  document               RateDocument?               @relation(fields: [documentID], references: [id])
+
+  // Add-path payload (set only when documentOp = ADD).
+  // All nullable at the DB layer; write-path validator enforces name/sha256/s3URL for adds.
+  name         String?
+  s3URL        String?
+  s3BucketName String?
+  s3Key        String?
+  sha256       String?
 
   // Meta data
-  dateAdded DateTime?
+  dateAdded   DateTime?
+  dateAddedOp ScalarFieldOverrideOperation?
 }
 
 model RateSupportingDocumentOverride {
-  id                     String                 @id @default(uuid())
-  createdAt              DateTime               @default(now())
+  id                     String                      @id @default(uuid())
+  createdAt              DateTime                    @default(now())
   rateRevisionOverrideID String
-  rateRevisionOverride   RateRevisionOverrides  @relation(fields: [rateRevisionOverrideID], references: [id], onDelete: Cascade)
-  documentID             String
-  document               RateSupportingDocument @relation(fields: [documentID], references: [id])
+  rateRevisionOverride   RateRevisionOverrides       @relation(fields: [rateRevisionOverrideID], references: [id], onDelete: Cascade)
+  documentOp             ArrayFieldOverrideOperation
+  documentSha256         String
+  documentID             String?
+  document               RateSupportingDocument?     @relation(fields: [documentID], references: [id])
+
+  // Add-path payload (set only when documentOp = ADD).
+  // All nullable at the DB layer; write-path validator enforces name/sha256/s3URL for adds.
+  name         String?
+  s3URL        String?
+  s3BucketName String?
+  s3Key        String?
+  sha256       String?
 
   // Meta data
-  dateAdded DateTime?
+  dateAdded   DateTime?
+  dateAddedOp ScalarFieldOverrideOperation?
 }
 
 // Override on a single contract document for a submitted contract revision.
-// documentID null = add a new document on this revision (payload fields required by write-path validator).
-// documentID non-null = update an existing document on this revision (only dateAdded overrideable today).
+// documentOp controls add/override/delete behavior. documentID is only a relation
+// to a base document when the row targets an original submitted-revision document.
 model ContractDocumentOverride {
-  id                         String                    @id @default(uuid())
-  createdAt                  DateTime                  @default(now())
+  id                         String                      @id @default(uuid())
+  createdAt                  DateTime                    @default(now())
   contractRevisionOverrideID String
-  contractRevisionOverride   ContractRevisionOverrides @relation(fields: [contractRevisionOverrideID], references: [id], onDelete: Cascade)
+  contractRevisionOverride   ContractRevisionOverrides   @relation(fields: [contractRevisionOverrideID], references: [id], onDelete: Cascade)
+  documentOp                 ArrayFieldOverrideOperation
+  documentSha256             String
   documentID                 String?
-  document                   ContractDocument?         @relation(fields: [documentID], references: [id])
+  document                   ContractDocument?           @relation(fields: [documentID], references: [id])
 
-  // Add-path payload (set only when documentID is null).
+  // Add-path payload (set only when documentOp = ADD).
   // All nullable at the DB layer; write-path validator enforces name/sha256/s3URL for adds.
   name         String?
   s3URL        String?
@@ -954,20 +992,23 @@ model ContractDocumentOverride {
   sha256       String?
 
   // Meta data — overrideable in both add and update paths.
-  dateAdded DateTime?
+  dateAdded   DateTime?
+  dateAddedOp ScalarFieldOverrideOperation?
 }
 
 // Override on a single contract supporting document for a submitted contract revision.
 // Same add vs. update semantics as ContractDocumentOverride.
 model ContractSupportingDocumentOverride {
-  id                         String                     @id @default(uuid())
-  createdAt                  DateTime                   @default(now())
+  id                         String                      @id @default(uuid())
+  createdAt                  DateTime                    @default(now())
   contractRevisionOverrideID String
-  contractRevisionOverride   ContractRevisionOverrides  @relation(fields: [contractRevisionOverrideID], references: [id], onDelete: Cascade)
+  contractRevisionOverride   ContractRevisionOverrides   @relation(fields: [contractRevisionOverrideID], references: [id], onDelete: Cascade)
+  documentOp                 ArrayFieldOverrideOperation
+  documentSha256             String
   documentID                 String?
   document                   ContractSupportingDocument? @relation(fields: [documentID], references: [id])
 
-  // Add-path payload (set only when documentID is null).
+  // Add-path payload (set only when documentOp = ADD).
   // All nullable at the DB layer; write-path validator enforces name/sha256/s3URL for adds.
   name         String?
   s3URL        String?
@@ -976,5 +1017,6 @@ model ContractSupportingDocumentOverride {
   sha256       String?
 
   // Meta data — overrideable in both add and update paths.
-  dateAdded DateTime?
+  dateAdded   DateTime?
+  dateAddedOp ScalarFieldOverrideOperation?
 }
