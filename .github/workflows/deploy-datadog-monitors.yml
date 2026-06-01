@@ -15,6 +15,7 @@ on:
 permissions:
   id-token: write
   contents: read
+  pull-requests: write
 
 jobs:
   validate:
@@ -35,6 +36,74 @@ jobs:
           tofu init -backend=false
           tofu validate
           tofu fmt --check
+
+  plan:
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: [validate]
+    name: plan - Datadog monitors (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Get AWS credentials (dev)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: 'true'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.9.0"
+
+      - name: Plan monitors (dev)
+        working-directory: infra/datadog
+        env:
+          TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
+          TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
+        run: |
+          tofu init -backend-config="bucket=datadog-tf-state-dev-bucket-cdk"
+          tofu plan -var-file=environments/dev.tfvars -no-color 2>&1 | tee plan_output.txt
+
+      - name: Post plan as PR comment
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const planFile = 'infra/datadog/plan_output.txt';
+            const plan = fs.existsSync(planFile)
+              ? fs.readFileSync(planFile, 'utf8')
+              : '(plan output unavailable — check CI logs for init/auth errors)';
+            const marker = '<!-- datadog-monitors-plan -->';
+            const body = `${marker}\n#### Datadog Monitors Plan (dev)\n\`\`\`\n${plan}\n\`\`\``;
+
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const existing = comments.data.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                comment_id: existing.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            }
 
   deploy-monitors-dev:
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
