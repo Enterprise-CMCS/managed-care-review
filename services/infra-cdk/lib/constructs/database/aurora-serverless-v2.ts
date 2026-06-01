@@ -59,15 +59,20 @@ export class AuroraServerlessV2 extends Construct {
             )
         }
 
-        const databaseSecretName = `aurora-postgres-${props.stage}-cdk` // pragma: allowlist secret
-
-        // Import the existing database credentials secret by the same name this
-        // construct previously created.
-        this.secret = Secret.fromSecretNameV2(
-            this,
-            'Secret',
-            databaseSecretName
-        )
+        // Create database credentials secret
+        // Use CDK-specific naming to avoid conflicts with serverless
+        this.secret = new Secret(this, 'Secret', {
+            secretName: `aurora-postgres-${props.stage}-cdk`, // pragma: allowlist secret
+            description: `Database credentials for ${props.databaseName} - ${props.stage}`,
+            generateSecretString: {
+                secretStringTemplate: JSON.stringify({
+                    username: 'mcreviewadmin',
+                }),
+                generateStringKey: 'password',
+                excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
+                passwordLength: 30,
+            },
+        })
 
         // Create the Aurora Serverless v2 cluster
         this.cluster = new DatabaseCluster(this, 'Cluster', {
@@ -116,6 +121,7 @@ export class AuroraServerlessV2 extends Construct {
             vpcSubnets: props.vpcSubnets,
             securityGroup: props.securityGroup,
             excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
+            rotateImmediatelyOnUpdate: false,
         })
     }
 }
