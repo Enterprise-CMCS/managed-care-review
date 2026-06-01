@@ -740,7 +740,8 @@ export const SubmissionType = ({
                                                 <ReactRouterLinkWithLogging
                                                     variant="external"
                                                     to={{
-                                                        pathname: '/help',
+                                                        pathname:
+                                                            '/resources/help',
                                                         hash: '#submission-description',
                                                     }}
                                                     target="_blank"
