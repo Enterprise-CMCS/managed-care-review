@@ -35,8 +35,6 @@ import {
     UnlockSubmitModal,
 } from '../../../../components/Modal'
 import { toGQLError } from '@mc-review/helpers'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
 
 export const EQROReviewSubmit = (): React.ReactElement => {
     const { id } = useRouteParams()
@@ -46,12 +44,6 @@ export const EQROReviewSubmit = (): React.ReactElement => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
     const { loggedInUser } = useAuth()
     const modalRef = useRef<ModalRef>(null)
-    const ldClient = useLDClient()
-
-    const chipSubmissionAutomation = ldClient?.variation(
-        featureFlags.CHIP_SUBMISSION_AUTOMATION.flag,
-        featureFlags.CHIP_SUBMISSION_AUTOMATION.defaultValue
-    )
 
     const getPath = (route: RouteT) => {
         return generatePath(RoutesRecord[route], {
@@ -179,14 +171,9 @@ export const EQROReviewSubmit = (): React.ReactElement => {
                     submissionData={contract}
                     submissionName={submissionName}
                     modalType={
-                        chipSubmissionAutomation &&
-                        contractFormData.populationCovered === 'CHIP'
-                            ? contract.status === 'UNLOCKED'
-                                ? 'RESUBMIT_CHIP_ONLY'
-                                : 'SUBMIT_CHIP_ONLY'
-                            : contract.status === 'UNLOCKED'
-                              ? 'RESUBMIT_EQRO_CONTRACT'
-                              : 'SUBMIT_EQRO_CONTRACT'
+                        contract.status === 'UNLOCKED'
+                            ? 'RESUBMIT_EQRO_CONTRACT'
+                            : 'SUBMIT_EQRO_CONTRACT'
                     }
                     modalRef={modalRef}
                     setIsSubmitting={setIsSubmitting}
