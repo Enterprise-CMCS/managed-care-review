@@ -5,6 +5,9 @@ on:
     workflows: ["Promote (CDK)"]
     types: [completed]
     branches: [main]
+  pull_request:
+    paths:
+      - 'infra/datadog/**'
 
 # No concurrency group needed — jobs run sequentially and only trigger
 # after a full promote-cdk run, so overlapping runs are not possible.
@@ -14,8 +17,27 @@ permissions:
   contents: read
 
 jobs:
+  validate:
+    name: validate - Datadog monitors
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: "1.9.0"
+
+      - name: Validate
+        working-directory: infra/datadog
+        run: |
+          tofu init -backend=false
+          tofu validate
+          tofu fmt --check
+
   deploy-monitors-dev:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
     name: deploy - Datadog monitors (dev)
     runs-on: ubuntu-24.04
     environment: dev
@@ -46,6 +68,7 @@ jobs:
           tofu apply -var-file=environments/dev.tfvars -auto-approve
 
   deploy-monitors-val:
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
     needs: [deploy-monitors-dev]
     name: deploy - Datadog monitors (val)
     runs-on: ubuntu-24.04
@@ -77,6 +100,7 @@ jobs:
           tofu apply -var-file=environments/val.tfvars -auto-approve
 
   deploy-monitors-prod:
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
     needs: [deploy-monitors-val]
     name: deploy - Datadog monitors (prod)
     runs-on: ubuntu-24.04

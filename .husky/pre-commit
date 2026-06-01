@@ -1,6 +1,6 @@
 # In a continuing effort to print errors when they are needed, we check for
 # all pre-commit dependency requirements here.
-requirements=("protolint" "shellcheck" "detect-secrets")
+requirements=("protolint" "shellcheck" "detect-secrets" "tofu")
 
 for req in "${requirements[@]}"; do
     if ! command -v "$req" &> /dev/null; then
