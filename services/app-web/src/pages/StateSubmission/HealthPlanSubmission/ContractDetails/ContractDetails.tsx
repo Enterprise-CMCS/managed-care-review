@@ -648,7 +648,7 @@ export const ContractDetails = ({
                                                     <LinkWithLogging
                                                         aria-label="Document definitions and requirements (opens in new window)"
                                                         href={
-                                                            '/help#key-documents'
+                                                            '/resources/help#key-documents'
                                                         }
                                                         variant="external"
                                                         target="_blank"
@@ -725,7 +725,7 @@ export const ContractDetails = ({
                                                         <LinkWithLogging
                                                             aria-label="Document definitions and requirements (opens in new window)"
                                                             href={
-                                                                '/help#supporting-documents'
+                                                                '/resources/help#supporting-documents'
                                                             }
                                                             variant="external"
                                                             target="_blank"
@@ -912,7 +912,7 @@ export const ContractDetails = ({
                                                             }
                                                             to={{
                                                                 pathname:
-                                                                    '/help',
+                                                                    '/resources/help',
                                                                 hash: '#non-compliance-guidance',
                                                             }}
                                                             target="_blank"
@@ -1020,7 +1020,7 @@ export const ContractDetails = ({
                                                     <LinkWithLogging
                                                         aria-label="Effective date guidance (opens in new window)"
                                                         href={
-                                                            '/help#effective-date-guidance'
+                                                            '/resources/help#effective-date-guidance'
                                                         }
                                                         variant="external"
                                                         target="_blank"
@@ -1289,7 +1289,7 @@ export const ContractDetails = ({
                                                             <LinkWithLogging
                                                                 variant="external"
                                                                 href={
-                                                                    '/help#dual-eligible-special-needs-plans'
+                                                                    '/resources/help#dual-eligible-special-needs-plans'
                                                                 }
                                                                 target="_blank"
                                                                 data-testid="dsnpGuidanceLink"
