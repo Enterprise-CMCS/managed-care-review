@@ -17,5 +17,5 @@ terraform {
 provider "datadog" {
   api_key = var.dd_api_key
   app_key = var.dd_app_key
-  site    = "ddog-gov.com"
+  api_url = "https://api.ddog-gov.com"
 }
