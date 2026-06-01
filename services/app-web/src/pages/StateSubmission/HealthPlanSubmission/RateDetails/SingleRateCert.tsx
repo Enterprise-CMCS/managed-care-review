@@ -271,7 +271,7 @@ export const SingleRateCert = ({
 
                         <LinkWithLogging
                             aria-label="Rate certification type definitions (opens in new window)"
-                            href={'/help#rate-cert-type-definitions'}
+                            href={'/resources/help#rate-cert-type-definitions'}
                             variant="external"
                             target="_blank"
                         >
