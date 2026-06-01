@@ -8,7 +8,7 @@ import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRate
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
 import type { SubmitContractArgsType } from './submitContract'
 import { submitContractInsideTransaction } from './submitContract'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type UndoWithdrawRateArgsType = {
     rateID: string
@@ -60,6 +60,10 @@ const undoWithdrawRateInsideTransaction = async (
 
     const latestRateRev = withdrawnRate.packageSubmissions[0].rateRevision
     const parentContractID = withdrawnRate.parentContractID
+
+    if (withdrawnRate.reviewStatusActions?.[0]?.actionType !== 'WITHDRAW') {
+        throw new Error('Rate to undo withdrawal is not currently withdrawn')
+    }
 
     if (
         !withdrawnRate.withdrawnFromContracts ||
@@ -231,17 +235,17 @@ const undoWithdrawRate = async (
     client: ExtendedPrismaClient,
     args: UndoWithdrawRateArgsType
 ): Promise<RateType | Error> => {
-    try {
-        return await client.$transaction(
-            async (tx) => await undoWithdrawRateInsideTransaction(tx, args),
-            {
-                timeout: 30000,
-            }
-        )
-    } catch (err) {
-        console.error('PRISMA ERROR: Error undoing rate withdrawal', err)
-        return parseErrorToError(err)
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'undoWithdrawRate',
+        table: 'RateTable',
+        id: args.rateID,
+        transaction: async (tx) =>
+            await undoWithdrawRateInsideTransaction(tx, args),
+        transactionOptions: {
+            timeout: 30000,
+        },
+    })
 }
 
 export {

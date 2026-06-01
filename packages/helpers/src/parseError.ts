@@ -35,3 +35,23 @@ function stringifyError(err: unknown): string {
         return 'Unknown error'
     }
 }
+
+/**
+ * Convert any caught value into a plain object safe for structured logging.
+ * Explicitly includes `name`, `message`, and `stack` (which Error hides from
+ * spreads and JSON.stringify), and keeps any extra properties.
+ */
+export function serializeError(err: unknown): {
+    name: string
+    message: string
+    stack?: string
+    [key: string]: unknown
+} {
+    const e = parseErrorToError(err)
+    return {
+        ...e,
+        name: e.name,
+        message: e.message,
+        stack: e.stack,
+    }
+}

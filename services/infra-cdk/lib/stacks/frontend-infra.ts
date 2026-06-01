@@ -25,8 +25,9 @@ import {
     type ICertificate,
     Certificate,
 } from 'aws-cdk-lib/aws-certificatemanager'
-import { CfnOutput } from 'aws-cdk-lib'
+import { CfnOutput, RemovalPolicy } from 'aws-cdk-lib'
 import { ResourceNames } from '../config/shared'
+import { isReviewEnvironment } from '../config/environments'
 
 /**
  * Frontend infrastructure stack - S3 + CloudFront + WAF for both main app and storybook
@@ -78,6 +79,8 @@ export class FrontendInfraStack extends BaseStack {
             )
         }
 
+        const isReview = isReviewEnvironment(this.stage)
+
         // Create S3 bucket
         this.bucket = new Bucket(this, 'S3Bucket', {
             bucketName: ResourceNames.resourceName('ui', 'bucket', this.stage),
@@ -87,6 +90,10 @@ export class FrontendInfraStack extends BaseStack {
             blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
             objectOwnership: ObjectOwnership.OBJECT_WRITER,
             enforceSSL: true,
+            removalPolicy: isReview
+                ? RemovalPolicy.DESTROY
+                : RemovalPolicy.RETAIN,
+            autoDeleteObjects: isReview,
         })
 
         // Create Origin Access Identity
@@ -194,10 +201,13 @@ function handler(event) {
             // Security: Enforce TLS 1.2 as minimum protocol version (Security Hub compliance)
             minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
 
-            // Logging to same bucket
-            enableLogging: true,
-            logBucket: this.bucket,
-            logFilePrefix: `${this.stage}-ui-cloudfront-logs/`,
+            // Logging disabled for review environments to avoid race condition on destroy
+            // (CloudFront continues writing logs after bucket is emptied, blocking deletion)
+            enableLogging: !isReview,
+            logBucket: isReview ? undefined : this.bucket,
+            logFilePrefix: isReview
+                ? undefined
+                : `${this.stage}-ui-cloudfront-logs/`,
         })
 
         // Set application URL - use custom domain if configured, otherwise CloudFront URL
@@ -218,6 +228,10 @@ function handler(event) {
             blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
             objectOwnership: ObjectOwnership.OBJECT_WRITER,
             enforceSSL: true,
+            removalPolicy: isReview
+                ? RemovalPolicy.DESTROY
+                : RemovalPolicy.RETAIN,
+            autoDeleteObjects: isReview,
         })
 
         // Create storybook Origin Access Identity
@@ -283,10 +297,13 @@ function handler(event) {
                 // Security: Enforce TLS 1.2 as minimum protocol version (Security Hub compliance)
                 minimumProtocolVersion: SecurityPolicyProtocol.TLS_V1_2_2021,
 
-                // Logging to same bucket
-                enableLogging: true,
-                logBucket: this.storybookBucket,
-                logFilePrefix: `${this.stage}-storybook-cloudfront-logs/`,
+                // Logging disabled for review environments to avoid race condition on destroy
+                // (CloudFront continues writing logs after bucket is emptied, blocking deletion)
+                enableLogging: !isReview,
+                logBucket: isReview ? undefined : this.storybookBucket,
+                logFilePrefix: isReview
+                    ? undefined
+                    : `${this.stage}-storybook-cloudfront-logs/`,
             }
         )
 

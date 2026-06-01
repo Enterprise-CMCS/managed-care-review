@@ -2,11 +2,10 @@ import type { RateType } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findRateWithHistory } from './findRateWithHistory'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type UnlockRateArgsType = {
-    rateID?: string
-    rateRevisionID?: string
+    rateID: string
     unlockedByUserID: string
     unlockReason: string
 }
@@ -194,34 +193,17 @@ async function unlockRate(
     client: ExtendedPrismaClient,
     args: UnlockRateArgsType
 ): Promise<RateType | Error> {
-    const { rateRevisionID, unlockedByUserID, unlockReason } = args
-    let rateID = args.rateID
+    const { rateID, unlockedByUserID, unlockReason } = args
 
-    // this is a hack that should not outlive protobuf. Protobufs only have
-    // rate revision IDs in them, so we allow submitting by rate revisionID from our submitHPP resolver
-    if (!rateID && !rateRevisionID) {
-        return new Error(
-            'Either rateID or rateRevisionID must be supplied. both are blank'
-        )
-    }
-
-    try {
-        return await client.$transaction(async (tx) => {
-            if (rateRevisionID) {
-                const rate = await tx.rateRevisionTable.findUniqueOrThrow({
-                    where: { id: rateRevisionID },
-                })
-                rateID = rate.id
-            }
-
-            if (!rateID) {
-                throw new Error(
-                    'Programming Error: we must have a rateID at this point.'
-                )
-            }
-
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'unlockRate',
+        table: 'RateTable',
+        id: rateID,
+        transaction: async (tx) => {
             const currentDateTime = new Date()
-            // create the unlock info to be shared across all submissions.
+            // create the unlock info for unlockRateInDB. unlockRateInDB is used
+            // in other store functions so it cannot be done inside of it.
             const unlockInfo = await tx.updateInfoTable.create({
                 data: {
                     updatedAt: currentDateTime,
@@ -237,11 +219,8 @@ async function unlockRate(
             }
 
             return findRateWithHistory(tx, rateID)
-        })
-    } catch (err) {
-        console.error('SUBMIT PRISMA CONTRACT ERR', err)
-        return parseErrorToError(err)
-    }
+        },
+    })
 }
 
 export { unlockRate, unlockRateInDB }

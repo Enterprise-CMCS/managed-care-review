@@ -1,37 +1,67 @@
-import opentelemetry, { type Tracer, SpanStatusCode } from '@opentelemetry/api'
-import { trace } from '@opentelemetry/api'
-import { Resource } from '@opentelemetry/resources'
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
 import {
-    SimpleSpanProcessor,
-    BatchSpanProcessor,
-} from '@opentelemetry/sdk-trace-base'
+    resourceFromAttributes,
+    defaultResource,
+} from '@opentelemetry/resources'
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
+import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { AWSXRayPropagator } from '@opentelemetry/propagator-aws-xray'
-import { AWSXRayIdGenerator } from '@opentelemetry/id-generator-aws-xray'
+import { W3CTraceContextPropagator } from '@opentelemetry/core'
 import { PrismaInstrumentation } from '@prisma/instrumentation'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
-import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
+import {
+    ATTR_SERVICE_NAME,
+    SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
+} from '@opentelemetry/semantic-conventions'
 
-export function initTracer(serviceName: string, otelCollectorURL: string) {
+const DD_TRACES_URL = 'https://otlp.ddog-gov.com/v1/traces'
+
+let tracerProvider: NodeTracerProvider | undefined
+
+function getDDHeaders() {
+    if (!process.env.DD_API_KEY) {
+        throw new Error(
+            'Configuration error: DD_API_KEY environment variable is required for OpenTelemetry'
+        )
+    }
+    return {
+        'dd-api-key': process.env.DD_API_KEY,
+        'dd-otlp-source': 'datadog',
+        'dd-otel-span-mapping': '{span_name_as_resource_name: false}',
+    }
+}
+
+export function initTracer(serviceName: string) {
+    // Guard against re-registration on warm Lambda invocations — registering
+    // multiple providers causes duplicate spans and leaks span processors
+    if (tracerProvider) return
+
     console.info('-----Setting OTEL instrumentation-----')
 
-    const resource = new Resource({
-        [ATTR_SERVICE_NAME]: serviceName,
-    })
+    if (!process.env.stage) {
+        throw new Error(
+            'Configuration error: stage environment variable is required for OpenTelemetry'
+        )
+    }
+
+    const resource = defaultResource().merge(
+        resourceFromAttributes({
+            [ATTR_SERVICE_NAME]: serviceName,
+            [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: process.env.stage,
+        })
+    )
 
     const exporter = new OTLPTraceExporter({
-        url: otelCollectorURL,
-        headers: {},
+        url: DD_TRACES_URL,
+        headers: getDDHeaders(),
     })
     const provider = new NodeTracerProvider({
-        idGenerator: new AWSXRayIdGenerator(),
-        resource: resource,
+        resource,
         spanProcessors: [new BatchSpanProcessor(exporter)],
     })
 
     provider.register({
-        propagator: new AWSXRayPropagator(),
+        propagator: new W3CTraceContextPropagator(),
     })
 
     // Register Prisma instrumentation to capture database operations
@@ -40,7 +70,15 @@ export function initTracer(serviceName: string, otelCollectorURL: string) {
         instrumentations: [new PrismaInstrumentation()],
     })
 
+    tracerProvider = provider
     console.info('Prisma instrumentation registered')
+}
+
+// Call after each Lambda invocation to flush queued spans before Lambda freezes
+export async function flushTracer(): Promise<void> {
+    if (tracerProvider) {
+        await tracerProvider.forceFlush()
+    }
 }
 
 export function recordException(
@@ -61,28 +99,4 @@ export function recordException(
     } finally {
         span.end()
     }
-}
-
-export function createTracer(serviceName: string): Tracer {
-    const provider = new NodeTracerProvider({
-        idGenerator: new AWSXRayIdGenerator(),
-        resource: new Resource({
-            [ATTR_SERVICE_NAME]: serviceName,
-        }),
-    })
-
-    // log to console and send to New Relic
-    const exporter = new OTLPTraceExporter({
-        url: process.env.API_APP_OTEL_COLLECTOR_URL,
-        headers: {},
-    })
-
-    provider.addSpanProcessor(new SimpleSpanProcessor(exporter))
-
-    // Initialize the OpenTelemetry APIs to use the NodeTracerProvider bindings
-    provider.register({
-        propagator: new AWSXRayPropagator(),
-    })
-
-    return trace.getTracer(serviceName)
 }

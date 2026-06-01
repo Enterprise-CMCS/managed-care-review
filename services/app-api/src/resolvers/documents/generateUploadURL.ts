@@ -1,12 +1,8 @@
 import { GraphQLError } from 'graphql'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-    setSuccessAttributesOnActiveSpan,
-} from '../attributeHelper'
+import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
-import { logError, logSuccess } from '../../logger'
+import { logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import type { S3ClientT } from '../../s3'
 import { v4 as uuidv4 } from 'uuid'
@@ -18,78 +14,85 @@ export function generateUploadURLResolver(
     s3Client: S3ClientT
 ): MutationResolvers['generateUploadURL'] {
     return async (_parent, { input }, context: Context) => {
-        const { user, ctx, tracer } = context
-        const span = tracer?.startSpan('generateUploadURLResolver', {}, ctx)
-        setResolverDetailsOnActiveSpan('generateUploadURL', user, span)
+        const { user } = context
 
-        // Check OAuth client write permissions
-        if (!canOauthWrite(context)) {
-            const errMessage = `OAuth client does not have write permissions`
-            logError('generateUploadURL', errMessage)
-            setErrorAttributesOnActiveSpan(errMessage, span)
-            throw new GraphQLError(errMessage, {
-                extensions: {
-                    code: 'FORBIDDEN',
-                    cause: 'INSUFFICIENT_OAUTH_GRANTS',
-                },
-            })
-        }
+        return withResolverSpan(
+            context,
+            'generateUploadURL',
+            undefined,
+            async (span) => {
+                setResolverDetails(span, user)
 
-        const { fileName, fileType, bucketName } = input
-        const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins
+                // Check OAuth client write permissions
+                if (!canOauthWrite(context)) {
+                    const errMessage = `OAuth client does not have write permissions`
+                    logResolverError('generateUploadURL', errMessage, context)
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'FORBIDDEN',
+                            cause: 'INSUFFICIENT_OAUTH_GRANTS',
+                        },
+                    })
+                }
 
-        if (!fileName) {
-            const fileNameErr = 'file name cannot be blank'
-            logError('generateUploadURL', fileNameErr)
-            setErrorAttributesOnActiveSpan(fileNameErr, span)
-            throw new GraphQLError(fileNameErr, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'BAD_USER_INPUT',
-                },
-            })
-        }
+                const { fileName, fileType, bucketName } = input
+                const expiresIn = 300 //300 is 5 mins, default (900) is 15 mins
 
-        // fileType is guaranteed to be a valid UploadFileType enum by GraphQL, no additional validations needed here
-        const contentType =
-            UPLOAD_FILE_TYPE_TO_MIME[
-                fileType as keyof typeof UPLOAD_FILE_TYPE_TO_MIME
-            ]
+                if (!fileName) {
+                    const fileNameErr = 'file name cannot be blank'
+                    logResolverError('generateUploadURL', fileNameErr, context)
+                    throw new GraphQLError(fileNameErr, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'BAD_USER_INPUT',
+                        },
+                    })
+                }
 
-        const extension = fileName.split('.').pop()?.toLowerCase()
+                // fileType is guaranteed to be a valid UploadFileType enum by GraphQL, no additional validations needed here
+                const contentType =
+                    UPLOAD_FILE_TYPE_TO_MIME[
+                        fileType as keyof typeof UPLOAD_FILE_TYPE_TO_MIME
+                    ]
 
-        if (extension !== fileType.toLowerCase()) {
-            const extenErr = `File extension ".${extension}" does not match fileType "${fileType}"`
-            logError('generateUploadURL', extenErr)
-            setErrorAttributesOnActiveSpan(extenErr, span)
-            throw new GraphQLError(extenErr, {
-                extensions: {
-                    code: 'INTERNAL_SERVER_ERROR',
-                    cause: 'BAD_USER_INPUT',
-                },
-            })
-        }
+                const extension = fileName.split('.').pop()?.toLowerCase()
 
-        const s3Key = `${uuidv4()}.${extension}`
+                if (extension !== fileType.toLowerCase()) {
+                    const extenErr = `File extension ".${extension}" does not match fileType "${fileType}"`
+                    logResolverError('generateUploadURL', extenErr, context)
+                    throw new GraphQLError(extenErr, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'BAD_USER_INPUT',
+                        },
+                    })
+                }
 
-        const uploadURL = await s3Client.getUploadURL(
-            s3Key,
-            bucketName,
-            contentType,
-            expiresIn
+                const s3Key = `${uuidv4()}.${extension}`
+
+                const uploadURL = await s3Client.getUploadURL(
+                    s3Key,
+                    bucketName,
+                    contentType,
+                    expiresIn
+                )
+
+                const s3URL = await s3Client.getS3URL(
+                    s3Key,
+                    fileName,
+                    bucketName
+                )
+
+                logResolverSuccess('generateUploadURL', context)
+
+                return {
+                    uploadURL,
+                    s3Key,
+                    bucket: bucketName,
+                    expiresIn,
+                    s3URL,
+                }
+            }
         )
-
-        const s3URL = await s3Client.getS3URL(s3Key, fileName, bucketName)
-
-        logSuccess('generateUploadURL')
-        setSuccessAttributesOnActiveSpan(span)
-
-        return {
-            uploadURL,
-            s3Key,
-            bucket: bucketName,
-            expiresIn,
-            s3URL,
-        }
     }
 }

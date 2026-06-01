@@ -21,6 +21,7 @@ export default defineConfig({
         globals: true,
         environment: 'node',
         setupFiles: './setupTests.ts',
+        reporters: ['default'],
         coverage: {
             reporter: ['json', 'lcov', 'text'],
             exclude: [

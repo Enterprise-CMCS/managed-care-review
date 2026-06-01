@@ -76,7 +76,7 @@ export default defineConfig(() => ({
     },
     build: {
         outDir: './build',
-        sourcemap: true,
+        sourcemap: false,
     },
     resolve: {
         alias: {
@@ -111,6 +111,27 @@ export default defineConfig(() => ({
                         './node_modules/@uswds/uswds/packages'
                     ),
                 ],
+                // Each .module.scss is its own Sass compilation, so the
+                // $theme-show-notifications override in src/index.scss doesn't
+                // reach them. Filter USWDS' notification @warn output here.
+                logger: {
+                    warn(message: string) {
+                        if (
+                            message.includes('USWDS Notifications') ||
+                            message.includes(
+                                '`$theme-show-notifications: false`'
+                            )
+                        ) {
+                            return
+                        }
+                        // eslint-disable-next-line no-console
+                        console.warn(message)
+                    },
+                    debug(message: string) {
+                        // eslint-disable-next-line no-console
+                        console.log(message)
+                    },
+                },
             },
         },
     },
@@ -118,6 +139,7 @@ export default defineConfig(() => ({
         environment: 'jsdom',
         setupFiles: 'src/setupTests.ts',
         globals: true,
+        reporters: ['default'],
         // Inline-transform react-uswds so vi.mock('focus-trap-react') in test
         // files also intercepts uswds' internal imports (pnpm gives uswds its
         // own resolution path that escapes mocks otherwise).

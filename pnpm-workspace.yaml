@@ -1,5 +1,48 @@
 packages:
     - 'services/**'
+    - '!services/**/cdk.out/**'
     - 'packages/**'
     - 'dev_tool'
     - 'scripts'
+overrides:
+    '@babel/runtime': '>=7.29.2'
+    axios: '>=1.15.2'
+    '@hono/node-server': '>=2.0.2'
+    defu: '>=6.1.7'
+    diff: '>=4.0.4 <5'
+    effect: '>=3.20.0'
+    fast-uri: '>=3.1.2'
+    fast-xml-builder: '>=1.2.0'
+    fast-xml-parser: '>=5.8.0'
+    handlebars: '>=4.7.9'
+    hono: '>=4.12.18'
+    immutable: '>=5.1.5'
+    ip-address: '>=10.2.0'
+    js-yaml: '>=4.1.1'
+    lodash: '>=4.18.1'
+    lodash-es: '>=4.18.1'
+    picomatch: '>=4.0.4'
+    postcss: '>=8.5.14'
+    protobufjs: '>=8.2.0'
+    qs: '>=6.14.2'
+    rollup: '>=4.60.4'
+    systeminformation: '>=5.31.6'
+    undici: '>=7.25.0 <8'
+    vite: '>=7.3.2'
+    ws: '>=8.20.1 <9'
+    yaml: '>=2.9.0'
+allowBuilds:
+    '@apollo/protobufjs': false
+    '@parcel/watcher': true
+    '@prisma/engines': true
+    core-js: false
+    cpu-features: false
+    cypress: true
+    esbuild: true
+    prisma: true
+    protobufjs: false
+    ssh2: false
+    unrs-resolver: true
+# SchemaStore's pnpm-workspace schema can lag pnpm; pnpm 11 supports gitPreferHttps.
+# yaml-language-server-disable
+gitPreferHttps: true

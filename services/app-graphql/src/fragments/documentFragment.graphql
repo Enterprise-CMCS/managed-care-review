@@ -5,6 +5,8 @@ fragment genericDocumentFragment on GenericDocument {
     sha256
     dateAdded
     downloadURL
+    s3BucketName
+    s3Key
 }
 
 fragment documentFragment on Document {
@@ -12,4 +14,6 @@ fragment documentFragment on Document {
     s3URL
     name
     downloadURL
+    s3BucketName
+    s3Key
 }

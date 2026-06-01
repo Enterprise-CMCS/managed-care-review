@@ -54,6 +54,8 @@ describe('createRateQuestion', () => {
                         name: 'Test Question',
                         s3URL: 's3://bucketname/key/test1',
                         downloadURL: expect.any(String),
+                        s3BucketName: 'bucketname',
+                        s3Key: 'allusers/key',
                     },
                 ],
                 addedBy: cmsUser,
@@ -90,6 +92,8 @@ describe('createRateQuestion', () => {
                         name: 'Test Question',
                         s3URL: 's3://bucketname/key/test1',
                         downloadURL: expect.any(String),
+                        s3BucketName: 'bucketname',
+                        s3Key: 'allusers/key',
                     },
                 ],
                 addedBy: cmsUser,
@@ -121,6 +125,8 @@ describe('createRateQuestion', () => {
                         name: 'Test Question 2',
                         s3URL: 's3://bucketname/key/test1',
                         downloadURL: expect.any(String),
+                        s3BucketName: 'bucketname',
+                        s3Key: 'allusers/key',
                     },
                 ],
                 addedBy: cmsUser,
@@ -168,7 +174,7 @@ describe('createRateQuestion', () => {
         expect(rateQuestion.errors).toBeDefined()
         expect(assertAnErrorCode(rateQuestion)).toBe('BAD_USER_INPUT')
         expect(assertAnError(rateQuestion).message).toBe(
-            'Issue creating question for rate. Message: Rate is in a invalid statius: DRAFT'
+            'Issue creating question for rate. Message: Rate is in an invalid status: DRAFT'
         )
 
         const withdrawnRate = await withdrawTestRate(
@@ -200,7 +206,7 @@ describe('createRateQuestion', () => {
             'BAD_USER_INPUT'
         )
         expect(assertAnError(rateQuestionForWithdrawnRate).message).toBe(
-            'Issue creating question for rate. Message: Rate is in a invalid statius: WITHDRAWN'
+            'Issue creating question for rate. Message: Rate is in an invalid status: WITHDRAWN'
         )
     })
     it('returns an error of a state user attempts to create a rate question', async () => {

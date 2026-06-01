@@ -3,7 +3,7 @@ import { NotFoundError } from '../postgresErrors'
 import type { ContractType } from '../../domain-models'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 async function approveContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -15,49 +15,55 @@ async function approveContractInsideTransaction(
         dateApprovalReleasedToState,
         updatedReason,
     } = args
-    try {
-        const contract = await tx.contractTable.findFirst({
-            where: {
-                id: contractID,
-            },
-            include: {
-                reviewStatusActions: true,
-            },
-        })
 
-        if (!contract) {
-            const err = `PRISMA ERROR: Cannot find contract with id: ${contractID}`
-            console.error(err)
-            return new NotFoundError(err)
-        }
-
-        // generate approval notice info and update contract
-        const approvalNotice = await tx.contractActionTable.create({
-            data: {
-                updatedByID: updatedByID,
-                dateApprovalReleasedToState: dateApprovalReleasedToState,
-                updatedReason,
-                actionType: 'MARK_AS_APPROVED',
-                contractID: contractID,
-            },
-        })
-
-        await tx.contractTable.update({
-            where: {
-                id: contractID,
-            },
-            data: {
-                reviewStatusActions: {
-                    connect: { id: approvalNotice.id },
+    const contract = await tx.contractTable.findFirst({
+        where: {
+            id: contractID,
+        },
+        include: {
+            reviewStatusActions: {
+                orderBy: {
+                    updatedAt: 'desc',
                 },
+                take: 1,
             },
-        })
+        },
+    })
 
-        return findContractWithHistory(tx, contractID)
-    } catch (err) {
-        console.error('Prisma error finding contract to approve', err)
-        return parseErrorToError(err)
+    if (!contract) {
+        throw new NotFoundError(
+            `PRISMA ERROR: Cannot find contract with id: ${contractID}`
+        )
     }
+
+    const latestReviewStatusAction = contract.reviewStatusActions[0]
+    if (latestReviewStatusAction?.actionType === 'MARK_AS_APPROVED') {
+        throw new Error('Cannot approve contract: contract is already approved')
+    }
+
+    // generate approval notice info and update contract
+    const approvalNotice = await tx.contractActionTable.create({
+        data: {
+            updatedByID: updatedByID,
+            dateApprovalReleasedToState: dateApprovalReleasedToState,
+            updatedReason,
+            actionType: 'MARK_AS_APPROVED',
+            contractID: contractID,
+        },
+    })
+
+    await tx.contractTable.update({
+        where: {
+            id: contractID,
+        },
+        data: {
+            reviewStatusActions: {
+                connect: { id: approvalNotice.id },
+            },
+        },
+    })
+
+    return findContractWithHistory(tx, contractID)
 }
 
 type ApproveContractArgsType = {
@@ -71,18 +77,14 @@ async function approveContract(
     client: ExtendedPrismaClient,
     args: ApproveContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
-    try {
-        return await client.$transaction(async (tx) => {
-            const result = await approveContractInsideTransaction(tx, args)
-            if (result instanceof Error) {
-                throw result
-            }
-            return result
-        })
-    } catch (err) {
-        console.error('Prisma error approving contract', err)
-        return parseErrorToError(err)
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'approveContract',
+        table: 'ContractTable',
+        id: args.contractID,
+        transaction: async (tx) =>
+            await approveContractInsideTransaction(tx, args),
+    })
 }
 
 export { approveContract }

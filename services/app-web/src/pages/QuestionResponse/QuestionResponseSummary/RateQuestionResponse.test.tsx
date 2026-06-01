@@ -586,5 +586,65 @@ describe('RateQuestionResponse', () => {
                 screen.queryByRole('button', { name: 'Add questions' })
             ).toBeNull()
         })
+
+        it('does not render an Add questions button for a DMCP user', async () => {
+            const rate = rateDataMock()
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser({
+                                divisionAssignment: 'DMCP',
+                            }),
+                            statusCode: 200,
+                        }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/rates/${rate.id}/question-and-answers`,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryByRole('link', { name: 'Add questions' })
+            ).not.toBeInTheDocument()
+        })
+
+        it('does not render an Add questions button for an OACT user', async () => {
+            const rate = rateDataMock()
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser({
+                                divisionAssignment: 'OACT',
+                            }),
+                            statusCode: 200,
+                        }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/rates/${rate.id}/question-and-answers`,
+                },
+            })
+
+            await waitFor(() => {
+                expect(screen.queryByTestId('sidenav')).toBeInTheDocument()
+            })
+
+            expect(
+                screen.queryByRole('link', { name: 'Add questions' })
+            ).not.toBeInTheDocument()
+        })
     })
 })

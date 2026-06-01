@@ -11,15 +11,15 @@ vi.mock('../logger', () => ({
 vi.mock('@aws-sdk/client-s3', () => {
     const mockSendFn = vi.fn()
     return {
-        S3Client: vi.fn(() => ({ send: mockSendFn })),
-        GetObjectCommand: vi.fn((params) => ({
-            commandType: 'GetObject',
-            ...params,
-        })),
-        PutObjectCommand: vi.fn((params) => ({
-            commandType: 'PutObject',
-            ...params,
-        })),
+        S3Client: vi.fn(function () {
+            return { send: mockSendFn }
+        }),
+        GetObjectCommand: vi.fn(function (params) {
+            return { commandType: 'GetObject', ...params }
+        }),
+        PutObjectCommand: vi.fn(function (params) {
+            return { commandType: 'PutObject', ...params }
+        }),
         __mockSendFn: mockSendFn,
     }
 })
@@ -32,9 +32,11 @@ vi.mock('stream/promises', () => ({
     pipeline: vi.fn().mockResolvedValue(undefined),
 }))
 
-vi.mock('archiver')
-import Archiver from 'archiver'
-const mockArchiver = vi.mocked(Archiver)
+vi.mock('archiver', () => ({
+    ZipArchive: vi.fn(),
+}))
+import { ZipArchive } from 'archiver'
+const mockZipArchive = vi.mocked(ZipArchive)
 
 vi.mock('crypto')
 const mockCrypto = vi.mocked(crypto)
@@ -77,6 +79,7 @@ describe('generateDocumentZip', () => {
             write: vi.fn(),
             end: vi.fn(),
             on: vi.fn(),
+            once: vi.fn(),
         } as unknown as fs.WriteStream)
 
         const mockReadStream = {
@@ -100,9 +103,9 @@ describe('generateDocumentZip', () => {
             file: vi.fn(),
             finalize: vi.fn().mockResolvedValue(undefined),
         }
-        mockArchiver.mockReturnValue(
-            mockArchive as unknown as ReturnType<typeof Archiver>
-        )
+        mockZipArchive.mockImplementation(function () {
+            return mockArchive as unknown as ZipArchive
+        })
 
         // Setup crypto mock
         const mockHashInstance = {
@@ -223,6 +226,7 @@ describe('generateDocumentZip', () => {
                 write: vi.fn(),
                 end: vi.fn(),
                 on: vi.fn(),
+                once: vi.fn(),
             } as unknown as fs.WriteStream)
 
             const mockReadStream = {
@@ -248,9 +252,9 @@ describe('generateDocumentZip', () => {
                 file: vi.fn(),
                 finalize: vi.fn().mockResolvedValue(undefined),
             }
-            mockArchiver.mockReturnValue(
-                mockArchive as unknown as ReturnType<typeof Archiver>
-            )
+            mockZipArchive.mockImplementation(function () {
+                return mockArchive as unknown as ZipArchive
+            })
 
             // Setup crypto mock
             const mockHashInstance = {

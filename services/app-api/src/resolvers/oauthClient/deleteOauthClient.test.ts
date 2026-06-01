@@ -82,7 +82,9 @@ describe('deleteOauthClient', () => {
             query: DeleteOauthClientDocument,
             variables: { input: { clientId: 'nonexistent' } },
         })
-        expect(res.errors?.[0].message).toBe('Failed to delete OAuth client')
+        expect(res.errors?.[0].message).toBe(
+            'Failed to delete OAuth client. OAuth client not found'
+        )
         expect(res.errors?.[0].extensions?.code).toBe('INTERNAL_SERVER_ERROR')
         expect(res.errors?.[0].extensions?.cause).toBe('DB_ERROR')
     })

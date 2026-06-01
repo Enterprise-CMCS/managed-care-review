@@ -1,0 +1,1 @@
+export { EQROSubmissionRevisionSummary } from './EQROSubmissionRevisionSummary'
