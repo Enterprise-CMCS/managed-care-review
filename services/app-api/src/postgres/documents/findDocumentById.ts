@@ -1,6 +1,7 @@
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { NotFoundError } from '..'
 import { findAllDocuments } from '.'
+import { findOverrideAddedDocumentById } from './findOverrideAddedDocuments'
 import type {
     DocumentTypes,
     SharedDocument,
@@ -22,6 +23,17 @@ export async function findDocumentById(
                             },
                         })
                     if (!contractDoc) {
+                        const overrideDoc = await findOverrideAddedDocumentById(
+                            client,
+                            docID,
+                            docType
+                        )
+                        if (overrideDoc instanceof Error) {
+                            return overrideDoc
+                        }
+                        if (overrideDoc) {
+                            return overrideDoc
+                        }
                         const err = `PRISMA ERROR: Cannot find contract document with id: ${docID}`
                         return new NotFoundError(err)
                     }
@@ -34,6 +46,17 @@ export async function findDocumentById(
                             },
                         })
                     if (!contractSupportingDoc) {
+                        const overrideDoc = await findOverrideAddedDocumentById(
+                            client,
+                            docID,
+                            docType
+                        )
+                        if (overrideDoc instanceof Error) {
+                            return overrideDoc
+                        }
+                        if (overrideDoc) {
+                            return overrideDoc
+                        }
                         const err = `PRISMA ERROR: Cannot find contract supporting document with id: ${docID}`
                         return new NotFoundError(err)
                     }
@@ -45,6 +68,17 @@ export async function findDocumentById(
                         },
                     })
                     if (!rateDoc) {
+                        const overrideDoc = await findOverrideAddedDocumentById(
+                            client,
+                            docID,
+                            docType
+                        )
+                        if (overrideDoc instanceof Error) {
+                            return overrideDoc
+                        }
+                        if (overrideDoc) {
+                            return overrideDoc
+                        }
                         const err = `PRISMA ERROR: Cannot find rate document with id: ${docID}`
                         return new NotFoundError(err)
                     }
@@ -57,6 +91,17 @@ export async function findDocumentById(
                             },
                         })
                     if (!rateSupportingDoc) {
+                        const overrideDoc = await findOverrideAddedDocumentById(
+                            client,
+                            docID,
+                            docType
+                        )
+                        if (overrideDoc instanceof Error) {
+                            return overrideDoc
+                        }
+                        if (overrideDoc) {
+                            return overrideDoc
+                        }
                         const err = `PRISMA ERROR: Cannot find rate supporting document with id: ${docID}`
                         return new NotFoundError(err)
                     }
