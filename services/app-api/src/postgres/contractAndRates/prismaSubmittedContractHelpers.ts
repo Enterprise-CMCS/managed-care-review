@@ -10,10 +10,13 @@ const selectContractRevisionOverrides = {
     createdAt: true,
     contractRevisionID: true,
     contractType: true,
+    contractTypeOp: true,
     contractDocuments: {
         select: {
             id: true,
             createdAt: true,
+            documentOp: true,
+            documentSha256: true,
             documentID: true,
             name: true,
             sha256: true,
@@ -21,12 +24,15 @@ const selectContractRevisionOverrides = {
             s3BucketName: true,
             s3Key: true,
             dateAdded: true,
+            dateAddedOp: true,
         },
     },
     supportingDocuments: {
         select: {
             id: true,
             createdAt: true,
+            documentOp: true,
+            documentSha256: true,
             documentID: true,
             name: true,
             sha256: true,
@@ -34,6 +40,7 @@ const selectContractRevisionOverrides = {
             s3BucketName: true,
             s3Key: true,
             dateAdded: true,
+            dateAddedOp: true,
         },
     },
 } satisfies Prisma.ContractRevisionOverridesSelect
