@@ -1,10 +1,42 @@
 import { v4 as uuidv4 } from 'uuid'
-import { must } from '../../testHelpers/assertionHelpers'
-import { mockInsertContractArgs } from '../../testHelpers/contractDataMocks'
+import { describe, expect, it } from 'vitest'
+import { must } from '../../testHelpers'
+import { mockInsertContractArgs } from '../../testHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
 import { overrideContractData } from './overrideContractData'
 import { submitContract } from './submitContract'
+import type { ContractDocumentOverrideInput } from './overrideContractData'
+
+function addDocumentOverride(input: {
+    name: string
+    s3URL: string
+    s3BucketName: string
+    s3Key: string
+    sha256: string
+    dateAdded?: Date
+}): ContractDocumentOverrideInput {
+    return {
+        ...input,
+        documentOp: 'ADD',
+        documentSha256: input.sha256,
+        dateAddedOp: input.dateAdded ? 'OVERRIDE' : null,
+    }
+}
+
+function overrideDocumentDateAdded(input: {
+    documentID: string
+    documentSha256: string
+    dateAdded: Date
+}): ContractDocumentOverrideInput {
+    return {
+        documentOp: 'OVERRIDE',
+        documentID: input.documentID,
+        documentSha256: input.documentSha256,
+        dateAddedOp: 'OVERRIDE',
+        dateAdded: input.dateAdded,
+    }
+}
 
 // Inserts a draft contract with two contractDocuments and one supportingDocument,
 // submits it, and returns the bits commonly needed across the override tests.
@@ -38,11 +70,15 @@ async function setupSubmittedContractWithDocs() {
                     {
                         name: 'cd1.pdf',
                         s3URL: 's3://bucket/cd1',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/cd1',
                         sha256: 'sha-cd1',
                     },
                     {
                         name: 'cd2.pdf',
                         s3URL: 's3://bucket/cd2',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/cd2',
                         sha256: 'sha-cd2',
                     },
                 ],
@@ -50,6 +86,8 @@ async function setupSubmittedContractWithDocs() {
                     {
                         name: 'sd1.pdf',
                         s3URL: 's3://bucket/sd1',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/sd1',
                         sha256: 'sha-sd1',
                     },
                 ],
@@ -110,8 +148,10 @@ describe('overrideContractData', () => {
                 description: 'Override contract metadata',
                 overrides: {
                     initiallySubmittedAt,
+                    initiallySubmittedAtOp: 'OVERRIDE',
                     revisionOverride: {
                         contractType: 'AMENDMENT',
+                        contractTypeOp: 'OVERRIDE',
                     },
                 },
             })
@@ -121,11 +161,13 @@ describe('overrideContractData', () => {
             description: 'Override contract metadata',
             overrides: {
                 initiallySubmittedAt,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: {
                     contractRevisionID:
                         submittedContract.packageSubmissions[0].contractRevision
                             .id,
                     contractType: 'AMENDMENT',
+                    contractTypeOp: 'OVERRIDE',
                 },
             },
         })
@@ -156,6 +198,7 @@ describe('overrideContractData', () => {
             overrides: {
                 revisionOverride: {
                     contractType: 'AMENDMENT',
+                    contractTypeOp: 'OVERRIDE',
                 },
             },
         })
@@ -180,12 +223,14 @@ describe('overrideContractData', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            addDocumentOverride({
                                 name: 'added-cd.pdf',
                                 s3URL: 's3://bucket/added-cd',
+                                s3BucketName: 'bucket',
+                                s3Key: 'allusers/added-cd',
                                 sha256: 'sha-added',
                                 dateAdded: addedDateAdded,
-                            },
+                            }),
                         ],
                     },
                 },
@@ -214,7 +259,8 @@ describe('overrideContractData', () => {
 
         const latestRev =
             submittedContract.packageSubmissions[0].contractRevision
-        const targetDocID = latestRev.formData.contractDocuments[0].id!
+        const baseTargetDoc = latestRev.formData.contractDocuments[0]
+        const targetDocID = baseTargetDoc.id!
         const newDateAdded = new Date('2025-04-04')
 
         const overriddenContract = must(
@@ -225,10 +271,11 @@ describe('overrideContractData', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            overrideDocumentDateAdded({
                                 documentID: targetDocID,
+                                documentSha256: baseTargetDoc.sha256,
                                 dateAdded: newDateAdded,
-                            },
+                            }),
                         ],
                     },
                 },
@@ -255,7 +302,8 @@ describe('overrideContractData', () => {
 
         const latestRev =
             submittedContract.packageSubmissions[0].contractRevision
-        const existingSupDocID = latestRev.formData.supportingDocuments[0].id!
+        const existingSupDoc = latestRev.formData.supportingDocuments[0]
+        const existingSupDocID = existingSupDoc.id!
         const updatedDateAdded = new Date('2025-05-05')
 
         const overriddenContract = must(
@@ -268,16 +316,19 @@ describe('overrideContractData', () => {
                     revisionOverride: {
                         supportingDocuments: [
                             // update existing
-                            {
+                            overrideDocumentDateAdded({
                                 documentID: existingSupDocID,
+                                documentSha256: existingSupDoc.sha256,
                                 dateAdded: updatedDateAdded,
-                            },
+                            }),
                             // add new
-                            {
+                            addDocumentOverride({
                                 name: 'added-sd.pdf',
                                 s3URL: 's3://bucket/added-sd',
+                                s3BucketName: 'bucket',
+                                s3Key: 'allusers/added-sd',
                                 sha256: 'sha-added-sd',
-                            },
+                            }),
                         ],
                     },
                 },
@@ -312,7 +363,8 @@ describe('overrideContractData', () => {
         const latestRev =
             submittedContract.packageSubmissions[0].contractRevision
         // Pick the second existing contract document for the update path.
-        const targetDocID = latestRev.formData.contractDocuments[1].id!
+        const baseTargetDoc = latestRev.formData.contractDocuments[1]
+        const targetDocID = baseTargetDoc.id!
         const newDateAdded = new Date('2025-06-06')
 
         // Override #1: add a new contract document.
@@ -324,11 +376,13 @@ describe('overrideContractData', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            addDocumentOverride({
                                 name: 'added-via-override-1.pdf',
                                 s3URL: 's3://bucket/added-via-override-1',
+                                s3BucketName: 'bucket',
+                                s3Key: 'allusers/added-via-override-1',
                                 sha256: 'sha-added-1',
-                            },
+                            }),
                         ],
                     },
                 },
@@ -344,10 +398,11 @@ describe('overrideContractData', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            overrideDocumentDateAdded({
                                 documentID: targetDocID,
+                                documentSha256: baseTargetDoc.sha256,
                                 dateAdded: newDateAdded,
-                            },
+                            }),
                         ],
                     },
                 },

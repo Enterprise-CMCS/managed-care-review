@@ -929,13 +929,20 @@ describe('fetchRate', () => {
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newDate,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: {
                     rateDocuments: rateDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                     supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                 },
@@ -990,11 +997,17 @@ describe('fetchRate', () => {
             overrides: {
                 revisionOverride: {
                     rateDocuments: rateDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newerDate,
                     })),
                     supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newerDate,
                     })),
                 },

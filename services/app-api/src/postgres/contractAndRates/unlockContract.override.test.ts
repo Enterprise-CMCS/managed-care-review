@@ -4,8 +4,39 @@ import { mockInsertContractArgs } from '../../testHelpers/contractDataMocks'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
 import { overrideContractData } from './overrideContractData'
+import type { ContractDocumentOverrideInput } from './overrideContractData'
 import { submitContract } from './submitContract'
 import { unlockContract } from './unlockContract'
+
+function addDocumentOverride(input: {
+    name: string
+    s3URL: string
+    s3BucketName: string
+    s3Key: string
+    sha256: string
+    dateAdded?: Date
+}): ContractDocumentOverrideInput {
+    return {
+        ...input,
+        documentOp: 'ADD',
+        documentSha256: input.sha256,
+        dateAddedOp: input.dateAdded ? 'OVERRIDE' : null,
+    }
+}
+
+function overrideDocumentDateAdded(input: {
+    documentID: string
+    documentSha256: string
+    dateAdded: Date
+}): ContractDocumentOverrideInput {
+    return {
+        documentOp: 'OVERRIDE',
+        documentID: input.documentID,
+        documentSha256: input.documentSha256,
+        dateAddedOp: 'OVERRIDE',
+        dateAdded: input.dateAdded,
+    }
+}
 
 // Sets up a submitted contract with two contractDocuments and one
 // supportingDocument so document-override unlock tests have something to
@@ -40,11 +71,15 @@ async function setupSubmittedContractWithDocsForUnlock() {
                     {
                         name: 'cd1.pdf',
                         s3URL: 's3://bucket/cd1',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/cd1',
                         sha256: 'sha-cd1',
                     },
                     {
                         name: 'cd2.pdf',
                         s3URL: 's3://bucket/cd2',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/cd2',
                         sha256: 'sha-cd2',
                     },
                 ],
@@ -52,6 +87,8 @@ async function setupSubmittedContractWithDocsForUnlock() {
                     {
                         name: 'sd1.pdf',
                         s3URL: 's3://bucket/sd1',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/sd1',
                         sha256: 'sha-sd1',
                     },
                 ],
@@ -111,6 +148,7 @@ describe('unlockContract with revision overrides', () => {
                 overrides: {
                     revisionOverride: {
                         contractType: 'AMENDMENT',
+                        contractTypeOp: 'OVERRIDE',
                     },
                 },
             })
@@ -142,12 +180,14 @@ describe('unlockContract with revision overrides', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            addDocumentOverride({
                                 name: 'added-cd.pdf',
                                 s3URL: 's3://bucket/added-cd',
+                                s3BucketName: 'bucket',
+                                s3Key: 'allusers/added-cd',
                                 sha256: 'sha-added',
                                 dateAdded: addedDateAdded,
-                            },
+                            }),
                         ],
                     },
                 },
@@ -183,9 +223,10 @@ describe('unlockContract with revision overrides', () => {
         const { client, cmsUser, submittedContract } =
             await setupSubmittedContractWithDocsForUnlock()
 
-        const targetDocID =
+        const baseTargetDoc =
             submittedContract.packageSubmissions[0].contractRevision.formData
-                .contractDocuments[0].id!
+                .contractDocuments[0]
+        const targetDocID = baseTargetDoc.id!
 
         must(
             await overrideContractData(client, {
@@ -195,10 +236,11 @@ describe('unlockContract with revision overrides', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            overrideDocumentDateAdded({
                                 documentID: targetDocID,
+                                documentSha256: baseTargetDoc.sha256,
                                 dateAdded: new Date('2025-04-04'),
-                            },
+                            }),
                         ],
                     },
                 },
@@ -227,9 +269,10 @@ describe('unlockContract with revision overrides', () => {
         const { client, cmsUser, submittedContract } =
             await setupSubmittedContractWithDocsForUnlock()
 
-        const targetDocID =
+        const baseTargetDoc =
             submittedContract.packageSubmissions[0].contractRevision.formData
-                .contractDocuments[1].id!
+                .contractDocuments[1]
+        const targetDocID = baseTargetDoc.id!
 
         // Override 1: add a doc.
         must(
@@ -240,12 +283,14 @@ describe('unlockContract with revision overrides', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            addDocumentOverride({
                                 name: 'added.pdf',
                                 s3URL: 's3://bucket/added',
+                                s3BucketName: 'bucket',
+                                s3Key: 'allusers/added',
                                 sha256: 'sha-added',
                                 dateAdded: new Date('2025-05-05'),
-                            },
+                            }),
                         ],
                     },
                 },
@@ -261,10 +306,11 @@ describe('unlockContract with revision overrides', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            overrideDocumentDateAdded({
                                 documentID: targetDocID,
+                                documentSha256: baseTargetDoc.sha256,
                                 dateAdded: new Date('2025-06-06'),
-                            },
+                            }),
                         ],
                     },
                 },
@@ -306,12 +352,14 @@ describe('unlockContract with revision overrides', () => {
                 overrides: {
                     revisionOverride: {
                         contractDocuments: [
-                            {
+                            addDocumentOverride({
                                 name: 'lifecycle-added.pdf',
                                 s3URL: 's3://bucket/lifecycle-added',
+                                s3BucketName: 'bucket',
+                                s3Key: 'allusers/lifecycle-added',
                                 sha256: 'sha-lifecycle',
                                 dateAdded: adminDateAdded,
-                            },
+                            }),
                         ],
                     },
                 },

@@ -118,6 +118,7 @@ describe('indexRatesStripped', () => {
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newRateDate1,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: undefined,
             },
         })
@@ -131,6 +132,7 @@ describe('indexRatesStripped', () => {
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newRateDate2,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: undefined,
             },
         })

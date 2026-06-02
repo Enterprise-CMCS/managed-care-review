@@ -1364,13 +1364,20 @@ describe('withdrawRate', () => {
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newDate,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: {
                     rateDocuments: rateDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                     supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                 },

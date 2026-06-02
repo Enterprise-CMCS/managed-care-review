@@ -50,6 +50,7 @@ describe('prismaToDomainModel', () => {
                         createdAt: new Date(),
                         contractRevisionID,
                         contractType: 'AMENDMENT',
+                        contractTypeOp: 'OVERRIDE',
                         contractDocuments: [],
                         supportingDocuments: [],
                     },

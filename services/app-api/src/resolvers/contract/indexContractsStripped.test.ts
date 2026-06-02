@@ -386,6 +386,7 @@ describe('indexContractsStripped', () => {
                 updatedByID: adminUser.id,
                 description: 'Override initiallySubmittedAt for test',
                 initiallySubmittedAt: overrideDate,
+                initiallySubmittedAtOp: 'OVERRIDE',
             },
         })
 
