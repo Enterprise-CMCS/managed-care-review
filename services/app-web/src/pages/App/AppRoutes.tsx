@@ -122,20 +122,6 @@ const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
             element={showResourcesNavPages ? <ContactUs /> : <Error404 />}
         />
         <Route
-            path="/help"
-            element={<Navigate to={RoutesRecord.HELP} replace />}
-        />
-        <Route
-            path="/training"
-            element={
-                showResourcesNavPages ? (
-                    <Navigate to={RoutesRecord.RESOURCES_TRAINING} replace />
-                ) : (
-                    <Error404 />
-                )
-            }
-        />
-        <Route
             path={RoutesRecord.RESOURCES}
             element={<ResourcesSideNav showSideNav={showResourcesNavPages} />}
         >
@@ -538,7 +524,7 @@ const UnauthenticatedRoutes = ({
                     element={<AddLocalUser />}
                 />
             )}
-            <Route path="*" element={<Landing />} />
+            <Route path="*" element={<Error404 />} />
         </Routes>
     )
 }
