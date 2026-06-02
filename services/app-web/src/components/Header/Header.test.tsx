@@ -176,6 +176,24 @@ describe('Header', () => {
                 ).not.toBeInTheDocument()
             })
         })
+
+        it('does not show public navigation while auth is still loading on an unknown route', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: {
+                    route: '/submissions/new/health-plan/stingray',
+                },
+                apolloProvider: {
+                    mocks: [],
+                },
+                featureFlags: { 'resources-nav-pages': true },
+            })
+
+            expect(
+                screen.queryByRole('navigation', {
+                    name: 'Public page navigation',
+                })
+            ).not.toBeInTheDocument()
+        })
     })
 
     describe('when logged in', () => {

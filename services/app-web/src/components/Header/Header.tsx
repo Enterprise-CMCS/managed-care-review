@@ -40,7 +40,7 @@ export const Header = ({
         featureFlags.RESOURCES_NAV_PAGES.defaultValue
     )
     const shouldShowPublicNavigation =
-        !loggedInUser &&
+        loginStatus === 'LOGGED_OUT' &&
         showResourcesNavPages &&
         [
             'ROOT',
