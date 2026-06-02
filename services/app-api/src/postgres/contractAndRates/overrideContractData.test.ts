@@ -104,6 +104,61 @@ async function setupSubmittedContractWithDocs() {
     return { client, stateUser, cmsUser, draftContract, submittedContract }
 }
 
+async function setupSubmittedContractWithDuplicateContractDocumentSha() {
+    const client = await sharedTestPrismaClient()
+    const stateUser = await client.user.create({
+        data: {
+            id: uuidv4(),
+            givenName: 'Aang',
+            familyName: 'Avatar',
+            email: 'aang@example.com',
+            role: 'STATE_USER',
+            stateCode: 'MN',
+        },
+    })
+    const cmsUser = await client.user.create({
+        data: {
+            id: uuidv4(),
+            givenName: 'Zuko',
+            familyName: 'Hotman',
+            email: 'zuko@example.com',
+            role: 'CMS_USER',
+        },
+    })
+    const draftContract = must(
+        await insertDraftContract(
+            client,
+            mockInsertContractArgs({
+                contractType: 'BASE',
+                contractDocuments: [
+                    {
+                        name: 'duplicate-1.pdf',
+                        s3URL: 's3://bucket/duplicate-1',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/duplicate-1',
+                        sha256: 'duplicate-sha',
+                    },
+                    {
+                        name: 'duplicate-2.pdf',
+                        s3URL: 's3://bucket/duplicate-2',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/duplicate-2',
+                        sha256: 'duplicate-sha',
+                    },
+                ],
+            })
+        )
+    )
+    const submittedContract = must(
+        await submitContract(client, {
+            contractID: draftContract.id,
+            submittedByUserID: stateUser.id,
+            submittedReason: 'initial submit',
+        })
+    )
+    return { client, cmsUser, submittedContract }
+}
+
 describe('overrideContractData', () => {
     it('creates contract metadata and revision overrides on the latest submitted revision', async () => {
         const client = await sharedTestPrismaClient()
@@ -206,6 +261,107 @@ describe('overrideContractData', () => {
         expect(result).toBeInstanceOf(Error)
         expect((result as Error).message).toContain(
             'contract consolidated status must be SUBMITTED, RESUBMITTED, or APPROVED'
+        )
+    })
+
+    it('clears scalar contract revision overrides', async () => {
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDocs()
+
+        must(
+            await overrideContractData(client, {
+                contractID: submittedContract.id,
+                updatedByID: cmsUser.id,
+                description: 'Override contract type',
+                overrides: {
+                    revisionOverride: {
+                        contractType: 'AMENDMENT',
+                        contractTypeOp: 'OVERRIDE',
+                    },
+                },
+            })
+        )
+
+        const clearedContract = must(
+            await overrideContractData(client, {
+                contractID: submittedContract.id,
+                updatedByID: cmsUser.id,
+                description: 'Clear contract type override',
+                overrides: {
+                    revisionOverride: {
+                        contractTypeOp: 'CLEAR_OVERRIDE',
+                    },
+                },
+            })
+        )
+
+        expect(clearedContract.revisions[0].formData.contractType).toBe('BASE')
+        expect(
+            clearedContract.contractOverrides?.[0]?.overrides.revisionOverride
+                ?.contractTypeOp
+        ).toBe('CLEAR_OVERRIDE')
+    })
+
+    it('rejects scalar values without matching operation fields', async () => {
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDocs()
+
+        const result = await overrideContractData(client, {
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Invalid initiallySubmittedAt payload',
+            overrides: {
+                initiallySubmittedAt: new Date('2025-01-01'),
+            },
+        })
+
+        expect(result).toBeInstanceOf(Error)
+        expect((result as Error).message).toContain(
+            'value cannot be provided without an operation'
+        )
+    })
+
+    it('rejects clear scalar operations with values', async () => {
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDocs()
+
+        const result = await overrideContractData(client, {
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Invalid clear with value',
+            overrides: {
+                revisionOverride: {
+                    contractType: 'AMENDMENT',
+                    contractTypeOp: 'CLEAR_OVERRIDE',
+                },
+            },
+        })
+
+        expect(result).toBeInstanceOf(Error)
+        expect((result as Error).message).toContain(
+            'CLEAR_OVERRIDE cannot carry a value'
+        )
+    })
+
+    it('rejects non-nullable scalar override to null', async () => {
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDocs()
+
+        const result = await overrideContractData(client, {
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Invalid null contract type',
+            overrides: {
+                revisionOverride: {
+                    contractType: null,
+                    contractTypeOp: 'OVERRIDE',
+                },
+            },
+        })
+
+        expect(result).toBeInstanceOf(Error)
+        expect((result as Error).message).toContain(
+            'OVERRIDE value failed schema validation'
         )
     })
 
@@ -353,6 +509,96 @@ describe('overrideContractData', () => {
                 s3URL: 's3://bucket/added-sd',
                 sha256: 'sha-added-sd',
             })
+        )
+    })
+
+    it('rejects ADD rows when documentSha256 does not match sha256 payload', async () => {
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDocs()
+
+        const result = await overrideContractData(client, {
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Invalid document sha mismatch',
+            overrides: {
+                revisionOverride: {
+                    contractDocuments: [
+                        {
+                            documentOp: 'ADD',
+                            documentSha256: 'document-sha',
+                            name: 'mismatch.pdf',
+                            s3URL: 's3://bucket/mismatch',
+                            s3BucketName: 'bucket',
+                            s3Key: 'allusers/mismatch',
+                            sha256: 'payload-sha',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result).toBeInstanceOf(Error)
+        expect((result as Error).message).toContain(
+            'ADD documentSha256 must match payload sha256'
+        )
+    })
+
+    it('rejects DELETE rows carrying document payload fields', async () => {
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDocs()
+        const baseDoc =
+            submittedContract.packageSubmissions[0].contractRevision.formData
+                .contractDocuments[0]
+
+        const result = await overrideContractData(client, {
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Invalid delete payload',
+            overrides: {
+                revisionOverride: {
+                    contractDocuments: [
+                        {
+                            documentOp: 'DELETE',
+                            documentID: baseDoc.id,
+                            documentSha256: baseDoc.sha256,
+                            name: baseDoc.name,
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result).toBeInstanceOf(Error)
+        expect((result as Error).message).toContain(
+            'DELETE cannot carry document payload or scalar field patches'
+        )
+    })
+
+    it('rejects ambiguous document overrides when duplicate effective documentSha256 values exist', async () => {
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDuplicateContractDocumentSha()
+
+        const result = await overrideContractData(client, {
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Ambiguous document override',
+            overrides: {
+                revisionOverride: {
+                    contractDocuments: [
+                        {
+                            documentOp: 'OVERRIDE',
+                            documentSha256: 'duplicate-sha',
+                            dateAddedOp: 'OVERRIDE',
+                            dateAdded: new Date('2025-08-08'),
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result).toBeInstanceOf(Error)
+        expect((result as Error).message).toContain(
+            'OVERRIDE target documentSha256 matches multiple effective documents; documentID is required'
         )
     })
 
