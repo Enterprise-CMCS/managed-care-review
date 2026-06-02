@@ -2,16 +2,24 @@ import { z } from 'zod'
 import { baseUserSchema } from '../UserType'
 import { contractTypeSchema, preprocessNulls } from './formDataTypes'
 
-// Override on a single contract document for a submitted contract revision.
-// documentID null = add a new doc (payload fields must be populated).
-// documentID non-null = update an existing doc (only dateAdded overrideable today).
-// Sparse-patch convention: null on a payload field means "no override for this field".
-const contractDocumentOverrideSchema = z.object({
+const scalarFieldOverrideOperationSchema = z.enum([
+    'OVERRIDE',
+    'CLEAR_OVERRIDE',
+])
+
+const arrayFieldOverrideOperationSchema = z.enum(['OVERRIDE', 'ADD', 'DELETE'])
+
+// Override on a single document item for a submitted contract/rate revision.
+// documentOp is the item-level array operation. Field-level intent is carried
+// by scalar op/value pairs such as dateAddedOp/dateAdded.
+const genericDocumentOverrideSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
+    documentOp: arrayFieldOverrideOperationSchema,
+    documentSha256: z.string(),
     documentID: preprocessNulls(z.uuid().nullable().optional()),
 
-    // Add-path payload (set only when documentID is null).
+    // Add-path payload (set only when documentOp is ADD).
     name: preprocessNulls(z.string().nullable().optional()),
     sha256: preprocessNulls(z.string().nullable().optional()),
     s3URL: preprocessNulls(z.string().nullable().optional()),
@@ -20,13 +28,21 @@ const contractDocumentOverrideSchema = z.object({
 
     // Overrideable in both add and update paths.
     dateAdded: preprocessNulls(z.date().nullable().optional()),
+    dateAddedOp: preprocessNulls(
+        scalarFieldOverrideOperationSchema.nullable().optional()
+    ),
 })
+
+const contractDocumentOverrideSchema = genericDocumentOverrideSchema
 
 const contractRevisionOverrideDataFragmentSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
     contractRevisionID: z.uuid(),
     contractType: preprocessNulls(contractTypeSchema.optional()),
+    contractTypeOp: preprocessNulls(
+        scalarFieldOverrideOperationSchema.nullable().optional()
+    ),
     contractDocuments: preprocessNulls(
         z.array(contractDocumentOverrideSchema).optional()
     ),
@@ -37,6 +53,9 @@ const contractRevisionOverrideDataFragmentSchema = z.object({
 
 const contractOverrideDataFragmentSchema = z.object({
     initiallySubmittedAt: preprocessNulls(z.date().optional()),
+    initiallySubmittedAtOp: preprocessNulls(
+        scalarFieldOverrideOperationSchema.nullable().optional()
+    ),
     revisionOverride: preprocessNulls(
         contractRevisionOverrideDataFragmentSchema.optional()
     ),
@@ -52,12 +71,6 @@ const contractDataOverrideSchema = z.object({
 
 type ContractDataOverrideType = z.infer<typeof contractDataOverrideSchema>
 
-const genericDocumentOverrideSchema = z.object({
-    id: z.uuid(),
-    dateAdded: preprocessNulls(z.date().nullable().optional()),
-    documentID: z.uuid(),
-})
-
 const rateRevisionOverrideDataFragmentSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
@@ -72,6 +85,9 @@ const rateRevisionOverrideDataFragmentSchema = z.object({
 
 const rateOverrideDataFragmentSchema = z.object({
     initiallySubmittedAt: preprocessNulls(z.date().optional()),
+    initiallySubmittedAtOp: preprocessNulls(
+        scalarFieldOverrideOperationSchema.nullable().optional()
+    ),
     revisionOverride: preprocessNulls(
         rateRevisionOverrideDataFragmentSchema.optional()
     ),
@@ -99,6 +115,8 @@ export {
     contractOverrideDataFragmentSchema,
     rateOverrideDataFragmentSchema,
     contractDocumentOverrideSchema,
+    scalarFieldOverrideOperationSchema,
+    arrayFieldOverrideOperationSchema,
 }
 export type {
     ContractDataOverrideType,
