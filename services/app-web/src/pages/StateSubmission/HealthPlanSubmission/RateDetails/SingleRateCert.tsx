@@ -154,7 +154,7 @@ export const SingleRateCert = ({
                             <span className={styles.guidanceTextBlockNoPadding}>
                                 <LinkWithLogging
                                     aria-label="Document definitions and requirements (opens in new window)"
-                                    href={'/help#key-documents'}
+                                    href={'/resources/help#key-documents'}
                                     variant="external"
                                     target="_blank"
                                 >
@@ -200,7 +200,7 @@ export const SingleRateCert = ({
                             <span className={styles.guidanceTextBlockNoPadding}>
                                 <LinkWithLogging
                                     aria-label="Document definitions and requirements (opens in new window)"
-                                    href={'/help#key-documents'}
+                                    href={'/resources/help#key-documents'}
                                     variant="external"
                                     target="_blank"
                                 >
@@ -271,7 +271,7 @@ export const SingleRateCert = ({
 
                         <LinkWithLogging
                             aria-label="Rate certification type definitions (opens in new window)"
-                            href={'/help#rate-cert-type-definitions'}
+                            href={'/resources/help#rate-cert-type-definitions'}
                             variant="external"
                             target="_blank"
                         >
