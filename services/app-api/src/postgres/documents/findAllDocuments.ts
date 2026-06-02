@@ -1,8 +1,19 @@
 import type { AuditDocument } from '../../domain-models'
 import { auditDocumentSchema } from '../../domain-models'
+import type {
+    ContractDocument,
+    ContractQuestionDocument,
+    ContractQuestionResponseDocument,
+    ContractSupportingDocument,
+    RateDocument,
+    RateQuestionDocument,
+    RateQuestionResponseDocument,
+    RateSupportingDocument,
+} from '../../generated/client'
 import type { z } from 'zod'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseErrorToError } from '@mc-review/helpers'
+import { findAllOverrideAddedDocuments } from './findOverrideAddedDocuments'
 
 export async function findAllDocuments(
     client: ExtendedPrismaClient
@@ -17,6 +28,7 @@ export async function findAllDocuments(
             contractQuestionResponseDocs,
             rateQuestionDocs,
             rateQuestionResponseDocs,
+            overrideAddedDocs,
         ] = await Promise.all([
             getContractDocuments(client),
             getRateDocuments(client),
@@ -26,6 +38,7 @@ export async function findAllDocuments(
             getContractQuestionResponseDocument(client),
             getRateQuestionDocument(client),
             getRateQuestionResponseDocument(client),
+            findAllOverrideAddedDocuments(client),
         ])
         if (contractDocs instanceof Error) return contractDocs
         if (rateDocs instanceof Error) return rateDocs
@@ -39,6 +52,7 @@ export async function findAllDocuments(
         if (rateQuestionDocs instanceof Error) return rateQuestionDocs
         if (rateQuestionResponseDocs instanceof Error)
             return rateQuestionResponseDocs
+        if (overrideAddedDocs instanceof Error) return overrideAddedDocs
 
         const allDocs = [
             ...contractDocs.map((doc) => ({
@@ -70,6 +84,12 @@ export async function findAllDocuments(
                 ...doc,
                 type: 'RATE_QUESTION_RESPONSE_DOC' as const,
             })),
+            // Override-added docs are appended as additional stored/downloadable
+            // document records for global lookup and audit_s3. They do not
+            // replace or patch base document rows here. Client-facing effective
+            // revision data should use the contract/rate override merge path
+            // before building a document list.
+            ...overrideAddedDocs,
         ]
 
         console.info(`Got some docs back: ${JSON.stringify(allDocs)}`)
@@ -106,7 +126,8 @@ async function getContractDocuments(
     prisma: ExtendedPrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.contractDocument.findMany()
+        const docs: ContractDocument[] =
+            await prisma.contractDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             contractRevisionID: doc.contractRevisionID,
@@ -122,7 +143,7 @@ async function getRateDocuments(
     prisma: ExtendedPrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.rateDocument.findMany()
+        const docs: RateDocument[] = await prisma.rateDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             rateRevisionID: doc.rateRevisionID,
@@ -138,7 +159,8 @@ async function getContractSupportingDocuments(
     prisma: ExtendedPrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.contractSupportingDocument.findMany()
+        const docs: ContractSupportingDocument[] =
+            await prisma.contractSupportingDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             contractRevisionID: doc.contractRevisionID,
@@ -154,7 +176,8 @@ async function getRateSupportingDocuments(
     prisma: ExtendedPrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.rateSupportingDocument.findMany()
+        const docs: RateSupportingDocument[] =
+            await prisma.rateSupportingDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             rateRevisionID: doc.rateRevisionID,
@@ -170,7 +193,8 @@ async function getContractQuestionDocument(
     prisma: ExtendedPrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.contractQuestionDocument.findMany()
+        const docs: ContractQuestionDocument[] =
+            await prisma.contractQuestionDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             questionID: doc.questionID,
@@ -186,7 +210,8 @@ async function getContractQuestionResponseDocument(
     prisma: ExtendedPrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.contractQuestionResponseDocument.findMany()
+        const docs: ContractQuestionResponseDocument[] =
+            await prisma.contractQuestionResponseDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             responseID: doc.responseID,
@@ -202,7 +227,8 @@ async function getRateQuestionDocument(
     prisma: ExtendedPrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.rateQuestionDocument.findMany()
+        const docs: RateQuestionDocument[] =
+            await prisma.rateQuestionDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             questionID: doc.questionID,
@@ -218,7 +244,8 @@ async function getRateQuestionResponseDocument(
     prisma: ExtendedPrismaClient
 ): Promise<Omit<AuditDocument, 'type'>[] | Error> {
     try {
-        const docs = await prisma.rateQuestionResponseDocument.findMany()
+        const docs: RateQuestionResponseDocument[] =
+            await prisma.rateQuestionResponseDocument.findMany()
         return docs.map((doc) => ({
             ...doc,
             responseID: doc.responseID,
