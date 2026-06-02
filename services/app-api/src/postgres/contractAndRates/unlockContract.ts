@@ -5,10 +5,7 @@ import { unlockRateInDB } from './unlockRate'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { runTransactionWithRowLock } from '../prismaHelpers'
-import {
-    mergeContractRevisionOverrides,
-    mergeContractDocumentOverrides,
-} from './prismaSharedContractRateHelpers'
+import { mergeContractRevisionOverrides } from '../prismaOverrideMergeHelpers'
 
 async function unlockContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -59,9 +56,7 @@ async function unlockContractInsideTransaction(
                     createdAt: true,
                     contractRevisionID: true,
                     contractType: true,
-                    // Needed so mergeContractRevisionOverrides has the
-                    // expected shape, even though unlock only reads
-                    // contractType today.
+                    contractTypeOp: true,
                     contractDocuments: true,
                     supportingDocuments: true,
                 },
@@ -190,7 +185,10 @@ async function unlockContractInsideTransaction(
     const relevantOverrides = currentRev.revisionOverrides.filter(
         (o) => o.contractRevisionID === currentRev.id
     )
-    const mergedOverride = mergeContractRevisionOverrides(relevantOverrides)
+    const mergedOverride = mergeContractRevisionOverrides({
+        revisionOverrides: relevantOverrides,
+        contractRevision: currentRev,
+    })
 
     // Materialize document overrides into the new unlocked draft revision.
     // Update-mode overrides land as patched fields (today: dateAdded) on the
@@ -199,16 +197,6 @@ async function unlockContractInsideTransaction(
     // current max. The override rows on the previous (submitted) revision are
     // left in place as audit history; they're scoped to that revision and
     // don't apply to the new draft.
-    const mergedContractDocuments = mergeContractDocumentOverrides(
-        currentRev.contractDocuments,
-        mergedOverride.contractDocuments,
-        currentRev.id
-    )
-    const mergedSupportingDocuments = mergeContractDocumentOverrides(
-        currentRev.supportingDocuments,
-        mergedOverride.supportingDocuments,
-        currentRev.id
-    )
     const existingContractDocIDs = new Set(
         currentRev.contractDocuments.map((d) => d.id)
     )
@@ -225,48 +213,52 @@ async function unlockContractInsideTransaction(
             : -1
 
     let contractDocAddOrdinal = 0
-    const contractDocumentsToCreate = mergedContractDocuments.map((d) => {
-        const isExisting = existingContractDocIDs.has(d.id)
-        if (!isExisting) contractDocAddOrdinal++
-        const position = isExisting
-            ? d.position
-            : maxContractDocPosition + contractDocAddOrdinal
+    const contractDocumentsToCreate = mergedOverride.contractDocuments.map(
+        (d) => {
+            const isExisting = existingContractDocIDs.has(d.id)
+            if (!isExisting) contractDocAddOrdinal++
+            const position = isExisting
+                ? d.position
+                : maxContractDocPosition + contractDocAddOrdinal
 
-        const base = {
-            position,
-            name: d.name,
-            s3URL: d.s3URL,
-            sha256: d.sha256,
-            s3BucketName: d.s3BucketName,
-            s3Key: d.s3Key,
+            const base = {
+                position,
+                name: d.name,
+                s3URL: d.s3URL,
+                sha256: d.sha256,
+                s3BucketName: d.s3BucketName,
+                s3Key: d.s3Key,
+            }
+            // dateAdded is included only for synthesized adds — they sourced it
+            // from the override row and have no other origin. Update-mode
+            // overrides on existing docs are NOT carried through unlock here;
+            // the override's dateAdded effect on existing docs is restored at
+            // resubmit by the override-aware trace in submitContractAndOrRates.
+            // This mirrors the rate-side unlock + submit handoff.
+            return isExisting ? base : { ...base, dateAdded: d.dateAdded }
         }
-        // dateAdded is included only for synthesized adds — they sourced it
-        // from the override row and have no other origin. Update-mode
-        // overrides on existing docs are NOT carried through unlock here;
-        // the override's dateAdded effect on existing docs is restored at
-        // resubmit by the override-aware trace in submitContractAndOrRates.
-        // This mirrors the rate-side unlock + submit handoff.
-        return isExisting ? base : { ...base, dateAdded: d.dateAdded }
-    })
+    )
 
     let supportingDocAddOrdinal = 0
-    const supportingDocumentsToCreate = mergedSupportingDocuments.map((d) => {
-        const isExisting = existingSupportingDocIDs.has(d.id)
-        if (!isExisting) supportingDocAddOrdinal++
-        const position = isExisting
-            ? d.position
-            : maxSupportingDocPosition + supportingDocAddOrdinal
+    const supportingDocumentsToCreate = mergedOverride.supportingDocuments.map(
+        (d) => {
+            const isExisting = existingSupportingDocIDs.has(d.id)
+            if (!isExisting) supportingDocAddOrdinal++
+            const position = isExisting
+                ? d.position
+                : maxSupportingDocPosition + supportingDocAddOrdinal
 
-        const base = {
-            position,
-            name: d.name,
-            s3URL: d.s3URL,
-            sha256: d.sha256,
-            s3BucketName: d.s3BucketName,
-            s3Key: d.s3Key,
+            const base = {
+                position,
+                name: d.name,
+                s3URL: d.s3URL,
+                sha256: d.sha256,
+                s3BucketName: d.s3BucketName,
+                s3Key: d.s3Key,
+            }
+            return isExisting ? base : { ...base, dateAdded: d.dateAdded }
         }
-        return isExisting ? base : { ...base, dateAdded: d.dateAdded }
-    })
+    )
 
     await tx.contractRevisionTable.create({
         data: {
@@ -285,8 +277,9 @@ async function unlockContractInsideTransaction(
             riskBasedContract: currentRev.riskBasedContract,
             submissionType: currentRev.submissionType,
             submissionDescription: currentRev.submissionDescription,
-            contractType:
-                mergedOverride.contractType ?? currentRev.contractType,
+            contractType: mergedOverride.contractType.hasOverride
+                ? (mergedOverride.contractType.value ?? currentRev.contractType)
+                : currentRev.contractType,
             dsnpContract: currentRev.dsnpContract,
             contractExecutionStatus: currentRev.contractExecutionStatus,
             contractDateStart: currentRev.contractDateStart,
