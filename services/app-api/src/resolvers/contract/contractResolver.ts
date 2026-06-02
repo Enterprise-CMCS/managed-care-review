@@ -19,6 +19,7 @@ import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import type { Context } from '../../handlers/apollo_gql'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 import { logResolverError } from '../../logger'
+import { resolveInitiallySubmittedAtOverride } from '../shared/overrideHelpers'
 
 // this is probably a little delicate type-wise. But seems worth it not to be duplicating the same resolver in two places.
 function genericContractResolver<
@@ -58,11 +59,9 @@ function genericContractResolver<
                     parent.packageSubmissions[
                         parent.packageSubmissions.length - 1
                     ]
-                // Use override date if exists.
-                return (
-                    parent.contractOverrides?.[0]?.overrides
-                        .initiallySubmittedAt ||
-                    firstSubmission.submitInfo.updatedAt
+                return resolveInitiallySubmittedAtOverride(
+                    firstSubmission.submitInfo.updatedAt,
+                    parent.contractOverrides
                 )
             }
 
