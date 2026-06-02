@@ -524,7 +524,7 @@ const UnauthenticatedRoutes = ({
                     element={<AddLocalUser />}
                 />
             )}
-            <Route path="*" element={<Error404 />} />
+            <Route path="*" element={<Landing />} />
         </Routes>
     )
 }

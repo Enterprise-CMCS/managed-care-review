@@ -303,63 +303,6 @@ describe('AppRoutes and routing configuration', () => {
         })
     })
 
-    describe('/help', () => {
-        it('shows 404 page for state users', async () => {
-            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/help' },
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                        }),
-                    ],
-                },
-                featureFlags: { 'session-expiring-modal': false },
-            })
-
-            await waitFor(() => {
-                expect404Page()
-            })
-        })
-
-        it('shows 404 page for CMS users', async () => {
-            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/help' },
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 200,
-                            user: mockValidCMSUser(),
-                        }),
-                    ],
-                },
-                featureFlags: { 'session-expiring-modal': false },
-            })
-
-            await waitFor(() => {
-                expect404Page()
-            })
-        })
-
-        it('shows 404 page for unauthenticated users', async () => {
-            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/help' },
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            statusCode: 403,
-                        }),
-                    ],
-                },
-                featureFlags: { 'session-expiring-modal': false },
-            })
-
-            await waitFor(() => {
-                expect404Page()
-            })
-        })
-    })
-
     describe('/contact-us', () => {
         it('can be accessed by state user', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
@@ -722,7 +665,7 @@ describe('AppRoutes and routing configuration', () => {
     })
 
     describe('invalid routes', () => {
-        it('shows 404 page when no user', async () => {
+        it('shows the landing page when no user', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/not-a-real-place' },
                 apolloProvider: {
@@ -736,7 +679,12 @@ describe('AppRoutes and routing configuration', () => {
             })
 
             await waitFor(() => {
-                expect404Page()
+                expect(
+                    screen.getByRole('heading', {
+                        name: /How it works/i,
+                        level: 2,
+                    })
+                ).toBeInTheDocument()
             })
         })
 

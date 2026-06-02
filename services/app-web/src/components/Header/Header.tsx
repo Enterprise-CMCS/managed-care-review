@@ -44,6 +44,7 @@ export const Header = ({
         showResourcesNavPages &&
         [
             'ROOT',
+            'UNKNOWN_ROUTE',
             'RESOURCES',
             'HELP',
             'CONTACT_US',
