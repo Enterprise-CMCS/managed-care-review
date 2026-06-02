@@ -1,8 +1,21 @@
-import { parseErrorToError } from '@mc-review/helpers'
 import type { ContractType } from '../../domain-models'
+import { z } from 'zod'
+import type {
+    ArrayFieldOverrideOperation,
+    ContractDocumentOverride,
+    ContractType as PrismaContractType,
+    ScalarFieldOverrideOperation,
+} from '../../generated/client'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findContractWithHistory } from './findContractWithHistory'
+import {
+    normalizeDocumentOverrideInputs,
+    validateDocumentOverrideInputs,
+    validateScalarOverrideInput,
+} from '../prismaOverrideMergeHelpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
+import { contractFormDataSchema } from '../../domain-models/contractAndRates/formDataTypes'
 
 // NOTE on DocumentZipPackage: override creation does NOT regenerate or
 // invalidate the stored zip for the submitted contract revision. Zips are
@@ -20,20 +33,17 @@ import { findContractWithHistory } from './findContractWithHistory'
 // See skills/skill-api/references/10-revision-overrides.md
 // (Document Zip Packages And Overrides) for the full context.
 
-// Input shape for a single contract document override (used for both
-// contractDocuments and supportingDocuments arrays).
-//
-// documentID null  => add a new doc on this revision; name, sha256, s3URL required.
-// documentID set   => update an existing doc on this revision; only dateAdded
-//                     may be overridden today (mirrors RateDocumentOverride).
 type ContractDocumentOverrideInput = {
+    documentOp: ArrayFieldOverrideOperation
+    documentSha256: string
     documentID?: string | null
     name?: string | null
     sha256?: string | null
     s3URL?: string | null
     s3BucketName?: string | null
     s3Key?: string | null
-    dateAdded?: Date | null
+    dateAddedOp?: ScalarFieldOverrideOperation | null
+    dateAdded?: ContractDocumentOverride['dateAdded']
 }
 
 type OverrideContractDataArgsType = {
@@ -42,45 +52,14 @@ type OverrideContractDataArgsType = {
     description: string
     overrides: {
         initiallySubmittedAt?: Date | null
+        initiallySubmittedAtOp?: ScalarFieldOverrideOperation | null
         revisionOverride?: {
-            contractType?: 'BASE' | 'AMENDMENT' | null
+            contractType?: PrismaContractType | null
+            contractTypeOp?: ScalarFieldOverrideOperation | null
             contractDocuments?: ContractDocumentOverrideInput[]
             supportingDocuments?: ContractDocumentOverrideInput[]
         }
     }
-}
-
-// Validates add-path requireds and update-path restrictions on a document
-// override input array. Returns an Error describing the first invalid row,
-// or undefined if all rows pass.
-const validateContractDocumentOverrideInputs = (
-    docs: ContractDocumentOverrideInput[],
-    docKind: 'contractDocuments' | 'supportingDocuments'
-): Error | undefined => {
-    for (const [idx, doc] of docs.entries()) {
-        if (doc.documentID == null) {
-            // ADD path
-            if (!doc.name || !doc.sha256 || !doc.s3URL) {
-                return new Error(
-                    `Invalid ${docKind} override at index ${idx}: when documentID is null (add path), name, sha256, and s3URL are required.`
-                )
-            }
-        } else {
-            // UPDATE path - only dateAdded overrideable today
-            if (
-                doc.name != null ||
-                doc.sha256 != null ||
-                doc.s3URL != null ||
-                doc.s3BucketName != null ||
-                doc.s3Key != null
-            ) {
-                return new Error(
-                    `Invalid ${docKind} override at index ${idx}: when documentID is set (update path), only dateAdded may be overridden today; name, sha256, s3URL, s3BucketName, and s3Key must be null.`
-                )
-            }
-        }
-    }
-    return undefined
 }
 
 const overrideContractDataInsideTransaction = async (
@@ -88,7 +67,8 @@ const overrideContractDataInsideTransaction = async (
     args: OverrideContractDataArgsType
 ): Promise<ContractType | Error> => {
     const { contractID, updatedByID, description, overrides } = args
-    const { initiallySubmittedAt, revisionOverride } = overrides
+    const { initiallySubmittedAt, initiallySubmittedAtOp, revisionOverride } =
+        overrides
 
     const contractWithHistory = await findContractWithHistory(tx, contractID)
 
@@ -120,21 +100,81 @@ const overrideContractDataInsideTransaction = async (
         )
     }
 
+    const initiallySubmittedAtValidation = validateScalarOverrideInput({
+        fieldName: 'initiallySubmittedAt',
+        operation: initiallySubmittedAtOp,
+        value: initiallySubmittedAt,
+        valueSchema: z.date(),
+    })
+    if (initiallySubmittedAtValidation) {
+        throw initiallySubmittedAtValidation
+    }
+
+    const contractTypeValidation = validateScalarOverrideInput({
+        fieldName: 'contractType',
+        operation: revisionOverride?.contractTypeOp,
+        value: revisionOverride?.contractType,
+        valueSchema: contractFormDataSchema.shape.contractType,
+    })
+    if (contractTypeValidation) {
+        throw contractTypeValidation
+    }
+
+    let contractDocumentOverrides = revisionOverride?.contractDocuments
+    let supportingDocumentOverrides = revisionOverride?.supportingDocuments
+
     // Validate document override inputs before writing.
     if (revisionOverride?.contractDocuments) {
-        const validationError = validateContractDocumentOverrideInputs(
-            revisionOverride.contractDocuments,
-            'contractDocuments'
+        // latestRevision.formData is the effective document view and can include
+        // override-added docs whose id is an override row id. documentID is a
+        // base-table FK, so normalize non-base ids to null before writing.
+        const baseContractDocumentIDs = new Set(
+            (
+                await tx.contractDocument.findMany({
+                    where: { contractRevisionID: latestRevision.id },
+                    select: { id: true },
+                })
+            ).map((doc) => doc.id)
         )
+        contractDocumentOverrides = normalizeDocumentOverrideInputs({
+            overrideDocs: revisionOverride.contractDocuments,
+            effectiveDocs: latestRevision.formData.contractDocuments,
+            baseDocumentIDs: baseContractDocumentIDs,
+        })
+        const validationError = validateDocumentOverrideInputs({
+            overrideDocs: contractDocumentOverrides,
+            effectiveDocs: latestRevision.formData.contractDocuments,
+            baseDocumentIDs: baseContractDocumentIDs,
+            documentType: 'CONTRACT_DOCUMENTS',
+            valueSchemas: { dateAdded: z.date().nullable() },
+        })
         if (validationError) {
             throw validationError
         }
     }
     if (revisionOverride?.supportingDocuments) {
-        const validationError = validateContractDocumentOverrideInputs(
-            revisionOverride.supportingDocuments,
-            'supportingDocuments'
+        // See contractDocuments above: documentID may only be written when it
+        // references a stored base document row.
+        const baseSupportingDocumentIDs = new Set(
+            (
+                await tx.contractSupportingDocument.findMany({
+                    where: { contractRevisionID: latestRevision.id },
+                    select: { id: true },
+                })
+            ).map((doc) => doc.id)
         )
+        supportingDocumentOverrides = normalizeDocumentOverrideInputs({
+            overrideDocs: revisionOverride.supportingDocuments,
+            effectiveDocs: latestRevision.formData.supportingDocuments,
+            baseDocumentIDs: baseSupportingDocumentIDs,
+        })
+        const validationError = validateDocumentOverrideInputs({
+            overrideDocs: supportingDocumentOverrides,
+            effectiveDocs: latestRevision.formData.supportingDocuments,
+            baseDocumentIDs: baseSupportingDocumentIDs,
+            documentType: 'CONTRACT_SUPPORTING_DOCUMENTS',
+            valueSchemas: { dateAdded: z.date().nullable() },
+        })
         if (validationError) {
             throw validationError
         }
@@ -146,6 +186,7 @@ const overrideContractDataInsideTransaction = async (
             updatedByID,
             description,
             initiallySubmittedAt: initiallySubmittedAt ?? null,
+            initiallySubmittedAtOp: initiallySubmittedAtOp ?? null,
             revisionOverride: revisionOverride
                 ? {
                       create: {
@@ -155,21 +196,22 @@ const overrideContractDataInsideTransaction = async (
                               },
                           },
                           contractType: revisionOverride.contractType ?? null,
-                          contractDocuments: revisionOverride.contractDocuments
+                          contractTypeOp:
+                              revisionOverride.contractTypeOp ?? null,
+                          contractDocuments: contractDocumentOverrides
                               ? {
                                     createMany: {
-                                        data: revisionOverride.contractDocuments,
+                                        data: contractDocumentOverrides,
                                     },
                                 }
                               : undefined,
-                          supportingDocuments:
-                              revisionOverride.supportingDocuments
-                                  ? {
-                                        createMany: {
-                                            data: revisionOverride.supportingDocuments,
-                                        },
-                                    }
-                                  : undefined,
+                          supportingDocuments: supportingDocumentOverrides
+                              ? {
+                                    createMany: {
+                                        data: supportingDocumentOverrides,
+                                    },
+                                }
+                              : undefined,
                       },
                   }
                 : undefined,
@@ -195,14 +237,13 @@ const overrideContractData = async (
     client: ExtendedPrismaClient,
     args: OverrideContractDataArgsType
 ): Promise<ContractType | Error> => {
-    try {
-        return await client.$transaction(
-            async (tx) => await overrideContractDataInsideTransaction(tx, args)
-        )
-    } catch (err) {
-        console.error('PRISMA ERROR: Error overriding contract data', err)
-        return parseErrorToError(err)
-    }
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'overrideContractData',
+        table: 'ContractTable',
+        id: args.contractID,
+        transaction: (tx) => overrideContractDataInsideTransaction(tx, args),
+    })
 }
 
 export {
