@@ -4,11 +4,11 @@ import type {
     ContractRevisionTable,
     RateRevisionTable,
 } from '../../generated/client'
+import { getLatestActiveRevision } from './prismaSharedContractRateHelpers'
 import {
-    getLatestActiveRevision,
-    mergeContractRevisionOverrides,
+    mergeContractDocumentOverrides,
     mergeRateRevisionOverrides,
-} from './prismaSharedContractRateHelpers'
+} from '../prismaOverrideMergeHelpers'
 
 const includeContractRevWithOnlyDocs = {
     submitInfo: true,
@@ -31,6 +31,11 @@ const includeContractRevWithOnlyDocs = {
             createdAt: true,
             contractRevisionID: true,
             contractType: true,
+            contractTypeOp: true,
+            // These document override rows are needed when resubmitting an
+            // unlocked contract. Unlock materializes override-added docs into
+            // the draft, but previous submitted revisions still carry the
+            // override history that determines the original effective dateAdded.
             contractDocuments: true,
             supportingDocuments: true,
         },
@@ -90,40 +95,39 @@ async function submitContractAndOrRates(
         // order. We need to find the first time docs are submitted.
         const previousRevisions = allRevisions.slice(1).reverse()
 
-        // Collect first date added for our documents from previous submissions.
-        // For each previous revision, apply any ContractRevisionOverrides on
-        // dateAdded before falling back to the doc's raw dateAdded or the
-        // revision's submitInfo.updatedAt. Doc kinds are processed
-        // separately so a (hypothetical) documentID collision between a
-        // contract doc and a supporting doc cannot match the wrong override.
-        // Mirrors the rate-side handling in this same file.
+        // Build a first-submitted date lookup by document sha. Previous
+        // revisions may have submitted document overrides, so merge those
+        // override rows before reading dateAdded. This prevents resubmit from
+        // losing the original effective dateAdded for override-added or
+        // override-updated documents.
         const prevDocs: { [key: string]: Date | undefined } = {}
         for (const rev of previousRevisions) {
-            const mergedRevOverride = mergeContractRevisionOverrides(
-                rev.revisionOverrides ?? []
-            )
             const docKinds = [
                 {
                     docs: rev.contractDocuments,
-                    overrides: mergedRevOverride.contractDocuments,
+                    overrides: (rev.revisionOverrides ?? []).flatMap(
+                        (override) => override.contractDocuments
+                    ),
                 },
                 {
                     docs: rev.supportingDocuments,
-                    overrides: mergedRevOverride.supportingDocuments,
+                    overrides: (rev.revisionOverrides ?? []).flatMap(
+                        (override) => override.supportingDocuments
+                    ),
                 },
             ]
             for (const { docs, overrides } of docKinds) {
-                // Raw docs on this revision, with update-mode overrides
-                // applied by documentID.
-                for (const doc of docs) {
+                // Contract docs and supporting docs are separate arrays, so
+                // merge each array independently before recording first-seen
+                // dateAdded values.
+                const effectiveDocs = mergeContractDocumentOverrides(
+                    docs,
+                    overrides,
+                    rev.id
+                )
+                for (const doc of effectiveDocs) {
                     if (prevDocs[doc.sha256]) continue
-                    const docOverride = overrides.find(
-                        (o) => o.documentID === doc.id
-                    )
-                    const effective =
-                        docOverride?.dateAdded ??
-                        doc.dateAdded ??
-                        rev.submitInfo?.updatedAt
+                    const effective = doc.dateAdded ?? rev.submitInfo?.updatedAt
                     if (!effective) {
                         // Preserve pre-existing behavior: skip docs with no
                         // dateAdded source. Final update step will fall back
@@ -132,28 +136,12 @@ async function submitContractAndOrRates(
                     }
                     prevDocs[doc.sha256] = effective
                 }
-                // Add-mode override rows on this revision act as ghost docs
-                // for the prevDocs trace: their sha256 is what the
-                // materialized doc on the next draft will carry. Honoring
-                // the admin-supplied dateAdded here is what lets an
-                // add-override's dateAdded survive a resubmit cycle.
-                for (const addOverride of overrides.filter(
-                    (o) => o.documentID == null
-                )) {
-                    if (!addOverride.sha256 || prevDocs[addOverride.sha256]) {
-                        continue
-                    }
-                    const effective =
-                        addOverride.dateAdded ?? rev.submitInfo?.updatedAt
-                    if (effective) {
-                        prevDocs[addOverride.sha256] = effective
-                    }
-                }
             }
         }
 
-        // Update the contract to include the submitInfo ID and set date added.
-        // doc dateAdded defaults to the first submission of this document, then fallback to current date time.
+        // Stamp the draft revision as submitted and write effective dateAdded.
+        // Existing docs keep the earliest effective date from previous
+        // submissions; newly submitted docs fall back to this submit time.
         await tx.contractRevisionTable.update({
             where: {
                 id: submittedContractRev.id,
@@ -243,7 +231,6 @@ async function submitContractAndOrRates(
                 },
             },
             revisionOverrides: {
-                // Get overrides for revision to apply to submitted revision.
                 orderBy: {
                     createdAt: 'desc',
                 },
@@ -251,6 +238,9 @@ async function submitContractAndOrRates(
                     id: true,
                     createdAt: true,
                     rateRevisionID: true,
+                    // Previous submitted rate revisions may have document
+                    // overrides that affect effective dateAdded. Include them
+                    // so we can rebuild the effective document arrays below.
                     rateDocuments: true,
                     supportingDocuments: true,
                 },
@@ -261,44 +251,35 @@ async function submitContractAndOrRates(
         },
     })
 
-    // hashmap of unique docs by sha256 and dateAdded.
-    // key of property is formatted as rateID-sha256. This narrows documents to the rate it was uploaded on.
+    // Build a first-submitted date lookup for rate documents. The key includes
+    // rateID because the same file sha can appear on multiple rates and should
+    // not share dateAdded history across rates.
     const prevRateDocs: { [key: string]: Date | undefined } = {}
     for (const rev of previousSubmissions) {
-        // Full-merge across all rate revision overrides on this revision
-        // (newer wins per documentID for dateAdded). Replaces the prior
-        // single-latest `revisionOverrides?.[0]` access.
-        const mergedRateOverride = mergeRateRevisionOverrides(
-            rev.revisionOverrides ?? []
-        )
+        // Merge the full previous rate revision override history before reading
+        // documents. This makes resubmit preserve dateAdded from override-added
+        // or override-updated documents on earlier submissions.
+        const mergedRateOverride = mergeRateRevisionOverrides({
+            revisionOverrides: rev.revisionOverrides ?? [],
+            rateRevision: rev,
+        })
 
-        // Process each doc kind in its own pass so a (hypothetical)
-        // documentID collision between a rate doc and a supporting doc
-        // cannot match the wrong override.
+        // Process each document array independently. Rate documents and
+        // supporting documents have the same merge rules, but they should not
+        // affect each other's first-submitted date lookup.
         const docKinds = [
             {
-                docs: rev.rateDocuments,
-                overrides: mergedRateOverride.rateDocuments,
+                docs: mergedRateOverride.rateDocuments,
             },
             {
-                docs: rev.supportingDocuments,
-                overrides: mergedRateOverride.supportingDocuments,
+                docs: mergedRateOverride.supportingDocuments,
             },
         ]
 
-        for (const { docs, overrides } of docKinds) {
+        for (const { docs } of docKinds) {
             for (const doc of docs) {
                 const hashKey = `${rev.rateID}-${doc.sha256}`
-                // set date to current documents dateAdded
                 let dateAdded: Date | null | undefined = doc.dateAdded
-                const docOverride = overrides.find(
-                    (overrideDoc) => overrideDoc.documentID === doc.id
-                )
-
-                // Use override dateAdded if it exists
-                if (docOverride?.dateAdded) {
-                    dateAdded = docOverride.dateAdded
-                }
 
                 // If both do not exist, use the revision submitted at date.
                 if (!dateAdded) {
@@ -326,8 +307,9 @@ async function submitContractAndOrRates(
         }
     }
 
-    // Loop through each rate rev and add submit info and document date added.
-    // Fallback on submission date if this doc was not previously submitted.
+    // Stamp each draft rate revision as submitted and write effective
+    // dateAdded. Existing docs keep the earliest effective date from previous
+    // submissions; newly submitted docs fall back to this submit time.
     for (const rev of submittedRateRevs) {
         await tx.rateRevisionTable.update({
             where: {
