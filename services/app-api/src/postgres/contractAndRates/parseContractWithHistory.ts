@@ -3,7 +3,8 @@ import type {
     ContractRevisionType,
     StrippedContractRevisionType,
 } from '../../domain-models'
-import type { StrippedContractType } from '../../domain-models/contractAndRates/contractTypes'
+import { z } from 'zod'
+import type { StrippedContractType } from '../../domain-models'
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import type { ContractPackageSubmissionType } from '../../domain-models'
@@ -12,21 +13,22 @@ import type {
     ContractRevisionTableWithFormData,
     StrippedContractRevisionTableWithFormData,
 } from './prismaSharedContractRateHelpers'
-import { getConsolidatedContractStatus } from './prismaSharedContractRateHelpers'
-import {
-    rateRevisionToDomainModel,
-    unsortedRatesRevisionsToDomainModel,
-} from './prismaSharedContractRateHelpers'
 import {
     contractFormDataToDomainModel,
     convertUpdateInfoToDomainModel,
+    getConsolidatedContractStatus,
     getContractRateStatus,
     getContractReviewStatus,
     DRAFT_PARENT_PLACEHOLDER,
     isDraftRevision,
     isSubmittedRevision,
-    mergeContractRevisionOverrides,
+    rateRevisionToDomainModel,
+    unsortedRatesRevisionsToDomainModel,
 } from './prismaSharedContractRateHelpers'
+import {
+    mergeScalarFieldOverrides,
+    mergeStrippedContractRevisionOverrides,
+} from '../prismaOverrideMergeHelpers'
 import type {
     ContractTableWithoutDraftRates,
     ContractTableStrippedPayload,
@@ -133,6 +135,8 @@ function contractOverridesToDomainModel(
                 overrides: {
                     initiallySubmittedAt:
                         override.initiallySubmittedAt ?? undefined,
+                    initiallySubmittedAtOp:
+                        override.initiallySubmittedAtOp ?? undefined,
                     revisionOverride: revisionOverride
                         ? {
                               id: revisionOverride.id,
@@ -141,18 +145,40 @@ function contractOverridesToDomainModel(
                                   revisionOverride.contractRevisionID,
                               contractType:
                                   revisionOverride.contractType ?? undefined,
+                              contractTypeOp:
+                                  revisionOverride.contractTypeOp ?? undefined,
                               contractDocuments:
                                   revisionOverride.contractDocuments.map(
                                       (doc) => ({
                                           ...doc,
+                                          documentID:
+                                              doc.documentID ?? undefined,
+                                          name: doc.name ?? undefined,
+                                          sha256: doc.sha256 ?? undefined,
+                                          s3URL: doc.s3URL ?? undefined,
+                                          s3BucketName:
+                                              doc.s3BucketName ?? undefined,
+                                          s3Key: doc.s3Key ?? undefined,
                                           dateAdded: doc.dateAdded ?? undefined,
+                                          dateAddedOp:
+                                              doc.dateAddedOp ?? undefined,
                                       })
                                   ),
                               supportingDocuments:
                                   revisionOverride.supportingDocuments.map(
                                       (doc) => ({
                                           ...doc,
+                                          documentID:
+                                              doc.documentID ?? undefined,
+                                          name: doc.name ?? undefined,
+                                          sha256: doc.sha256 ?? undefined,
+                                          s3URL: doc.s3URL ?? undefined,
+                                          s3BucketName:
+                                              doc.s3BucketName ?? undefined,
+                                          s3Key: doc.s3Key ?? undefined,
                                           dateAdded: doc.dateAdded ?? undefined,
+                                          dateAddedOp:
+                                              doc.dateAddedOp ?? undefined,
                                       })
                                   ),
                           }
@@ -348,18 +374,24 @@ function contractWithHistoryToDomainModel(
 function strippedContractFormDataToDomainModel(
     contractRevision: StrippedContractRevisionTableWithFormData
 ) {
+    // Revision overrides are stored in parent-level history, but each row only
+    // applies to its target revision. Filter to this revision before merging so
+    // older audit/history rows do not affect the current effective form data.
     const relevantOverrides = (contractRevision.revisionOverrides ?? []).filter(
         (o) => o.contractRevisionID === contractRevision.id
     )
-    const mergedOverride = mergeContractRevisionOverrides(relevantOverrides)
+    const mergedOverride =
+        mergeStrippedContractRevisionOverrides(relevantOverrides)
 
     return {
         programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
-        contractType:
-            mergedOverride.contractType ?? contractRevision.contractType,
+        contractType: mergedOverride.contractType.hasOverride
+            ? (mergedOverride.contractType.value ??
+              contractRevision.contractType)
+            : contractRevision.contractType,
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
         contractDateStart: contractRevision.contractDateStart ?? undefined,
@@ -451,13 +483,22 @@ function strippedContractToDomainModel(
         )
     }
 
-    const latestOverride = contractOverridesToDomainModel(
-        contract.contractOverrides
-    )[0]
+    const initiallySubmittedAtOverride = mergeScalarFieldOverrides<
+        Date,
+        ContractTableStrippedPayload['contractOverrides'][number]
+    >({
+        rows: contract.contractOverrides,
+        getOperation: (row) => row.initiallySubmittedAtOp,
+        getValue: (row) => row.initiallySubmittedAt,
+        valueSchema: z.date(),
+        fieldPath: 'ContractOverrides.initiallySubmittedAt',
+    })
 
     // Use override or calculate initial contract submission.
     const initiallySubmittedAt =
-        latestOverride?.overrides.initiallySubmittedAt ||
+        (initiallySubmittedAtOverride.hasOverride
+            ? initiallySubmittedAtOverride.value
+            : undefined) ||
         submittedRevisionsDescending[submittedRevisionsDescending.length - 1]
             ?.submitInfo?.updatedAt
 

@@ -6,6 +6,7 @@ import type {
     ContractPackageSubmissionType,
     RatePackageSubmissionType,
 } from '../../domain-models'
+import { z } from 'zod'
 import { rateSchema } from '../../domain-models/contractAndRates'
 import type { RateWithoutDraftContractsType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import {
@@ -28,6 +29,7 @@ import {
     isDraftRevision,
     isSubmittedRevision,
 } from './prismaSharedContractRateHelpers'
+import { mergeScalarFieldOverrides } from '../prismaOverrideMergeHelpers'
 import type {
     RateTableWithoutDraftContractsPayload,
     RateTableWithoutDraftContractsStrippedPayload,
@@ -112,6 +114,8 @@ function rateOverridesToDomainModel(
                 overrides: {
                     initiallySubmittedAt:
                         override.initiallySubmittedAt ?? undefined,
+                    initiallySubmittedAtOp:
+                        override.initiallySubmittedAtOp ?? undefined,
                     revisionOverride: revisionOverride
                         ? {
                               id: revisionOverride.id,
@@ -120,14 +124,32 @@ function rateOverridesToDomainModel(
                               rateDocuments: revisionOverride.rateDocuments.map(
                                   (doc) => ({
                                       ...doc,
+                                      documentID: doc.documentID ?? undefined,
+                                      name: doc.name ?? undefined,
+                                      sha256: doc.sha256 ?? undefined,
+                                      s3URL: doc.s3URL ?? undefined,
+                                      s3BucketName:
+                                          doc.s3BucketName ?? undefined,
+                                      s3Key: doc.s3Key ?? undefined,
                                       dateAdded: doc.dateAdded ?? undefined,
+                                      dateAddedOp: doc.dateAddedOp ?? undefined,
                                   })
                               ),
                               supportingDocuments:
                                   revisionOverride.supportingDocuments.map(
                                       (doc) => ({
                                           ...doc,
+                                          documentID:
+                                              doc.documentID ?? undefined,
+                                          name: doc.name ?? undefined,
+                                          sha256: doc.sha256 ?? undefined,
+                                          s3URL: doc.s3URL ?? undefined,
+                                          s3BucketName:
+                                              doc.s3BucketName ?? undefined,
+                                          s3Key: doc.s3Key ?? undefined,
                                           dateAdded: doc.dateAdded ?? undefined,
+                                          dateAddedOp:
+                                              doc.dateAddedOp ?? undefined,
                                       })
                                   ),
                           }
@@ -388,11 +410,22 @@ function strippedRateWithoutDraftContractsToDomainModel(
 
     const submittedRevisionsDescending = submittedRevisions.reverse()
 
-    const latestOverride = rateOverridesToDomainModel(rate.rateOverrides)[0]
+    const initiallySubmittedAtOverride = mergeScalarFieldOverrides<
+        Date,
+        RateTableWithoutDraftContractsStrippedPayload['rateOverrides'][number]
+    >({
+        rows: rate.rateOverrides,
+        getOperation: (row) => row.initiallySubmittedAtOp,
+        getValue: (row) => row.initiallySubmittedAt,
+        valueSchema: z.date(),
+        fieldPath: 'RateOverrides.initiallySubmittedAt',
+    })
 
     // Use override or calculate initial rate submission.
     const initiallySubmittedAt =
-        latestOverride?.overrides.initiallySubmittedAt ||
+        (initiallySubmittedAtOverride.hasOverride
+            ? initiallySubmittedAtOverride.value
+            : undefined) ||
         submittedRevisionsDescending[submittedRevisionsDescending.length - 1]
             .submitInfo?.updatedAt
 
