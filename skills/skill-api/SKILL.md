@@ -31,7 +31,7 @@ If the task only involves UI/frontend without touching the data layer, you proba
 | Withdraw contract specifically | `references/07-withdraw.md` |
 | Working out what status a contract or rate ends up in; computing parent contract; resolving cause on `packageSubmissions`; recursion in domain types | `references/08-derived-state.md` |
 | Undo unlock, reversed revisions, active-draft rules, linked-rate cleanup | `references/09-undo-unlock.md` |
-| Revision overrides, flatten/merge behavior, document overrides, unlock expectations | `references/10-revision-overrides.md` |
+| Contract/rate data overrides, override mutations, parser merge behavior, adding new overridable fields | `references/10-revision-overrides.md` + `docs/technical-design/contract-and-rate-data-override.md` |
 
 For broad multi-area features (e.g. a new "undo unlock contract" mutation): read `01`, `02`, `05`, and `08` first; pull in `06` and `07` if rates cross contract boundaries.
 
@@ -48,17 +48,14 @@ For broad multi-area features (e.g. a new "undo unlock contract" mutation): read
 - **One `UpdateInfoTable` event row per submit-or-unlock; shared across the contract and every child rate touched in that transaction.** This is what lets the parser later detect "these were submitted/unlocked together."
 - **`SubmissionPackageJoinTable`** is the immutable snapshot of contract↔rate at submit time, joining specific contract revision + specific rate revision + position. **`DraftRateJoinTable`** is the working set on a contract that's currently in draft, joining parent tables only.
 - **Form-data writes via `updateDraftContract` are full replaces, not merges.** Omitted fields are nulled (`nullify`) or emptied (`emptify`). Child collections (documents, contacts) are delete-and-recreate, so row IDs are not stable across updates.
-<<<<<<< HEAD
-<<<<<<< HEAD
-- **Reverse unlock is revision history, not a new submission event.** Read `09-reverse-unlock.md` if you touch `reverseUnlockInfo`, active-draft logic, or linked-rate cleanup.
-- **Overrides are sparse metadata patches on submitted revisions.** Read `10-revision-overrides.md` if you touch revision overrides, document overrides, or unlock behavior for overridden revisions. Rate unlock is currently contract-driven: child rates are unlocked through `unlockContract`, not treated as an independent workflow with parity requirements.
-=======
-=======
 - **Resolver-called store function writes to `ContractTable`, `RateTable`, `ContractQuestion`, or `RateQuestion` should default to `runTransactionWithRowLock`.** Use `services/app-api/src/postgres/prismaHelpers.ts` and pass the table + row id so concurrent writes to the same record serialize before the store performs additional reads or writes.
 - **After acquiring a row lock, re-check write preconditions inside the transaction.** Resolver-time validation can be stale by the time the lock is acquired; the store should validate current state again before applying writes.
 - **Question-response writes follow the same rule as contract/rate state changes.** If a resolver-called store function writes a `ContractQuestion` or `RateQuestion` row or appends related responses based on current question state, default to `runTransactionWithRowLock` and validate deleted/current status after the lock is acquired.
 - **Undo unlock is revision history, not a new submission event.** Read `09-undo-unlock.md` if you touch `undoUnlockInfo`, active-draft logic, or linked-rate cleanup.
-- **Overrides are sparse metadata patches on submitted revisions.** Read `10-revision-overrides.md` if you touch revision overrides, document overrides, or unlock behavior for overridden revisions.
+- **Contract/rate data overrides are append-only correction events on submitted data.** Read `10-revision-overrides.md` and `docs/technical-design/contract-and-rate-data-override.md` before touching override mutations, override tables, parser merge behavior, document override lookup, or unlock/submit behavior for overridden data.
+- **Override operation columns carry intent; value columns carry payload.** Do not infer override behavior from null/undefined values. `OVERRIDE` applies payload, `CLEAR_OVERRIDE` clears scalar field override state, and nullable op columns mean no instruction.
+- **Override reads apply in the postgres-to-domain parser.** Most effective contract/rate data should be merged in parse helpers, not ad hoc in GraphQL object-field resolvers. Some parent-level fields may still need field resolver handling when the response shape does not use full parser output.
+- **Document overrides are array-item operations, not full array replacement.** Use `documentSha256` as the sparse merge key, use `documentID` to disambiguate duplicate base docs, and remember override-added documents expose the override row id as `GenericDocument.id`.
 - **Deprecated — do not include in new designs:**
   - `ContractTable.sharedRateRevisions` / `RateRevisionTable.contractsWithSharedRateRevision` (the `SharedRateRevisions` M:N) — not marked deprecated in the schema source, but confirmed deprecated 2026-05-04.
   - `HealthPlanPackageTable` / `HealthPlanRevisionTable` (proto legacy) — marked `deprecated Boolean @default(true)`.
@@ -75,6 +72,7 @@ For broad multi-area features (e.g. a new "undo unlock contract" mutation): read
 | `unlockContract` | CMS user (`hasCMSPermissions`) | Resolver |
 | `unlockRate` | CMS user (`hasCMSPermissions`), inactive standalone-rate path | Resolver |
 | `withdrawContract` / `withdrawRate` | CMS user | Resolver |
+| `overrideContractData` / `overrideRateData` | Admin user only | Resolver + store status checks |
 | Edit a rate's form data via `UPDATE` | Only the rate's parent contract | Postgres + resolver enforce `parentContractID === contract.id` |
 | Link to a rate via `LINK` | Any contract (target must not be DRAFT or WITHDRAWN) | Resolver |
 
@@ -96,6 +94,8 @@ OAuth `canWrite` (or `canOauthWrite`) is required on every write. State-vs-CMS c
 | Full include shapes | `prismaFullContractRateHelpers.ts` (same dir) |
 | Without-draft includes | `prismaSubmittedContractHelpers.ts`, `prismaSubmittedRateHelpers.ts` |
 | Parsers | `parseContractWithHistory.ts`, `parseRateWithHistory.ts` |
+| Override write paths | `services/app-api/src/resolvers/contract/overrideContractData.ts`, `services/app-api/src/resolvers/rate/overrideRateData.ts`, `services/app-api/src/postgres/contractAndRates/overrideContractData.ts`, `services/app-api/src/postgres/contractAndRates/overrideRateData.ts` |
+| Override merge and validation helpers | `services/app-api/src/postgres/prismaOverrideMergeHelpers.ts` |
 | Status helpers, parent-id, formData converters | `prismaSharedContractRateHelpers.ts` |
 | Insert (create new) | `insertContract.ts`, `insertRate.ts` |
 | Update draft form data | `updateDraftContract.ts`, `updateDraftRate.ts`, `updateDraftContractRates.ts`, `updateDraftContractWithRates.ts` |
@@ -124,6 +124,7 @@ The repo's `docs/` directory has broader architecture and conventions docs that 
 
 ### Architecture and conventions
 - `docs/architectural-decision-records/023-seperate-contract-rates-tables-postgres.md` — the ADR that established the two-tier contract/rate schema this skill describes
+- `docs/technical-design/contract-and-rate-data-override.md` — canonical design for contract/rate override storage, operation semantics, read-time merge behavior, write validation, document overrides, and submission lifecycle behavior
 - `docs/technical-design/graphql-resovler-design.md` — resolver layer conventions (error formatting, structure, audit trails)
 - `docs/technical-design/dependency-injection-pattern.md` — how the `Store` is injected into resolvers
 - `docs/architectural-decision-records/011-typescript-error-handling.md` + `012-custom-error-types.md` — the result/error pattern used throughout the postgres helpers
