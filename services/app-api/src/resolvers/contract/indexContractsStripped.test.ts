@@ -25,9 +25,9 @@ import {
     createAndUpdateTestEQROContract,
     withdrawTestContract,
     approveTestContract,
+    overrideTestContractData,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('indexContractsStripped', () => {
     const ldService = testLDService({
@@ -361,30 +361,19 @@ describe('indexContractsStripped', () => {
     })
 
     it('returns overridden initiallySubmittedAt for contract', async () => {
-        const prismaClient = await sharedTestPrismaClient()
         const adminUser = testAdminUser()
-
-        // Ensure admin user exists in DB for the override relation
-        await prismaClient.user.upsert({
-            where: { id: adminUser.id },
-            update: {},
-            create: {
-                id: adminUser.id,
-                givenName: adminUser.givenName,
-                familyName: adminUser.familyName,
-                email: adminUser.email,
-                role: adminUser.role,
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
             },
         })
 
         const overrideDate = new Date('2020-01-15')
 
-        // Insert contract override directly via Prisma
-        await prismaClient.contractOverrides.create({
-            data: {
-                contractID: approvedContract.id,
-                updatedByID: adminUser.id,
-                description: 'Override initiallySubmittedAt for test',
+        await overrideTestContractData(adminServer, {
+            contractID: approvedContract.id,
+            description: 'Override initiallySubmittedAt for test',
+            overrides: {
                 initiallySubmittedAt: overrideDate,
                 initiallySubmittedAtOp: 'OVERRIDE',
             },

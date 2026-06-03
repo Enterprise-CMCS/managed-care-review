@@ -21,6 +21,7 @@ import {
 import {
     addNewRateToTestContract,
     fetchTestRateById,
+    overrideTestRateData,
     undoWithdrawTestRate,
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
@@ -39,7 +40,6 @@ import { expect } from 'vitest'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/submissions'
 import { must } from '../../testHelpers'
-import { NewPostgresStore } from '../../postgres'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -1313,8 +1313,6 @@ describe('withdrawRate', () => {
     })
 
     it('withdraw rate retains rate overrides', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
         const cmsUser = testCMSUser()
         const adminUser = testAdminUser()
         const stateServer = await constructTestPostgresServer()
@@ -1358,9 +1356,8 @@ describe('withdrawRate', () => {
         const newDate = new Date('2025-05-05')
 
         // add overrides to rate
-        await store.overrideRateData({
+        await overrideTestRateData(adminServer, {
             rateID,
-            updatedByID: adminUser.id,
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newDate,

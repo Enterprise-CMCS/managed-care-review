@@ -19,9 +19,11 @@ import {
 import { submitTestRate, updateTestRate } from '../../testHelpers'
 import { v4 as uuidv4 } from 'uuid'
 import {
+    addLinkedRateToTestContract,
     addNewRateToTestContract,
     createSubmitAndUnlockTestRate,
     fetchTestRateById,
+    overrideTestRateData,
     updateRatesInputFromDraftContract,
     updateTestDraftRateOnContract,
     updateTestDraftRatesOnContract,
@@ -31,12 +33,12 @@ import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     fetchTestContract,
+    overrideTestContractData,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
 import { dayjs } from '@mc-review/dates'
-import { NewPostgresStore } from '../../postgres'
 
 describe('fetchRate', () => {
     const ldService = testLDService({
@@ -875,8 +877,6 @@ describe('fetchRate', () => {
     })
 
     it('returns rate data with overrides', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
         const cmsUser = testCMSUser()
         const adminUser = testAdminUser()
         const stateServer = await constructTestPostgresServer({
@@ -923,9 +923,8 @@ describe('fetchRate', () => {
         const newDate = new Date('2025-05-05')
 
         // add overrides to rate
-        await store.overrideRateData({
+        await overrideTestRateData(adminServer, {
             rateID,
-            updatedByID: adminUser.id,
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newDate,
@@ -990,9 +989,8 @@ describe('fetchRate', () => {
         // null fields is a no-op, NOT a tombstone that erases earlier
         // overrides. Removal would require a future tombstone mechanism.
         const newerDate = new Date('2025-06-06')
-        await store.overrideRateData({
+        await overrideTestRateData(adminServer, {
             rateID,
-            updatedByID: adminUser.id,
             description: 'Second override with newer dateAdded',
             overrides: {
                 revisionOverride: {
@@ -1045,5 +1043,64 @@ describe('fetchRate', () => {
                 )
             )
         )
+    })
+
+    it('returns linked contract data with overrides', async () => {
+        const cmsUser = testCMSUser()
+        const adminUser = testAdminUser()
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+        })
+
+        const contractWithRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const linkedRateID =
+            contractWithRate.packageSubmissions[0].rateRevisions[0].rateID
+        if (!linkedRateID) {
+            throw new Error(
+                'Unexpected error: Rate was not found in contract and rate submission'
+            )
+        }
+
+        const draftLinkedContract =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const linkedContractDraft = await addLinkedRateToTestContract(
+            stateServer,
+            draftLinkedContract,
+            linkedRateID
+        )
+        const submittedLinkedContract = await submitTestContract(
+            stateServer,
+            linkedContractDraft.id
+        )
+
+        await overrideTestContractData(adminServer, {
+            contractID: submittedLinkedContract.id,
+            description: 'Override linked contract contractType',
+            overrides: {
+                revisionOverride: {
+                    contractType: 'AMENDMENT',
+                    contractTypeOp: 'OVERRIDE',
+                },
+            },
+        })
+
+        const overriddenRate = await fetchTestRateById(cmsServer, linkedRateID)
+        const linkedContractRevision = overriddenRate.packageSubmissions
+            ?.flatMap((submission) => submission.contractRevisions)
+            .find(
+                (revision) => revision.contractID === submittedLinkedContract.id
+            )
+
+        expect(linkedContractRevision).toBeDefined()
+        expect(linkedContractRevision?.formData.contractType).toBe('AMENDMENT')
     })
 })
