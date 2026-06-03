@@ -81,7 +81,7 @@ Implement full OAuth 2.0 Token Exchange (RFC 8693) using CMS IDM/Okta (`idp.idm.
 
 **Flow:**
 
-1. Salesforce passes the logged in user's OIDC token to Mulesoft
+1. Salesforce passes the logged-in user's OIDC token to MuleSoft
 2. MuleSoft exchanges for user-scoped token from Okta (with `act` claim)
 3. Our API validates token against Okta's public key (JWKS)
 
