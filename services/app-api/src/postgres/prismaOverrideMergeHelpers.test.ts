@@ -42,7 +42,7 @@ const validateTestScalarOverrideInput = (
         ...args,
         valueSchema:
             args.valueSchema ??
-            (args.fieldName === 'dateAdded' ? z.date().nullable() : z.string()),
+            (args.fieldName === 'dateAdded' ? z.date() : z.string()),
     })
 
 const validateTestDocumentOverrideInputs = (
@@ -55,7 +55,7 @@ const validateTestDocumentOverrideInputs = (
     documentType: Parameters<
         typeof validateDocumentOverrideInputs
     >[0]['documentType'],
-    valueSchemas = { dateAdded: z.date().nullable() },
+    valueSchemas = { dateAdded: z.date() },
     baseDocumentIDs = new Set(
         effectiveDocs.flatMap((doc) => (doc.id ? [doc.id] : []))
     )
@@ -89,11 +89,12 @@ describe('validateScalarOverrideInput', () => {
         expect(result).toBeUndefined()
     })
 
-    it('allows OVERRIDE with null for nullable fields', () => {
+    it('allows OVERRIDE with null for a generic nullable scalar field', () => {
         const result = validateTestScalarOverrideInput({
-            fieldName: 'dateAdded',
+            fieldName: 'nullableField',
             operation: 'OVERRIDE',
             value: null,
+            valueSchema: z.string().nullable(),
         })
 
         expect(result).toBeUndefined()
@@ -189,7 +190,7 @@ describe('validateDocumentOverrideInputs', () => {
         expect(result).toBeUndefined()
     })
 
-    it('allows OVERRIDE with nullable dateAdded scalar override', () => {
+    it('rejects OVERRIDE with null dateAdded scalar override', () => {
         const result = validateTestDocumentOverrideInputs(
             [
                 {
@@ -204,7 +205,10 @@ describe('validateDocumentOverrideInputs', () => {
             'CONTRACT_SUPPORTING_DOCUMENTS'
         )
 
-        expect(result).toBeUndefined()
+        expect(result).toBeInstanceOf(Error)
+        expect(result?.message).toContain(
+            'OVERRIDE value failed schema validation'
+        )
     })
 
     it('allows DELETE for an existing document without payload fields', () => {
@@ -316,6 +320,36 @@ describe('validateDocumentOverrideInputs', () => {
         )
     })
 
+    it('rejects ambiguous OVERRIDE when documentSha256 matches both a base and override-added document', () => {
+        const result = validateTestDocumentOverrideInputs(
+            [
+                {
+                    documentOp: 'OVERRIDE',
+                    documentSha256: 'base-sha',
+                    dateAddedOp: 'OVERRIDE',
+                    dateAdded: new Date('2026-01-01T00:00:00.000Z'),
+                },
+            ],
+            [
+                ...effectiveDocs,
+                {
+                    id: 'override-row-doc-1',
+                    name: 'override-added duplicate sha doc',
+                    s3URL: 's3://bucket/override-added-duplicate-sha-doc',
+                    sha256: 'base-sha',
+                },
+            ],
+            'CONTRACT_DOCUMENTS',
+            { dateAdded: z.date() },
+            new Set(['base-doc-1'])
+        )
+
+        expect(result).toBeInstanceOf(Error)
+        expect(result?.message).toContain(
+            'OVERRIDE target documentSha256 matches multiple effective documents; documentID is required'
+        )
+    })
+
     it('rejects ADD targeting an existing base document', () => {
         const result = validateTestDocumentOverrideInputs(
             [
@@ -369,7 +403,7 @@ describe('validateDocumentOverrideInputs', () => {
             ],
             effectiveDocs,
             'CONTRACT_SUPPORTING_DOCUMENTS',
-            { dateAdded: z.date().nullable() },
+            { dateAdded: z.date() },
             new Set(['base-doc-1', 'wrong-doc-id'])
         )
 
@@ -450,7 +484,7 @@ describe('validateDocumentOverrideInputs', () => {
             ],
             effectiveDocs,
             'CONTRACT_SUPPORTING_DOCUMENTS',
-            { dateAdded: z.date().nullable() },
+            { dateAdded: z.date() },
             new Set(['base-doc-1', 'wrong-doc-id'])
         )
 
@@ -477,12 +511,12 @@ describe('validateDocumentOverrideInputs', () => {
                     documentOp: 'OVERRIDE',
                     documentSha256: 'override-added-sha',
                     dateAddedOp: 'OVERRIDE',
-                    dateAdded: null,
+                    dateAdded: new Date('2026-01-01T00:00:00.000Z'),
                 },
             ],
             overrideAddedDocs,
             'CONTRACT_DOCUMENTS',
-            { dateAdded: z.date().nullable() },
+            { dateAdded: z.date() },
             new Set(['base-doc-1'])
         )
 
@@ -518,7 +552,7 @@ describe('validateDocumentOverrideInputs', () => {
             normalizedDocs,
             overrideAddedDocs,
             'CONTRACT_DOCUMENTS',
-            { dateAdded: z.date().nullable() },
+            { dateAdded: z.date() },
             new Set(['base-doc-1'])
         )
 
@@ -554,7 +588,7 @@ describe('validateDocumentOverrideInputs', () => {
             normalizedDocs,
             overrideAddedDocs,
             'CONTRACT_DOCUMENTS',
-            { dateAdded: z.date().nullable() },
+            { dateAdded: z.date() },
             new Set(['base-doc-1'])
         )
 
@@ -610,7 +644,7 @@ describe('validateDocumentOverrideInputs', () => {
             normalizedDocs,
             overrideAddedDocs,
             'CONTRACT_DOCUMENTS',
-            { dateAdded: z.date().nullable() },
+            { dateAdded: z.date() },
             new Set(['base-doc-1'])
         )
 
@@ -705,7 +739,7 @@ describe('mergeScalarFieldOverrides', () => {
         expect(result).toEqual({ hasOverride: false })
     })
 
-    it('allows OVERRIDE with null for nullable fields', () => {
+    it('allows OVERRIDE with null when merging a generic nullable scalar field', () => {
         const result = mergeTestScalarOverrides({
             rows: [
                 {
@@ -884,5 +918,71 @@ describe('mergeContractDocumentOverrides', () => {
             dateAdded: overrideDateAdded,
         })
         expect(result[1]).toEqual(originalDocs[1])
+    })
+
+    it('ignores persisted document OVERRIDE rows with invalid dateAdded values', () => {
+        const originalDateAdded = new Date('2026-01-01T00:00:00.000Z')
+        const originalDoc = {
+            id: 'base-doc-1',
+            createdAt: new Date('2026-01-01T00:00:00.000Z'),
+            updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+            position: 0,
+            name: 'base doc',
+            s3URL: 's3://bucket/base-doc',
+            sha256: 'base-sha',
+            s3BucketName: 'bucket',
+            s3Key: 'base-key',
+            dateAdded: originalDateAdded,
+            contractRevisionID: 'contract-revision-1',
+        }
+
+        const result = mergeContractDocumentOverrides(
+            [originalDoc],
+            [
+                {
+                    id: 'override-row-1',
+                    createdAt: new Date('2026-02-01T00:00:00.000Z'),
+                    documentOp: 'OVERRIDE',
+                    documentSha256: 'base-sha',
+                    documentID: 'base-doc-1',
+                    dateAddedOp: 'OVERRIDE',
+                    dateAdded: 'not-a-date',
+                },
+            ] as never,
+            'contract-revision-1'
+        )
+
+        expect(result).toEqual([originalDoc])
+    })
+
+    it('ignores persisted document rows that cannot find a merge target', () => {
+        const originalDoc = {
+            id: 'base-doc-1',
+            createdAt: new Date('2026-01-01T00:00:00.000Z'),
+            updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+            position: 0,
+            name: 'base doc',
+            s3URL: 's3://bucket/base-doc',
+            sha256: 'base-sha',
+            s3BucketName: 'bucket',
+            s3Key: 'base-key',
+            dateAdded: new Date('2026-01-01T00:00:00.000Z'),
+            contractRevisionID: 'contract-revision-1',
+        }
+
+        const result = mergeContractDocumentOverrides(
+            [originalDoc],
+            [
+                {
+                    id: 'override-row-1',
+                    createdAt: new Date('2026-02-01T00:00:00.000Z'),
+                    documentOp: 'DELETE',
+                    documentSha256: 'missing-sha',
+                },
+            ] as never,
+            'contract-revision-1'
+        )
+
+        expect(result).toEqual([originalDoc])
     })
 })
