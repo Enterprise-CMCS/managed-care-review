@@ -120,7 +120,9 @@ Clearing or deleting in the effective view appends a newer row. It does not
 delete old rows.
 
 Override writes to the database are serialized with row locks so two override
-events for the same contract or rate cannot be inserted out of order.
+events for the same contract or rate cannot be inserted out of order. Contract
+override writes lock the parent contract row. Rate override writes lock the
+parent rate row.
 
 Merge rows in `createdAt ASC` order. This applies to:
 
@@ -163,11 +165,19 @@ Document override rows follow these rules:
   optional `s3BucketName` and `s3Key`
 - `ADD` must not carry `documentID`
 - `ADD` is invalid when `documentSha256` does not match payload `sha256`
+- `ADD` does not require `dateAdded`. If `dateAddedOp = OVERRIDE` is supplied,
+  the `dateAdded` payload must be a concrete date. Without that field-level
+  override, the override-added document's effective `dateAdded` is `null`
 - `OVERRIDE` and `DELETE` must target an active base document or an active
   override-added document
 - `OVERRIDE` currently supports `dateAdded` field-level overrides only
 - `DELETE` hides either a base document or override-added document from the
   effective view
+
+Only one document override row is allowed per `documentSha256` in a single
+override event for a given document kind. If two active base documents share the
+same `sha256` and both need changes, write separate override events and use
+`documentID` in each event to disambiguate the target.
 
 For submitted contract and rate documents, `dateAdded` is not nullable in the
 override domain. `dateAddedOp = OVERRIDE` requires a concrete date. To remove a
@@ -231,6 +241,9 @@ workflows, but it does not replace, patch, or remove base document rows.
 Override mutations are admin-only in the current implementation and require the
 normal API write permission path.
 
+New override mutations target the latest submitted revision for the contract or
+rate. They do not accept an arbitrary historical revision ID.
+
 Contract overrides are allowed when the contract consolidated status is:
 
 - `SUBMITTED`
@@ -265,7 +278,9 @@ Unlock creates a new draft revision from effective submitted data.
 On unlock:
 
 - revision scalar overrides that should become draft base data are materialized
-  into the draft value
+  into the draft value. Today this includes `contractType`.
+- parent-level override history, such as `initiallySubmittedAt`, is not copied
+  into draft revision form data
 - active override-added documents become normal draft document rows
 - documents hidden by `DELETE` are not copied into the draft
 - field overrides on existing documents, such as `dateAdded`, are not copied
@@ -285,6 +300,8 @@ implementation.
 - Metadata-only overrides, such as `dateAdded`, do not change zip contents.
 - Document `ADD` and `DELETE` can make an existing zip package stale because the
   merged effective document set differs from the stored zip contents.
+- Effective form-data reads can show the merged document set while existing zip
+  package downloads still reflect the previously generated stored zip.
 - That stale-zip window is accepted for now and resolves when lifecycle events
   regenerate zips, such as unlock plus resubmit or explicit zip regeneration.
 - If override resolvers later regenerate zips for document `ADD` or `DELETE`,
