@@ -245,10 +245,10 @@ describe('AppRoutes and routing configuration', () => {
         })
     })
 
-    describe('/help', () => {
+    describe('/resources/help', () => {
         it('can be accessed by state user', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/help' },
+                routerProvider: { route: '/resources/help' },
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -267,7 +267,7 @@ describe('AppRoutes and routing configuration', () => {
 
         it('can be accessed by CMS user', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/help' },
+                routerProvider: { route: '/resources/help' },
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -286,7 +286,7 @@ describe('AppRoutes and routing configuration', () => {
 
         it('can be accessed by unauthenticated users', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
-                routerProvider: { route: '/help' },
+                routerProvider: { route: '/resources/help' },
                 apolloProvider: {
                     mocks: [
                         fetchCurrentUserMock({
@@ -640,7 +640,7 @@ describe('AppRoutes and routing configuration', () => {
         })
     })
 
-    describe('/resources/help', () => {
+    describe('/resources/help link', () => {
         it('shows Submission form guidance without sidenav when feature flag is off', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/resources/help' },
@@ -665,7 +665,7 @@ describe('AppRoutes and routing configuration', () => {
     })
 
     describe('invalid routes', () => {
-        it('redirect to landing page when no user', async () => {
+        it('shows the landing page when no user', async () => {
             renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/not-a-real-place' },
                 apolloProvider: {
