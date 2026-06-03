@@ -1,4 +1,4 @@
-fragment rateOverridesFragment on RateOverrideType {
+fragment contractOverridesFragment on ContractOverrideType {
     id
     createdAt
     updatedBy {
@@ -11,8 +11,10 @@ fragment rateOverridesFragment on RateOverrideType {
         revisionOverride {
             id
             createdAt
-            rateRevisionID
-            rateDocuments {
+            contractRevisionID
+            contractType
+            contractTypeOp
+            contractDocuments {
                 ...genericDocumentOverrideFragment
             }
             supportingDocuments {

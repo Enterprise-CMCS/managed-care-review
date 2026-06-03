@@ -34,9 +34,11 @@ import {
     unlockRate,
     withdrawRate,
     undoWithdrawRate,
+    overrideRateData,
 } from './rate'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { updateContract } from './contract/updateContract'
+import { overrideContractData } from './contract/overrideContractData'
 import { indexContractsResolver } from './contract/indexContracts'
 import { indexContractsStripped } from './contract/indexContractsStripped'
 import { unlockContractResolver } from './contract/unlockContract'
@@ -126,6 +128,8 @@ export function configureResolvers(
             ),
             withdrawRate: withdrawRate(store, emailer),
             undoWithdrawRate: undoWithdrawRate(store, emailer),
+            overrideContractData: overrideContractData(store),
+            overrideRateData: overrideRateData(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),
