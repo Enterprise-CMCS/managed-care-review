@@ -10,7 +10,7 @@ title: Use header-based impersonation with client-credential restrictions for Mu
 
 ## Background
 
-This ADR covers write access for the MuleSoft/Salesforce API integration with MC-Review State Portal. The MC-Review State Portal team initially recommended — and our ISSO approved — Option 3 (RFC 8693 Token Exchange with Okta). Following a cross-team assessment in the following months — involving the MuleSoft and Salesforces team, CMS's IDM team, our business owner and the ISSO — by April 2026 Option 3 was determined to be non-viable. Our ISSO approved the current approach as an alternative. This document reflects the final decision.
+This ADR covers write access for the MuleSoft/Salesforce API integration with MC-Review State Portal. The MC-Review State Portal team initially recommended — and our ISSO approved — Option 3 (RFC 8693 Token Exchange with Okta). Following a cross-team assessment in the following months — involving the MuleSoft and Salesforce team, CMS's IDM team, our business owner and the ISSO — by April 2026 Option 3 was determined to be non-viable. Our ISSO approved the current approach as an alternative. This document reflects the final decision.
 
 ## Decision Drivers
 
