@@ -97,7 +97,7 @@ Implement full OAuth 2.0 Token Exchange (RFC 8693) using CMS IDM/Okta (`idp.idm.
 
 **Con:**
 
-- **SAML→OIDC technical blocker** — The Salesforce team's enterprise authentication is SAML-based. The OBO flow would required a SAML assertion → OIDC token conversion, which the CMS IDM team assessed as too complex given their current capacity and the number of applications they manage
+- **SAML→OIDC technical blocker** — The Salesforce team's enterprise authentication is SAML-based. The OBO flow would require a SAML assertion → OIDC token conversion, which the CMS IDM team assessed as too complex given their current capacity and the number of applications they manage
 - **Requires coordination with CMS IDM team** — Need OAuth client provisioned in Okta and a workflow for SAML → OIDC; IDM team manages this system and no other CMS teams currently use this auth flow.
 - **Salesforce complexity** — Would require SAML → OIDC assertion via Okta (RFC 7522)
 - **MuleSoft complexity** — Must implement token caching and exchange logic (RFC 8693)
