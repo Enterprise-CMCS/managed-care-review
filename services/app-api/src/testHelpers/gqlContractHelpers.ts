@@ -11,6 +11,7 @@ import {
     UndoUnlockContractDocument,
     WithdrawContractDocument,
     UndoWithdrawContractDocument,
+    OverrideContractDataDocument,
 } from '../gen/gqlClient'
 import { findStatePrograms } from '../postgres'
 import { must } from './assertionHelpers'
@@ -22,6 +23,7 @@ import type {
     RateFormData,
     UnlockedContract,
     CreateContractInput,
+    OverrideContractDataInput,
 } from '../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { addNewRateToTestContract } from './gqlRateHelpers'
@@ -134,6 +136,28 @@ async function unlockTestContract(
     }
 
     return result.data.unlockContract.contract
+}
+
+async function overrideTestContractData(
+    server: ApolloServer,
+    input: OverrideContractDataInput
+): Promise<Contract> {
+    const response = await executeGraphQLOperation(server, {
+        query: OverrideContractDataDocument,
+        variables: { input },
+    })
+
+    if (response.errors) {
+        throw new Error(
+            `overrideTestContractData mutation failed with errors ${JSON.stringify(response.errors)}`
+        )
+    }
+
+    if (!response.data.overrideContractData.contract) {
+        throw new Error('overrideTestContractData returned nothing')
+    }
+
+    return response.data.overrideContractData.contract
 }
 
 async function createSubmitAndUnlockTestContract(
@@ -738,6 +762,7 @@ export {
     createTestContract,
     withdrawTestContract,
     undoWithdrawTestContract,
+    overrideTestContractData,
     contractHistoryToDescriptions,
     errorUndoWithdrawTestContract,
     createAndUpdateTestEQROContract,
