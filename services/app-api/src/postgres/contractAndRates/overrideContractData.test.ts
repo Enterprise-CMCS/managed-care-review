@@ -6,7 +6,15 @@ import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { insertDraftContract } from './insertContract'
 import { overrideContractData } from './overrideContractData'
 import { submitContract } from './submitContract'
-import type { ContractDocumentOverrideInput } from './overrideContractData'
+import type {
+    ContractDocumentOverrideInput,
+    OverrideContractDataArgsType,
+} from './overrideContractData'
+
+type OverrideContractDataClient = Parameters<typeof overrideContractData>[0]
+type RevisionOverrideInput = NonNullable<
+    OverrideContractDataArgsType['overrides']['revisionOverride']
+>
 
 function addDocumentOverride(input: {
     name: string
@@ -38,9 +46,49 @@ function overrideDocumentDateAdded(input: {
     }
 }
 
+function clearDocumentDateAdded(input: {
+    documentID: string
+    documentSha256: string
+}): ContractDocumentOverrideInput {
+    return {
+        documentOp: 'OVERRIDE',
+        documentID: input.documentID,
+        documentSha256: input.documentSha256,
+        dateAddedOp: 'CLEAR_OVERRIDE',
+    }
+}
+
+function deleteDocumentOverride(input: {
+    documentSha256: string
+    documentID?: string
+}): ContractDocumentOverrideInput {
+    return {
+        documentOp: 'DELETE',
+        documentID: input.documentID,
+        documentSha256: input.documentSha256,
+    }
+}
+
 // Inserts a draft contract with two contractDocuments and one supportingDocument,
 // submits it, and returns the bits commonly needed across the override tests.
-async function setupSubmittedContractWithDocs() {
+async function setupSubmittedContractWithDocs(
+    contractDocuments = [
+        {
+            name: 'cd1.pdf',
+            s3URL: 's3://bucket/cd1',
+            s3BucketName: 'bucket',
+            s3Key: 'allusers/cd1',
+            sha256: 'sha-cd1',
+        },
+        {
+            name: 'cd2.pdf',
+            s3URL: 's3://bucket/cd2',
+            s3BucketName: 'bucket',
+            s3Key: 'allusers/cd2',
+            sha256: 'sha-cd2',
+        },
+    ]
+) {
     const client = await sharedTestPrismaClient()
     const stateUser = await client.user.create({
         data: {
@@ -61,27 +109,13 @@ async function setupSubmittedContractWithDocs() {
             role: 'CMS_USER',
         },
     })
+
     const draftContract = must(
         await insertDraftContract(
             client,
             mockInsertContractArgs({
                 contractType: 'BASE',
-                contractDocuments: [
-                    {
-                        name: 'cd1.pdf',
-                        s3URL: 's3://bucket/cd1',
-                        s3BucketName: 'bucket',
-                        s3Key: 'allusers/cd1',
-                        sha256: 'sha-cd1',
-                    },
-                    {
-                        name: 'cd2.pdf',
-                        s3URL: 's3://bucket/cd2',
-                        s3BucketName: 'bucket',
-                        s3Key: 'allusers/cd2',
-                        sha256: 'sha-cd2',
-                    },
-                ],
+                contractDocuments,
                 supportingDocuments: [
                     {
                         name: 'sd1.pdf',
@@ -104,101 +138,34 @@ async function setupSubmittedContractWithDocs() {
     return { client, stateUser, cmsUser, draftContract, submittedContract }
 }
 
-async function setupSubmittedContractWithDuplicateContractDocumentSha() {
-    const client = await sharedTestPrismaClient()
-    const stateUser = await client.user.create({
-        data: {
-            id: uuidv4(),
-            givenName: 'Aang',
-            familyName: 'Avatar',
-            email: 'aang@example.com',
-            role: 'STATE_USER',
-            stateCode: 'MN',
-        },
-    })
-    const cmsUser = await client.user.create({
-        data: {
-            id: uuidv4(),
-            givenName: 'Zuko',
-            familyName: 'Hotman',
-            email: 'zuko@example.com',
-            role: 'CMS_USER',
-        },
-    })
-    const draftContract = must(
-        await insertDraftContract(
-            client,
-            mockInsertContractArgs({
-                contractType: 'BASE',
-                contractDocuments: [
-                    {
-                        name: 'duplicate-1.pdf',
-                        s3URL: 's3://bucket/duplicate-1',
-                        s3BucketName: 'bucket',
-                        s3Key: 'allusers/duplicate-1',
-                        sha256: 'duplicate-sha',
-                    },
-                    {
-                        name: 'duplicate-2.pdf',
-                        s3URL: 's3://bucket/duplicate-2',
-                        s3BucketName: 'bucket',
-                        s3Key: 'allusers/duplicate-2',
-                        sha256: 'duplicate-sha',
-                    },
-                ],
-            })
-        )
-    )
-    const submittedContract = must(
-        await submitContract(client, {
-            contractID: draftContract.id,
-            submittedByUserID: stateUser.id,
-            submittedReason: 'initial submit',
+async function applyRevisionOverride(input: {
+    client: OverrideContractDataClient
+    contractID: string
+    updatedByID: string
+    description: string
+    revisionOverride: RevisionOverrideInput
+}) {
+    return must(
+        await overrideContractData(input.client, {
+            contractID: input.contractID,
+            updatedByID: input.updatedByID,
+            description: input.description,
+            overrides: {
+                revisionOverride: input.revisionOverride,
+            },
         })
     )
-    return { client, cmsUser, submittedContract }
 }
 
 describe('overrideContractData', () => {
     it('creates contract metadata and revision overrides on the latest submitted revision', async () => {
-        const client = await sharedTestPrismaClient()
-        const stateUser = await client.user.create({
-            data: {
-                id: uuidv4(),
-                givenName: 'Aang',
-                familyName: 'Avatar',
-                email: 'aang@example.com',
-                role: 'STATE_USER',
-                stateCode: 'MN',
-            },
-        })
-        const cmsUser = await client.user.create({
-            data: {
-                id: uuidv4(),
-                givenName: 'Zuko',
-                familyName: 'Hotman',
-                email: 'zuko@example.com',
-                role: 'CMS_USER',
-            },
-        })
-        const draftContract = must(
-            await insertDraftContract(
-                client,
-                mockInsertContractArgs({ contractType: 'BASE' })
-            )
-        )
-        const submittedContract = must(
-            await submitContract(client, {
-                contractID: draftContract.id,
-                submittedByUserID: stateUser.id,
-                submittedReason: 'initial submit',
-            })
-        )
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDocs()
         const initiallySubmittedAt = new Date('2024-01-01')
 
         const overriddenContract = must(
             await overrideContractData(client, {
-                contractID: draftContract.id,
+                contractID: submittedContract.id,
                 updatedByID: cmsUser.id,
                 description: 'Override contract metadata',
                 overrides: {
@@ -268,32 +235,26 @@ describe('overrideContractData', () => {
         const { client, cmsUser, submittedContract } =
             await setupSubmittedContractWithDocs()
 
-        must(
-            await overrideContractData(client, {
-                contractID: submittedContract.id,
-                updatedByID: cmsUser.id,
-                description: 'Override contract type',
-                overrides: {
-                    revisionOverride: {
-                        contractType: 'AMENDMENT',
-                        contractTypeOp: 'OVERRIDE',
-                    },
-                },
-            })
-        )
+        await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override contract type',
+            revisionOverride: {
+                contractType: 'AMENDMENT',
+                contractTypeOp: 'OVERRIDE',
+            },
+        })
 
-        const clearedContract = must(
-            await overrideContractData(client, {
-                contractID: submittedContract.id,
-                updatedByID: cmsUser.id,
-                description: 'Clear contract type override',
-                overrides: {
-                    revisionOverride: {
-                        contractTypeOp: 'CLEAR_OVERRIDE',
-                    },
-                },
-            })
-        )
+        const clearedContract = await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Clear contract type override',
+            revisionOverride: {
+                contractTypeOp: 'CLEAR_OVERRIDE',
+            },
+        })
 
         expect(clearedContract.revisions[0].formData.contractType).toBe('BASE')
         expect(
@@ -302,59 +263,87 @@ describe('overrideContractData', () => {
         ).toBe('CLEAR_OVERRIDE')
     })
 
-    it('rejects scalar values without matching operation fields', async () => {
+    it('deletes original contract and supporting documents as override rows without deleting base rows', async () => {
         const { client, cmsUser, submittedContract } =
             await setupSubmittedContractWithDocs()
+        const baseFormData =
+            submittedContract.packageSubmissions[0].contractRevision.formData
+        const baseContractDoc = baseFormData.contractDocuments[0]
+        const baseSupportingDoc = baseFormData.supportingDocuments[0]
 
-        const result = await overrideContractData(client, {
+        const overriddenContract = await applyRevisionOverride({
+            client,
             contractID: submittedContract.id,
             updatedByID: cmsUser.id,
-            description: 'Invalid initiallySubmittedAt payload',
-            overrides: {
-                initiallySubmittedAt: new Date('2025-01-01'),
+            description: 'Delete base documents',
+            revisionOverride: {
+                contractDocuments: [
+                    deleteDocumentOverride({
+                        documentID: baseContractDoc.id!,
+                        documentSha256: baseContractDoc.sha256,
+                    }),
+                ],
+                supportingDocuments: [
+                    deleteDocumentOverride({
+                        documentID: baseSupportingDoc.id!,
+                        documentSha256: baseSupportingDoc.sha256,
+                    }),
+                ],
             },
         })
 
-        expect(result).toBeInstanceOf(Error)
-        expect((result as Error).message).toContain(
-            'value cannot be provided without an operation'
+        const formData = overriddenContract.revisions[0].formData
+        expect(
+            formData.contractDocuments.some(
+                (doc) => doc.id === baseContractDoc.id
+            )
+        ).toBe(false)
+        expect(
+            formData.supportingDocuments.some(
+                (doc) => doc.id === baseSupportingDoc.id
+            )
+        ).toBe(false)
+        expect(formData.contractDocuments).toHaveLength(
+            baseFormData.contractDocuments.length - 1
         )
+        expect(formData.supportingDocuments).toHaveLength(
+            baseFormData.supportingDocuments.length - 1
+        )
+
+        await expect(
+            client.contractDocument.findUnique({
+                where: { id: baseContractDoc.id! },
+            })
+        ).resolves.toBeDefined()
+        await expect(
+            client.contractSupportingDocument.findUnique({
+                where: { id: baseSupportingDoc.id! },
+            })
+        ).resolves.toBeDefined()
     })
 
-    it('rejects clear scalar operations with values', async () => {
+    it('rejects document dateAdded OVERRIDE without a date value', async () => {
         const { client, cmsUser, submittedContract } =
             await setupSubmittedContractWithDocs()
+        const baseDoc =
+            submittedContract.packageSubmissions[0].contractRevision.formData
+                .contractDocuments[0]
 
         const result = await overrideContractData(client, {
             contractID: submittedContract.id,
             updatedByID: cmsUser.id,
-            description: 'Invalid clear with value',
+            description: 'Invalid null document dateAdded override',
             overrides: {
                 revisionOverride: {
-                    contractType: 'AMENDMENT',
-                    contractTypeOp: 'CLEAR_OVERRIDE',
-                },
-            },
-        })
-
-        expect(result).toBeInstanceOf(Error)
-        expect((result as Error).message).toContain(
-            'CLEAR_OVERRIDE cannot carry a value'
-        )
-    })
-
-    it('rejects non-nullable scalar override to null', async () => {
-        const { client, cmsUser, submittedContract } =
-            await setupSubmittedContractWithDocs()
-
-        const result = await overrideContractData(client, {
-            contractID: submittedContract.id,
-            updatedByID: cmsUser.id,
-            description: 'Invalid null contract type',
-            overrides: {
-                revisionOverride: {
-                    contractType: null,
-                    contractTypeOp: 'OVERRIDE',
+                    contractDocuments: [
+                        {
+                            documentOp: 'OVERRIDE',
+                            documentID: baseDoc.id,
+                            documentSha256: baseDoc.sha256,
+                            dateAddedOp: 'OVERRIDE',
+                            dateAdded: null as never,
+                        },
+                    ],
                 },
             },
         })
@@ -365,310 +354,409 @@ describe('overrideContractData', () => {
         )
     })
 
-    it('adds a new contract document via revisionOverride', async () => {
+    it('normalizes override-added document IDs before writing follow-up override and delete rows', async () => {
         const { client, cmsUser, submittedContract } =
             await setupSubmittedContractWithDocs()
+        const addedDocSha = 'sha-added-normalized-doc'
+        const addedDateAdded = new Date('2025-10-10')
+        const patchedDateAdded = new Date('2025-11-11')
 
-        const addedDateAdded = new Date('2025-03-03')
-
-        const overriddenContract = must(
-            await overrideContractData(client, {
-                contractID: submittedContract.id,
-                updatedByID: cmsUser.id,
-                description: 'Add a contract document via override',
-                overrides: {
-                    revisionOverride: {
-                        contractDocuments: [
-                            addDocumentOverride({
-                                name: 'added-cd.pdf',
-                                s3URL: 's3://bucket/added-cd',
-                                s3BucketName: 'bucket',
-                                s3Key: 'allusers/added-cd',
-                                sha256: 'sha-added',
-                                dateAdded: addedDateAdded,
-                            }),
-                        ],
-                    },
-                },
-            })
-        )
-
-        const formData = overriddenContract.revisions[0].formData
-        // Append-at-end semantics: 2 original + 1 added
-        expect(formData.contractDocuments).toHaveLength(3)
-        expect(formData.contractDocuments[2]).toEqual(
-            expect.objectContaining({
-                name: 'added-cd.pdf',
-                s3URL: 's3://bucket/added-cd',
-                sha256: 'sha-added',
-                dateAdded: addedDateAdded,
-            })
-        )
-        // Original docs unchanged
-        expect(formData.contractDocuments[0].name).toBe('cd1.pdf')
-        expect(formData.contractDocuments[1].name).toBe('cd2.pdf')
-    })
-
-    it('updates an existing contract document dateAdded via revisionOverride', async () => {
-        const { client, cmsUser, submittedContract } =
-            await setupSubmittedContractWithDocs()
-
-        const latestRev =
-            submittedContract.packageSubmissions[0].contractRevision
-        const baseTargetDoc = latestRev.formData.contractDocuments[0]
-        const targetDocID = baseTargetDoc.id!
-        const newDateAdded = new Date('2025-04-04')
-
-        const overriddenContract = must(
-            await overrideContractData(client, {
-                contractID: submittedContract.id,
-                updatedByID: cmsUser.id,
-                description: 'Update a contract document dateAdded',
-                overrides: {
-                    revisionOverride: {
-                        contractDocuments: [
-                            overrideDocumentDateAdded({
-                                documentID: targetDocID,
-                                documentSha256: baseTargetDoc.sha256,
-                                dateAdded: newDateAdded,
-                            }),
-                        ],
-                    },
-                },
-            })
-        )
-
-        const formData = overriddenContract.revisions[0].formData
-        // No add, no removal: count is the same as the original.
-        expect(formData.contractDocuments).toHaveLength(2)
-        const targetDoc = formData.contractDocuments.find(
-            (d) => d.id === targetDocID
-        )
-        expect(targetDoc?.dateAdded).toStrictEqual(newDateAdded)
-        // The other doc's dateAdded is not touched
-        const otherDoc = formData.contractDocuments.find(
-            (d) => d.id !== targetDocID
-        )
-        expect(otherDoc?.name).toBe('cd2.pdf')
-    })
-
-    it('adds and updates supportingDocuments in a single override', async () => {
-        const { client, cmsUser, submittedContract } =
-            await setupSubmittedContractWithDocs()
-
-        const latestRev =
-            submittedContract.packageSubmissions[0].contractRevision
-        const existingSupDoc = latestRev.formData.supportingDocuments[0]
-        const existingSupDocID = existingSupDoc.id!
-        const updatedDateAdded = new Date('2025-05-05')
-
-        const overriddenContract = must(
-            await overrideContractData(client, {
-                contractID: submittedContract.id,
-                updatedByID: cmsUser.id,
-                description:
-                    'Add and update supportingDocuments in a single override',
-                overrides: {
-                    revisionOverride: {
-                        supportingDocuments: [
-                            // update existing
-                            overrideDocumentDateAdded({
-                                documentID: existingSupDocID,
-                                documentSha256: existingSupDoc.sha256,
-                                dateAdded: updatedDateAdded,
-                            }),
-                            // add new
-                            addDocumentOverride({
-                                name: 'added-sd.pdf',
-                                s3URL: 's3://bucket/added-sd',
-                                s3BucketName: 'bucket',
-                                s3Key: 'allusers/added-sd',
-                                sha256: 'sha-added-sd',
-                            }),
-                        ],
-                    },
-                },
-            })
-        )
-
-        const formData = overriddenContract.revisions[0].formData
-        // 1 original + 1 added = 2
-        expect(formData.supportingDocuments).toHaveLength(2)
-
-        const existingDoc = formData.supportingDocuments.find(
-            (d) => d.id === existingSupDocID
-        )
-        expect(existingDoc?.dateAdded).toStrictEqual(updatedDateAdded)
-
-        const addedDoc = formData.supportingDocuments.find(
-            (d) => d.id !== existingSupDocID
-        )
-        expect(addedDoc).toEqual(
-            expect.objectContaining({
-                name: 'added-sd.pdf',
-                s3URL: 's3://bucket/added-sd',
-                sha256: 'sha-added-sd',
-            })
-        )
-    })
-
-    it('rejects ADD rows when documentSha256 does not match sha256 payload', async () => {
-        const { client, cmsUser, submittedContract } =
-            await setupSubmittedContractWithDocs()
-
-        const result = await overrideContractData(client, {
+        const addResult = await applyRevisionOverride({
+            client,
             contractID: submittedContract.id,
             updatedByID: cmsUser.id,
-            description: 'Invalid document sha mismatch',
-            overrides: {
-                revisionOverride: {
-                    contractDocuments: [
-                        {
-                            documentOp: 'ADD',
-                            documentSha256: 'document-sha',
-                            name: 'mismatch.pdf',
-                            s3URL: 's3://bucket/mismatch',
-                            s3BucketName: 'bucket',
-                            s3Key: 'allusers/mismatch',
-                            sha256: 'payload-sha',
-                        },
-                    ],
-                },
+            description: 'Add document for normalization',
+            revisionOverride: {
+                contractDocuments: [
+                    addDocumentOverride({
+                        name: 'added-normalized-doc.pdf',
+                        s3URL: 's3://bucket/added-normalized-doc',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/added-normalized-doc',
+                        sha256: addedDocSha,
+                        dateAdded: addedDateAdded,
+                    }),
+                ],
+            },
+        })
+        const addedDoc = addResult.revisions[0].formData.contractDocuments.find(
+            (doc) => doc.sha256 === addedDocSha
+        )
+
+        expect(addedDoc?.id).toBeDefined()
+
+        const patchResult = await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Patch override-added document by effective id',
+            revisionOverride: {
+                contractDocuments: [
+                    {
+                        documentOp: 'OVERRIDE',
+                        documentID: addedDoc!.id,
+                        documentSha256: addedDocSha,
+                        dateAdded: patchedDateAdded,
+                        dateAddedOp: 'OVERRIDE',
+                    },
+                ],
             },
         })
 
-        expect(result).toBeInstanceOf(Error)
-        expect((result as Error).message).toContain(
-            'ADD documentSha256 must match payload sha256'
-        )
+        expect(
+            patchResult.revisions[0].formData.contractDocuments.find(
+                (doc) => doc.sha256 === addedDocSha
+            )?.dateAdded
+        ).toEqual(patchedDateAdded)
+
+        const persistedPatchRow =
+            await client.contractDocumentOverride.findFirst({
+                where: {
+                    documentOp: 'OVERRIDE',
+                    documentSha256: addedDocSha,
+                    dateAddedOp: 'OVERRIDE',
+                },
+                orderBy: { createdAt: 'desc' },
+            })
+        expect(persistedPatchRow?.documentID).toBeNull()
+
+        const deleteResult = await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Delete override-added document by effective id',
+            revisionOverride: {
+                contractDocuments: [
+                    {
+                        documentOp: 'DELETE',
+                        documentID: addedDoc!.id,
+                        documentSha256: addedDocSha,
+                    },
+                ],
+            },
+        })
+
+        expect(
+            deleteResult.revisions[0].formData.contractDocuments.some(
+                (doc) => doc.sha256 === addedDocSha
+            )
+        ).toBe(false)
+
+        const persistedDeleteRow =
+            await client.contractDocumentOverride.findFirst({
+                where: {
+                    documentOp: 'DELETE',
+                    documentSha256: addedDocSha,
+                },
+                orderBy: { createdAt: 'desc' },
+            })
+        expect(persistedDeleteRow?.documentID).toBeNull()
     })
 
-    it('rejects DELETE rows carrying document payload fields', async () => {
+    it('accepts empty document override arrays as no document instructions', async () => {
         const { client, cmsUser, submittedContract } =
             await setupSubmittedContractWithDocs()
-        const baseDoc =
+        const baseFormData =
             submittedContract.packageSubmissions[0].contractRevision.formData
-                .contractDocuments[0]
 
-        const result = await overrideContractData(client, {
+        const overriddenContract = await applyRevisionOverride({
+            client,
             contractID: submittedContract.id,
             updatedByID: cmsUser.id,
-            description: 'Invalid delete payload',
-            overrides: {
-                revisionOverride: {
-                    contractDocuments: [
-                        {
-                            documentOp: 'DELETE',
-                            documentID: baseDoc.id,
-                            documentSha256: baseDoc.sha256,
-                            name: baseDoc.name,
-                        },
-                    ],
-                },
+            description: 'Empty document override arrays',
+            revisionOverride: {
+                contractType: 'AMENDMENT',
+                contractTypeOp: 'OVERRIDE',
+                contractDocuments: [],
+                supportingDocuments: [],
             },
         })
-
-        expect(result).toBeInstanceOf(Error)
-        expect((result as Error).message).toContain(
-            'DELETE cannot carry document payload or scalar field patches'
-        )
-    })
-
-    it('rejects ambiguous document overrides when duplicate effective documentSha256 values exist', async () => {
-        const { client, cmsUser, submittedContract } =
-            await setupSubmittedContractWithDuplicateContractDocumentSha()
-
-        const result = await overrideContractData(client, {
-            contractID: submittedContract.id,
-            updatedByID: cmsUser.id,
-            description: 'Ambiguous document override',
-            overrides: {
-                revisionOverride: {
-                    contractDocuments: [
-                        {
-                            documentOp: 'OVERRIDE',
-                            documentSha256: 'duplicate-sha',
-                            dateAddedOp: 'OVERRIDE',
-                            dateAdded: new Date('2025-08-08'),
-                        },
-                    ],
-                },
-            },
-        })
-
-        expect(result).toBeInstanceOf(Error)
-        expect((result as Error).message).toContain(
-            'OVERRIDE target documentSha256 matches multiple effective documents; documentID is required'
-        )
-    })
-
-    it('accumulates document overrides across multiple override rows on the same revision', async () => {
-        const { client, cmsUser, submittedContract } =
-            await setupSubmittedContractWithDocs()
-
-        const latestRev =
-            submittedContract.packageSubmissions[0].contractRevision
-        // Pick the second existing contract document for the update path.
-        const baseTargetDoc = latestRev.formData.contractDocuments[1]
-        const targetDocID = baseTargetDoc.id!
-        const newDateAdded = new Date('2025-06-06')
-
-        // Override #1: add a new contract document.
-        must(
-            await overrideContractData(client, {
-                contractID: submittedContract.id,
-                updatedByID: cmsUser.id,
-                description: 'Override 1: add a contract document',
-                overrides: {
-                    revisionOverride: {
-                        contractDocuments: [
-                            addDocumentOverride({
-                                name: 'added-via-override-1.pdf',
-                                s3URL: 's3://bucket/added-via-override-1',
-                                s3BucketName: 'bucket',
-                                s3Key: 'allusers/added-via-override-1',
-                                sha256: 'sha-added-1',
-                            }),
-                        ],
-                    },
-                },
-            })
-        )
-
-        // Override #2: update a *different* existing doc's dateAdded.
-        const overriddenContract = must(
-            await overrideContractData(client, {
-                contractID: submittedContract.id,
-                updatedByID: cmsUser.id,
-                description: 'Override 2: update an existing doc dateAdded',
-                overrides: {
-                    revisionOverride: {
-                        contractDocuments: [
-                            overrideDocumentDateAdded({
-                                documentID: targetDocID,
-                                documentSha256: baseTargetDoc.sha256,
-                                dateAdded: newDateAdded,
-                            }),
-                        ],
-                    },
-                },
-            })
-        )
 
         const formData = overriddenContract.revisions[0].formData
-        // 2 original + 1 added from override #1.
-        expect(formData.contractDocuments).toHaveLength(3)
-
-        // Effect from override #2: target doc's dateAdded reflects the update.
-        const targetDoc = formData.contractDocuments.find(
-            (d) => d.id === targetDocID
+        expect(formData.contractType).toBe('AMENDMENT')
+        expect(formData.contractDocuments).toHaveLength(
+            baseFormData.contractDocuments.length
         )
-        expect(targetDoc?.dateAdded).toStrictEqual(newDateAdded)
-
-        // Effect from override #1: added doc is present (appended at end).
-        const addedDoc = formData.contractDocuments.find(
-            (d) => d.name === 'added-via-override-1.pdf'
+        expect(formData.supportingDocuments).toHaveLength(
+            baseFormData.supportingDocuments.length
         )
-        expect(addedDoc).toBeDefined()
+        expect(formData.contractDocuments.map((doc) => doc.id)).toEqual(
+            baseFormData.contractDocuments.map((doc) => doc.id)
+        )
+        expect(formData.supportingDocuments.map((doc) => doc.id)).toEqual(
+            baseFormData.supportingDocuments.map((doc) => doc.id)
+        )
+    })
+
+    it('merges many contract override events with sparse document updates, added documents, deletes, and clears', async () => {
+        const { client, cmsUser, submittedContract } =
+            await setupSubmittedContractWithDocs([
+                {
+                    name: 'A.pdf',
+                    s3URL: 's3://bucket/A',
+                    s3BucketName: 'bucket',
+                    s3Key: 'allusers/A',
+                    sha256: 'sha-A',
+                },
+                {
+                    name: 'B.pdf',
+                    s3URL: 's3://bucket/B',
+                    s3BucketName: 'bucket',
+                    s3Key: 'allusers/B',
+                    sha256: 'sha-B',
+                },
+                {
+                    name: 'C.pdf',
+                    s3URL: 's3://bucket/C',
+                    s3BucketName: 'bucket',
+                    s3Key: 'allusers/C',
+                    sha256: 'sha-C',
+                },
+            ])
+
+        const baseDocs =
+            submittedContract.packageSubmissions[0].contractRevision.formData
+                .contractDocuments
+        const baseSupportingDocs =
+            submittedContract.packageSubmissions[0].contractRevision.formData
+                .supportingDocuments
+        const [baseA, baseB, baseC] = baseDocs
+        const baseSupportingDoc = baseSupportingDocs[0]
+        const a1DateAdded = new Date('2025-01-01')
+        const b1DateAdded = new Date('2025-02-02')
+        const a2DateAdded = new Date('2025-03-03')
+        const c1DateAdded = new Date('2025-04-04')
+        const d1DateAdded = new Date('2025-05-05')
+        const d2DateAdded = new Date('2025-06-06')
+        const a3DateAdded = new Date('2025-07-07')
+        const supporting1DateAdded = new Date('2025-08-08')
+        const supporting2DateAdded = new Date('2025-09-09')
+        const addedContractDocSha = 'sha-added-contract-doc-D'
+        const addedSupportingDocSha = 'sha-added-supporting-doc-T'
+
+        // o.1: contractType AMENDMENT + A.1
+        await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override 1: contractType + A.1',
+            revisionOverride: {
+                contractType: 'AMENDMENT',
+                contractTypeOp: 'OVERRIDE',
+                contractDocuments: [
+                    overrideDocumentDateAdded({
+                        documentID: baseA.id!,
+                        documentSha256: baseA.sha256,
+                        dateAdded: a1DateAdded,
+                    }),
+                ],
+            },
+        })
+
+        // o.2: B.1
+        await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override 2: B.1',
+            revisionOverride: {
+                contractDocuments: [
+                    overrideDocumentDateAdded({
+                        documentID: baseB.id!,
+                        documentSha256: baseB.sha256,
+                        dateAdded: b1DateAdded,
+                    }),
+                ],
+            },
+        })
+
+        // o.3: add D.1
+        await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override 3: add D.1',
+            revisionOverride: {
+                contractDocuments: [
+                    addDocumentOverride({
+                        name: 'D.pdf',
+                        s3URL: 's3://bucket/D',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/D',
+                        sha256: addedContractDocSha,
+                        dateAdded: d1DateAdded,
+                    }),
+                ],
+            },
+        })
+
+        // o.4: A.2, proving later overrides win for the same document field.
+        await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override 4: A.2',
+            revisionOverride: {
+                contractDocuments: [
+                    overrideDocumentDateAdded({
+                        documentID: baseA.id!,
+                        documentSha256: baseA.sha256,
+                        dateAdded: a2DateAdded,
+                    }),
+                ],
+            },
+        })
+
+        // o.5: C.1 + supporting S.1 + add supporting T.
+        await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override 5: C.1 + supporting docs',
+            revisionOverride: {
+                contractDocuments: [
+                    overrideDocumentDateAdded({
+                        documentID: baseC.id!,
+                        documentSha256: baseC.sha256,
+                        dateAdded: c1DateAdded,
+                    }),
+                ],
+                supportingDocuments: [
+                    overrideDocumentDateAdded({
+                        documentID: baseSupportingDoc.id!,
+                        documentSha256: baseSupportingDoc.sha256,
+                        dateAdded: supporting1DateAdded,
+                    }),
+                    addDocumentOverride({
+                        name: 'T.pdf',
+                        s3URL: 's3://bucket/T',
+                        s3BucketName: 'bucket',
+                        s3Key: 'allusers/T',
+                        sha256: addedSupportingDocSha,
+                    }),
+                ],
+            },
+        })
+
+        // o.6: D.2 + T.2, proving override-added contract and supporting
+        // documents can both be patched after their ADD row.
+        const d2Contract = await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override 6: D.2',
+            revisionOverride: {
+                contractDocuments: [
+                    {
+                        documentOp: 'OVERRIDE',
+                        documentSha256: addedContractDocSha,
+                        dateAddedOp: 'OVERRIDE',
+                        dateAdded: d2DateAdded,
+                    },
+                ],
+                supportingDocuments: [
+                    {
+                        documentOp: 'OVERRIDE',
+                        documentSha256: addedSupportingDocSha,
+                        dateAddedOp: 'OVERRIDE',
+                        dateAdded: supporting2DateAdded,
+                    },
+                ],
+            },
+        })
+
+        expect(
+            d2Contract.revisions[0].formData.contractDocuments.find(
+                (doc) => doc.sha256 === addedContractDocSha
+            )?.dateAdded
+        ).toEqual(d2DateAdded)
+        expect(
+            d2Contract.revisions[0].formData.supportingDocuments.find(
+                (doc) => doc.sha256 === addedSupportingDocSha
+            )?.dateAdded
+        ).toEqual(supporting2DateAdded)
+
+        // o.7: delete D + clear B.
+        await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override 7: delete D + clear B',
+            revisionOverride: {
+                contractDocuments: [
+                    deleteDocumentOverride({
+                        documentSha256: addedContractDocSha,
+                    }),
+                    clearDocumentDateAdded({
+                        documentID: baseB.id!,
+                        documentSha256: baseB.sha256,
+                    }),
+                ],
+            },
+        })
+
+        // o.8: clear contractType, set A.3, clear supporting S, delete T.
+        const finalContract = await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override 8: final mixed clear',
+            revisionOverride: {
+                contractTypeOp: 'CLEAR_OVERRIDE',
+                contractDocuments: [
+                    overrideDocumentDateAdded({
+                        documentID: baseA.id!,
+                        documentSha256: baseA.sha256,
+                        dateAdded: a3DateAdded,
+                    }),
+                ],
+                supportingDocuments: [
+                    clearDocumentDateAdded({
+                        documentID: baseSupportingDoc.id!,
+                        documentSha256: baseSupportingDoc.sha256,
+                    }),
+                    deleteDocumentOverride({
+                        documentSha256: addedSupportingDocSha,
+                    }),
+                ],
+            },
+        })
+
+        const formData = finalContract.revisions[0].formData
+        expect(formData.contractType).toBe(
+            submittedContract.packageSubmissions[0].contractRevision.formData
+                .contractType
+        )
+        expect(formData.contractDocuments).toHaveLength(baseDocs.length)
+        expect(formData.supportingDocuments).toHaveLength(
+            baseSupportingDocs.length
+        )
+        expect(
+            formData.contractDocuments.find((doc) => doc.id === baseA.id)
+                ?.dateAdded
+        ).toEqual(a3DateAdded)
+        expect(
+            formData.contractDocuments.find((doc) => doc.id === baseB.id)
+                ?.dateAdded
+        ).toEqual(baseB.dateAdded)
+        expect(
+            formData.contractDocuments.find((doc) => doc.id === baseC.id)
+                ?.dateAdded
+        ).toEqual(c1DateAdded)
+        expect(
+            formData.contractDocuments.some(
+                (doc) => doc.sha256 === addedContractDocSha
+            )
+        ).toBe(false)
+        expect(
+            formData.supportingDocuments.find(
+                (doc) => doc.id === baseSupportingDoc.id
+            )?.dateAdded
+        ).toEqual(baseSupportingDoc.dateAdded)
+        expect(
+            formData.supportingDocuments.some(
+                (doc) => doc.sha256 === addedSupportingDocSha
+            )
+        ).toBe(false)
     })
 })
