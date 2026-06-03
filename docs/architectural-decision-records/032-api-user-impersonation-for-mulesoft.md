@@ -123,7 +123,7 @@ This approach uses the header mechanism from Option 1 with a subset of the acces
 ### Rationale
 
 1. **Option 3 became non-viable** — SAML→OIDC bridging required for the token exchange flow was not feasible for the IDM team
-2. **No external dependencies** — Option 3 required coordination with the CMS IDM team, introducing timeline uncertainty. It also included a need to pass an OIDC token between Salesforce and Mulesoft, which also introduced timeline uncertainty.
+2. **No external dependencies** — Option 3 required coordination with the CMS IDM team, introducing timeline uncertainty. It also included a need to pass an OIDC token between Salesforce and MuleSoft, which also introduced timeline uncertainty.
 3. **ISSO approval** — The ISSO reviewed the security tradeoffs of all three options and approved this approach following the April 2026 cross-team assessment
 4. **Scope** — This is an internal CMS-to-CMS integration between known systems; the security posture was assessed as acceptable for this scope by the approving authority
 5. **Future migration path** — If compliance requirements change or new integrations require stronger guarantees, migration to Option 3 remains possible; the authorization and user mapping logic would be reusable
