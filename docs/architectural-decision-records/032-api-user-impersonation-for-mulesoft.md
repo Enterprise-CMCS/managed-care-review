@@ -104,7 +104,7 @@ Implement full OAuth 2.0 Token Exchange (RFC 8693) using CMS IDM/Okta (`idp.idm.
 
 ## Decision History
 
-The MC-Review team recommended Option 2 due to the unknown complexity for the Salesforce/Mulesoft team, with an eventual migration to Option 3. Our ISSO asked us to go straight to Option 3, which was approved as the target approach. Over the following months, it became apparent that Option 3 was not feasible:
+The MC-Review team recommended Option 2 due to the unknown complexity for the Salesforce/MuleSoft team, with an eventual migration to Option 3. Our ISSO asked us to go straight to Option 3, which was approved as the target approach. Over the following months, it became apparent that Option 3 was not feasible:
 
 - The MuleSoft/Salesforce teams had not completed discovery on their implementation requirements. When discovery did occur, the SAML→OIDC bridging required for the token exchange flow was identified as a complication they had not accounted for.
 - The CMS IDM team, which manages the enterprise Okta instance (`idp.idm.cms.gov`), assessed the SAML assertion → OIDC token conversion and OBO flow as beyond their current capacity given existing commitments.
