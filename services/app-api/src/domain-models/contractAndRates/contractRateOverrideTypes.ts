@@ -17,17 +17,17 @@ const genericDocumentOverrideSchema = z.object({
     createdAt: z.date(),
     documentOp: arrayFieldOverrideOperationSchema,
     documentSha256: z.string(),
-    documentID: preprocessNulls(z.uuid().nullable().optional()),
+    documentID: preprocessNulls(z.uuid().optional()),
 
     // Add-path payload (set only when documentOp is ADD).
-    name: preprocessNulls(z.string().nullable().optional()),
-    sha256: preprocessNulls(z.string().nullable().optional()),
-    s3URL: preprocessNulls(z.string().nullable().optional()),
-    s3BucketName: preprocessNulls(z.string().nullable().optional()),
-    s3Key: preprocessNulls(z.string().nullable().optional()),
+    name: preprocessNulls(z.string().optional()),
+    sha256: preprocessNulls(z.string().optional()),
+    s3URL: preprocessNulls(z.string().optional()),
+    s3BucketName: preprocessNulls(z.string().optional()),
+    s3Key: preprocessNulls(z.string().optional()),
 
     // Overrideable in both add and update paths.
-    dateAdded: preprocessNulls(z.date().nullable().optional()),
+    dateAdded: preprocessNulls(z.date().optional()),
     dateAddedOp: preprocessNulls(
         scalarFieldOverrideOperationSchema.nullable().optional()
     ),

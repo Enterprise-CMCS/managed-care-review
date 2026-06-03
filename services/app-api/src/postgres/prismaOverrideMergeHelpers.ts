@@ -7,13 +7,13 @@ import type {
     RateSupportingDocument,
     ScalarFieldOverrideOperation,
 } from '../generated/client'
-import type { z } from 'zod'
+import { z } from 'zod'
 import { logError } from '../logger'
 import {
     contractFormDataSchema,
     type ContractFormDataType,
     type RateFormDataType,
-} from '../domain-models/contractAndRates/formDataTypes'
+} from '../domain-models/contractAndRates'
 import type { ContractRevisionOverridesTablePayload } from './contractAndRates/prismaSubmittedContractHelpers'
 import type { RateRevisionOverridesTablePayload } from './contractAndRates/prismaSubmittedRateHelpers'
 
@@ -75,7 +75,7 @@ const validateScalarOverrideInput = ({
 }
 
 type DocumentOverrideValueSchemas = {
-    dateAdded: z.ZodType<Date | null>
+    dateAdded: z.ZodType<Date>
 }
 
 type EffectiveDocumentOverrideDocs =
@@ -562,7 +562,15 @@ const applyDocumentScalarOverrides = <T extends DocumentWithCommonFields>(
     } else if (row.dateAddedOp === 'CLEAR_OVERRIDE') {
         dateAdded = baseDoc.dateAdded
     } else if (row.dateAddedOp === 'OVERRIDE') {
-        dateAdded = row.dateAdded ?? null
+        const parsedDateAdded = z.date().safeParse(row.dateAdded)
+        if (!parsedDateAdded.success) {
+            logError(
+                'prismaOverrideMergeHelpers.applyDocumentScalarOverrides',
+                `${context}.dateAdded: OVERRIDE value failed schema validation; ignoring operation. Zod error: ${parsedDateAdded.error.message}`
+            )
+        } else {
+            dateAdded = parsedDateAdded.data
+        }
     } else {
         logError(
             'prismaOverrideMergeHelpers.applyDocumentScalarOverrides',

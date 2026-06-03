@@ -42,6 +42,10 @@ type OverrideRateDataArgsType = {
     }
 }
 
+const nonEmptyDocumentOverridesOrUndefined = (
+    documents: RateDocumentOverrideInput[] | undefined
+) => (documents && documents.length > 0 ? documents : undefined)
+
 const overrideRateDataInsideTransaction = async (
     tx: PrismaTransactionType,
     args: OverrideRateDataArgsType
@@ -87,10 +91,14 @@ const overrideRateDataInsideTransaction = async (
         throw initiallySubmittedAtValidation
     }
 
-    let rateDocumentOverrides = revisionOverride?.rateDocuments
-    let supportingDocumentOverrides = revisionOverride?.supportingDocuments
+    let rateDocumentOverrides = nonEmptyDocumentOverridesOrUndefined(
+        revisionOverride?.rateDocuments
+    )
+    let supportingDocumentOverrides = nonEmptyDocumentOverridesOrUndefined(
+        revisionOverride?.supportingDocuments
+    )
 
-    if (revisionOverride?.rateDocuments) {
+    if (rateDocumentOverrides) {
         // latestRevision.formData is the effective document view and can include
         // override-added docs whose id is an override row id. documentID is a
         // base-table FK, so normalize non-base ids to null before writing.
@@ -103,7 +111,7 @@ const overrideRateDataInsideTransaction = async (
             ).map((doc) => doc.id)
         )
         rateDocumentOverrides = normalizeDocumentOverrideInputs({
-            overrideDocs: revisionOverride.rateDocuments,
+            overrideDocs: rateDocumentOverrides,
             effectiveDocs: latestRevision.formData.rateDocuments ?? [],
             baseDocumentIDs: baseRateDocumentIDs,
         })
@@ -112,13 +120,13 @@ const overrideRateDataInsideTransaction = async (
             effectiveDocs: latestRevision.formData.rateDocuments ?? [],
             baseDocumentIDs: baseRateDocumentIDs,
             documentType: 'RATE_DOCUMENTS',
-            valueSchemas: { dateAdded: z.date().nullable() },
+            valueSchemas: { dateAdded: z.date() },
         })
         if (validationError) {
             throw validationError
         }
     }
-    if (revisionOverride?.supportingDocuments) {
+    if (supportingDocumentOverrides) {
         // See rateDocuments above: documentID may only be written when it
         // references a stored base document row.
         const baseSupportingDocumentIDs = new Set(
@@ -130,7 +138,7 @@ const overrideRateDataInsideTransaction = async (
             ).map((doc) => doc.id)
         )
         supportingDocumentOverrides = normalizeDocumentOverrideInputs({
-            overrideDocs: revisionOverride.supportingDocuments,
+            overrideDocs: supportingDocumentOverrides,
             effectiveDocs: latestRevision.formData.supportingDocuments ?? [],
             baseDocumentIDs: baseSupportingDocumentIDs,
         })
@@ -139,7 +147,7 @@ const overrideRateDataInsideTransaction = async (
             effectiveDocs: latestRevision.formData.supportingDocuments ?? [],
             baseDocumentIDs: baseSupportingDocumentIDs,
             documentType: 'RATE_SUPPORTING_DOCUMENTS',
-            valueSchemas: { dateAdded: z.date().nullable() },
+            valueSchemas: { dateAdded: z.date() },
         })
         if (validationError) {
             throw validationError

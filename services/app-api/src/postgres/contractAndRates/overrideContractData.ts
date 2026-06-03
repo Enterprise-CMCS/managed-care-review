@@ -62,6 +62,10 @@ type OverrideContractDataArgsType = {
     }
 }
 
+const nonEmptyDocumentOverridesOrUndefined = (
+    documents: ContractDocumentOverrideInput[] | undefined
+) => (documents && documents.length > 0 ? documents : undefined)
+
 const overrideContractDataInsideTransaction = async (
     tx: PrismaTransactionType,
     args: OverrideContractDataArgsType
@@ -120,11 +124,16 @@ const overrideContractDataInsideTransaction = async (
         throw contractTypeValidation
     }
 
-    let contractDocumentOverrides = revisionOverride?.contractDocuments
-    let supportingDocumentOverrides = revisionOverride?.supportingDocuments
+    // normalize document arrays, empty arrays into undefines.
+    let contractDocumentOverrides = nonEmptyDocumentOverridesOrUndefined(
+        revisionOverride?.contractDocuments
+    )
+    let supportingDocumentOverrides = nonEmptyDocumentOverridesOrUndefined(
+        revisionOverride?.supportingDocuments
+    )
 
     // Validate document override inputs before writing.
-    if (revisionOverride?.contractDocuments) {
+    if (contractDocumentOverrides) {
         // latestRevision.formData is the effective document view and can include
         // override-added docs whose id is an override row id. documentID is a
         // base-table FK, so normalize non-base ids to null before writing.
@@ -137,7 +146,7 @@ const overrideContractDataInsideTransaction = async (
             ).map((doc) => doc.id)
         )
         contractDocumentOverrides = normalizeDocumentOverrideInputs({
-            overrideDocs: revisionOverride.contractDocuments,
+            overrideDocs: contractDocumentOverrides,
             effectiveDocs: latestRevision.formData.contractDocuments,
             baseDocumentIDs: baseContractDocumentIDs,
         })
@@ -146,13 +155,13 @@ const overrideContractDataInsideTransaction = async (
             effectiveDocs: latestRevision.formData.contractDocuments,
             baseDocumentIDs: baseContractDocumentIDs,
             documentType: 'CONTRACT_DOCUMENTS',
-            valueSchemas: { dateAdded: z.date().nullable() },
+            valueSchemas: { dateAdded: z.date() },
         })
         if (validationError) {
             throw validationError
         }
     }
-    if (revisionOverride?.supportingDocuments) {
+    if (supportingDocumentOverrides) {
         // See contractDocuments above: documentID may only be written when it
         // references a stored base document row.
         const baseSupportingDocumentIDs = new Set(
@@ -164,7 +173,7 @@ const overrideContractDataInsideTransaction = async (
             ).map((doc) => doc.id)
         )
         supportingDocumentOverrides = normalizeDocumentOverrideInputs({
-            overrideDocs: revisionOverride.supportingDocuments,
+            overrideDocs: supportingDocumentOverrides,
             effectiveDocs: latestRevision.formData.supportingDocuments,
             baseDocumentIDs: baseSupportingDocumentIDs,
         })
@@ -173,7 +182,7 @@ const overrideContractDataInsideTransaction = async (
             effectiveDocs: latestRevision.formData.supportingDocuments,
             baseDocumentIDs: baseSupportingDocumentIDs,
             documentType: 'CONTRACT_SUPPORTING_DOCUMENTS',
-            valueSchemas: { dateAdded: z.date().nullable() },
+            valueSchemas: { dateAdded: z.date() },
         })
         if (validationError) {
             throw validationError
