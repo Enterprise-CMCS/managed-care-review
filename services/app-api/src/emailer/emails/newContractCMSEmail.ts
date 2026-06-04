@@ -121,7 +121,7 @@ export const newContractCMSEmail = async (
     } else {
         const stagePrefix = config.stage !== 'prod' ? `[${config.stage}] ` : ''
         const subjectLine = isChipOnly
-            ? `${packageName} is not subject to DMCO review and validation.`
+            ? `${packageName} is not subject to DMCO review and validation`
             : `New Managed Care Submission: ${packageName}`
 
         return {

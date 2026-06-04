@@ -343,7 +343,7 @@ export const SubmissionSummary = (): React.ReactElement => {
             )
         }
 
-        if (showChipOnlyBanner) {
+        if (isStateUser && showChipOnlyBanner) {
             return <ChipOnlySubmissionBanner className={styles.banner} />
         }
     }

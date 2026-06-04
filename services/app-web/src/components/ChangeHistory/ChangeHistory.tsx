@@ -24,6 +24,8 @@ import {
     eqroValidationAndReviewDetermination,
     healthPlanReviewDetermination,
 } from '@mc-review/submissions'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 type ChangeHistoryProps = {
     contract: Contract | UnlockedContract
@@ -229,6 +231,11 @@ export const ChangeHistory = ({
     contract,
 }: ChangeHistoryProps): React.ReactElement => {
     const { logAccordionEvent } = useTealium()
+    const ldClient = useLDClient()
+    const chipSubmissionAutomation = ldClient?.variation(
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.flag,
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.defaultValue
+    )
     const flattenedRevisions = (): flatRevisions[] => {
         const result: flatRevisions[] = []
         const contractSubmissions = contract.packageSubmissions.filter(
@@ -299,7 +306,10 @@ export const ChangeHistory = ({
                                 newSubmit.reviewDecision =
                                     'NOT_SUBJECT_TO_REVIEW'
                             }
-                        } else if (isHealthPlanCHIPOnly) {
+                        } else if (
+                            chipSubmissionAutomation &&
+                            isHealthPlanCHIPOnly
+                        ) {
                             newSubmit.reviewDecision =
                                 healthPlanReviewDetermination(
                                     r.contractRevision.formData
