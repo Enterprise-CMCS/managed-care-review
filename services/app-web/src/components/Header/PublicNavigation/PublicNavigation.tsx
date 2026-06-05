@@ -21,7 +21,7 @@ const publicNavItems: PublicNavItem[] = [
     {
         label: 'Home',
         to: RoutesRecord.ROOT,
-        isActive: (route) => route === 'ROOT',
+        isActive: (route) => route === 'ROOT' || route === 'UNKNOWN_ROUTE',
     },
     {
         label: 'Resources',

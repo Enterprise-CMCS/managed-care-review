@@ -120,6 +120,29 @@ describe('Header', () => {
             ).not.toHaveAttribute('aria-current')
         })
 
+        it('shows public navigation on unknown public routes when feature flag is enabled', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/sport' },
+                apolloProvider: {
+                    mocks: [fetchCurrentUserMock({ statusCode: 403 })],
+                },
+                featureFlags: { 'resources-nav-pages': true },
+            })
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('navigation', {
+                        name: 'Public page navigation',
+                    })
+                ).toBeInTheDocument()
+            })
+
+            expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute(
+                'aria-current',
+                'page'
+            )
+        })
+
         it('highlights Resources navigation for the help page when feature flag is enabled', async () => {
             renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
                 routerProvider: { route: '/resources/help' },
@@ -152,6 +175,24 @@ describe('Header', () => {
                     })
                 ).not.toBeInTheDocument()
             })
+        })
+
+        it('does not show public navigation while auth is still loading on an unknown route', async () => {
+            renderWithProviders(<Header authMode={'AWS_COGNITO'} />, {
+                routerProvider: {
+                    route: '/submissions/new/health-plan/stingray',
+                },
+                apolloProvider: {
+                    mocks: [],
+                },
+                featureFlags: { 'resources-nav-pages': true },
+            })
+
+            expect(
+                screen.queryByRole('navigation', {
+                    name: 'Public page navigation',
+                })
+            ).not.toBeInTheDocument()
         })
     })
 

@@ -1,6 +1,13 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### May 28, 2026
+#### Updated
+- `createContractQuestion` now rejects EQRO contract questions from CMS users who are not assigned to the `DMCO` division.
+    - Applies only to `EQRO` submissions.
+    - `HEALTH_PLAN` submissions continue to allow contract questions from CMS users in any assigned CMS division.
+    - API clients should expect a `FORBIDDEN` error when a non-`DMCO` CMS user attempts to create a question for an `EQRO` contract.
+
 ### May 13, 2026
 #### Updated
 - Renamed mutation `reverseUnlockContract` to `undoUnlockContract`
