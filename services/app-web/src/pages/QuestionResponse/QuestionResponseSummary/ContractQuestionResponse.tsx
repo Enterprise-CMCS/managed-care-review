@@ -16,7 +16,7 @@ import {
 } from '../../../gen/gqlClient'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { getUserDivision } from '../QuestionResponseHelpers'
+import { extractQuestions, getUserDivision } from '../QuestionResponseHelpers'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
@@ -81,6 +81,13 @@ export const ContractQuestionResponse = () => {
     if (hasCMSPermissions) {
         division = getUserDivision(loggedInUser as CmsUser)
     }
+
+    const canAddQuestions = contract.questions
+        ? extractQuestions(contract.questions).every(
+              (question) => question.responses.length > 0
+          )
+        : false
+
     return (
         <div className={styles.background} id={activeMainContentId}>
             <GridContainer className={styles.container}>
@@ -98,6 +105,7 @@ export const ContractQuestionResponse = () => {
                         questionType="contract"
                         userDivision={division}
                         consolidatedStatus={contract.consolidatedStatus}
+                        canAddQuestionsGotAllResponses={canAddQuestions}
                     />
                 ) : (
                     <StateQuestionResponseTable
