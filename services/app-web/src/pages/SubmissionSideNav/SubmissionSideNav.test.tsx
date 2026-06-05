@@ -198,7 +198,10 @@ describe('SubmissionSideNav', () => {
         // validate correct param renders summary page
         await waitFor(() => {
             expect(
-                screen.getByRole('heading', { level: 1, name: 'Submission summary' })
+                screen.getByRole('heading', {
+                    level: 1,
+                    name: 'Submission summary',
+                })
             ).toBeInTheDocument()
         })
 
@@ -219,7 +222,10 @@ describe('SubmissionSideNav', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByRole('link', { name: /Add questions/ })
+                screen.getByRole('heading', {
+                    level: 1,
+                    name: 'Contract questions',
+                })
             ).toBeInTheDocument()
         })
 
@@ -361,7 +367,10 @@ describe('SubmissionSideNav', () => {
         // validate correct param renders summary page
         await waitFor(() => {
             expect(
-                screen.getByRole('heading', { level: 1, name: 'Submission summary' })
+                screen.getByRole('heading', {
+                    level: 1,
+                    name: 'Submission summary',
+                })
             ).toBeInTheDocument()
         })
 
