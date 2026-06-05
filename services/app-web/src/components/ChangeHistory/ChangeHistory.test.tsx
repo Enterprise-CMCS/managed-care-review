@@ -489,7 +489,9 @@ describe('Change History', () => {
         contract.packageSubmissions[0].contractRevision.formData.populationCovered =
             'CHIP'
 
-        renderWithProviders(<ChangeHistory contract={contract} />)
+        renderWithProviders(<ChangeHistory contract={contract} />, {
+            featureFlags: { 'chip-submission-automation': true },
+        })
 
         const submissionRow = screen.getByRole('button', {
             name: `${formatToPacificTime(
