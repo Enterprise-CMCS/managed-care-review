@@ -23,6 +23,7 @@ import {
 } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
 import {
+    ChipOnlyModalDescription,
     EQROModalDescription,
     EQROResubmitModalDescription,
 } from './ModalBodyContent'
@@ -33,7 +34,9 @@ type ModalTypes =
     | 'RESUBMIT_EQRO_CONTRACT'
     | 'UNLOCK_RATE'
     | 'SUBMIT_CONTRACT'
+    | 'SUBMIT_CHIP_ONLY'
     | 'RESUBMIT_CONTRACT'
+    | 'RESUBMIT_CHIP_ONLY'
     | 'UNLOCK_CONTRACT'
     | 'SUBMIT_EQRO_CONTRACT'
 
@@ -119,6 +122,23 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
         errorHeading: ERROR_MESSAGES.submit_error_heading,
         errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
     },
+    SUBMIT_CHIP_ONLY: {
+        modalHeading: 'Ready to submit?',
+        onSubmitText: 'Submit',
+        modalDescription: ChipOnlyModalDescription,
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+    },
+    RESUBMIT_CHIP_ONLY: {
+        modalHeading: 'Ready to submit?',
+        onSubmitText: 'Submit',
+        modalDescription: ChipOnlyModalDescription,
+        inputHint: 'Provide summary of all changes made to this contract',
+        unlockSubmitModalInputValidation:
+            'You must provide a summary of changes',
+        errorHeading: ERROR_MESSAGES.submit_error_heading,
+        errorSuggestion: ERROR_MESSAGES.submit_error_suggestion,
+    },
     SUBMIT_EQRO_CONTRACT: {
         modalHeading: 'Ready to submit?',
         onSubmitText: 'Submit',
@@ -174,6 +194,7 @@ export const UnlockSubmitModal = ({
     const isSubmitting = mutationLoading || formik.isSubmitting
     const includesFormInput = ![
         'SUBMIT_CONTRACT',
+        'SUBMIT_CHIP_ONLY',
         'SUBMIT_RATE',
         'SUBMIT_EQRO_CONTRACT',
     ].includes(modalType)
@@ -211,6 +232,7 @@ export const UnlockSubmitModal = ({
                 console.info('submit rate not implemented yet')
                 break
             case 'SUBMIT_CONTRACT':
+            case 'SUBMIT_CHIP_ONLY':
             case 'SUBMIT_EQRO_CONTRACT':
                 result = await submitMutationWrapper(
                     submitContract,
@@ -219,6 +241,7 @@ export const UnlockSubmitModal = ({
                 )
                 break
             case 'RESUBMIT_CONTRACT':
+            case 'RESUBMIT_CHIP_ONLY':
                 result = await submitMutationWrapper(
                     submitContract,
                     submissionData.id,
@@ -251,7 +274,7 @@ export const UnlockSubmitModal = ({
             modalRef.current?.toggleModal(undefined, false)
 
             if (modalType !== 'UNLOCK_CONTRACT' && submissionName) {
-                navigate(
+                await navigate(
                     `/dashboard/submissions?justSubmitted=${submissionName}`
                 )
             } else {
@@ -272,8 +295,10 @@ export const UnlockSubmitModal = ({
             if (
                 [
                     'RESUBMIT_CONTRACT',
+                    'RESUBMIT_CHIP_ONLY',
                     'RESUBMIT_EQRO_CONTRACT',
                     'SUBMIT_CONTRACT',
+                    'SUBMIT_CHIP_ONLY',
                     'SUBMIT_EQRO_CONTRACT',
                 ].includes(modalType) &&
                 submissionName &&
@@ -282,7 +307,7 @@ export const UnlockSubmitModal = ({
                 await client.refetchQueries({
                     include: [IndexContractsStrippedDocument],
                 })
-                navigate(
+                await navigate(
                     `/dashboard/submissions?justSubmitted=${submissionName}&contractType=${submissionData.contractSubmissionType}&id=${submissionData.id}`
                 )
             } else {

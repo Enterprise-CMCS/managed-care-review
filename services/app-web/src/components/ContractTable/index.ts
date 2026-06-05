@@ -1,4 +1,8 @@
-export { ContractTable, StatusTag } from './ContractTable'
+export {
+    ContractTable,
+    StatusTag,
+    getConsolidatedContractStatusText,
+} from './ContractTable'
 
 export type {
     ContractInDashboardType,

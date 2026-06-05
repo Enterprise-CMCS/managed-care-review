@@ -283,7 +283,7 @@ test('includes information about what is next', async () => {
     )
 })
 
-test('does not include information about what is next for CHIP-only submissions', async () => {
+test('renders CHIP-only template for CHIP-only submissions', async () => {
     const sub = mockContract()
     sub.packageSubmissions[0].contractRevision.formData.contractType =
         'AMENDMENT'
@@ -301,10 +301,11 @@ test('does not include information about what is next for CHIP-only submissions'
         throw template
     }
 
-    expect(template.bodyText).not.toContain('What comes next:')
+    // CHIP-only template marker
+    expect(template.bodyText).toContain('Record keeping:')
+    // Standard new-contract review-flow steps must not appear
     expect(template.bodyText).not.toContain('Check for completeness:')
     expect(template.bodyText).not.toContain('CMS review:')
-    expect(template.bodyText).not.toContain('Questions:')
     expect(template.bodyText).not.toContain('Decision:')
 })
 

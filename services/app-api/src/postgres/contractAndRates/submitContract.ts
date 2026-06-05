@@ -246,8 +246,6 @@ async function submitContract(
                 return eqroReviewUpdate
             }
 
-            // HEALTH_PLAN CHIP-only submissions are not subject to review.
-            // Gated behind the `chip-submission-automation` LaunchDarkly flag.
             if (
                 chipSubmissionAutomationFlag &&
                 result.contractSubmissionType === 'HEALTH_PLAN'

@@ -78,7 +78,7 @@ describe('State user can view submissions', () => {
             cy.findByRole('heading', {
                 name: new RegExp(`Minnesota Submission ID | ${submissionName}`),
             }).should('exist')
-            cy.findByText('Submitted').should('exist')
+            cy.findAllByText('Submitted').should('exist')
             cy.findByText('Rate details').should('exist')
             cy.findByText('New rate certification').should('exist')
             cy.findByText('02/29/2024 to 02/28/2025').should('exist')

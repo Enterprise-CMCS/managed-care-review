@@ -484,6 +484,34 @@ describe('Change History', () => {
             within(submissionItem).getByText('Review decision:')
         ).toBeInTheDocument()
     })
+    it('renders CHIP-only HEALTH_PLAN initial submission not subject to review', async () => {
+        const contract = mockContractPackageSubmitted()
+        contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+            'CHIP'
+
+        renderWithProviders(<ChangeHistory contract={contract} />, {
+            featureFlags: { 'chip-submission-automation': true },
+        })
+
+        const submissionRow = screen.getByRole('button', {
+            name: `${formatToPacificTime(
+                contract.packageSubmissions[0].submitInfo.updatedAt
+            )} - Submission`,
+        })
+        await userEvent.click(submissionRow)
+
+        const submissionItem = screen.getByTestId(
+            `accordionItem_${contract.packageSubmissions[0].submitInfo.updatedAt}`
+        )
+
+        expect(within(submissionItem).getByText('Status:')).toBeInTheDocument()
+        expect(
+            within(submissionItem).getByText('Review decision:')
+        ).toBeInTheDocument()
+        expect(
+            within(submissionItem).getAllByText('Not subject to review')
+        ).toHaveLength(2)
+    })
     it('preserves historical review decisions across EQRO resubmissions', async () => {
         const contract = mockEqroContractResubmittedWithReviewStatusChange()
 

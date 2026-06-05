@@ -53,6 +53,8 @@ export const newContractStateEmail = async (
         config.baseUrl
     )
 
+    const isChipOnly = formData.populationCovered === 'CHIP'
+
     const contractSubmissionType =
         contract.contractSubmissionType === 'HEALTH_PLAN'
             ? 'Health plan'
@@ -107,24 +109,28 @@ export const newContractStateEmail = async (
                         : formatCalendarDate(rate.formData.rateDateEnd, 'UTC'),
             })),
         submissionURL: contractURL,
-        isChipOnly: formData.populationCovered === 'CHIP',
+        isChipOnly: isChipOnly,
     }
 
-    const result = await renderTemplate<typeof data>(
-        'newContractStateEmail',
-        data
-    )
+    const emailTemplate = isChipOnly
+        ? 'newChipOnlyStateEmail'
+        : 'newContractStateEmail'
+
+    const result = await renderTemplate<typeof data>(emailTemplate, data)
 
     if (result instanceof Error) {
         return result
     } else {
+        const stagePrefix = config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        const subjectLine = isChipOnly
+            ? `${packageName} is not subject to DMCO review and validation.`
+            : `${packageName} was sent to CMS`
+
         return {
             toAddresses: receiverEmails,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
-            subject: `${
-                config.stage !== 'prod' ? `[${config.stage}] ` : ''
-            }${packageName} was sent to CMS`,
+            subject: `${stagePrefix}${subjectLine}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

@@ -1,0 +1,10 @@
+Submission <%= it.packageName %> is not subject to DMCO review and validation.<br />
+<br />
+<b>Submitted by:</b> <%= it.resubmittedBy %><br />
+<b>Updated on:</b> <%= it.resubmittedOn %><br />
+<b>Status</b>: Not subject to review<br />
+<b>Populations covered by this contract action</b>: CHIP-only<br />
+<br />
+<b>Summary of changes</b>: <%= it.resubmissionReason %><br />
+<br />
+<a href="<%= it.submissionURL%>">View submission</a><br />

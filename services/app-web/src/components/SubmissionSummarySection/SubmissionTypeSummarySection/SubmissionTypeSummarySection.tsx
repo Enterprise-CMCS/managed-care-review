@@ -17,12 +17,15 @@ import {
     ContractProgramsSummary,
     ContractTypeSummary,
     PopulationCoverageSummary,
+    ReviewDecisionSummary,
     RiskBasedContractSummary,
     SubmissionDescriptionSummary,
     SubmissionTypeSummary,
     SubmittedAtSummary,
+    UpdatedAtSummary,
 } from '../SummarySectionFields'
 import { formattedProgramNames } from '../../../formHelpers'
+import { getConsolidatedContractStatusText } from '../../ContractTable'
 
 export type SubmissionTypeSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -65,6 +68,8 @@ export const SubmissionTypeSummarySection = ({
         contract.status === 'SUBMITTED' || contract.status === 'RESUBMITTED'
     const isUnlocked = contract.status === 'UNLOCKED'
 
+    const lastUpdated = contract.lastUpdatedForDisplay || contract.updatedAt
+
     return (
         <SectionCard
             id="submissionTypeSection"
@@ -81,13 +86,36 @@ export const SubmissionTypeSummarySection = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {initiallySubmittedAt &&
-                    (isSubmitted || (!isStateUser && isUnlocked)) && (
-                        <SubmittedAtSummary
-                            initiallySubmittedAt={initiallySubmittedAt}
+                {contract.consolidatedStatus && isSubmitted && (
+                    <ReviewDecisionSummary
+                        reviewDecision={
+                            contract.consolidatedStatus ===
+                                'NOT_SUBJECT_TO_REVIEW' &&
+                            contractFormData.populationCovered === 'CHIP'
+                                ? 'Not subject to DMCO review and validation'
+                                : getConsolidatedContractStatusText(
+                                      contract.consolidatedStatus
+                                  )
+                        }
+                        explainMissingData={explainMissingData}
+                    />
+                )}
+                <MultiColumnGrid columns={2}>
+                    {initiallySubmittedAt &&
+                        (isSubmitted || (!isStateUser && isUnlocked)) && (
+                            <SubmittedAtSummary
+                                initiallySubmittedAt={initiallySubmittedAt}
+                            />
+                        )}
+                    {lastUpdated && isSubmitted && (
+                        <UpdatedAtSummary updatedAt={lastUpdated} />
+                    )}
+                    {(contractFormData.populationCovered || !isSubmitted) && (
+                        <PopulationCoverageSummary
+                            contractFormData={contractFormData}
+                            explainMissingData={explainMissingData}
                         />
                     )}
-                <MultiColumnGrid columns={2}>
                     {(programIDs.length > 0 || !isSubmitted) && (
                         <ContractProgramsSummary
                             programNames={programNames}
@@ -110,12 +138,6 @@ export const SubmissionTypeSummarySection = ({
                         (!isSubmitted &&
                             contractFormData.riskBasedContract !== null)) && (
                         <RiskBasedContractSummary
-                            contractFormData={contractFormData}
-                            explainMissingData={explainMissingData}
-                        />
-                    )}
-                    {(contractFormData.populationCovered || !isSubmitted) && (
-                        <PopulationCoverageSummary
                             contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
                         />
