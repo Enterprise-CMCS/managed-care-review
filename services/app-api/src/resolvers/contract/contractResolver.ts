@@ -70,27 +70,36 @@ function genericContractResolver<
             _args: Record<string, never>,
             context: Context
         ) {
-            const packageState = parent.stateCode
-            const state = typedStatePrograms.states.find(
-                (st) => st.code === packageState
-            )
+            return withResolverSpan(
+                context,
+                'Contract.state',
+                { 'contract.id': parent.id },
+                async (span) => {
+                    setResolverDetails(span, context.user)
 
-            if (state === undefined) {
-                const errMessage =
-                    'State not found in database: ' + packageState
-                logResolverError(
-                    'genericContractResolver.state',
-                    errMessage,
-                    context
-                )
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-            return state
+                    const packageState = parent.stateCode
+                    const state = typedStatePrograms.states.find(
+                        (st) => st.code === packageState
+                    )
+
+                    if (state === undefined) {
+                        const errMessage =
+                            'State not found in database: ' + packageState
+                        logResolverError(
+                            'genericContractResolver.state',
+                            errMessage,
+                            context
+                        )
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+                    return state
+                }
+            )
         },
         dateContractDocsExecuted(parent: ParentType) {
             let dateFirstSubmitted: Date | null = null
@@ -120,76 +129,85 @@ function genericContractResolver<
             _args: Record<string, never>,
             context: Context
         ) {
-            const gqlSubs: ContractPackageSubmissionWithCauseType[] = []
-            for (let i = 0; i < parent.packageSubmissions.length; i++) {
-                const thisSub = parent.packageSubmissions[i]
-                let prevSub = undefined
-                if (i < parent.packageSubmissions.length - 1) {
-                    prevSub = parent.packageSubmissions[i + 1]
-                }
+            return withResolverSpan(
+                context,
+                'Contract.packageSubmissions',
+                { 'contract.id': parent.id },
+                async (span) => {
+                    setResolverDetails(span, context.user)
 
-                // determine the cause for this submission
-                let cause: SubmissionReason = 'CONTRACT_SUBMISSION'
-
-                if (
-                    !thisSub.submittedRevisions.find(
-                        (r) => r.id === thisSub.contractRevision.id
-                    )
-                ) {
-                    // not a contract submission, this contract wasn't in the submitted bits
-                    const connectedRateRevisionIDs = thisSub.rateRevisions.map(
-                        (r) => r.id
-                    )
-                    const submittedRate = thisSub.submittedRevisions.find((r) =>
-                        connectedRateRevisionIDs.includes(r.id)
-                    )
-
-                    if (!submittedRate) {
-                        cause = 'RATE_UNLINK'
-                    } else {
-                        const thisSubmittedRate =
-                            submittedRate as RateRevisionType
-                        if (!prevSub) {
-                            const errorMsg =
-                                'Cannot determine contract package submission cause: non-contract package submission is missing a previous package submission'
-                            logResolverError(
-                                'genericContractResolver.packageSubmissions',
-                                errorMsg,
-                                context
-                            )
-                            throw new GraphQLError(errorMsg, {
-                                extensions: {
-                                    code: 'INTERNAL_SERVER_ERROR',
-                                    cause: 'DB_ERROR',
-                                },
-                            })
+                    const gqlSubs: ContractPackageSubmissionWithCauseType[] = []
+                    for (let i = 0; i < parent.packageSubmissions.length; i++) {
+                        const thisSub = parent.packageSubmissions[i]
+                        let prevSub = undefined
+                        if (i < parent.packageSubmissions.length - 1) {
+                            prevSub = parent.packageSubmissions[i + 1]
                         }
-                        const previousRateRevisionIDs =
-                            prevSub.rateRevisions.map((r) => r.rateID)
+
+                        // determine the cause for this submission
+                        let cause: SubmissionReason = 'CONTRACT_SUBMISSION'
+
                         if (
-                            previousRateRevisionIDs.includes(
-                                thisSubmittedRate.rateID
+                            !thisSub.submittedRevisions.find(
+                                (r) => r.id === thisSub.contractRevision.id
                             )
                         ) {
-                            cause = 'RATE_SUBMISSION'
-                        } else {
-                            cause = 'RATE_LINK'
+                            // not a contract submission, this contract wasn't in the submitted bits
+                            const connectedRateRevisionIDs =
+                                thisSub.rateRevisions.map((r) => r.id)
+                            const submittedRate =
+                                thisSub.submittedRevisions.find((r) =>
+                                    connectedRateRevisionIDs.includes(r.id)
+                                )
+
+                            if (!submittedRate) {
+                                cause = 'RATE_UNLINK'
+                            } else {
+                                const thisSubmittedRate =
+                                    submittedRate as RateRevisionType
+                                if (!prevSub) {
+                                    const errorMsg =
+                                        'Cannot determine contract package submission cause: non-contract package submission is missing a previous package submission'
+                                    logResolverError(
+                                        'genericContractResolver.packageSubmissions',
+                                        errorMsg,
+                                        context
+                                    )
+                                    throw new GraphQLError(errorMsg, {
+                                        extensions: {
+                                            code: 'INTERNAL_SERVER_ERROR',
+                                            cause: 'DB_ERROR',
+                                        },
+                                    })
+                                }
+                                const previousRateRevisionIDs =
+                                    prevSub.rateRevisions.map((r) => r.rateID)
+                                if (
+                                    previousRateRevisionIDs.includes(
+                                        thisSubmittedRate.rateID
+                                    )
+                                ) {
+                                    cause = 'RATE_SUBMISSION'
+                                } else {
+                                    cause = 'RATE_LINK'
+                                }
+                            }
                         }
+
+                        const gqlSub: ContractPackageSubmissionWithCauseType = {
+                            cause,
+                            submitInfo: thisSub.submitInfo,
+                            submittedRevisions: thisSub.submittedRevisions,
+                            contractRevision: thisSub.contractRevision,
+                            rateRevisions: thisSub.rateRevisions,
+                        }
+
+                        gqlSubs.push(gqlSub)
                     }
+
+                    return gqlSubs
                 }
-
-                const gqlSub: ContractPackageSubmissionWithCauseType = {
-                    cause,
-                    submitInfo: thisSub.submitInfo,
-                    submittedRevisions: thisSub.submittedRevisions,
-                    contractRevision: thisSub.contractRevision,
-                    rateRevisions: thisSub.rateRevisions,
-                }
-
-                gqlSubs.push(gqlSub)
-            }
-
-            return gqlSubs
+            )
         },
 
         questions: async (
@@ -271,28 +289,37 @@ export function contractStrippedResolver(): Resolvers['ContractStripped'] {
             _args: Record<string, never>,
             context: Context
         ) {
-            const packageState = parent.stateCode
-            const state = typedStatePrograms.states.find(
-                (st) => st.code === packageState
+            return withResolverSpan(
+                context,
+                'ContractStripped.state',
+                { 'contract.id': parent.id },
+                async (span) => {
+                    setResolverDetails(span, context.user)
+
+                    const packageState = parent.stateCode
+                    const state = typedStatePrograms.states.find(
+                        (st) => st.code === packageState
+                    )
+
+                    if (state === undefined) {
+                        const errMessage =
+                            'State not found in database: ' + packageState
+                        logResolverError(
+                            'contractStrippedResolver.state',
+                            errMessage,
+                            context
+                        )
+
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+                    return state
+                }
             )
-
-            if (state === undefined) {
-                const errMessage =
-                    'State not found in database: ' + packageState
-                logResolverError(
-                    'contractStrippedResolver.state',
-                    errMessage,
-                    context
-                )
-
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-            return state
         },
     }
 }
