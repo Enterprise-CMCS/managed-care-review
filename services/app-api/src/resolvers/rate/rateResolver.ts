@@ -7,10 +7,7 @@ import type {
     RateType,
 } from '../../domain-models'
 import path from 'path'
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-} from '../attributeHelper'
+import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { convertToIndexRateQuestionsPayload } from '../../postgres/questionResponse'
@@ -135,42 +132,45 @@ export function rateResolver(
             return gqlSubs
         },
         questions: async (parent, _args, context) => {
-            const { user, ctx, tracer } = context
-            // add a span to OTEL
-            const span = tracer?.startSpan(
-                'fetchRateWithQuestionsResolver',
-                {},
-                ctx
-            )
-            setResolverDetailsOnActiveSpan('fetchRateWithQuestions', user, span)
+            return withResolverSpan(
+                context,
+                'Rate.questions',
+                { 'rate.id': parent.id },
+                async (span) => {
+                    setResolverDetails(span, context.user)
 
-            const questionsForRate = await store.findAllQuestionsByRate(
-                parent.id
-            )
+                    const questionsForRate = await store.findAllQuestionsByRate(
+                        parent.id
+                    )
 
-            if (questionsForRate instanceof Error) {
-                const errMessage = `Issue finding questions for rate. Message: ${questionsForRate.message}`
-                logResolverError('rateResolver.questions', errMessage, context)
-                setErrorAttributesOnActiveSpan(errMessage, span)
+                    if (questionsForRate instanceof Error) {
+                        const errMessage = `Issue finding questions for rate. Message: ${questionsForRate.message}`
+                        logResolverError(
+                            'rateResolver.questions',
+                            errMessage,
+                            context
+                        )
 
-                if (questionsForRate instanceof NotFoundError) {
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'NOT_FOUND',
-                            cause: 'DB_ERROR',
-                        },
-                    })
+                        if (questionsForRate instanceof NotFoundError) {
+                            throw new GraphQLError(errMessage, {
+                                extensions: {
+                                    code: 'NOT_FOUND',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
+                        }
+
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+
+                    return convertToIndexRateQuestionsPayload(questionsForRate)
                 }
-
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-
-            return convertToIndexRateQuestionsPayload(questionsForRate)
+            )
         },
     }
 }
@@ -208,33 +208,34 @@ export function rateStrippedResolver(
             return state
         },
         relatedContracts: async (parent, _args, context) => {
-            const { ctx, tracer } = context
-            const span = tracer?.startSpan(
-                'rateStrippedResolver.relatedContracts',
-                {},
-                ctx
-            )
-            const relatedContracts = await store.findRateRelatedContracts(
-                parent.id
-            )
+            return withResolverSpan(
+                context,
+                'RateStripped.relatedContracts',
+                { 'rate.id': parent.id },
+                async (span) => {
+                    setResolverDetails(span, context.user)
 
-            if (relatedContracts instanceof Error) {
-                const msg = `Issue finding related contracts for rate with id: ${parent.id}. Message: ${relatedContracts.message}`
-                logResolverError(
-                    'rateStrippedResolver.relatedContracts',
-                    msg,
-                    context
-                )
-                setErrorAttributesOnActiveSpan(msg, span)
-                throw new GraphQLError(msg, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
+                    const relatedContracts =
+                        await store.findRateRelatedContracts(parent.id)
 
-            return relatedContracts
+                    if (relatedContracts instanceof Error) {
+                        const msg = `Issue finding related contracts for rate with id: ${parent.id}. Message: ${relatedContracts.message}`
+                        logResolverError(
+                            'rateStrippedResolver.relatedContracts',
+                            msg,
+                            context
+                        )
+                        throw new GraphQLError(msg, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+
+                    return relatedContracts
+                }
+            )
         },
     }
 }

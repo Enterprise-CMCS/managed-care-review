@@ -11,10 +11,7 @@ import type { StrippedContractType } from '../../domain-models'
 import path from 'path'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-} from '../attributeHelper'
+import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import type { Context } from '../../handlers/apollo_gql'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
@@ -200,50 +197,44 @@ function genericContractResolver<
             _args: Record<string, never>,
             context: Context
         ) => {
-            const { user, ctx, tracer } = context
-            // add a span to OTEL
-            const span = tracer?.startSpan(
-                'fetchContractWithQuestionsResolver',
-                {},
-                ctx
-            )
-            setResolverDetailsOnActiveSpan(
-                'fetchContractWithQuestions',
-                user,
-                span
-            )
+            return withResolverSpan(
+                context,
+                'Contract.questions',
+                { 'contract.id': parent.id },
+                async (span) => {
+                    setResolverDetails(span, context.user)
 
-            const questionsForContract = await store.findAllQuestionsByContract(
-                parent.id
-            )
+                    const questionsForContract =
+                        await store.findAllQuestionsByContract(parent.id)
 
-            if (questionsForContract instanceof Error) {
-                const errMessage = `Issue finding contract message: ${questionsForContract.message}`
-                logResolverError(
-                    'genericContractResolver.questions',
-                    errMessage,
-                    context
-                )
-                setErrorAttributesOnActiveSpan(errMessage, span)
+                    if (questionsForContract instanceof Error) {
+                        const errMessage = `Issue finding contract message: ${questionsForContract.message}`
+                        logResolverError(
+                            'genericContractResolver.questions',
+                            errMessage,
+                            context
+                        )
 
-                if (questionsForContract instanceof NotFoundError) {
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'NOT_FOUND',
-                            cause: 'DB_ERROR',
-                        },
-                    })
+                        if (questionsForContract instanceof NotFoundError) {
+                            throw new GraphQLError(errMessage, {
+                                extensions: {
+                                    code: 'NOT_FOUND',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
+                        }
+
+                        throw new GraphQLError(errMessage, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+
+                    return convertToIndexQuestionsPayload(questionsForContract)
                 }
-
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
-
-            return convertToIndexQuestionsPayload(questionsForContract)
+            )
         },
     }
 }

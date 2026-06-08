@@ -2,6 +2,7 @@ import type { Context } from '../handlers/apollo_gql'
 
 function createRequestContext(context: Pick<Context, 'user' | 'oauthClient'>) {
     return {
+        // TODO: Include API Gateway requestId here to correlate resolver logs with OTEL http.request_id.
         userId: context.user?.id,
         role: context.user?.role,
         oauthClient: context.oauthClient,

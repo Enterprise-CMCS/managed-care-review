@@ -5,7 +5,11 @@ import type {
 } from '../../domain-models'
 import type { Resolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
-import { setErrorAttributesOnActiveSpan } from '../attributeHelper'
+import {
+    recordResolverError,
+    setResolverDetails,
+    withResolverSpan,
+} from '../attributeHelper'
 import { logResolverError } from '../../logger'
 import type { DocumentZipPackageType } from '../../domain-models/ZipType'
 import type { Context } from '../../handlers/apollo_gql'
@@ -53,43 +57,45 @@ export function contractRevisionResolver(
             _args: Record<string, never>,
             context: Context
         ): Promise<DocumentZipPackageType[]> => {
-            const { ctx, tracer } = context
-            const span = tracer?.startSpan(
-                'fetchContractRevisionZipPackages',
-                {},
-                ctx
-            )
+            return withResolverSpan(
+                context,
+                'ContractRevision.documentZipPackages',
+                { 'contract_revision.id': parent.id },
+                async (span) => {
+                    setResolverDetails(span, context.user)
 
-            try {
-                const documentZipPackages =
-                    await store.findDocumentZipPackagesByContractRevision(
-                        parent.id
-                    )
+                    try {
+                        const documentZipPackages =
+                            await store.findDocumentZipPackagesByContractRevision(
+                                parent.id
+                            )
 
-                if (documentZipPackages instanceof Error) {
-                    const errMessage = `Error fetching document zip packages for contract revision ${parent.id}: ${documentZipPackages.message}`
-                    logResolverError(
-                        'contractRevision.documentZipPackages',
-                        errMessage,
-                        context
-                    )
-                    setErrorAttributesOnActiveSpan(errMessage, span)
-                    return []
+                        if (documentZipPackages instanceof Error) {
+                            const errMessage = `Error fetching document zip packages for contract revision ${parent.id}: ${documentZipPackages.message}`
+                            logResolverError(
+                                'contractRevision.documentZipPackages',
+                                errMessage,
+                                context
+                            )
+                            // This resolver intentionally falls back to an empty list, so record the non-fatal error on the span.
+                            recordResolverError(span, errMessage)
+                            return []
+                        }
+                        return documentZipPackages
+                    } catch (error) {
+                        const errorMessage = parseErrorToError(error).message
+                        const errMessage = `Unexpected error fetching document zip packages: ${errorMessage}`
+                        logResolverError(
+                            'contractRevision.documentZipPackages',
+                            errMessage,
+                            context
+                        )
+                        // This resolver intentionally falls back to an empty list, so record the non-fatal error on the span.
+                        recordResolverError(span, errMessage)
+                        return []
+                    }
                 }
-                return documentZipPackages
-            } catch (error) {
-                const errorMessage = parseErrorToError(error).message
-                const errMessage = `Unexpected error fetching document zip packages: ${errorMessage}`
-                logResolverError(
-                    'contractRevision.documentZipPackages',
-                    errMessage,
-                    context
-                )
-                setErrorAttributesOnActiveSpan(errMessage, span)
-                return []
-            } finally {
-                span?.end()
-            }
+            )
         },
     }
 }
