@@ -1,5 +1,9 @@
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
-import { ContractTable, ContractInDashboardType } from './ContractTable'
+import {
+    ContractTable,
+    ContractInDashboardType,
+    getConsolidatedContractStatusText,
+} from './ContractTable'
 import { screen, waitFor, within } from '@testing-library/react'
 import selectEvent from 'react-select-event'
 import userEvent from '@testing-library/user-event'
@@ -167,6 +171,20 @@ const apolloProviderWithCMSUser = () => ({
             user: mockCMSUser(),
         }),
     ],
+})
+
+describe('getConsolidatedContractStatusText', () => {
+    it.each([
+        ['SUBMITTED', 'Submitted'],
+        ['RESUBMITTED', 'Submitted'],
+        ['DRAFT', 'Draft'],
+        ['UNLOCKED', 'Unlocked'],
+        ['APPROVED', 'Approved'],
+        ['WITHDRAWN', 'Withdrawn'],
+        ['NOT_SUBJECT_TO_REVIEW', 'Not subject to review'],
+    ] as const)('normalizes %s to "%s"', (status, expected) => {
+        expect(getConsolidatedContractStatusText(status)).toBe(expected)
+    })
 })
 
 describe('ContractTable for CMS User (with filters)', () => {

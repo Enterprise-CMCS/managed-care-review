@@ -17,8 +17,6 @@ export const newContractCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    // config
-    const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateCMSReviewerEmailsForSubmittedContract(
         config,
         contract,
@@ -57,6 +55,8 @@ export const newContractCMSEmail = async (
         contractRev.formData.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(contract.packageSubmissions[0].rateRevisions.length)
 
+    const isChipOnly = contractRev.formData.populationCovered === 'CHIP'
+
     const data = {
         shouldIncludeRates: isContractAndRates,
         packageName: packageName,
@@ -77,6 +77,10 @@ export const newContractCMSEmail = async (
             contractRev.formData.contractDateEnd,
             'UTC'
         ),
+        contractActionType:
+            contractRev.formData.contractType === 'BASE'
+                ? 'Base contract'
+                : 'Amendment to base contract',
         rateInfos:
             isContractAndRates &&
             contract.packageSubmissions[0].rateRevisions.map((rate) => ({
@@ -106,20 +110,25 @@ export const newContractCMSEmail = async (
         submissionURL: packageURL,
     }
 
-    const result = await renderTemplate<typeof data>(
-        'newContractCMSEmail',
-        data
-    )
+    const emailTemplate = isChipOnly
+        ? 'newChipOnlyCMSEmail'
+        : 'newContractCMSEmail'
+
+    const result = await renderTemplate<typeof data>(emailTemplate, data)
+
     if (result instanceof Error) {
         return result
     } else {
+        const stagePrefix = config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        const subjectLine = isChipOnly
+            ? `${packageName} is not subject to DMCO review and validation`
+            : `New Managed Care Submission: ${packageName}`
+
         return {
             toAddresses: reviewerEmails,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
-            subject: `${
-                isTestEnvironment ? `[${config.stage}] ` : ''
-            }New Managed Care Submission: ${packageName}`,
+            subject: `${stagePrefix}${subjectLine}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

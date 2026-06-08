@@ -106,20 +106,22 @@ function localLDService(baseUrl: string): LDService {
             }
         },
         allFlags: async () => {
+            const defaults = defaultFeatureFlags()
             try {
                 const response = await fetch(flagsUrl)
                 if (!response.ok) {
                     console.warn(
                         `localLDService: failed to fetch flags, using defaults: Error:${response.status} ${response.statusText}`
                     )
-                    return defaultFeatureFlags()
+                    return defaults
                 }
-                return (await response.json()) as FeatureFlagSettings
+                const flags = (await response.json()) as FeatureFlagSettings
+                return { ...defaults, ...flags }
             } catch (err) {
                 console.warn(
                     `localLDService: failed to fetch flags, using defaults: Error:${parseErrorToError(err).message}`
                 )
-                return defaultFeatureFlags()
+                return defaults
             }
         },
     }

@@ -95,6 +95,16 @@ export function createContractQuestionResolver(
                     })
                 }
 
+                if (
+                    contractResult.contractSubmissionType === 'EQRO' &&
+                    user.divisionAssignment !== 'DMCO'
+                ) {
+                    const msg =
+                        'only users assigned to the DMCO division are authorized to create EQRO contract questions'
+                    logResolverError('createContractQuestion', msg, context)
+                    throw createForbiddenError(msg)
+                }
+
                 // Return error if contract status is DRAFT, contract will have no submitted revisions
                 // Return error if contract has been approved
                 if (

@@ -126,7 +126,9 @@ export const Landing = (): React.ReactElement => {
                                             <li>
                                                 <LinkWithLogging
                                                     aria-label="Required supporting documents"
-                                                    href={'/help#key-documents'}
+                                                    href={
+                                                        '/resources/help#key-documents'
+                                                    }
                                                 >
                                                     Required supporting
                                                     documents
@@ -145,7 +147,9 @@ export const Landing = (): React.ReactElement => {
                                             <li>
                                                 <LinkWithLogging
                                                     aria-label="Required supporting documents"
-                                                    href={'/help#key-documents'}
+                                                    href={
+                                                        '/resources/help#key-documents'
+                                                    }
                                                 >
                                                     Supporting documents
                                                 </LinkWithLogging>
@@ -255,7 +259,9 @@ export const Landing = (): React.ReactElement => {
                                     <li>
                                         <LinkWithLogging
                                             aria-label="Required supporting documents"
-                                            href={'/help#key-documents'}
+                                            href={
+                                                '/resources/help#key-documents'
+                                            }
                                         >
                                             Required supporting documents
                                         </LinkWithLogging>{' '}
