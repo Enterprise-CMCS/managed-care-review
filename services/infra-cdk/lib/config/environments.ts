@@ -46,7 +46,7 @@ const BASE_CONFIG = {
     database: {
         minCapacity: 1,
         maxCapacity: 16,
-        passwordRotationDays: 90,
+        passwordRotationDays: 30,
         enableDataApi: true,
     },
     lambda: {
