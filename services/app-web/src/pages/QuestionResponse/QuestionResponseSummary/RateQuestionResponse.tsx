@@ -11,7 +11,7 @@ import { GridContainer } from '@trussworks/react-uswds'
 import { QuestionResponseSubmitBanner } from '../../../components'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { getUserDivision } from '../QuestionResponseHelpers'
+import { extractQuestions, getUserDivision } from '../QuestionResponseHelpers'
 import { UserAccountWarningBanner } from '../../../components/Banner'
 import { useAuth } from '../../../contexts/AuthContext'
 import { RoutesRecord } from '@mc-review/constants'
@@ -86,6 +86,12 @@ export const RateQuestionResponse = () => {
         division = getUserDivision(loggedInUser as CmsUser)
     }
 
+    const canAddQuestions = rate.questions
+        ? extractQuestions(rate.questions).every(
+              (question) => question.responses.length > 0
+          )
+        : false
+
     return (
         <div className={styles.background} id={activeMainContentId}>
             <GridContainer className={styles.container}>
@@ -101,6 +107,7 @@ export const RateQuestionResponse = () => {
                         questionType="rate"
                         consolidatedStatus={rate.consolidatedStatus}
                         userDivision={division}
+                        canAddQuestionsGotAllResponses={canAddQuestions}
                     />
                 ) : (
                     <StateQuestionResponseTable

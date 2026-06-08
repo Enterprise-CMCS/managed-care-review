@@ -615,6 +615,43 @@ describe('ContractQuestionResponse', () => {
             )
         })
 
+        it('ability to add questions should exist for non approved contracts', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockSubmittedContractWithAnsweredQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockSubmittedContractWithAnsweredQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/health-plan/test-contract-id/question-and-answers`,
+                },
+            })
+
+            expect(
+                await screen.findByRole('link', { name: 'Add questions' })
+            ).toBeInTheDocument()
+        })
+
         it('renders Add questions link for EQRO when the feature flag is on', async () => {
             renderWithProviders(<CommonCMSRoutes />, {
                 apolloProvider: {
