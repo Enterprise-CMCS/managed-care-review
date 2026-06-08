@@ -1,8 +1,10 @@
 import type { Context } from '../handlers/apollo_gql'
 
-function createRequestContext(context: Pick<Context, 'user' | 'oauthClient'>) {
+function createRequestContext(
+    context: Pick<Context, 'user' | 'oauthClient' | 'requestId'>
+) {
     return {
-        // TODO: Include API Gateway requestId here to correlate resolver logs with OTEL http.request_id.
+        requestId: context.requestId,
         userId: context.user?.id,
         role: context.user?.role,
         oauthClient: context.oauthClient,
@@ -28,7 +30,7 @@ function logSuccess(operation: string) {
  */
 function logResolverSuccess(
     operation: string,
-    context: Pick<Context, 'user' | 'oauthClient'>
+    context: Pick<Context, 'user' | 'oauthClient' | 'requestId'>
 ) {
     console.info({
         message: `${operation} succeeded`,
@@ -60,7 +62,7 @@ function logError(operation: string, error: Error | string) {
 function logResolverError(
     operation: string,
     error: Error | string,
-    context: Pick<Context, 'user' | 'oauthClient'>
+    context: Pick<Context, 'user' | 'oauthClient' | 'requestId'>
 ) {
     console.error({
         message: `${operation} failed`,

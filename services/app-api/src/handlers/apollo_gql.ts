@@ -60,6 +60,7 @@ let s3Client: S3ClientT
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
     user: UserType
+    requestId?: string
     span?: Span
     tracer?: Tracer
     ctx?: OTELContext
@@ -277,6 +278,7 @@ function contextForRequestForFetcher(
 
                     return {
                         user: userResult,
+                        requestId: event.requestContext.requestId,
                         tracer: tracer,
                         ctx: parentContext,
                         span: requestSpan,
@@ -325,6 +327,7 @@ function contextForRequestForFetcher(
 
                     const context: Context = {
                         user: userResult,
+                        requestId: event.requestContext.requestId,
                         tracer: tracer,
                         ctx: parentContext,
                         span: requestSpan,
