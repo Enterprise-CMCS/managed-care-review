@@ -167,7 +167,7 @@ describe('SubmissionRevisionSummary', () => {
                 ).toBeInTheDocument()
                 // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
                 expect(
-                    await screen.findByLabelText('Submitted')
+                    await screen.findByLabelText('Submission date')
                 ).toHaveTextContent('12/31/2023')
             })
 
@@ -257,6 +257,43 @@ describe('SubmissionRevisionSummary', () => {
                 expect(
                     await screen.findByLabelText('Submission description')
                 ).toHaveTextContent('Submission 3')
+            })
+
+            it('returns 404 when the contract is an EQRO submission', async () => {
+                renderWithProviders(
+                    <Routes>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_REVISION}
+                            element={<SubmissionRevisionSummary />}
+                        />
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractMockSuccess({
+                                    contract:
+                                        mockContractPackageSubmittedWithRevisions(
+                                            {
+                                                id: '15',
+                                                contractSubmissionType: 'EQRO',
+                                            }
+                                        ),
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/15/revisions/2',
+                        },
+                        featureFlags: {},
+                    }
+                )
+                expect(await screen.findByRole('heading')).toHaveTextContent(
+                    '404 / Page not found'
+                )
             })
 
             it('renders the error indexed version 4', async () => {

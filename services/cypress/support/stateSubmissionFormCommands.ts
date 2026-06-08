@@ -663,10 +663,17 @@ Cypress.Commands.add('fillOutSupportingDocuments', () => {
 
 // for file upload with the table view and checkboxes- tableView can be assigned to a number that represents how many items in the list should be preses
 Cypress.Commands.add('waitForDocumentsToLoad', () => {
-    // list view is the default behavior
-    cy.findAllByTestId('file-input-preview-image', {
-        timeout: 200_000,
-    }).should('not.have.class', 'is-loading')
+    // React 19 + current FileUpload/Formik updates can replace preview nodes while
+    // uploads transition from PENDING -> SCANNING -> UPLOAD_COMPLETE.
+    // Use the current query root so this works both inside and outside `within()`.
+    // Assert via a callback so Cypress retries the whole check without requiring
+    // a transient loading element to exist first.
+    cy.root({ timeout: 200_000 }).should(($root) => {
+        expect(
+            $root.find('[data-testid="file-input-preview-image"].is-loading')
+                .length
+        ).to.eq(0)
+    })
 })
 
 Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {

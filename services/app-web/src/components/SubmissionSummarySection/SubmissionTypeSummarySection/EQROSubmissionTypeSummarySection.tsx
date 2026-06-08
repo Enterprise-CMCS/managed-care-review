@@ -9,7 +9,11 @@ import {
     getVisibleLatestContractFormData,
 } from '@mc-review/submissions'
 import { GenericErrorPage } from '../../../pages/Errors/GenericErrorPage'
-import { Contract, UnlockedContract } from '../../../gen/gqlClient'
+import {
+    Contract,
+    ContractRevision,
+    UnlockedContract,
+} from '../../../gen/gqlClient'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
     ContractProgramsSummary,
@@ -24,6 +28,7 @@ import { formattedProgramNames } from '../../../formHelpers'
 
 export type EQROSubmissionTypeSummarySection = {
     contract: Contract | UnlockedContract
+    contractRev?: ContractRevision
     editNavigateTo?: string
     headerChildComponent?: React.ReactElement
     subHeaderComponent?: React.ReactElement
@@ -69,6 +74,7 @@ const calcChangeInReviewDetermination = (
 
 export const EQROSubmissionTypeSummarySection = ({
     contract,
+    contractRev,
     initiallySubmittedAt,
     isStateUser,
     editNavigateTo,
@@ -77,8 +83,9 @@ export const EQROSubmissionTypeSummarySection = ({
     explainMissingData,
     headerText,
 }: EQROSubmissionTypeSummarySection): React.ReactElement => {
+    const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
-        contract,
+        contractOrRev,
         isStateUser
     )
     if (!contractFormData) return <GenericErrorPage />
@@ -95,21 +102,34 @@ export const EQROSubmissionTypeSummarySection = ({
     const isDraft = contract.status === 'DRAFT'
     const showReviewDetermination = !(isStateUser && (isUnlocked || isDraft))
 
-    const lastReviewDetermination = contract.reviewStatusActions?.find(
-        (action) =>
-            action.actionType === 'UNDER_REVIEW' ||
-            action.actionType === 'NOT_SUBJECT_TO_REVIEW'
-    )
+    let subjectToReview: boolean | undefined
+    let hasReviewDeterminationChanged = false
 
-    const subjectToReview =
-        lastReviewDetermination === undefined
-            ? undefined
-            : lastReviewDetermination.actionType === 'UNDER_REVIEW'
+    if (contractRev) {
+        // For a historical revision view, derive the determination from this
+        // revision's own form data rather than from contract-level review actions.
+        const derived = eqroValidationAndReviewDetermination(
+            contract.id,
+            contractFormData
+        )
+        subjectToReview = derived instanceof Error ? undefined : derived
+    } else {
+        const lastReviewDetermination = contract.reviewStatusActions?.find(
+            (action) =>
+                action.actionType === 'UNDER_REVIEW' ||
+                action.actionType === 'NOT_SUBJECT_TO_REVIEW'
+        )
 
-    const hasReviewDeterminationChanged = calcChangeInReviewDetermination(
-        contract,
-        subjectToReview
-    )
+        subjectToReview =
+            lastReviewDetermination === undefined
+                ? undefined
+                : lastReviewDetermination.actionType === 'UNDER_REVIEW'
+
+        hasReviewDeterminationChanged = calcChangeInReviewDetermination(
+            contract,
+            subjectToReview
+        )
+    }
 
     return (
         <SectionCard

@@ -308,6 +308,53 @@ jobs:
             --context stage=dev \
             --require-approval never
 
+      - name: Clean up orphaned Postgres secrets
+        run: |
+          SECRET_NAME="aurora-postgres-dev-cdk"
+
+          # || true: non-fatal — secret may not exist yet
+          SECRET_ARN=$(aws secretsmanager describe-secret \
+            --secret-id "$SECRET_NAME" \
+            --query 'ARN' --output text 2>/dev/null) || true
+
+          if [ -z "$SECRET_ARN" ] || [ "$SECRET_ARN" = "None" ]; then
+            echo "Secret $SECRET_NAME does not exist — nothing to clean up"
+            exit 0
+          fi
+
+          echo "Found secret: $SECRET_ARN"
+
+          # || true: non-fatal — stack may not exist yet; --output text returns "None" when missing
+          STACK_STATUS=$(aws cloudformation describe-stacks \
+            --stack-name postgres-dev-cdk \
+            --query 'Stacks[0].StackStatus' \
+            --output text 2>/dev/null) || true
+
+          if [ -z "$STACK_STATUS" ] || [ "$STACK_STATUS" = "None" ]; then
+            echo "Stack postgres-dev-cdk does not exist — secret is an orphan, deleting"
+            aws secretsmanager delete-secret \
+              --secret-id "$SECRET_ARN" \
+              --force-delete-without-recovery
+            exit 0
+          fi
+
+          # CF uses the secret ARN (not name) as PhysicalResourceId.
+          # No || true here — if this call fails we abort rather than risk deleting a tracked secret.
+          # --output text returns "None" (not empty) when the filter matches nothing.
+          TRACKED=$(aws cloudformation describe-stack-resources \
+            --stack-name postgres-dev-cdk \
+            --query "StackResources[?ResourceType=='AWS::SecretsManager::Secret'&&PhysicalResourceId=='$SECRET_ARN'].LogicalResourceId" \
+            --output text)
+
+          if [ -z "$TRACKED" ] || [ "$TRACKED" = "None" ]; then
+            echo "Secret $SECRET_ARN is not tracked by postgres-dev-cdk — deleting orphan"
+            aws secretsmanager delete-secret \
+              --secret-id "$SECRET_ARN" \
+              --force-delete-without-recovery
+          else
+            echo "Secret is tracked by CloudFormation (logical ID: $TRACKED) — skipping"
+          fi
+
       - name: Deploy Postgres stack
         working-directory: services/infra-cdk
         env:
@@ -397,6 +444,7 @@ jobs:
           STAGE_NAME: dev
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-dev-cdk \

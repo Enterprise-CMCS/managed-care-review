@@ -65,6 +65,8 @@ describe('createQuestion', () => {
                         name: 'Test Question',
                         s3URL: 's3://bucketname/key/test1',
                         downloadURL: expect.any(String),
+                        s3BucketName: 'bucketname',
+                        s3Key: 'allusers/key',
                     },
                 ],
                 addedBy: cmsUser,
@@ -117,6 +119,8 @@ describe('createQuestion', () => {
                                         name: 'Test Question',
                                         s3URL: 's3://bucketname/key/test1',
                                         downloadURL: expect.any(String),
+                                        s3BucketName: 'bucketname',
+                                        s3Key: 'allusers/key',
                                     },
                                 ],
                                 addedBy: cmsUser,
@@ -134,6 +138,8 @@ describe('createQuestion', () => {
                                         name: 'Test Question 2',
                                         s3URL: 's3://bucketname/key/test12',
                                         downloadURL: expect.any(String),
+                                        s3BucketName: 'bucketname',
+                                        s3Key: 'allusers/key',
                                     },
                                 ],
                                 addedBy: cmsUser,
@@ -342,6 +348,68 @@ describe('createQuestion', () => {
         expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
         expect(assertAnError(createdQuestion).message).toBe(
             `users without an assigned division are not authorized to create a question`
+        )
+    })
+    it('returns an error if a non-DMCO CMS user attempts to create a question for an EQRO contract', async () => {
+        const oactCmsUser = testCMSUser({ divisionAssignment: 'OACT' })
+        await createDBUsersWithFullData([oactCmsUser])
+
+        const stateServer = await constructTestPostgresServer()
+        const oactCmsServer = await constructTestPostgresServer({
+            context: {
+                user: oactCmsUser,
+            },
+        })
+
+        const draft = await createAndUpdateTestEQROContract(stateServer)
+        const contract = await submitTestContract(stateServer, draft.id)
+
+        const createdQuestion = await executeGraphQLOperation(oactCmsServer, {
+            query: CreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID: contract.id,
+                    documents: [
+                        {
+                            name: 'Test Question',
+                            s3URL: 's3://bucketname/key/test1',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(createdQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(createdQuestion)).toBe('FORBIDDEN')
+        expect(assertAnError(createdQuestion).message).toBe(
+            'only users assigned to the DMCO division are authorized to create EQRO contract questions'
+        )
+    })
+    it('allows a non-DMCO CMS user to create a question for a health plan submission', async () => {
+        const oactCmsUser = testCMSUser({ divisionAssignment: 'OACT' })
+        await createDBUsersWithFullData([oactCmsUser])
+
+        const stateServer = await constructTestPostgresServer()
+        const oactCmsServer = await constructTestPostgresServer({
+            context: {
+                user: oactCmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const createdQuestion = await createTestQuestion(
+            oactCmsServer,
+            contract.id
+        )
+
+        expect(createdQuestion).toEqual(
+            expect.objectContaining({
+                id: expect.any(String),
+                contractID: contract.id,
+                division: 'OACT',
+                addedBy: oactCmsUser,
+            })
         )
     })
     it('send state email to state contacts and all submitters when submitting a question succeeds', async () => {

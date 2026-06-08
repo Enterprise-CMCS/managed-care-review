@@ -32,7 +32,7 @@ describe('Admin user can undo an unlocked submission', () => {
                     submissionSummaryUrl
                 )
                 cy.findByTestId('submission-summary').should('exist')
-                cy.findByText('Submitted').should('exist')
+                cy.findAllByText('Submitted').should('exist')
                 cy.findByTestId('unlockedBanner').should('not.exist')
                 cy.findByRole('button', {
                     name: 'Undo submission unlock',

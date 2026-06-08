@@ -7,13 +7,13 @@ import {
     useParams,
 } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { idmRedirectURL } from '../../pages/Auth/cognitoAuth'
+import { idmRedirectURL } from '../Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '@mc-review/common-code'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '@mc-review/constants'
 import { getRouteName } from '../../routeHelpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
-import { useTitle } from '../../hooks/useTitle'
+import { useTitle } from '../../hooks'
 import { LocalLogin } from '../../localAuth'
 import { CognitoLogin } from '../Auth/CognitoLogin'
 import {
@@ -38,10 +38,10 @@ import {
     NewSubmissionForm,
 } from '../StateSubmission'
 import { SubmissionSummaryRoutes } from '../SubmissionSummary'
-import { SubmissionRevisionSummary } from '../SubmissionRevisionSummary'
-import { useScrollToPageTop } from '../../hooks/useScrollToPageTop'
+import { RevisionSummaryRoutes } from '../SubmissionRevisionSummary'
+import { useScrollToPageTop } from '../../hooks'
 import { featureFlags } from '@mc-review/common-code'
-import { useLocalStorage } from '../../hooks/useLocalStorage'
+import { useLocalStorage } from '../../hooks'
 import { recordJSException } from '@mc-review/otel'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import {
@@ -120,20 +120,6 @@ const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
         <Route
             path={RoutesRecord.CONTACT_US}
             element={showResourcesNavPages ? <ContactUs /> : <Error404 />}
-        />
-        <Route
-            path="/help"
-            element={<Navigate to={RoutesRecord.HELP} replace />}
-        />
-        <Route
-            path="/training"
-            element={
-                showResourcesNavPages ? (
-                    <Navigate to={RoutesRecord.RESOURCES_TRAINING} replace />
-                ) : (
-                    <Error404 />
-                )
-            }
         />
         <Route
             path={RoutesRecord.RESOURCES}
@@ -265,7 +251,11 @@ const StateUserRoutes = ({
                 </Route>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
-                    element={<SubmissionRevisionSummary />}
+                    element={
+                        <RevisionSummaryRoutes
+                            showEqroSubmissions={showEqroSubmissions}
+                        />
+                    }
                 />
                 {renderUniversalRoutes(showResourcesNavPages)}
                 {isExplorerAllowed(stageName) && (
@@ -445,7 +435,11 @@ const CMSUserRoutes = ({
 
                 <Route
                     path={RoutesRecord.SUBMISSIONS_REVISION}
-                    element={<SubmissionRevisionSummary />}
+                    element={
+                        <RevisionSummaryRoutes
+                            showEqroSubmissions={showEqroSubmissions}
+                        />
+                    }
                 />
                 {isExplorerAllowed(stageName) && (
                     <Route

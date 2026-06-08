@@ -114,6 +114,8 @@ export function fetchDocumentResolver(
                     s3URL: fetchedDocument.s3URL,
                     sha256: fetchedDocument.sha256 ?? undefined,
                     downloadURL: url,
+                    s3BucketName: fetchedDocument.s3BucketName ?? undefined,
+                    s3Key: fetchedDocument.s3Key ?? undefined,
                 }
 
                 logResolverSuccess(

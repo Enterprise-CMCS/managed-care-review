@@ -90,6 +90,22 @@ function submissionURL(
     return getSubmissionPath('SUBMISSIONS_SUMMARY', contractSubmissionType, id)
 }
 
+export const getConsolidatedContractStatusText = (
+    status: ConsolidatedContractStatus
+): string => {
+    if (status === 'SUBMITTED' || status === 'RESUBMITTED') {
+        return SubmissionStatusRecord['SUBMITTED']
+    }
+    if (
+        status === 'APPROVED' ||
+        status === 'WITHDRAWN' ||
+        status === 'NOT_SUBJECT_TO_REVIEW'
+    ) {
+        return SubmissionReviewStatusRecord[status]
+    }
+    return SubmissionStatusRecord[status]
+}
+
 export const StatusTag = ({
     status,
     notStateUser,
@@ -120,12 +136,6 @@ export const StatusTag = ({
         emphasize = !notStateUser
     }
 
-    const statusText = isSubmittedStatus
-        ? SubmissionStatusRecord['SUBMITTED']
-        : isApproved || isWithdrawn || isNotSubjectToReview
-          ? SubmissionReviewStatusRecord[status]
-          : SubmissionStatusRecord[status]
-
     return (
         <InfoTag
             color={color}
@@ -134,7 +144,7 @@ export const StatusTag = ({
                 isNotSubjectToReview ? styles.notSubjectToReviewTag : undefined
             }
         >
-            {statusText}
+            {getConsolidatedContractStatusText(status)}
         </InfoTag>
     )
 }

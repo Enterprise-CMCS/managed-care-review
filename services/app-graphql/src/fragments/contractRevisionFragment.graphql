@@ -92,5 +92,7 @@ fragment contractRevisionFragment on ContractRevision {
         documentType
         createdAt
         downloadUrl
+        s3BucketName
+        s3Key
     }
 }
