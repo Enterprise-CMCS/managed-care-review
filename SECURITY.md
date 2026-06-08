@@ -8,7 +8,7 @@ Please report vulnerabilities through one of these channels:
 
 1. **GitHub Private Vulnerability Reporting (preferred)**
    Use [GitHub's private advisory workflow](https://github.com/Enterprise-CMCS/managed-care-review/security/advisories/new).
-   This keeps disclosure coordinated and allows a CVE to be issued through the standard GitHub/NVD pipeline.
+   This keeps disclosure coordinated and may allow a CVE to be requested/issued through GitHub’s advisory process (when eligible).
 
 2. **CMS Vulnerability Disclosure Policy**
    Reports may also be submitted through the HHS/CMS VDP at
