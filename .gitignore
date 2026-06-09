@@ -6,6 +6,7 @@
 .dynamodb
 .yarn_install
 .pnpm_install
+.pnpm-store/
 node_modules
 testcafe_results
 .DS_Store

@@ -310,6 +310,64 @@ describe('RateQuestionResponse', () => {
                 </Route>
             </Routes>
         )
+
+        const rateWithAnsweredQuestions = () => {
+            const mockedResponse = fetchRateWithQuestionsMockSuccess({
+                rate: { id: 'test-rate-id' },
+            })
+            const rate = (
+                mockedResponse.result as {
+                    data: {
+                        fetchRate: { rate: ReturnType<typeof rateDataMock> }
+                    }
+                }
+            ).data.fetchRate.rate
+
+            return {
+                ...rate,
+                questions: {
+                    ...rate.questions!,
+                    DMCOQuestions: {
+                        ...rate.questions!.DMCOQuestions,
+                        edges: rate.questions!.DMCOQuestions.edges.map(
+                            (edge) =>
+                                edge.node.id === 'dmco-question-1-id'
+                                    ? {
+                                          ...edge,
+                                          node: {
+                                              ...edge.node,
+                                              responses: [
+                                                  {
+                                                      __typename:
+                                                          'QuestionResponse' as const,
+                                                      id: 'response-to-dmco-1-id',
+                                                      questionID:
+                                                          'dmco-question-1-id',
+                                                      addedBy:
+                                                          mockValidStateUser(),
+                                                      createdAt: new Date(
+                                                          '2022-12-16'
+                                                      ),
+                                                      documents: [
+                                                          {
+                                                              id: 'response-to-dmco-1-document-1',
+                                                              s3URL: 's3://bucketname/key/response-to-dmco-1-document-1',
+                                                              name: 'response-to-dmco-1-document-1',
+                                                              downloadURL:
+                                                                  'https://example.com/response-to-dmco-1-document-1',
+                                                          },
+                                                      ],
+                                                  },
+                                              ],
+                                          },
+                                      }
+                                    : edge
+                        ),
+                    },
+                },
+            }
+        }
+
         it('renders no questions text', async () => {
             const indexRateQuestions: IndexRateQuestionsPayload = {
                 __typename: 'IndexRateQuestionsPayload',
@@ -472,6 +530,38 @@ describe('RateQuestionResponse', () => {
             )
             expect(otherDivisionRounds[2]).toHaveTextContent(
                 'response-to-dmcp-1-document-1'
+            )
+
+            expect(
+                screen.queryByRole('link', { name: 'Add questions' })
+            ).not.toBeInTheDocument()
+        })
+
+        it('renders Add questions button when all existing rate questions have responses', async () => {
+            const rate = rateWithAnsweredQuestions()
+
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                        fetchRateWithQuestionsMockSuccess({ rate }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/rates/${rate.id}/question-and-answers`,
+                },
+            })
+
+            expect(
+                await screen.findByRole('link', { name: 'Add questions' })
+            ).toHaveAttribute(
+                'href',
+                `/rates/${rate.id}/question-and-answers/dmco/upload-questions`
             )
         })
         it('renders with question submit banner after question submitted', async () => {
