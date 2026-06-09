@@ -13,7 +13,8 @@ export class DatadogInfra extends BaseStack {
         })
 
         // S3 bucket for OpenTofu state. Name resolves to datadog-tf-state-{stage}-bucket-cdk.
-        // Always retained so monitor state is never accidentally destroyed.
+        // removalPolicy and autoDeleteObjects must stay explicit: SecureS3Bucket defaults to
+        // DESTROY/true for non-prod stages, which would wipe the TF state on stack recreation.
         const tfStateBucket = new SecureS3Bucket(this, 'TfStateBucket', {
             bucketName: 'datadog-tf-state',
             stage: this.stage,

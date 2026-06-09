@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+import 'source-map-support/register'
 import { AppConfigLoader } from '../lib/config/app'
 import { DatadogInfra } from '../lib/stacks/datadog-infra'
 import { getEnvironment, getCdkEnvironment } from '../lib/config/environments'

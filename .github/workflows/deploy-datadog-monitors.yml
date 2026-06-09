@@ -2,7 +2,7 @@ name: Deploy Datadog Monitors
 
 on:
   workflow_run:
-    workflows: ["Promote (CDK)"]
+    workflows: ['Promote (CDK)']
     types: [completed]
     branches: [main]
   pull_request:
@@ -31,7 +31,7 @@ jobs:
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: "1.9.0"
+          tofu_version: '1.9.0'
 
       - name: Validate
         working-directory: infra/datadog
@@ -61,7 +61,7 @@ jobs:
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: "1.9.0"
+          tofu_version: '1.9.0'
 
       - name: Plan monitors (dev)
         working-directory: infra/datadog
@@ -69,8 +69,12 @@ jobs:
           TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
           TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
         run: |
-          tofu init -backend-config="bucket=datadog-tf-state-dev-bucket-cdk"
-          set -o pipefail
+          set -eo pipefail
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name datadog-infra-dev-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
+            --output text)
+          tofu init -backend-config="bucket=$BUCKET"
           tofu plan -var-file=environments/dev.tfvars -no-color 2>&1 | tee plan_output.txt
 
       - name: Post plan as PR comment
@@ -112,6 +116,7 @@ jobs:
 
   deploy-monitors-dev:
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
+    needs: [validate]
     name: deploy - Datadog monitors (dev)
     runs-on: ubuntu-24.04
     environment: dev
@@ -130,7 +135,7 @@ jobs:
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: "1.9.0"
+          tofu_version: '1.9.0'
 
       - name: Apply monitors (dev)
         working-directory: infra/datadog
@@ -138,7 +143,12 @@ jobs:
           TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
           TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
         run: |
-          tofu init -backend-config="bucket=datadog-tf-state-dev-bucket-cdk"
+          set -eo pipefail
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name datadog-infra-dev-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
+            --output text)
+          tofu init -backend-config="bucket=$BUCKET"
           tofu apply -var-file=environments/dev.tfvars -auto-approve
 
   deploy-monitors-val:
@@ -162,7 +172,7 @@ jobs:
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: "1.9.0"
+          tofu_version: '1.9.0'
 
       - name: Apply monitors (val)
         working-directory: infra/datadog
@@ -170,7 +180,12 @@ jobs:
           TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
           TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
         run: |
-          tofu init -backend-config="bucket=datadog-tf-state-val-bucket-cdk"
+          set -eo pipefail
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name datadog-infra-val-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
+            --output text)
+          tofu init -backend-config="bucket=$BUCKET"
           tofu apply -var-file=environments/val.tfvars -auto-approve
 
   deploy-monitors-prod:
@@ -194,7 +209,7 @@ jobs:
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v2
         with:
-          tofu_version: "1.9.0"
+          tofu_version: '1.9.0'
 
       - name: Apply monitors (prod)
         working-directory: infra/datadog
@@ -202,5 +217,10 @@ jobs:
           TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
           TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
         run: |
-          tofu init -backend-config="bucket=datadog-tf-state-prod-bucket-cdk"
+          set -eo pipefail
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name datadog-infra-prod-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
+            --output text)
+          tofu init -backend-config="bucket=$BUCKET"
           tofu apply -var-file=environments/prod.tfvars -auto-approve

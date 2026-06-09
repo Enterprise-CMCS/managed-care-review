@@ -19,7 +19,8 @@ resource "datadog_monitor" "graphql_errors" {
     critical = var.graphql_error_threshold
   }
 
-  notify_no_data    = false
+  notify_no_data    = var.notify_no_data
+  no_data_timeframe = var.no_data_timeframe
   evaluation_delay  = 60
   renotify_interval = 60
   include_tags      = true
@@ -53,7 +54,8 @@ resource "datadog_monitor" "js_exceptions" {
     critical = var.js_error_threshold
   }
 
-  notify_no_data    = false
+  notify_no_data    = var.notify_no_data
+  no_data_timeframe = var.no_data_timeframe
   evaluation_delay  = 60
   renotify_interval = 60
   include_tags      = true

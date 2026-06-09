@@ -29,3 +29,15 @@ variable "js_error_threshold" {
   description = "JS exceptions in 5 minutes before alerting"
   default     = 5
 }
+
+variable "notify_no_data" {
+  type        = bool
+  description = "Alert when a monitor stops receiving data entirely (e.g. service crash with no traces)"
+  default     = false
+}
+
+variable "no_data_timeframe" {
+  type        = number
+  description = "Minutes of absent data before a no-data alert fires (only used when notify_no_data = true)"
+  default     = 10
+}
