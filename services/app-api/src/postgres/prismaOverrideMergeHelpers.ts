@@ -1210,6 +1210,7 @@ const mergeRateRevisionOverrides = ({
 
 export {
     mergeContractDocumentOverrides,
+    mergeDocumentOverrides,
     mergeContractRevisionOverrides,
     mergeRateRevisionOverrides,
     mergeScalarFieldOverrides,
@@ -1219,4 +1220,4 @@ export {
     validateScalarOverrideInput,
 }
 
-export type { DocumentWithCommonFields }
+export type { DocumentOverrideRow, DocumentWithCommonFields }
