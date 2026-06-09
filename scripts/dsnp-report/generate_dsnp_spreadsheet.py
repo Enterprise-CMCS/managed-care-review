@@ -101,7 +101,10 @@ def run_query(database_url, from_date, to_date, basis):
         "--csv",
         "-f", str(SQL_FILE),
     ]
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True)
+    except FileNotFoundError:
+        sys.exit("psql not found on PATH. Install the Postgres client and retry.")
     if result.returncode != 0:
         sys.exit(f"psql failed:\n{result.stderr}")
     return list(csv.DictReader(io.StringIO(result.stdout)))
@@ -109,10 +112,10 @@ def run_query(database_url, from_date, to_date, basis):
 
 def valid_date(s):
     try:
-        datetime.strptime(s, "%Y-%m-%d")
+        # normalize so "2025-11-4" becomes the canonical "2025-11-04"
+        return datetime.strptime(s, "%Y-%m-%d").strftime("%Y-%m-%d")
     except ValueError:
         raise argparse.ArgumentTypeError(f"{s!r} is not a valid YYYY-MM-DD date")
-    return s
 
 
 def main():
@@ -141,6 +144,9 @@ def main():
     if args.to_date and args.from_date and args.to_date < args.from_date:
         sys.exit(f"TO date {args.to_date} is before FROM date {args.from_date}.")
     out_path = args.out
+    out_dir = os.path.dirname(os.path.abspath(out_path))
+    if not os.path.isdir(out_dir):
+        sys.exit(f"Output directory does not exist: {out_dir}")
 
     lookup = load_program_lookup()
     rows = run_query(args.database_url, args.from_date, args.to_date, args.by)
