@@ -70,6 +70,11 @@ const extractQuestions = (
     return flattenedQuestions
 }
 
+const allQuestionsAnswered = (questions?: IndexQuestionType): boolean =>
+    extractQuestions(questions).every(
+        (question) => question.responses.length > 0
+    )
+
 // Combines question and response documents and sorts them in desc order.
 const extractDocumentsFromQuestion = (
     question: QuestionType
@@ -161,6 +166,7 @@ const getAddedByName = (currentUser: User, addedBy: User) => {
 }
 
 export {
+    allQuestionsAnswered,
     extractQuestions,
     getUserDivision,
     getDivisionOrder,
