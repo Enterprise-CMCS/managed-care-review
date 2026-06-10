@@ -8,7 +8,7 @@ import type { State } from '../../gen/gqlServer'
 import { pluralize } from '@mc-review/common-code'
 import type { InsertContractArgsType } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 
 export function createContract(
     store: Store

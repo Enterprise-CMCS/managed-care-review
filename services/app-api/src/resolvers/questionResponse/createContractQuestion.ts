@@ -7,7 +7,7 @@ import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { StateCodeType } from '@mc-review/submissions'
 import { parseAndValidateDocuments } from '../documentHelpers'
 

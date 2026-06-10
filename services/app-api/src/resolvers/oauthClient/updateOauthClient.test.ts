@@ -73,6 +73,166 @@ describe('updateOauthClient', () => {
         expect(oauthClient.scopes).toEqual(updateInput.scopes)
     })
 
+    it('updates an OAuth client associated with an ADMIN user', async () => {
+        const adminUser = testAdminUser()
+        const oauthAdminUser = testAdminUser({
+            email: 'update-oauth-admin@example.com',
+        })
+
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: oauthAdminUser.id,
+                givenName: oauthAdminUser.givenName,
+                familyName: oauthAdminUser.familyName,
+                email: oauthAdminUser.email,
+                role: oauthAdminUser.role,
+            },
+        })
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+
+        const createRes = await executeGraphQLOperation(server, {
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Initial admin OAuth client',
+                    grants: ['client_credentials'],
+                    scopes: [OAuthScope.ADMIN_SUBMISSION_ACTIONS],
+                    userID: oauthAdminUser.id,
+                },
+            },
+        })
+        expect(createRes.errors).toBeUndefined()
+        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
+
+        const res = await executeGraphQLOperation(server, {
+            query: UpdateOauthClientDocument,
+            variables: {
+                input: {
+                    clientId,
+                    description: 'Updated admin OAuth client',
+                    scopes: [OAuthScope.ADMIN_SUBMISSION_ACTIONS],
+                },
+            },
+        })
+
+        expect(res.errors).toBeUndefined()
+        const oauthClient = res.data?.updateOauthClient.oauthClient
+        expect(oauthClient).toBeDefined()
+        expect(oauthClient.description).toBe('Updated admin OAuth client')
+        expect(oauthClient.scopes).toEqual([
+            OAuthScope.ADMIN_SUBMISSION_ACTIONS,
+        ])
+        expect(oauthClient.user.id).toBe(oauthAdminUser.id)
+        expect(oauthClient.user.email).toBe(oauthAdminUser.email)
+        expect(oauthClient.user.role).toBe('ADMIN_USER')
+    })
+
+    it('updates an ADMIN user OAuth client with CMS_SUBMISSION_ACTIONS scope', async () => {
+        const adminUser = testAdminUser()
+        const oauthAdminUser = testAdminUser({
+            email: 'update-oauth-admin-cms-scope@example.com',
+        })
+
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: oauthAdminUser.id,
+                givenName: oauthAdminUser.givenName,
+                familyName: oauthAdminUser.familyName,
+                email: oauthAdminUser.email,
+                role: oauthAdminUser.role,
+            },
+        })
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+
+        const createRes = await executeGraphQLOperation(server, {
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Initial admin OAuth client',
+                    grants: ['client_credentials'],
+                    userID: oauthAdminUser.id,
+                },
+            },
+        })
+        expect(createRes.errors).toBeUndefined()
+        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
+
+        const res = await executeGraphQLOperation(server, {
+            query: UpdateOauthClientDocument,
+            variables: {
+                input: {
+                    clientId,
+                    scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
+                },
+            },
+        })
+
+        expect(res.errors).toBeUndefined()
+        const oauthClient = res.data?.updateOauthClient.oauthClient
+        expect(oauthClient).toBeDefined()
+        expect(oauthClient.scopes).toEqual([OAuthScope.CMS_SUBMISSION_ACTIONS])
+        expect(oauthClient.user.id).toBe(oauthAdminUser.id)
+        expect(oauthClient.user.role).toBe('ADMIN_USER')
+    })
+
+    it('errors when assigning ADMIN_SUBMISSION_ACTIONS scope to a CMS user client', async () => {
+        const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+            },
+        })
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+
+        const createRes = await executeGraphQLOperation(server, {
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Initial CMS OAuth client',
+                    grants: ['client_credentials'],
+                    scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
+                    userID: cmsUser.id,
+                },
+            },
+        })
+        expect(createRes.errors).toBeUndefined()
+        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
+
+        const res = await executeGraphQLOperation(server, {
+            query: UpdateOauthClientDocument,
+            variables: {
+                input: {
+                    clientId,
+                    scopes: [OAuthScope.ADMIN_SUBMISSION_ACTIONS],
+                },
+            },
+        })
+
+        expect(res.errors?.[0].message).toMatch(
+            /ADMIN_SUBMISSION_ACTIONS scope can only be assigned to ADMIN users/
+        )
+        expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(res.errors?.[0].extensions?.argumentName).toBe('scopes')
+    })
+
     it('ignores empty string values', async () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()

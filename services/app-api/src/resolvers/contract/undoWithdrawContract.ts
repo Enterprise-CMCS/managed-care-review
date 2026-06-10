@@ -12,7 +12,7 @@ import { GraphQLError } from 'graphql/index'
 import { hasCMSPermissions } from '../../domain-models'
 import type { StateCodeType } from '@mc-review/submissions'
 import type { Emailer } from '../../emailer'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 
 export function undoWithdrawContract(

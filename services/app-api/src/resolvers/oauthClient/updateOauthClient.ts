@@ -3,10 +3,10 @@ import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
 import type { OAuthScope } from '../../generated/enums'
 import { logResolverError, logResolverSuccess } from '../../logger'
-import { createForbiddenError } from '../errorUtils'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canHaveOAuthScopes, canWrite } from '../../oauth/oauthAuthorization'
 
 export function updateOauthClientResolver(
     store: Store
@@ -38,6 +38,40 @@ export function updateOauthClientResolver(
                         'user not authorized to update OAuth clients'
                     logResolverError('updateOauthClient', message, context)
                     throw createForbiddenError(message)
+                }
+
+                if (input.scopes && input.scopes.length > 0) {
+                    const oauthClient = await store.getOAuthClientByClientId(
+                        input.clientId
+                    )
+
+                    if (oauthClient instanceof Error) {
+                        const message = `Failed to fetch OAuth client: ${oauthClient.message}`
+                        logResolverError('updateOauthClient', message, context)
+                        throw new GraphQLError(message, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+
+                    if (!oauthClient) {
+                        throw new GraphQLError('OAuth client not found', {
+                            extensions: {
+                                code: 'NOT_FOUND',
+                                cause: 'CLIENT_NOT_FOUND',
+                            },
+                        })
+                    }
+
+                    if (
+                        !canHaveOAuthScopes(oauthClient.user.role, input.scopes)
+                    ) {
+                        const message = `ADMIN_SUBMISSION_ACTIONS scope can only be assigned to ADMIN users`
+                        logResolverError('updateOauthClient', message, context)
+                        throw createUserInputError(message, 'scopes')
+                    }
                 }
 
                 // Build update data object with only provided fields

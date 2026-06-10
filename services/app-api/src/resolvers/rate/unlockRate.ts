@@ -7,7 +7,7 @@ import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasCMSPermissions } from '../../domain-models'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 
 export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
     return async (_parent, { input }, context) => {

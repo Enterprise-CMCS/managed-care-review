@@ -2,10 +2,13 @@ import { describe, it, expect } from 'vitest'
 import type { Context } from '../handlers/apollo_gql'
 import type { UserType } from '../domain-models'
 import {
+    hasDelegatedOAuthScope,
     isOAuthClientCredentials,
     canRead,
     canWrite,
     canOauthWrite,
+    canOauthAdminWrite,
+    canHaveOAuthScopes,
 } from './oauthAuthorization'
 
 // Mock users for testing
@@ -29,6 +32,79 @@ const mockCMSUser: UserType = {
 }
 
 describe('OAuth Authorization', () => {
+    describe('canHaveOAuthScopes', () => {
+        it('allows admin submission actions scope for admin users', () => {
+            expect(
+                canHaveOAuthScopes('ADMIN_USER', ['ADMIN_SUBMISSION_ACTIONS'])
+            ).toBe(true)
+        })
+
+        it('allows CMS submission actions scope for admin users', () => {
+            expect(
+                canHaveOAuthScopes('ADMIN_USER', ['CMS_SUBMISSION_ACTIONS'])
+            ).toBe(true)
+        })
+
+        it('denies admin submission actions scope for CMS users', () => {
+            expect(
+                canHaveOAuthScopes('CMS_USER', ['ADMIN_SUBMISSION_ACTIONS'])
+            ).toBe(false)
+        })
+
+        it('allows CMS submission actions scope for CMS users', () => {
+            expect(
+                canHaveOAuthScopes('CMS_USER', ['CMS_SUBMISSION_ACTIONS'])
+            ).toBe(true)
+        })
+    })
+
+    describe('hasDelegatedOAuthScope', () => {
+        it('returns true for OAuth client with CMS submission actions scope', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: false,
+                },
+            }
+
+            expect(hasDelegatedOAuthScope(context.oauthClient)).toBe(true)
+        })
+
+        it('returns true for OAuth client with admin submission actions scope', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: false,
+                },
+            }
+
+            expect(hasDelegatedOAuthScope(context.oauthClient)).toBe(true)
+        })
+
+        it('returns false for OAuth client without delegated request scopes', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: [],
+                    isDelegatedUser: false,
+                },
+            }
+
+            expect(hasDelegatedOAuthScope(context.oauthClient)).toBe(false)
+        })
+    })
+
     describe('isOAuthClientCredentials', () => {
         it('returns true for OAuth client with client_credentials', () => {
             const context: Context = {
@@ -156,6 +232,53 @@ describe('OAuth Authorization', () => {
             }
 
             expect(canOauthWrite(context)).toBe(false)
+        })
+    })
+
+    describe('canOauthAdminWrite', () => {
+        it('allows writing for delegated OAuth client with admin submission actions scope', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(canOauthAdminWrite(context)).toBe(true)
+        })
+
+        it('denies writing for delegated OAuth client without admin submission actions scope', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(canOauthAdminWrite(context)).toBe(false)
+        })
+
+        it('denies writing for non-delegated OAuth client with admin submission actions scope', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: false,
+                },
+            }
+
+            expect(canOauthAdminWrite(context)).toBe(false)
         })
     })
 })

@@ -10,7 +10,7 @@ import {
     type Store,
 } from '../../postgres'
 import { GraphQLError } from 'graphql'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 
 export function deleteContractQuestionResolver(
     store: Store

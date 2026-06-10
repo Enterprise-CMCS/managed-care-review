@@ -1,11 +1,52 @@
 import { OAuthScope } from '../generated/enums'
 import type { Context } from '../handlers/apollo_gql'
+import type { UserRoles } from '../domain-models/UserType'
 
 /**
  * context.oauthClient:
  * Only exists for OAuth-authenticated requests.
  * Undefined for non-OAuth requests.
  */
+
+const delegatedOAuthScopes = new Set<string>([
+    OAuthScope.CMS_SUBMISSION_ACTIONS,
+    OAuthScope.ADMIN_SUBMISSION_ACTIONS,
+])
+
+export const validDelegatedUserRoles: UserRoles[] = [
+    'CMS_USER',
+    'CMS_APPROVER_USER',
+    'ADMIN_USER',
+]
+
+/**
+ * Checks whether a user's role is allowed to receive the requested OAuth scopes.
+ */
+export function canHaveOAuthScopes(
+    userRole: UserRoles,
+    scopes: OAuthScope[] | null | undefined
+): boolean {
+    if (scopes?.includes(OAuthScope.ADMIN_SUBMISSION_ACTIONS)) {
+        return userRole === 'ADMIN_USER'
+    }
+
+    return true
+}
+
+/**
+ * Checks whether an OAuth client has any scope that permits delegated requests.
+ *
+ * This is the broad context-building gate for honoring `x-acting-as-user`.
+ * Endpoint-specific authorization still belongs in `canOauthWrite`,
+ * `canOauthAdminWrite`, and resolver role checks.
+ */
+export function hasDelegatedOAuthScope(
+    oauthClient: Context['oauthClient']
+): boolean {
+    return !!oauthClient?.scopes?.some((scope) =>
+        delegatedOAuthScopes.has(scope)
+    )
+}
 
 /**
  * Checks if the context represents an OAuth client with client_credentials grant
@@ -67,5 +108,21 @@ export function canOauthWrite(context: Context): boolean {
     }
 
     // Regular authenticated users can write (subject to role-specific restrictions in resolvers)
+    return true
+}
+
+/**
+ * Checks if the current context is an OAuth client with admin write permissions.
+ */
+export function canOauthAdminWrite(context: Context): boolean {
+    if (context.oauthClient) {
+        return !!(
+            context.oauthClient.isDelegatedUser &&
+            context.oauthClient.scopes?.includes(
+                OAuthScope.ADMIN_SUBMISSION_ACTIONS
+            )
+        )
+    }
+
     return true
 }
