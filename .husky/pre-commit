@@ -1,6 +1,6 @@
 # In a continuing effort to print errors when they are needed, we check for
 # all pre-commit dependency requirements here.
-requirements=("protolint" "shellcheck" "detect-secrets" "tofu")
+requirements=("protolint" "shellcheck" "detect-secrets")
 
 for req in "${requirements[@]}"; do
     if ! command -v "$req" &> /dev/null; then
@@ -11,5 +11,5 @@ done
 # Detect secrets in commit, excluding pnpm-lock.yaml
 git diff --staged --name-only -z | grep -zv 'pnpm-lock.yaml' | xargs -0 detect-secrets-hook
 
-# Run "precommit" in all pnpm workspaces 
+# Run "precommit" in all pnpm workspaces
 pnpm lint-staged --allow-empty
