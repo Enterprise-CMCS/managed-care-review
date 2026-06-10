@@ -38,7 +38,7 @@ jobs:
         run: |
           tofu init -backend=false
           tofu validate
-          tofu fmt --check
+          tofu fmt -check
 
   plan:
     if: ${{ github.event_name == 'pull_request' }}
