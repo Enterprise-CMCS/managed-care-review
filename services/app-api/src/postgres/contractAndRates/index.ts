@@ -9,8 +9,10 @@ export type { UndoUnlockContractArgsType } from './undoUnlockContract'
 export type { UpdateMCCRSIDFormArgsType } from './updateMCCRSID'
 export type { SubmitContractArgsType } from './submitContract'
 export type { SubmitRateArgsType } from './submitRate'
+export type { OverrideContractDataArgsType } from './overrideContractData'
 export { submitContract } from './submitContract'
 export { submitRate } from './submitRate'
+export { overrideContractData } from './overrideContractData'
 export {
     unlockContract,
     unlockContractInsideTransaction,

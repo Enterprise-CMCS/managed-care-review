@@ -7,19 +7,16 @@ fragment rateOverridesFragment on RateOverrideType {
     description
     overrides {
         initiallySubmittedAt
+        initiallySubmittedAtOp
         revisionOverride {
             id
             createdAt
             rateRevisionID
             rateDocuments {
-                id
-                documentID
-                dateAdded
+                ...genericDocumentOverrideFragment
             }
             supportingDocuments {
-                id
-                documentID
-                dateAdded
+                ...genericDocumentOverrideFragment
             }
         }
     }
