@@ -339,6 +339,17 @@ jobs:
             --context stage=dev \
             --require-approval never
 
+      - name: Deploy Datadog infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Deploying Datadog infrastructure stack ==="
+          pnpm cdk deploy datadog-infra-dev-cdk \
+            --app 'pnpm tsx bin/datadog-infra.ts' \
+            --context stage=dev \
+            --require-approval never
+
   deploy-frontend-app-dev:
     needs:
       [
@@ -687,6 +698,17 @@ jobs:
             --context stage=val \
             --require-approval never
 
+      - name: Deploy Datadog infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: val
+        run: |
+          echo "=== Deploying Datadog infrastructure stack ==="
+          pnpm cdk deploy datadog-infra-val-cdk \
+            --app 'pnpm tsx bin/datadog-infra.ts' \
+            --context stage=val \
+            --require-approval never
+
   deploy-cdk-app-val:
     needs:
       [
@@ -1023,6 +1045,17 @@ jobs:
           echo "=== Deploying Cognito stack ==="
           pnpm cdk deploy cognito-prod-cdk \
             --app 'pnpm tsx bin/cognito.ts' \
+            --context stage=prod \
+            --require-approval never
+
+      - name: Deploy Datadog infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          echo "=== Deploying Datadog infrastructure stack ==="
+          pnpm cdk deploy datadog-infra-prod-cdk \
+            --app 'pnpm tsx bin/datadog-infra.ts' \
             --context stage=prod \
             --require-approval never
 
