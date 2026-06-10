@@ -2,7 +2,7 @@ resource "datadog_monitor" "graphql_errors" {
   name = "[${var.environment}] MCR - GraphQL API Errors"
   type = "trace-analytics alert"
 
-  query = "traces(\"service:app-api-${var.environment} @error:true\").rollup(\"count\").last(\"5m\") > ${var.graphql_error_threshold}"
+  query = "trace-analytics(\"service:app-api-${var.environment} status:error\").rollup(\"count\").last(\"5m\") > ${var.graphql_error_threshold}"
 
   message = <<-EOT
     GraphQL API errors detected in **${var.environment}**.
@@ -37,7 +37,7 @@ resource "datadog_monitor" "web_trace_errors" {
   name = "[${var.environment}] MCR - Web Application Trace Errors"
   type = "trace-analytics alert"
 
-  query = "traces(\"service:app-web-${var.environment} @error:true\").rollup(\"count\").last(\"5m\") > ${var.web_error_threshold}"
+  query = "trace-analytics(\"service:app-web-${var.environment} status:error\").rollup(\"count\").last(\"5m\") > ${var.web_error_threshold}"
 
   message = <<-EOT
     Trace errors detected in the MCR web app in **${var.environment}**.
