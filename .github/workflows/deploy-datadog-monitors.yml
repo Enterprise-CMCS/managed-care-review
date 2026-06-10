@@ -79,7 +79,7 @@ jobs:
           tofu plan -var-file=environments/dev.tfvars -no-color -input=false 2>&1 | tee plan_output.txt
 
       - name: Post plan as PR comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         if: always()
         with:
           script: |
