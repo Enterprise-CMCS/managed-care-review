@@ -33,16 +33,16 @@ resource "datadog_monitor" "graphql_errors" {
   ]
 }
 
-resource "datadog_monitor" "js_exceptions" {
+resource "datadog_monitor" "web_trace_errors" {
   name = "[${var.environment}] MCR - Web Application Trace Errors"
   type = "trace-analytics alert"
 
-  query = "traces(\"service:app-web-${var.environment} @error:true\").rollup(\"count\").last(\"5m\") > ${var.js_error_threshold}"
+  query = "traces(\"service:app-web-${var.environment} @error:true\").rollup(\"count\").last(\"5m\") > ${var.web_error_threshold}"
 
   message = <<-EOT
     Trace errors detected in the MCR web app in **${var.environment}**.
 
-    Triggered when >${var.js_error_threshold} errors are recorded in OTEL spans from `app-web-${var.environment}` in 5 minutes.
+    Triggered when >${var.web_error_threshold} errors are recorded in OTEL spans from `app-web-${var.environment}` in 5 minutes.
 
     - Review error details in Datadog APM under service `app-web-${var.environment}`
     - Review recent frontend deployments
@@ -51,7 +51,7 @@ resource "datadog_monitor" "js_exceptions" {
   EOT
 
   monitor_thresholds {
-    critical = var.js_error_threshold
+    critical = var.web_error_threshold
   }
 
   notify_no_data    = var.notify_no_data

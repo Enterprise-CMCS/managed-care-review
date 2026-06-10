@@ -24,9 +24,9 @@ variable "graphql_error_threshold" {
   default     = 5
 }
 
-variable "js_error_threshold" {
+variable "web_error_threshold" {
   type        = number
-  description = "JS exceptions in 5 minutes before alerting"
+  description = "Trace errors from app-web in 5 minutes before alerting"
   default     = 5
 }
 

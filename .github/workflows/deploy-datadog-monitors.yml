@@ -36,7 +36,7 @@ jobs:
       - name: Validate
         working-directory: infra/datadog
         run: |
-          tofu init -backend=false
+          tofu init -backend=false -input=false
           tofu validate
           tofu fmt -check
 
@@ -74,8 +74,8 @@ jobs:
             --stack-name datadog-infra-dev-cdk \
             --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
             --output text)
-          tofu init -backend-config="bucket=$BUCKET"
-          tofu plan -var-file=environments/dev.tfvars -no-color 2>&1 | tee plan_output.txt
+          tofu init -backend-config="bucket=$BUCKET" -input=false
+          tofu plan -var-file=environments/dev.tfvars -no-color -input=false 2>&1 | tee plan_output.txt
 
       - name: Post plan as PR comment
         uses: actions/github-script@v7
@@ -148,8 +148,8 @@ jobs:
             --stack-name datadog-infra-dev-cdk \
             --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
             --output text)
-          tofu init -backend-config="bucket=$BUCKET"
-          tofu apply -var-file=environments/dev.tfvars -auto-approve
+          tofu init -backend-config="bucket=$BUCKET" -input=false
+          tofu apply -var-file=environments/dev.tfvars -auto-approve -input=false -no-color
 
   deploy-monitors-val:
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
@@ -185,8 +185,8 @@ jobs:
             --stack-name datadog-infra-val-cdk \
             --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
             --output text)
-          tofu init -backend-config="bucket=$BUCKET"
-          tofu apply -var-file=environments/val.tfvars -auto-approve
+          tofu init -backend-config="bucket=$BUCKET" -input=false
+          tofu apply -var-file=environments/val.tfvars -auto-approve -input=false -no-color
 
   deploy-monitors-prod:
     if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
@@ -222,5 +222,5 @@ jobs:
             --stack-name datadog-infra-prod-cdk \
             --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
             --output text)
-          tofu init -backend-config="bucket=$BUCKET"
-          tofu apply -var-file=environments/prod.tfvars -auto-approve
+          tofu init -backend-config="bucket=$BUCKET" -input=false
+          tofu apply -var-file=environments/prod.tfvars -auto-approve -input=false -no-color
