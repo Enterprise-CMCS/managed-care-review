@@ -133,10 +133,10 @@ describe('CreateOauthClient', () => {
 
         expect(screen.getByText('cmsUser1@example.com')).toBeInTheDocument()
         expect(screen.getByText('cmsUser2@example.com')).toBeInTheDocument()
+        expect(screen.getByText('cmsAdmin1@example.com')).toBeInTheDocument()
         expect(screen.queryByText('HelpDesk User')).toBeNull()
         expect(screen.queryByText('BusinessOwner User')).toBeNull()
         expect(screen.queryByText('State User')).toBeNull()
-        expect(screen.queryByText('Admin User')).toBeNull()
         expect(screen.queryByText('cmsUser3@example.com')).toBeInTheDocument()
         expect(screen.queryByText('cmsUser4@example.com')).toBeInTheDocument()
     })

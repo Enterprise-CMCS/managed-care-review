@@ -173,8 +173,23 @@ export function configureResolvers(
             __resolveType(obj) {
                 if (obj.role === 'CMS_USER') {
                     return 'CMSUser'
-                } else {
+                } else if (obj.role === 'CMS_APPROVER_USER') {
                     return 'CMSApproverUser'
+                } else {
+                    return null
+                }
+            },
+        },
+        OAuthUser: {
+            __resolveType(obj) {
+                if (obj.role === 'CMS_USER') {
+                    return 'CMSUser'
+                } else if (obj.role === 'CMS_APPROVER_USER') {
+                    return 'CMSApproverUser'
+                } else if (obj.role === 'ADMIN_USER') {
+                    return 'AdminUser'
+                } else {
+                    return null
                 }
             },
         },

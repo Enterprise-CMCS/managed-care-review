@@ -53,6 +53,124 @@ describe('createOauthClient', () => {
         expect(oauthClient.user.id).toBe(cmsUser.id)
     })
 
+    it('creates a new OAuth client associated with an ADMIN user', async () => {
+        const adminUser = testAdminUser()
+        const oauthAdminUser = testAdminUser({
+            email: 'oauth-admin@example.com',
+        })
+
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: oauthAdminUser.id,
+                givenName: oauthAdminUser.givenName,
+                familyName: oauthAdminUser.familyName,
+                email: oauthAdminUser.email,
+                role: oauthAdminUser.role,
+            },
+        })
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+        const input = {
+            grants: ['client_credentials'],
+            scopes: [OAuthScope.ADMIN_SUBMISSION_ACTIONS],
+            description: 'Admin OAuth client',
+            userID: oauthAdminUser.id,
+        }
+        const res = await executeGraphQLOperation(server, {
+            query: CreateOauthClientDocument,
+            variables: { input },
+        })
+
+        expect(res.errors).toBeUndefined()
+        const oauthClient = res.data?.createOauthClient.oauthClient
+        expect(oauthClient).toBeDefined()
+        expect(oauthClient?.scopes).toEqual([
+            OAuthScope.ADMIN_SUBMISSION_ACTIONS,
+        ])
+        expect(oauthClient?.user).toBeDefined()
+        expect(oauthClient?.user.id).toBe(oauthAdminUser.id)
+        expect(oauthClient?.user.role).toBe('ADMIN_USER')
+    })
+
+    it('creates an ADMIN user OAuth client with CMS_SUBMISSION_ACTIONS scope', async () => {
+        const adminUser = testAdminUser()
+        const oauthAdminUser = testAdminUser({
+            email: 'oauth-admin-cms-scope@example.com',
+        })
+
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: oauthAdminUser.id,
+                givenName: oauthAdminUser.givenName,
+                familyName: oauthAdminUser.familyName,
+                email: oauthAdminUser.email,
+                role: oauthAdminUser.role,
+            },
+        })
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+        const input = {
+            grants: ['client_credentials'],
+            scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
+            description: 'Admin OAuth client with CMS scope',
+            userID: oauthAdminUser.id,
+        }
+        const res = await executeGraphQLOperation(server, {
+            query: CreateOauthClientDocument,
+            variables: { input },
+        })
+
+        expect(res.errors).toBeUndefined()
+        const oauthClient = res.data?.createOauthClient.oauthClient
+        expect(oauthClient).toBeDefined()
+        expect(oauthClient?.scopes).toEqual([OAuthScope.CMS_SUBMISSION_ACTIONS])
+        expect(oauthClient?.user.id).toBe(oauthAdminUser.id)
+        expect(oauthClient?.user.role).toBe('ADMIN_USER')
+    })
+
+    it('errors when assigning ADMIN_SUBMISSION_ACTIONS scope to a CMS user client', async () => {
+        const adminUser = testAdminUser()
+        const cmsUser = testCMSUser()
+
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: cmsUser.id,
+                givenName: cmsUser.givenName,
+                familyName: cmsUser.familyName,
+                email: cmsUser.email,
+                role: cmsUser.role,
+            },
+        })
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+        const res = await executeGraphQLOperation(server, {
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    grants: ['client_credentials'],
+                    scopes: [OAuthScope.ADMIN_SUBMISSION_ACTIONS],
+                    description: 'Invalid admin scope client',
+                    userID: cmsUser.id,
+                },
+            },
+        })
+
+        expect(res.errors?.[0].message).toMatch(
+            /ADMIN_SUBMISSION_ACTIONS scope can only be assigned to ADMIN users/
+        )
+        expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(res.errors?.[0].extensions?.argumentName).toBe('scopes')
+    })
+
     it('defaults to ["client_credentials"] if no grants provided', async () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
@@ -202,7 +320,7 @@ describe('createOauthClient', () => {
         expect(res.data?.createOauthClient.oauthClient).toBeDefined()
     })
 
-    it('errors when trying to associate OAuth client with non-CMS user', async () => {
+    it('errors when trying to associate OAuth client with an ineligible user', async () => {
         const adminUser = testAdminUser()
         const stateUser = testStateUser()
 
@@ -232,7 +350,7 @@ describe('createOauthClient', () => {
             variables: { input },
         })
         expect(res.errors?.[0].message).toMatch(
-            /OAuth clients can only be associated with CMS users/
+            /OAuth clients can only be associated with CMS or admin users/
         )
     })
 })

@@ -983,6 +983,8 @@ type CMSApproverUser {
 
 union CMSUsersUnion = CMSUser | CMSApproverUser
 
+union OAuthUser = CMSUser | CMSApproverUser | AdminUser
+
 "AdminUser is a user that works on the MC Review app itself"
 type AdminUser {
     id: ID!
@@ -2823,7 +2825,7 @@ type OauthClient {
     description: String
     createdAt: DateTime!
     updatedAt: DateTime!
-    user: CMSUsersUnion!
+    user: OAuthUser!
     scopes: [OAuthScope!]!
 }
 
@@ -2923,6 +2925,7 @@ enum ContractSubmissionType {
 
 enum OAuthScope {
     CMS_SUBMISSION_ACTIONS
+    ADMIN_SUBMISSION_ACTIONS
 }
 
 enum UploadBucketName {

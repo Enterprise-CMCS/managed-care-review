@@ -2,10 +2,10 @@ import { MockLink } from '@apollo/client/testing'
 import {
     FetchOauthClientsDocument,
     FetchOauthClientsQuery,
-    CmsUsersUnion,
     CreateOauthClientDocument,
     CreateOauthClientInput,
     CreateOauthClientMutation,
+    OAuthUser,
 } from '../gen/gqlClient'
 import { GraphQLError } from 'graphql'
 import { v4 as uuidv4 } from 'uuid'
@@ -74,7 +74,7 @@ const createOauthClientMockSuccess = ({
     user,
 }: {
     input: CreateOauthClientInput
-    user: CmsUsersUnion
+    user: OAuthUser
 }): MockLink.MockedResponse<CreateOauthClientMutation> => {
     return {
         request: {

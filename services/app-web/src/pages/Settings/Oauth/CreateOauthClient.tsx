@@ -128,7 +128,8 @@ export const CreateOauthClient = (): React.ReactElement => {
     indexUsers.forEach((user) => {
         if (
             user.node.__typename === 'CMSApproverUser' ||
-            user.node.__typename === 'CMSUser'
+            user.node.__typename === 'CMSUser' ||
+            user.node.__typename === 'AdminUser'
         ) {
             dropdownOptions.push({
                 label: user.node.email,
@@ -199,7 +200,7 @@ export const CreateOauthClient = (): React.ReactElement => {
                                             </PoliteErrorMessage>
                                         )}
                                         <FieldSelect
-                                            label="CMS User"
+                                            label="OAuth client user"
                                             name="cmsUser"
                                             inputId="cmsUserEmail"
                                             optionDescriptionSingular="user"

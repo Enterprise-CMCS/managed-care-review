@@ -4,7 +4,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canHaveOAuthScopes, canWrite } from '../../oauth/oauthAuthorization'
 
 export function createOauthClientResolver(
     store: Store
@@ -37,7 +37,7 @@ export function createOauthClientResolver(
                     throw createForbiddenError(msg)
                 }
 
-                // Validate that the provided userID exists and is a valid CMS user
+                // Validate that the provided userID exists and is eligible for OAuth association.
                 const targetUser = await store.findUser(input.userID)
                 if (targetUser instanceof Error) {
                     logResolverError(
@@ -62,14 +62,21 @@ export function createOauthClientResolver(
                     )
                 }
 
-                // Ensure the target user is a CMS user (CMSUser or CMSApproverUser)
+                // Ensure the target user is a CMS, CMS approver, or admin user.
                 if (
                     targetUser.role !== 'CMS_USER' &&
-                    targetUser.role !== 'CMS_APPROVER_USER'
+                    targetUser.role !== 'CMS_APPROVER_USER' &&
+                    targetUser.role !== 'ADMIN_USER'
                 ) {
-                    const msg = `OAuth clients can only be associated with CMS users`
+                    const msg = `OAuth clients can only be associated with CMS or admin users`
                     logResolverError('createOauthClient', msg, context)
                     throw createUserInputError(msg, 'userID')
+                }
+
+                if (!canHaveOAuthScopes(targetUser.role, input.scopes)) {
+                    const msg = `ADMIN_SUBMISSION_ACTIONS scope can only be assigned to ADMIN users`
+                    logResolverError('createOauthClient', msg, context)
+                    throw createUserInputError(msg, 'scopes')
                 }
 
                 const oauthClient = await store.createOAuthClient({
