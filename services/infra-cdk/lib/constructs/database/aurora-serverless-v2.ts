@@ -112,5 +112,16 @@ export class AuroraServerlessV2 extends Construct {
                 publiclyAccessible: false,
             }),
         })
+
+        // Rotate the admin password via the Secrets Manager hosted rotation Lambda.
+        this.cluster.addRotationSingleUser({
+            automaticallyAfter: Duration.days(
+                props.databaseConfig.passwordRotationDays
+            ),
+            vpcSubnets: props.vpcSubnets,
+            securityGroup: props.securityGroup,
+            excludeCharacters: ' %+~`#$&*()|[]{}:;<>?!\'/@"\\',
+            rotateImmediatelyOnUpdate: false,
+        })
     }
 }
