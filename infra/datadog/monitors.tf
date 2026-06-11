@@ -33,6 +33,39 @@ resource "datadog_monitor" "graphql_errors" {
   ]
 }
 
+resource "datadog_monitor" "large_payload_alert" {
+  name = "[${var.environment}] MCR - Large GraphQL Request Payload"
+  type = "trace-analytics alert"
+
+  query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"Large request payload detected\\\"\").rollup(\"count\").last(\"5m\") > ${var.large_payload_threshold}"
+
+  message = <<-EOT
+    A GraphQL request with an oversized payload was detected in **${var.environment}**.
+
+    Triggered when `app-api-${var.environment}` records a "Large request payload detected" error span (request body over 5.5MB).
+
+    - Review the trace details in Datadog APM under service `app-api-${var.environment}`
+    - Identify which client/query is sending oversized requests
+
+    ${var.notify_slack}
+  EOT
+
+  monitor_thresholds {
+    critical = var.large_payload_threshold
+  }
+
+  evaluation_delay  = 60
+  renotify_interval = 60
+  include_tags      = true
+
+  tags = [
+    "env:${var.environment}",
+    "service:app-api-${var.environment}",
+    "managed-by:opentofu",
+    "project:mcr",
+  ]
+}
+
 resource "datadog_monitor" "web_trace_errors" {
   name = "[${var.environment}] MCR - Web Application Trace Errors"
   type = "trace-analytics alert"
