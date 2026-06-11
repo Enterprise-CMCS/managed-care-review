@@ -1,92 +1,114 @@
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { configurePostgres } from './configuration'
 import { CustomOAuth2Server } from '../oauth/oauth2Server'
+import { initTracer, recordException, flushTracer } from '../otel/otel_handler'
 
 async function main(
     event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
-    // Check for required environment variables
-    if (!process.env.DATABASE_URL) {
-        return {
-            statusCode: 500,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                error: 'server_error',
-                error_description: 'Database configuration missing',
-            }),
-        }
-    }
-
-    if (!process.env.SECRETS_MANAGER_SECRET) {
-        return {
-            statusCode: 500,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                error: 'server_error',
-                error_description: 'Secrets manager env var missing',
-            }),
-        }
-    }
-
-    if (!process.env.JWT_SECRET) {
-        return {
-            statusCode: 500,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                error: 'server_error',
-                error_description: 'JWT configuration missing',
-            }),
-        }
-    }
-
-    if (!process.env.MCREVIEW_OAUTH_ISSUER) {
-        return {
-            statusCode: 500,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                error: 'server_error',
-                error_description: 'OAuth issuer configuration missing',
-            }),
-        }
-    }
-
     // stage is either set in lambda env or we can set to local for local dev
     const stage = process.env.stage ?? 'local'
-    const dbURL = process.env.DATABASE_URL
-    const sms = process.env.SECRETS_MANAGER_SECRET
+    const serviceName = 'app-api-oauth-token-' + stage
+    initTracer(serviceName)
 
-    // Configure database
-    const db = await configurePostgres(dbURL, sms, stage)
-    if (db instanceof Error) {
-        return {
-            statusCode: 500,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                error: 'server_error',
-                error_description: "Error: Postgres couldn't be configured",
-            }),
+    try {
+        // Check for required environment variables
+        if (!process.env.DATABASE_URL) {
+            const errMsg = 'Database configuration missing'
+            recordException(errMsg, serviceName, 'config')
+            return {
+                statusCode: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: 'server_error',
+                    error_description: errMsg,
+                }),
+            }
+        }
+
+        if (!process.env.SECRETS_MANAGER_SECRET) {
+            const errMsg = 'Secrets manager env var missing'
+            recordException(errMsg, serviceName, 'config')
+            return {
+                statusCode: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: 'server_error',
+                    error_description: errMsg,
+                }),
+            }
+        }
+
+        if (!process.env.JWT_SECRET) {
+            const errMsg = 'JWT configuration missing'
+            recordException(errMsg, serviceName, 'config')
+            return {
+                statusCode: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: 'server_error',
+                    error_description: errMsg,
+                }),
+            }
+        }
+
+        if (!process.env.MCREVIEW_OAUTH_ISSUER) {
+            const errMsg = 'OAuth issuer configuration missing'
+            recordException(errMsg, serviceName, 'config')
+            return {
+                statusCode: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: 'server_error',
+                    error_description: errMsg,
+                }),
+            }
+        }
+
+        const dbURL = process.env.DATABASE_URL
+        const sms = process.env.SECRETS_MANAGER_SECRET
+
+        // Configure database
+        const db = await configurePostgres(dbURL, sms, stage)
+        if (db instanceof Error) {
+            const errMsg = "Error: Postgres couldn't be configured"
+            recordException(errMsg, serviceName, 'configurePostgres')
+            return {
+                statusCode: 500,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    error: 'server_error',
+                    error_description: errMsg,
+                }),
+            }
+        }
+
+        // Initialize OAuth2 server
+        const oauth2Server = new CustomOAuth2Server(
+            db,
+            process.env.JWT_SECRET,
+            process.env.MCREVIEW_OAUTH_ISSUER
+        )
+
+        // Handle token request
+        return await oauth2Server.token(event)
+    } finally {
+        try {
+            await flushTracer()
+        } catch (flushErr) {
+            console.warn('otel: flush failed', flushErr)
         }
     }
-
-    // Initialize OAuth2 server
-    const oauth2Server = new CustomOAuth2Server(
-        db,
-        process.env.JWT_SECRET,
-        process.env.MCREVIEW_OAUTH_ISSUER
-    )
-
-    // Handle token request
-    return oauth2Server.token(event)
 }
 
 export { main }

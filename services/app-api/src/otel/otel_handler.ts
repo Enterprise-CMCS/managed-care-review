@@ -100,3 +100,18 @@ export function recordException(
         span.end()
     }
 }
+
+// Records a standalone, successful span carrying the given attributes.
+// Used to emit a queryable signal for events we want to track volume/trends
+// on (e.g. delegated-user requests) independent of the outcome of the
+// request that triggered them.
+export function recordSpanEvent(
+    serviceName: string,
+    spanName: string,
+    attributes: Record<string, string | number | boolean>
+) {
+    const tracer = opentelemetry.trace.getTracer(serviceName)
+    const span = tracer.startSpan(spanName, { attributes })
+    span.setStatus({ code: SpanStatusCode.OK })
+    span.end()
+}

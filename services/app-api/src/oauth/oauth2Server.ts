@@ -16,8 +16,11 @@ import {
 import { newJWTLib } from '../jwt'
 import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
 import { parseErrorToError } from '@mc-review/helpers'
+import { recordException } from '../otel/otel_handler'
 
 const JWT_EXPIRATION_SECONDS = 60 * 30 // 30 minutes
+const OTEL_SERVICE_NAME =
+    'app-api-oauth-token-' + (process.env.stage ?? 'local')
 
 export class CustomOAuth2Server {
     private oauth2Server: InstanceType<typeof OAuth2Server>
@@ -246,6 +249,11 @@ export class CustomOAuth2Server {
                 }
             } catch (error) {
                 if (error instanceof InvalidRequestError) {
+                    recordException(
+                        error,
+                        OTEL_SERVICE_NAME,
+                        'oauth2Server.token.invalidRequest'
+                    )
                     return {
                         statusCode: 400,
                         headers: {
@@ -258,6 +266,11 @@ export class CustomOAuth2Server {
                     }
                 }
                 if (error instanceof InvalidClientError) {
+                    recordException(
+                        error,
+                        OTEL_SERVICE_NAME,
+                        'oauth2Server.token.invalidClient'
+                    )
                     return {
                         statusCode: 401,
                         headers: {
@@ -270,6 +283,11 @@ export class CustomOAuth2Server {
                     }
                 }
                 if (error instanceof UnauthorizedClientError) {
+                    recordException(
+                        error,
+                        OTEL_SERVICE_NAME,
+                        'oauth2Server.token.unauthorizedClient'
+                    )
                     return {
                         statusCode: 401,
                         headers: {
@@ -282,6 +300,11 @@ export class CustomOAuth2Server {
                     }
                 }
                 const parsedError = parseErrorToError(error)
+                recordException(
+                    parsedError,
+                    OTEL_SERVICE_NAME,
+                    'oauth2Server.token.serverError'
+                )
                 return {
                     statusCode: 500,
                     headers: {
