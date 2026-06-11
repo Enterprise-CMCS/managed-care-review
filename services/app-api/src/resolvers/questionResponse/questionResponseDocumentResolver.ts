@@ -28,7 +28,7 @@ export function questionResponseDocumentResolver(
                     if (key instanceof Error) {
                         const errMsg = `Document missing valid s3Key: ${key.message}`
                         logResolverError(
-                            'genericDocumentResolver.downloadURL',
+                            'questionResponseDocumentResolver.downloadURL',
                             errMsg,
                             context
                         )
