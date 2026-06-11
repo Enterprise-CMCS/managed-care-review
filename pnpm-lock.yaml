@@ -963,8 +963,8 @@ importers:
         specifier: ^5.1.1
         version: 5.1.1(graphql@16.14.0)(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       vite-plugin-static-copy:
-        specifier: ^4.1.0
-        version: 4.1.0(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
+        specifier: ^4.1.1
+        version: 4.1.1(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       vite-plugin-svgr:
         specifier: ^5.2.0
         version: 5.2.0(rollup@4.61.0)(typescript@5.9.3)(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
@@ -11842,6 +11842,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  semver@7.8.4:
+    resolution: {integrity: sha512-rUCObTnP32Q08R2uuIrt7r9PlEonuTmtuXYcW6s5kjdlj3xbnwe+21yXptAUYcMAABLkYYTtnmzb3w3EDZfueA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   send@0.19.2:
     resolution: {integrity: sha512-VMbMxbDeehAxpOtWJXlcUS5E8iXh6QmN+BkRX1GARS3wRaXEEgzCcB10gTQazO42tpNIya8xIyNx8fll1OFPrg==}
     engines: {node: '>= 0.8.0'}
@@ -12893,8 +12898,8 @@ packages:
       graphql: ^16.0.0
       vite: '>=7.3.2'
 
-  vite-plugin-static-copy@4.1.0:
-    resolution: {integrity: sha512-9XOarNV7LgP0KBB7AApxdgFikLXx3daZdqjC3AevYsL6MrUH62zphonLUs2a6LZc1HN1GY+vQdheZ8VVJb6dQQ==}
+  vite-plugin-static-copy@4.1.1:
+    resolution: {integrity: sha512-GrlA8YklrAfSyxJ4M3fdQLOo9oNkp56IM9FYgX/WtEgeIFkPwhu4wzpufBCIuNKCa6Fn77FkRdYxkHqV0FwjAw==}
     engines: {node: ^22.0.0 || >=24.0.0}
     peerDependencies:
       vite: '>=7.3.2'
@@ -19206,7 +19211,7 @@ snapshots:
       hermes-profile-transformer: 0.0.6
       node-stream-zip: 1.15.0
       ora: 5.4.1
-      semver: 7.8.3
+      semver: 7.8.4
       strip-ansi: 5.2.0
       wcwidth: 1.0.1
       yaml: 2.9.0
@@ -19277,7 +19282,7 @@ snapshots:
       node-fetch: 2.7.0
       open: 6.4.0
       ora: 5.4.1
-      semver: 7.8.3
+      semver: 7.8.4
       shell-quote: 1.8.4
       sudo-prompt: 9.2.1
     transitivePeerDependencies:
@@ -19305,7 +19310,7 @@ snapshots:
       fs-extra: 8.1.0
       graceful-fs: 4.2.11
       prompts: 2.4.2
-      semver: 7.8.3
+      semver: 7.8.4
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -26895,6 +26900,8 @@ snapshots:
 
   semver@7.8.3: {}
 
+  semver@7.8.4: {}
+
   send@0.19.2:
     dependencies:
       debug: 2.6.9
@@ -28058,12 +28065,12 @@ snapshots:
       magic-string: 0.30.21
       vite: 7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)
 
-  vite-plugin-static-copy@4.1.0(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)):
+  vite-plugin-static-copy@4.1.1(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)):
     dependencies:
       chokidar: 3.6.0
       p-map: 7.0.4
       picocolors: 1.1.1
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       vite: 7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)
 
   vite-plugin-svgr@5.2.0(rollup@4.61.0)(typescript@5.9.3)(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0)):
