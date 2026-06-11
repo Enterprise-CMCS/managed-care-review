@@ -32,7 +32,7 @@ variable "web_error_threshold" {
 
 variable "large_payload_threshold" {
   type        = number
-  description = "Number of \"Large request payload detected\" error spans in 5 minutes before alerting"
+  description = "Alert when more than this many \"Large request payload detected\" error spans occur in 5 minutes. Default 0 means any single occurrence triggers the alert."
   default     = 0
 }
 

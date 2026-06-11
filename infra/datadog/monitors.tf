@@ -42,7 +42,7 @@ resource "datadog_monitor" "large_payload_alert" {
   message = <<-EOT
     A GraphQL request with an oversized payload was detected in **${var.environment}**.
 
-    Triggered when `app-api-${var.environment}` records a "Large request payload detected" error span (request body over 5.5MB).
+    Triggered when >${var.large_payload_threshold} "Large request payload detected" error spans (request body over 5.5MB) are recorded by `app-api-${var.environment}` in 5 minutes.
 
     - Review the trace details in Datadog APM under service `app-api-${var.environment}`
     - Identify which client/query is sending oversized requests
@@ -54,6 +54,10 @@ resource "datadog_monitor" "large_payload_alert" {
     critical = var.large_payload_threshold
   }
 
+  # Unlike the other monitors in this file, this one does not honor
+  # var.notify_no_data: large payloads are rare, so "no data" is the normal,
+  # healthy state rather than a sign of an outage.
+  notify_no_data    = false
   evaluation_delay  = 60
   renotify_interval = 60
   include_tags      = true
