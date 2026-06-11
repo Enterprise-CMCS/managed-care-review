@@ -30,6 +30,12 @@ variable "web_error_threshold" {
   default     = 5
 }
 
+variable "large_payload_threshold" {
+  type        = number
+  description = "Alert when more than this many \"Large request payload detected\" error spans occur in 5 minutes. Default 0 means any single occurrence triggers the alert."
+  default     = 0
+}
+
 variable "notify_no_data" {
   type        = bool
   description = "Alert when a monitor stops receiving data entirely (e.g. service crash with no traces)"
