@@ -157,5 +157,22 @@ describe('OAuth Authorization', () => {
 
             expect(canOauthWrite(context)).toBe(false)
         })
+
+        it('denies writing for OAuth client when stage is prod', () => {
+            process.env.stage = 'prod'
+
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(canOauthWrite(context)).toBe(false)
+        })
     })
 })
