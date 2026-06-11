@@ -99,8 +99,10 @@ export async function withResolverSpan<T>(
         const result = await otelContext.with(resolverContext, () =>
             resolver(span)
         )
-        // Success: set OK status and end span
-        span.setStatus({ code: SpanStatusCode.OK })
+        // Leave the span status Unset (the default) on a non-throwing return.
+        // Backends treat Unset as non-error, and—unlike OK, which the OTEL spec
+        // makes final—it lets a non-fatal ERROR set inside the resolver (e.g. via
+        // recordResolverError) survive instead of being clobbered back to healthy.
         span.end()
         return result
     } catch (error) {
@@ -144,9 +146,13 @@ export function setResolverDetails(
 }
 
 /**
- * Records an error on the span and adds it as an attribute.
- * Use this for errors that don't terminate the resolver (non-fatal errors).
- * For fatal errors, just throw - withResolverSpan will handle it.
+ * Records a non-fatal error on the span: attaches the exception event AND marks
+ * the span status ERROR so it surfaces in status-based dashboards/alerts.
+ *
+ * Use this for errors that don't terminate the resolver (the resolver still
+ * returns a fallback value). A recorded exception should always be actionable in
+ * the trace—an exception event without an ERROR status looks healthy and hides
+ * the failure. For fatal errors, just throw; withResolverSpan handles those.
  *
  * @param span - The resolver span
  * @param error - The error to record (Error object or string message)
@@ -156,11 +162,9 @@ export function recordResolverError(
     error: Error | string
 ): void {
     if (!span) return
-    if (error instanceof Error) {
-        span.recordException(error)
-    } else {
-        span.recordException(new Error(error))
-    }
+    const err = error instanceof Error ? error : new Error(error)
+    span.recordException(err)
+    span.setStatus({ code: SpanStatusCode.ERROR, message: err.message })
 }
 
 // ===== DEPRECATED FUNCTIONS =====
