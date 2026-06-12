@@ -39,10 +39,10 @@ describe('OAuth Authorization', () => {
             ).toBe(true)
         })
 
-        it('allows CMS submission actions scope for admin users', () => {
+        it('denies CMS submission actions scope for admin users', () => {
             expect(
                 canHaveOAuthScopes('ADMIN_USER', ['CMS_SUBMISSION_ACTIONS'])
-            ).toBe(true)
+            ).toBe(false)
         })
 
         it('denies admin submission actions scope for CMS users', () => {
@@ -55,6 +55,23 @@ describe('OAuth Authorization', () => {
             expect(
                 canHaveOAuthScopes('CMS_USER', ['CMS_SUBMISSION_ACTIONS'])
             ).toBe(true)
+        })
+
+        it('allows CMS submission actions scope for CMS approver users', () => {
+            expect(
+                canHaveOAuthScopes('CMS_APPROVER_USER', [
+                    'CMS_SUBMISSION_ACTIONS',
+                ])
+            ).toBe(true)
+        })
+
+        it('denies mixed admin and CMS scopes for admin users', () => {
+            expect(
+                canHaveOAuthScopes('ADMIN_USER', [
+                    'ADMIN_SUBMISSION_ACTIONS',
+                    'CMS_SUBMISSION_ACTIONS',
+                ])
+            ).toBe(false)
         })
     })
 
@@ -253,7 +270,7 @@ describe('OAuth Authorization', () => {
     })
 
     describe('canOauthAdminWrite', () => {
-        it('allows writing for delegated OAuth client with admin submission actions scope', () => {
+        it('denies writing for delegated OAuth client with admin submission actions scope', () => {
             const context: Context = {
                 user: mockCMSUser,
                 oauthClient: {
@@ -265,7 +282,7 @@ describe('OAuth Authorization', () => {
                 },
             }
 
-            expect(canOauthAdminWrite(context)).toBe(true)
+            expect(canOauthAdminWrite(context)).toBe(false)
         })
 
         it('denies writing for delegated OAuth client without admin submission actions scope', () => {
@@ -283,7 +300,7 @@ describe('OAuth Authorization', () => {
             expect(canOauthAdminWrite(context)).toBe(false)
         })
 
-        it('denies writing for non-delegated OAuth client with admin submission actions scope', () => {
+        it('allows writing for non-delegated OAuth client with admin submission actions scope', () => {
             const context: Context = {
                 user: mockCMSUser,
                 oauthClient: {
@@ -295,7 +312,7 @@ describe('OAuth Authorization', () => {
                 },
             }
 
-            expect(canOauthAdminWrite(context)).toBe(false)
+            expect(canOauthAdminWrite(context)).toBe(true)
         })
     })
 })

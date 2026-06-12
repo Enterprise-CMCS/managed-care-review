@@ -26,11 +26,21 @@ export function canHaveOAuthScopes(
     userRole: UserRoles,
     scopes: OAuthScope[] | null | undefined
 ): boolean {
-    if (scopes?.includes(OAuthScope.ADMIN_SUBMISSION_ACTIONS)) {
-        return userRole === 'ADMIN_USER'
+    if (!scopes || scopes.length === 0) {
+        return true
     }
 
-    return true
+    return scopes.every((scope) => {
+        if (scope === OAuthScope.ADMIN_SUBMISSION_ACTIONS) {
+            return userRole === 'ADMIN_USER'
+        }
+
+        if (scope === OAuthScope.CMS_SUBMISSION_ACTIONS) {
+            return userRole === 'CMS_USER' || userRole === 'CMS_APPROVER_USER'
+        }
+
+        return false
+    })
 }
 
 /**
@@ -114,12 +124,15 @@ export function canOauthWrite(context: Context): boolean {
 }
 
 /**
- * Checks if the current context is an OAuth client with admin write permissions.
+ * Checks if the current context is allowed to perform admin OAuth writes.
+ *
+ * Admin OAuth writes cannot be delegated. The OAuth client itself must have the
+ * admin scope and the request must not include an acting/delegated user.
  */
 export function canOauthAdminWrite(context: Context): boolean {
     if (context.oauthClient) {
         return !!(
-            context.oauthClient.isDelegatedUser &&
+            !context.oauthClient.isDelegatedUser &&
             context.oauthClient.scopes?.includes(
                 OAuthScope.ADMIN_SUBMISSION_ACTIONS
             )
