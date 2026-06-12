@@ -62,6 +62,8 @@ import {
 import { EditStateAssign } from '../Settings/EditStateAssign/EditStateAssign'
 import {
     UploadContractQuestions,
+    AdminUploadContractQuestions,
+    AdminUploadContractResponse,
     UploadRateQuestions,
 } from '../QuestionResponse'
 import { RateSummarySideNav } from '../SubmissionSideNav/RateSummarySideNav'
@@ -360,12 +362,26 @@ const CMSUserRoutes = ({
                         }
                     />
                     {isAdminUser && (
-                        <Route
-                            path={
-                                RoutesRecord.SUBMISSIONS_DELETE_CONTRACT_QUESTION
-                            }
-                            element={<DeleteContractQuestion />}
-                        />
+                        <>
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_DELETE_CONTRACT_QUESTION
+                                }
+                                element={<DeleteContractQuestion />}
+                            />
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_ADMIN_UPLOAD_CONTRACT_QUESTION
+                                }
+                                element={<AdminUploadContractQuestions />}
+                            />
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_ADMIN_UPLOAD_CONTRACT_RESPONSE
+                                }
+                                element={<AdminUploadContractResponse />}
+                            />
+                        </>
                     )}
                     <Route
                         path={RoutesRecord.SUBMISSIONS_SUMMARY}
