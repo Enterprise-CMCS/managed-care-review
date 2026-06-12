@@ -4,7 +4,8 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
-import { canHaveOAuthScopes, canWrite } from '../../oauth/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
+import { getAvailableOAuthScopesForUserRole } from '@mc-review/common-code'
 
 export function createOauthClientResolver(
     store: Store
@@ -73,7 +74,14 @@ export function createOauthClientResolver(
                     throw createUserInputError(msg, 'userID')
                 }
 
-                if (!canHaveOAuthScopes(targetUser.role, input.scopes)) {
+                const availableScopes = getAvailableOAuthScopesForUserRole(
+                    targetUser.role
+                )
+                if (
+                    input.scopes?.some(
+                        (scope) => !availableScopes.includes(scope)
+                    )
+                ) {
                     const msg = `OAuth scopes are not valid for the selected user role`
                     logResolverError('createOauthClient', msg, context)
                     throw createUserInputError(msg, 'scopes')
