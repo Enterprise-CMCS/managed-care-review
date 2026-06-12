@@ -90,6 +90,30 @@ export function createRateQuestionResolver(
                     throw createUserInputError(errMessage)
                 }
 
+                // Do not allow a new question to be created while a previous
+                // question round is still open. A round is open when any
+                // existing question has not yet received a response. Mirrors
+                // the allQuestionsAnswered logic in app-web's
+                // questionResponseHelpers.ts.
+                const existingQuestions = await store.findAllQuestionsByRate(
+                    rate.id
+                )
+                if (existingQuestions instanceof Error) {
+                    const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw new Error(errMessage)
+                }
+
+                const hasOpenQuestionRound = existingQuestions.some(
+                    (question) => question.responses.length === 0
+                )
+                if (hasOpenQuestionRound) {
+                    const errMessage =
+                        'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw createUserInputError(errMessage)
+                }
+
                 // Parse and validate document s3URLs
                 const docs = parseAndValidateDocuments(
                     input.documents.map((d) => ({
