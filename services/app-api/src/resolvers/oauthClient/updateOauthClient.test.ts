@@ -8,6 +8,7 @@ import {
     testStateUser,
     testCMSUser,
 } from '../../testHelpers/userHelpers'
+import { NewPostgresStore } from '../../postgres'
 import {
     CreateOauthClientDocument,
     UpdateOauthClientDocument,
@@ -19,8 +20,8 @@ describe('updateOauthClient', () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create CMS user in database
         const client = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(client)
         await client.user.create({
             data: {
                 id: cmsUser.id,
@@ -31,26 +32,24 @@ describe('updateOauthClient', () => {
             },
         })
 
+        const createdClient = await postgresStore.createOAuthClient({
+            description: 'Initial description',
+            grants: ['client_credentials'],
+            userID: cmsUser.id,
+        })
+
+        if (createdClient instanceof Error) {
+            throw createdClient
+        }
+
         const server = await constructTestPostgresServer({
+            store: postgresStore,
             context: { user: adminUser },
         })
 
-        const createRes = await executeGraphQLOperation(server, {
-            query: CreateOauthClientDocument,
-            variables: {
-                input: {
-                    description: 'Initial description',
-                    grants: ['client_credentials'],
-                    userID: cmsUser.id,
-                },
-            },
-        })
-        expect(createRes.errors).toBeUndefined()
-        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
-
         // Update the client
         const updateInput = {
-            clientId,
+            clientId: createdClient.clientId,
             description: 'Updated description',
             grants: ['client_credentials', 'refresh_token'],
             scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
@@ -131,7 +130,7 @@ describe('updateOauthClient', () => {
         expect(oauthClient.user.role).toBe('ADMIN_USER')
     })
 
-    it('updates an ADMIN user OAuth client with CMS_SUBMISSION_ACTIONS scope', async () => {
+    it('errors when assigning CMS_SUBMISSION_ACTIONS scope to an ADMIN user client', async () => {
         const adminUser = testAdminUser()
         const oauthAdminUser = testAdminUser({
             email: 'update-oauth-admin-cms-scope@example.com',
@@ -175,12 +174,11 @@ describe('updateOauthClient', () => {
             },
         })
 
-        expect(res.errors).toBeUndefined()
-        const oauthClient = res.data?.updateOauthClient.oauthClient
-        expect(oauthClient).toBeDefined()
-        expect(oauthClient.scopes).toEqual([OAuthScope.CMS_SUBMISSION_ACTIONS])
-        expect(oauthClient.user.id).toBe(oauthAdminUser.id)
-        expect(oauthClient.user.role).toBe('ADMIN_USER')
+        expect(res.errors?.[0].message).toMatch(
+            /OAuth scopes are not valid for the selected user role/
+        )
+        expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(res.errors?.[0].extensions?.argumentName).toBe('scopes')
     })
 
     it('errors when assigning ADMIN_SUBMISSION_ACTIONS scope to a CMS user client', async () => {
@@ -227,7 +225,7 @@ describe('updateOauthClient', () => {
         })
 
         expect(res.errors?.[0].message).toMatch(
-            /ADMIN_SUBMISSION_ACTIONS scope can only be assigned to ADMIN users/
+            /OAuth scopes are not valid for the selected user role/
         )
         expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(res.errors?.[0].extensions?.argumentName).toBe('scopes')
@@ -237,8 +235,8 @@ describe('updateOauthClient', () => {
         const adminUser = testAdminUser()
         const cmsUser = testCMSUser()
 
-        // Create CMS user in database
         const client = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(client)
         await client.user.create({
             data: {
                 id: cmsUser.id,
@@ -249,27 +247,25 @@ describe('updateOauthClient', () => {
             },
         })
 
+        const createdClient = await postgresStore.createOAuthClient({
+            description: 'Initial description',
+            grants: ['client_credentials'],
+            scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
+            userID: cmsUser.id,
+        })
+
+        if (createdClient instanceof Error) {
+            throw createdClient
+        }
+
         const server = await constructTestPostgresServer({
+            store: postgresStore,
             context: { user: adminUser },
         })
 
-        const createRes = await executeGraphQLOperation(server, {
-            query: CreateOauthClientDocument,
-            variables: {
-                input: {
-                    description: 'Initial description',
-                    grants: ['client_credentials'],
-                    scopes: [OAuthScope.CMS_SUBMISSION_ACTIONS],
-                    userID: cmsUser.id,
-                },
-            },
-        })
-        expect(createRes.errors).toBeUndefined()
-        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
-
         // Update with empty strings
         const updateInput = {
-            clientId,
+            clientId: createdClient.clientId,
             description: '',
             grants: [],
         }

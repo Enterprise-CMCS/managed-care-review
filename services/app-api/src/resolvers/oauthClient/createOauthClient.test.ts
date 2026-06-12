@@ -8,7 +8,7 @@ import {
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { CreateOauthClientDocument } from '../../gen/gqlClient'
-import { OAuthScope } from '../../generated/client'
+import { OAuthScope } from '../../generated/enums'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createOauthClient', () => {
@@ -95,7 +95,7 @@ describe('createOauthClient', () => {
         expect(oauthClient?.user.role).toBe('ADMIN_USER')
     })
 
-    it('creates an ADMIN user OAuth client with CMS_SUBMISSION_ACTIONS scope', async () => {
+    it('errors when assigning CMS_SUBMISSION_ACTIONS scope to an ADMIN user client', async () => {
         const adminUser = testAdminUser()
         const oauthAdminUser = testAdminUser({
             email: 'oauth-admin-cms-scope@example.com',
@@ -126,12 +126,11 @@ describe('createOauthClient', () => {
             variables: { input },
         })
 
-        expect(res.errors).toBeUndefined()
-        const oauthClient = res.data?.createOauthClient.oauthClient
-        expect(oauthClient).toBeDefined()
-        expect(oauthClient?.scopes).toEqual([OAuthScope.CMS_SUBMISSION_ACTIONS])
-        expect(oauthClient?.user.id).toBe(oauthAdminUser.id)
-        expect(oauthClient?.user.role).toBe('ADMIN_USER')
+        expect(res.errors?.[0].message).toMatch(
+            /OAuth scopes are not valid for the selected user role/
+        )
+        expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(res.errors?.[0].extensions?.argumentName).toBe('scopes')
     })
 
     it('errors when assigning ADMIN_SUBMISSION_ACTIONS scope to a CMS user client', async () => {
@@ -165,7 +164,7 @@ describe('createOauthClient', () => {
         })
 
         expect(res.errors?.[0].message).toMatch(
-            /ADMIN_SUBMISSION_ACTIONS scope can only be assigned to ADMIN users/
+            /OAuth scopes are not valid for the selected user role/
         )
         expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(res.errors?.[0].extensions?.argumentName).toBe('scopes')

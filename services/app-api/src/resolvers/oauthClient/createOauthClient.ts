@@ -74,7 +74,7 @@ export function createOauthClientResolver(
                 }
 
                 if (!canHaveOAuthScopes(targetUser.role, input.scopes)) {
-                    const msg = `ADMIN_SUBMISSION_ACTIONS scope can only be assigned to ADMIN users`
+                    const msg = `OAuth scopes are not valid for the selected user role`
                     logResolverError('createOauthClient', msg, context)
                     throw createUserInputError(msg, 'scopes')
                 }
