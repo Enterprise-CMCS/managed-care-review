@@ -7,7 +7,6 @@ import {
     canWrite,
     canOauthWrite,
     canOauthAdminWrite,
-    canHaveOAuthScopes,
 } from './oauthAuthorization'
 
 // Mock users for testing
@@ -39,49 +38,6 @@ const mockAdminUser: UserType = {
 }
 
 describe('OAuth Authorization', () => {
-    describe('canHaveOAuthScopes', () => {
-        it('allows admin submission actions scope for admin users', () => {
-            expect(
-                canHaveOAuthScopes('ADMIN_USER', ['ADMIN_SUBMISSION_ACTIONS'])
-            ).toBe(true)
-        })
-
-        it('denies CMS submission actions scope for admin users', () => {
-            expect(
-                canHaveOAuthScopes('ADMIN_USER', ['CMS_SUBMISSION_ACTIONS'])
-            ).toBe(false)
-        })
-
-        it('denies admin submission actions scope for CMS users', () => {
-            expect(
-                canHaveOAuthScopes('CMS_USER', ['ADMIN_SUBMISSION_ACTIONS'])
-            ).toBe(false)
-        })
-
-        it('allows CMS submission actions scope for CMS users', () => {
-            expect(
-                canHaveOAuthScopes('CMS_USER', ['CMS_SUBMISSION_ACTIONS'])
-            ).toBe(true)
-        })
-
-        it('allows CMS submission actions scope for CMS approver users', () => {
-            expect(
-                canHaveOAuthScopes('CMS_APPROVER_USER', [
-                    'CMS_SUBMISSION_ACTIONS',
-                ])
-            ).toBe(true)
-        })
-
-        it('denies mixed admin and CMS scopes for admin users', () => {
-            expect(
-                canHaveOAuthScopes('ADMIN_USER', [
-                    'ADMIN_SUBMISSION_ACTIONS',
-                    'CMS_SUBMISSION_ACTIONS',
-                ])
-            ).toBe(false)
-        })
-    })
-
     describe('isOAuthClientCredentials', () => {
         it('returns true for OAuth client with client_credentials', () => {
             const context: Context = {

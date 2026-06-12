@@ -16,30 +16,6 @@ export const validDelegatedUserRoles: UserRoles[] = [
 ]
 
 /**
- * Checks whether a user's role is allowed to receive the requested OAuth scopes.
- */
-export function canHaveOAuthScopes(
-    userRole: UserRoles,
-    scopes: OAuthScope[] | null | undefined
-): boolean {
-    if (!scopes || scopes.length === 0) {
-        return true
-    }
-
-    return scopes.every((scope) => {
-        if (scope === OAuthScope.ADMIN_SUBMISSION_ACTIONS) {
-            return userRole === 'ADMIN_USER'
-        }
-
-        if (scope === OAuthScope.CMS_SUBMISSION_ACTIONS) {
-            return userRole === 'CMS_USER' || userRole === 'CMS_APPROVER_USER'
-        }
-
-        return false
-    })
-}
-
-/**
  * Checks if the context represents an OAuth client with client_credentials grant
  */
 export function isOAuthClientCredentials(context: Context): boolean {
