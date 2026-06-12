@@ -4,6 +4,8 @@ import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     createContractQuestionResolver,
+    adminCreateContractQuestionResolver,
+    adminCreateContractQuestionResponseResolver,
     deleteContractQuestionResolver,
     createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
@@ -133,6 +135,10 @@ export function configureResolvers(
                 store,
                 emailer
             ),
+            adminCreateContractQuestion:
+                adminCreateContractQuestionResolver(store),
+            adminCreateContractQuestionResponse:
+                adminCreateContractQuestionResponseResolver(store),
             deleteContractQuestion: deleteContractQuestionResolver(store),
             createContractQuestionResponse:
                 createContractQuestionResponseResolver(store, emailer),
@@ -175,6 +181,26 @@ export function configureResolvers(
                     return 'CMSUser'
                 } else {
                     return 'CMSApproverUser'
+                }
+            },
+        },
+        QuestionAuthor: {
+            __resolveType(obj) {
+                if (obj.role === 'CMS_USER') {
+                    return 'CMSUser'
+                } else if (obj.role === 'ADMIN_USER') {
+                    return 'AdminUser'
+                } else {
+                    return 'CMSApproverUser'
+                }
+            },
+        },
+        ResponseAuthor: {
+            __resolveType(obj) {
+                if (obj.role === 'ADMIN_USER') {
+                    return 'AdminUser'
+                } else {
+                    return 'StateUser'
                 }
             },
         },
