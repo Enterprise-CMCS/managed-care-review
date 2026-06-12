@@ -74,7 +74,7 @@ resource "datadog_monitor" "impersonation_failed_attempts" {
   name = "[${var.environment}] MCR - Failed Impersonation Attempts"
   type = "trace-analytics alert"
 
-  query = "trace-analytics(\"env:${var.environment} status:error \\\"delegated\\\"\").rollup(\"count\").last(\"5m\") > ${var.impersonation_failure_threshold}"
+  query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"delegated\\\"\").rollup(\"count\").last(\"5m\") > ${var.impersonation_failure_threshold}"
 
   message = <<-EOT
     Repeated failed delegated-user (impersonation) attempts detected in **${var.environment}**.
@@ -99,6 +99,7 @@ resource "datadog_monitor" "impersonation_failed_attempts" {
 
   tags = [
     "env:${var.environment}",
+    "service:app-api-${var.environment}",
     "managed-by:opentofu",
     "project:mcr",
   ]
@@ -108,7 +109,7 @@ resource "datadog_monitor" "impersonation_volume_anomaly" {
   name = "[${var.environment}] MCR - Impersonation Request Volume Anomaly"
   type = "trace-analytics alert"
 
-  query = "trace-analytics(\"env:${var.environment} \\\"delegatedUserRequest\\\"\").rollup(\"count\").last(\"5m\") > ${var.impersonation_volume_threshold}"
+  query = "trace-analytics(\"service:app-api-${var.environment} \\\"delegatedUserRequest\\\"\").rollup(\"count\").last(\"5m\") > ${var.impersonation_volume_threshold}"
 
   message = <<-EOT
     Unusual volume of delegated-user (impersonation) requests detected in **${var.environment}**.
@@ -133,6 +134,7 @@ resource "datadog_monitor" "impersonation_volume_anomaly" {
 
   tags = [
     "env:${var.environment}",
+    "service:app-api-${var.environment}",
     "managed-by:opentofu",
     "project:mcr",
   ]
