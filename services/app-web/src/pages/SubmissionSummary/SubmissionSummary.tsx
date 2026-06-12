@@ -244,6 +244,9 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const latestContractAction = contract.reviewStatusActions?.[0]
 
+    const contractName =
+        contract.packageSubmissions[0].contractRevision.contractName
+
     const showApprovalBtn =
         (hasCMSPermissions || isAdminUser) &&
         ['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)
@@ -344,7 +347,12 @@ export const SubmissionSummary = (): React.ReactElement => {
         }
 
         if (isStateUser && showChipOnlyBanner) {
-            return <ChipOnlySubmissionBanner className={styles.banner} />
+            return (
+                <ChipOnlySubmissionBanner
+                    className={styles.banner}
+                    contractName={contractName}
+                />
+            )
         }
     }
 
