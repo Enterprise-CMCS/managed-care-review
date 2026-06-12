@@ -19,8 +19,14 @@ import { parseErrorToError } from '@mc-review/helpers'
 import { recordException } from '../otel/otel_handler'
 
 const JWT_EXPIRATION_SECONDS = 60 * 30 // 30 minutes
-const OTEL_SERVICE_NAME =
-    'app-api-oauth-token-' + (process.env.stage ?? 'local')
+
+const stageName = process.env.stage
+
+if (stageName === undefined) {
+    throw new Error('Configuration Error: stage is required')
+}
+
+const OTEL_SERVICE_NAME = 'app-api-oauth-token-' + stageName
 
 export class CustomOAuth2Server {
     private oauth2Server: InstanceType<typeof OAuth2Server>

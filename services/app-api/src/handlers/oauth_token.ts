@@ -6,9 +6,13 @@ import { initTracer, recordException, flushTracer } from '../otel/otel_handler'
 async function main(
     event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> {
-    // stage is either set in lambda env or we can set to local for local dev
-    const stage = process.env.stage ?? 'local'
-    const serviceName = 'app-api-oauth-token-' + stage
+    const stageName = process.env.stage
+
+    if (stageName === undefined) {
+        throw new Error('Configuration Error: stage is required')
+    }
+
+    const serviceName = 'app-api-oauth-token-' + stageName
     initTracer(serviceName)
 
     try {
@@ -77,7 +81,7 @@ async function main(
         const sms = process.env.SECRETS_MANAGER_SECRET
 
         // Configure database
-        const db = await configurePostgres(dbURL, sms, stage)
+        const db = await configurePostgres(dbURL, sms, stageName)
         if (db instanceof Error) {
             const errMsg = "Error: Postgres couldn't be configured"
             recordException(errMsg, serviceName, 'configurePostgres')
