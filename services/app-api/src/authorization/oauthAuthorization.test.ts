@@ -120,7 +120,7 @@ describe('OAuth Authorization', () => {
     })
 
     describe('canOauthWrite', () => {
-        it('allows writing for OAuth client with scopes', () => {
+        it('allows writing for OAuth client with scopes when the feature flag is on', () => {
             const context: Context = {
                 user: mockCMSUser,
                 oauthClient: {
@@ -132,7 +132,11 @@ describe('OAuth Authorization', () => {
                 },
             }
 
-            expect(canOauthWrite(context)).toBe(true)
+            expect(
+                canOauthWrite(context, {
+                    'external-api-write-request': true,
+                })
+            ).toBe(true)
         })
 
         it('allows writing for regular users', () => {
@@ -158,9 +162,7 @@ describe('OAuth Authorization', () => {
             expect(canOauthWrite(context)).toBe(false)
         })
 
-        it('denies writing for OAuth client when stage is prod', () => {
-            process.env.stage = 'prod'
-
+        it('denies writing for OAuth client when the feature flag is off', () => {
             const context: Context = {
                 user: mockCMSUser,
                 oauthClient: {
@@ -172,7 +174,11 @@ describe('OAuth Authorization', () => {
                 },
             }
 
-            expect(canOauthWrite(context)).toBe(false)
+            expect(
+                canOauthWrite(context, {
+                    'external-api-write-request': false,
+                })
+            ).toBe(false)
         })
     })
 })

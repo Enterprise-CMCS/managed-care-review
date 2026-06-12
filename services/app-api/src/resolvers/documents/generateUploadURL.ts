@@ -8,10 +8,12 @@ import type { S3ClientT } from '../../s3'
 import { v4 as uuidv4 } from 'uuid'
 import type { Context } from '../../handlers/apollo_gql'
 import { UPLOAD_FILE_TYPE_TO_MIME } from './uploadFileTypeMap'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function generateUploadURLResolver(
     store: Store,
-    s3Client: S3ClientT
+    s3Client: S3ClientT,
+    launchDarkly: LDService
 ): MutationResolvers['generateUploadURL'] {
     return async (_parent, { input }, context: Context) => {
         const { user } = context
@@ -23,8 +25,12 @@ export function generateUploadURLResolver(
             async (span) => {
                 setResolverDetails(span, user)
 
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
                 // Check OAuth client write permissions
-                if (!canOauthWrite(context)) {
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('generateUploadURL', errMessage, context)
                     throw new GraphQLError(errMessage, {

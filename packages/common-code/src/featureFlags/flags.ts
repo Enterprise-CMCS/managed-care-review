@@ -97,8 +97,12 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     The number of minutes before the session expires and countdown modal appears
-    */
+     * This flag toggles the ability for external API users to send write requests.
+     */
+    EXTERNAL_API_WRITE_REQUEST: {
+        flag: 'external-api-write-request',
+        defaultValue: true,
+    },
     MINUTES_UNTIL_SESSION_EXPIRES: {
         flag: 'session-expiration-minutes',
         defaultValue: 30,

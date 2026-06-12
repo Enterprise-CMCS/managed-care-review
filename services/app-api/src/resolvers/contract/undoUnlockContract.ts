@@ -11,9 +11,11 @@ import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function undoUnlockContract(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): MutationResolvers['undoUnlockContract'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -26,7 +28,11 @@ export function undoUnlockContract(
             async (span) => {
                 setResolverDetails(span, user)
 
-                if (!canOauthWrite(context)) {
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('undoUnlockContract', errMessage, context)
 
