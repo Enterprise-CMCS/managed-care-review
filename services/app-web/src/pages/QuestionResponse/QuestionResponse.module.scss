@@ -6,6 +6,13 @@
     width: 100%;
 }
 
+// Matches the Required/Optional indicator used by FieldTextarea in the state
+// submission forms, for required fields on the plain-state admin Q&A form.
+.requiredOptionalText {
+    display: block;
+    color: custom.$mcr-foundation-hint;
+}
+
 .container {
     max-width: custom.$mcr-container-standard-width-fixed;
     padding-bottom: 2rem;
