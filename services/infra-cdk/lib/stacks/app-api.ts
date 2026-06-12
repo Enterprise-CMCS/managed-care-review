@@ -35,6 +35,7 @@ import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
 import { SubnetType, Vpc, SecurityGroup } from 'aws-cdk-lib/aws-ec2'
 import { Match, Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
+import { Trigger, InvocationType } from 'aws-cdk-lib/triggers'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
@@ -538,6 +539,29 @@ export class AppApiStack extends BaseStack {
                 },
             }
         )
+
+        // Run database migrations as part of the deploy, ordered so the schema is
+        // always migrated before the GraphQL Lambda swaps onto new code.
+        //
+        // CloudFormation serializes this as: update migrate Lambda -> invoke it
+        // (this Trigger) -> update graphqlFunction. That closes the window where
+        // newly-deployed GraphQL code could query a table/column a migration has
+        // not created yet (e.g. ContractRevisionOverrides). REQUEST_RESPONSE makes
+        // the invocation synchronous so a failed migration (the handler throws)
+        // fails the change set and rolls the GraphQL code update back, rather than
+        // leaving new code running against an un-migrated schema.
+        //
+        // The Trigger re-fires whenever the migrate Lambda's bundle changes; a new
+        // migration changes the bundled prisma/migrations, so it runs exactly when
+        // there is something to apply (and always on stack creation).
+        new Trigger(this, 'RunMigrations', {
+            handler: this.migrateFunction,
+            invocationType: InvocationType.REQUEST_RESPONSE,
+            // Allow for Aurora cold start plus the migrate Lambda's own 60s timeout.
+            timeout: Duration.minutes(2),
+            executeAfter: [this.migrateFunction],
+            executeBefore: [this.graphqlFunction],
+        })
 
         // Create API Gateway resources and methods first
         this.setupApiGatewayRoutes(this.apiGateway)

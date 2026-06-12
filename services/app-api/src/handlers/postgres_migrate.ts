@@ -8,7 +8,15 @@ const main: Handler = async (): Promise<APIGatewayProxyResultV2> => {
     const serviceName = 'postgres-migrate'
     initTracer(serviceName)
     try {
-        return await run(serviceName)
+        const result = await run(serviceName)
+        // Throw on a non-200 result so callers that key off a thrown error treat a
+        // failed migration as a failure.
+        if (typeof result !== 'string' && result.statusCode !== 200) {
+            throw new Error(
+                `postgres migrate failed: ${result.body ?? 'unknown error'}`
+            )
+        }
+        return result
     } finally {
         try {
             await flushTracer()
