@@ -1,6 +1,7 @@
 import {
     constructTestPostgresServer,
     createTestRateQuestion,
+    createTestRateQuestionResponse,
     executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
@@ -62,6 +63,44 @@ describe('createRateQuestion', () => {
             })
         )
     })
+    it('returns an error if there is an open question round (unanswered questions)', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+        const submittedContractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
+                .rateID
+
+        // Create a first question and leave it unanswered to keep the round open
+        must(await createTestRateQuestion(cmsServer, rateID))
+
+        // Attempting to create another question while the round is open should fail
+        const rateQuestion = await executeGraphQLOperation(cmsServer, {
+            query: CreateRateQuestionDocument,
+            variables: {
+                input: {
+                    rateID,
+                    documents: [
+                        {
+                            name: 'Test Question 2',
+                            s3URL: 's3://bucketname/key/test2',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(rateQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(rateQuestion)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(rateQuestion).message).toBe(
+            'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
+        )
+    })
     it('allows question creation on UNLOCKED and RESUBMITTED rate', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
@@ -105,6 +144,9 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.id,
             'Test resubmit reason'
         )
+        // Answer the first question so the round is closed and a new question
+        // can be created.
+        await createTestRateQuestionResponse(stateServer, rateQuestion.id)
         const rateQuestion2 = await createTestRateQuestion(cmsServer, rateID, {
             documents: [
                 {
@@ -432,15 +474,24 @@ describe('createRateQuestion', () => {
             submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
         const rateID = rateRevision.rateID
 
+        // Each question round must be answered before a new question can be
+        // created, so respond to each question before asking the next.
         // round 1 dmco question
-        must(await createTestRateQuestion(cmsServer, rateID))
+        const dmcoQuestionRound1 = must(
+            await createTestRateQuestion(cmsServer, rateID)
+        )
+        await createTestRateQuestionResponse(stateServer, dmcoQuestionRound1.id)
         // round 1 oact question
-        must(await createTestRateQuestion(oactServer, rateID))
+        const oactQuestionRound1 = must(
+            await createTestRateQuestion(oactServer, rateID)
+        )
+        await createTestRateQuestionResponse(stateServer, oactQuestionRound1.id)
         // round 2 dmco
         must(await createTestRateQuestion(cmsServer, rateID))
 
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            6,
+        // The last email sent is the CMS email for the second DMCO question,
+        // which should report round 2.
+        expect(mockEmailer.sendEmail).toHaveBeenLastCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Questions sent for ${rateRevision.formData.rateCertificationName}`

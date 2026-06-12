@@ -7,6 +7,7 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     constructTestPostgresServer,
     createTestRateQuestion,
+    createTestRateQuestionResponse,
     defaultFloridaRateProgram,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
@@ -732,9 +733,14 @@ describe('fetchRate', () => {
         const rateID =
             submittedRate.packageSubmissions[0].rateRevisions[0].rateID
 
-        await createTestRateQuestion(dmcoServer, rateID)
-        await createTestRateQuestion(dmcpServer, rateID)
-        await createTestRateQuestion(oactServer, rateID)
+        // Each question round must be answered before a new question can be
+        // created, so respond to each question before asking the next.
+        const dmcoQuestion = await createTestRateQuestion(dmcoServer, rateID)
+        await createTestRateQuestionResponse(server, dmcoQuestion.id)
+        const dmcpQuestion = await createTestRateQuestion(dmcpServer, rateID)
+        await createTestRateQuestionResponse(server, dmcpQuestion.id)
+        const oactQuestion = await createTestRateQuestion(oactServer, rateID)
+        await createTestRateQuestionResponse(server, oactQuestion.id)
 
         const result = await executeGraphQLOperation(server, {
             query: FetchRateWithQuestionsDocument,
