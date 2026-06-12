@@ -1,4 +1,4 @@
-import {
+import type {
     ConsolidatedContractStatus,
     ContractQuestionList,
     RateQuestionList,
@@ -10,6 +10,7 @@ import { divisionFullNames } from '../QuestionResponseHelpers'
 import type { IndexQuestionType } from '../QuestionResponseHelpers'
 import { QuestionResponseRound, QuestionRounds } from './QuestionResponseRound'
 import { sortRoundsByDate } from './CMSQuestionResponseTable'
+import { NavLinkWithLogging } from '../../../components'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
@@ -82,7 +83,19 @@ export const StateQuestionResponseTable = ({
                     headerId="outsandingContractQuestions"
                     headingLevel="h3"
                     hideBorderTop
-                />
+                >
+                    {loggedInUser?.__typename === 'AdminUser' && (
+                        <div>
+                            <NavLinkWithLogging
+                                className="usa-button"
+                                variant="unstyled"
+                                to="./admin-upload-questions"
+                            >
+                                Add questions
+                            </NavLinkWithLogging>
+                        </div>
+                    )}
+                </SectionHeader>
                 {sortedUnansweredQuestions.length ? (
                     sortedUnansweredQuestions.map((questionRound) =>
                         questionRound.map(({ roundTitle, questionData }) => (
