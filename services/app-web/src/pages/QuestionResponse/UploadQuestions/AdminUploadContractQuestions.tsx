@@ -111,9 +111,16 @@ export const AdminUploadContractQuestions = () => {
             contractID: id as string,
             reason: data.reason.trim(),
             documents: questionDocs,
-            addedByUserID: data.addedByUserID,
-            division: data.division as Division,
-            createdAt: data.createdAt,
+        }
+
+        if (data.addedByUserID) {
+            input.addedByUserID = data.addedByUserID
+        }
+        if (data.division) {
+            input.division = data.division as Division
+        }
+        if (data.createdAt) {
+            input.createdAt = data.createdAt
         }
 
         try {

@@ -163,9 +163,7 @@ const AdminUploadResponseForm = ({
             errorsObject['#admin-response-upload'] = fileUploadError
         }
         Object.entries(errors).forEach(([field, value]) => {
-            if (typeof value === 'string') {
-                errorsObject[`#${fieldFocusId[field] ?? field}`] = value
-            }
+            errorsObject[`#${fieldFocusId[field] ?? field}`] = value
         })
         return errorsObject
     }
