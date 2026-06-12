@@ -11,8 +11,6 @@ import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { runTransactionWithRowLock } from '../prismaHelpers'
 
-// Start of the UTC day for a date, so a response dated the same day as the
-// question is allowed even when the question's createdAt is a full timestamp.
 const startOfUTCDay = (date: Date): Date =>
     new Date(
         Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
@@ -76,7 +74,9 @@ export async function insertAdminContractQuestionResponse(
                 )
             }
 
-            // A backfilled response cannot predate the question it answers.
+            // User-entered response dates are date-only, so compare them to the
+            // question's calendar day. If no date is supplied, the DB timestamp
+            // defaults to now and this backfill validation does not apply.
             if (
                 response.createdAt &&
                 response.createdAt < startOfUTCDay(question.createdAt)
