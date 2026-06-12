@@ -8,15 +8,11 @@ import type { UserRoles } from '../domain-models/UserType'
  * Undefined for non-OAuth requests.
  */
 
-const delegatedOAuthScopes = new Set<string>([
-    OAuthScope.CMS_SUBMISSION_ACTIONS,
-    OAuthScope.ADMIN_SUBMISSION_ACTIONS,
-])
-
+// Admin users cannot be delegated users. Admin OAuth requests must use the
+// OAuth client's attached admin user directly.
 export const validDelegatedUserRoles: UserRoles[] = [
     'CMS_USER',
     'CMS_APPROVER_USER',
-    'ADMIN_USER',
 ]
 
 /**
@@ -41,21 +37,6 @@ export function canHaveOAuthScopes(
 
         return false
     })
-}
-
-/**
- * Checks whether an OAuth client has any scope that permits delegated requests.
- *
- * This is the broad context-building gate for honoring `x-acting-as-user`.
- * Endpoint-specific authorization still belongs in `canOauthWrite`,
- * `canOauthAdminWrite`, and resolver role checks.
- */
-export function hasDelegatedOAuthScope(
-    oauthClient: Context['oauthClient']
-): boolean {
-    return !!oauthClient?.scopes?.some((scope) =>
-        delegatedOAuthScopes.has(scope)
-    )
 }
 
 /**
