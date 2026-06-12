@@ -46,12 +46,18 @@ export const QuestionResponseRound = ({
     const isStateUser = currentUser?.__typename === 'StateUser'
     const isAdminUser = currentUser?.__typename === 'AdminUser'
     const isApprovedContract = contractStatus === 'APPROVED'
-    const classes = classNames('usa-button', {
+    const buttonClass = classNames('usa-button', {
         'usa-button--outline': question.responses.length > 0,
     })
 
+    const deleteButtonClass = classNames('usa-button', 'usa-button--secondary')
+
     const showUploadResponseBtn = isStateUser && !isApprovedContract
     const showDeleteQuestionBtn = isAdminUser && questionType === 'contract'
+    // Admin Q&A is a corrective tool, so admins can record a response on any
+    // existing contract question regardless of status. Contract Q&A only for now.
+    const showAdminUploadResponseBtn =
+        isAdminUser && questionType === 'contract'
 
     const documents = extractDocumentsFromQuestion(question)
 
@@ -64,7 +70,7 @@ export const QuestionResponseRound = ({
                 <h4 id={`${question.id}-header`}>{roundTitle}</h4>
                 {showUploadResponseBtn && (
                     <NavLinkWithLogging
-                        className={classes}
+                        className={buttonClass}
                         variant="unstyled"
                         aria-describedby={`${qaSectionHeaderId} ${question.id}-header`}
                         to={`./${question.division.toLowerCase()}/${question.id}/upload-response`}
@@ -72,14 +78,14 @@ export const QuestionResponseRound = ({
                         Upload response
                     </NavLinkWithLogging>
                 )}
-                {showDeleteQuestionBtn && (
+                {showAdminUploadResponseBtn && (
                     <NavLinkWithLogging
-                        className={classes}
+                        className={buttonClass}
                         variant="unstyled"
                         aria-describedby={`${qaSectionHeaderId} ${question.id}-header`}
-                        to={`./${question.division.toLowerCase()}/${question.id}/delete-question`}
+                        to={`./${question.id}/admin-upload-response`}
                     >
-                        Delete question
+                        Upload response
                     </NavLinkWithLogging>
                 )}
             </div>
@@ -89,6 +95,18 @@ export const QuestionResponseRound = ({
                 user={currentUser}
                 onlyDisplayInitial={false}
             />
+            {showDeleteQuestionBtn && (
+                <div className={styles.tableFooter}>
+                    <NavLinkWithLogging
+                        className={deleteButtonClass}
+                        variant="unstyled"
+                        aria-describedby={`${qaSectionHeaderId} ${question.id}-header`}
+                        to={`./${question.division.toLowerCase()}/${question.id}/delete-question`}
+                    >
+                        Delete question
+                    </NavLinkWithLogging>
+                </div>
+            )}
         </section>
     )
 }
