@@ -6,6 +6,9 @@ fragment questionResponseFragment on QuestionResponse {
         ... on StateUser {
             ...stateUserFragment
         }
+        ... on AdminUser {
+            ...adminUserFragment
+        }
     }
     documents {
         ...documentFragment
