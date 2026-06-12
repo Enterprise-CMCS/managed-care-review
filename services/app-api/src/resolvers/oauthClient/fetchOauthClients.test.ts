@@ -80,9 +80,17 @@ describe('fetchOauthClients', () => {
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
-        expect(oauthClients).toHaveLength(2)
-        // Verify user objects are included
-        oauthClients.forEach((client: unknown) => {
+
+        const createdClients = oauthClients.filter((client: OAuthClient) =>
+            [client1Id, client2Id].includes(client.clientId)
+        )
+        expect(createdClients).toHaveLength(2)
+        expect(
+            createdClients.map((client: OAuthClient) => client.clientId)
+        ).toEqual(expect.arrayContaining([client1Id, client2Id]))
+
+        // Verify user objects are included on the clients created by this test.
+        createdClients.forEach((client: unknown) => {
             const typedClient = client as {
                 user: { id: string; email: string; role: string }
             }
