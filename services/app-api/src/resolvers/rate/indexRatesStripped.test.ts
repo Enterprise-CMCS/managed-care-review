@@ -19,9 +19,8 @@ import {
     submitTestContract,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
+import { overrideTestRateData } from '../../testHelpers/gqlRateHelpers'
 import { testS3Client } from '../../testHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { NewPostgresStore } from '../../postgres'
 
 describe('indexRatesStripped', () => {
     const ldService = testLDService({
@@ -78,19 +77,7 @@ describe('indexRatesStripped', () => {
     })
 
     it('returns stripped rates with overridden initial submit date', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
         const adminUser = testAdminUser()
-
-        await prismaClient.user.create({
-            data: {
-                id: adminUser.id,
-                givenName: adminUser.givenName,
-                familyName: adminUser.familyName,
-                email: adminUser.email,
-                role: adminUser.role,
-            },
-        })
 
         const stateServer = await constructTestPostgresServer({
             ldService,
@@ -98,6 +85,11 @@ describe('indexRatesStripped', () => {
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: testCMSUser(),
+            },
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
             },
         })
 
@@ -112,12 +104,12 @@ describe('indexRatesStripped', () => {
         const newRateDate1 = new Date('2025-05-05')
 
         // add overrides to rate
-        await store.overrideRateData({
+        await overrideTestRateData(adminServer, {
             rateID: submit1ID,
-            updatedByID: adminUser.id,
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newRateDate1,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: undefined,
             },
         })
@@ -125,12 +117,12 @@ describe('indexRatesStripped', () => {
         const newRateDate2 = new Date('2024-05-05')
 
         // add overrides to rate
-        await store.overrideRateData({
+        await overrideTestRateData(adminServer, {
             rateID: submit2ID,
-            updatedByID: adminUser.id,
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newRateDate2,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: undefined,
             },
         })

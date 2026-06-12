@@ -114,6 +114,6 @@ Mechanism summary: parent reassignment is just a submission of the new parent co
 | Link to an existing rate (`LINK`) | Any contract (target must not be DRAFT or WITHDRAWN) | Linking is a join-table-only operation |
 | Unlink (`UNLINK`/`DELETE`) | The contract being edited | Removes its own join row only |
 | Unlock the rate (drag along with contract unlock) | The parent contract's unlock | `submittedContracts[0].contractID === contractID` filter |
-| Standalone unlock the rate (`unlockRate` resolver) | CMS, but only via the parent contract — the resolver fetches `rate.parentContractID` and validates the parent's status (not WITHDRAWN/APPROVED) | Linked rates aren't separately unlockable; they unlock via their parent |
+| Standalone unlock the rate (`unlockRate` resolver) | Inactive standalone-rate path; not part of the current contract-driven rate lifecycle | Rates currently unlock via their associated contract, and this resolver should not be used as a parity target for `unlockContract` unless standalone rate submissions are revived |
 | Withdraw the rate | CMS; affects every contract the rate is linked to (must not be APPROVED) | `withdrawRate` walks all linked contracts |
 | Reassign parent | CMS via `reassignParentContract`, typically as part of withdraw-parent flow | Simulates a submit by the new parent |

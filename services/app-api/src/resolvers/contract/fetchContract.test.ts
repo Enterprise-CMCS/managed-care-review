@@ -3,9 +3,14 @@ import {
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import { FetchContractDocument } from '../../gen/gqlClient'
-import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
+import {
+    testAdminUser,
+    testCMSUser,
+    testStateUser,
+} from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
+    createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createTestContract,
@@ -14,7 +19,11 @@ import {
     unlockTestContract,
     updateTestContractDraftRevision,
 } from '../../testHelpers/gqlContractHelpers'
-import { addNewRateToTestContract } from '../../testHelpers/gqlRateHelpers'
+import {
+    addLinkedRateToTestContract,
+    addNewRateToTestContract,
+    overrideTestRateData,
+} from '../../testHelpers/gqlRateHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
     testS3Client,
@@ -49,6 +58,70 @@ describe('fetchContract', () => {
 
         // validate correct contract submission
         expect(fetchedContract.contractSubmissionType).toBe('HEALTH_PLAN')
+    })
+
+    it('returns merged rate overrides when fetching a linked contract submission', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const linkedRateRevision =
+            contractA.packageSubmissions[0].rateRevisions[0]
+        const linkedRateID = linkedRateRevision.rateID
+        const targetRateDoc = linkedRateRevision.formData.rateDocuments[0]
+
+        const draftContractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        await addLinkedRateToTestContract(
+            stateServer,
+            draftContractB,
+            linkedRateID
+        )
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            draftContractB.id
+        )
+
+        const overrideDate = '2025-04-04T00:00:00.000Z'
+        await overrideTestRateData(adminServer, {
+            rateID: linkedRateID,
+            description: 'Override linked rate document dateAdded',
+            overrides: {
+                revisionOverride: {
+                    rateDocuments: [
+                        {
+                            documentOp: 'OVERRIDE',
+                            documentID: targetRateDoc.id,
+                            documentSha256: targetRateDoc.sha256,
+                            dateAdded: overrideDate,
+                            dateAddedOp: 'OVERRIDE',
+                        },
+                    ],
+                },
+            },
+        })
+
+        const fetchedContractB = await fetchTestContract(
+            stateServer,
+            submittedContractB.id
+        )
+        const fetchedLinkedRateRevision =
+            fetchedContractB.packageSubmissions[0].rateRevisions.find(
+                (revision) => revision.rateID === linkedRateID
+            )
+        const fetchedRateDoc =
+            fetchedLinkedRateRevision?.formData.rateDocuments.find(
+                (doc) => doc.id === targetRateDoc.id
+            )
+
+        expect(fetchedRateDoc).toBeDefined()
+        expect(new Date(fetchedRateDoc!.dateAdded).toISOString()).toBe(
+            overrideDate
+        )
     })
 
     it('gets the right contract name', async () => {

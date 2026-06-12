@@ -112,6 +112,9 @@ async function unlockRateInDB(
                 currentRev.actuaryCommunicationPreference,
             rateMedicaidPopulations: currentRev.rateMedicaidPopulations,
 
+            // Standalone rate unlock is currently inactive. If this path is
+            // reactivated, update it to materialize effective rate overrides
+            // before copying documents, matching unlockContract behavior.
             rateDocuments: {
                 create: currentRev.rateDocuments.map((d) => ({
                     position: d.position,

@@ -29,10 +29,9 @@ import {
 import {
     addNewRateToTestContract,
     fetchTestIndexRatesStripped,
+    overrideTestRateData,
 } from '../../testHelpers/gqlRateHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { NewPostgresStore } from '../../postgres'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
@@ -1374,19 +1373,7 @@ describe('withdrawContract', () => {
     })
 
     it('can withdraw and undo withdraw contract and rate submission with rate overrides', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
         const adminUser = testAdminUser()
-
-        await prismaClient.user.create({
-            data: {
-                id: adminUser.id,
-                givenName: adminUser.givenName,
-                familyName: adminUser.familyName,
-                email: adminUser.email,
-                role: adminUser.role,
-            },
-        })
 
         const stateServer = await constructTestPostgresServer({
             context: {
@@ -1397,6 +1384,11 @@ describe('withdrawContract', () => {
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
+            },
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
             },
         })
 
@@ -1424,19 +1416,25 @@ describe('withdrawContract', () => {
         const supportingDocuments = rateARevision.formData.supportingDocuments
 
         // add overrides to rate
-        await store.overrideRateData({
+        await overrideTestRateData(adminServer, {
             rateID: rateID,
-            updatedByID: adminUser.id,
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newDate,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: {
                     rateDocuments: rateDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                     supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                 },

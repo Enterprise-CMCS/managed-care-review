@@ -1,4 +1,4 @@
-import { OAuthScope } from '../generated/enums'
+import { OAuthScope } from '../generated/client'
 import type { Context } from '../handlers/apollo_gql'
 import type { UserRoles } from '../domain-models/UserType'
 
@@ -92,10 +92,12 @@ export function canWrite(context: Context): boolean {
  * specific endpoints will allow if the OAuth client has been validated for delegated user
  */
 export function canOauthWrite(context: Context): boolean {
-    // OAuth clients can only write if they are delegated users
-    // with the required submission-actions scope.
+    const stageName = process.env.stage
+    // OAuth clients can only write if scopes is populated
+    // and we are temporarily restricting them from writing in prod
     if (context.oauthClient) {
         if (
+            stageName !== 'prod' &&
             context.oauthClient?.isDelegatedUser &&
             context.oauthClient?.scopes?.includes(
                 OAuthScope.CMS_SUBMISSION_ACTIONS

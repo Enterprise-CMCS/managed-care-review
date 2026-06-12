@@ -26,7 +26,9 @@ type Query {
     - ForbiddenError: User must be a CMS, Admin, or State type user
     - NotFoundError: No submitted contracts found
     """
-    indexContractsStripped(input: IndexContractsStrippedInput): IndexContractsStrippedPayload!
+    indexContractsStripped(
+        input: IndexContractsStrippedInput
+    ): IndexContractsStrippedPayload!
 
     """
     indexUsers returns all of the Users in the system.
@@ -447,6 +449,36 @@ type Mutation {
     submitContract(input: SubmitContractInput!): SubmitContractPayload!
 
     """
+    overrideContractData creates an append-only override event for the latest submitted
+    contract data and returns the contract with effective override data merged in.
+
+    This can only be called by an AdminUser.
+    The contract must be in the SUBMITTED, RESUBMITTED, or APPROVED consolidated status.
+
+    The override payload is sparse. Operation fields carry intent and value fields carry
+    payload. Empty document override arrays are ignored. Document override rows target the
+    effective document list, so documentID can refer to a base document and documentSha256
+    can target either a base document or an override-added document.
+
+    Errors:
+    - ForbiddenError:
+        - A non AdminUser called this
+    - NotFoundError:
+        - A contract cannot be found with the given `contractID`
+    - UserInputError:
+        - The contract is not in an overridable consolidated status
+        - An override operation is supplied without a valid value
+        - A document override does not identify an effective document
+        - A document override has conflicting documentID and documentSha256 values
+    - INTERNAL_SERVER_ERROR:
+        - DB_ERROR
+            - Postgres returns error when attempting to find or update the contract
+    """
+    overrideContractData(
+        input: OverrideContractDataInput!
+    ): OverrideContractDataPayload!
+
+    """
     approveContract is a CMS or Admin user action to mark a contract as approved.
     Admin users must provide updatedReason. CMS and CMS Approver users may omit it.
 
@@ -476,7 +508,9 @@ type Mutation {
         - DB_ERROR
             - A contract cannot be found by id
     """
-    reverseApproveContract(input: ReverseApproveContractInput!): ReverseApproveContractPayload
+    reverseApproveContract(
+        input: ReverseApproveContractInput!
+    ): ReverseApproveContractPayload
 
     """
     undoUnlockContract is a CMS user only action to discard an unlocked draft and restore the last submitted contract state
@@ -491,7 +525,9 @@ type Mutation {
         - DB_ERROR
             - A contract cannot be found by id
     """
-    undoUnlockContract(input: UndoUnlockContractInput!): UndoUnlockContractPayload
+    undoUnlockContract(
+        input: UndoUnlockContractInput!
+    ): UndoUnlockContractPayload
 
     """
     withdrawRate is CMS user only action to withdraw a rate from review
@@ -524,6 +560,34 @@ type Mutation {
     - Issues restoring relationships between rate and contracts
     """
     undoWithdrawRate(input: UndoWithdrawRateInput!): UndoWithdrawRatePayload
+
+    """
+    overrideRateData creates an append-only override event for the latest submitted
+    rate data and returns the rate with effective override data merged in.
+
+    This can only be called by an AdminUser.
+    The rate must be in the SUBMITTED or RESUBMITTED consolidated status.
+
+    The override payload is sparse. Operation fields carry intent and value fields carry
+    payload. Empty document override arrays are ignored. Document override rows target the
+    effective document list, so documentID can refer to a base document and documentSha256
+    can target either a base document or an override-added document.
+
+    Errors:
+    - ForbiddenError:
+        - A non AdminUser called this
+    - NotFoundError:
+        - A rate cannot be found with the given `rateID`
+    - UserInputError:
+        - The rate is not in an overridable consolidated status
+        - An override operation is supplied without a valid value
+        - A document override does not identify an effective document
+        - A document override has conflicting documentID and documentSha256 values
+    - INTERNAL_SERVER_ERROR:
+        - DB_ERROR
+            - Postgres returns error when attempting to find or update the rate
+    """
+    overrideRateData(input: OverrideRateDataInput!): OverrideRateDataPayload!
 
     """
     withdrawSubmission is a CMS user only action to withdraw an entire submission package, which includes contract and child rates.
@@ -868,6 +932,74 @@ input SubmitContractInput {
 
 type SubmitContractPayload {
     contract: Contract!
+}
+
+type OverrideContractDataPayload {
+    contract: Contract!
+}
+
+type OverrideRateDataPayload {
+    rate: Rate!
+}
+
+enum ScalarFieldOverrideOperation {
+    OVERRIDE
+    CLEAR_OVERRIDE
+}
+
+enum ArrayFieldOverrideOperation {
+    OVERRIDE
+    ADD
+    DELETE
+}
+
+input OverrideContractDataInput {
+    contractID: ID!
+    description: String!
+    overrides: ContractDataOverrideInput!
+}
+
+input OverrideRateDataInput {
+    rateID: ID!
+    description: String!
+    overrides: RateDataOverrideInput!
+}
+
+input ContractDataOverrideInput {
+    initiallySubmittedAt: DateTime
+    initiallySubmittedAtOp: ScalarFieldOverrideOperation
+    revisionOverride: ContractRevisionDataOverrideInput
+}
+
+input RateDataOverrideInput {
+    initiallySubmittedAt: DateTime
+    initiallySubmittedAtOp: ScalarFieldOverrideOperation
+    revisionOverride: RateRevisionDataOverrideInput
+}
+
+input ContractRevisionDataOverrideInput {
+    contractType: ContractType
+    contractTypeOp: ScalarFieldOverrideOperation
+    contractDocuments: [DocumentDataOverrideInput!]
+    supportingDocuments: [DocumentDataOverrideInput!]
+}
+
+input RateRevisionDataOverrideInput {
+    rateDocuments: [DocumentDataOverrideInput!]
+    supportingDocuments: [DocumentDataOverrideInput!]
+}
+
+input DocumentDataOverrideInput {
+    documentOp: ArrayFieldOverrideOperation!
+    documentSha256: String!
+    documentID: ID
+    name: String
+    sha256: String
+    s3URL: String
+    s3BucketName: String
+    s3Key: String
+    dateAdded: DateTime
+    dateAddedOp: ScalarFieldOverrideOperation
 }
 
 input UnlockContractInput {
@@ -2293,6 +2425,12 @@ type Contract {
     , unlocked, or resubmitted. The array is in descending order by createdAt.
     """
     questions: IndexContractQuestionsPayload
+
+    """
+    Contract metadata and revision overrides. Overrides are append-only audit history
+    and are returned in descending order by createdAt.
+    """
+    contractOverrides: [ContractOverrideType]
 }
 
 """
@@ -2384,8 +2522,8 @@ type RateEdge {
 input IndexRatesInput {
     stateCode: String
     rateIDs: [String!]
-
 }
+
 input IndexRatesPaginatedInput {
     """
     Optional state filter for CMS and admin users.
@@ -2883,8 +3021,41 @@ type GenerateUploadURLPayload {
 
 type GenericDocumentOverrideType {
     id: ID!
-    documentID: String!
+    createdAt: DateTime!
+    documentOp: ArrayFieldOverrideOperation!
+    documentSha256: String!
+    documentID: String
+    name: String
+    sha256: String
+    s3URL: String
+    s3BucketName: String
+    s3Key: String
     dateAdded: DateTime
+    dateAddedOp: ScalarFieldOverrideOperation
+}
+
+type ContractRevisionOverrideDataType {
+    id: ID!
+    createdAt: DateTime!
+    contractRevisionID: String!
+    contractType: ContractType
+    contractTypeOp: ScalarFieldOverrideOperation
+    contractDocuments: [GenericDocumentOverrideType]
+    supportingDocuments: [GenericDocumentOverrideType]
+}
+
+type ContractOverrideDataType {
+    initiallySubmittedAt: DateTime
+    initiallySubmittedAtOp: ScalarFieldOverrideOperation
+    revisionOverride: ContractRevisionOverrideDataType
+}
+
+type ContractOverrideType {
+    id: ID!
+    createdAt: DateTime!
+    updatedBy: AdminUser
+    description: String!
+    overrides: ContractOverrideDataType!
 }
 
 type RateRevisionOverrideDataType {
@@ -2897,6 +3068,7 @@ type RateRevisionOverrideDataType {
 
 type RateOverrideDataType {
     initiallySubmittedAt: DateTime
+    initiallySubmittedAtOp: ScalarFieldOverrideOperation
     revisionOverride: RateRevisionOverrideDataType
 }
 

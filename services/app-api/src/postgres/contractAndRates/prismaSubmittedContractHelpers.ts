@@ -5,6 +5,46 @@ import {
     includeStrippedContractFormData,
 } from './prismaSharedContractRateHelpers'
 
+const selectContractRevisionOverrides = {
+    id: true,
+    createdAt: true,
+    contractRevisionID: true,
+    contractType: true,
+    contractTypeOp: true,
+    contractDocuments: {
+        select: {
+            id: true,
+            createdAt: true,
+            documentOp: true,
+            documentSha256: true,
+            documentID: true,
+            name: true,
+            sha256: true,
+            s3URL: true,
+            s3BucketName: true,
+            s3Key: true,
+            dateAdded: true,
+            dateAddedOp: true,
+        },
+    },
+    supportingDocuments: {
+        select: {
+            id: true,
+            createdAt: true,
+            documentOp: true,
+            documentSha256: true,
+            documentID: true,
+            name: true,
+            sha256: true,
+            s3URL: true,
+            s3BucketName: true,
+            s3Key: true,
+            dateAdded: true,
+            dateAddedOp: true,
+        },
+    },
+} satisfies Prisma.ContractRevisionOverridesSelect
+
 const includeLatestSubmittedRateRev = {
     revisions: {
         where: {
@@ -63,6 +103,9 @@ const includeContractWithoutDraftRates = {
     contractOverrides: {
         include: {
             updatedBy: true,
+            revisionOverride: {
+                select: selectContractRevisionOverrides,
+            },
         },
     },
 } satisfies Prisma.ContractTableInclude
@@ -95,6 +138,9 @@ const includeStrippedContractWithoutDraftRates = {
         },
         include: {
             updatedBy: true,
+            revisionOverride: {
+                select: selectContractRevisionOverrides,
+            },
         },
     },
 } satisfies Prisma.ContractTableInclude
@@ -103,10 +149,19 @@ type ContractTableStrippedPayload = Prisma.ContractTableGetPayload<{
     include: typeof includeStrippedContractWithoutDraftRates
 }>
 
+type ContractRevisionOverridesTablePayload =
+    Prisma.ContractRevisionOverridesGetPayload<{
+        select: typeof selectContractRevisionOverrides
+    }>
+
 export {
     includeContractWithoutDraftRates,
     includeLatestSubmittedRateRev,
     includeStrippedContractWithoutDraftRates,
 }
 
-export type { ContractTableWithoutDraftRates, ContractTableStrippedPayload }
+export type {
+    ContractTableWithoutDraftRates,
+    ContractTableStrippedPayload,
+    ContractRevisionOverridesTablePayload,
+}

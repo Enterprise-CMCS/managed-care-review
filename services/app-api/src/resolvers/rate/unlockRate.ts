@@ -9,6 +9,14 @@ import { GraphQLError } from 'graphql'
 import { hasCMSPermissions } from '../../domain-models'
 import { canWrite } from '../../oauth/oauthAuthorization'
 
+/*
+NOTE: This resolver, unlockRate is not currently used. 
+Rates cannot be submitted independently of a contract 
+— rate unlock happens via unlockContract, which cascades to associated rates.
+This code was built in anticipation of standalone rate submissions, 
+which was descoped. Preserve or extend with care;
+do not assume parity with unlockContract semantics
+*/
 export function unlockRate(store: Store): MutationResolvers['unlockRate'] {
     return async (_parent, { input }, context) => {
         const { user } = context

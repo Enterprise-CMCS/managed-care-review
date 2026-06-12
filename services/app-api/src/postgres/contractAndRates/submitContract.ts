@@ -220,6 +220,9 @@ async function submitContract(
         operationName: 'submitContract',
         table: 'ContractTable',
         id: contractID,
+        transactionOptions: {
+            timeout: 10000,
+        },
         transaction: async (tx) => {
             const result = await submitContractInsideTransaction(tx, {
                 contractID,

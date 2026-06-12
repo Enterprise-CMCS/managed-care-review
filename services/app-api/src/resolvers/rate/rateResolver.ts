@@ -16,16 +16,18 @@ import { NotFoundError } from '../../postgres'
 import { convertToIndexRateQuestionsPayload } from '../../postgres/questionResponse'
 import { logResolverError } from '../../logger'
 import type { Context } from '../../handlers/apollo_gql'
+import { resolveInitiallySubmittedAtOverride } from '../shared/overrideHelpers'
 
 // Return the date of the first submission for a rate
 // This method relies on revisions always being presented in most-recent-first order
 function initialSubmitDate(rate: RateType): Date | undefined {
     const firstSubmittedRev = rate.revisions[rate.revisions.length - 1]
-    // Use override date if exists
-    return (
-        rate.rateOverrides?.[0]?.overrides.initiallySubmittedAt ||
-        firstSubmittedRev?.submitInfo?.updatedAt
-    )
+    const baseValue = firstSubmittedRev?.submitInfo?.updatedAt
+    if (!baseValue) {
+        return undefined
+    }
+
+    return resolveInitiallySubmittedAtOverride(baseValue, rate.rateOverrides)
 }
 
 export function rateResolver(

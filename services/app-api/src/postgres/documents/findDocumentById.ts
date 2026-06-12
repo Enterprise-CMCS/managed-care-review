@@ -1,10 +1,85 @@
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { NotFoundError } from '..'
-import { findAllDocuments } from '.'
+import {
+    findOverrideDocumentById,
+    type OverrideDocumentType,
+} from './findOverrideDocumentById'
 import type {
     DocumentTypes,
     SharedDocument,
 } from '../../domain-models/DocumentType'
+
+const overrideDocumentTypes: OverrideDocumentType[] = [
+    'CONTRACT_DOC',
+    'CONTRACT_SUPPORTING_DOC',
+    'RATE_DOC',
+    'RATE_SUPPORTING_DOC',
+]
+
+async function findBaseDocumentById(
+    client: ExtendedPrismaClient,
+    docID: string
+): Promise<SharedDocument | undefined> {
+    const [
+        contractDoc,
+        contractSupportingDoc,
+        rateDoc,
+        rateSupportingDoc,
+        contractQuestionDoc,
+        contractQuestionResponseDoc,
+        rateQuestionDoc,
+        rateQuestionResponseDoc,
+    ] = await Promise.all([
+        client.contractDocument.findUnique({ where: { id: docID } }),
+        client.contractSupportingDocument.findUnique({ where: { id: docID } }),
+        client.rateDocument.findUnique({ where: { id: docID } }),
+        client.rateSupportingDocument.findUnique({ where: { id: docID } }),
+        client.contractQuestionDocument.findUnique({ where: { id: docID } }),
+        client.contractQuestionResponseDocument.findUnique({
+            where: { id: docID },
+        }),
+        client.rateQuestionDocument.findUnique({ where: { id: docID } }),
+        client.rateQuestionResponseDocument.findUnique({
+            where: { id: docID },
+        }),
+    ])
+
+    return (
+        contractDoc ??
+        contractSupportingDoc ??
+        rateDoc ??
+        rateSupportingDoc ??
+        contractQuestionDoc ??
+        contractQuestionResponseDoc ??
+        rateQuestionDoc ??
+        rateQuestionResponseDoc ??
+        undefined
+    )
+}
+
+async function validateAndFindOverrideDoc(
+    client: ExtendedPrismaClient,
+    docID: string,
+    notFoundMessage: string,
+    docType?: DocumentTypes
+): Promise<SharedDocument | Error> {
+    if (overrideDocumentTypes.includes(docType as OverrideDocumentType)) {
+        const overrideDocumentType = docType as OverrideDocumentType
+        const overrideDoc = await findOverrideDocumentById(
+            client,
+            docID,
+            overrideDocumentType
+        )
+        if (overrideDoc instanceof Error) {
+            return overrideDoc
+        }
+        if (overrideDoc) {
+            return overrideDoc
+        }
+    }
+
+    return new NotFoundError(notFoundMessage)
+}
 
 export async function findDocumentById(
     client: ExtendedPrismaClient,
@@ -23,7 +98,12 @@ export async function findDocumentById(
                         })
                     if (!contractDoc) {
                         const err = `PRISMA ERROR: Cannot find contract document with id: ${docID}`
-                        return new NotFoundError(err)
+                        return validateAndFindOverrideDoc(
+                            client,
+                            docID,
+                            err,
+                            docType
+                        )
                     }
                     return contractDoc
                 case 'CONTRACT_SUPPORTING_DOC':
@@ -35,7 +115,12 @@ export async function findDocumentById(
                         })
                     if (!contractSupportingDoc) {
                         const err = `PRISMA ERROR: Cannot find contract supporting document with id: ${docID}`
-                        return new NotFoundError(err)
+                        return validateAndFindOverrideDoc(
+                            client,
+                            docID,
+                            err,
+                            docType
+                        )
                     }
                     return contractSupportingDoc
                 case 'RATE_DOC':
@@ -46,7 +131,12 @@ export async function findDocumentById(
                     })
                     if (!rateDoc) {
                         const err = `PRISMA ERROR: Cannot find rate document with id: ${docID}`
-                        return new NotFoundError(err)
+                        return validateAndFindOverrideDoc(
+                            client,
+                            docID,
+                            err,
+                            docType
+                        )
                     }
                     return rateDoc
                 case 'RATE_SUPPORTING_DOC':
@@ -58,7 +148,12 @@ export async function findDocumentById(
                         })
                     if (!rateSupportingDoc) {
                         const err = `PRISMA ERROR: Cannot find rate supporting document with id: ${docID}`
-                        return new NotFoundError(err)
+                        return validateAndFindOverrideDoc(
+                            client,
+                            docID,
+                            err,
+                            docType
+                        )
                     }
                     return rateSupportingDoc
                 case 'CONTRACT_QUESTION_DOC':
@@ -115,23 +210,14 @@ export async function findDocumentById(
                     throw new Error(`Unsupported docType: ${docType}`)
             }
         } else {
-            // fetch all the documents in the db
-            const allDocs = await findAllDocuments(client)
-            if (allDocs instanceof Error) {
-                const err = `Fetching all documents failed: ${allDocs.message}`
-                console.error(err)
-                return new Error(err)
+            const fetchedDoc = await findBaseDocumentById(client, docID)
+            if (fetchedDoc) {
+                return fetchedDoc
             }
 
-            // find document by id
-            const fetchedDoc = allDocs.find((doc) => doc.id === docID)
-            if (!fetchedDoc) {
-                const err = `PRISMA ERROR: Cannot find document with id: ${docID}`
-                console.error(err)
-                return new NotFoundError(err)
-            }
-
-            return fetchedDoc
+            const err = `PRISMA ERROR: Cannot find document with id: ${docID}`
+            console.error(err)
+            return new NotFoundError(err)
         }
     } catch (err) {
         return err instanceof Error
