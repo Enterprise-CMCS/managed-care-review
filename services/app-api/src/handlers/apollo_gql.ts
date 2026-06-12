@@ -60,6 +60,7 @@ let s3Client: S3ClientT
 // The Context type passed to all of our GraphQL resolvers
 export interface Context {
     user: UserType
+    requestId?: string
     span?: Span
     tracer?: Tracer
     ctx?: OTELContext
@@ -138,6 +139,7 @@ function contextForRequestForFetcher(
                     'http.method': event.httpMethod,
                     'http.url': event.path,
                     'http.route': event.requestContext.resourcePath,
+                    'http.request_id': event.requestContext.requestId,
                 },
             },
             parentContext // Use the extracted context as the parent
@@ -164,6 +166,12 @@ function contextForRequestForFetcher(
                 }
 
                 if (fromThirdPartyAuthorizer) {
+                    const authMethod = 'OAuth 2.0'
+                    const operationName = extractOAuthOperationName(event)
+                    requestSpan.setAttributes({
+                        'graphql.operation.name': operationName ?? 'anonymous',
+                        'mcreview.auth_method': authMethod,
+                    })
                     const principalId =
                         event.requestContext.authorizer?.principalId
                     const authorizerContext = event.requestContext.authorizer
@@ -190,11 +198,11 @@ function contextForRequestForFetcher(
                     // extra context for logging
                     const oauthContext = {
                         operation: 'contextForRequestForFetcher',
-                        authMethod: 'OAuth 2.0',
+                        authMethod,
                         principalId,
                         path: event.path,
                         requestId: event.requestContext.requestId,
-                        queryName: extractOAuthOperationName(event),
+                        queryName: operationName,
                         ['x-acting-as-user']: delegatedUser,
                     }
 
@@ -270,19 +278,26 @@ function contextForRequestForFetcher(
 
                     return {
                         user: userResult,
+                        requestId: event.requestContext.requestId,
                         tracer: tracer,
                         ctx: parentContext,
                         span: requestSpan,
                         oauthClient,
                     }
                 } else {
+                    const authMethod = 'Cognito'
+                    const operationName = extractOperationName(event)
+                    requestSpan.setAttributes({
+                        'graphql.operation.name': operationName ?? 'anonymous',
+                        'mcreview.auth_method': authMethod,
+                    })
                     const userResult = await userFetcher(authProvider!, store)
                     const cognitoContext = {
                         operation: 'contextForRequestForFetcher',
-                        authMethod: 'Cognito',
+                        authMethod,
                         path: event.path,
                         requestId: event.requestContext.requestId,
-                        queryName: extractOperationName(event),
+                        queryName: operationName,
                     }
 
                     if (userResult === undefined) {
@@ -312,6 +327,7 @@ function contextForRequestForFetcher(
 
                     const context: Context = {
                         user: userResult,
+                        requestId: event.requestContext.requestId,
                         tracer: tracer,
                         ctx: parentContext,
                         span: requestSpan,

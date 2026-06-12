@@ -80,7 +80,7 @@ describe('SubmissionTypeSummarySection', () => {
             screen.queryByText(/You must provide this information/)
         ).toBeNull()
         // API returns UTC timezone, we display timestamped dates in PT timezone so 1 day before on these tests.
-        expect(screen.getByLabelText('Submitted')).toHaveTextContent(
+        expect(screen.getByLabelText('Submission date')).toHaveTextContent(
             '11/26/2024'
         )
     })
@@ -227,7 +227,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         await waitFor(() => {
             expect(
-                screen.getByRole('definition', { name: 'Submitted' })
+                screen.getByRole('definition', { name: 'Submission date' })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', { name: 'Program(s)' })
@@ -241,7 +241,7 @@ describe('SubmissionTypeSummarySection', () => {
                 })
             ).toBeInTheDocument()
             expect(
-                screen.queryByRole('definition', { name: 'Submitted' })
+                screen.queryByRole('definition', { name: 'Submission date' })
             ).toBeInTheDocument()
         })
     })
@@ -269,7 +269,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         await waitFor(() => {
             expect(
-                screen.getByRole('definition', { name: 'Submitted' })
+                screen.getByRole('definition', { name: 'Submission date' })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', { name: 'Program(s)' })
@@ -306,7 +306,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         await waitFor(() => {
             expect(
-                screen.getByRole('definition', { name: 'Submitted' })
+                screen.getByRole('definition', { name: 'Submission date' })
             ).toBeInTheDocument()
             expect(
                 screen.getByRole('definition', { name: 'Program(s)' })
@@ -342,7 +342,7 @@ describe('SubmissionTypeSummarySection', () => {
         )
         await waitFor(() => {
             expect(
-                screen.queryByRole('definition', { name: 'Submitted' })
+                screen.queryByRole('definition', { name: 'Submission date' })
             ).not.toBeInTheDocument()
             expect(
                 screen.getByRole('definition', { name: 'Program(s)' })
@@ -368,7 +368,7 @@ describe('SubmissionTypeSummarySection', () => {
             />
         )
         expect(
-            screen.queryByRole('definition', { name: 'Submitted' })
+            screen.queryByRole('definition', { name: 'Submission date' })
         ).not.toBeInTheDocument()
     })
 
@@ -434,6 +434,49 @@ describe('SubmissionTypeSummarySection', () => {
         // SNBC is the default program in the mock — should not have (retired)
         expect(screen.getByText('SNBC')).toBeInTheDocument()
         expect(screen.queryByText(/\(retired\)/)).not.toBeInTheDocument()
+    })
+
+    it('renders CHIP-only Review decision with DMCO override text when NOT_SUBJECT_TO_REVIEW', () => {
+        const contract = mockContractPackageSubmitted({
+            consolidatedStatus: 'NOT_SUBJECT_TO_REVIEW',
+            reviewStatus: 'NOT_SUBJECT_TO_REVIEW',
+        })
+        contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+            'CHIP'
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={contract}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={true}
+                initiallySubmittedAt={contract.initiallySubmittedAt}
+            />
+        )
+        const reviewDecision = screen.getByRole('definition', {
+            name: 'Review decision',
+        })
+        expect(reviewDecision).toHaveTextContent(
+            'Not subject to DMCO review and validation'
+        )
+    })
+
+    it('renders Review decision with normalized status text when not CHIP-only', () => {
+        const contract = mockContractPackageSubmitted({
+            consolidatedStatus: 'SUBMITTED',
+        })
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={contract}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={true}
+                initiallySubmittedAt={contract.initiallySubmittedAt}
+            />
+        )
+        const reviewDecision = screen.getByRole('definition', {
+            name: 'Review decision',
+        })
+        expect(reviewDecision).toHaveTextContent('Submitted')
     })
 
     it('does not render fields with missing fields for submitted package on submission summary', () => {

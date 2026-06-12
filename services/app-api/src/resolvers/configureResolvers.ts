@@ -36,9 +36,11 @@ import {
     unlockRate,
     withdrawRate,
     undoWithdrawRate,
+    overrideRateData,
 } from './rate'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { updateContract } from './contract/updateContract'
+import { overrideContractData } from './contract/overrideContractData'
 import { indexContractsResolver } from './contract/indexContracts'
 import { indexContractsStripped } from './contract/indexContractsStripped'
 import { unlockContractResolver } from './contract/unlockContract'
@@ -109,7 +111,11 @@ export function configureResolvers(
                 launchDarkly,
                 documentZip
             ),
-            unlockContract: unlockContractResolver(store, emailer),
+            unlockContract: unlockContractResolver(
+                store,
+                emailer,
+                launchDarkly
+            ),
             createContract: createContract(store),
             updateContract: updateContract(store),
             updateContractDraftRevision: updateContractDraftRevision(
@@ -117,29 +123,41 @@ export function configureResolvers(
                 launchDarkly
             ),
             updateDraftContractRates: updateDraftContractRates(store),
-            approveContract: approveContract(store),
-            reverseApproveContract: reverseApproveContract(store),
-            undoUnlockContract: undoUnlockContract(store),
-            withdrawContract: withdrawContract(store, emailer, documentZip),
+            approveContract: approveContract(store, launchDarkly),
+            reverseApproveContract: reverseApproveContract(store, launchDarkly),
+            undoUnlockContract: undoUnlockContract(store, launchDarkly),
+            withdrawContract: withdrawContract(
+                store,
+                emailer,
+                documentZip,
+                launchDarkly
+            ),
             undoWithdrawContract: undoWithdrawContract(
                 store,
                 emailer,
-                documentZip
+                documentZip,
+                launchDarkly
             ),
-            withdrawRate: withdrawRate(store, emailer),
-            undoWithdrawRate: undoWithdrawRate(store, emailer),
+            withdrawRate: withdrawRate(store, emailer, launchDarkly),
+            undoWithdrawRate: undoWithdrawRate(store, emailer, launchDarkly),
+            overrideContractData: overrideContractData(store, launchDarkly),
+            overrideRateData: overrideRateData(store, launchDarkly),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),
             createContractQuestion: createContractQuestionResolver(
                 store,
-                emailer
+                emailer,
+                launchDarkly
+            ),
+            deleteContractQuestion: deleteContractQuestionResolver(
+                store,
+                launchDarkly
             ),
             adminCreateContractQuestion:
                 adminCreateContractQuestionResolver(store),
             adminCreateContractQuestionResponse:
                 adminCreateContractQuestionResponseResolver(store),
-            deleteContractQuestion: deleteContractQuestionResolver(store),
             createContractQuestionResponse:
                 createContractQuestionResponseResolver(store, emailer),
             createRateQuestion: createRateQuestionResolver(store, emailer),
@@ -153,7 +171,11 @@ export function configureResolvers(
             createOauthClient: createOauthClientResolver(store),
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
-            generateUploadURL: generateUploadURLResolver(store, s3Client),
+            generateUploadURL: generateUploadURLResolver(
+                store,
+                s3Client,
+                launchDarkly
+            ),
         },
         User: {
             // resolveType is required to differentiate Unions

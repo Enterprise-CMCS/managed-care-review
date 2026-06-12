@@ -180,6 +180,9 @@ function mockStoreThatErrors(): Store {
         undoWithdrawContract: async (_ID) => {
             return genericError
         },
+        overrideContractData: async (_args) => {
+            return genericError
+        },
         withdrawRate: async (_ID) => {
             return genericError
         },

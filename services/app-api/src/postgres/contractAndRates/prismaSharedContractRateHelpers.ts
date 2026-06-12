@@ -1,8 +1,4 @@
-import type {
-    Prisma,
-    RateDocument,
-    RateSupportingDocument,
-} from '../../generated/client'
+import type { Prisma } from '../../generated/client'
 import type { ProgramType } from '../../domain-models'
 import type {
     ContractFormDataType,
@@ -31,10 +27,14 @@ import type {
     RateTableWithoutDraftContractsStrippedPayload,
     RateRevisionTableWithRelatedSubmissionContracts,
     RateTableWithRelatedContractsPayload,
-    RateRevisionOverridesTablePayload,
 } from './prismaSubmittedRateHelpers'
 import type { ConsolidatedRateStatusType } from '../../domain-models/contractAndRates/statusType'
 import type { RelatedContractStripped } from '../../gen/gqlServer'
+import type { DocumentWithCommonFields } from '../prismaOverrideMergeHelpers'
+import {
+    mergeContractRevisionOverrides,
+    mergeRateRevisionOverrides,
+} from '../prismaOverrideMergeHelpers'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -75,6 +75,20 @@ const includeContractFormData = {
     supportingDocuments: {
         orderBy: {
             position: 'asc',
+        },
+    },
+    revisionOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            contractRevisionID: true,
+            contractType: true,
+            contractTypeOp: true,
+            contractDocuments: true,
+            supportingDocuments: true,
         },
     },
 } satisfies Prisma.ContractRevisionTableInclude
@@ -525,6 +539,18 @@ const includeStrippedContractFormData = {
     unlockInfo: includeUpdateInfo,
     undoUnlockInfo: includeUpdateInfo,
     contract: true,
+    revisionOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            contractRevisionID: true,
+            contractType: true,
+            contractTypeOp: true,
+        },
+    },
 } satisfies Prisma.ContractRevisionTableInclude
 
 type RateRevisionTableWithFormData = Prisma.RateRevisionTableGetPayload<{
@@ -541,35 +567,13 @@ type StrippedContractRevisionTableWithFormData =
         include: typeof includeStrippedContractFormData
     }>
 
-// Function to take in original document and look for override dateAdded
-// returns original doc data and applies override to dateAdded.
-const documentDataToDomainModel = (
-    originalDoc: RateDocument | RateSupportingDocument,
-    revisionOverrides?: RateRevisionOverridesTablePayload
-): DocumentType => {
-    let dateAdded = originalDoc.dateAdded
-
-    // Override document data
-    if (revisionOverrides) {
-        const overrideDocs = [
-            ...revisionOverrides.rateDocuments,
-            ...revisionOverrides.supportingDocuments,
-        ]
-
-        const overrideDoc =
-            overrideDocs &&
-            overrideDocs.find((doc) => doc.documentID === originalDoc.id)
-
-        if (overrideDoc?.dateAdded) {
-            dateAdded = overrideDoc.dateAdded
-        }
-    }
-
+// Formats an effective document row into the domain document shape.
+const documentToDomainModel = (doc: DocumentWithCommonFields): DocumentType => {
     return {
-        ...originalDoc,
-        dateAdded: dateAdded ?? undefined,
-        s3BucketName: originalDoc.s3BucketName ?? undefined,
-        s3Key: originalDoc.s3Key ?? undefined,
+        ...doc,
+        dateAdded: doc.dateAdded ?? undefined,
+        s3BucketName: doc.s3BucketName ?? undefined,
+        s3Key: doc.s3Key ?? undefined,
     }
 }
 
@@ -609,29 +613,28 @@ function rateFormDataToDomainModel(
         })
     }
 
-    // Get any rate overrides to override rate revision data.
-    const latestOverride = rateRevision.revisionOverrides?.[0]
-
-    const revisionOverrides =
-        latestOverride && latestOverride.rateRevisionID === rateRevision.id
-            ? latestOverride
-            : undefined
+    // Revision overrides are stored in parent-level history, but each row only
+    // applies to its target revision. Filter to this revision before merging so
+    // older audit/history rows do not affect the current effective form data.
+    const relevantOverrides = (rateRevision.revisionOverrides ?? []).filter(
+        (o) => o.rateRevisionID === rateRevision.id
+    )
+    const mergedOverride = mergeRateRevisionOverrides({
+        revisionOverrides: relevantOverrides,
+        rateRevision,
+    })
 
     return {
         id: rateRevision.rateID,
         rateID: rateRevision.rateID,
         rateType: rateRevision.rateType ?? undefined,
         rateCapitationType: rateRevision.rateCapitationType ?? undefined,
-        rateDocuments: rateRevision.rateDocuments
-            ? rateRevision.rateDocuments.map((doc) =>
-                  documentDataToDomainModel(doc, revisionOverrides)
-              )
-            : [],
-        supportingDocuments: rateRevision.supportingDocuments
-            ? rateRevision.supportingDocuments.map((doc) =>
-                  documentDataToDomainModel(doc, revisionOverrides)
-              )
-            : [],
+        rateDocuments: mergedOverride.rateDocuments.map((doc) =>
+            documentToDomainModel(doc)
+        ),
+        supportingDocuments: mergedOverride.supportingDocuments.map((doc) =>
+            documentToDomainModel(doc)
+        ),
         rateDateStart: rateRevision.rateDateStart ?? undefined,
         rateDateEnd: rateRevision.rateDateEnd ?? undefined,
         rateDateCertified: rateRevision.rateDateCertified ?? undefined,
@@ -725,10 +728,24 @@ type ContractRevisionTableWithFormData =
 function contractFormDataToDomainModel(
     contractRevision: ContractRevisionTableWithFormData
 ): ContractFormDataType {
+    // Revision overrides are stored in parent-level history, but each row only
+    // applies to its target revision. Filter to this revision before merging so
+    // older audit/history rows do not affect the current effective form data.
+    const relevantOverrides = (contractRevision.revisionOverrides ?? []).filter(
+        (o) => o.contractRevisionID === contractRevision.id
+    )
+    const mergedOverride = mergeContractRevisionOverrides({
+        revisionOverrides: relevantOverrides,
+        contractRevision,
+    })
+
     return {
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
-        contractType: contractRevision.contractType,
+        contractType: mergedOverride.contractType.hasOverride
+            ? (mergedOverride.contractType.value ??
+              contractRevision.contractType)
+            : contractRevision.contractType,
         programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
         riskBasedContract:
@@ -746,24 +763,14 @@ function contractFormDataToDomainModel(
                   email: contact.email ?? undefined,
               }))
             : [],
-        supportingDocuments: contractRevision.supportingDocuments
-            ? contractRevision.supportingDocuments.map((doc) => ({
-                  ...doc,
-                  dateAdded: doc.dateAdded ?? undefined,
-                  s3BucketName: doc.s3BucketName ?? undefined,
-                  s3Key: doc.s3Key ?? undefined,
-              }))
-            : [],
+        supportingDocuments: mergedOverride.supportingDocuments.map((doc) =>
+            documentToDomainModel(doc)
+        ),
         contractExecutionStatus:
             contractRevision.contractExecutionStatus ?? undefined,
-        contractDocuments: contractRevision.contractDocuments
-            ? contractRevision.contractDocuments.map((doc) => ({
-                  ...doc,
-                  dateAdded: doc.dateAdded ?? undefined,
-                  s3BucketName: doc.s3BucketName ?? undefined,
-                  s3Key: doc.s3Key ?? undefined,
-              }))
-            : [],
+        contractDocuments: mergedOverride.contractDocuments.map((doc) =>
+            documentToDomainModel(doc)
+        ),
         contractDateStart: contractRevision.contractDateStart ?? undefined,
         contractDateEnd: contractRevision.contractDateEnd ?? undefined,
         managedCareEntities: contractRevision.managedCareEntities ?? undefined,

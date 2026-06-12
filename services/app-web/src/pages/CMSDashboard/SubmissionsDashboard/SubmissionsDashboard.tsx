@@ -39,13 +39,6 @@ const SubmissionsDashboard = (): React.ReactElement => {
     data.indexContractsStripped.edges
         .map((edge) => edge.node)
         .forEach((sub) => {
-            // When a sub.reviewStatus has been moved out of 'UNDER_REVIEW'
-            // have the reviewStatus supersede the sub.status
-            const status =
-                sub.reviewStatus !== 'UNDER_REVIEW'
-                    ? sub.reviewStatus
-                    : sub.status
-
             // Errors - data handling
             if (sub.consolidatedStatus === 'DRAFT') {
                 recordJSException(
@@ -122,7 +115,7 @@ const SubmissionsDashboard = (): React.ReactElement => {
                     displayRateFormData.programIDs.includes(program.id)
                 ),
                 submittedAt: sub.initiallySubmittedAt,
-                status: status,
+                status: sub.consolidatedStatus,
                 updatedAt: lastUpdated,
                 submissionType:
                     SubmissionTypeRecord[displayRateFormData.submissionType],

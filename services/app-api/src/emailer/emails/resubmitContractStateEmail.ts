@@ -12,6 +12,7 @@ import {
 } from '../templateHelpers'
 import type { EmailData, EmailConfiguration } from '../'
 import { pruneDuplicateEmails } from '../formatters'
+import { submissionSummaryURL } from '../generateURLs'
 
 export const resubmitContractStateEmail = async (
     contract: ContractType,
@@ -20,7 +21,6 @@ export const resubmitContractStateEmail = async (
     config: EmailConfiguration,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isTestEnvironment = config.stage !== 'prod'
     const stateContactEmails: string[] = []
     const contractRev = contract.packageSubmissions[0].contractRevision
     const formData = contractRev.formData
@@ -51,6 +51,14 @@ export const resubmitContractStateEmail = async (
         formData.submissionType === 'CONTRACT_AND_RATES' &&
         Boolean(contract.packageSubmissions[0].rateRevisions.length)
 
+    const isChipOnly = formData.populationCovered === 'CHIP'
+
+    const contractURL = submissionSummaryURL(
+        contract.id,
+        contract.contractSubmissionType,
+        config.baseUrl
+    )
+
     const data = {
         packageName,
         resubmittedBy: updateInfo.updatedBy.email,
@@ -59,6 +67,7 @@ export const resubmitContractStateEmail = async (
             'America/Los_Angeles'
         ),
         resubmissionReason: updateInfo.updatedReason,
+        submissionURL: contractURL,
         shouldIncludeRates: isContractAndRates,
         rateInfos:
             isContractAndRates &&
@@ -67,20 +76,24 @@ export const resubmitContractStateEmail = async (
             })),
     }
 
-    const result = await renderTemplate<typeof data>(
-        'resubmitContractStateEmail',
-        data
-    )
+    const emailTemplate = isChipOnly
+        ? 'resubmitChipOnlyStateEmail'
+        : 'resubmitContractStateEmail'
+
+    const result = await renderTemplate<typeof data>(emailTemplate, data)
     if (result instanceof Error) {
         return result
     } else {
+        const stagePrefix = config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        const subjectLine = isChipOnly
+            ? `${packageName} is not subject to DMCO review and validation.`
+            : `${packageName} was resubmitted`
+
         return {
             toAddresses: receiverEmails,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
-            subject: `${
-                isTestEnvironment ? `[${config.stage}] ` : ''
-            }${packageName} was resubmitted`,
+            subject: `${stagePrefix}${subjectLine}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

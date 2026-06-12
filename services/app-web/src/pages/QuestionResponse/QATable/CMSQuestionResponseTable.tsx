@@ -17,6 +17,7 @@ type CMSQuestionResponseTableProps = {
     questionType: 'contract' | 'rate'
     consolidatedStatus?: ConsolidatedContractStatus | ConsolidatedRateStatus
     userDivision?: Division
+    canAddQuestionsGotAllResponses?: boolean
 }
 
 // Reusable function for sorting rounds by createdAt and reversing
@@ -81,12 +82,14 @@ export const CMSQuestionResponseTable = ({
     questionType,
     consolidatedStatus,
     userDivision,
+    canAddQuestionsGotAllResponses,
 }: CMSQuestionResponseTableProps) => {
     const { loggedInUser } = useAuth()
     const canAddQuestions =
         !['APPROVED', 'WITHDRAWN'].includes(consolidatedStatus!) &&
         userDivision &&
-        userDivision === 'DMCO'
+        userDivision === 'DMCO' &&
+        (canAddQuestionsGotAllResponses ?? true)
 
     const { usersRounds, otherRounds } = sortQuestionRounds(
         indexQuestions,

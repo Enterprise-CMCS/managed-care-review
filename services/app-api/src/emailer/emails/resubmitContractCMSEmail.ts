@@ -22,7 +22,6 @@ export const resubmitContractCMSEmail = async (
     stateAnalystsEmails: StateAnalystsEmails,
     statePrograms: ProgramType[]
 ): Promise<EmailData | Error> => {
-    const isTestEnvironment = config.stage !== 'prod'
     const reviewerEmails = generateCMSReviewerEmailsForSubmittedContract(
         config,
         contract,
@@ -58,6 +57,8 @@ export const resubmitContractCMSEmail = async (
         config.baseUrl
     )
 
+    const isChipOnly = formData.populationCovered === 'CHIP'
+
     const data = {
         packageName: packageName,
         resubmittedBy: updateInfo.updatedBy.email,
@@ -75,20 +76,25 @@ export const resubmitContractCMSEmail = async (
         submissionURL: packageURL,
     }
 
-    const result = await renderTemplate<typeof data>(
-        'resubmitContractCMSEmail',
-        data
-    )
+    const emailTemplate = isChipOnly
+        ? 'resubmitChipOnlyCMSEmail'
+        : 'resubmitContractCMSEmail'
+
+    const result = await renderTemplate<typeof data>(emailTemplate, data)
+
     if (result instanceof Error) {
         return result
     } else {
+        const stagePrefix = config.stage !== 'prod' ? `[${config.stage}] ` : ''
+        const subjectLine = isChipOnly
+            ? `${packageName} is not subject to DMCO review and validation.`
+            : `${packageName} was resubmitted`
+
         return {
             toAddresses: reviewerEmails,
             replyToAddresses: [],
             sourceEmail: config.emailSource,
-            subject: `${
-                isTestEnvironment ? `[${config.stage}] ` : ''
-            }${packageName} was resubmitted`,
+            subject: `${stagePrefix}${subjectLine}`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }

@@ -41,8 +41,24 @@ import { NewTag } from '../../InfoTag'
 
 type SummaryDetailProps = {
     contractFormData: ContractFormData
+    reviewDecision?: string
     explainMissingData?: boolean
     label?: string
+}
+
+export const ReviewDecisionSummary = ({
+    reviewDecision,
+    explainMissingData,
+    label,
+}: Omit<SummaryDetailProps, 'contractFormData'>) => {
+    return (
+        <DataDetail
+            id="reviewDecision"
+            label={label ?? 'Review decision'}
+            explainMissingData={explainMissingData}
+            children={reviewDecision}
+        />
+    )
 }
 
 export const PopulationCoverageSummary = ({
@@ -198,14 +214,34 @@ export const SubmittedAtSummary = ({
 }) => {
     return (
         <DataDetail
-            id="submitted"
-            label={label ?? 'Submitted'}
+            id="submissionDate"
+            label={label ?? 'Submission date'}
             children={
                 <span>
                     {formatCalendarDate(
                         initiallySubmittedAt,
                         'America/Los_Angeles'
                     )}
+                </span>
+            }
+        />
+    )
+}
+
+export const UpdatedAtSummary = ({
+    updatedAt,
+    label,
+}: {
+    updatedAt: Date
+    label?: string
+}) => {
+    return (
+        <DataDetail
+            id="lastUpdated"
+            label={label ?? 'Last updated'}
+            children={
+                <span>
+                    {formatCalendarDate(updatedAt, 'America/Los_Angeles')}
                 </span>
             }
         />

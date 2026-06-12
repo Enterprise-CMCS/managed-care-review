@@ -353,6 +353,55 @@ describe('ContractQuestionResponse', () => {
                 </Route>
             </Routes>
         )
+
+        const mockSubmittedContractWithAnsweredQuestions = () => {
+            const contract = mockContractPackageSubmittedWithQuestions()
+
+            return {
+                ...contract,
+                questions: {
+                    ...contract.questions!,
+                    DMCOQuestions: {
+                        ...contract.questions!.DMCOQuestions,
+                        edges: contract.questions!.DMCOQuestions.edges.map(
+                            (edge) =>
+                                edge.node.id === 'dmco-question-2-id'
+                                    ? {
+                                          ...edge,
+                                          node: {
+                                              ...edge.node,
+                                              responses: [
+                                                  {
+                                                      __typename:
+                                                          'QuestionResponse' as const,
+                                                      id: 'response-to-dmco-2-id',
+                                                      questionID:
+                                                          'dmco-question-2-id',
+                                                      addedBy:
+                                                          mockValidStateUser(),
+                                                      createdAt: new Date(
+                                                          '2022-12-20'
+                                                      ),
+                                                      documents: [
+                                                          {
+                                                              id: 'response-to-dmco-2-document-1',
+                                                              s3URL: 's3://bucketname/key/response-to-dmco-2-document-1',
+                                                              name: 'response-to-dmco-2-document-1',
+                                                              downloadURL:
+                                                                  'https://example.com/response-to-dmco-2-document-1',
+                                                          },
+                                                      ],
+                                                  },
+                                              ],
+                                          },
+                                      }
+                                    : edge
+                        ),
+                    },
+                },
+            }
+        }
+
         it('renders no questions text', async () => {
             const indexContractQuestions: IndexContractQuestionsPayload = {
                 __typename: 'IndexContractQuestionsPayload',
@@ -520,11 +569,88 @@ describe('ContractQuestionResponse', () => {
                 'response-to-oact-1-document-1'
             )
 
-            // ability to add questions should exist for non approved contracts
-            const addQuestion = await screen.findByRole('link', {
+            // ability to add questions should not exist while any question is unanswered
+            const addQuestion = screen.queryByRole('link', {
                 name: 'Add questions',
             })
-            expect(addQuestion).toBeInTheDocument()
+            expect(addQuestion).not.toBeInTheDocument()
+        })
+
+        it('renders Add questions button when all existing questions have responses', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockSubmittedContractWithAnsweredQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockSubmittedContractWithAnsweredQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/health-plan/test-contract-id/question-and-answers`,
+                },
+            })
+
+            expect(
+                await screen.findByRole('link', { name: 'Add questions' })
+            ).toHaveAttribute(
+                'href',
+                '/submissions/health-plan/test-contract-id/question-and-answers/dmco/upload-questions'
+            )
+        })
+
+        it('ability to add questions should exist for non approved contracts', async () => {
+            renderWithProviders(<CommonCMSRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockSubmittedContractWithAnsweredQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockSubmittedContractWithAnsweredQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/health-plan/test-contract-id/question-and-answers`,
+                },
+            })
+
+            expect(
+                await screen.findByRole('link', { name: 'Add questions' })
+            ).toBeInTheDocument()
         })
 
         it('renders Add questions link for EQRO when the feature flag is on', async () => {
@@ -540,14 +666,14 @@ describe('ContractQuestionResponse', () => {
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
-                                ...mockContractPackageSubmittedWithQuestions(),
+                                ...mockSubmittedContractWithAnsweredQuestions(),
                                 id: 'test-contract-id',
                                 contractSubmissionType: 'EQRO',
                             },
                         }),
                         fetchContractWithQuestionsMockSuccess({
                             contract: {
-                                ...mockContractPackageSubmittedWithQuestions(),
+                                ...mockSubmittedContractWithAnsweredQuestions(),
                                 id: 'test-contract-id',
                                 contractSubmissionType: 'EQRO',
                             },

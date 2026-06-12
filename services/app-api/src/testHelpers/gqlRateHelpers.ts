@@ -8,6 +8,7 @@ import {
     WithdrawRateDocument,
     UndoWithdrawnRateDocument,
     IndexRatesStrippedDocument,
+    OverrideRateDataDocument,
 } from '../gen/gqlClient'
 import { must } from './assertionHelpers'
 import {
@@ -27,6 +28,7 @@ import type {
     RateFormDataInput,
     UpdateDraftContractRatesInput,
     Rate,
+    OverrideRateDataInput,
 } from '../gen/gqlServer'
 import type { ApolloServer } from '@apollo/server'
 import type {
@@ -123,6 +125,29 @@ const submitTestRate = async (
     }
 
     return updateResult.data.submitRate.rate
+}
+
+const overrideTestRateData = async (
+    server: ApolloServer,
+    input: OverrideRateDataInput
+): Promise<Rate> => {
+    const result = await executeGraphQLOperation(server, {
+        query: OverrideRateDataDocument,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        console.info('errors', result.errors)
+        throw new Error(
+            `overrideTestRateData mutation failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+
+    if (!result.data.overrideRateData.rate) {
+        throw new Error('overrideTestRateData returned nothing')
+    }
+
+    return result.data.overrideRateData.rate
 }
 
 const unlockTestRate = async (
@@ -620,6 +645,7 @@ export {
     fetchTestRateWithQuestionsById,
     withdrawTestRate,
     undoWithdrawTestRate,
+    overrideTestRateData,
     fetchTestIndexRatesStripped,
     testRateFormInputData,
 }

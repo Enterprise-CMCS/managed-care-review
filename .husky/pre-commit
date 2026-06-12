@@ -11,5 +11,5 @@ done
 # Detect secrets in commit, excluding pnpm-lock.yaml
 git diff --staged --name-only -z | grep -zv 'pnpm-lock.yaml' | xargs -0 detect-secrets-hook
 
-# Run "precommit" in all pnpm workspaces 
+# Run "precommit" in all pnpm workspaces
 pnpm lint-staged --allow-empty

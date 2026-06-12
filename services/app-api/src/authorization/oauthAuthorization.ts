@@ -1,5 +1,6 @@
 import { OAuthScope } from '../generated/enums'
 import type { Context } from '../handlers/apollo_gql'
+import type { FeatureFlagSettings } from '@mc-review/common-code'
 
 /**
  * context.oauthClient:
@@ -50,11 +51,17 @@ export function canWrite(context: Context): boolean {
  * While majority of endpoints will not support OAuth write requests (canWrite),
  * specific endpoints will allow if the OAuth client has been validated for delegated user
  */
-export function canOauthWrite(context: Context): boolean {
-    // OAuth clients can only write if they are delegated users
-    // with the required submission-actions scope.
+export function canOauthWrite(
+    context: Context,
+    featureFlags?: FeatureFlagSettings
+): boolean {
+    // feature flag to toggle one or off external API write requests.
+    const apiWriteFlag = featureFlags?.['external-api-write-request']
+
+    // OAuth clients can only write if scopes is populated
     if (context.oauthClient) {
         if (
+            apiWriteFlag &&
             context.oauthClient?.isDelegatedUser &&
             context.oauthClient?.scopes?.includes(
                 OAuthScope.CMS_SUBMISSION_ACTIONS

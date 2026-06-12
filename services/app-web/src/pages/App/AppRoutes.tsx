@@ -124,20 +124,6 @@ const renderUniversalRoutes = (showResourcesNavPages: boolean) => (
             element={showResourcesNavPages ? <ContactUs /> : <Error404 />}
         />
         <Route
-            path="/help"
-            element={<Navigate to={RoutesRecord.HELP} replace />}
-        />
-        <Route
-            path="/training"
-            element={
-                showResourcesNavPages ? (
-                    <Navigate to={RoutesRecord.RESOURCES_TRAINING} replace />
-                ) : (
-                    <Error404 />
-                )
-            }
-        />
-        <Route
             path={RoutesRecord.RESOURCES}
             element={<ResourcesSideNav showSideNav={showResourcesNavPages} />}
         >
