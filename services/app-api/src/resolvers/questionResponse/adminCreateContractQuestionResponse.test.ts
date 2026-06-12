@@ -21,6 +21,7 @@ import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import {
     approveTestContract,
     createAndSubmitTestContractWithRate,
+    withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 
 const responseDocuments = [
@@ -183,6 +184,41 @@ describe('adminCreateContractQuestionResponse', () => {
         expect(question.responses).toHaveLength(1)
         expect(question.responses[0].addedBy).toEqual(
             expect.objectContaining({ id: adminUser.id, role: 'ADMIN_USER' })
+        )
+    })
+
+    it('returns a BAD_USER_INPUT error when the question contract is WITHDRAWN', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: cmsUser },
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const cmsQuestion = await createTestQuestion(cmsServer, contract.id)
+        await withdrawTestContract(
+            cmsServer,
+            contract.id,
+            'withdraw test contract'
+        )
+
+        const result = await executeGraphQLOperation(adminServer, {
+            query: AdminCreateContractQuestionResponseDocument,
+            variables: {
+                input: {
+                    questionID: cmsQuestion.id,
+                    reason: 'Recording prior response',
+                    documents: responseDocuments,
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(result).message).toBe(
+            'Issue creating response for contract. Message: Cannot create response for contract in WITHDRAWN status'
         )
     })
 

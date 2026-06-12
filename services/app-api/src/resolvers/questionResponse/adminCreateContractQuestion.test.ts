@@ -22,6 +22,7 @@ import {
     approveTestContract,
     createAndSubmitTestContractWithRate,
     createTestContract,
+    withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 
 const questionDocuments = [
@@ -412,6 +413,41 @@ describe('adminCreateContractQuestion', () => {
 
         expect(result.errors).toBeDefined()
         expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
+    })
+
+    it('returns a BAD_USER_INPUT error when the contract is WITHDRAWN', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: testCMSUser() },
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            contract.id,
+            'withdraw test contract'
+        )
+
+        const result = await executeGraphQLOperation(adminServer, {
+            query: AdminCreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID: withdrawnContract.id,
+                    division: 'DMCO',
+                    reason: 'Recording prior Q&A',
+                    documents: questionDocuments,
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        expect(assertAnErrorCode(result)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(result).message).toBe(
+            'Issue creating question for contract. Message: Cannot create question for contract in WITHDRAWN status'
+        )
     })
 
     it('allows adding a question to an approved contract (corrective use case)', async () => {

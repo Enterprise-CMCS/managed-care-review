@@ -11,6 +11,7 @@ import {
 import { GraphQLError } from 'graphql'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
+import { adminCreateQuestionAllowedStatuses } from './adminCreateContractQuestion'
 
 // Lets an AdminUser record a response on behalf of the state, attached to any
 // existing contract question (including questions authored by CMS). No
@@ -82,6 +83,78 @@ export function adminCreateContractQuestionResponseResolver(
                         context
                     )
                     throw createUserInputError(msg)
+                }
+
+                const question = await store.findContractQuestion(
+                    input.questionID
+                )
+                if (question instanceof Error) {
+                    if (question instanceof NotFoundError) {
+                        const errMessage = `Contract question with ID: ${input.questionID} not found to attach response to`
+                        logResolverError(
+                            'adminCreateContractQuestionResponse',
+                            errMessage,
+                            context
+                        )
+                        throw createUserInputError(errMessage)
+                    }
+
+                    const errMessage = `Issue finding contract question ${input.questionID}. Message: ${question.message}`
+                    logResolverError(
+                        'adminCreateContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                const contract = await store.findContractWithHistory(
+                    question.contractID
+                )
+                if (contract instanceof Error) {
+                    if (contract instanceof NotFoundError) {
+                        const errMessage = `Package with id ${question.contractID} does not exist`
+                        logResolverError(
+                            'adminCreateContractQuestionResponse',
+                            errMessage,
+                            context
+                        )
+                        throw new GraphQLError(errMessage, {
+                            extensions: { code: 'NOT_FOUND' },
+                        })
+                    }
+
+                    const errMessage = `Issue finding a package. Message: ${contract.message}`
+                    logResolverError(
+                        'adminCreateContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                if (
+                    !adminCreateQuestionAllowedStatuses.includes(
+                        contract.consolidatedStatus
+                    )
+                ) {
+                    const errMessage = `Issue creating response for contract. Message: Cannot create response for contract in ${contract.consolidatedStatus} status`
+                    logResolverError(
+                        'adminCreateContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
+                    throw createUserInputError(errMessage)
                 }
 
                 // Attribute the response to the chosen state user, or to the

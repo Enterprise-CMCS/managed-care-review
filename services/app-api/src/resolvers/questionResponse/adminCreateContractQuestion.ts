@@ -15,6 +15,10 @@ import type {
     AdminCreateContractQuestionInput,
     DivisionType,
 } from '../../domain-models'
+import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
+
+export const adminCreateQuestionAllowedStatuses: ConsolidatedContractStatus[] =
+    ['UNLOCKED', 'SUBMITTED', 'RESUBMITTED', 'APPROVED']
 
 // Lets an AdminUser record a question on behalf of CMS. The admin can either pick
 // a division directly (the question is then attributed to the admin), or select a
@@ -215,11 +219,11 @@ export function adminCreateContractQuestionResolver(
                     throw createUserInputError(msg)
                 }
 
-                // Admin Q&A is a corrective tool, so questions are allowed on a
-                // contract in any workflow status (including APPROVED). The one
-                // invariant kept is that the contract must have a submitted
-                // package to attach Q&A to — a never-submitted DRAFT has none.
-                if (contractResult.revisions.length === 0) {
+                if (
+                    !adminCreateQuestionAllowedStatuses.includes(
+                        contractResult.consolidatedStatus
+                    )
+                ) {
                     const errMessage = `Issue creating question for contract. Message: Cannot create question for contract in ${contractResult.consolidatedStatus} status`
                     logResolverError(
                         'adminCreateContractQuestion',
