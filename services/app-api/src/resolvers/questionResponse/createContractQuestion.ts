@@ -152,6 +152,23 @@ export function createContractQuestionResolver(
                     throw new Error(errMessage)
                 }
 
+                // Do not allow a new question to be created while a previous
+                // question round is still open. A round is open when any
+                // existing question has not yet received a response.
+                const hasOpenQuestionRound = allQuestions.some(
+                    (question) => question.responses.length === 0
+                )
+                if (hasOpenQuestionRound) {
+                    const errMessage =
+                        'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
+                    logResolverError(
+                        'createContractQuestion',
+                        errMessage,
+                        context
+                    )
+                    throw createUserInputError(errMessage)
+                }
+
                 // Parse and validate document s3URLs at API boundary
                 const docs = parseAndValidateDocuments(
                     input.documents.map((d) => ({
