@@ -11,7 +11,7 @@ import {
 import { GraphQLError } from 'graphql'
 import { canWrite } from '../../authorization/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
-import { adminCreateQuestionAllowedStatuses } from './adminCreateContractQuestion'
+import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
 
 // Lets an AdminUser record a response on behalf of the state, attached to any
 // existing contract question (including questions authored by CMS). No
@@ -144,7 +144,7 @@ export function adminCreateContractQuestionResponseResolver(
                 }
 
                 if (
-                    !adminCreateQuestionAllowedStatuses.includes(
+                    !isAdminQuestionResponseAllowedStatus(
                         contract.consolidatedStatus
                     )
                 ) {

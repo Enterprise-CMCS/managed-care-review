@@ -1,4 +1,4 @@
-import { ConsolidatedContractStatus, User } from '../../../gen/gqlClient'
+import type { ConsolidatedContractStatus, User } from '../../../gen/gqlClient'
 import styles from './QATable.module.scss'
 import { NavLinkWithLogging } from '../../../components'
 import classNames from 'classnames'
@@ -7,6 +7,7 @@ import {
     extractDocumentsFromQuestion,
     QuestionType,
 } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
 
 export type RoundData = {
     roundTitle: string
@@ -54,10 +55,10 @@ export const QuestionResponseRound = ({
 
     const showUploadResponseBtn = isStateUser && !isApprovedContract
     const showDeleteQuestionBtn = isAdminUser && questionType === 'contract'
-    // Admin Q&A is a corrective tool, so admins can record a response on any
-    // existing contract question regardless of status. Contract Q&A only for now.
     const showAdminUploadResponseBtn =
-        isAdminUser && questionType === 'contract'
+        isAdminUser &&
+        questionType === 'contract' &&
+        isAdminQuestionResponseAllowedStatus(contractStatus)
 
     const documents = extractDocumentsFromQuestion(question)
 

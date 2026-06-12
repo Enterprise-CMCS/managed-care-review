@@ -11,6 +11,7 @@ import type { IndexQuestionType } from '../QuestionResponseHelpers'
 import { QuestionResponseRound, QuestionRounds } from './QuestionResponseRound'
 import { sortRoundsByDate } from './CMSQuestionResponseTable'
 import { NavLinkWithLogging } from '../../../components'
+import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
@@ -28,6 +29,9 @@ export const StateQuestionResponseTable = ({
     const { loggedInUser } = useAuth()
     const answeredQuestions: QuestionRounds = []
     const unansweredQuestions: QuestionRounds = []
+    const canAdminAddQuestions =
+        loggedInUser?.__typename === 'AdminUser' &&
+        isAdminQuestionResponseAllowedStatus(contractStatus)
 
     // Bucket questions
     Object.entries(indexQuestions).forEach(([key, value]) => {
@@ -84,7 +88,7 @@ export const StateQuestionResponseTable = ({
                     headingLevel="h3"
                     hideBorderTop
                 >
-                    {loggedInUser?.__typename === 'AdminUser' && (
+                    {canAdminAddQuestions && (
                         <div>
                             <NavLinkWithLogging
                                 className="usa-button"

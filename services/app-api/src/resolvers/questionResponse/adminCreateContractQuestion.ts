@@ -15,10 +15,7 @@ import type {
     AdminCreateContractQuestionInput,
     DivisionType,
 } from '../../domain-models'
-import type { ConsolidatedContractStatus } from '../../gen/gqlClient'
-
-export const adminCreateQuestionAllowedStatuses: ConsolidatedContractStatus[] =
-    ['UNLOCKED', 'SUBMITTED', 'RESUBMITTED', 'APPROVED']
+import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
 
 // Lets an AdminUser record a question on behalf of CMS. The admin can either pick
 // a division directly (the question is then attributed to the admin), or select a
@@ -220,7 +217,7 @@ export function adminCreateContractQuestionResolver(
                 }
 
                 if (
-                    !adminCreateQuestionAllowedStatuses.includes(
+                    !isAdminQuestionResponseAllowedStatus(
                         contractResult.consolidatedStatus
                     )
                 ) {
