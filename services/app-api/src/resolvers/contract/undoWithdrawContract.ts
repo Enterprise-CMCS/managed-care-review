@@ -14,11 +14,13 @@ import type { StateCodeType } from '@mc-review/submissions'
 import type { Emailer } from '../../emailer'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function undoWithdrawContract(
     store: Store,
     emailer: Emailer,
-    documentZip: DocumentZipService
+    documentZip: DocumentZipService,
+    launchDarkly: LDService
 ): MutationResolvers['undoWithdrawContract'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -31,8 +33,12 @@ export function undoWithdrawContract(
             async (span) => {
                 setResolverDetails(span, user)
 
-                // Check OAuth client read permissions
-                if (!canOauthWrite(context)) {
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
+                // Check OAuth client write permissions
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError(
                         'undoWithdrawContract',

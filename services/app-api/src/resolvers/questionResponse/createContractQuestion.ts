@@ -10,10 +10,12 @@ import type { Emailer } from '../../emailer'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { StateCodeType } from '@mc-review/submissions'
 import { parseAndValidateDocuments } from '../documentHelpers'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function createContractQuestionResolver(
     store: Store,
-    emailer: Emailer
+    emailer: Emailer,
+    launchDarkly: LDService
 ): MutationResolvers['createContractQuestion'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -25,8 +27,12 @@ export function createContractQuestionResolver(
             async (span) => {
                 setResolverDetails(span, user)
 
-                // Check OAuth client read permissions
-                if (!canOauthWrite(context)) {
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
+                // Check OAuth client write permissions
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError(
                         'createContractQuestion',
