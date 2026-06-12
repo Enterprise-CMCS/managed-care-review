@@ -1,5 +1,5 @@
 import type { Store } from '../../postgres'
-import { NotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'

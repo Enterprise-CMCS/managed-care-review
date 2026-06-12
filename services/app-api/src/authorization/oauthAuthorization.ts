@@ -1,4 +1,4 @@
-import { OAuthScope } from '../generated/client'
+import { OAuthScope } from '../generated/enums'
 import type { Context } from '../handlers/apollo_gql'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 
