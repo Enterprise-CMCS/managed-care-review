@@ -99,7 +99,7 @@ const featureFlags = {
     /**
      * This flag toggles the ability for external API users to send write requests.
      */
-    EXTERNAL_API_WRITE_REQUESTS: {
+    EXTERNAL_API_WRITE_REQUEST: {
         flag: 'external-api-write-request',
         defaultValue: true,
     },
