@@ -74,6 +74,12 @@ function mockStoreThatErrors(): Store {
         insertContractQuestion: async (_ID) => {
             return genericError
         },
+        insertAdminContractQuestion: async (_ID) => {
+            return genericError
+        },
+        insertAdminContractQuestionResponse: async (_ID) => {
+            return genericError
+        },
         softDeleteContractQuestion: async (_ID) => {
             return genericError
         },

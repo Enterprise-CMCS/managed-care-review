@@ -1,5 +1,7 @@
 export { findAllQuestionsByContract } from './findAllQuestionsByContract'
 export { insertContractQuestion } from './insertContractQuestion'
+export { insertAdminContractQuestion } from './insertAdminContractQuestion'
+export { insertAdminContractQuestionResponse } from './insertAdminContractQuestionResponse'
 export { softDeleteContractQuestion } from './softDeleteContractQuestion'
 export {
     convertToIndexQuestionsPayload,
