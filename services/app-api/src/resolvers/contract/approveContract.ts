@@ -6,9 +6,11 @@ import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasCMSPermissions, isAdminUser } from '../../domain-models/user'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function approveContract(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): MutationResolvers['approveContract'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -20,8 +22,12 @@ export function approveContract(
             async (span) => {
                 setResolverDetails(span, user)
 
-                // Check OAuth client read permissions
-                if (!canOauthWrite(context)) {
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
+                // Check OAuth client write permissions
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('approveContract', errMessage, context)
                     throw new GraphQLError(errMessage, {

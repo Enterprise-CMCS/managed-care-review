@@ -9,10 +9,12 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function withdrawRate(
     store: Store,
-    emailer: Emailer
+    emailer: Emailer,
+    launchDarkly: LDService
 ): MutationResolvers['withdrawRate'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -26,8 +28,12 @@ export function withdrawRate(
 
                 const { rateID, updatedReason } = input
 
-                // Check OAuth client read permissions
-                if (!canOauthWrite(context)) {
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
+                // Check OAuth client write permissions
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('withdrawRate', errMessage, context)
                     throw new GraphQLError(errMessage, {

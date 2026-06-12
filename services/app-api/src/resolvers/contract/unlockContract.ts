@@ -10,10 +10,12 @@ import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { canOauthWrite } from '../../authorization/oauthAuthorization'
 import type { StateCodeType } from '@mc-review/submissions'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function unlockContractResolver(
     store: Store,
-    emailer: Emailer
+    emailer: Emailer,
+    launchDarkly: LDService
 ): MutationResolvers['unlockContract'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -27,7 +29,11 @@ export function unlockContractResolver(
 
                 const { unlockedReason, contractID } = input
 
-                if (!canOauthWrite(context)) {
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('unlockContract', errMessage, context)
                     throw new GraphQLError(errMessage, {

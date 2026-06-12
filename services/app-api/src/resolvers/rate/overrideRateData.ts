@@ -6,6 +6,7 @@ import { logResolverError, logResolverSuccess } from '../../logger'
 import { NotFoundError, type Store } from '../../postgres'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 const isOverrideUserInputError = (message: string): boolean =>
     message.startsWith('Invalid ') ||
@@ -13,7 +14,8 @@ const isOverrideUserInputError = (message: string): boolean =>
     message.startsWith('Could not find latest submitted')
 
 export function overrideRateData(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): MutationResolvers['overrideRateData'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -25,7 +27,11 @@ export function overrideRateData(
             async (span) => {
                 setResolverDetails(span, user)
 
-                if (!canOauthWrite(context)) {
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('overrideRateData', errMessage, context)
                     throw new GraphQLError(errMessage, {

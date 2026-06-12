@@ -281,6 +281,95 @@ describe('unlockContract', () => {
             }
         )
 
+        it('allows delegated OAuth client with submission scope to unlock a contract when external API writes are enabled', async () => {
+            const ldService = testLDService({
+                'external-api-write-request': true,
+            })
+            const stateServer = await constructTestPostgresServer({
+                ldService,
+                s3Client: mockS3,
+            })
+            const oauthServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['client_credentials'],
+                        iss: 'mcreview-test',
+                        scopes: ['CMS_SUBMISSION_ACTIONS'],
+                        isDelegatedUser: true,
+                    },
+                },
+                ldService,
+                s3Client: mockS3,
+            })
+
+            const contract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            const unlockResult = await executeGraphQLOperation(oauthServer, {
+                query: UnlockContractDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        unlockedReason: 'Delegated OAuth unlock',
+                    },
+                },
+            })
+
+            expect(unlockResult.errors).toBeUndefined()
+            expect(unlockResult.data?.unlockContract.contract).toEqual(
+                expect.objectContaining({
+                    id: contract.id,
+                    consolidatedStatus: 'UNLOCKED',
+                })
+            )
+        })
+
+        it('denies delegated OAuth client with submission scope from unlocking a contract when external API writes are disabled', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const oauthServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                    oauthClient: {
+                        clientId: 'test-oauth-client',
+                        grants: ['client_credentials'],
+                        iss: 'mcreview-test',
+                        scopes: ['CMS_SUBMISSION_ACTIONS'],
+                        isDelegatedUser: true,
+                    },
+                },
+                ldService: testLDService({
+                    'external-api-write-request': false,
+                }),
+                s3Client: mockS3,
+            })
+
+            const contract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            const unlockResult = await executeGraphQLOperation(oauthServer, {
+                query: UnlockContractDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        unlockedReason: 'Delegated OAuth unlock',
+                    },
+                },
+            })
+
+            expect(unlockResult.errors).toBeDefined()
+            expect(unlockResult.errors?.[0].extensions?.code).toBe('FORBIDDEN')
+            expect(unlockResult.errors?.[0].extensions?.cause).toBe(
+                'INSUFFICIENT_OAUTH_GRANTS'
+            )
+            expect(unlockResult.errors?.[0].message).toBe(
+                'OAuth client does not have write permissions'
+            )
+        })
+
         it('handles unlock and editing rates', async () => {
             const ldService = testLDService({
                 'rate-edit-unlock': true,
