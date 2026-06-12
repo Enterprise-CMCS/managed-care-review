@@ -1,4 +1,5 @@
 export { findAllQuestionsByContract } from './findAllQuestionsByContract'
+export { findContractQuestion } from './findContractQuestion'
 export { insertContractQuestion } from './insertContractQuestion'
 export { insertAdminContractQuestion } from './insertAdminContractQuestion'
 export { insertAdminContractQuestionResponse } from './insertAdminContractQuestionResponse'
