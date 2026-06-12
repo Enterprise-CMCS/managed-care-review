@@ -56,6 +56,7 @@ assertIsAuthMode(authMode)
 const cache = new InMemoryCache({
     possibleTypes: {
         CMSUsersUnion: ['CMSUser', 'CMSApproverUser'],
+        OAuthUser: ['CMSUser', 'CMSApproverUser', 'AdminUser'],
     },
     typePolicies: {
         ContractRevision: {

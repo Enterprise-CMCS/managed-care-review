@@ -133,10 +133,10 @@ describe('CreateOauthClient', () => {
 
         expect(screen.getByText('cmsUser1@example.com')).toBeInTheDocument()
         expect(screen.getByText('cmsUser2@example.com')).toBeInTheDocument()
+        expect(screen.getByText('cmsAdmin1@example.com')).toBeInTheDocument()
         expect(screen.queryByText('HelpDesk User')).toBeNull()
         expect(screen.queryByText('BusinessOwner User')).toBeNull()
         expect(screen.queryByText('State User')).toBeNull()
-        expect(screen.queryByText('Admin User')).toBeNull()
         expect(screen.queryByText('cmsUser3@example.com')).toBeInTheDocument()
         expect(screen.queryByText('cmsUser4@example.com')).toBeInTheDocument()
     })
@@ -163,6 +163,7 @@ describe('CreateOauthClient', () => {
                             input: {
                                 userID: selectedUser.id,
                                 description: 'This is a new oauth client',
+                                scopes: ['CMS_SUBMISSION_ACTIONS'],
                             },
                             user: {
                                 ...selectedUser,
@@ -189,6 +190,29 @@ describe('CreateOauthClient', () => {
 
         expect(cmsUser).toBeInTheDocument()
         await user.click(cmsUser)
+
+        const selectedUserDetail = screen.getByTestId('selectedOAuthClientUser')
+        expect(
+            within(selectedUserDetail).getByText(/Jim Bob/)
+        ).toBeInTheDocument()
+        expect(
+            within(selectedUserDetail).getByText(/CMS_USER/)
+        ).toBeInTheDocument()
+        expect(
+            within(selectedUserDetail).getByText(/jim.bob@example.com/)
+        ).toBeInTheDocument()
+
+        const cmsSubmissionActionsScope = screen.getByRole('checkbox', {
+            name: 'CMS_SUBMISSION_ACTIONS',
+        })
+        expect(cmsSubmissionActionsScope).toBeInTheDocument()
+        expect(
+            screen.queryByRole('checkbox', {
+                name: 'ADMIN_SUBMISSION_ACTIONS',
+            })
+        ).not.toBeInTheDocument()
+        await user.click(cmsSubmissionActionsScope)
+        expect(cmsSubmissionActionsScope).toBeChecked()
 
         const descriptionInput = screen.getByRole('textbox', {
             name: /Description for OAuth client/,
@@ -222,6 +246,95 @@ describe('CreateOauthClient', () => {
         expect(
             within(banner).getByText(/This is a new oauth client/)
         ).toBeInTheDocument()
+    })
+
+    it('clears selected scopes when the OAuth client user changes', async () => {
+        const cmsUser = mockValidCMSUser({
+            id: 'cms-user-1',
+            givenName: 'Jim',
+            email: 'jim.bob@example.com',
+            familyName: 'Bob',
+            divisionAssignment: 'OACT',
+        })
+        const adminUser = mockValidAdminUser({
+            id: 'admin-user-1',
+            givenName: 'Admin',
+            email: 'admin.user@example.com',
+            familyName: 'User',
+        })
+        const description = 'Admin OAuth client'
+        const { user } = renderWithProviders(
+            wrapInRoutes(<CreateOauthClient />),
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+                        indexUsersQueryMock([cmsUser, adminUser]),
+                        createOauthClientMockSuccess({
+                            input: {
+                                userID: adminUser.id,
+                                description,
+                                scopes: [],
+                            },
+                            user: adminUser,
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/mc-review-settings/oauth-clients/create-oauth-client`,
+                },
+            }
+        )
+
+        await waitFor(async () => {
+            expect(
+                screen.getByTestId('createOAuthClientForm')
+            ).toBeInTheDocument()
+            await user.click(screen.getByRole('combobox'))
+        })
+
+        await user.click(screen.getByText(cmsUser.email))
+
+        const cmsSubmissionActionsScope = screen.getByRole('checkbox', {
+            name: 'CMS_SUBMISSION_ACTIONS',
+        })
+        await user.click(cmsSubmissionActionsScope)
+        expect(cmsSubmissionActionsScope).toBeChecked()
+
+        await user.click(screen.getByRole('combobox'))
+        await user.click(screen.getByText(adminUser.email))
+
+        expect(
+            screen.queryByRole('checkbox', {
+                name: 'CMS_SUBMISSION_ACTIONS',
+            })
+        ).not.toBeInTheDocument()
+        expect(
+            screen.getByRole('checkbox', {
+                name: 'ADMIN_SUBMISSION_ACTIONS',
+            })
+        ).not.toBeChecked()
+
+        await user.type(
+            screen.getByRole('textbox', {
+                name: /Description for OAuth client/,
+            }),
+            description
+        )
+        await user.click(
+            screen.getByRole('button', {
+                name: /Create client/,
+            })
+        )
+
+        await waitFor(async () => {
+            expect(
+                screen.getByRole('heading', { name: 'Oauth clients' })
+            ).toBeInTheDocument()
+        })
     })
 })
 
@@ -290,7 +403,11 @@ describe('CreateOauthClient error handling', () => {
                             statusCode: 200,
                         }),
                         indexUsersQueryMock([selectedUser, ...mockUsers]),
-                        createOauthClientMockFailure(),
+                        createOauthClientMockFailure({
+                            userID: selectedUser.id,
+                            description,
+                            scopes: [],
+                        }),
                     ],
                 },
                 routerProvider: {

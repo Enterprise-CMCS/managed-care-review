@@ -1,12 +1,20 @@
-import { OAuthScope } from '../generated/enums'
+import { OAuthScope } from '../generated/client'
 import type { Context } from '../handlers/apollo_gql'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
+import type { UserRoles } from '../domain-models/UserType'
 
 /**
  * context.oauthClient:
  * Only exists for OAuth-authenticated requests.
  * Undefined for non-OAuth requests.
  */
+
+// Admin users cannot be delegated users. Admin OAuth requests must use the
+// OAuth client's attached admin user directly.
+export const validDelegatedUserRoles: UserRoles[] = [
+    'CMS_USER',
+    'CMS_APPROVER_USER',
+]
 
 /**
  * Checks if the context represents an OAuth client with client_credentials grant
@@ -74,5 +82,24 @@ export function canOauthWrite(
     }
 
     // Regular authenticated users can write (subject to role-specific restrictions in resolvers)
+    return true
+}
+
+/**
+ * Checks if the current context is allowed to perform admin OAuth writes.
+ *
+ * Admin OAuth writes cannot be delegated. The OAuth client itself must have the
+ * admin scope and the request must not include an acting/delegated user.
+ */
+export function canOauthAdminWrite(context: Context): boolean {
+    if (context.oauthClient) {
+        return !!(
+            !context.oauthClient.isDelegatedUser &&
+            context.oauthClient.scopes?.includes(
+                OAuthScope.ADMIN_SUBMISSION_ACTIONS
+            )
+        )
+    }
+
     return true
 }

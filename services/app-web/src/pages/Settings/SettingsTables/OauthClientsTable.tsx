@@ -57,6 +57,19 @@ const OauthClientTable = ({
                 cell: (info) => info.getValue().join(', '),
                 header: 'Grants',
             }),
+            columnHelper.accessor('scopes', {
+                id: 'scopes',
+                cell: (info) => {
+                    const scopes = info.getValue()
+
+                    if (!scopes.length) {
+                        return 'None'
+                    }
+
+                    return scopes.join(', ')
+                },
+                header: 'Scopes',
+            }),
         ]
     }, [])
 

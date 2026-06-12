@@ -8,7 +8,7 @@ import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { StateCodeType } from '@mc-review/submissions'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 

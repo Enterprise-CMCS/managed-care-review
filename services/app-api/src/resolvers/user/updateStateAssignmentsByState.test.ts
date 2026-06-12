@@ -170,7 +170,15 @@ describe.each(authorizedUserTests)(
 
             const users2 =
                 updateRes2.data.updateStateAssignmentsByState.assignedUsers
-            expect(users2).toHaveLength(2)
+            // The shared test DB can include other users assigned to CA, so only
+            // assert that this test's created users were assigned.
+            const updatedUsers2 = users2.filter((user: User) =>
+                [secondUser.id, thirdUser.id].includes(user.id)
+            )
+            expect(updatedUsers2).toHaveLength(2)
+            expect(updatedUsers2.map((user: User) => user.id)).toEqual(
+                expect.arrayContaining([secondUser.id, thirdUser.id])
+            )
 
             const updateRes3 = await executeGraphQLOperation(server, {
                 query: UpdateStateAssignmentsByStateDocument,

@@ -12,7 +12,7 @@ import {
     handleUserInputPostgresError,
 } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 
 // Update cms users assigned to a specific state
 export function updateStateAssignmentsByState(

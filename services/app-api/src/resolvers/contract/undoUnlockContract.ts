@@ -10,7 +10,7 @@ import {
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function undoUnlockContract(

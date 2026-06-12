@@ -11,6 +11,8 @@ import {
     CreateOauthClientDocument,
     FetchOauthClientsDocument,
 } from '../../gen/gqlClient'
+import type { OAuthClient } from '../../generated/client'
+import { OAuthScope } from '../../generated/client'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { NewPostgresStore } from '../../postgres'
 import { assertAnError } from '../../testHelpers'
@@ -78,9 +80,17 @@ describe('fetchOauthClients', () => {
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
-        expect(oauthClients).toHaveLength(2)
-        // Verify user objects are included
-        oauthClients.forEach((client: unknown) => {
+
+        const createdClients = oauthClients.filter((client: OAuthClient) =>
+            [client1Id, client2Id].includes(client.clientId)
+        )
+        expect(createdClients).toHaveLength(2)
+        expect(
+            createdClients.map((client: OAuthClient) => client.clientId)
+        ).toEqual(expect.arrayContaining([client1Id, client2Id]))
+
+        // Verify user objects are included on the clients created by this test.
+        createdClients.forEach((client: unknown) => {
             const typedClient = client as {
                 user: { id: string; email: string; role: string }
             }
@@ -119,16 +129,6 @@ describe('fetchOauthClients', () => {
             },
         })
 
-        // Clean up any existing OAuth clients to ensure test isolation
-        await client.oAuthClient.deleteMany()
-        // Fetch all should return empty array after cleanup
-        const emptyRes = await executeGraphQLOperation(server, {
-            query: FetchOauthClientsDocument,
-            variables: { input: {} },
-        })
-        expect(emptyRes.errors).toBeUndefined()
-        expect(emptyRes.data?.fetchOauthClients.oauthClients).toHaveLength(0)
-
         // Create an OAuth client
         const createRes = await executeGraphQLOperation(server, {
             query: CreateOauthClientDocument,
@@ -141,8 +141,12 @@ describe('fetchOauthClients', () => {
             },
         })
         expect(createRes.errors).toBeUndefined()
+        const createdClientId =
+            createRes.data?.createOauthClient.oauthClient.clientId
+        expect(createdClientId).toBeDefined()
 
-        // Now fetch all should return our client
+        // Fetch all should return our client, but the shared local test DB may
+        // also contain OAuth clients from other tests or prior test runs.
         const res = await executeGraphQLOperation(server, {
             query: FetchOauthClientsDocument,
             variables: { input: {} },
@@ -150,16 +154,18 @@ describe('fetchOauthClients', () => {
         expect(res.errors).toBeUndefined()
         const oauthClients = res.data?.fetchOauthClients.oauthClients
         expect(Array.isArray(oauthClients)).toBe(true)
-        expect(oauthClients).toHaveLength(1)
 
         // Basic verification of the client
-        const ourClient = oauthClients[0]
-        expect(ourClient.clientId).toBeDefined()
-        expect(ourClient.description).toBe('Test Client for fetch all')
-        expect(ourClient.user).toBeDefined()
-        expect(ourClient.user.id).toBe(cmsUser.id)
-        expect(ourClient.user.email).toBe(cmsUser.email)
-        expect(ourClient.user.role).toBe(cmsUser.role)
+        const ourClient = oauthClients.find(
+            (client: OAuthClient) => client.clientId === createdClientId
+        )
+        expect(ourClient).toBeDefined()
+        expect(ourClient?.clientId).toBe(createdClientId)
+        expect(ourClient?.description).toBe('Test Client for fetch all')
+        expect(ourClient?.user).toBeDefined()
+        expect(ourClient?.user.id).toBe(cmsUser.id)
+        expect(ourClient?.user.email).toBe(cmsUser.email)
+        expect(ourClient?.user.role).toBe(cmsUser.role)
     })
 
     it('fetches only specified clientIds', async () => {
@@ -212,6 +218,58 @@ describe('fetchOauthClients', () => {
         expect(oauthClients[0].clientId).toBe(clientId)
         expect(oauthClients[0].user).toBeDefined()
         expect(oauthClients[0].user.id).toBe(cmsUser.id)
+    })
+
+    it('fetches an OAuth client associated with an ADMIN user', async () => {
+        const adminUser = testAdminUser()
+        const oauthAdminUser = testAdminUser({
+            email: 'fetch-oauth-admin@example.com',
+        })
+
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: oauthAdminUser.id,
+                givenName: oauthAdminUser.givenName,
+                familyName: oauthAdminUser.familyName,
+                email: oauthAdminUser.email,
+                role: oauthAdminUser.role,
+            },
+        })
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+
+        const createRes = await executeGraphQLOperation(server, {
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Admin user client',
+                    grants: ['client_credentials'],
+                    scopes: [OAuthScope.ADMIN_SUBMISSION_ACTIONS],
+                    userID: oauthAdminUser.id,
+                },
+            },
+        })
+        expect(createRes.errors).toBeUndefined()
+        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
+
+        const res = await executeGraphQLOperation(server, {
+            query: FetchOauthClientsDocument,
+            variables: { input: { clientIds: [clientId] } },
+        })
+
+        expect(res.errors).toBeUndefined()
+        const oauthClients = res.data?.fetchOauthClients.oauthClients
+        expect(oauthClients).toHaveLength(1)
+        expect(oauthClients[0].clientId).toBe(clientId)
+        expect(oauthClients[0].scopes).toEqual([
+            OAuthScope.ADMIN_SUBMISSION_ACTIONS,
+        ])
+        expect(oauthClients[0].user.id).toBe(oauthAdminUser.id)
+        expect(oauthClients[0].user.email).toBe(oauthAdminUser.email)
+        expect(oauthClients[0].user.role).toBe('ADMIN_USER')
     })
 
     it('returns empty array if no clients match', async () => {
