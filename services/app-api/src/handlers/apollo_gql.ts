@@ -12,7 +12,12 @@ import {
     startServerAndCreateLambdaHandler,
     handlers,
 } from '@as-integrations/aws-lambda'
-import { initTracer, recordException, flushTracer } from '../otel/otel_handler'
+import {
+    initTracer,
+    recordException,
+    recordSpanEvent,
+    flushTracer,
+} from '../otel/otel_handler'
 import type { APIGatewayProxyEvent, Handler } from 'aws-lambda'
 
 import typeDefs from '../../../app-graphql/src/schema.graphql'
@@ -206,6 +211,20 @@ function contextForRequestForFetcher(
                         ['x-acting-as-user']: delegatedUser,
                     }
 
+                    // Record a span for every delegated (impersonation) request,
+                    // independent of whether it ultimately succeeds or fails,
+                    // so request volume can be tracked for anomaly detection.
+                    if (delegatedUser) {
+                        recordSpanEvent(
+                            'app-api-' + stageName,
+                            'delegatedUserRequest',
+                            {
+                                'oauth.client_id': oauthClientId ?? 'unknown',
+                                'oauth.acting_as_user': delegatedUser,
+                            }
+                        )
+                    }
+
                     const storedOauthClient =
                         await store.getOAuthClientByClientId(oauthClientId)
 
@@ -242,15 +261,19 @@ function contextForRequestForFetcher(
                         ) &&
                         delegatedUser
                     ) {
+                        const errMsg =
+                            'Client is not authorized to make delegated requests'
                         console.error({
-                            message:
-                                'Client is not authorized to make delegated requests',
+                            message: errMsg,
                             ...oauthContext,
                             ...oauthClient,
                         })
-                        throw new Error(
-                            'Client is not authorized to make delegated requests'
+                        recordException(
+                            errMsg,
+                            'app-api-' + stageName,
+                            'delegatedUserAuth'
                         )
+                        throw new Error(errMsg)
                     }
 
                     // Get user data
