@@ -365,6 +365,7 @@ export const ContractTable = ({
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
     const isNotStateUser = user.__typename !== 'StateUser'
+    const isStateUser = !isNotStateUser
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
@@ -538,6 +539,17 @@ export const ContractTable = ({
             label: state,
         }))
 
+    const contractTypeFilterOptions = Array.from(
+        contractTypeColumn.getFacetedUniqueValues().keys()
+    )
+        .sort()
+        .map((contractType) => ({
+            value: contractType,
+            label:
+                contractTypeOptions.find((opt) => opt.value === contractType)
+                    ?.label ?? contractType,
+        }))
+
     const filterLength = columnFilters.flatMap((filter) => filter.value).length
     const filtersApplied = `${filterLength} ${pluralize(
         'filter',
@@ -571,7 +583,7 @@ export const ContractTable = ({
 
     useEffect(() => {
         // if on root route
-        if (location.hash === '' && showFilters) {
+        if (location.hash === '' && showFilters && isNotStateUser) {
             updateFilters(
                 statusColumn,
                 [
@@ -587,7 +599,7 @@ export const ContractTable = ({
                 'status'
             )
         }
-    }, [showFilters, statusColumn])
+    }, [showFilters, statusColumn, isNotStateUser])
 
     //Store caption element in state in order for screen readers to read dynamic captions.
     useEffect(() => {
@@ -656,95 +668,146 @@ export const ContractTable = ({
                             onClearFilters={clearFilters}
                             filterTitle="Filters"
                         >
-                            <MultiColumnGrid columns={2}>
-                                <FilterSelect
-                                    value={getSelectedFiltersFromUrl(
-                                        columnFilters,
-                                        'stateName'
+                            {isStateUser ? (
+                                <MultiColumnGrid columns={2}>
+                                    {eqroSubmissions && (
+                                        <FilterSelect
+                                            value={getSelectedFiltersFromUrl(
+                                                columnFilters,
+                                                'contractSubmissionType'
+                                            )}
+                                            name="contractType"
+                                            label="Contract type"
+                                            filterOptions={
+                                                contractTypeFilterOptions
+                                            }
+                                            onChange={(selectedOptions) =>
+                                                updateFilters(
+                                                    contractTypeColumn,
+                                                    selectedOptions,
+                                                    'contractType'
+                                                )
+                                            }
+                                        />
                                     )}
-                                    name="state"
-                                    label="State"
-                                    filterOptions={stateFilterOptions}
-                                    onChange={(selectedOptions) =>
-                                        updateFilters(
-                                            stateColumn,
-                                            selectedOptions,
-                                            'state'
-                                        )
-                                    }
-                                />
-                                {eqroSubmissions ? (
                                     <FilterSelect
                                         value={getSelectedFiltersFromUrl(
                                             columnFilters,
-                                            'contractSubmissionType'
-                                        )}
-                                        name="contractType"
-                                        label="Contract type"
-                                        filterOptions={contractTypeOptions}
-                                        onChange={(selectedOptions) =>
-                                            updateFilters(
-                                                contractTypeColumn,
-                                                selectedOptions,
-                                                'contractType'
-                                            )
-                                        }
-                                    />
-                                ) : (
-                                    <FilterSelect
-                                        value={getSelectedFiltersFromUrl(
-                                            columnFilters,
-                                            'submissionType'
-                                        )}
-                                        name="submissionType"
-                                        label="Submission type"
-                                        filterOptions={submissionTypeOptions}
-                                        onChange={(selectedOptions) =>
-                                            updateFilters(
-                                                submissionTypeColumn,
-                                                selectedOptions,
-                                                'submissionType'
-                                            )
-                                        }
-                                    />
-                                )}
-                            </MultiColumnGrid>
-                            <MultiColumnGrid columns={2}>
-                                <FilterSelect
-                                    value={getSelectedFiltersFromUrl(
-                                        columnFilters,
-                                        'status'
-                                    )}
-                                    name="status"
-                                    label="Status"
-                                    filterOptions={submissionStatusOptions}
-                                    onChange={(selectedOptions) =>
-                                        updateFilters(
-                                            statusColumn,
-                                            selectedOptions,
                                             'status'
-                                        )
-                                    }
-                                />
-                                {eqroSubmissions && (
-                                    <FilterSelect
-                                        value={getSelectedFiltersFromUrl(
-                                            columnFilters,
-                                            'submissionType'
                                         )}
-                                        name="submissionType"
-                                        label="Submission type"
-                                        filterOptions={submissionTypeOptions}
+                                        name="status"
+                                        label="Status"
+                                        filterOptions={submissionStatusOptions}
                                         onChange={(selectedOptions) =>
                                             updateFilters(
-                                                submissionTypeColumn,
+                                                statusColumn,
                                                 selectedOptions,
-                                                'submissionType'
+                                                'status'
                                             )
                                         }
                                     />
-                                )}
-                            </MultiColumnGrid>
+                                </MultiColumnGrid>
+                            ) : (
+                                <>
+                                    <MultiColumnGrid columns={2}>
+                                        <FilterSelect
+                                            value={getSelectedFiltersFromUrl(
+                                                columnFilters,
+                                                'stateName'
+                                            )}
+                                            name="state"
+                                            label="State"
+                                            filterOptions={stateFilterOptions}
+                                            onChange={(selectedOptions) =>
+                                                updateFilters(
+                                                    stateColumn,
+                                                    selectedOptions,
+                                                    'state'
+                                                )
+                                            }
+                                        />
+                                        {eqroSubmissions ? (
+                                            <FilterSelect
+                                                value={getSelectedFiltersFromUrl(
+                                                    columnFilters,
+                                                    'contractSubmissionType'
+                                                )}
+                                                name="contractType"
+                                                label="Contract type"
+                                                filterOptions={
+                                                    contractTypeOptions
+                                                }
+                                                onChange={(selectedOptions) =>
+                                                    updateFilters(
+                                                        contractTypeColumn,
+                                                        selectedOptions,
+                                                        'contractType'
+                                                    )
+                                                }
+                                            />
+                                        ) : (
+                                            <FilterSelect
+                                                value={getSelectedFiltersFromUrl(
+                                                    columnFilters,
+                                                    'submissionType'
+                                                )}
+                                                name="submissionType"
+                                                label="Submission type"
+                                                filterOptions={
+                                                    submissionTypeOptions
+                                                }
+                                                onChange={(selectedOptions) =>
+                                                    updateFilters(
+                                                        submissionTypeColumn,
+                                                        selectedOptions,
+                                                        'submissionType'
+                                                    )
+                                                }
+                                            />
+                                        )}
+                                    </MultiColumnGrid>
+                                    <MultiColumnGrid columns={2}>
+                                        <FilterSelect
+                                            value={getSelectedFiltersFromUrl(
+                                                columnFilters,
+                                                'status'
+                                            )}
+                                            name="status"
+                                            label="Status"
+                                            filterOptions={
+                                                submissionStatusOptions
+                                            }
+                                            onChange={(selectedOptions) =>
+                                                updateFilters(
+                                                    statusColumn,
+                                                    selectedOptions,
+                                                    'status'
+                                                )
+                                            }
+                                        />
+                                        {eqroSubmissions && (
+                                            <FilterSelect
+                                                value={getSelectedFiltersFromUrl(
+                                                    columnFilters,
+                                                    'submissionType'
+                                                )}
+                                                name="submissionType"
+                                                label="Submission type"
+                                                filterOptions={
+                                                    submissionTypeOptions
+                                                }
+                                                onChange={(selectedOptions) =>
+                                                    updateFilters(
+                                                        submissionTypeColumn,
+                                                        selectedOptions,
+                                                        'submissionType'
+                                                    )
+                                                }
+                                            />
+                                        )}
+                                    </MultiColumnGrid>
+                                </>
+                            )}
                         </FilterAccordion>
                     )}
                     <div aria-live="polite" aria-atomic>
