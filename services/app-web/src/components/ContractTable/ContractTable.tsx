@@ -307,6 +307,15 @@ export const stateFilterFn = (
     return filterValue.includes(cellValue)
 }
 
+export const programsFilterFn = (
+    row: any,
+    columnId: string,
+    filterValue: string[]
+): boolean => {
+    const cellValue = row.getValue(columnId) as Program[]
+    return cellValue.some((program) => filterValue.includes(program.name))
+}
+
 export const ContractTable = ({
     caption,
     tableData,
@@ -428,6 +437,7 @@ export const ContractTable = ({
                 filterFn: `arrIncludesSome`,
             }),
             columnHelper.accessor('programs', {
+                id: 'programs',
                 header: 'Programs',
                 cell: (info) =>
                     info.getValue().map((program) => {
@@ -444,6 +454,7 @@ export const ContractTable = ({
                 meta: {
                     dataTestID: `${tableConfig.rowIDName}-programs`,
                 },
+                filterFn: programsFilterFn,
             }),
             columnHelper.accessor('submittedAt', {
                 header: 'Submission date',
@@ -522,6 +533,9 @@ export const ContractTable = ({
     const submissionTypeColumn = reactTable.getColumn(
         'submissionType'
     ) as Column<ContractInDashboardType>
+    const programsColumn = reactTable.getColumn(
+        'programs'
+    ) as Column<ContractInDashboardType>
     const statusColumn = reactTable.getColumn(
         'status'
     ) as Column<ContractInDashboardType>
@@ -548,6 +562,19 @@ export const ContractTable = ({
             label:
                 contractTypeOptions.find((opt) => opt.value === contractType)
                     ?.label ?? contractType,
+        }))
+
+    const programFilterOptions = Array.from(
+        new Set(
+            tableData.flatMap((submission) =>
+                submission.programs.map((program) => program.name)
+            )
+        )
+    )
+        .sort()
+        .map((program) => ({
+            value: program,
+            label: program,
         }))
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length
@@ -690,6 +717,22 @@ export const ContractTable = ({
                                             }
                                         />
                                     )}
+                                    <FilterSelect
+                                        value={getSelectedFiltersFromUrl(
+                                            columnFilters,
+                                            'programs'
+                                        )}
+                                        name="programs"
+                                        label="Programs"
+                                        filterOptions={programFilterOptions}
+                                        onChange={(selectedOptions) =>
+                                            updateFilters(
+                                                programsColumn,
+                                                selectedOptions,
+                                                'programs'
+                                            )
+                                        }
+                                    />
                                     <FilterSelect
                                         value={getSelectedFiltersFromUrl(
                                             columnFilters,

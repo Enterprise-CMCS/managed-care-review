@@ -474,6 +474,7 @@ describe('StateDashboard', () => {
 
         expect(await screen.findByTestId('accordion')).toBeInTheDocument()
         expect(screen.getByTestId('contractType-filter')).toBeInTheDocument()
+        expect(screen.getByTestId('programs-filter')).toBeInTheDocument()
         expect(screen.getByTestId('status-filter')).toBeInTheDocument()
         expect(screen.queryByTestId('state-filter')).not.toBeInTheDocument()
         expect(
@@ -507,6 +508,7 @@ describe('StateDashboard', () => {
         })
 
         expect(await screen.findByTestId('accordion')).toBeInTheDocument()
+        expect(screen.getByTestId('programs-filter')).toBeInTheDocument()
         expect(screen.getByTestId('status-filter')).toBeInTheDocument()
         expect(
             screen.queryByTestId('contractType-filter')

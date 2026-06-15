@@ -1152,6 +1152,43 @@ describe('ContractTable state user tests', () => {
         window.location.assign('#')
     })
 
+    it('can filter table by programs for state users', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockStateUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        await userEvent.click(
+            screen.getByTestId('accordionButton_filterAccordionItems')
+        )
+
+        const programsFilter = await screen.findByTestId('programs-filter')
+        const programsCombobox = within(programsFilter).getByRole('combobox')
+
+        selectEvent.openMenu(programsCombobox)
+        const programOptions = screen.getByTestId('programs-filter-options')
+
+        await waitFor(async () => {
+            expect(within(programOptions).getByText('PMAP')).toBeInTheDocument()
+            expect(within(programOptions).getByText('SNBC')).toBeInTheDocument()
+            await selectEvent.select(programOptions, 'SNBC')
+        })
+
+        const rows = await screen.findAllByRole('row')
+        expect(rows).toHaveLength(2)
+        expect(screen.getByText('1 filter applied')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 1 of 5 submissions')
+        ).toBeInTheDocument()
+    })
+
     it('does not display State and Submission type columns for state users', async () => {
         renderWithProviders(
             <ContractTable tableData={submissions} user={mockStateUser()} />,
