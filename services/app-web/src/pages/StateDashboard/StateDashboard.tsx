@@ -178,7 +178,6 @@ export const StateDashboard = (): React.ReactElement => {
                                 tableData={submissionRows}
                                 user={loggedInUser}
                                 showFilters
-                                filterCountClassName={styles.filterCount}
                             />
                         </section>
                     ) : (
