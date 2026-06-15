@@ -3,7 +3,13 @@ import { contractSubmitters, hasCMSPermissions } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError, type Store } from '../../postgres'
+import {
+    NotFoundError,
+    OPEN_QUESTION_ROUND_ERROR_MESSAGE,
+    UserInputPostgresError,
+    handleUserInputPostgresError,
+    type Store,
+} from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
@@ -159,14 +165,14 @@ export function createContractQuestionResolver(
                     (question) => question.responses.length === 0
                 )
                 if (hasOpenQuestionRound) {
-                    const errMessage =
-                        'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
                     logResolverError(
                         'createContractQuestion',
-                        errMessage,
+                        OPEN_QUESTION_ROUND_ERROR_MESSAGE,
                         context
                     )
-                    throw createUserInputError(errMessage)
+                    throw createUserInputError(
+                        OPEN_QUESTION_ROUND_ERROR_MESSAGE
+                    )
                 }
 
                 // Parse and validate document s3URLs at API boundary
@@ -187,6 +193,18 @@ export function createContractQuestionResolver(
                 )
 
                 if (questionResult instanceof Error) {
+                    // The store re-checks for an open question round inside a
+                    // row-locked transaction; a request that loses a concurrent
+                    // race is rejected here with a BAD_USER_INPUT error.
+                    if (questionResult instanceof UserInputPostgresError) {
+                        logResolverError(
+                            'createContractQuestion',
+                            questionResult.message,
+                            context
+                        )
+                        throw handleUserInputPostgresError(questionResult)
+                    }
+
                     const errMessage = `Issue creating question for package. Message: ${questionResult.message}`
                     logResolverError(
                         'createContractQuestion',

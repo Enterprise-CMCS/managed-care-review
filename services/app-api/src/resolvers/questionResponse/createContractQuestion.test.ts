@@ -298,6 +298,46 @@ describe('createQuestion', () => {
             })
         )
     })
+    it('prevents concurrent requests from creating two open question rounds', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const createQuestion = () =>
+            executeGraphQLOperation(cmsServer, {
+                query: CreateContractQuestionDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
+                },
+            })
+
+        // Fire two requests at once. The parent contract row lock serializes
+        // them so only one question round can be created.
+        const results = await Promise.all([createQuestion(), createQuestion()])
+
+        const succeeded = results.filter((r) => !r.errors)
+        const failed = results.filter((r) => r.errors)
+
+        expect(succeeded).toHaveLength(1)
+        expect(failed).toHaveLength(1)
+        expect(assertAnErrorCode(failed[0])).toBe('BAD_USER_INPUT')
+        expect(assertAnError(failed[0]).message).toBe(
+            'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
+        )
+    })
     it('returns an error if a state user attempts to create a question for a package', async () => {
         const stateServer = await constructTestPostgresServer()
         const contract = await createAndSubmitTestContractWithRate(stateServer)

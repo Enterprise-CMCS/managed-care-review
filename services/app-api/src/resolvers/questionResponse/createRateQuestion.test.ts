@@ -101,6 +101,49 @@ describe('createRateQuestion', () => {
             'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
         )
     })
+    it('prevents concurrent requests from creating two open question rounds', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+        const submittedContractAndRate =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContractAndRate.packageSubmissions[0].rateRevisions[0]
+                .rateID
+
+        const createQuestion = () =>
+            executeGraphQLOperation(cmsServer, {
+                query: CreateRateQuestionDocument,
+                variables: {
+                    input: {
+                        rateID,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
+                },
+            })
+
+        // Fire two requests at once. The parent rate row lock serializes them
+        // so only one question round can be created.
+        const results = await Promise.all([createQuestion(), createQuestion()])
+
+        const succeeded = results.filter((r) => !r.errors)
+        const failed = results.filter((r) => r.errors)
+
+        expect(succeeded).toHaveLength(1)
+        expect(failed).toHaveLength(1)
+        expect(assertAnErrorCode(failed[0])).toBe('BAD_USER_INPUT')
+        expect(assertAnError(failed[0]).message).toBe(
+            'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
+        )
+    })
     it('allows question creation on UNLOCKED and RESUBMITTED rate', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
