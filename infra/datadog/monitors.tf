@@ -147,7 +147,7 @@ resource "datadog_monitor" "web_trace_errors" {
   query = "trace-analytics(\"service:app-web-${var.environment} status:error\").rollup(\"count\").last(\"5m\") > ${var.web_error_threshold}"
 
   message = <<-EOT
-    Trace errors detected in the mc-review web app in **${var.environment}**.
+    Trace errors detected in the ${var.team} web app in **${var.environment}**.
 
     Triggered when >${var.web_error_threshold} errors are recorded in OTEL spans from `app-web-${var.environment}` in 5 minutes.
 
