@@ -32,6 +32,12 @@ function getDDHeaders() {
 }
 
 export function initTracer(serviceName: string) {
+    // Skip OTEL setup under unit tests (setupTests.ts sets stage='test'). This
+    // keeps tests hermetic: without a registered provider, recordException/
+    // recordSpanEvent use a no-op tracer and flushTracer() short-circuits, so
+    // no real OTLP exporter is created and no outbound spans are attempted.
+    if (process.env.stage === 'test') return
+
     // Guard against re-registration on warm Lambda invocations — registering
     // multiple providers causes duplicate spans and leaks span processors
     if (tracerProvider) return
