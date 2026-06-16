@@ -1,5 +1,5 @@
 resource "datadog_monitor" "graphql_errors" {
-  name = "[${var.environment}] MCR - GraphQL API Errors"
+  name = "[${var.team}] GraphQL API Errors - ${var.environment}"
   type = "trace-analytics alert"
 
   query = "trace-analytics(\"service:app-api-${var.environment} status:error\").rollup(\"count\").last(\"5m\") > ${var.graphql_error_threshold}"
@@ -29,12 +29,12 @@ resource "datadog_monitor" "graphql_errors" {
     "env:${var.environment}",
     "service:app-api-${var.environment}",
     "managed-by:opentofu",
-    "project:mcr",
+    "team:${var.team}",
   ]
 }
 
 resource "datadog_monitor" "large_payload_alert" {
-  name = "[${var.environment}] MCR - Large GraphQL Request Payload"
+  name = "[${var.team}] Large GraphQL Request Payload - ${var.environment}"
   type = "trace-analytics alert"
 
   query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"Large request payload detected\\\"\").rollup(\"count\").last(\"5m\") > ${var.large_payload_threshold}"
@@ -66,12 +66,12 @@ resource "datadog_monitor" "large_payload_alert" {
     "env:${var.environment}",
     "service:app-api-${var.environment}",
     "managed-by:opentofu",
-    "project:mcr",
+    "team:${var.team}",
   ]
 }
 
 resource "datadog_monitor" "impersonation_failed_attempts" {
-  name = "[${var.environment}] MCR - Failed Impersonation Attempts"
+  name = "[${var.team}] Failed Impersonation Attempts - ${var.environment}"
   type = "trace-analytics alert"
 
   query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"delegated\\\"\").rollup(\"count\").last(\"5m\") > ${var.impersonation_failure_threshold}"
@@ -101,12 +101,12 @@ resource "datadog_monitor" "impersonation_failed_attempts" {
     "env:${var.environment}",
     "service:app-api-${var.environment}",
     "managed-by:opentofu",
-    "project:mcr",
+    "team:${var.team}",
   ]
 }
 
 resource "datadog_monitor" "impersonation_volume_anomaly" {
-  name = "[${var.environment}] MCR - Impersonation Request Volume Anomaly"
+  name = "[${var.team}] Impersonation Request Volume Anomaly - ${var.environment}"
   type = "trace-analytics alert"
 
   query = "trace-analytics(\"service:app-api-${var.environment} \\\"delegatedUserRequest\\\"\").rollup(\"count\").last(\"5m\") > ${var.impersonation_volume_threshold}"
@@ -136,18 +136,18 @@ resource "datadog_monitor" "impersonation_volume_anomaly" {
     "env:${var.environment}",
     "service:app-api-${var.environment}",
     "managed-by:opentofu",
-    "project:mcr",
+    "team:${var.team}",
   ]
 }
 
 resource "datadog_monitor" "web_trace_errors" {
-  name = "[${var.environment}] MCR - Web Application Trace Errors"
+  name = "[${var.team}] Web Application Trace Errors - ${var.environment}"
   type = "trace-analytics alert"
 
   query = "trace-analytics(\"service:app-web-${var.environment} status:error\").rollup(\"count\").last(\"5m\") > ${var.web_error_threshold}"
 
   message = <<-EOT
-    Trace errors detected in the MCR web app in **${var.environment}**.
+    Trace errors detected in the ${var.team} web app in **${var.environment}**.
 
     Triggered when >${var.web_error_threshold} errors are recorded in OTEL spans from `app-web-${var.environment}` in 5 minutes.
 
@@ -171,6 +171,6 @@ resource "datadog_monitor" "web_trace_errors" {
     "env:${var.environment}",
     "service:app-web-${var.environment}",
     "managed-by:opentofu",
-    "project:mcr",
+    "team:${var.team}",
   ]
 }
