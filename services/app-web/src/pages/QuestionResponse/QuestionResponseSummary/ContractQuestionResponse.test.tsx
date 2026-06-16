@@ -7,6 +7,7 @@ import {
     mockContractPackageSubmittedWithQuestions,
     mockValidCMSUser,
     mockValidStateUser,
+    mockValidAdminUser,
     mockContractPackageApprovedWithQuestions,
 } from '@mc-review/mocks'
 import { IndexContractQuestionsPayload } from '../../../gen/gqlClient'
@@ -951,6 +952,107 @@ describe('ContractQuestionResponse', () => {
             expect(
                 screen.queryByRole('button', { name: 'Add questions' })
             ).toBeNull()
+        })
+    })
+
+    describe('Admin user tests', () => {
+        const CommonAdminRoutes = () => (
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                    <Route
+                        path={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_QUESTIONS_AND_ANSWERS
+                        }
+                        element={<ContractQuestionResponse />}
+                    />
+                </Route>
+            </Routes>
+        )
+
+        it('renders an Add questions link to the admin upload page for a submitted contract', async () => {
+            renderWithProviders(<CommonAdminRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-contract-id',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageSubmittedWithQuestions(),
+                                id: 'test-contract-id',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/health-plan/test-contract-id/question-and-answers`,
+                },
+            })
+
+            const addQuestion = await screen.findByRole('link', {
+                name: 'Add questions',
+            })
+            expect(addQuestion).toHaveAttribute(
+                'href',
+                '/submissions/health-plan/test-contract-id/question-and-answers/admin-upload-questions'
+            )
+        })
+
+        it('renders an Add questions link for an approved contract (admins can correct any status)', async () => {
+            renderWithProviders(<CommonAdminRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidAdminUser(),
+                            statusCode: 200,
+                        }),
+                        fetchRateMockSuccess({
+                            id: 'test-abc-123',
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageApprovedWithQuestions(),
+                                id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                        fetchContractWithQuestionsMockSuccess({
+                            contract: {
+                                ...mockContractPackageApprovedWithQuestions(),
+                                id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            },
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: `/submissions/health-plan/test-abc-123/question-and-answers`,
+                },
+            })
+
+            const addQuestion = await screen.findByRole('link', {
+                name: 'Add questions',
+            })
+            expect(addQuestion).toHaveAttribute(
+                'href',
+                '/submissions/health-plan/test-abc-123/question-and-answers/admin-upload-questions'
+            )
         })
     })
 })

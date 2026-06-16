@@ -18,20 +18,21 @@ export async function userFromThirdPartyAuthorizer(
             const delegatedUser = await lookupUserAurora(store, delegatedUserId)
 
             if (delegatedUser instanceof Error) {
-                return new Error(
-                    `Fetch delegated user error. ${delegatedUser.message}`
-                )
+                const errMsg = `Fetch delegated user error. ${delegatedUser.message}`
+                recordException(errMsg, serviceName, 'delegatedUserAuth')
+                return new Error(errMsg)
             }
             if (delegatedUser === undefined) {
-                return new Error(
+                const errMsg =
                     'Fetch delegated user error. Delegated user not found in db.'
-                )
+                recordException(errMsg, serviceName, 'delegatedUserAuth')
+                return new Error(errMsg)
             }
 
             if (!validDelegatedUserRoles.includes(delegatedUser.role)) {
-                return new Error(
-                    `Fetch delegated user error. Delegated user not authorized. Role: ${delegatedUser.role}`
-                )
+                const errMsg = `Fetch delegated user error. Delegated user not authorized. Role: ${delegatedUser.role}`
+                recordException(errMsg, serviceName, 'delegatedUserAuth')
+                return new Error(errMsg)
             }
 
             return delegatedUser

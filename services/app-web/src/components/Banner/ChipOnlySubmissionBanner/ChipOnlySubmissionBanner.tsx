@@ -5,7 +5,11 @@ import { ExpandableText } from '../../ExpandableText'
 
 export const ChipOnlySubmissionBanner = ({
     className,
-}: React.HTMLAttributes<HTMLDivElement>): React.ReactElement => {
+    contractName,
+}: {
+    className?: string
+    contractName: string
+}): React.ReactElement => {
     return (
         <AccessibleAlertBanner
             type="info"
@@ -18,32 +22,34 @@ export const ChipOnlySubmissionBanner = ({
             <div className={styles.chipOnlyBanner}>
                 <ExpandableText>
                     <p className={styles.subHeader}>
-                        Because this submission covers a CHIP-only population,
-                        DMCO won't validate that it meets federal requirements.
+                        {contractName} is not subject to DMCO review and
+                        validation.
                     </p>
-                    <strong>
-                        For all CHIP-only contracts, you’re still required to:
-                    </strong>
-                    <ul className={styles.listItems}>
-                        <li>
-                            Submit base contracts, amendments, and extensions to
-                            CMS, as required at 42 CFR 457.1201(a).
-                        </li>
-                        <li>
-                            Meet all applicable requirements at 42 CFR Part 457
-                            Subpart L.
-                        </li>
-                    </ul>
                     <strong>What comes next:</strong>
                     <ul className={styles.listItems}>
                         <li>
-                            Recordkeeping: CMS will keep your submission on
-                            file. DMCO doesn't issue formal validation for
-                            CHIP-only contracts.
+                            Record keeping: This submission will be filed for
+                            record keeping. DMCO will not issue formal
+                            communication validating that this CHIP-only
+                            contract submission meets federal requirements.
                         </li>
                         <li>
-                            Questions: You may receive questions by email from
+                            Questions: You may receive questions via email from
                             other CMS components.
+                        </li>
+                    </ul>
+                    <strong>
+                        As a reminder, all CHIP-only contracts must:
+                    </strong>
+                    <ul className={styles.listItems}>
+                        <li>
+                            Be submitted to CMS as required at 42 CFR
+                            457.1201(a). This includes base contracts,
+                            amendments to base contracts, and extensions.
+                        </li>
+                        <li>
+                            Meet all applicable requirements at 42 CFR Part 457,
+                            Subpart L.
                         </li>
                     </ul>
                 </ExpandableText>

@@ -36,6 +36,18 @@ variable "large_payload_threshold" {
   default     = 0
 }
 
+variable "impersonation_failure_threshold" {
+  type        = number
+  description = "Alert when more than this many failed delegated-user (impersonation) authorization spans - user not found, unauthorized role, or rejected header - occur in 5 minutes."
+  default     = 2
+}
+
+variable "impersonation_volume_threshold" {
+  type        = number
+  description = "Alert when more than this many delegated-user (impersonation) requests occur in 5 minutes, which may indicate credential misuse. Tune based on observed baseline traffic."
+  default     = 20
+}
+
 variable "notify_no_data" {
   type        = bool
   description = "Alert when a monitor stops receiving data entirely (e.g. service crash with no traces)"

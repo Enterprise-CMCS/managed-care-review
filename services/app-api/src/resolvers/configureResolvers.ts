@@ -4,6 +4,8 @@ import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     createContractQuestionResolver,
+    adminCreateContractQuestionResolver,
+    adminCreateContractQuestionResponseResolver,
     deleteContractQuestionResolver,
     createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
@@ -152,6 +154,10 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
+            adminCreateContractQuestion:
+                adminCreateContractQuestionResolver(store),
+            adminCreateContractQuestionResponse:
+                adminCreateContractQuestionResponseResolver(store),
             createContractQuestionResponse:
                 createContractQuestionResponseResolver(store, emailer),
             createRateQuestion: createRateQuestionResolver(store, emailer),
@@ -212,6 +218,26 @@ export function configureResolvers(
                     return 'AdminUser'
                 } else {
                     return null
+                }
+            },
+        },
+        QuestionAuthor: {
+            __resolveType(obj) {
+                if (obj.role === 'CMS_USER') {
+                    return 'CMSUser'
+                } else if (obj.role === 'ADMIN_USER') {
+                    return 'AdminUser'
+                } else {
+                    return 'CMSApproverUser'
+                }
+            },
+        },
+        ResponseAuthor: {
+            __resolveType(obj) {
+                if (obj.role === 'ADMIN_USER') {
+                    return 'AdminUser'
+                } else {
+                    return 'StateUser'
                 }
             },
         },

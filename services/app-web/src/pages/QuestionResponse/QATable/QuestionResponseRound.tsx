@@ -1,4 +1,4 @@
-import { ConsolidatedContractStatus, User } from '../../../gen/gqlClient'
+import type { ConsolidatedContractStatus, User } from '../../../gen/gqlClient'
 import styles from './QATable.module.scss'
 import { NavLinkWithLogging } from '../../../components'
 import classNames from 'classnames'
@@ -7,6 +7,7 @@ import {
     extractDocumentsFromQuestion,
     QuestionType,
 } from '../QuestionResponseHelpers/questionResponseHelpers'
+import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
 
 export type RoundData = {
     roundTitle: string
@@ -46,12 +47,18 @@ export const QuestionResponseRound = ({
     const isStateUser = currentUser?.__typename === 'StateUser'
     const isAdminUser = currentUser?.__typename === 'AdminUser'
     const isApprovedContract = contractStatus === 'APPROVED'
-    const classes = classNames('usa-button', {
+    const buttonClass = classNames('usa-button', {
         'usa-button--outline': question.responses.length > 0,
     })
 
+    const deleteButtonClass = classNames('usa-button', 'usa-button--secondary')
+
     const showUploadResponseBtn = isStateUser && !isApprovedContract
     const showDeleteQuestionBtn = isAdminUser && questionType === 'contract'
+    const showAdminUploadResponseBtn =
+        isAdminUser &&
+        questionType === 'contract' &&
+        isAdminQuestionResponseAllowedStatus(contractStatus)
 
     const documents = extractDocumentsFromQuestion(question)
 
@@ -64,7 +71,7 @@ export const QuestionResponseRound = ({
                 <h4 id={`${question.id}-header`}>{roundTitle}</h4>
                 {showUploadResponseBtn && (
                     <NavLinkWithLogging
-                        className={classes}
+                        className={buttonClass}
                         variant="unstyled"
                         aria-describedby={`${qaSectionHeaderId} ${question.id}-header`}
                         to={`./${question.division.toLowerCase()}/${question.id}/upload-response`}
@@ -72,14 +79,14 @@ export const QuestionResponseRound = ({
                         Upload response
                     </NavLinkWithLogging>
                 )}
-                {showDeleteQuestionBtn && (
+                {showAdminUploadResponseBtn && (
                     <NavLinkWithLogging
-                        className={classes}
+                        className={buttonClass}
                         variant="unstyled"
                         aria-describedby={`${qaSectionHeaderId} ${question.id}-header`}
-                        to={`./${question.division.toLowerCase()}/${question.id}/delete-question`}
+                        to={`./${question.id}/admin-upload-response`}
                     >
-                        Delete question
+                        Upload response
                     </NavLinkWithLogging>
                 )}
             </div>
@@ -89,6 +96,18 @@ export const QuestionResponseRound = ({
                 user={currentUser}
                 onlyDisplayInitial={false}
             />
+            {showDeleteQuestionBtn && (
+                <div className={styles.tableFooter}>
+                    <NavLinkWithLogging
+                        className={deleteButtonClass}
+                        variant="unstyled"
+                        aria-describedby={`${qaSectionHeaderId} ${question.id}-header`}
+                        to={`./${question.division.toLowerCase()}/${question.id}/delete-question`}
+                    >
+                        Delete question
+                    </NavLinkWithLogging>
+                </div>
+            )}
         </section>
     )
 }
