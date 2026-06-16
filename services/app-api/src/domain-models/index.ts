@@ -68,6 +68,8 @@ export type {
     CreateRateQuestionInputType,
     IndexRateQuestionsPayload,
     InsertQuestionResponseArgs,
+    AdminCreateContractQuestionInput,
+    AdminCreateContractQuestionResponseInput,
     QuestionResponseType,
     QuestionAndResponseDocument,
     QuestionAction,

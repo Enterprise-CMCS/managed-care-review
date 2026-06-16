@@ -765,6 +765,7 @@ enum QuestionActionType {
   RESTORE
   CASCADE_DELETE
   CASCADE_RESTORE
+  ADMIN_CREATE
 }
 
 enum Division {

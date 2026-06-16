@@ -11,6 +11,7 @@ const questionActionTypeSchema = z.enum([
     'RESTORE',
     'CASCADE_DELETE',
     'CASCADE_RESTORE',
+    'ADMIN_CREATE',
 ])
 
 const questionActionSchema = z.object({
@@ -108,6 +109,36 @@ const insertQuestionResponseArgs = z.object({
     documents: z.array(documentInputSchema),
 })
 
+// Admin-recorded response in the resolved shape the store consumes: the resolver
+// has decided the author (the admin, or the state user being recorded on behalf
+// of) and validated the reason and date.
+const adminCreateContractQuestionResponseInput = z.object({
+    questionID: z.uuid(),
+    addedByUserID: z.uuid(),
+    createdByAdminID: z.uuid(),
+    reason: z.string(),
+    createdAt: z.date().optional(),
+    documents: z.array(documentInputSchema),
+})
+
+// Admin-authored contract question, in the resolved shape the store consumes:
+// the resolver has already decided the author (the admin, or the CMS user being
+// asked on behalf of) and the division (the admin's pick, or the CMS user's
+// division). Admin responses are recorded separately via the standalone admin
+// response mutation.
+const adminCreateContractQuestionInput = z.object({
+    contractID: z.uuid(),
+    division: divisionType,
+    addedByUserID: z.uuid(),
+    // The admin performing the action — recorded as updatedBy on the audit action.
+    createdByAdminID: z.uuid(),
+    // Reason captured on the ADMIN_CREATE audit action.
+    reason: z.string(),
+    // Optional backfill date; when omitted the store lets the column default to now.
+    createdAt: z.date().optional(),
+    documents: z.array(documentInputSchema),
+})
+
 type CreateContractQuestionPayload = z.infer<
     typeof createContractQuestionPayload
 >
@@ -136,6 +167,14 @@ type QuestionResponseType = z.infer<typeof questionResponseSchema>
 
 type InsertQuestionResponseArgs = z.infer<typeof insertQuestionResponseArgs>
 
+type AdminCreateContractQuestionInput = z.infer<
+    typeof adminCreateContractQuestionInput
+>
+
+type AdminCreateContractQuestionResponseInput = z.infer<
+    typeof adminCreateContractQuestionResponseInput
+>
+
 type QuestionAction = z.infer<typeof questionActionSchema>
 
 export type {
@@ -151,6 +190,8 @@ export type {
     IndexRateQuestionsPayload,
     QuestionResponseType,
     InsertQuestionResponseArgs,
+    AdminCreateContractQuestionInput,
+    AdminCreateContractQuestionResponseInput,
     QuestionAction,
 }
 
@@ -164,6 +205,8 @@ export {
     createRateQuestionInput,
     indexRateQuestionsPayload,
     insertQuestionResponseArgs,
+    adminCreateContractQuestionInput,
+    adminCreateContractQuestionResponseInput,
     questionActionSchema,
     questionActionTypeSchema,
 }

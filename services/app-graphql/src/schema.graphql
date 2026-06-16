@@ -301,6 +301,64 @@ type Mutation {
     ): CreateContractQuestionPayload!
 
     """
+    adminCreateContractQuestion lets an AdminUser record a question on a submitted
+    contract on behalf of CMS. The admin either picks a division (the question is
+    attributed to the admin), or selects a CMS user to ask on behalf of (the
+    question's addedBy and division are taken from that user; if that user has no
+    division assignment, the admin supplies one). The created date may be backfilled,
+    and a reason is required and recorded on the question's audit log (ADMIN_CREATE action).
+    Questions can be recorded in any post-submission status, including APPROVED. No
+    notification emails are sent.
+
+    This can only be called by an AdminUser.
+
+    Errors:
+    - ForbiddenError:
+        - A non-AdminUser called this
+    - NotFoundError:
+        - A contract cannot be found with the given `contractID`
+    - UserInputError:
+        - The contract has no submitted package (it is in the DRAFT state)
+        - No question documents were provided
+        - No reason was provided
+        - The created date is in the future
+        - `addedByUserID` does not reference a CMS user
+        - A division is required (no CMS user was selected, or the selected CMS
+          user has no division assignment) and none was provided
+        - The question is attributed to a non-DMCO division on an EQRO contract
+    """
+    adminCreateContractQuestion(
+        input: AdminCreateContractQuestionInput!
+    ): AdminCreateContractQuestionPayload!
+
+    """
+    adminCreateContractQuestionResponse lets an AdminUser record a response on
+    behalf of the state, attached to any existing contract question (including
+    ones authored by CMS). The admin may attribute it to a state user or to
+    themselves, and may backfill the response date (on or after the question's
+    created date and not in the future). A reason is required and recorded on the
+    response's audit log (ADMIN_CREATE action). Responses can be recorded in any
+    contract status, including APPROVED. No notification emails are sent.
+
+    This can only be called by an AdminUser.
+
+    Errors:
+    - ForbiddenError:
+        - A non-AdminUser called this
+    - UserInputError:
+        - A question cannot be found with the given `questionID`
+        - The question has been deleted
+        - No response documents were provided
+        - No reason was provided
+        - `addedByUserID` does not reference a state user
+        - The response date is in the future
+        - The response date is before the question's created date
+    """
+    adminCreateContractQuestionResponse(
+        input: AdminCreateContractQuestionResponseInput!
+    ): CreateContractQuestionResponsePayload!
+
+    """
     deleteContractQuestion soft-deletes a contract question by recording a DELETE action
     in the question's audit log. The question itself is not removed from the database;
     subsequent reads filter it out via the audit log's latest action.
@@ -853,6 +911,46 @@ type CreateContractQuestionPayload {
     question: ContractQuestion!
 }
 
+input AdminCreateContractQuestionInput {
+    "The ID of the contract for which to create a question"
+    contractID: ID!
+    """
+    The CMS division to attribute the question to. Required when addedByUserID is
+    omitted; ignored when addedByUserID is provided (the division is derived from
+    that CMS user instead).
+    """
+    division: Division
+    """
+    Optional CMS user to attribute the question to (asking on their behalf). When
+    provided, the question's addedBy and division are taken from this user. When
+    omitted, the question is attributed to the admin and uses the division above.
+    """
+    addedByUserID: ID
+    """
+    Optional date to record as the question's created date (for backfilling Q&A
+    that happened earlier). Cannot be in the future. Defaults to now when omitted.
+    """
+    createdAt: Date
+    """
+    Reason this question is being recorded by an admin. Captured on the question's
+    audit log (ADMIN_CREATE action).
+    """
+    reason: String!
+    "A list of documents to attach to the question"
+    documents: [DocumentInput!]!
+    "A note to attach to the question"
+    noteText: String
+    "The date the answer to the question is due"
+    dueDate: Date
+    "The rate IDs associated with the question"
+    rateIDs: [String!]
+}
+
+type AdminCreateContractQuestionPayload {
+    "The newly created question"
+    question: ContractQuestion!
+}
+
 input DeleteContractQuestionInput {
     "The ID of the contract question to soft delete"
     questionID: ID!
@@ -901,6 +999,33 @@ input CreateQuestionResponseInput {
     questionID: ID!
     "A list of documents to attach to the response"
     documents: [DocumentInput!]! # should be Generic Document with sha256
+    "A note to attach to the response"
+    noteText: String
+}
+
+"""
+Input for an admin recording a response on an existing contract question.
+"""
+input AdminCreateContractQuestionResponseInput {
+    "The ID of the question for which to create a response"
+    questionID: ID!
+    """
+    Optional state user to attribute the response to (recording on their behalf).
+    When omitted, the response is attributed to the admin.
+    """
+    addedByUserID: ID
+    """
+    Optional date to record as the response's created date. Must be on or after
+    the question's created date and not in the future. Defaults to now when omitted.
+    """
+    createdAt: Date
+    """
+    Reason this response is being recorded by an admin. Captured on the response's
+    audit log (ADMIN_CREATE action).
+    """
+    reason: String!
+    "A list of documents to attach to the response"
+    documents: [DocumentInput!]!
     "A note to attach to the response"
     noteText: String
 }
@@ -1114,6 +1239,18 @@ type CMSApproverUser {
 }
 
 union CMSUsersUnion = CMSUser | CMSApproverUser
+
+"""
+Possible authors of a Q&A question: a CMS reviewer/approver, or an AdminUser
+recording a round on their behalf.
+"""
+union QuestionAuthor = CMSUser | CMSApproverUser | AdminUser
+
+"""
+Possible authors of a Q&A response: a state user, or an AdminUser recording a
+round on their behalf.
+"""
+union ResponseAuthor = StateUser | AdminUser
 
 "AdminUser is a user that works on the MC Review app itself"
 type AdminUser {
@@ -1359,7 +1496,7 @@ type ContractQuestion {
     id: ID!
     contractID: ID!
     createdAt: DateTime!
-    addedBy: CMSUsersUnion!
+    addedBy: QuestionAuthor!
     documents: [Document!]!
     division: Division!
     round: Int!
@@ -1378,6 +1515,8 @@ enum QuestionActionType {
     RESTORE
     CASCADE_DELETE
     CASCADE_RESTORE
+    "Recorded when an admin creates a question on behalf of CMS."
+    ADMIN_CREATE
 }
 
 "A single audit log entry recording an action taken on a Q&A row."
@@ -1398,7 +1537,7 @@ type RateQuestion {
     id: ID!
     rateID: ID!
     createdAt: DateTime!
-    addedBy: CMSUsersUnion!
+    addedBy: QuestionAuthor!
     documents: [Document!]!
     division: Division!
     round: Int!
@@ -1417,7 +1556,7 @@ type QuestionResponse {
     id: ID!
     questionID: ID!
     createdAt: DateTime!
-    addedBy: StateUser!
+    addedBy: ResponseAuthor!
     documents: [Document!]!
     #    noteText: String
 }

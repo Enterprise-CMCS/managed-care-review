@@ -1,0 +1,9 @@
+mutation adminCreateContractQuestionResponse(
+    $input: AdminCreateContractQuestionResponseInput!
+) {
+    adminCreateContractQuestionResponse(input: $input) {
+        question {
+            ...contractQuestionFragment
+        }
+    }
+}
