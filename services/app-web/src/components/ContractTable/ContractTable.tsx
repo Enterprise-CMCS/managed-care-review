@@ -183,6 +183,14 @@ const submissionStatusOptions = [
     },
 ]
 
+const stateSubmissionStatusOptions = [
+    ...submissionStatusOptions,
+    {
+        label: 'Draft',
+        value: 'DRAFT',
+    },
+]
+
 const contractTypeOptions = [
     {
         label: 'EQRO',
@@ -287,7 +295,7 @@ const getSelectedFiltersFromUrl = (
 
             if (id === 'status') {
                 return (
-                    submissionStatusOptions.find(
+                    stateSubmissionStatusOptions.find(
                         (opt) => opt.value === item.value
                     ) || item
                 )
@@ -375,6 +383,9 @@ export const ContractTable = ({
 
     const isNotStateUser = user.__typename !== 'StateUser'
     const isStateUser = !isNotStateUser
+    const statusFilterOptions = isStateUser
+        ? stateSubmissionStatusOptions
+        : submissionStatusOptions
     const tableColumns = React.useMemo(
         () => [
             columnHelper.accessor((row) => row, {
@@ -740,7 +751,7 @@ export const ContractTable = ({
                                         )}
                                         name="status"
                                         label="Status"
-                                        filterOptions={submissionStatusOptions}
+                                        filterOptions={statusFilterOptions}
                                         onChange={(selectedOptions) =>
                                             updateFilters(
                                                 statusColumn,
@@ -817,9 +828,7 @@ export const ContractTable = ({
                                             )}
                                             name="status"
                                             label="Status"
-                                            filterOptions={
-                                                submissionStatusOptions
-                                            }
+                                            filterOptions={statusFilterOptions}
                                             onChange={(selectedOptions) =>
                                                 updateFilters(
                                                     statusColumn,

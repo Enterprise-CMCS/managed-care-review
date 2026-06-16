@@ -1145,6 +1145,39 @@ describe('ContractTable for CMS User (with filters)', () => {
             screen.getByText('Displaying 3 of 4 submissions')
         ).toBeInTheDocument()
     })
+
+    it('does not show Draft in the status filter for cms users', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        await userEvent.click(
+            screen.getByTestId('accordionButton_filterAccordionItems')
+        )
+
+        const statusFilter = await screen.findByTestId('status-filter')
+        const statusCombobox = within(statusFilter).getByRole('combobox')
+
+        selectEvent.openMenu(statusCombobox)
+        const statusOptions = screen.getByTestId('status-filter-options')
+
+        await waitFor(() => {
+            expect(
+                within(statusOptions).queryByText('Draft')
+            ).not.toBeInTheDocument()
+            expect(
+                within(statusOptions).getByText('Submitted')
+            ).toBeInTheDocument()
+        })
+    })
 })
 
 describe('ContractTable state user tests', () => {
@@ -1187,6 +1220,37 @@ describe('ContractTable state user tests', () => {
         expect(
             screen.getByText('Displaying 1 of 5 submissions')
         ).toBeInTheDocument()
+    })
+
+    it('shows Draft in the status filter for state users only', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockStateUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        await userEvent.click(
+            screen.getByTestId('accordionButton_filterAccordionItems')
+        )
+
+        const statusFilter = await screen.findByTestId('status-filter')
+        const statusCombobox = within(statusFilter).getByRole('combobox')
+
+        selectEvent.openMenu(statusCombobox)
+        const statusOptions = screen.getByTestId('status-filter-options')
+
+        await waitFor(() => {
+            expect(within(statusOptions).getByText('Draft')).toBeInTheDocument()
+            expect(
+                within(statusOptions).getByText('Submitted')
+            ).toBeInTheDocument()
+        })
     })
 
     it('does not display State and Submission type columns for state users', async () => {
