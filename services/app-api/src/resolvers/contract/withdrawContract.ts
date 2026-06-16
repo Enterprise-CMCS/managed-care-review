@@ -12,7 +12,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/submissions'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 

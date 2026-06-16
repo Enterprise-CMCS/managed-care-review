@@ -16,7 +16,7 @@ import type { RateOrErrorArrayType } from '../../postgres/contractAndRates'
 import { logError, logResolverError, logResolverSuccess } from '../../logger'
 import { GraphQLError } from 'graphql'
 import type { RateType } from '../../domain-models'
-import { canRead } from '../../authorization/oauthAuthorization'
+import { canRead } from '../../oauth/oauthAuthorization'
 import { NotFoundError } from '../../postgres'
 import { getRateLastUpdatedForDisplay } from '../helpers'
 

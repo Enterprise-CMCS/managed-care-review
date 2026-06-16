@@ -5,7 +5,7 @@ import { NotFoundError, type Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { hasCMSPermissions, isAdminUser } from '../../domain-models'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function approveContract(

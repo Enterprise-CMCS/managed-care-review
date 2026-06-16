@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
 import {
     ButtonGroup,
+    Fieldset,
     FormGroup,
     GridContainer,
     Label,
@@ -8,10 +9,11 @@ import {
 } from '@trussworks/react-uswds'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
-import { Formik, FormikErrors } from 'formik'
+import { Formik, FormikErrors, useField } from 'formik'
 import {
     ActionButton,
     Breadcrumbs,
+    FieldCheckbox,
     FieldTextarea,
     GenericApiErrorBanner,
     Loading,
@@ -24,8 +26,15 @@ import {
     CreateOauthClientDocument,
     IndexUsersDocument,
 } from '../../../gen/gqlClient'
+import type {
+    IndexUsersQuery,
+    OAuthScope,
+    OAuthUser,
+    User,
+} from '../../../gen/gqlClient'
 import { RoutesRecord } from '@mc-review/constants'
 import { FieldSelect } from '../../../components/Select'
+import { getAvailableOAuthScopesForUserRole } from '@mc-review/common-code'
 import { wrapApolloResult } from '@mc-review/helpers'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { FilterOptionType } from '../../../components/FilterAccordion'
@@ -50,10 +59,42 @@ const CreateOauthClientSchema = Yup.object().shape({
 export interface CreateOauthClientFormValuesType {
     cmsUser: FilterOptionType
     oauthDescription?: string
+    scopes: OAuthScope[]
 }
 
 type FormError =
     FormikErrors<CreateOauthClientFormValuesType>[keyof FormikErrors<CreateOauthClientFormValuesType>]
+
+type IndexUserEdge = IndexUsersQuery['indexUsers']['edges'][number]
+type OAuthUserIndexEdge = Omit<IndexUserEdge, 'node'> & { node: OAuthUser }
+
+const isOAuthUser = (user: User): user is OAuthUser =>
+    user.__typename === 'CMSApproverUser' ||
+    user.__typename === 'CMSUser' ||
+    user.__typename === 'AdminUser'
+
+const getAvailableOauthScopes = (user?: OAuthUser): OAuthScope[] => {
+    if (!user) {
+        return []
+    }
+
+    return getAvailableOAuthScopesForUserRole(user.role) as OAuthScope[]
+}
+
+const ClearOauthScopesOnUserChange = (): null => {
+    const [{ value: cmsUser }] = useField<FilterOptionType>('cmsUser')
+    const [, , { setValue: setScopes }] = useField<OAuthScope[]>('scopes')
+    const previousUserID = React.useRef(cmsUser.value)
+
+    useEffect(() => {
+        if (previousUserID.current !== cmsUser.value) {
+            previousUserID.current = cmsUser.value
+            void setScopes([])
+        }
+    }, [cmsUser.value, setScopes])
+
+    return null
+}
 
 export const CreateOauthClient = (): React.ReactElement => {
     // Page level state
@@ -88,6 +129,7 @@ export const CreateOauthClient = (): React.ReactElement => {
                 input: {
                     userID: values.cmsUser.value,
                     description: values.oauthDescription,
+                    scopes: values.scopes,
                 },
             },
         })
@@ -113,29 +155,24 @@ export const CreateOauthClient = (): React.ReactElement => {
         return <SettingsErrorAlert error={indexUsersResult.error} />
     }
 
-    const indexUsers = indexUsersResult.data.indexUsers.edges
-    const dropdownOptions: FilterOptionType[] = []
+    const indexUsers = indexUsersResult.data.indexUsers.edges.filter(
+        (user): user is OAuthUserIndexEdge => isOAuthUser(user.node)
+    )
+
+    const dropdownOptions: FilterOptionType[] = indexUsers.map((user) => ({
+        label: user.node.email,
+        value: user.node.id,
+    }))
 
     // Form setup
-    const formInitialValues = {
+    const formInitialValues: CreateOauthClientFormValuesType = {
         cmsUser: {
             label: '',
             value: '',
         },
         oauthDescription: '',
+        scopes: [],
     }
-
-    indexUsers.forEach((user) => {
-        if (
-            user.node.__typename === 'CMSApproverUser' ||
-            user.node.__typename === 'CMSUser'
-        ) {
-            dropdownOptions.push({
-                label: user.node.email,
-                value: user.node.id,
-            })
-        }
-    })
 
     return (
         <FormContainer id="createOauthForm" className="standaloneForm">
@@ -161,94 +198,173 @@ export const CreateOauthClient = (): React.ReactElement => {
             />
             <Formik
                 initialValues={formInitialValues}
-                onSubmit={(values) => onSubmit(values)}
+                onSubmit={onSubmit}
                 validationSchema={CreateOauthClientSchema}
             >
-                {({ errors, handleChange, values, handleSubmit }) => (
-                    <Grid className={styles.maxWidthContainer}>
-                        {createClientError && <GenericApiErrorBanner />}
-                        <UswdsForm
-                            data-testid="createOAuthClientForm"
-                            id="createOauthForm"
-                            onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
-                                setShouldValidate(true)
-                                return handleSubmit(e)
-                            }}
-                        >
-                            <div id="formInnerContainer">
-                                <fieldset>
-                                    <h2>Create OAuth client</h2>
-                                    <legend className="srOnly">
-                                        Create OAuth client
-                                    </legend>
-                                    <FormGroup
-                                        error={showFieldErrors(errors.cmsUser)}
-                                    >
-                                        <Label htmlFor={'cmsUserEmail'}>
-                                            OAuth client user
-                                        </Label>
-                                        <span className="usa-hint">
-                                            Required
-                                        </span>
-                                        {showFieldErrors(errors.cmsUser) && (
-                                            <PoliteErrorMessage formFieldLabel="OAuth client user">
-                                                {
-                                                    errors.cmsUser
-                                                        ?.value as string
+                {({ errors, values, handleSubmit }) => {
+                    const selectedUser = indexUsers.find(
+                        (user) => user.node.id === values.cmsUser.value
+                    )?.node
+                    const availableScopes =
+                        getAvailableOauthScopes(selectedUser)
+
+                    return (
+                        <Grid className={styles.maxWidthContainer}>
+                            {createClientError && <GenericApiErrorBanner />}
+                            <UswdsForm
+                                data-testid="createOAuthClientForm"
+                                id="createOauthForm"
+                                onSubmit={(
+                                    e: React.FormEvent<HTMLFormElement>
+                                ) => {
+                                    setShouldValidate(true)
+                                    return handleSubmit(e)
+                                }}
+                            >
+                                <div id="formInnerContainer">
+                                    <ClearOauthScopesOnUserChange />
+                                    <fieldset>
+                                        <h2>Create OAuth client</h2>
+                                        <legend className="srOnly">
+                                            Create OAuth client
+                                        </legend>
+                                        <FormGroup
+                                            error={showFieldErrors(
+                                                errors.cmsUser
+                                            )}
+                                        >
+                                            <Label htmlFor={'cmsUserEmail'}>
+                                                OAuth client user
+                                            </Label>
+                                            <span className="usa-hint">
+                                                Required
+                                            </span>
+                                            {showFieldErrors(
+                                                errors.cmsUser
+                                            ) && (
+                                                <PoliteErrorMessage formFieldLabel="OAuth client user">
+                                                    {
+                                                        errors.cmsUser
+                                                            ?.value as string
+                                                    }
+                                                </PoliteErrorMessage>
+                                            )}
+                                            <FieldSelect
+                                                label="OAuth client user"
+                                                name="cmsUser"
+                                                inputId="cmsUserEmail"
+                                                optionDescriptionSingular="user"
+                                                dropdownOptions={
+                                                    dropdownOptions
                                                 }
-                                            </PoliteErrorMessage>
+                                                initialValues={values.cmsUser}
+                                            />
+                                        </FormGroup>
+
+                                        {selectedUser && (
+                                            <div
+                                                className={
+                                                    styles.selectedUserSummary
+                                                }
+                                                data-testid="selectedOAuthClientUser"
+                                            >
+                                                <div
+                                                    className={
+                                                        styles.selectedUserLabel
+                                                    }
+                                                >
+                                                    Selected user
+                                                </div>
+                                                <address
+                                                    className={
+                                                        styles.selectedUserAddress
+                                                    }
+                                                >
+                                                    {`${selectedUser.givenName} ${selectedUser.familyName}`}
+                                                    <br />
+                                                    {selectedUser.role}
+                                                    <br />
+                                                    {selectedUser.email}
+                                                </address>
+                                            </div>
                                         )}
-                                        <FieldSelect
-                                            label="CMS User"
-                                            name="cmsUser"
-                                            inputId="cmsUserEmail"
-                                            optionDescriptionSingular="user"
-                                            dropdownOptions={dropdownOptions}
-                                            initialValues={values.cmsUser}
+
+                                        {availableScopes.length > 0 && (
+                                            <FormGroup>
+                                                <Fieldset
+                                                    legend="OAuth client scopes"
+                                                    id="oauthScopes"
+                                                    className={
+                                                        styles.scopeFieldset
+                                                    }
+                                                >
+                                                    {availableScopes.map(
+                                                        (scope) => (
+                                                            <FieldCheckbox
+                                                                id={`oauthScope-${scope}`}
+                                                                key={scope}
+                                                                name="scopes"
+                                                                label={scope}
+                                                                value={scope}
+                                                                heading="OAuth client scopes"
+                                                                parent_component_heading="Create OAuth client"
+                                                                aria-required={
+                                                                    false
+                                                                }
+                                                            />
+                                                        )
+                                                    )}
+                                                </Fieldset>
+                                            </FormGroup>
+                                        )}
+
+                                        <FieldTextarea
+                                            label="Description for OAuth client"
+                                            name="oauthDescription"
+                                            id="oauthDescription"
+                                            hint="Provide a description for this OAuth client."
+                                            showError={showFieldErrors(
+                                                errors.oauthDescription
+                                            )}
                                         />
-                                    </FormGroup>
-                                    <FieldTextarea
-                                        label="Description for OAuth client"
-                                        name="oauthDescription"
-                                        id="oauthDescription"
-                                        hint="Provide a description for this OAuth client."
-                                        showError={showFieldErrors(
-                                            errors.oauthDescription
-                                        )}
-                                    />
-                                </fieldset>
-                            </div>
+                                    </fieldset>
+                                </div>
 
-                            <PageActionsContainer>
-                                <ButtonGroup type="default">
-                                    <ActionButton
-                                        type="button"
-                                        variant="outline"
-                                        data-testid="page-actions-left-secondary"
-                                        parent_component_type="page body"
-                                        link_url={RoutesRecord.OAUTH_CLIENTS}
-                                        onClick={() =>
-                                            navigate(RoutesRecord.OAUTH_CLIENTS)
-                                        }
-                                    >
-                                        Cancel
-                                    </ActionButton>
+                                <PageActionsContainer>
+                                    <ButtonGroup type="default">
+                                        <ActionButton
+                                            type="button"
+                                            variant="outline"
+                                            data-testid="page-actions-left-secondary"
+                                            parent_component_type="page body"
+                                            link_url={
+                                                RoutesRecord.OAUTH_CLIENTS
+                                            }
+                                            onClick={() =>
+                                                navigate(
+                                                    RoutesRecord.OAUTH_CLIENTS
+                                                )
+                                            }
+                                        >
+                                            Cancel
+                                        </ActionButton>
 
-                                    <ActionButton
-                                        type="submit"
-                                        variant="success"
-                                        data-testid="page-actions-right-primary"
-                                        parent_component_type="page body"
-                                        animationTimeout={1000}
-                                        loading={createClientLoading}
-                                    >
-                                        Create client
-                                    </ActionButton>
-                                </ButtonGroup>
-                            </PageActionsContainer>
-                        </UswdsForm>
-                    </Grid>
-                )}
+                                        <ActionButton
+                                            type="submit"
+                                            variant="success"
+                                            data-testid="page-actions-right-primary"
+                                            parent_component_type="page body"
+                                            animationTimeout={1000}
+                                            loading={createClientLoading}
+                                        >
+                                            Create client
+                                        </ActionButton>
+                                    </ButtonGroup>
+                                </PageActionsContainer>
+                            </UswdsForm>
+                        </Grid>
+                    )
+                }}
             </Formik>
         </FormContainer>
     )

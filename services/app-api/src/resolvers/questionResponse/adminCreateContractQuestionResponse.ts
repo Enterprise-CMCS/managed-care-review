@@ -9,7 +9,7 @@ import {
     type Store,
 } from '../../postgres'
 import { GraphQLError } from 'graphql'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
 import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
 

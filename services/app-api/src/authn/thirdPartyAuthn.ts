@@ -2,6 +2,7 @@ import type { Store } from '../postgres'
 import { lookupUserAurora } from './cognitoAuthn'
 import { initTracer, recordException } from '../otel/otel_handler'
 import type { UserType } from '../domain-models'
+import { validDelegatedUserRoles } from '../oauth/oauthAuthorization'
 
 export async function userFromThirdPartyAuthorizer(
     store: Store,
@@ -28,11 +29,7 @@ export async function userFromThirdPartyAuthorizer(
                 return new Error(errMsg)
             }
 
-            //validate the delegated user is a CMS or CMS Approver role
-            if (
-                delegatedUser.role !== 'CMS_USER' &&
-                delegatedUser.role !== 'CMS_APPROVER_USER'
-            ) {
+            if (!validDelegatedUserRoles.includes(delegatedUser.role)) {
                 const errMsg = `Fetch delegated user error. Delegated user not authorized. Role: ${delegatedUser.role}`
                 recordException(errMsg, serviceName, 'delegatedUserAuth')
                 return new Error(errMsg)

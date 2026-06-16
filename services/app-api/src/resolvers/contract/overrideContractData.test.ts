@@ -106,6 +106,117 @@ describe('overrideContractData resolver', () => {
         ).toBe('AMENDMENT')
     })
 
+    it('allows non-delegated admin OAuth clients with admin scope to override contract data', async () => {
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const oauthAdminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-admin-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: false,
+                },
+            },
+            ldService,
+        })
+
+        const result = await overrideTestContractData(oauthAdminServer, {
+            contractID: submittedContract.id,
+            description: 'Admin OAuth override contract type',
+            overrides: {
+                revisionOverride: {
+                    contractType: 'AMENDMENT',
+                    contractTypeOp: 'OVERRIDE',
+                },
+            },
+        })
+
+        expect(
+            result.packageSubmissions[0].contractRevision.formData.contractType
+        ).toBe('AMENDMENT')
+    })
+
+    it('rejects delegated admin OAuth clients from overriding contract data', async () => {
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const oauthAdminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-delegated-admin-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            },
+            ldService,
+        })
+
+        const result = await executeGraphQLOperation(oauthAdminServer, {
+            query: OverrideContractDataDocument,
+            variables: {
+                input: {
+                    contractID: submittedContract.id,
+                    description: 'Delegated admin OAuth override attempt',
+                    overrides: {
+                        revisionOverride: {
+                            contractType: 'AMENDMENT',
+                            contractTypeOp: 'OVERRIDE',
+                        },
+                    },
+                },
+            },
+        })
+
+        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
+        expect(result.errors?.[0]?.message).toBe(
+            'OAuth client does not have write permissions'
+        )
+    })
+
+    it('rejects CMS-scoped OAuth clients from overriding contract data', async () => {
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const oauthAdminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-cms-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: false,
+                },
+            },
+            ldService,
+        })
+
+        const result = await executeGraphQLOperation(oauthAdminServer, {
+            query: OverrideContractDataDocument,
+            variables: {
+                input: {
+                    contractID: submittedContract.id,
+                    description: 'CMS OAuth override attempt',
+                    overrides: {
+                        revisionOverride: {
+                            contractType: 'AMENDMENT',
+                            contractTypeOp: 'OVERRIDE',
+                        },
+                    },
+                },
+            },
+        })
+
+        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
+        expect(result.errors?.[0]?.message).toBe(
+            'OAuth client does not have write permissions'
+        )
+    })
+
     it('creates a contract initiallySubmittedAt override and returns effective contract data', async () => {
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)

@@ -8,7 +8,7 @@ import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function undoWithdrawRate(
