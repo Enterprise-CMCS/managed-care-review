@@ -32,6 +32,8 @@ const contractWithoutDraftRatesSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    // Last persisted contract action that should affect display freshness.
+    lastActionDate: z.date().nullish(),
     status: statusSchema,
     reviewStatus: contractReviewStatusSchema,
     consolidatedStatus: consolidatedContractStatusSchema,
@@ -82,6 +84,8 @@ const rateWithoutDraftContractsSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    // Last persisted rate action that should affect display freshness.
+    lastActionDate: z.date().nullish(),
     status: statusSchema,
     reviewStatus: rateReviewStatusSchema,
     consolidatedStatus: consolidatedRateStatusSchema,
