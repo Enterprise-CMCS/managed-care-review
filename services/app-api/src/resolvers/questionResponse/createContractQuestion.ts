@@ -3,11 +3,17 @@ import { contractSubmitters, hasCMSPermissions } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError, type Store } from '../../postgres'
+import {
+    NotFoundError,
+    OPEN_QUESTION_ROUND_ERROR_MESSAGE,
+    UserInputPostgresError,
+    handleUserInputPostgresError,
+    type Store,
+} from '../../postgres'
 import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { StateCodeType } from '@mc-review/submissions'
 import { parseAndValidateDocuments } from '../documentHelpers'
 import type { LDService } from '../../launchDarkly/launchDarkly'
@@ -158,6 +164,23 @@ export function createContractQuestionResolver(
                     throw new Error(errMessage)
                 }
 
+                // Do not allow a new question to be created while a previous
+                // question round is still open. A round is open when any
+                // existing question has not yet received a response.
+                const hasOpenQuestionRound = allQuestions.some(
+                    (question) => question.responses.length === 0
+                )
+                if (hasOpenQuestionRound) {
+                    logResolverError(
+                        'createContractQuestion',
+                        OPEN_QUESTION_ROUND_ERROR_MESSAGE,
+                        context
+                    )
+                    throw createUserInputError(
+                        OPEN_QUESTION_ROUND_ERROR_MESSAGE
+                    )
+                }
+
                 // Parse and validate document s3URLs at API boundary
                 const docs = parseAndValidateDocuments(
                     input.documents.map((d) => ({
@@ -176,6 +199,18 @@ export function createContractQuestionResolver(
                 )
 
                 if (questionResult instanceof Error) {
+                    // The store re-checks for an open question round inside a
+                    // row-locked transaction; a request that loses a concurrent
+                    // race is rejected here with a BAD_USER_INPUT error.
+                    if (questionResult instanceof UserInputPostgresError) {
+                        logResolverError(
+                            'createContractQuestion',
+                            questionResult.message,
+                            context
+                        )
+                        throw handleUserInputPostgresError(questionResult)
+                    }
+
                     const errMessage = `Issue creating question for package. Message: ${questionResult.message}`
                     logResolverError(
                         'createContractQuestion',

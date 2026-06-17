@@ -11,6 +11,7 @@ import {
     CreateOauthClientDocument,
     DeleteOauthClientDocument,
 } from '../../gen/gqlClient'
+import { OAuthScope } from '../../generated/client'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('deleteOauthClient', () => {
@@ -59,6 +60,57 @@ describe('deleteOauthClient', () => {
         expect(deleteRes.data?.deleteOauthClient.oauthClient.user.id).toBe(
             cmsUser.id
         )
+    })
+
+    it('deletes an OAuth client associated with an ADMIN user', async () => {
+        const adminUser = testAdminUser()
+        const oauthAdminUser = testAdminUser({
+            email: 'delete-oauth-admin@example.com',
+        })
+
+        const client = await sharedTestPrismaClient()
+        await client.user.create({
+            data: {
+                id: oauthAdminUser.id,
+                givenName: oauthAdminUser.givenName,
+                familyName: oauthAdminUser.familyName,
+                email: oauthAdminUser.email,
+                role: oauthAdminUser.role,
+            },
+        })
+
+        const server = await constructTestPostgresServer({
+            context: { user: adminUser },
+        })
+
+        const createRes = await executeGraphQLOperation(server, {
+            query: CreateOauthClientDocument,
+            variables: {
+                input: {
+                    description: 'Admin client to delete',
+                    grants: ['client_credentials'],
+                    scopes: [OAuthScope.ADMIN_SUBMISSION_ACTIONS],
+                    userID: oauthAdminUser.id,
+                },
+            },
+        })
+        expect(createRes.errors).toBeUndefined()
+        const clientId = createRes.data?.createOauthClient.oauthClient.clientId
+
+        const deleteRes = await executeGraphQLOperation(server, {
+            query: DeleteOauthClientDocument,
+            variables: { input: { clientId } },
+        })
+
+        expect(deleteRes.errors).toBeUndefined()
+        const deletedClient = deleteRes.data?.deleteOauthClient.oauthClient
+        expect(deletedClient.clientId).toBe(clientId)
+        expect(deletedClient.scopes).toEqual([
+            OAuthScope.ADMIN_SUBMISSION_ACTIONS,
+        ])
+        expect(deletedClient.user.id).toBe(oauthAdminUser.id)
+        expect(deletedClient.user.email).toBe(oauthAdminUser.email)
+        expect(deletedClient.user.role).toBe('ADMIN_USER')
     })
 
     it('errors if not ADMIN', async () => {

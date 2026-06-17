@@ -7,7 +7,7 @@ import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
 import { isValidStateCode, type StateCodeType } from '@mc-review/submissions'
 import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 
 export function updateStateAssignment(
     store: Store

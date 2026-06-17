@@ -1240,6 +1240,8 @@ type CMSApproverUser {
 
 union CMSUsersUnion = CMSUser | CMSApproverUser
 
+union OAuthUser = CMSUser | CMSApproverUser | AdminUser
+
 """
 Possible authors of a Q&A question: a CMS reviewer/approver, or an AdminUser
 recording a round on their behalf.
@@ -3100,7 +3102,7 @@ type OauthClient {
     description: String
     createdAt: DateTime!
     updatedAt: DateTime!
-    user: CMSUsersUnion!
+    user: OAuthUser!
     scopes: [OAuthScope!]!
 }
 
@@ -3234,6 +3236,7 @@ enum ContractSubmissionType {
 
 enum OAuthScope {
     CMS_SUBMISSION_ACTIONS
+    ADMIN_SUBMISSION_ACTIONS
 }
 
 enum UploadBucketName {

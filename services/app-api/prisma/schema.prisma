@@ -912,6 +912,7 @@ enum ContractSubmissionType {
 
 enum OAuthScope {
   CMS_SUBMISSION_ACTIONS
+  ADMIN_SUBMISSION_ACTIONS
 }
 
 enum ScalarFieldOverrideOperation {

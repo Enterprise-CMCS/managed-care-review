@@ -726,6 +726,11 @@ describe('Admin only settings page tests', () => {
                 })
             ).toBeInTheDocument()
             expect(
+                within(clientTable).getByRole('columnheader', {
+                    name: 'Scopes',
+                })
+            ).toBeInTheDocument()
+            expect(
                 within(clientTable).getByText('oauth-client-123')
             ).toBeInTheDocument()
             expect(
@@ -735,6 +740,9 @@ describe('Admin only settings page tests', () => {
                 within(clientTable).getByText(
                     'client_credentials, refresh_token'
                 )
+            ).toBeInTheDocument()
+            expect(
+                within(clientTable).getByText('CMS_SUBMISSION_ACTIONS')
             ).toBeInTheDocument()
             expect(
                 within(clientTable).getByText('client-key-123')

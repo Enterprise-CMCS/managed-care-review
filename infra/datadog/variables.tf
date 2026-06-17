@@ -13,6 +13,12 @@ variable "environment" {
   description = "Deployment environment (dev, val, prod)"
 }
 
+variable "team" {
+  type        = string
+  description = "Team slug used for the [team] name prefix and the team: tag that the shared Datadog dashboard filter keys on."
+  default     = "mc-review"
+}
+
 variable "notify_slack" {
   type        = string
   description = "Datadog Slack notification handle, e.g. @slack-managed-care-alerts"
