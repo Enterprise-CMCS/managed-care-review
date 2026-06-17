@@ -140,6 +140,48 @@ resource "datadog_monitor" "impersonation_volume_anomaly" {
   ]
 }
 
+resource "datadog_monitor" "zip_generation_failures" {
+  name = "[${var.team}] Document Zip Generation Failures - ${var.environment}"
+  type = "trace-analytics alert"
+
+  # Matches the dedicated `zip.generate` spans emitted by the app-api zip service
+  # (services/app-api/src/zip/zipTracing.ts). Every failed contract or rate zip
+  # records an exception prefixed with the stable "Document zip generation failed"
+  # marker and sets the span status to error. Keep this phrase in sync with
+  # ZIP_FAILURE_MARKER in zipTracing.ts.
+  query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"Document zip generation failed\\\"\").rollup(\"count\").last(\"5m\") > ${var.zip_failure_threshold}"
+
+  message = <<-EOT
+    Document zip generation failures detected in **${var.environment}**.
+
+    Triggered when >${var.zip_failure_threshold} contract or rate `zip.generate` spans fail (status:error) in 5 minutes. These zips are produced when a contract is submitted/withdrawn and by the batch zip-regeneration Lambda.
+
+    - Review the failing `zip.generate` spans in Datadog APM under service `app-api-${var.environment}` (filter on `@zip.type`, `@zip.revision_id`, `@zip.document_type`)
+    - Failures are frequently transient (S3 download/upload timeouts) — confirm whether the affected revisions self-healed or still have no `documentZipPackage`
+    - Persistent failures can be backfilled by invoking the `app-api-${var.environment}-cdk-regenerate-zips` Lambda
+
+    ${var.notify_slack}
+  EOT
+
+  monitor_thresholds {
+    critical = var.zip_failure_threshold
+  }
+
+  # No failing zips is the normal, healthy state, so absence of data is not an
+  # outage signal here (mirrors large_payload_alert / impersonation monitors).
+  notify_no_data    = false
+  evaluation_delay  = 60
+  renotify_interval = 60
+  include_tags      = true
+
+  tags = [
+    "env:${var.environment}",
+    "service:app-api-${var.environment}",
+    "managed-by:opentofu",
+    "team:${var.team}",
+  ]
+}
+
 resource "datadog_monitor" "web_trace_errors" {
   name = "[${var.team}] Web Application Trace Errors - ${var.environment}"
   type = "trace-analytics alert"

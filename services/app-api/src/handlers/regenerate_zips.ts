@@ -31,6 +31,7 @@ import {
     includeRateFormData,
 } from '../postgres/contractAndRates/prismaSharedContractRateHelpers'
 import { parseErrorToError } from '@mc-review/helpers'
+import { initTracer, flushTracer } from '../otel/otel_handler'
 
 export type RegenerateZipsEvent = {
     contractRevisionID?: string // Optional: regenerate for specific contract revision
@@ -79,6 +80,10 @@ export const main: Handler = async (
     const prismaClient = prismaClientResult
     const postgresStore = NewPostgresStore(prismaClient)
     const zipService = documentZipService(postgresStore, generateDocumentZip)
+
+    // Emit zip.generate spans under the same `app-api-<stage>` service as the
+    // submit path so failures here are caught by the same Datadog zip monitor.
+    initTracer('app-api-' + (process.env.stage ?? 'local'))
 
     const limit = event.limit ?? 100
     const dryRun = event.dryRun ?? false
@@ -218,6 +223,9 @@ export const main: Handler = async (
         response.success = false
         response.errors.push(errorMessage)
         return response
+    } finally {
+        // Flush queued zip.generate spans before the Lambda freezes.
+        await flushTracer()
     }
     // NOTE: Don't call $disconnect() - we use a singleton pattern to reuse connections
     // across warm Lambda invocations. AWS cleans up when the container terminates.
