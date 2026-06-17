@@ -56,8 +56,8 @@ variable "impersonation_volume_threshold" {
 
 variable "zip_failure_threshold" {
   type        = number
-  description = "Alert when more than this many document zip generation failures (contract or rate, submit or batch-regeneration path) occur in 5 minutes. Individual zip failures are often transient and self-heal on regeneration, so the default alerts only on repeated failures. Set to 0 to alert on any single failure."
-  default     = 2
+  description = "Alert when more than this many document zip generation failures (contract or rate, submit or batch-regeneration path) occur in 5 minutes. There is no automatic retry: a failed zip means a submitted contract/rate is left with no document zip until it is manually regenerated, so the default of 0 alerts on every single failure. Raise it only if a known transient source starts generating noise."
+  default     = 0
 }
 
 variable "notify_no_data" {

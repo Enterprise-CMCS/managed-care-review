@@ -152,13 +152,15 @@ resource "datadog_monitor" "zip_generation_failures" {
   query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"Document zip generation failed\\\"\").rollup(\"count\").last(\"5m\") > ${var.zip_failure_threshold}"
 
   message = <<-EOT
-    Document zip generation failures detected in **${var.environment}**.
+    A document zip failed to generate in **${var.environment}**.
 
     Triggered when >${var.zip_failure_threshold} contract or rate `zip.generate` spans fail (status:error) in 5 minutes. These zips are produced when a contract is submitted/withdrawn and by the batch zip-regeneration Lambda.
 
-    - Review the failing `zip.generate` spans in Datadog APM under service `app-api-${var.environment}` (filter on `@zip.type`, `@zip.revision_id`, `@zip.document_type`)
-    - Failures are frequently transient (S3 download/upload timeouts) — confirm whether the affected revisions self-healed or still have no `documentZipPackage`
-    - Persistent failures can be backfilled by invoking the `app-api-${var.environment}-cdk-regenerate-zips` Lambda
+    **There is no automatic retry today** — each failure means a submitted contract or rate is sitting without its document zip until someone regenerates it, so treat every alert as actionable:
+
+    - Find the failing `zip.generate` span in Datadog APM under service `app-api-${var.environment}` and note `@zip.type`, `@zip.revision_id`, and `@zip.document_type`
+    - Regenerate the missing zip by invoking the `app-api-${var.environment}-cdk-regenerate-zips` Lambda with that revision ID
+    - If failures are frequent, capture the underlying error (often S3 download/upload timeouts) to inform the planned worker-queue retry work
 
     ${var.notify_slack}
   EOT
