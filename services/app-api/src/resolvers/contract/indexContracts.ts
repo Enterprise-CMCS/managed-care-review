@@ -21,7 +21,19 @@ import {
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
 import { canRead } from '../../authorization/oauthAuthorization'
-import { getLastUpdatedForDisplay } from '../helpers'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+import { getLastUpdatedForDisplay, latestDate } from '../helpers'
+
+async function getUseStoredActionDatesFlag(
+    launchDarkly: LDService,
+    email: string
+): Promise<boolean> {
+    const flagValue = await launchDarkly.getFeatureFlag({
+        key: email,
+        flag: 'use-stored-contract-action-dates',
+    })
+    return flagValue === true
+}
 
 const parseContracts = (
     contractsWithHistory: ContractOrErrorArrayType,
@@ -82,11 +94,89 @@ const formatContracts = (
     return { totalCount: edges.length, edges }
 }
 
+/**
+ * Formats contracts for CMS/Admin when the use-stored-contract-action-dates
+ * flag is on.
+ *
+ * @param results Parsed contracts to return.
+ * @param statusesToExclude Optional consolidated statuses to remove from the result.
+ */
+const formatContractsWithStoredActionDates = (
+    results: ContractType[],
+    statusesToExclude?: ConsolidatedContractStatus[] | null
+) => {
+    let contracts: ContractType[] = results
+    if (statusesToExclude) {
+        contracts = contracts.filter((contract: ContractType) => {
+            return !statusesToExclude?.includes(contract.consolidatedStatus)
+        })
+    }
+    const edges = contracts.map((contract) => {
+        return {
+            node: {
+                ...contract,
+            },
+        }
+    })
+
+    return { totalCount: edges.length, edges }
+}
+
+/**
+ * Formats contracts for state users sorted by the DB lastActionDate date
+ * when use-stored-contract-action-dates flag is on. State users take account of
+ * the last updatedAt date for a draftRevision
+ *
+ * @param results Parsed contracts scoped to the user's state.
+ * @param updatedWithin Optional age cutoff in seconds, applied against the latest of lastActionDate or draftRevision.updatedAt.
+ */
+const formatStateContractsWithStoredActionDates = (
+    results: ContractType[],
+    updatedWithin?: number | null
+) => {
+    let contracts: ContractType[] = results
+    if (updatedWithin) {
+        const now = new Date()
+        const cutoff = new Date(now.getTime() - updatedWithin * 1000)
+
+        contracts = contracts.filter((contract: ContractType) => {
+            const lastUpdated = latestDate([
+                contract.lastActionDate,
+                contract.draftRevision?.updatedAt,
+            ])
+            if (!lastUpdated) return false
+            return lastUpdated.getTime() > cutoff.getTime()
+        })
+    }
+    const edges = contracts.map((contract) => {
+        return {
+            node: {
+                ...contract,
+            },
+        }
+    })
+
+    return { totalCount: edges.length, edges }
+}
+
+const buildFilterStoredActionDate = (
+    requestedAt: Date,
+    updatedWithin: number
+) => {
+    return new Date(requestedAt.getTime() - updatedWithin * 1000)
+}
+
 export function indexContractsResolver(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): QueryResolvers['indexContracts'] {
     return async (_parent, { input }, context) => {
         const { user } = context
+        // Anchor the updatedWithin window once, as early as possible — before
+        // the LaunchDarkly fetch and the DB query below — so request-processing
+        // latency doesn't push the cutoff later than the user intended. This one
+        // timestamp feeds both the DB filter and the in-memory filter.
+        const requestedAt = new Date()
 
         return withResolverSpan(
             context,
@@ -105,6 +195,12 @@ export function indexContractsResolver(
                     throw createForbiddenError(errMessage)
                 }
 
+                const useStoredActionDates = await getUseStoredActionDatesFlag(
+                    launchDarkly,
+                    context.user.email
+                )
+
+                // State users need draft updates in addition to stored submitted-action freshness.
                 if (isStateUser(user)) {
                     const contractsWithHistory =
                         await store.findAllContractsWithHistoryByState(
@@ -131,21 +227,100 @@ export function indexContractsResolver(
                             },
                         })
                     }
+
+                    const parsedContracts = parseContracts(
+                        contractsWithHistory,
+                        span
+                    )
+
                     logResolverSuccess(
                         context.oauthClient
                             ? 'indexContracts - oauthClient'
                             : 'indexContracts',
                         context
                     )
-                    const parsedContracts = parseContracts(
-                        contractsWithHistory,
-                        span
-                    )
+
+                    // fetching contract will include the lastActionDate already, we just need to take account of
+                    // draftRevision.updatedAt vs lastActionDate for state users.
+                    if (useStoredActionDates) {
+                        return formatStateContractsWithStoredActionDates(
+                            parsedContracts
+                        )
+                    }
+
                     return formatContracts(parsedContracts)
-                } else if (
-                    hasAdminPermissions(user) ||
-                    hasCMSPermissions(user)
-                ) {
+                }
+
+                // CMS/Admin users do not need draft freshness, so the flagged path can
+                // push updatedWithin into the DB using the stored lastActionDate.
+                if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
+                    const cleanedStatuses =
+                        input?.statusesToExclude?.filter(
+                            (s): s is ConsolidatedContractStatus => s != null
+                        ) ?? null
+
+                    if (useStoredActionDates) {
+                        // calculate date to filter lastActionDate in the db using current date and the updatedWithin
+                        const filterLastActionDateAfter = input?.updatedWithin
+                            ? buildFilterStoredActionDate(
+                                  requestedAt,
+                                  input.updatedWithin
+                              )
+                            : undefined
+
+                        // With DB stored lastActionDate, we do not need the legacy code triggered by skipFindingLatest
+                        // param.
+                        const contractsWithHistory =
+                            await store.findAllContractsWithHistoryBySubmitInfo(
+                                false,
+                                true,
+                                filterLastActionDateAfter
+                            )
+
+                        if (contractsWithHistory instanceof Error) {
+                            const errMessage = `Issue finding contracts with history by submit info. Message: ${contractsWithHistory.message}`
+                            logResolverError(
+                                'indexContracts',
+                                errMessage,
+                                context
+                            )
+
+                            if (contractsWithHistory instanceof NotFoundError) {
+                                throw new GraphQLError(errMessage, {
+                                    extensions: {
+                                        code: 'NOT_FOUND',
+                                        cause: 'DB_ERROR',
+                                    },
+                                })
+                            }
+
+                            throw new GraphQLError(errMessage, {
+                                extensions: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'DB_ERROR',
+                                },
+                            })
+                        }
+
+                        const parsedContracts = parseContracts(
+                            contractsWithHistory,
+                            span
+                        )
+
+                        logResolverSuccess(
+                            context.oauthClient
+                                ? 'indexContracts - oauthClient'
+                                : 'indexContracts',
+                            context
+                        )
+
+                        return formatContractsWithStoredActionDates(
+                            parsedContracts,
+                            cleanedStatuses
+                        )
+                    }
+
+                    // Legacy path uses skipFindingLatest to parse extra data in order to calculate the last updated date.
                     const skipFindingLatest = !!input?.updatedWithin
                     const contractsWithHistory =
                         await store.findAllContractsWithHistoryBySubmitInfo(
@@ -184,23 +359,19 @@ export function indexContractsResolver(
                         contractsWithHistory,
                         span
                     )
-                    const cleanedStatuses =
-                        input?.statusesToExclude?.filter(
-                            (s): s is ConsolidatedContractStatus => s != null
-                        ) ?? null
                     return formatContracts(
                         parsedContracts,
                         input?.updatedWithin,
                         cleanedStatuses
                     )
-                } else {
-                    const authInfo = !!context.oauthClient
-                    const errMsg = authInfo
-                        ? `OAuth client not authorized to fetch contract data`
-                        : 'user not authorized to fetch state data'
-                    logResolverError('indexContracts', errMsg, context)
-                    throw createForbiddenError(errMsg)
                 }
+
+                const authInfo = !!context.oauthClient
+                const errMsg = authInfo
+                    ? `OAuth client not authorized to fetch contract data`
+                    : 'user not authorized to fetch state data'
+                logResolverError('indexContracts', errMsg, context)
+                throw createForbiddenError(errMsg)
             }
         )
     }

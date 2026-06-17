@@ -7,26 +7,106 @@ import type {
     RateRevisionType,
     UnlockedContractType,
 } from '../../domain-models'
+import { isStateUser } from '../../domain-models'
 import type { StrippedContractType } from '../../domain-models'
 import path from 'path'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
-import {
-    setErrorAttributesOnActiveSpan,
-    setResolverDetailsOnActiveSpan,
-} from '../attributeHelper'
+import { setResolverDetailsOnActiveSpan } from '../attributeHelper'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import type { Context } from '../../handlers/apollo_gql'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 import { logResolverError } from '../../logger'
 import { resolveInitiallySubmittedAtOverride } from '../shared/overrideHelpers'
+import { latestDate } from '../helpers'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+import { buildContractActionLog } from './contractActionLog'
+
+async function findQuestionsForContract(
+    store: Store,
+    contractID: string,
+    context: Context,
+    resolverName: string
+) {
+    const questionsForContract =
+        await store.findAllQuestionsByContract(contractID)
+
+    if (questionsForContract instanceof Error) {
+        const errMessage = `Issue finding contract message: ${questionsForContract.message}`
+        logResolverError(resolverName, errMessage, context)
+
+        if (questionsForContract instanceof NotFoundError) {
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'NOT_FOUND',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
+
+        throw new GraphQLError(errMessage, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'DB_ERROR',
+            },
+        })
+    }
+
+    return questionsForContract
+}
+
+async function useStoredActionDates(
+    launchDarkly: LDService,
+    context: Context
+): Promise<boolean> {
+    const flagValue = await launchDarkly.getFeatureFlag({
+        key: context.user.email,
+        flag: 'use-stored-contract-action-dates',
+    })
+    return flagValue === true
+}
+
+function getStoredActionDateForDisplay(
+    contract: Pick<
+        ContractType | UnlockedContractType | StrippedContractType,
+        'lastActionDate' | 'draftRevision' | 'updatedAt'
+    >,
+    context: Context
+): Date {
+    // Include draft update dates for state users.
+    if (isStateUser(context.user)) {
+        return (
+            latestDate([
+                contract.lastActionDate,
+                contract.draftRevision?.updatedAt,
+            ]) ?? contract.updatedAt
+        )
+    }
+
+    // CMS/Admin users use lastActionDate, they do no have visibility of draft
+    // changes.
+    if (contract.lastActionDate) {
+        return contract.lastActionDate
+    }
+
+    // Fallback to updatedAt date
+    return contract.updatedAt
+}
 
 // this is probably a little delicate type-wise. But seems worth it not to be duplicating the same resolver in two places.
 function genericContractResolver<
     ParentType extends ContractType | UnlockedContractType,
->(store: Store, applicationEndpoint: string) {
+>(store: Store, applicationEndpoint: string, launchDarkly: LDService) {
     return {
-        lastUpdatedForDisplay(parent: ParentType) {
+        async lastUpdatedForDisplay(
+            parent: ParentType,
+            _args: unknown,
+            context: Context
+        ) {
+            if (await useStoredActionDates(launchDarkly, context)) {
+                return getStoredActionDateForDisplay(parent, context)
+            }
+
             // These dates are mechanical, draft vs. submit vs. unlock, whatever is latest is latest
             const contractUpdated = parent.updatedAt
             const draftUpdated = parent.draftRevision?.updatedAt
@@ -194,6 +274,24 @@ function genericContractResolver<
             return gqlSubs
         },
 
+        contractActionLog: async (
+            parent: ParentType,
+            _args: Record<string, never>,
+            context: Context
+        ) => {
+            const questionsForContract = await findQuestionsForContract(
+                store,
+                parent.id,
+                context,
+                'genericContractResolver.contractActionLog'
+            )
+
+            return buildContractActionLog({
+                ...parent,
+                questions: convertToIndexQuestionsPayload(questionsForContract),
+            })
+        },
+
         questions: async (
             parent: ParentType,
             _args: Record<string, never>,
@@ -212,44 +310,31 @@ function genericContractResolver<
                 span
             )
 
-            const questionsForContract = await store.findAllQuestionsByContract(
-                parent.id
+            const questionsForContract = await findQuestionsForContract(
+                store,
+                parent.id,
+                context,
+                'genericContractResolver.questions'
             )
-
-            if (questionsForContract instanceof Error) {
-                const errMessage = `Issue finding contract message: ${questionsForContract.message}`
-                logResolverError(
-                    'genericContractResolver.questions',
-                    errMessage,
-                    context
-                )
-                setErrorAttributesOnActiveSpan(errMessage, span)
-
-                if (questionsForContract instanceof NotFoundError) {
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'NOT_FOUND',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
-
-                throw new GraphQLError(errMessage, {
-                    extensions: {
-                        code: 'INTERNAL_SERVER_ERROR',
-                        cause: 'DB_ERROR',
-                    },
-                })
-            }
 
             return convertToIndexQuestionsPayload(questionsForContract)
         },
     }
 }
 
-export function contractStrippedResolver(): Resolvers['ContractStripped'] {
+export function contractStrippedResolver(
+    launchDarkly: LDService
+): Resolvers['ContractStripped'] {
     return {
-        lastUpdatedForDisplay(parent: StrippedContractType) {
+        async lastUpdatedForDisplay(
+            parent: StrippedContractType,
+            _args: unknown,
+            context: Context
+        ) {
+            if (await useStoredActionDates(launchDarkly, context)) {
+                return getStoredActionDateForDisplay(parent, context)
+            }
+
             const contractUpdated = parent.updatedAt
             const draftUpdated = parent.draftRevision?.updatedAt
 
@@ -307,14 +392,16 @@ export function contractStrippedResolver(): Resolvers['ContractStripped'] {
 
 export function unlockedContractResolver(
     store: Store,
-    applicationEndpoint: string
+    applicationEndpoint: string,
+    launchDarkly: LDService
 ): Resolvers['UnlockedContract'] {
-    return genericContractResolver(store, applicationEndpoint)
+    return genericContractResolver(store, applicationEndpoint, launchDarkly)
 }
 
 export function contractResolver(
     store: Store,
-    applicationEndpoint: string
+    applicationEndpoint: string,
+    launchDarkly: LDService
 ): Resolvers['Contract'] {
-    return genericContractResolver(store, applicationEndpoint)
+    return genericContractResolver(store, applicationEndpoint, launchDarkly)
 }

@@ -195,7 +195,8 @@ type Store = {
     ) => Promise<ContractOrErrorArrayType | Error>
     findAllContractsWithHistoryBySubmitInfo: (
         useZod?: boolean,
-        skipFindingLatest?: boolean
+        skipFindingLatest?: boolean,
+        filterLastActionDateAfter?: Date
     ) => Promise<ContractOrErrorArrayType | Error>
     findAllContractsStripped: (
         args?: FindAllContractsStrippedType
@@ -384,8 +385,17 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             findContractWithHistory(client, args),
         findAllContractsWithHistoryByState: (args) =>
             findAllContractsWithHistoryByState(client, args),
-        findAllContractsWithHistoryBySubmitInfo: (args) =>
-            findAllContractsWithHistoryBySubmitInfo(client, args),
+        findAllContractsWithHistoryBySubmitInfo: (
+            useZod,
+            skipFindingLatest,
+            filterLastActionDateAfter
+        ) =>
+            findAllContractsWithHistoryBySubmitInfo(
+                client,
+                useZod,
+                skipFindingLatest,
+                filterLastActionDateAfter
+            ),
         findAllContractsStripped: (args) =>
             findAllContractsStripped(client, args),
         findContractRevision: (args) => findContractRevision(client, args),
