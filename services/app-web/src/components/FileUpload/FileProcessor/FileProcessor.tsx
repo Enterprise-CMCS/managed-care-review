@@ -46,7 +46,8 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Duplicate file, please remove
+                    You already added a file with this name and extension.
+                    Remove one.
                 </span>
             </>
         )

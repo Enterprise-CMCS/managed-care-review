@@ -191,7 +191,9 @@ describe('FileUpload component', () => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name)).toHaveLength(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name)).toHaveLength(2)
             expect(
-                screen.queryAllByText('Duplicate file, please remove')
+                screen.queryAllByText(
+                    'You already added a file with this name and extension. Remove one.'
+                )
             ).toHaveLength(1)
         })
     })

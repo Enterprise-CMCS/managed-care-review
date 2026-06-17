@@ -229,7 +229,7 @@ exports[`FileItemList component > renders correctly 1`] = `
           <span
             class="_fileItemBoldMessage_d52d47"
           >
-            Duplicate file, please remove
+            You already added a file with this name and extension. Remove one.
           </span>
           <span>
             testFile4.pdf

@@ -1757,7 +1757,9 @@ describe('EQROContractDetails', () => {
 
             await waitFor(() => {
                 expect(
-                    screen.queryAllByText('Duplicate file, please remove')
+                    screen.queryAllByText(
+                        'You already added a file with this name and extension. Remove one.'
+                    )
                 ).toHaveLength(1)
             })
             await userEvent.click(saveAsDraftButton)
@@ -1953,7 +1955,9 @@ describe('EQROContractDetails', () => {
             await waitFor(() => {
                 expect(backButton).not.toHaveAttribute('aria-disabled')
                 expect(
-                    screen.queryAllByText('Duplicate file, please remove')
+                    screen.queryAllByText(
+                        'You already added a file with this name and extension. Remove one.'
+                    )
                 ).toHaveLength(1)
             })
             await userEvent.click(backButton)

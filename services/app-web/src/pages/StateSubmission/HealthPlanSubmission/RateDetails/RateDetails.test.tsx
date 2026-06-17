@@ -460,6 +460,86 @@ describe('RateDetails', () => {
             })
         })
 
+        it('duplicate supporting documents only show the file input error after a continue attempt', async () => {
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractWithLinkedRateDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                    // clean draft rates for this test.
+                                    draftRates: [],
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                        dsnp: true,
+                    },
+                }
+            )
+            await screen.findByText('Rate Details')
+
+            await userEvent.click(
+                screen.getByLabelText(
+                    'No, this rate certification was not included with any other submissions'
+                )
+            )
+
+            const supportingInput = screen.getByLabelText(
+                'Upload supporting documents'
+            )
+            await userEvent.upload(supportingInput, [TEST_DOC_FILE])
+            await userEvent.upload(supportingInput, [TEST_DOC_FILE])
+
+            // The duplicate is flagged on the file row right away
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText(
+                        'You already added a file with this name and extension. Remove one.'
+                    )
+                ).toHaveLength(1)
+            })
+
+            // ...but the file input's own visual error does not appear until the
+            // user attempts to continue
+            expect(
+                screen.queryAllByText(
+                    'You must remove all documents with error messages before continuing'
+                )
+            ).toHaveLength(0)
+
+            const submitButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            await user.click(submitButton)
+
+            await waitFor(() => {
+                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                // Shown both in the error summary and as the file input's
+                // inline visual error
+                expect(
+                    screen.queryAllByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
+                ).toHaveLength(2)
+            })
+        })
+
         it('validate form when the linked rate question is answered as YES', async () => {
             const { user } = renderWithProviders(
                 <Routes>
