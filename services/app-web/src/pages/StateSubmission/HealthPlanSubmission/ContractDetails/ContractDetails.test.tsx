@@ -1083,6 +1083,75 @@ describe('ContractDetails', () => {
             })
         })
 
+        it('duplicate files only show the file input error after a continue attempt', async () => {
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<ContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractPackageUnlockedWithUnlockedType(),
+                                    id: '15',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('Contract Details')
+
+            const input = screen.getByLabelText('Upload contract')
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.upload(input, [TEST_DOC_FILE])
+            await userEvent.upload(input, []) // clear input and ensure we add same file twice
+            await userEvent.upload(input, [TEST_DOC_FILE])
+
+            // The duplicate is flagged on the file row right away
+            await waitFor(() => {
+                expect(
+                    screen.queryAllByText(
+                        'You already added a file with this name and extension. Remove one.'
+                    )
+                ).toHaveLength(1)
+            })
+
+            // ...but the file input's own visual error does not appear until the
+            // user attempts to continue
+            expect(
+                screen.queryAllByText(
+                    'You must remove all documents with error messages before continuing'
+                )
+            ).toHaveLength(0)
+
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+                // Shown both in the error summary and as the file input's
+                // inline visual error
+                expect(
+                    screen.queryAllByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
+                ).toHaveLength(2)
+            })
+        })
+
         it('disabled with alert after first attempt to continue with invalid files', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
