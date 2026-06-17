@@ -53,16 +53,28 @@ function toSpanAttributes(attributes: ZipSpanAttributes): Attributes {
 
 /**
  * Records a zip-generation failure on its dedicated span using the current OTEL
- * pattern (recordException + ERROR status). The recorded exception message is
- * prefixed with ZIP_FAILURE_MARKER so the Datadog "zip generation failed"
- * monitor can find it, and `zip.outcome` is set so healthy/failed zips are easy
- * to split in APM.
+ * pattern (recordException + ERROR status). The exception is recorded with the
+ * original stack trace preserved (so the trace stays actionable) but its message
+ * is prefixed with ZIP_FAILURE_MARKER, which is also set as the span status
+ * message. Datadog maps the exception event to the searchable `error.message`
+ * tag, so the marker must live there for the monitor to match it reliably.
+ * `zip.outcome` is set so healthy/failed zips are easy to split in APM.
  */
 export function recordZipFailure(span: Span, error: Error | string): void {
     const err = error instanceof Error ? error : new Error(error)
+    const message = `${ZIP_FAILURE_MARKER}: ${err.message}`
+
+    // Re-wrap so the marker is in the message, but carry over the original
+    // stack/name so we don't lose where the failure actually came from.
+    const markedError = new Error(message)
+    markedError.name = err.name
+    if (err.stack) {
+        markedError.stack = err.stack
+    }
+
     span.setAttribute('zip.outcome', 'failure')
-    span.recordException(new Error(`${ZIP_FAILURE_MARKER}: ${err.message}`))
-    span.setStatus({ code: SpanStatusCode.ERROR, message: err.message })
+    span.recordException(markedError)
+    span.setStatus({ code: SpanStatusCode.ERROR, message })
 }
 
 /**

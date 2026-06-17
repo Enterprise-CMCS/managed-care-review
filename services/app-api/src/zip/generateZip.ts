@@ -417,8 +417,8 @@ export function documentZipService(
 
                     // The dedicated zip.generate span already recorded this
                     // failure (see generateContractDocumentsZip). We just log and
-                    // propagate; submitContract marks the resolver span via
-                    // recordResolverError.
+                    // propagate; the calling resolver marks its own resolver span
+                    // via recordResolverError.
                     logError(
                         'createContractZips - contract documents zip generation failed',
                         errorWithContext
@@ -479,8 +479,8 @@ export function documentZipService(
 
                         // The dedicated zip.generate span already recorded this
                         // failure (see generateRateDocumentsZip). We just log and
-                        // collect; submitContract marks the resolver span via
-                        // recordResolverError.
+                        // collect; the calling resolver marks its own resolver
+                        // span via recordResolverError.
                         logError(
                             'createRateZips - rate documents zip generation failed',
                             errorWithContext
