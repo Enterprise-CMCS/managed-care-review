@@ -259,6 +259,8 @@ function rateWithoutDraftContractsToDomainModel(
         id: rate.id,
         createdAt: rate.createdAt,
         updatedAt: rate.updatedAt,
+        lastActionDate:
+            (rate as { lastActionDate?: Date | null }).lastActionDate ?? null,
         status,
         reviewStatus,
         consolidatedStatus,
@@ -433,6 +435,8 @@ function strippedRateWithoutDraftContractsToDomainModel(
         id: rate.id,
         createdAt: rate.createdAt,
         updatedAt: rate.updatedAt,
+        lastActionDate:
+            (rate as { lastActionDate?: Date | null }).lastActionDate ?? null,
         initiallySubmittedAt,
         status,
         reviewStatus,
