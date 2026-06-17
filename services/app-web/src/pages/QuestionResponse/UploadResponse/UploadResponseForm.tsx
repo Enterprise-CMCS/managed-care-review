@@ -14,7 +14,10 @@ import {
     GenericApiErrorBanner,
     PageActionsContainer,
 } from '../../../components'
-import { useFileUpload } from '../../../hooks/useFileUpload'
+import {
+    useFileUpload,
+    DOCUMENTS_WITH_ERRORS_MESSAGE,
+} from '../../../hooks/useFileUpload'
 import {
     ACCEPTED_SUBMISSION_FILE_TYPES,
     FileItemT,
@@ -63,6 +66,11 @@ const UploadResponseForm = ({
     const fileUploadErrorFocusKey = hasNoFiles
         ? uploadComponentID
         : '#file-items-list'
+    // Document errors (e.g. duplicate files) are already surfaced inline on the
+    // file row and the file input, so we keep them out of the error summary
+    // banner. Other file upload errors (missing or still-uploading) still show.
+    const showFileUploadErrorInSummary =
+        showFileUploadError && fileUploadError !== DOCUMENTS_WITH_ERRORS_MESSAGE
 
     const cancelLink =
         type === 'contract'
@@ -123,7 +131,7 @@ const UploadResponseForm = ({
                 {shouldValidate && (
                     <ErrorSummary
                         errors={
-                            showFileUploadError && fileUploadError
+                            showFileUploadErrorInSummary && fileUploadError
                                 ? {
                                       [fileUploadErrorFocusKey]:
                                           fileUploadError,
