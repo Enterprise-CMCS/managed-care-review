@@ -3,7 +3,13 @@ import { hasCMSPermissions, isValidCmsDivison } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError, type Store } from '../../postgres'
+import {
+    NotFoundError,
+    OPEN_QUESTION_ROUND_ERROR_MESSAGE,
+    UserInputPostgresError,
+    handleUserInputPostgresError,
+    type Store,
+} from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/submissions'
@@ -90,6 +96,34 @@ export function createRateQuestionResolver(
                     throw createUserInputError(errMessage)
                 }
 
+                // Do not allow a new question to be created while a previous
+                // question round is still open. A round is open when any
+                // existing question has not yet received a response. Mirrors
+                // the allQuestionsAnswered logic in app-web's
+                // questionResponseHelpers.ts.
+                const existingQuestions = await store.findAllQuestionsByRate(
+                    rate.id
+                )
+                if (existingQuestions instanceof Error) {
+                    const errMessage = `Issue finding all questions associated with the rate: ${rate.id}`
+                    logResolverError('createRateQuestion', errMessage, context)
+                    throw new Error(errMessage)
+                }
+
+                const hasOpenQuestionRound = existingQuestions.some(
+                    (question) => question.responses.length === 0
+                )
+                if (hasOpenQuestionRound) {
+                    logResolverError(
+                        'createRateQuestion',
+                        OPEN_QUESTION_ROUND_ERROR_MESSAGE,
+                        context
+                    )
+                    throw createUserInputError(
+                        OPEN_QUESTION_ROUND_ERROR_MESSAGE
+                    )
+                }
+
                 // Parse and validate document s3URLs
                 const docs = parseAndValidateDocuments(
                     input.documents.map((d) => ({
@@ -109,6 +143,18 @@ export function createRateQuestionResolver(
                 )
 
                 if (questionResult instanceof Error) {
+                    // The store re-checks for an open question round inside a
+                    // row-locked transaction; a request that loses a concurrent
+                    // race is rejected here with a BAD_USER_INPUT error.
+                    if (questionResult instanceof UserInputPostgresError) {
+                        logResolverError(
+                            'createRateQuestion',
+                            questionResult.message,
+                            context
+                        )
+                        throw handleUserInputPostgresError(questionResult)
+                    }
+
                     const errMessage = `Issue creating question for rate. Message: ${questionResult.message}`
                     logResolverError('createRateQuestion', errMessage, context)
                     throw new Error(errMessage)

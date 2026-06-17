@@ -7,9 +7,12 @@ import type {
 import type { ExtendedPrismaClient } from '../prismaClient'
 import {
     contractQuestionPrismaToDomainType,
+    hasOpenQuestionRound,
+    OPEN_QUESTION_ROUND_ERROR_MESSAGE,
     questionInclude,
 } from './questionHelpers'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
+import { UserInputPostgresError } from '../postgresErrors'
 
 export async function insertContractQuestion(
     client: ExtendedPrismaClient,
@@ -24,29 +27,45 @@ export async function insertContractQuestion(
         s3Key: document.s3Key,
     }))
 
-    try {
-        const result = await client.contractQuestion.create({
-            data: {
-                contract: {
-                    connect: {
-                        id: questionInput.contractID,
-                    },
-                },
-                addedBy: {
-                    connect: {
-                        id: user.id,
-                    },
-                },
-                documents: {
-                    create: documents,
-                },
-                division: user.divisionAssignment as DivisionType,
-            },
-            include: questionInclude,
-        })
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'insertContractQuestion',
+        table: 'ContractTable',
+        id: questionInput.contractID,
+        transactionOptions: { timeout: 20000 },
+        transaction: async (tx) => {
+            const existingQuestions = await tx.contractQuestion.findMany({
+                where: { contractID: questionInput.contractID },
+                include: questionInclude,
+            })
 
-        return contractQuestionPrismaToDomainType(result)
-    } catch (e) {
-        return parseErrorToError(e)
-    }
+            if (hasOpenQuestionRound(existingQuestions)) {
+                return new UserInputPostgresError(
+                    OPEN_QUESTION_ROUND_ERROR_MESSAGE
+                )
+            }
+
+            const result = await tx.contractQuestion.create({
+                data: {
+                    contract: {
+                        connect: {
+                            id: questionInput.contractID,
+                        },
+                    },
+                    addedBy: {
+                        connect: {
+                            id: user.id,
+                        },
+                    },
+                    documents: {
+                        create: documents,
+                    },
+                    division: user.divisionAssignment as DivisionType,
+                },
+                include: questionInclude,
+            })
+
+            return contractQuestionPrismaToDomainType(result)
+        },
+    })
 }

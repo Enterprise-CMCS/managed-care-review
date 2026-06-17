@@ -1,6 +1,7 @@
 import {
     constructTestPostgresServer,
     createTestQuestion,
+    createTestQuestionResponse,
 } from '../../testHelpers/gqlHelpers'
 import {
     testCMSUser,
@@ -45,6 +46,9 @@ describe(`questionResolver`, () => {
                 ],
             }
         )
+
+        // Answer the first question to close the round before asking the next.
+        await createTestQuestionResponse(stateServer, createdDMCPQuestion.id)
 
         const createdDMCPQuestion2 = await createTestQuestion(
             dmcpCMSServer,

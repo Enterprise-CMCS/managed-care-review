@@ -12,6 +12,13 @@ import type { Prisma, QuestionActionType } from '../../generated/client'
 
 const DELETE_ACTIONS: QuestionActionType[] = ['DELETE', 'CASCADE_DELETE']
 
+// Shared message used when a new question is created while a previous question
+// round is still open (any existing question has not yet been answered). Kept
+// in one place so the resolver early-check and the transactional store check
+// stay in sync.
+const OPEN_QUESTION_ROUND_ERROR_MESSAGE =
+    'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
+
 // Works for any Q&A parent — their action rows all share QuestionActionType.
 // This filters out soft deleted questions, may not want this if we want to
 // expose soft deleted questions for future UI or API consumer usage
@@ -134,6 +141,18 @@ const excludeSoftDeletedQuestionData = <
     return result
 }
 
+// True when any non-deleted question in the list has not yet received a
+// response, i.e. a question round is still open. Mirrors the
+// allQuestionsAnswered logic in app-web's questionResponseHelpers.ts.
+const hasOpenQuestionRound = <
+    P extends PrismaQuestionType | PrismaRateQuestionType,
+>(
+    prismaQuestions: P[]
+): boolean =>
+    excludeSoftDeletedQuestionData(prismaQuestions).some(
+        (question) => question.responses.length === 0
+    )
+
 const contractQuestionPrismaToDomainType = (
     prismaQuestion: PrismaQuestionType
 ): ContractQuestionType => commonQuestionPrismaToDomainType(prismaQuestion)
@@ -190,7 +209,9 @@ const convertToIndexRateQuestionsPayload = (
 
 export {
     DELETE_ACTIONS,
+    OPEN_QUESTION_ROUND_ERROR_MESSAGE,
     isDeleted,
+    hasOpenQuestionRound,
     questionInclude,
     excludeSoftDeletedQuestionData,
     contractQuestionPrismaToDomainType,
