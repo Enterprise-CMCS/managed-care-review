@@ -61,9 +61,12 @@ model HealthPlanRevisionTable {
 }
 
 model ContractTable {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id                     String    @id @default(uuid())
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @default(now()) @updatedAt
+  // Last persisted contract action that should affect display freshness.
+  // The first value is set on initial submission.
+  lastActionDate          DateTime?
 
   mccrsID                String?
   stateCode              String
@@ -80,6 +83,8 @@ model ContractTable {
   sharedRateRevisions RateRevisionTable[]     @relation(name: "SharedRateRevisions")
 
   contractOverrides ContractOverrides[]
+
+  @@index([lastActionDate])
 }
 
 // Record of contract data overrides
@@ -125,9 +130,12 @@ model ContractRevisionOverrides {
 }
 
 model RateTable {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
+  id                 String    @id @default(uuid())
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @default(now()) @updatedAt
+  // Last persisted rate action that should affect display freshness.
+  // The first value is set on initial submission.
+  lastActionDate     DateTime?
 
   stateCode   String
   state       State  @relation(fields: [stateCode], references: [stateCode])
@@ -142,6 +150,8 @@ model RateTable {
   revisions RateRevisionTable[]
 
   rateOverrides RateOverrides[]
+
+  @@index([lastActionDate])
 }
 
 // Record of rate meta data overrides
