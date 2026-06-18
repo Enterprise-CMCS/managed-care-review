@@ -72,6 +72,7 @@ type AdminUploadResponseFormProps = {
     question?: QuestionType
     stateUsers: StateUser[]
     loggedInUser?: User
+    adminOnlyQaRounds: boolean
 }
 
 // Owns the admin response form: the Formik state, the document upload, and the
@@ -86,6 +87,7 @@ const AdminUploadResponseForm = ({
     question,
     stateUsers,
     loggedInUser,
+    adminOnlyQaRounds,
 }: AdminUploadResponseFormProps) => {
     const navigate = useNavigate()
     const { handleUploadFile, handleScanFile } = useS3()
@@ -112,7 +114,9 @@ const AdminUploadResponseForm = ({
     const questionRound = question?.round ?? 0
 
     const userOptions: AdminSelectOption[] = [
-        { label: 'Myself (admin)', value: '' },
+        ...(adminOnlyQaRounds
+            ? [{ label: 'Myself (admin)', value: 'myself' }]
+            : []),
         ...stateUsers.map((u) => ({ label: u.email, value: u.id })),
     ]
 
@@ -189,7 +193,11 @@ const AdminUploadResponseForm = ({
                 const selectedStateUser = stateUsers.find(
                     (u) => u.id === values.addedByUserID
                 )
-                const displayedUser = selectedStateUser ?? loggedInUser
+                const myselfSelected =
+                    adminOnlyQaRounds && values.addedByUserID === 'myself'
+                const displayedUser =
+                    selectedStateUser ??
+                    (myselfSelected ? loggedInUser : undefined)
                 const displayedUserState =
                     displayedUser && 'state' in displayedUser
                         ? displayedUser.state.code
@@ -197,7 +205,7 @@ const AdminUploadResponseForm = ({
 
                 const selectedUserOption =
                     userOptions.find((o) => o.value === values.addedByUserID) ??
-                    userOptions[0]
+                    null
 
                 return (
                     <UswdsForm
@@ -295,6 +303,7 @@ const AdminUploadResponseForm = ({
                                     className={selectStyles.multiSelect}
                                     classNamePrefix="select"
                                     isSearchable
+                                    isClearable={!adminOnlyQaRounds}
                                     options={userOptions}
                                     value={selectedUserOption}
                                     onChange={(newValue) =>
@@ -305,34 +314,45 @@ const AdminUploadResponseForm = ({
                                     }
                                 />
                                 {displayedUser && (
-                                    <address
-                                        className="margin-top-1"
+                                    <div
+                                        className={styles.selectedUserSummary}
                                         data-testid="selected-response-user-info"
                                     >
-                                        {displayedUser.givenName}{' '}
-                                        {displayedUser.familyName}
-                                        <br />
-                                        {userRoleDisplayNames[
-                                            displayedUser.role
-                                        ] ?? displayedUser.role}
-                                        <br />
-                                        <LinkWithLogging
-                                            href={`mailto:${displayedUser.email}`}
-                                            target="_blank"
-                                            variant="external"
-                                            rel="noreferrer"
-                                            event_name="contact_click"
-                                            contact_method="email"
+                                        <div
+                                            className={styles.selectedUserLabel}
                                         >
-                                            {displayedUser.email}
-                                        </LinkWithLogging>
-                                        {displayedUserState && (
-                                            <>
-                                                <br />
-                                                {displayedUserState}
-                                            </>
-                                        )}
-                                    </address>
+                                            Selected user
+                                        </div>
+                                        <address
+                                            className={
+                                                styles.selectedUserAddress
+                                            }
+                                        >
+                                            {displayedUser.givenName}{' '}
+                                            {displayedUser.familyName}
+                                            <br />
+                                            {userRoleDisplayNames[
+                                                displayedUser.role
+                                            ] ?? displayedUser.role}
+                                            <br />
+                                            <LinkWithLogging
+                                                href={`mailto:${displayedUser.email}`}
+                                                target="_blank"
+                                                variant="external"
+                                                rel="noreferrer"
+                                                event_name="contact_click"
+                                                contact_method="email"
+                                            >
+                                                {displayedUser.email}
+                                            </LinkWithLogging>
+                                            {displayedUserState && (
+                                                <>
+                                                    <br />
+                                                    {displayedUserState}
+                                                </>
+                                            )}
+                                        </address>
+                                    </div>
                                 )}
                             </FormGroup>
 

@@ -71,6 +71,7 @@ type AdminUploadQuestionsFormProps = {
     contract: ContractWithQuestions
     cmsUsers: CmsUserNode[]
     loggedInUser?: User
+    adminOnlyQaRounds: boolean
 }
 
 // Owns the admin question form: the Formik state, the document upload, and the
@@ -84,6 +85,7 @@ const AdminUploadQuestionsForm = ({
     contract,
     cmsUsers,
     loggedInUser,
+    adminOnlyQaRounds,
 }: AdminUploadQuestionsFormProps) => {
     const navigate = useNavigate()
     const { handleUploadFile, handleScanFile } = useS3()
@@ -104,7 +106,9 @@ const AdminUploadQuestionsForm = ({
     const todayISO = new Date().toISOString().slice(0, 10)
 
     const userOptions: AdminSelectOption[] = [
-        { label: 'Myself (admin)', value: '' },
+        ...(adminOnlyQaRounds
+            ? [{ label: 'Myself (admin)', value: 'myself' }]
+            : []),
         ...cmsUsers.map((user) => ({
             label: user.email,
             value: user.id,
@@ -207,7 +211,12 @@ const AdminUploadQuestionsForm = ({
                 )
 
                 // Who the question is attributed to — the CMS user, or the admin.
-                const displayedUser = selectedCmsUser ?? loggedInUser
+                // Show the admin only when they explicitly pick "Myself".
+                const myselfSelected =
+                    adminOnlyQaRounds && values.addedByUserID === 'myself'
+                const displayedUser =
+                    selectedCmsUser ??
+                    (myselfSelected ? loggedInUser : undefined)
                 const displayedUserDivision =
                     displayedUser && 'divisionAssignment' in displayedUser
                         ? displayedUser.divisionAssignment
@@ -215,7 +224,7 @@ const AdminUploadQuestionsForm = ({
 
                 const selectedCmsUserOption =
                     userOptions.find((o) => o.value === values.addedByUserID) ??
-                    userOptions[0]
+                    null
                 const selectedDivisionOption =
                     divisionOptions.find((o) => o.value === values.division) ??
                     null
@@ -299,6 +308,7 @@ const AdminUploadQuestionsForm = ({
                                     className={selectStyles.multiSelect}
                                     classNamePrefix="select"
                                     isSearchable
+                                    isClearable={!adminOnlyQaRounds}
                                     options={userOptions}
                                     value={selectedCmsUserOption}
                                     onChange={(newValue) =>
@@ -309,30 +319,42 @@ const AdminUploadQuestionsForm = ({
                                     }
                                 />
                                 {displayedUser && (
-                                    <address
-                                        className="margin-top-1"
+                                    <div
+                                        className={styles.selectedUserSummary}
                                         data-testid="selected-user-info"
                                     >
-                                        {displayedUser.givenName}{' '}
-                                        {displayedUser.familyName}
-                                        <br />
-                                        {userRoleDisplayNames[
-                                            displayedUser.role
-                                        ] ?? displayedUser.role}
-                                        <br />
-                                        <LinkWithLogging
-                                            href={`mailto:${displayedUser.email}`}
-                                            target="_blank"
-                                            variant="external"
-                                            rel="noreferrer"
-                                            event_name="contact_click"
-                                            contact_method="email"
+                                        <div
+                                            className={styles.selectedUserLabel}
                                         >
-                                            {displayedUser.email}
-                                        </LinkWithLogging>
-                                        <br />
-                                        {displayedUserDivision ?? 'No division'}
-                                    </address>
+                                            Selected user
+                                        </div>
+                                        <address
+                                            className={
+                                                styles.selectedUserAddress
+                                            }
+                                        >
+                                            {displayedUser.givenName}{' '}
+                                            {displayedUser.familyName}
+                                            <br />
+                                            {userRoleDisplayNames[
+                                                displayedUser.role
+                                            ] ?? displayedUser.role}
+                                            <br />
+                                            <LinkWithLogging
+                                                href={`mailto:${displayedUser.email}`}
+                                                target="_blank"
+                                                variant="external"
+                                                rel="noreferrer"
+                                                event_name="contact_click"
+                                                contact_method="email"
+                                            >
+                                                {displayedUser.email}
+                                            </LinkWithLogging>
+                                            <br />
+                                            {displayedUserDivision ??
+                                                'No division'}
+                                        </address>
+                                    </div>
                                 )}
                             </FormGroup>
 
@@ -371,6 +393,7 @@ const AdminUploadQuestionsForm = ({
                                         className={selectStyles.multiSelect}
                                         classNamePrefix="select"
                                         placeholder="- Select division -"
+                                        isClearable
                                         options={divisionOptions}
                                         value={selectedDivisionOption}
                                         onChange={(newValue) =>

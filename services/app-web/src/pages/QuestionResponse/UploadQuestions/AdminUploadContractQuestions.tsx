@@ -14,6 +14,8 @@ import {
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
 import { useAuth } from '../../../contexts/AuthContext'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 import { Breadcrumbs } from '../../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -36,6 +38,11 @@ export const AdminUploadContractQuestions = () => {
     }>()
     const navigate = useNavigate()
     const { loggedInUser } = useAuth()
+    const ldClient = useLDClient()
+    const adminOnlyQaRounds: boolean = ldClient?.variation(
+        featureFlags.ADMIN_ONLY_QA_ROUNDS.flag,
+        featureFlags.ADMIN_ONLY_QA_ROUNDS.defaultValue
+    )
 
     const {
         data: fetchContractData,
@@ -113,7 +120,7 @@ export const AdminUploadContractQuestions = () => {
             documents: questionDocs,
         }
 
-        if (data.addedByUserID) {
+        if (data.addedByUserID && data.addedByUserID !== 'myself') {
             input.addedByUserID = data.addedByUserID
         }
         if (data.division) {
@@ -159,6 +166,7 @@ export const AdminUploadContractQuestions = () => {
                 contract={contract}
                 cmsUsers={cmsUsers}
                 loggedInUser={loggedInUser}
+                adminOnlyQaRounds={adminOnlyQaRounds}
             />
         </div>
     )

@@ -28,7 +28,9 @@ const cmsUserNoDivision = mockValidCMSUser({
     divisionAssignment: null,
 })
 
-const renderAdminUploadQuestions = () => {
+const renderAdminUploadQuestions = (options?: {
+    featureFlags?: Record<string, boolean>
+}) => {
     const contract = mockContractPackageSubmittedWithQuestions()
     return renderWithProviders(
         <Routes>
@@ -64,35 +66,35 @@ const renderAdminUploadQuestions = () => {
             routerProvider: {
                 route: `/submissions/health-plan/15/question-and-answers/admin-upload-questions`,
             },
+            featureFlags: options?.featureFlags,
         }
     )
 }
 
 describe('AdminUploadContractQuestions', () => {
-    it('offers an optional "ask on behalf of" CMS user picker, defaulting to the admin', async () => {
+    it('offers an "ask on behalf of" picker with "Myself (admin)" when the flag is on, but does not pre-select', async () => {
         const user = userEvent.setup()
-        renderAdminUploadQuestions()
+        renderAdminUploadQuestions({
+            featureFlags: { 'admin-only-qa-rounds': true },
+        })
 
-        // The react-select control shows the default "Myself (admin)" selection
-        expect(await screen.findByText('Myself (admin)')).toBeInTheDocument()
-
-        // By default the admin picks a division manually
-        expect(
-            screen.getByRole('combobox', { name: 'Division' })
-        ).toBeInTheDocument()
-
-        // CMS users from indexUsers appear as options once the menu opens
-        const onBehalfOf = screen.getByRole('combobox', {
+        // Nothing is pre-selected; the admin info section is not shown
+        const onBehalfOf = await screen.findByRole('combobox', {
             name: 'Ask on behalf of',
         })
+        expect(
+            screen.queryByTestId('selected-user-info')
+        ).not.toBeInTheDocument()
+
+        // Opening the menu shows "Myself (admin)" and CMS users
         await user.click(onBehalfOf)
-        // CMS users are listed by email
+        expect(await screen.findByText('Myself (admin)')).toBeInTheDocument()
         expect(
             await screen.findByText(/anna\.analyst@example\.com/)
         ).toBeInTheDocument()
     })
 
-    it('locks the division to the selected CMS user’s division', async () => {
+    it("locks the division to the selected CMS user's division", async () => {
         const user = userEvent.setup()
         renderAdminUploadQuestions()
 
@@ -157,8 +159,17 @@ describe('AdminUploadContractQuestions', () => {
         expect(screen.getByText(/Cannot be a future date/)).toBeInTheDocument()
     })
 
-    it('displays the admin’s own info by default', async () => {
-        renderAdminUploadQuestions()
+    it('displays the admin\'s own info after explicitly selecting "Myself (admin)"', async () => {
+        const user = userEvent.setup()
+        renderAdminUploadQuestions({
+            featureFlags: { 'admin-only-qa-rounds': true },
+        })
+
+        const onBehalfOf = await screen.findByRole('combobox', {
+            name: 'Ask on behalf of',
+        })
+        await user.click(onBehalfOf)
+        await user.click(await screen.findByText('Myself (admin)'))
 
         const info = await screen.findByTestId('selected-user-info')
         expect(info).toHaveTextContent('Adam Admin')
@@ -166,7 +177,7 @@ describe('AdminUploadContractQuestions', () => {
         expect(info).toHaveTextContent('Admin')
     })
 
-    it('displays the selected CMS user’s details below the dropdown', async () => {
+    it("displays the selected CMS user's details below the dropdown", async () => {
         const user = userEvent.setup()
         renderAdminUploadQuestions()
 
