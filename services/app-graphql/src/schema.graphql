@@ -915,17 +915,12 @@ input AdminCreateContractQuestionInput {
     "The ID of the contract for which to create a question"
     contractID: ID!
     """
-    The CMS division to attribute the question to. Required when addedByUserID is
-    omitted; ignored when addedByUserID is provided (the division is derived from
-    that CMS user instead).
+    The CMS division to attribute the question to. Required when the selected CMS
+    user has no division assignment; ignored when the CMS user has one.
     """
     division: Division
-    """
-    Optional CMS user to attribute the question to (asking on their behalf). When
-    provided, the question's addedBy and division are taken from this user. When
-    omitted, the question is attributed to the admin and uses the division above.
-    """
-    addedByUserID: ID
+    "The CMS user to attribute the question to (asking on their behalf)."
+    addedByUserID: ID!
     """
     Optional date to record as the question's created date (for backfilling Q&A
     that happened earlier). Cannot be in the future. Defaults to now when omitted.
@@ -1009,11 +1004,8 @@ Input for an admin recording a response on an existing contract question.
 input AdminCreateContractQuestionResponseInput {
     "The ID of the question for which to create a response"
     questionID: ID!
-    """
-    Optional state user to attribute the response to (recording on their behalf).
-    When omitted, the response is attributed to the admin.
-    """
-    addedByUserID: ID
+    "The state user to attribute the response to (recording on their behalf)."
+    addedByUserID: ID!
     """
     Optional date to record as the response's created date. Must be on or after
     the question's created date and not in the future. Defaults to now when omitted.
@@ -1242,17 +1234,15 @@ union CMSUsersUnion = CMSUser | CMSApproverUser
 
 union OAuthUser = CMSUser | CMSApproverUser | AdminUser
 
-"""
-Possible authors of a Q&A question: a CMS reviewer/approver, or an AdminUser
-recording a round on their behalf.
-"""
-union QuestionAuthor = CMSUser | CMSApproverUser | AdminUser
+# TODO: Restore QuestionAuthor union when external API clients support inline
+# fragments on ContractQuestion/RateQuestion.addedBy. Revert addedBy back to
+# QuestionAuthor! and restore the fragment and resolver.
+# union QuestionAuthor = CMSUser | CMSApproverUser | AdminUser
 
-"""
-Possible authors of a Q&A response: a state user, or an AdminUser recording a
-round on their behalf.
-"""
-union ResponseAuthor = StateUser | AdminUser
+# TODO: Restore ResponseAuthor union when external API clients support inline
+# fragments on QuestionResponse.addedBy. Revert addedBy on QuestionResponse back
+# to ResponseAuthor! and restore the fragment and resolver.
+# union ResponseAuthor = StateUser | AdminUser
 
 "AdminUser is a user that works on the MC Review app itself"
 type AdminUser {
@@ -1498,7 +1488,7 @@ type ContractQuestion {
     id: ID!
     contractID: ID!
     createdAt: DateTime!
-    addedBy: QuestionAuthor!
+    addedBy: CMSUsersUnion!
     documents: [Document!]!
     division: Division!
     round: Int!
@@ -1539,7 +1529,7 @@ type RateQuestion {
     id: ID!
     rateID: ID!
     createdAt: DateTime!
-    addedBy: QuestionAuthor!
+    addedBy: CMSUsersUnion!
     documents: [Document!]!
     division: Division!
     round: Int!
@@ -1558,7 +1548,7 @@ type QuestionResponse {
     id: ID!
     questionID: ID!
     createdAt: DateTime!
-    addedBy: ResponseAuthor!
+    addedBy: StateUser!
     documents: [Document!]!
     #    noteText: String
 }

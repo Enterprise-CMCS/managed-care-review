@@ -80,6 +80,22 @@
     background: none;
     margin: uswds.units(2) auto;
 }
+.selectedUserSummary {
+    margin-bottom: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.selectedUserLabel {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+.selectedUserAddress {
+    font-style: normal;
+}
+
 .formContainer {
     > [class^='usa-fieldset'] {
         padding: uswds.units(4);

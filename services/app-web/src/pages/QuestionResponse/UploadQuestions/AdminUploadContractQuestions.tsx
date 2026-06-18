@@ -13,7 +13,6 @@ import {
     IndexUsersDocument,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
-import { useAuth } from '../../../contexts/AuthContext'
 import { Breadcrumbs } from '../../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -35,7 +34,6 @@ export const AdminUploadContractQuestions = () => {
         contractSubmissionType: ContractSubmissionType
     }>()
     const navigate = useNavigate()
-    const { loggedInUser } = useAuth()
 
     const {
         data: fetchContractData,
@@ -109,13 +107,11 @@ export const AdminUploadContractQuestions = () => {
 
         const input: AdminCreateContractQuestionInput = {
             contractID: id as string,
+            addedByUserID: data.addedByUserID,
             reason: data.reason.trim(),
             documents: questionDocs,
         }
 
-        if (data.addedByUserID) {
-            input.addedByUserID = data.addedByUserID
-        }
         if (data.division) {
             input.division = data.division as Division
         }
@@ -158,7 +154,6 @@ export const AdminUploadContractQuestions = () => {
                 apiError={Boolean(apiError)}
                 contract={contract}
                 cmsUsers={cmsUsers}
-                loggedInUser={loggedInUser}
             />
         </div>
     )

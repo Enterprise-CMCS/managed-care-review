@@ -65,7 +65,7 @@ describe('adminCreateContractQuestionResponse', () => {
         await createDBUsersWithFullData([adminUser, cmsUser, stateUser])
     })
 
-    it('records an admin response on a CMS-authored question, attributed to the admin', async () => {
+    it('records an admin response on a CMS-authored question, attributed to the state user', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: { user: cmsUser },
@@ -82,6 +82,7 @@ describe('adminCreateContractQuestionResponse', () => {
             adminServer,
             {
                 questionID: cmsQuestion.id,
+                addedByUserID: stateUser.id,
                 reason: 'Recording prior response',
                 documents: responseDocuments,
             }
@@ -92,8 +93,8 @@ describe('adminCreateContractQuestionResponse', () => {
         expect(question.responses[0]).toEqual(
             expect.objectContaining({
                 addedBy: expect.objectContaining({
-                    id: adminUser.id,
-                    role: 'ADMIN_USER',
+                    id: stateUser.id,
+                    role: 'STATE_USER',
                 }),
                 documents: expect.arrayContaining([
                     expect.objectContaining({ name: 'Admin Response' }),
@@ -116,6 +117,7 @@ describe('adminCreateContractQuestionResponse', () => {
             variables: {
                 input: {
                     questionID: cmsQuestion.id,
+                    addedByUserID: stateUser.id,
                     reason: 'Recording prior response',
                     documents: responseDocuments,
                 },
@@ -146,6 +148,7 @@ describe('adminCreateContractQuestionResponse', () => {
             variables: {
                 input: {
                     questionID: cmsQuestion.id,
+                    addedByUserID: stateUser.id,
                     reason: 'Recording prior response',
                     documents: [],
                 },
@@ -176,6 +179,7 @@ describe('adminCreateContractQuestionResponse', () => {
             adminServer,
             {
                 questionID: cmsQuestion.id,
+                addedByUserID: stateUser.id,
                 reason: 'Recording prior response',
                 documents: responseDocuments,
             }
@@ -183,7 +187,7 @@ describe('adminCreateContractQuestionResponse', () => {
 
         expect(question.responses).toHaveLength(1)
         expect(question.responses[0].addedBy).toEqual(
-            expect.objectContaining({ id: adminUser.id, role: 'ADMIN_USER' })
+            expect.objectContaining({ id: stateUser.id, role: 'STATE_USER' })
         )
     })
 
@@ -209,6 +213,7 @@ describe('adminCreateContractQuestionResponse', () => {
             variables: {
                 input: {
                     questionID: cmsQuestion.id,
+                    addedByUserID: stateUser.id,
                     reason: 'Recording prior response',
                     documents: responseDocuments,
                 },
@@ -232,6 +237,7 @@ describe('adminCreateContractQuestionResponse', () => {
             variables: {
                 input: {
                     questionID: '550e8400-e29b-41d4-a716-446655440000',
+                    addedByUserID: stateUser.id,
                     reason: 'Recording prior response',
                     documents: responseDocuments,
                 },
@@ -320,6 +326,7 @@ describe('adminCreateContractQuestionResponse', () => {
             variables: {
                 input: {
                     questionID: cmsQuestion.id,
+                    addedByUserID: stateUser.id,
                     reason: '   ',
                     documents: responseDocuments,
                 },
@@ -348,6 +355,7 @@ describe('adminCreateContractQuestionResponse', () => {
             variables: {
                 input: {
                     questionID: cmsQuestion.id,
+                    addedByUserID: stateUser.id,
                     reason: 'Recording prior response',
                     createdAt: '2999-01-01',
                     documents: responseDocuments,
@@ -380,6 +388,7 @@ describe('adminCreateContractQuestionResponse', () => {
             variables: {
                 input: {
                     questionID: cmsQuestion.id,
+                    addedByUserID: stateUser.id,
                     reason: 'Recording prior response',
                     createdAt: '2020-01-01',
                     documents: responseDocuments,
@@ -449,6 +458,7 @@ describe('adminCreateContractQuestionResponse', () => {
 
         await adminCreateTestContractQuestionResponse(adminServer, {
             questionID: cmsQuestion.id,
+            addedByUserID: stateUser.id,
             reason: 'Recording prior response',
             documents: responseDocuments,
         })

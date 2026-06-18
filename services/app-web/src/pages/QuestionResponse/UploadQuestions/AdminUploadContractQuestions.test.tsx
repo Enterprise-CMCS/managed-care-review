@@ -69,30 +69,27 @@ const renderAdminUploadQuestions = () => {
 }
 
 describe('AdminUploadContractQuestions', () => {
-    it('offers an optional "ask on behalf of" CMS user picker, defaulting to the admin', async () => {
+    it('offers an "ask on behalf of" picker with CMS users only', async () => {
         const user = userEvent.setup()
         renderAdminUploadQuestions()
 
-        // The react-select control shows the default "Myself (admin)" selection
-        expect(await screen.findByText('Myself (admin)')).toBeInTheDocument()
-
-        // By default the admin picks a division manually
-        expect(
-            screen.getByRole('combobox', { name: 'Division' })
-        ).toBeInTheDocument()
-
-        // CMS users from indexUsers appear as options once the menu opens
-        const onBehalfOf = screen.getByRole('combobox', {
+        // Nothing is pre-selected; the user info section is not shown
+        const onBehalfOf = await screen.findByRole('combobox', {
             name: 'Ask on behalf of',
         })
+        expect(
+            screen.queryByTestId('selected-user-info')
+        ).not.toBeInTheDocument()
+
+        // Opening the menu shows CMS users but no "Myself" option
         await user.click(onBehalfOf)
-        // CMS users are listed by email
+        expect(screen.queryByText('Myself (admin)')).not.toBeInTheDocument()
         expect(
             await screen.findByText(/anna\.analyst@example\.com/)
         ).toBeInTheDocument()
     })
 
-    it('locks the division to the selected CMS user’s division', async () => {
+    it("locks the division to the selected CMS user's division", async () => {
         const user = userEvent.setup()
         renderAdminUploadQuestions()
 
@@ -150,6 +147,35 @@ describe('AdminUploadContractQuestions', () => {
         ).toBeLessThan(summaryMessages.indexOf('You must provide a reason'))
     })
 
+    it('requires a CMS user to be selected before submitting', async () => {
+        const user = userEvent.setup()
+        renderAdminUploadQuestions()
+
+        const submit = await screen.findByRole('button', {
+            name: 'Add questions',
+        })
+        await user.click(submit)
+
+        expect(
+            (await screen.findAllByText('You must select a CMS user')).length
+        ).toBeGreaterThan(0)
+
+        // Error summary link points to (and can focus) the user select.
+        const userLink = screen.getByRole('link', {
+            name: 'You must select a CMS user',
+        })
+        expect(userLink).toHaveAttribute('href', '#cms-user-select')
+        expect(document.getElementById('cms-user-select')).toBeInTheDocument()
+
+        // The CMS user error is listed first, before the division error.
+        const summaryMessages = screen
+            .getAllByTestId('error-summary-message')
+            .map((el) => el.textContent)
+        expect(
+            summaryMessages.indexOf('You must select a CMS user')
+        ).toBeLessThan(summaryMessages.indexOf('You must select a division'))
+    })
+
     it('offers an optional question date field that disallows future dates', async () => {
         renderAdminUploadQuestions()
 
@@ -157,16 +183,7 @@ describe('AdminUploadContractQuestions', () => {
         expect(screen.getByText(/Cannot be a future date/)).toBeInTheDocument()
     })
 
-    it('displays the admin’s own info by default', async () => {
-        renderAdminUploadQuestions()
-
-        const info = await screen.findByTestId('selected-user-info')
-        expect(info).toHaveTextContent('Adam Admin')
-        expect(info).toHaveTextContent('adam.admin@example.com')
-        expect(info).toHaveTextContent('Admin')
-    })
-
-    it('displays the selected CMS user’s details below the dropdown', async () => {
+    it("displays the selected CMS user's details below the dropdown", async () => {
         const user = userEvent.setup()
         renderAdminUploadQuestions()
 
