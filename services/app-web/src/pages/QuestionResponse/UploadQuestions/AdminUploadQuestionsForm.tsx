@@ -14,7 +14,6 @@ import {
     Division,
     CmsUser,
     CmsApproverUser,
-    User,
     FetchContractWithQuestionsQuery,
 } from '../../../gen/gqlClient'
 import { formatUserInputDate } from '@mc-review/dates'
@@ -61,7 +60,6 @@ export type AdminUploadQuestionsFormData = AdminQuestionFormValues & {
 const userRoleDisplayNames: Record<string, string> = {
     CMS_USER: 'CMS User',
     CMS_APPROVER_USER: 'CMS Approver',
-    ADMIN_USER: 'Admin',
 }
 
 type AdminUploadQuestionsFormProps = {
@@ -70,8 +68,6 @@ type AdminUploadQuestionsFormProps = {
     apiError: boolean
     contract: ContractWithQuestions
     cmsUsers: CmsUserNode[]
-    loggedInUser?: User
-    adminOnlyQaRounds: boolean
 }
 
 // Owns the admin question form: the Formik state, the document upload, and the
@@ -84,8 +80,6 @@ const AdminUploadQuestionsForm = ({
     apiError,
     contract,
     cmsUsers,
-    loggedInUser,
-    adminOnlyQaRounds,
 }: AdminUploadQuestionsFormProps) => {
     const navigate = useNavigate()
     const { handleUploadFile, handleScanFile } = useS3()
@@ -105,15 +99,10 @@ const AdminUploadQuestionsForm = ({
 
     const todayISO = new Date().toISOString().slice(0, 10)
 
-    const userOptions: AdminSelectOption[] = [
-        ...(adminOnlyQaRounds
-            ? [{ label: 'Myself (admin)', value: 'myself' }]
-            : []),
-        ...cmsUsers.map((user) => ({
-            label: user.email,
-            value: user.id,
-        })),
-    ]
+    const userOptions: AdminSelectOption[] = cmsUsers.map((user) => ({
+        label: user.email,
+        value: user.id,
+    }))
     const divisionOptions: AdminSelectOption[] = (
         Object.keys(divisionFullNames) as Division[]
     ).map((d) => ({ label: divisionFullNames[d], value: d }))
@@ -210,17 +199,8 @@ const AdminUploadQuestionsForm = ({
                     values.addedByUserID && selectedUserDivision
                 )
 
-                // Who the question is attributed to — the CMS user, or the admin.
-                // Show the admin only when they explicitly pick "Myself".
-                const myselfSelected =
-                    adminOnlyQaRounds && values.addedByUserID === 'myself'
-                const displayedUser =
-                    selectedCmsUser ??
-                    (myselfSelected ? loggedInUser : undefined)
                 const displayedUserDivision =
-                    displayedUser && 'divisionAssignment' in displayedUser
-                        ? displayedUser.divisionAssignment
-                        : undefined
+                    selectedCmsUser?.divisionAssignment ?? undefined
 
                 const selectedCmsUserOption =
                     userOptions.find((o) => o.value === values.addedByUserID) ??
@@ -298,8 +278,7 @@ const AdminUploadQuestionsForm = ({
                                     Select a CMS user to attribute this question
                                     to. The division is set from that user when
                                     they have one; otherwise pick a division
-                                    below. Leave as "Myself" to attribute the
-                                    question to your admin account.
+                                    below.
                                 </span>
                                 <AccessibleSelect<AdminSelectOption>
                                     inputId="cms-user-select"
@@ -308,7 +287,7 @@ const AdminUploadQuestionsForm = ({
                                     className={selectStyles.multiSelect}
                                     classNamePrefix="select"
                                     isSearchable
-                                    isClearable={!adminOnlyQaRounds}
+                                    isClearable
                                     options={userOptions}
                                     value={selectedCmsUserOption}
                                     onChange={(newValue) =>
@@ -318,7 +297,7 @@ const AdminUploadQuestionsForm = ({
                                         )
                                     }
                                 />
-                                {displayedUser && (
+                                {selectedCmsUser && (
                                     <div
                                         className={styles.selectedUserSummary}
                                         data-testid="selected-user-info"
@@ -333,22 +312,22 @@ const AdminUploadQuestionsForm = ({
                                                 styles.selectedUserAddress
                                             }
                                         >
-                                            {displayedUser.givenName}{' '}
-                                            {displayedUser.familyName}
+                                            {selectedCmsUser.givenName}{' '}
+                                            {selectedCmsUser.familyName}
                                             <br />
                                             {userRoleDisplayNames[
-                                                displayedUser.role
-                                            ] ?? displayedUser.role}
+                                                selectedCmsUser.role
+                                            ] ?? selectedCmsUser.role}
                                             <br />
                                             <LinkWithLogging
-                                                href={`mailto:${displayedUser.email}`}
+                                                href={`mailto:${selectedCmsUser.email}`}
                                                 target="_blank"
                                                 variant="external"
                                                 rel="noreferrer"
                                                 event_name="contact_click"
                                                 contact_method="email"
                                             >
-                                                {displayedUser.email}
+                                                {selectedCmsUser.email}
                                             </LinkWithLogging>
                                             <br />
                                             {displayedUserDivision ??

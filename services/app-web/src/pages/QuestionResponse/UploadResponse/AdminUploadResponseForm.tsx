@@ -61,7 +61,6 @@ export type AdminUploadResponseFormData = AdminResponseFormValues & {
 
 const userRoleDisplayNames: Record<string, string> = {
     STATE_USER: 'State User',
-    ADMIN_USER: 'Admin',
 }
 
 type AdminUploadResponseFormProps = {
@@ -72,7 +71,6 @@ type AdminUploadResponseFormProps = {
     question?: QuestionType
     stateUsers: StateUser[]
     loggedInUser?: User
-    adminOnlyQaRounds: boolean
 }
 
 // Owns the admin response form: the Formik state, the document upload, and the
@@ -87,7 +85,6 @@ const AdminUploadResponseForm = ({
     question,
     stateUsers,
     loggedInUser,
-    adminOnlyQaRounds,
 }: AdminUploadResponseFormProps) => {
     const navigate = useNavigate()
     const { handleUploadFile, handleScanFile } = useS3()
@@ -113,12 +110,10 @@ const AdminUploadResponseForm = ({
         : undefined
     const questionRound = question?.round ?? 0
 
-    const userOptions: AdminSelectOption[] = [
-        ...(adminOnlyQaRounds
-            ? [{ label: 'Myself (admin)', value: 'myself' }]
-            : []),
-        ...stateUsers.map((u) => ({ label: u.email, value: u.id })),
-    ]
+    const userOptions: AdminSelectOption[] = stateUsers.map((u) => ({
+        label: u.email,
+        value: u.id,
+    }))
 
     const initialValues: AdminResponseFormValues = {
         addedByUserID: '',
@@ -128,6 +123,7 @@ const AdminUploadResponseForm = ({
 
     // Field order matches the page so the error summary lists them in page order.
     const validationSchema = Yup.object().shape({
+        addedByUserID: Yup.string().required('You must select a state user'),
         createdAt: Yup.string()
             .test(
                 'not-future',
@@ -153,6 +149,7 @@ const AdminUploadResponseForm = ({
     // on hidden inputs, so a `#id` key (focus by id) is used rather than the
     // field name.
     const fieldFocusId: Record<string, string> = {
+        addedByUserID: 'response-user-select',
         reason: 'reason',
         createdAt: 'admin-response-createdAt',
     }
@@ -188,20 +185,11 @@ const AdminUploadResponseForm = ({
             onSubmit={(values) => onFormSubmit(values)}
         >
             {({ values, errors, setFieldValue, handleSubmit: submitForm }) => {
-                // The state user being recorded on behalf of (if any), otherwise
-                // the response is attributed to the admin.
+                // The state user being recorded on behalf of.
                 const selectedStateUser = stateUsers.find(
                     (u) => u.id === values.addedByUserID
                 )
-                const myselfSelected =
-                    adminOnlyQaRounds && values.addedByUserID === 'myself'
-                const displayedUser =
-                    selectedStateUser ??
-                    (myselfSelected ? loggedInUser : undefined)
-                const displayedUserState =
-                    displayedUser && 'state' in displayedUser
-                        ? displayedUser.state.code
-                        : undefined
+                const displayedUserState = selectedStateUser?.state.code
 
                 const selectedUserOption =
                     userOptions.find((o) => o.value === values.addedByUserID) ??
@@ -285,16 +273,12 @@ const AdminUploadResponseForm = ({
                                 <Label htmlFor="response-user-select">
                                     Respond on behalf of
                                 </Label>
-                                <span className={styles.requiredOptionalText}>
-                                    Optional
-                                </span>
                                 <span
                                     className="usa-hint"
                                     id="response-user-select-hint"
                                 >
                                     Select a state user to attribute this
-                                    response to. Leave as "Myself" to attribute
-                                    it to your admin account.
+                                    response to.
                                 </span>
                                 <AccessibleSelect<AdminSelectOption>
                                     inputId="response-user-select"
@@ -303,7 +287,7 @@ const AdminUploadResponseForm = ({
                                     className={selectStyles.multiSelect}
                                     classNamePrefix="select"
                                     isSearchable
-                                    isClearable={!adminOnlyQaRounds}
+                                    isClearable
                                     options={userOptions}
                                     value={selectedUserOption}
                                     onChange={(newValue) =>
@@ -313,7 +297,7 @@ const AdminUploadResponseForm = ({
                                         )
                                     }
                                 />
-                                {displayedUser && (
+                                {selectedStateUser && (
                                     <div
                                         className={styles.selectedUserSummary}
                                         data-testid="selected-response-user-info"
@@ -328,22 +312,22 @@ const AdminUploadResponseForm = ({
                                                 styles.selectedUserAddress
                                             }
                                         >
-                                            {displayedUser.givenName}{' '}
-                                            {displayedUser.familyName}
+                                            {selectedStateUser.givenName}{' '}
+                                            {selectedStateUser.familyName}
                                             <br />
                                             {userRoleDisplayNames[
-                                                displayedUser.role
-                                            ] ?? displayedUser.role}
+                                                selectedStateUser.role
+                                            ] ?? selectedStateUser.role}
                                             <br />
                                             <LinkWithLogging
-                                                href={`mailto:${displayedUser.email}`}
+                                                href={`mailto:${selectedStateUser.email}`}
                                                 target="_blank"
                                                 variant="external"
                                                 rel="noreferrer"
                                                 event_name="contact_click"
                                                 contact_method="email"
                                             >
-                                                {displayedUser.email}
+                                                {selectedStateUser.email}
                                             </LinkWithLogging>
                                             {displayedUserState && (
                                                 <>

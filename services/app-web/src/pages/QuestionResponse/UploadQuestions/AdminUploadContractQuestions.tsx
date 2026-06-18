@@ -13,9 +13,6 @@ import {
     IndexUsersDocument,
 } from '../../../gen/gqlClient'
 import { usePage } from '../../../contexts/PageContext'
-import { useAuth } from '../../../contexts/AuthContext'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
 import { Breadcrumbs } from '../../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -37,12 +34,6 @@ export const AdminUploadContractQuestions = () => {
         contractSubmissionType: ContractSubmissionType
     }>()
     const navigate = useNavigate()
-    const { loggedInUser } = useAuth()
-    const ldClient = useLDClient()
-    const adminOnlyQaRounds: boolean = ldClient?.variation(
-        featureFlags.ADMIN_ONLY_QA_ROUNDS.flag,
-        featureFlags.ADMIN_ONLY_QA_ROUNDS.defaultValue
-    )
 
     const {
         data: fetchContractData,
@@ -116,13 +107,11 @@ export const AdminUploadContractQuestions = () => {
 
         const input: AdminCreateContractQuestionInput = {
             contractID: id as string,
+            addedByUserID: data.addedByUserID,
             reason: data.reason.trim(),
             documents: questionDocs,
         }
 
-        if (data.addedByUserID && data.addedByUserID !== 'myself') {
-            input.addedByUserID = data.addedByUserID
-        }
         if (data.division) {
             input.division = data.division as Division
         }
@@ -165,8 +154,6 @@ export const AdminUploadContractQuestions = () => {
                 apiError={Boolean(apiError)}
                 contract={contract}
                 cmsUsers={cmsUsers}
-                loggedInUser={loggedInUser}
-                adminOnlyQaRounds={adminOnlyQaRounds}
             />
         </div>
     )

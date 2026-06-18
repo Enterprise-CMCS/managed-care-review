@@ -154,15 +154,10 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
-            adminCreateContractQuestion: adminCreateContractQuestionResolver(
-                store,
-                launchDarkly
-            ),
+            adminCreateContractQuestion:
+                adminCreateContractQuestionResolver(store),
             adminCreateContractQuestionResponse:
-                adminCreateContractQuestionResponseResolver(
-                    store,
-                    launchDarkly
-                ),
+                adminCreateContractQuestionResponseResolver(store),
             createContractQuestionResponse:
                 createContractQuestionResponseResolver(store, emailer),
             createRateQuestion: createRateQuestionResolver(store, emailer),
@@ -226,26 +221,10 @@ export function configureResolvers(
                 }
             },
         },
-        QuestionAuthor: {
-            __resolveType(obj) {
-                if (obj.role === 'CMS_USER') {
-                    return 'CMSUser'
-                } else if (obj.role === 'ADMIN_USER') {
-                    return 'AdminUser'
-                } else {
-                    return 'CMSApproverUser'
-                }
-            },
-        },
-        ResponseAuthor: {
-            __resolveType(obj) {
-                if (obj.role === 'ADMIN_USER') {
-                    return 'AdminUser'
-                } else {
-                    return 'StateUser'
-                }
-            },
-        },
+        // TODO: Restore QuestionAuthor resolver when union is re-enabled
+        // in schema for ContractQuestion/RateQuestion.addedBy.
+        // TODO: Restore ResponseAuthor resolver when union is re-enabled
+        // in schema for QuestionResponse.addedBy.
         SubmittableRevision: {
             __resolveType(obj) {
                 if ('contract' in obj) {

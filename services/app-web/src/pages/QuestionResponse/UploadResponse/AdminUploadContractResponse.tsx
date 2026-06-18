@@ -11,8 +11,6 @@ import {
 import styles from '../QuestionResponse.module.scss'
 import { usePage } from '../../../contexts/PageContext'
 import { useAuth } from '../../../contexts/AuthContext'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
-import { featureFlags } from '@mc-review/common-code'
 import { Breadcrumbs } from '../../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
@@ -38,11 +36,6 @@ export const AdminUploadContractResponse = () => {
     const navigate = useNavigate()
     const { updateHeading, updateActiveMainContent } = usePage()
     const { loggedInUser } = useAuth()
-    const ldClient = useLDClient()
-    const adminOnlyQaRounds: boolean = ldClient?.variation(
-        featureFlags.ADMIN_ONLY_QA_ROUNDS.flag,
-        featureFlags.ADMIN_ONLY_QA_ROUNDS.defaultValue
-    )
 
     const {
         data: fetchContractData,
@@ -126,14 +119,11 @@ export const AdminUploadContractResponse = () => {
 
         const input: AdminCreateContractQuestionResponseInput = {
             questionID: questionID as string,
+            addedByUserID: data.addedByUserID,
             reason: data.reason.trim(),
             documents: responseDocs,
         }
 
-        //checks for empty strings as formik and forms need initial values to be ''
-        if (data.addedByUserID && data.addedByUserID !== 'myself') {
-            input.addedByUserID = data.addedByUserID
-        }
         if (data.createdAt) {
             input.createdAt = data.createdAt
         }
@@ -178,7 +168,6 @@ export const AdminUploadContractResponse = () => {
                 question={question}
                 stateUsers={stateUsers}
                 loggedInUser={loggedInUser}
-                adminOnlyQaRounds={adminOnlyQaRounds}
             />
         </div>
     )

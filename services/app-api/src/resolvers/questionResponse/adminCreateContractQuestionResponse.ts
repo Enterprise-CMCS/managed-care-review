@@ -12,14 +12,11 @@ import { GraphQLError } from 'graphql'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
 import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
-import type { LDService } from '../../launchDarkly/launchDarkly'
-
 // Lets an AdminUser record a response on behalf of the state, attached to any
 // existing contract question (including questions authored by CMS). No
 // notification emails are sent.
 export function adminCreateContractQuestionResponseResolver(
-    store: Store,
-    launchDarkly: LDService
+    store: Store
 ): MutationResolvers['adminCreateContractQuestionResponse'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -87,12 +84,7 @@ export function adminCreateContractQuestionResponseResolver(
                     throw createUserInputError(msg)
                 }
 
-                const adminOnlyQaRounds = await launchDarkly.getFeatureFlag({
-                    key: context.user.email,
-                    flag: 'admin-only-qa-rounds',
-                })
-
-                if (!adminOnlyQaRounds && !input.addedByUserID) {
+                if (!input.addedByUserID) {
                     const msg =
                         'a state user must be assigned as the response author'
                     logResolverError(
@@ -175,45 +167,42 @@ export function adminCreateContractQuestionResponseResolver(
                     throw createUserInputError(errMessage)
                 }
 
-                // Attribute the response to the chosen state user, or to the
-                // admin when none is selected.
-                let addedByUserID: string = user.id
-                if (input.addedByUserID) {
-                    const stateUser = await store.findUser(input.addedByUserID)
-                    if (stateUser instanceof Error) {
-                        const errMessage = `Issue finding user ${input.addedByUserID}. Message: ${stateUser.message}`
-                        logResolverError(
-                            'adminCreateContractQuestionResponse',
-                            errMessage,
-                            context
-                        )
-                        throw new GraphQLError(errMessage, {
-                            extensions: {
-                                code: 'INTERNAL_SERVER_ERROR',
-                                cause: 'DB_ERROR',
-                            },
-                        })
-                    }
-                    if (!stateUser) {
-                        const msg = `state user with id ${input.addedByUserID} does not exist`
-                        logResolverError(
-                            'adminCreateContractQuestionResponse',
-                            msg,
-                            context
-                        )
-                        throw createUserInputError(msg)
-                    }
-                    if (!isStateUser(stateUser)) {
-                        const msg = 'addedByUserID must reference a state user'
-                        logResolverError(
-                            'adminCreateContractQuestionResponse',
-                            msg,
-                            context
-                        )
-                        throw createUserInputError(msg)
-                    }
-                    addedByUserID = stateUser.id
+                // Attribute the response to the chosen state user.
+                // Admin users cannot be assigned as the response author.
+                const stateUser = await store.findUser(input.addedByUserID)
+                if (stateUser instanceof Error) {
+                    const errMessage = `Issue finding user ${input.addedByUserID}. Message: ${stateUser.message}`
+                    logResolverError(
+                        'adminCreateContractQuestionResponse',
+                        errMessage,
+                        context
+                    )
+                    throw new GraphQLError(errMessage, {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'DB_ERROR',
+                        },
+                    })
                 }
+                if (!stateUser) {
+                    const msg = `state user with id ${input.addedByUserID} does not exist`
+                    logResolverError(
+                        'adminCreateContractQuestionResponse',
+                        msg,
+                        context
+                    )
+                    throw createUserInputError(msg)
+                }
+                if (!isStateUser(stateUser)) {
+                    const msg = 'addedByUserID must reference a state user'
+                    logResolverError(
+                        'adminCreateContractQuestionResponse',
+                        msg,
+                        context
+                    )
+                    throw createUserInputError(msg)
+                }
+                const addedByUserID = stateUser.id
 
                 const docs = parseAndValidateDocuments(
                     input.documents.map((d) => ({

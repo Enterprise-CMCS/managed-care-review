@@ -28,9 +28,7 @@ const cmsUserNoDivision = mockValidCMSUser({
     divisionAssignment: null,
 })
 
-const renderAdminUploadQuestions = (options?: {
-    featureFlags?: Record<string, boolean>
-}) => {
+const renderAdminUploadQuestions = () => {
     const contract = mockContractPackageSubmittedWithQuestions()
     return renderWithProviders(
         <Routes>
@@ -66,19 +64,16 @@ const renderAdminUploadQuestions = (options?: {
             routerProvider: {
                 route: `/submissions/health-plan/15/question-and-answers/admin-upload-questions`,
             },
-            featureFlags: options?.featureFlags,
         }
     )
 }
 
 describe('AdminUploadContractQuestions', () => {
-    it('offers an "ask on behalf of" picker with "Myself (admin)" when the flag is on, but does not pre-select', async () => {
+    it('offers an "ask on behalf of" picker with CMS users only', async () => {
         const user = userEvent.setup()
-        renderAdminUploadQuestions({
-            featureFlags: { 'admin-only-qa-rounds': true },
-        })
+        renderAdminUploadQuestions()
 
-        // Nothing is pre-selected; the admin info section is not shown
+        // Nothing is pre-selected; the user info section is not shown
         const onBehalfOf = await screen.findByRole('combobox', {
             name: 'Ask on behalf of',
         })
@@ -86,9 +81,9 @@ describe('AdminUploadContractQuestions', () => {
             screen.queryByTestId('selected-user-info')
         ).not.toBeInTheDocument()
 
-        // Opening the menu shows "Myself (admin)" and CMS users
+        // Opening the menu shows CMS users but no "Myself" option
         await user.click(onBehalfOf)
-        expect(await screen.findByText('Myself (admin)')).toBeInTheDocument()
+        expect(screen.queryByText('Myself (admin)')).not.toBeInTheDocument()
         expect(
             await screen.findByText(/anna\.analyst@example\.com/)
         ).toBeInTheDocument()
@@ -157,24 +152,6 @@ describe('AdminUploadContractQuestions', () => {
 
         expect(await screen.findByText('Question date')).toBeInTheDocument()
         expect(screen.getByText(/Cannot be a future date/)).toBeInTheDocument()
-    })
-
-    it('displays the admin\'s own info after explicitly selecting "Myself (admin)"', async () => {
-        const user = userEvent.setup()
-        renderAdminUploadQuestions({
-            featureFlags: { 'admin-only-qa-rounds': true },
-        })
-
-        const onBehalfOf = await screen.findByRole('combobox', {
-            name: 'Ask on behalf of',
-        })
-        await user.click(onBehalfOf)
-        await user.click(await screen.findByText('Myself (admin)'))
-
-        const info = await screen.findByTestId('selected-user-info')
-        expect(info).toHaveTextContent('Adam Admin')
-        expect(info).toHaveTextContent('adam.admin@example.com')
-        expect(info).toHaveTextContent('Admin')
     })
 
     it("displays the selected CMS user's details below the dropdown", async () => {
