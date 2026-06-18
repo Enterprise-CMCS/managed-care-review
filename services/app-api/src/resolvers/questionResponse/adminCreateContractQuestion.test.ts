@@ -13,6 +13,7 @@ import {
     assertAnErrorCode,
     fetchTestContractWithQuestions,
 } from '../../testHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import {
     createDBUsersWithFullData,
     testAdminUser,
@@ -108,6 +109,7 @@ describe('adminCreateContractQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -129,6 +131,7 @@ describe('adminCreateContractQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -157,6 +160,7 @@ describe('adminCreateContractQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -189,6 +193,7 @@ describe('adminCreateContractQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -297,6 +302,7 @@ describe('adminCreateContractQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -326,6 +332,7 @@ describe('adminCreateContractQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -395,6 +402,7 @@ describe('adminCreateContractQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const draftContract = await createTestContract(stateServer)
@@ -422,6 +430,7 @@ describe('adminCreateContractQuestion', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -457,6 +466,7 @@ describe('adminCreateContractQuestion', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -481,6 +491,7 @@ describe('adminCreateContractQuestion', () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)

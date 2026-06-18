@@ -23,6 +23,7 @@ import {
     createAndSubmitTestContractWithRate,
     withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 const responseDocuments = [
     {
@@ -72,6 +73,7 @@ describe('adminCreateContractQuestionResponse', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -136,6 +138,7 @@ describe('adminCreateContractQuestionResponse', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -166,6 +169,7 @@ describe('adminCreateContractQuestionResponse', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -194,6 +198,7 @@ describe('adminCreateContractQuestionResponse', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -225,6 +230,7 @@ describe('adminCreateContractQuestionResponse', () => {
     it('returns a BAD_USER_INPUT error when the question does not exist', async () => {
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const result = await executeGraphQLOperation(adminServer, {
@@ -310,6 +316,7 @@ describe('adminCreateContractQuestionResponse', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -338,6 +345,7 @@ describe('adminCreateContractQuestionResponse', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -369,6 +377,7 @@ describe('adminCreateContractQuestionResponse', () => {
         })
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)
@@ -442,6 +451,7 @@ describe('adminCreateContractQuestionResponse', () => {
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
             emailer: mockEmailer,
+            ldService: testLDService({ 'admin-only-qa-rounds': true }),
         })
 
         const contract = await createAndSubmitTestContractWithRate(stateServer)

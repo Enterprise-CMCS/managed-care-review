@@ -97,6 +97,14 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * When enabled, an admin user can create a question or response
+     * assigning an admin user as the addedBy.
+     */
+    ADMIN_ONLY_QA_ROUNDS: {
+        flag: 'admin-only-qa-rounds',
+        defaultValue: false,
+    },
+    /**
      * This flag toggles the ability for external API users to send write requests.
      */
     EXTERNAL_API_WRITE_REQUEST: {

@@ -16,13 +16,15 @@ import type {
     DivisionType,
 } from '../../domain-models'
 import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 // Lets an AdminUser record a question on behalf of CMS. The admin can either pick
 // a division directly (the question is then attributed to the admin), or select a
 // CMS user to ask on behalf of (the question's addedBy and division come from that
 // user). No notification emails are sent.
 export function adminCreateContractQuestionResolver(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): MutationResolvers['adminCreateContractQuestion'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -84,6 +86,22 @@ export function adminCreateContractQuestionResolver(
                 if (input.createdAt && new Date(input.createdAt) > new Date()) {
                     const msg =
                         'the question created date cannot be in the future'
+                    logResolverError(
+                        'adminCreateContractQuestion',
+                        msg,
+                        context
+                    )
+                    throw createUserInputError(msg)
+                }
+
+                const adminOnlyQaRounds = await launchDarkly.getFeatureFlag({
+                    key: context.user.email,
+                    flag: 'admin-only-qa-rounds',
+                })
+
+                if (!adminOnlyQaRounds && !input.addedByUserID) {
+                    const msg =
+                        'a CMS user must be assigned as the question author'
                     logResolverError(
                         'adminCreateContractQuestion',
                         msg,

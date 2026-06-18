@@ -154,10 +154,15 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
-            adminCreateContractQuestion:
-                adminCreateContractQuestionResolver(store),
+            adminCreateContractQuestion: adminCreateContractQuestionResolver(
+                store,
+                launchDarkly
+            ),
             adminCreateContractQuestionResponse:
-                adminCreateContractQuestionResponseResolver(store),
+                adminCreateContractQuestionResponseResolver(
+                    store,
+                    launchDarkly
+                ),
             createContractQuestionResponse:
                 createContractQuestionResponseResolver(store, emailer),
             createRateQuestion: createRateQuestionResolver(store, emailer),

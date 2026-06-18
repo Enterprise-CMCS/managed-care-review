@@ -12,12 +12,14 @@ import { GraphQLError } from 'graphql'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
 import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 // Lets an AdminUser record a response on behalf of the state, attached to any
 // existing contract question (including questions authored by CMS). No
 // notification emails are sent.
 export function adminCreateContractQuestionResponseResolver(
-    store: Store
+    store: Store,
+    launchDarkly: LDService
 ): MutationResolvers['adminCreateContractQuestionResponse'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -77,6 +79,22 @@ export function adminCreateContractQuestionResponseResolver(
 
                 if (input.createdAt && new Date(input.createdAt) > new Date()) {
                     const msg = 'the response date cannot be in the future'
+                    logResolverError(
+                        'adminCreateContractQuestionResponse',
+                        msg,
+                        context
+                    )
+                    throw createUserInputError(msg)
+                }
+
+                const adminOnlyQaRounds = await launchDarkly.getFeatureFlag({
+                    key: context.user.email,
+                    flag: 'admin-only-qa-rounds',
+                })
+
+                if (!adminOnlyQaRounds && !input.addedByUserID) {
+                    const msg =
+                        'a state user must be assigned as the response author'
                     logResolverError(
                         'adminCreateContractQuestionResponse',
                         msg,
