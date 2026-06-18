@@ -177,7 +177,7 @@ export const StateDashboard = (): React.ReactElement => {
                             <ContractTable
                                 tableData={submissionRows}
                                 user={loggedInUser}
-                                filterCountClassName={styles.filterCount}
+                                showFilters
                             />
                         </section>
                     ) : (
