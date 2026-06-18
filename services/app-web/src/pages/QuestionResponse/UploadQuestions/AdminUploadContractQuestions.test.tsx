@@ -147,6 +147,35 @@ describe('AdminUploadContractQuestions', () => {
         ).toBeLessThan(summaryMessages.indexOf('You must provide a reason'))
     })
 
+    it('requires a CMS user to be selected before submitting', async () => {
+        const user = userEvent.setup()
+        renderAdminUploadQuestions()
+
+        const submit = await screen.findByRole('button', {
+            name: 'Add questions',
+        })
+        await user.click(submit)
+
+        expect(
+            (await screen.findAllByText('You must select a CMS user')).length
+        ).toBeGreaterThan(0)
+
+        // Error summary link points to (and can focus) the user select.
+        const userLink = screen.getByRole('link', {
+            name: 'You must select a CMS user',
+        })
+        expect(userLink).toHaveAttribute('href', '#cms-user-select')
+        expect(document.getElementById('cms-user-select')).toBeInTheDocument()
+
+        // The CMS user error is listed first, before the division error.
+        const summaryMessages = screen
+            .getAllByTestId('error-summary-message')
+            .map((el) => el.textContent)
+        expect(
+            summaryMessages.indexOf('You must select a CMS user')
+        ).toBeLessThan(summaryMessages.indexOf('You must select a division'))
+    })
+
     it('offers an optional question date field that disallows future dates', async () => {
         renderAdminUploadQuestions()
 

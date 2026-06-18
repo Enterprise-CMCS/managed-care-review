@@ -118,6 +118,7 @@ const AdminUploadQuestionsForm = ({
     // the selected CMS user supplies the division (in which case it is derived).
     // Field order matches the page so the error summary lists them in page order.
     const validationSchema = Yup.object().shape({
+        addedByUserID: Yup.string().required('You must select a CMS user'),
         division: Yup.string().test(
             'division-required',
             'You must select a division',
@@ -149,6 +150,7 @@ const AdminUploadQuestionsForm = ({
     // on hidden inputs, so a `#id` key (focus by id) is used rather than the
     // field name.
     const fieldFocusId: Record<string, string> = {
+        addedByUserID: 'cms-user-select',
         reason: 'reason',
         division: 'division-select',
         createdAt: 'admin-question-createdAt',
@@ -264,12 +266,14 @@ const AdminUploadQuestionsForm = ({
                                 />
                             </FormGroup>
 
-                            <FormGroup>
+                            <FormGroup
+                                error={showFieldErrors(errors.addedByUserID)}
+                            >
                                 <Label htmlFor="cms-user-select">
                                     Ask on behalf of
                                 </Label>
                                 <span className={styles.requiredOptionalText}>
-                                    Optional
+                                    Required
                                 </span>
                                 <span
                                     className="usa-hint"
@@ -280,6 +284,11 @@ const AdminUploadQuestionsForm = ({
                                     they have one; otherwise pick a division
                                     below.
                                 </span>
+                                {showFieldErrors(errors.addedByUserID) && (
+                                    <PoliteErrorMessage formFieldLabel="Ask on behalf of">
+                                        {errors.addedByUserID}
+                                    </PoliteErrorMessage>
+                                )}
                                 <AccessibleSelect<AdminSelectOption>
                                     inputId="cms-user-select"
                                     name="addedByUserID"
