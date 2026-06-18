@@ -565,17 +565,6 @@ export const ContractTable = ({
             label: state,
         }))
 
-    const contractTypeFilterOptions = Array.from(
-        contractTypeColumn.getFacetedUniqueValues().keys()
-    )
-        .sort()
-        .map((contractType) => ({
-            value: contractType,
-            label:
-                contractTypeOptions.find((opt) => opt.value === contractType)
-                    ?.label ?? contractType,
-        }))
-
     const programFilterOptions = isStateUser
         ? getAvailableContractPrograms(user.state.programs)
               .map((program) => program.name)
@@ -714,9 +703,7 @@ export const ContractTable = ({
                                             )}
                                             name="contractType"
                                             label="Contract type"
-                                            filterOptions={
-                                                contractTypeFilterOptions
-                                            }
+                                            filterOptions={contractTypeOptions}
                                             onChange={(selectedOptions) =>
                                                 updateFilters(
                                                     contractTypeColumn,
