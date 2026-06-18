@@ -41,6 +41,7 @@ import {
     featureFlags,
     stateNameToStateCode,
 } from '@mc-review/common-code'
+import { getAvailableContractPrograms } from '../../formHelpers'
 import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -381,9 +382,9 @@ export const ContractTable = ({
 
     const [tableCaption, setTableCaption] = useState<React.ReactNode | null>()
 
-    const isNotStateUser = user.__typename !== 'StateUser'
-    const isStateUser = !isNotStateUser
-    const statusFilterOptions = isStateUser
+    const isStateUser = user.__typename === 'StateUser'
+    const isNotStateUser = !isStateUser
+    const statusFilterOptions = !isNotStateUser
         ? stateSubmissionStatusOptions
         : submissionStatusOptions
     const tableColumns = React.useMemo(
@@ -575,18 +576,15 @@ export const ContractTable = ({
                     ?.label ?? contractType,
         }))
 
-    const programFilterOptions = Array.from(
-        new Set(
-            tableData.flatMap((submission) =>
-                submission.programs.map((program) => program.name)
-            )
-        )
-    )
-        .sort()
-        .map((program) => ({
-            value: program,
-            label: program,
-        }))
+    const programFilterOptions = isStateUser
+        ? getAvailableContractPrograms(user.state.programs)
+              .map((program) => program.name)
+              .sort((a, b) => a.localeCompare(b))
+              .map((program) => ({
+                  value: program,
+                  label: program,
+              }))
+        : []
 
     const filterLength = columnFilters.flatMap((filter) => filter.value).length
     const filtersApplied = `${filterLength} ${pluralize(
@@ -706,7 +704,7 @@ export const ContractTable = ({
                             onClearFilters={clearFilters}
                             filterTitle="Filters"
                         >
-                            {isStateUser ? (
+                            {!isNotStateUser ? (
                                 <MultiColumnGrid columns={2}>
                                     {eqroSubmissions && (
                                         <FilterSelect
