@@ -108,7 +108,7 @@ describe('SingleRateSummarySection', () => {
         ).toBeInTheDocument()
 
         expect(
-            screen.getByRole('heading', { name: 'Rate documents', level: 2 })
+            screen.getByRole('heading', { name: 'Rate documents', level: 3 })
         ).toBeInTheDocument()
     })
 
@@ -142,7 +142,7 @@ describe('SingleRateSummarySection', () => {
         )
 
         expect(
-            screen.getByRole('heading', { name: 'Rate documents', level: 2 })
+            screen.getByRole('heading', { name: 'Rate documents', level: 3 })
         ).toBeInTheDocument()
 
         const relatedContractActions = screen.getByRole('definition', {
@@ -219,7 +219,7 @@ describe('SingleRateSummarySection', () => {
         )
 
         expect(
-            screen.getByRole('heading', { name: 'Rate documents', level: 2 })
+            screen.getByRole('heading', { name: 'Rate documents', level: 3 })
         ).toBeInTheDocument()
 
         const relatedContractActions = screen.getByRole('definition', {
