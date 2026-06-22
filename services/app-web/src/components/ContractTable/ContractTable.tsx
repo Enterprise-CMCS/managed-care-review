@@ -9,9 +9,10 @@ import {
     useReactTable,
     getFacetedUniqueValues,
     Column,
+    type Updater,
 } from '@tanstack/react-table'
 import { useAtom } from 'jotai/react'
-import { atomWithHash } from 'jotai-location'
+import { atomWithSearchParams } from 'jotai-location'
 import {
     ConsolidatedContractStatus,
     ContractSubmissionType,
@@ -46,6 +47,7 @@ import { formatCalendarDate } from '@mc-review/dates'
 import { RowCellElement } from '..'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { getSubmissionPath } from '../../routeHelpers'
+import { useLocation } from 'react-router-dom'
 
 export type ContractInDashboardType = {
     id: string
@@ -258,10 +260,7 @@ const fromReadableUrlToColumnFilters = (
     }))
 }
 
-const columnHash = atomWithHash('filters', [] as ColumnFiltersState, {
-    serialize: fromColumnFiltersToReadableUrl,
-    deserialize: fromReadableUrlToColumnFilters,
-})
+const columnSearchParam = atomWithSearchParams('filters', '')
 
 /* transform react-table's ColumnFilterState (stringified, formatted, and stored in the URL) to react-select's FilterOptionType
     and return only the items matching the FilterSelect component that's calling the function*/
@@ -333,12 +332,18 @@ export const ContractTable = ({
     filterCountClassName,
 }: ContractTableProps): React.ReactElement => {
     const ldClient = useLDClient()
+    const location = useLocation()
     const tableConfig = {
         tableName: 'Submissions',
         rowIDName: 'submission',
     }
     const lastClickedElement = useRef<string | null>(null)
-    const [columnFilters, setColumnFilters] = useAtom(columnHash)
+    const [columnFiltersQuery, setColumnFiltersQuery] =
+        useAtom(columnSearchParam)
+    const columnFilters = React.useMemo(
+        () => fromReadableUrlToColumnFilters(columnFiltersQuery || null),
+        [columnFiltersQuery]
+    )
     const [prevFilters, setPrevFilters] = useState<{
         filtersForAnalytics: string
         results?: string
@@ -512,6 +517,20 @@ export const ContractTable = ({
         [eqroSubmissions, isNotStateUser, tableConfig.rowIDName]
     )
 
+    const setColumnFilters = React.useCallback(
+        (updater: Updater<ColumnFiltersState>) => {
+            const nextFilters =
+                typeof updater === 'function' ? updater(columnFilters) : updater
+
+            setColumnFiltersQuery(
+                nextFilters.length
+                    ? fromColumnFiltersToReadableUrl(nextFilters)
+                    : ''
+            )
+        },
+        [columnFilters, setColumnFiltersQuery]
+    )
+
     const reactTable = useReactTable({
         data: tableData.sort((a, b) =>
             a['updatedAt'] > b['updatedAt'] ? -1 : 1
@@ -608,7 +627,12 @@ export const ContractTable = ({
 
     useEffect(() => {
         // if on root route
-        if (location.hash === '' && showFilters && isNotStateUser) {
+        if (
+            location.hash === '' &&
+            location.search === '' &&
+            showFilters &&
+            isNotStateUser
+        ) {
             updateFilters(
                 statusColumn,
                 [
@@ -624,7 +648,7 @@ export const ContractTable = ({
                 'status'
             )
         }
-    }, [showFilters, statusColumn, isNotStateUser])
+    }, [showFilters, statusColumn, isNotStateUser, location])
 
     //Store caption element in state in order for screen readers to read dynamic captions.
     useEffect(() => {
