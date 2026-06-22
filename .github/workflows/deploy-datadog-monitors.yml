@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup OpenTofu
         uses: opentofu/setup-opentofu@v2
@@ -49,7 +49,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get AWS credentials (dev)
         uses: ./.github/actions/get_aws_credentials
@@ -123,7 +123,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get AWS credentials (dev)
         uses: ./.github/actions/get_aws_credentials
@@ -160,7 +160,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get AWS credentials (val)
         uses: ./.github/actions/get_aws_credentials
@@ -197,7 +197,7 @@ jobs:
     environment: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get AWS credentials (prod)
         uses: ./.github/actions/get_aws_credentials
