@@ -626,10 +626,14 @@ export const ContractTable = ({
     }
 
     useEffect(() => {
+        const hasFiltersParam =
+            new URLSearchParams(window.location.search).has('filters') ||
+            new URLSearchParams(location.search).has('filters')
+
         // if on root route
         if (
             location.hash === '' &&
-            location.search === '' &&
+            !hasFiltersParam &&
             showFilters &&
             isNotStateUser
         ) {
