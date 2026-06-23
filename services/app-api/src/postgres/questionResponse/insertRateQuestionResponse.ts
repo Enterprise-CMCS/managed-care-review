@@ -11,6 +11,7 @@ import {
 import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseErrorToError } from '@mc-review/helpers'
+import { updateRelatedContractsLastActionDateByRateID } from '../updateLastActionDateHelpers'
 
 export async function insertRateQuestionResponse(
     client: ExtendedPrismaClient,
@@ -69,6 +70,30 @@ export async function insertRateQuestionResponse(
             },
             include: questionInclude,
         })
+
+        const latestResponse = result.responses[0]
+        if (!latestResponse) {
+            return new Error(
+                `Question response was not created for rate question with the ID: ${response.questionID}`
+            )
+        }
+
+        // Rate Q&A responses change the rate's visible action history. Move the
+        // related submitted contracts too because their package includes this
+        // rate data.
+        await client.rateTable.update({
+            where: {
+                id: result.rateID,
+            },
+            data: {
+                lastActionDate: latestResponse.createdAt,
+            },
+        })
+        await updateRelatedContractsLastActionDateByRateID(
+            client,
+            result.rateID,
+            latestResponse.createdAt
+        )
 
         return rateQuestionPrismaToDomainType(result)
     } catch (e) {

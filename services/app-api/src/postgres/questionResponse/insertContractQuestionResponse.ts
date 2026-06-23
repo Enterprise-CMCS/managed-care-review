@@ -70,6 +70,25 @@ export async function insertContractQuestionResponse(
             include: questionInclude,
         })
 
+        const latestResponse = result.responses[0]
+        if (!latestResponse) {
+            return new Error(
+                `Question response was not created for question with the ID: ${response.questionID}`
+            )
+        }
+
+        // A response is a new action on the same contract question. Persist the
+        // response timestamp so contract lastActionDate reflects the Q&A thread
+        // update, not the original question date.
+        await client.contractTable.update({
+            where: {
+                id: result.contractID,
+            },
+            data: {
+                lastActionDate: latestResponse.createdAt,
+            },
+        })
+
         return contractQuestionPrismaToDomainType(result)
     } catch (e) {
         const parsedError = parseErrorToError(e)
