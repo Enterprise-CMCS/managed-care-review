@@ -1,1 +1,1 @@
-* Prefer using shell tools over writing python scripts
+* Prefer using shell tools over writing Python scripts
