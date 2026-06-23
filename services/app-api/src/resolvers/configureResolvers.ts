@@ -90,7 +90,7 @@ export function configureResolvers(
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),
-            indexContracts: indexContractsResolver(store),
+            indexContracts: indexContractsResolver(store, launchDarkly),
             indexContractsStripped: indexContractsStripped(store),
             indexUsers: indexUsersResolver(store),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
@@ -200,9 +200,13 @@ export function configureResolvers(
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
         RateQuestion: questionResolver(store),
-        ContractStripped: contractStrippedResolver(),
-        Contract: contractResolver(store, applicationEndpoint),
-        UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
+        ContractStripped: contractStrippedResolver(launchDarkly),
+        Contract: contractResolver(store, applicationEndpoint, launchDarkly),
+        UnlockedContract: unlockedContractResolver(
+            store,
+            applicationEndpoint,
+            launchDarkly
+        ),
         ContractRevision: contractRevisionResolver(store),
         ContractRevisionStripped: contractRevisionStrippedResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),
