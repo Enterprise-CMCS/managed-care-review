@@ -55,6 +55,9 @@ export const QuestionResponseRound = ({
 
     const showUploadResponseBtn = isStateUser && !isApprovedContract
     const showDeleteQuestionBtn = isAdminUser && questionType === 'contract'
+    // Responses can only be soft-deleted on contract Q&A. The admin-only
+    // permission check lives in QuestionDisplayTable.
+    const allowDeleteResponse = questionType === 'contract'
     const showAdminUploadResponseBtn =
         isAdminUser &&
         questionType === 'contract' &&
@@ -95,6 +98,7 @@ export const QuestionResponseRound = ({
                 documents={documents}
                 user={currentUser}
                 onlyDisplayInitial={false}
+                allowDeleteResponse={allowDeleteResponse}
             />
             {showDeleteQuestionBtn && (
                 <div className={styles.tableFooter}>
