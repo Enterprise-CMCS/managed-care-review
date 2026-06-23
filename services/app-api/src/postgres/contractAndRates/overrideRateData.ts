@@ -14,6 +14,7 @@ import {
     validateScalarOverrideInput,
 } from '../prismaOverrideMergeHelpers'
 import { runTransactionWithRowLock } from '../prismaHelpers'
+import { updateRelatedContractsLastActionDateByRateID } from '../updateLastActionDateHelpers'
 
 type RateDocumentOverrideInput = {
     documentOp: ArrayFieldOverrideOperation
@@ -154,7 +155,7 @@ const overrideRateDataInsideTransaction = async (
         }
     }
 
-    await tx.rateOverrides.create({
+    const rateOverride = await tx.rateOverrides.create({
         data: {
             rateID,
             updatedByID,
@@ -188,6 +189,26 @@ const overrideRateDataInsideTransaction = async (
                 : undefined,
         },
     })
+
+    // Rate overrides are submitted-data corrections visible on the rate
+    // itself, so the rate action date should move to the override timestamp.
+    await tx.rateTable.update({
+        where: {
+            id: rateID,
+        },
+        data: {
+            lastActionDate: rateOverride.createdAt,
+        },
+    })
+
+    // Rate overrides also change submitted rate data shown inside currently
+    // related contracts, but they do not create contract package history.
+    // Propagate the same action date to those contracts directly.
+    await updateRelatedContractsLastActionDateByRateID(
+        tx,
+        rateID,
+        rateOverride.createdAt
+    )
 
     const overriddenRate = await findRateWithHistory(tx, rateID)
 

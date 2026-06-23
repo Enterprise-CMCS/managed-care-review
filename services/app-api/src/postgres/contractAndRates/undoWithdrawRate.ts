@@ -7,7 +7,10 @@ import { unlockContractInsideTransaction } from './unlockContract'
 import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRates'
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
 import type { SubmitContractArgsType } from './submitContract'
-import { submitContractInsideTransaction } from './submitContract'
+import {
+    healthPlanContractReviewDeterminationAction,
+    submitContractInsideTransaction,
+} from './submitContract'
 import { runTransactionWithRowLock } from '../prismaHelpers'
 
 type UndoWithdrawRateArgsType = {
@@ -90,7 +93,7 @@ const undoWithdrawRateInsideTransaction = async (
         withdrawnFromContracts.splice(parentContractIndex, 1)[0]
     )
 
-    // Loop through contracts and undo withraw rate, starting with parent contract.
+    // Loop through contracts and undo withdraw rate, starting with parent contract.
     for (const contract of withdrawnFromContracts) {
         const latestRevision = contract.packageSubmissions[0].contractRevision
 
@@ -198,9 +201,33 @@ const undoWithdrawRateInsideTransaction = async (
         if (resubmitResult instanceof Error) {
             throw resubmitResult
         }
+
+        // Undoing a rate withdraw can resubmit every submitted contract that
+        // previously contained the rate. Run the same health plan review
+        // determination as normal submit so each contract's action history and
+        // lastActionDate reflect the final visible action. Linked contracts
+        // that are still withdrawn keep their withdrawn status, so skip the
+        // review helper for that edge case.
+        if (
+            ['SUBMITTED', 'RESUBMITTED'].includes(contract.consolidatedStatus)
+        ) {
+            const reviewDetermination =
+                await healthPlanContractReviewDeterminationAction(
+                    tx,
+                    resubmitResult
+                )
+
+            if (reviewDetermination instanceof Error) {
+                throw reviewDetermination
+            }
+        }
     }
 
-    // Update the review status
+    const syncedTimestamp = new Date()
+
+    // This restored review action is what makes the rate no longer withdrawn,
+    // so persist the same timestamp as the rate's lastActionDate while also
+    // clearing the withdrawn contract joins.
     await tx.rateTable.update({
         where: {
             id: rateID,
@@ -211,17 +238,10 @@ const undoWithdrawRateInsideTransaction = async (
                     updatedByID,
                     updatedReason,
                     actionType: 'UNDER_REVIEW',
+                    updatedAt: syncedTimestamp,
                 },
             },
-        },
-    })
-
-    // Add a reviewStatus action and remove all contracts from withdrawnFromContracts
-    await tx.rateTable.update({
-        where: {
-            id: rateID,
-        },
-        data: {
+            lastActionDate: syncedTimestamp,
             withdrawnFromContracts: {
                 deleteMany: {},
             },
