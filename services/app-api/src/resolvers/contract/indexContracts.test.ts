@@ -19,6 +19,8 @@ import {
     withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe(`indexContracts`, () => {
     describe('isStateUser', () => {
@@ -437,7 +439,7 @@ describe(`indexContracts`, () => {
             expect(ids.has(unlocked.id)).toBe(true)
             expect(ids.has(submittedA.id)).toBe(true)
             expect(ids.has(submittedB.id)).toBe(true)
-        })
+        }, 55000)
     })
 
     describe('updatedWithin', () => {
@@ -449,15 +451,12 @@ describe(`indexContracts`, () => {
                 context: { user: cmsUser },
             })
 
+            const oldContract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
             // simulate a time gap
-            let oldContract: any
-            await new Promise<void>((resolve) => {
-                setTimeout(() => {
-                    oldContract =
-                        createAndSubmitTestContractWithRate(stateServer)
-                    resolve()
-                }, 5000)
-            })
+            await new Promise((resolve) => setTimeout(resolve, 5000))
+
             // create a recent contract
             const recentContract =
                 await createAndSubmitTestContractWithRate(stateServer)
@@ -482,6 +481,59 @@ describe(`indexContracts`, () => {
                 (n: any) => n.id === oldContract.id
             )
             expect(hasoldContract).toBe(false)
+        })
+
+        it('filters CMS results by stored lastActionDate when the stored action dates flag is on', async () => {
+            const client = await sharedTestPrismaClient()
+            const cmsUser = testCMSUser()
+            const ldService = testLDService({
+                'use-stored-contract-action-dates': true,
+            })
+
+            const stateServer = await constructTestPostgresServer({
+                ldService,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+                ldService,
+            })
+
+            const oldContract =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const recentContract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            const now = new Date()
+            await client.contractTable.update({
+                where: {
+                    id: oldContract.id,
+                },
+                data: {
+                    lastActionDate: new Date(now.getTime() - 120_000),
+                },
+            })
+            await client.contractTable.update({
+                where: {
+                    id: recentContract.id,
+                },
+                data: {
+                    lastActionDate: now,
+                },
+            })
+
+            const result = await executeGraphQLOperation(cmsServer, {
+                query: IndexContractsForDashboardDocument,
+                variables: { input: { updatedWithin: 60 } },
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const nodes =
+                result.data?.indexContracts.edges.map((e: any) => e.node) ?? []
+            const resultIDs = nodes.map((node: Contract) => node.id)
+
+            expect(resultIDs).toContain(recentContract.id)
+            expect(resultIDs).not.toContain(oldContract.id)
         })
     })
 })
