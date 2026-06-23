@@ -30,7 +30,7 @@ Reference for any agent adding or changing distributed tracing in `services/app-
 |---|---|---|
 | Inside a top-level GraphQL Query/Mutation resolver | `withResolverSpan(context, name, attrs, fn)` | Auto-nests Prisma spans, auto-manages span status/lifecycle, links to the frontend trace |
 | A self-contained unit of work that can run **either** under a resolver **or** standalone in a batch Lambda (e.g. document zip generation) | A dedicated child span via the `withZipSpan` pattern in `zipTracing.ts` | Consistent span name + attributes regardless of caller; nests under the resolver when present, stands alone in the Lambda |
-| A standalone signal you want to count/trend independent of any request's outcome (volume counters, isolated error events) | `recordSpanEvent` / `recordException` from `otel_handler.ts` | They start from `ROOT_CONTEXT`, so the span survives independent of the active request's sampling |
+| A standalone signal you want to count/trend independent of any request's outcome (volume counters, isolated error events) | `recordSpanEvent` / `recordException` from `otel_handler.ts` | `recordSpanEvent` starts from `ROOT_CONTEXT`, so its span survives independent of the active request's sampling; `recordException` starts a span without an explicit context, so it nests under the active request when one exists |
 | Marking a **non-fatal** error on an existing span (resolver continues, returns a fallback) | `recordResolverError(span, error)` | Records the exception AND sets ERROR status so it surfaces in status-based dashboards/alerts |
 | A **fatal** error in a resolver | Just `throw` | `withResolverSpan` records the exception, sets ERROR status, and ends the span for you |
 
