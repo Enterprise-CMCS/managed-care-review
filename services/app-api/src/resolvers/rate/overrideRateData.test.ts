@@ -12,6 +12,7 @@ import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { OverrideRateDataDocument } from '../../gen/gqlClient'
 import { assertAnErrorCode } from '../../testHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('overrideRateData resolver', () => {
     const ldService = testLDService({
@@ -85,6 +86,7 @@ describe('overrideRateData resolver', () => {
     })
 
     it('creates a rate override and returns effective rate data', async () => {
+        const client = await sharedTestPrismaClient()
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)
         const rateID =
@@ -111,6 +113,24 @@ describe('overrideRateData resolver', () => {
                 result.data?.overrideRateData.rate.initiallySubmittedAt
             ).toISOString()
         ).toBe(overrideDate)
+
+        const overrideCreatedAt =
+            result.data?.overrideRateData.rate.rateOverrides?.[0]?.createdAt
+        expect(overrideCreatedAt).toBeDefined()
+
+        const rateTableRow = await client.rateTable.findUniqueOrThrow({
+            where: { id: rateID },
+            select: { lastActionDate: true },
+        })
+        const contractTableRow = await client.contractTable.findUniqueOrThrow({
+            where: { id: submittedContract.id },
+            select: { lastActionDate: true },
+        })
+
+        // Rate overrides change submitted rate data and the currently related
+        // contract view of that rate, so both stored action dates should move.
+        expect(rateTableRow.lastActionDate).toEqual(overrideCreatedAt)
+        expect(contractTableRow.lastActionDate).toEqual(overrideCreatedAt)
     })
 
     it('returns BAD_USER_INPUT for invalid override input', async () => {

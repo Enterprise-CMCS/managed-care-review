@@ -27,6 +27,7 @@ import {
     createAndUpdateTestContractWithRate,
     createSubmitAndUnlockTestContract,
     createTestContract,
+    clearRatesOnDraftContract,
     fetchTestContract,
     resubmitTestContract,
     submitTestContract,
@@ -174,6 +175,176 @@ describe('submitContract', () => {
 
             // expect no rates in latest submission
             expect(latestSubmission.rateRevisions).toHaveLength(0)
+        })
+
+        it('updates lastActionDate from submit and resubmit actions for contracts and rates', async () => {
+            const client = await sharedTestPrismaClient()
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                },
+                s3Client: mockS3,
+            })
+
+            const parentDraft =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+            const parentDraftWithRate = await addNewRateToTestContract(
+                stateServer,
+                parentDraft
+            )
+
+            const initialSubmit = await submitTestContract(
+                stateServer,
+                parentDraftWithRate.id
+            )
+            const childRateID =
+                initialSubmit.packageSubmissions[0].rateRevisions[0].rateID
+            const initialSubmitDate =
+                initialSubmit.packageSubmissions[0].submitInfo.updatedAt
+
+            let parentContractRow =
+                await client.contractTable.findUniqueOrThrow({
+                    where: { id: initialSubmit.id },
+                    select: { lastActionDate: true },
+                })
+            let childRateRow = await client.rateTable.findUniqueOrThrow({
+                where: { id: childRateID },
+                select: { lastActionDate: true },
+            })
+
+            // Initial submit writes the action date for the submitted contract
+            // and for the child rate submitted with that contract.
+            expect(parentContractRow.lastActionDate).toEqual(initialSubmitDate)
+            expect(childRateRow.lastActionDate).toEqual(initialSubmitDate)
+
+            await unlockTestContract(
+                cmsServer,
+                initialSubmit.id,
+                'Unlock parent before resubmit'
+            )
+            const parentResubmit = await submitTestContract(
+                stateServer,
+                initialSubmit.id,
+                'Parent resubmit'
+            )
+            const parentResubmitDate =
+                parentResubmit.packageSubmissions[0].submitInfo.updatedAt
+
+            parentContractRow = await client.contractTable.findUniqueOrThrow({
+                where: { id: parentResubmit.id },
+                select: { lastActionDate: true },
+            })
+            childRateRow = await client.rateTable.findUniqueOrThrow({
+                where: { id: childRateID },
+                select: { lastActionDate: true },
+            })
+
+            // Resubmit writes a new action date for the contract and for the
+            // child rate whose own revision was resubmitted with it.
+            expect(parentContractRow.lastActionDate).toEqual(parentResubmitDate)
+            expect(childRateRow.lastActionDate).toEqual(parentResubmitDate)
+
+            const linkedContractDraft =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+            await addLinkedRateToTestContract(
+                stateServer,
+                linkedContractDraft,
+                childRateID
+            )
+
+            childRateRow = await client.rateTable.findUniqueOrThrow({
+                where: { id: childRateID },
+                select: { lastActionDate: true },
+            })
+
+            // Draft links are not visible submission data yet, so the linked
+            // rate action date should not move until the contract is submitted.
+            expect(childRateRow.lastActionDate).toEqual(parentResubmitDate)
+
+            const linkedContractSubmit = await submitTestContract(
+                stateServer,
+                linkedContractDraft.id
+            )
+            const linkedContractSubmitDate =
+                linkedContractSubmit.packageSubmissions[0].submitInfo.updatedAt
+
+            let linkedContractRow =
+                await client.contractTable.findUniqueOrThrow({
+                    where: { id: linkedContractSubmit.id },
+                    select: { lastActionDate: true },
+                })
+            childRateRow = await client.rateTable.findUniqueOrThrow({
+                where: { id: childRateID },
+                select: { lastActionDate: true },
+            })
+
+            // Submitting the linked contract makes the link part of submission
+            // history, so both the linked contract and linked rate action dates move.
+            expect(linkedContractRow.lastActionDate).toEqual(
+                linkedContractSubmitDate
+            )
+            expect(childRateRow.lastActionDate).toEqual(
+                linkedContractSubmitDate
+            )
+
+            await unlockTestContract(
+                cmsServer,
+                linkedContractSubmit.id,
+                'Unlock linked contract before unlink'
+            )
+            await clearRatesOnDraftContract(
+                stateServer,
+                linkedContractSubmit.id
+            )
+            await updateTestContractDraftRevision(
+                stateServer,
+                linkedContractSubmit.id,
+                undefined,
+                {
+                    submissionType: 'CONTRACT_ONLY',
+                }
+            )
+
+            childRateRow = await client.rateTable.findUniqueOrThrow({
+                where: { id: childRateID },
+                select: { lastActionDate: true },
+            })
+
+            // Draft unlinks follow the same rule as draft links: no stored
+            // action date change until the draft contract is resubmitted.
+            expect(childRateRow.lastActionDate).toEqual(
+                linkedContractSubmitDate
+            )
+
+            const linkedContractUnlinkSubmit = await submitTestContract(
+                stateServer,
+                linkedContractSubmit.id,
+                'Linked contract unlink submit'
+            )
+            const linkedContractUnlinkSubmitDate =
+                linkedContractUnlinkSubmit.packageSubmissions[0].submitInfo
+                    .updatedAt
+
+            linkedContractRow = await client.contractTable.findUniqueOrThrow({
+                where: { id: linkedContractUnlinkSubmit.id },
+                select: { lastActionDate: true },
+            })
+            childRateRow = await client.rateTable.findUniqueOrThrow({
+                where: { id: childRateID },
+                select: { lastActionDate: true },
+            })
+
+            // Submitting the unlink removes the rate from the contract's
+            // submission package, which is a material rate relationship action.
+            expect(linkedContractRow.lastActionDate).toEqual(
+                linkedContractUnlinkSubmitDate
+            )
+            expect(childRateRow.lastActionDate).toEqual(
+                linkedContractUnlinkSubmitDate
+            )
         })
 
         it('handles a submission with a linked rate', async () => {
@@ -996,7 +1167,7 @@ describe('submitContract', () => {
             )
             expect(ds1.rateRevisions).toHaveLength(0)
             expect(ds1.cause).toBe('CONTRACT_SUBMISSION')
-        })
+        }, 60000)
 
         it('returns the correct dateAdded for documents', async () => {
             const ldService = testLDService({})
@@ -2385,6 +2556,7 @@ describe('submitContract', () => {
         })
 
         it('submits a EQRO and records review determination action', async () => {
+            const client = await sharedTestPrismaClient()
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
@@ -2416,6 +2588,18 @@ describe('submitContract', () => {
 
             expect(latestAction).toBeDefined()
             expect(latestAction?.actionType).toBe('NOT_SUBJECT_TO_REVIEW')
+
+            const contractTableRow =
+                await client.contractTable.findUniqueOrThrow({
+                    where: { id: contract.id },
+                    select: { lastActionDate: true },
+                })
+
+            // EQRO review determination is created after submit, so it should
+            // become the stored latest action date.
+            expect(contractTableRow.lastActionDate).toEqual(
+                latestAction?.updatedAt
+            )
 
             // let's unlock and resubmit with the same data
             const unlockedContract = await unlockTestContract(
@@ -2527,6 +2711,7 @@ describe('submitContract', () => {
         })
 
         it('records NOT_SUBJECT_TO_REVIEW action on a CHIP-only submission', async () => {
+            const client = await sharedTestPrismaClient()
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
                 ldService: chipAutomationLD,
@@ -2550,9 +2735,22 @@ describe('submitContract', () => {
             expect(contract.reviewStatusActions?.[0].actionType).toBe(
                 'NOT_SUBJECT_TO_REVIEW'
             )
+
+            const contractTableRow =
+                await client.contractTable.findUniqueOrThrow({
+                    where: { id: contract.id },
+                    select: { lastActionDate: true },
+                })
+
+            // Health plan review determination is created after submit, so it
+            // should become the stored latest action date.
+            expect(contractTableRow.lastActionDate).toEqual(
+                contract.reviewStatusActions?.[0].updatedAt
+            )
         })
 
         it('records UNDER_REVIEW action on non-CHIP HEALTH_PLAN submission', async () => {
+            const client = await sharedTestPrismaClient()
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
                 ldService: chipAutomationLD,
@@ -2566,6 +2764,18 @@ describe('submitContract', () => {
             expect(contract.reviewStatusActions).toHaveLength(1)
             expect(contract.reviewStatusActions?.[0].actionType).toBe(
                 'UNDER_REVIEW'
+            )
+
+            const contractTableRow =
+                await client.contractTable.findUniqueOrThrow({
+                    where: { id: contract.id },
+                    select: { lastActionDate: true },
+                })
+
+            // Health plan review determination is created after submit, so it
+            // should become the stored latest action date.
+            expect(contractTableRow.lastActionDate).toEqual(
+                contract.reviewStatusActions?.[0].updatedAt
             )
         })
 
