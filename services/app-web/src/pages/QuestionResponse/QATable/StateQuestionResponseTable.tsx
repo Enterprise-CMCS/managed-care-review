@@ -67,6 +67,13 @@ export const StateQuestionResponseTable = ({
     const sortedAnsweredQuestions = sortRoundsByDate(answeredQuestions)
     const sortedUnansweredQuestions = sortRoundsByDate(unansweredQuestions)
 
+    // Only the first question rendered on the page (outstanding questions are
+    // rendered before answered ones) gets the primary upload response button;
+    // all subsequent buttons use the secondary (outline) styling.
+    const firstQuestionId =
+        sortedUnansweredQuestions[0]?.[0]?.questionData.id ??
+        sortedAnsweredQuestions[0]?.[0]?.questionData.id
+
     return (
         <>
             {header && (
@@ -111,6 +118,9 @@ export const StateQuestionResponseTable = ({
                                 questionType={questionType}
                                 contractStatus={contractStatus}
                                 qaSectionHeaderId="outsandingContractQuestions"
+                                isFirstQuestion={
+                                    questionData.id === firstQuestionId
+                                }
                             />
                         ))
                     )
@@ -139,6 +149,9 @@ export const StateQuestionResponseTable = ({
                                 questionType={questionType}
                                 contractStatus={contractStatus}
                                 qaSectionHeaderId="answeredContractQuestions"
+                                isFirstQuestion={
+                                    questionData.id === firstQuestionId
+                                }
                             />
                         ))
                     )
