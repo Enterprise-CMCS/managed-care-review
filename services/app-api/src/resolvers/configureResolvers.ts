@@ -7,6 +7,7 @@ import {
     adminCreateContractQuestionResolver,
     adminCreateContractQuestionResponseResolver,
     deleteContractQuestionResolver,
+    deleteContractQuestionResponseResolver,
     createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
     createRateQuestionResolver,
@@ -154,6 +155,8 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
+            deleteContractQuestionResponse:
+                deleteContractQuestionResponseResolver(store),
             adminCreateContractQuestion:
                 adminCreateContractQuestionResolver(store),
             adminCreateContractQuestionResponse:
@@ -221,10 +224,6 @@ export function configureResolvers(
                 }
             },
         },
-        // TODO: Restore QuestionAuthor resolver when union is re-enabled
-        // in schema for ContractQuestion/RateQuestion.addedBy.
-        // TODO: Restore ResponseAuthor resolver when union is re-enabled
-        // in schema for QuestionResponse.addedBy.
         SubmittableRevision: {
             __resolveType(obj) {
                 if ('contract' in obj) {

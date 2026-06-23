@@ -83,6 +83,9 @@ function mockStoreThatErrors(): Store {
         softDeleteContractQuestion: async (_ID) => {
             return genericError
         },
+        softDeleteContractQuestionResponse: async (_ID) => {
+            return genericError
+        },
         findAllQuestionsByContract: async (_pkgID) => {
             return genericError
         },
