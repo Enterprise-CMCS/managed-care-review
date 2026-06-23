@@ -21,12 +21,20 @@ import {
 import {
     addLinkedRateToTestContract,
     addNewRateToTestContract,
+    fetchTestRateById,
     formatRateDataForSending,
+    overrideTestRateData,
+    undoWithdrawTestRate,
+    withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import { must } from '../../testHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
-import { buildContractSubmissionHistoryLog } from './submissionHistoryLog'
+import { findRateWithHistory } from './findRateWithHistory'
+import {
+    buildContractSubmissionHistoryLog,
+    buildRateSubmissionHistoryLog,
+} from './submissionHistoryLog'
 
 describe('buildContractSubmissionHistoryLog', () => {
     it('builds a complete action log from a complex contract history', async () => {
@@ -52,7 +60,7 @@ describe('buildContractSubmissionHistoryLog', () => {
 
         // Submit the target contract with both its own child rate and the linked
         // rate. This should count as a direct CONTRACT_SUBMISSION, not as a
-        // RATE_SUBMISSION, because the target contract revision is in
+        // LINKED_RATE_UPDATE, because the target contract revision is in
         // submittedRevisions.
         const targetDraft =
             await createAndUpdateTestContractWithRate(stateServer)
@@ -82,7 +90,7 @@ describe('buildContractSubmissionHistoryLog', () => {
 
         // Resubmit the parent package that owns the linked rate. This changes
         // submitted linked-rate data visible from the target contract, so the
-        // target history should include one RATE_SUBMISSION.
+        // target history should include one LINKED_RATE_UPDATE.
         await unlockTestContract(
             cmsServer,
             submittedParent.id,
@@ -182,11 +190,11 @@ describe('buildContractSubmissionHistoryLog', () => {
             'Unlock target for resubmit',
         ])
 
-        // RATE_SUBMISSION package causes should map to RATE_SUBMISSION
+        // RATE_SUBMISSION package causes should map to LINKED_RATE_UPDATE
         // history entries. This is the contract-side "linked rate data changed"
         // case.
         const linkedRateUpdateEntries = historyLog.filter(
-            (entry) => entry.actionType === 'RATE_SUBMISSION'
+            (entry) => entry.actionType === 'LINKED_RATE_UPDATE'
         )
         expect(linkedRateUpdateEntries).toHaveLength(
             rateSubmissionPackages.length
@@ -409,7 +417,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         expect(resubmitEntryIndex).toBe(1)
     })
 
-    it('adds one rate submission when multiple already-linked rates are resubmitted by the same parent', async () => {
+    it('adds one linked rate update when multiple already-linked rates are resubmitted by the same parent', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -467,7 +475,7 @@ describe('buildContractSubmissionHistoryLog', () => {
 
         // Resubmit the parent contract. Both linked rates are updated by the
         // same parent submit event, so the action log should get one
-        // RATE_SUBMISSION.
+        // LINKED_RATE_UPDATE.
         await unlockTestContract(
             cmsServer,
             submittedParent.id,
@@ -492,7 +500,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         // expected.
         const historyLog = buildContractSubmissionHistoryLog(contract)
         const linkedRateUpdateEntries = historyLog.filter(
-            (entry) => entry.actionType === 'RATE_SUBMISSION'
+            (entry) => entry.actionType === 'LINKED_RATE_UPDATE'
         )
 
         expect(linkedRateUpdateEntries).toHaveLength(1)
@@ -566,7 +574,9 @@ describe('buildContractSubmissionHistoryLog', () => {
         const historyLog = buildContractSubmissionHistoryLog(contract)
 
         expect(
-            historyLog.some((entry) => entry.actionType === 'RATE_SUBMISSION')
+            historyLog.some(
+                (entry) => entry.actionType === 'LINKED_RATE_UPDATE'
+            )
         ).toBe(false)
     })
 
@@ -653,7 +663,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         expect(
             historyLog.some(
                 (entry) =>
-                    entry.actionType === 'RATE_SUBMISSION' &&
+                    entry.actionType === 'LINKED_RATE_UPDATE' &&
                     entry.updatedReason ===
                         'Resubmit target without linked rate'
             )
@@ -701,11 +711,13 @@ describe('buildContractSubmissionHistoryLog', () => {
             )
         ).toHaveLength(1)
         expect(
-            historyLog.some((entry) => entry.actionType === 'RATE_SUBMISSION')
+            historyLog.some(
+                (entry) => entry.actionType === 'LINKED_RATE_UPDATE'
+            )
         ).toBe(false)
     })
 
-    it('skips a new link to another contract while existing linked contracts get RATE_SUBMISSION', async () => {
+    it('skips a new link to another contract while existing linked contracts get LINKED_RATE_UPDATE', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -733,7 +745,7 @@ describe('buildContractSubmissionHistoryLog', () => {
 
         // A different contract links to the same rate but has not submitted the
         // relationship yet. When the parent resubmits, the first linked
-        // contract should see a rate submission, while the second sees
+        // contract should see a linked rate update, while the second sees
         // a RATE_LINK relationship event.
         const secondLinkedSubmitted =
             await createAndSubmitTestContract(stateServer)
@@ -781,7 +793,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         expect(
             firstLinkedHistoryLog.filter(
                 (entry) =>
-                    entry.actionType === 'RATE_SUBMISSION' &&
+                    entry.actionType === 'LINKED_RATE_UPDATE' &&
                     entry.updatedReason ===
                         'Resubmit parent after another contract link'
             )
@@ -798,7 +810,567 @@ describe('buildContractSubmissionHistoryLog', () => {
 
         expect(
             secondLinkedHistoryLog.some(
-                (entry) => entry.actionType === 'RATE_SUBMISSION'
+                (entry) => entry.actionType === 'LINKED_RATE_UPDATE'
+            )
+        ).toBe(false)
+    })
+})
+
+describe('buildRateSubmissionHistoryLog', () => {
+    it('builds a child rate action log from parent contract submit, unlock, override, and withdraw', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+            },
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+
+        // Child rates are unlocked and resubmitted through their parent
+        // contract. The rate builder still logs this as RATE_SUBMISSION because
+        // the rate revision is part of submittedRevisions.
+        await unlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Unlock parent contract for rate resubmit'
+        )
+        await submitTestContract(
+            stateServer,
+            submittedContract.id,
+            'Resubmit child rate with parent contract'
+        )
+
+        // Rate overrides are outside packageSubmissions, but they still mutate
+        // submitted rate state and should move rate freshness.
+        await overrideTestRateData(adminServer, {
+            rateID,
+            description: 'Override rate initially submitted at',
+            overrides: {
+                initiallySubmittedAt: '2020-01-15T00:00:00.000Z',
+                initiallySubmittedAtOp: 'OVERRIDE',
+            },
+        })
+
+        // Withdrawing a rate performs its own unlock/resubmit flow before
+        // appending the WITHDRAW review action: the affected submitted
+        // contracts are unlocked and resubmitted without this rate, then the
+        // withdrawn rate revision is resubmitted with a withdrawal reason.
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw rate from review')
+
+        const fetchedRate = await fetchTestRateById(stateServer, rateID)
+        const rateSubmissionPackages =
+            fetchedRate.packageSubmissions?.filter(
+                (packageSubmission) =>
+                    packageSubmission.cause === 'RATE_SUBMISSION'
+            ) ?? []
+        const rateUnlinkPackages =
+            fetchedRate.packageSubmissions?.filter(
+                (packageSubmission) => packageSubmission.cause === 'RATE_UNLINK'
+            ) ?? []
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const rateSubmissionEntries = historyLog.filter(
+            (entry) => entry.actionType === 'RATE_SUBMISSION'
+        )
+        const unlockEntries = historyLog.filter(
+            (entry) => entry.actionType === 'UNLOCK'
+        )
+        const withdrawAction = rate.reviewStatusActions?.find(
+            (action) => action.actionType === 'WITHDRAW'
+        )
+        const withdrawEntry = historyLog.find(
+            (entry) => entry.actionType === 'WITHDRAW'
+        )
+        const rateUnlinkEntries = historyLog.filter(
+            (entry) => entry.actionType === 'RATE_UNLINK'
+        )
+        const override = rate.rateOverrides?.[0]
+        const overrideEntry = historyLog.find(
+            (entry) => entry.actionType === 'OVERRIDE'
+        )
+        const manualRateResubmitPackage = rate.packageSubmissions.find(
+            (packageSubmission) =>
+                packageSubmission.submitInfo.updatedReason ===
+                'Resubmit child rate with parent contract'
+        )
+        const manualUnlockInfo =
+            manualRateResubmitPackage?.rateRevision.unlockInfo
+
+        expect(
+            historyLog
+                .slice(1)
+                .every(
+                    (entry, index) =>
+                        historyLog[index].updatedAt.getTime() >=
+                        entry.updatedAt.getTime()
+                )
+        ).toBe(true)
+
+        const historyActions = historyLog.map((entry) => ({
+            actionType: entry.actionType,
+            updatedReason: entry.updatedReason,
+        }))
+        const rateSubmissionReasons = rateSubmissionEntries.map(
+            (entry) => entry.updatedReason
+        )
+        const unlockReasons = unlockEntries.map((entry) => entry.updatedReason)
+
+        expect(historyLog).toHaveLength(8)
+        expect(historyActions).toEqual(
+            expect.arrayContaining([
+                {
+                    actionType: 'RATE_SUBMISSION',
+                    updatedReason: 'Initial submission',
+                },
+                {
+                    actionType: 'UNLOCK',
+                    updatedReason: 'Unlock parent contract for rate resubmit',
+                },
+                {
+                    actionType: 'RATE_SUBMISSION',
+                    updatedReason: 'Resubmit child rate with parent contract',
+                },
+                {
+                    actionType: 'OVERRIDE',
+                    updatedReason: 'Override rate initially submitted at',
+                },
+                {
+                    actionType: 'RATE_SUBMISSION',
+                    updatedReason:
+                        'CMS has withdrawn this rate. Withdraw rate from review',
+                },
+                {
+                    actionType: 'WITHDRAW',
+                    updatedReason: 'Withdraw rate from review',
+                },
+            ])
+        )
+        expect(
+            historyActions.some(
+                (entry) =>
+                    entry.actionType === 'UNLOCK' &&
+                    entry.updatedReason?.includes('CMS withdrawing rate')
+            )
+        ).toBe(true)
+        expect(
+            historyActions.some(
+                (entry) =>
+                    entry.actionType === 'RATE_UNLINK' &&
+                    entry.updatedReason?.includes('CMS has withdrawn rate') &&
+                    entry.updatedReason.includes(
+                        'from this submission. Withdraw rate from review'
+                    )
+            )
+        ).toBe(true)
+        expect(rateSubmissionPackages).toHaveLength(3)
+        expect(rateUnlinkPackages).toHaveLength(1)
+        expect(rateSubmissionReasons).toHaveLength(3)
+        expect(rateSubmissionReasons).toEqual(
+            expect.arrayContaining([
+                'Initial submission',
+                'Resubmit child rate with parent contract',
+                'CMS has withdrawn this rate. Withdraw rate from review',
+            ])
+        )
+        expect(unlockReasons).toHaveLength(2)
+        expect(unlockReasons).toContain(
+            'Unlock parent contract for rate resubmit'
+        )
+        expect(
+            unlockReasons.some((reason) =>
+                reason?.includes('CMS withdrawing rate')
+            )
+        ).toBe(true)
+        expect(manualRateResubmitPackage).toBeDefined()
+        expect(
+            rateSubmissionEntries.find(
+                (entry) =>
+                    entry.updatedReason ===
+                    'Resubmit child rate with parent contract'
+            )
+        ).toEqual(
+            expect.objectContaining({
+                actionType: 'RATE_SUBMISSION',
+                updatedAt: manualRateResubmitPackage?.submitInfo.updatedAt,
+                updatedBy: manualRateResubmitPackage?.submitInfo.updatedBy,
+                updatedReason:
+                    manualRateResubmitPackage?.submitInfo.updatedReason,
+            })
+        )
+        expect(manualUnlockInfo).toBeDefined()
+        expect(
+            unlockEntries.find(
+                (entry) =>
+                    entry.updatedReason ===
+                    'Unlock parent contract for rate resubmit'
+            )
+        ).toEqual(
+            expect.objectContaining({
+                actionType: 'UNLOCK',
+                updatedAt: manualUnlockInfo?.updatedAt,
+                updatedBy: manualUnlockInfo?.updatedBy,
+                updatedReason: manualUnlockInfo?.updatedReason,
+            })
+        )
+        expect(override).toBeDefined()
+        expect(overrideEntry).toEqual(
+            expect.objectContaining({
+                actionType: 'OVERRIDE',
+                updatedAt: override?.createdAt,
+                updatedBy: override?.updatedBy,
+                updatedReason: override?.description,
+            })
+        )
+        expect(withdrawAction).toBeDefined()
+        expect(withdrawEntry).toEqual(
+            expect.objectContaining({
+                actionType: 'WITHDRAW',
+                updatedAt: withdrawAction?.updatedAt,
+                updatedBy: withdrawAction?.updatedBy,
+                updatedReason: withdrawAction?.updatedReason,
+            })
+        )
+        expect(rateUnlinkEntries).toHaveLength(1)
+        expect(rateUnlinkEntries[0].updatedReason).toContain(
+            'CMS has withdrawn rate'
+        )
+        expect(rateUnlinkEntries[0].updatedReason).toContain(
+            'from this submission. Withdraw rate from review'
+        )
+    })
+
+    it('logs an active draft rate unlock before the rate is resubmitted', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+
+        // The parent contract unlock creates the in-flight draft rate revision
+        // with unlockInfo. The rate itself is not independently unlocked.
+        await unlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Unlock parent contract without rate resubmit'
+        )
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const historyLog = buildRateSubmissionHistoryLog(rate)
+
+        expect(historyLog[0].actionType).toBe('UNLOCK')
+        expect(historyLog[0].updatedReason).toBe(
+            'Unlock parent contract without rate resubmit'
+        )
+    })
+
+    it('logs rate data changes when a linked rate parent resubmits', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedParent =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedParent.packageSubmissions[0].rateRevisions[0].rateID
+
+        // Link the parent-owned rate into another submitted contract. The rate
+        // is now visible from multiple packages, but its data is still owned by
+        // and resubmitted through the parent contract.
+        const linkedDraft =
+            await createAndUpdateTestContractWithRate(stateServer)
+        const linkedWithRate = await addLinkedRateToTestContract(
+            stateServer,
+            linkedDraft,
+            rateID
+        )
+        await submitTestContract(
+            stateServer,
+            linkedWithRate.id,
+            'Submit contract with linked parent rate'
+        )
+
+        await unlockTestContract(
+            cmsServer,
+            submittedParent.id,
+            'Unlock parent to update linked rate data'
+        )
+        await submitTestContract(
+            stateServer,
+            submittedParent.id,
+            'Resubmit parent linked rate data'
+        )
+
+        const fetchedRate = await fetchTestRateById(stateServer, rateID)
+        const rateSubmissionPackages =
+            fetchedRate.packageSubmissions?.filter(
+                (packageSubmission) =>
+                    packageSubmission.cause === 'RATE_SUBMISSION'
+            ) ?? []
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const rateSubmissionEntries = historyLog.filter(
+            (entry) => entry.actionType === 'RATE_SUBMISSION'
+        )
+
+        expect(rateSubmissionEntries).toHaveLength(
+            rateSubmissionPackages.length
+        )
+        expect(
+            rateSubmissionEntries.some(
+                (entry) =>
+                    entry.updatedReason === 'Resubmit parent linked rate data'
+            )
+        ).toBe(true)
+    })
+
+    it('does not log draft-only rate links before the contract submits', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedParent =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedParent.packageSubmissions[0].rateRevisions[0].rateID
+
+        const submittedContractOnly =
+            await createAndSubmitTestContract(stateServer)
+        await unlockTestContract(
+            cmsServer,
+            submittedContractOnly.id,
+            'Unlock contract for draft-only rate link'
+        )
+        const unlockedContractOnly = await fetchTestContract(
+            stateServer,
+            submittedContractOnly.id
+        )
+        await addLinkedRateToTestContract(
+            stateServer,
+            unlockedContractOnly,
+            rateID
+        )
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const historyLog = buildRateSubmissionHistoryLog(rate)
+
+        expect(
+            historyLog.some((entry) => entry.actionType === 'RATE_LINK')
+        ).toBe(false)
+        expect(
+            historyLog.some(
+                (entry) =>
+                    entry.updatedReason ===
+                    'Unlock contract for draft-only rate link'
+            )
+        ).toBe(false)
+    })
+
+    it('logs an under-review review action from undoing a rate withdraw', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+
+        await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw rate before undo review'
+        )
+        await undoWithdrawTestRate(
+            cmsServer,
+            rateID,
+            'Undo rate withdraw back to under review'
+        )
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const underReviewAction = rate.reviewStatusActions?.find(
+            (action) =>
+                action.actionType === 'UNDER_REVIEW' &&
+                action.updatedReason ===
+                    'Undo rate withdraw back to under review'
+        )
+        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const underReviewEntry = historyLog.find(
+            (entry) =>
+                entry.actionType === 'UNDER_REVIEW' &&
+                entry.updatedReason ===
+                    'Undo rate withdraw back to under review'
+        )
+
+        expect(underReviewAction).toBeDefined()
+        expect(underReviewEntry).toEqual(
+            expect.objectContaining({
+                actionType: 'UNDER_REVIEW',
+                updatedAt: underReviewAction?.updatedAt,
+                updatedBy: underReviewAction?.updatedBy,
+                updatedReason: underReviewAction?.updatedReason,
+            })
+        )
+    })
+
+    it('logs rate links and skips already-related contract submissions from package history', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedParent =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedParent.packageSubmissions[0].rateRevisions[0].rateID
+
+        // The first linked-contract submit is a relationship event from the
+        // rate perspective. It should appear as RATE_LINK, not
+        // CONTRACT_SUBMISSION.
+        const linkedDraft =
+            await createAndUpdateTestContractWithRate(stateServer)
+        const linkedWithRate = await addLinkedRateToTestContract(
+            stateServer,
+            linkedDraft,
+            rateID
+        )
+        const linkedSubmitted = await submitTestContract(
+            stateServer,
+            linkedWithRate.id,
+            'Submit newly linked contract'
+        )
+
+        // Once the contract is already connected, its resubmit is contract-only
+        // activity from the rate perspective and should not be logged.
+        await unlockTestContract(
+            cmsServer,
+            linkedSubmitted.id,
+            'Unlock already linked contract'
+        )
+        await submitTestContract(
+            stateServer,
+            linkedSubmitted.id,
+            'Resubmit already linked contract'
+        )
+
+        // Unlinking the rate from the already-connected contract is material
+        // rate relationship history and should be logged as RATE_UNLINK.
+        await unlockTestContract(
+            cmsServer,
+            linkedSubmitted.id,
+            'Unlock linked contract to unlink rate'
+        )
+        const unlockedLinkedContract = await fetchTestContract(
+            stateServer,
+            linkedSubmitted.id
+        )
+        const unlinkResult = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: unlockedLinkedContract.id,
+                    lastSeenUpdatedAt:
+                        unlockedLinkedContract.draftRevision?.updatedAt,
+                    updatedRates: unlockedLinkedContract.draftRates
+                        ?.filter((rate) => rate.id !== rateID)
+                        .map((rate) => ({
+                            type: 'UPDATE' as const,
+                            rateID: rate.id,
+                            formData: rate.draftRevision
+                                ? formatRateDataForSending(
+                                      rate.draftRevision.formData
+                                  )
+                                : undefined,
+                        })),
+                },
+            },
+        })
+
+        expect(unlinkResult.errors).toBeUndefined()
+        await submitTestContract(
+            stateServer,
+            linkedSubmitted.id,
+            'Resubmit linked contract without rate'
+        )
+
+        const fetchedRate = await fetchTestRateById(stateServer, rateID)
+        const contractSubmissionPackages =
+            fetchedRate.packageSubmissions?.filter(
+                (packageSubmission) =>
+                    packageSubmission.cause === 'CONTRACT_SUBMISSION'
+            ) ?? []
+        const rateLinkPackages =
+            fetchedRate.packageSubmissions?.filter(
+                (packageSubmission) => packageSubmission.cause === 'RATE_LINK'
+            ) ?? []
+        const rateUnlinkPackages =
+            fetchedRate.packageSubmissions?.filter(
+                (packageSubmission) => packageSubmission.cause === 'RATE_UNLINK'
+            ) ?? []
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const rateLinkEntries = historyLog.filter(
+            (entry) => entry.actionType === 'RATE_LINK'
+        )
+        const rateUnlinkEntries = historyLog.filter(
+            (entry) => entry.actionType === 'RATE_UNLINK'
+        )
+
+        expect(rateLinkPackages).toHaveLength(1)
+        expect(contractSubmissionPackages).toHaveLength(1)
+        expect(rateUnlinkPackages).toHaveLength(1)
+        expect(rateLinkEntries).toHaveLength(1)
+        expect(rateUnlinkEntries).toHaveLength(1)
+        // Initial contract submissions use the default submit reason, even
+        // when the test helper passes a reason string.
+        expect(rateLinkEntries[0].updatedReason).toBe('Initial submission')
+        expect(rateUnlinkEntries[0].updatedReason).toBe(
+            'Resubmit linked contract without rate'
+        )
+        expect(
+            historyLog.some(
+                (entry) =>
+                    entry.updatedReason === 'Submit newly linked contract'
+            )
+        ).toBe(false)
+        expect(
+            historyLog.some(
+                (entry) =>
+                    entry.updatedReason === 'Resubmit already linked contract'
             )
         ).toBe(false)
     })

@@ -4,28 +4,47 @@ import type {
     UpdateInfoType,
 } from '../../domain-models'
 import type { ReviewActionTypes } from '../../domain-models/contractAndRates/contractReviewActionType'
+import { logError } from '../../logger'
 
-// A single contract- or rate-level lifecycle event we care about for
-// "freshness" — the actions that should move a contract's or rate's
-// lastActionDate: every submit, every unlock, every review status action, every
-// admin data override, and contract-visible linked rate submissions. Q&A is
-// intentionally out of scope (handled separately). The contract and rate
-// builders below share this entry shape; the rate review action types
-// (UNDER_REVIEW / WITHDRAW) are a subset of the contract ones, so the union
-// below covers both sides.
-type SubmissionHistoryActionType =
-    | 'CONTRACT_SUBMISSION'
-    | 'RATE_SUBMISSION'
-    | 'UNLOCK'
-    | 'OVERRIDE'
-    | ReviewActionTypes
-
-type SubmissionHistoryLogEntry = {
-    actionType: SubmissionHistoryActionType
+type BaseSubmissionHistoryLogEntry<TActionType extends string> = {
+    actionType: TActionType
     updatedAt: Date
     updatedBy?: UpdateInfoType['updatedBy']
     updatedReason?: string
 }
+
+// Contract history tracks submitted-visible changes to the contract package.
+// Relationship-only rate link/unlink package events are skipped here because
+// the current contract's submitted relationship changes are captured by its own
+// CONTRACT_SUBMISSION.
+type ContractSubmissionHistoryActionType =
+    | 'CONTRACT_SUBMISSION'
+    | 'LINKED_RATE_UPDATE'
+    | 'UNLOCK'
+    | 'OVERRIDE'
+    | ReviewActionTypes
+
+type ContractSubmissionHistoryLogEntry =
+    BaseSubmissionHistoryLogEntry<ContractSubmissionHistoryActionType>
+
+// Rate history also tracks submitted-visible contract relationship changes.
+// A contract can link or unlink a rate without creating a new rate revision, so
+// RATE_LINK / RATE_UNLINK are meaningful rate history events when they appear
+// in rate.packageSubmissions.
+// Keep the review action side broad instead of narrowing to today's rate
+// actions (`UNDER_REVIEW` / `WITHDRAW`) because rate review workflows may grow
+// to approval or other contract-like review actions. The builder only emits
+// actions actually present on rate.reviewStatusActions at runtime.
+type RateSubmissionHistoryActionType =
+    | 'RATE_SUBMISSION'
+    | 'UNLOCK'
+    | 'OVERRIDE'
+    | ReviewActionTypes
+    | 'RATE_LINK'
+    | 'RATE_UNLINK'
+
+type RateSubmissionHistoryLogEntry =
+    BaseSubmissionHistoryLogEntry<RateSubmissionHistoryActionType>
 
 /**
  * Same-millisecond tie-breaker for action log sorting.
@@ -41,7 +60,11 @@ type SubmissionHistoryLogEntry = {
  * - contract/rate submissions sort above the unlock that opened the revision
  * - unlocks are the earliest action in a normal unlock -> submit lifecycle
  */
-function actionTypeSortRank(actionType: SubmissionHistoryActionType): number {
+function actionTypeSortRank(
+    actionType:
+        | ContractSubmissionHistoryActionType
+        | RateSubmissionHistoryActionType
+): number {
     switch (actionType) {
         case 'OVERRIDE':
             return 4
@@ -50,7 +73,10 @@ function actionTypeSortRank(actionType: SubmissionHistoryActionType): number {
         case 'MARK_AS_APPROVED':
         case 'WITHDRAW':
             return 3
+        case 'RATE_LINK':
+        case 'RATE_UNLINK':
         case 'CONTRACT_SUBMISSION':
+        case 'LINKED_RATE_UPDATE':
         case 'RATE_SUBMISSION':
             return 2
         case 'UNLOCK':
@@ -63,7 +89,7 @@ function actionTypeSortRank(actionType: SubmissionHistoryActionType): number {
 /**
  * Reconstructs the contract's submission action history from already-parsed
  * domain data, returning one entry per direct contract submission,
- * already-linked rate submission, direct unlock, review action, and override,
+ * already-linked rate data update, direct unlock, review action, and override,
  * sorted newest-first.
  *
  * This reads from the parsed ContractType rather than the DB so it can run on
@@ -71,8 +97,8 @@ function actionTypeSortRank(actionType: SubmissionHistoryActionType): number {
  */
 function buildContractSubmissionHistoryLog(
     contract: ContractType
-): SubmissionHistoryLogEntry[] {
-    const historyLog: SubmissionHistoryLogEntry[] = []
+): ContractSubmissionHistoryLogEntry[] {
+    const historyLog: ContractSubmissionHistoryLogEntry[] = []
 
     // Parse packageSubmission for submit and unlock logs
     for (const [
@@ -102,7 +128,7 @@ function buildContractSubmissionHistoryLog(
             // For direct contract resubmissions, the unlockInfo on this
             // submitted revision is the CMS unlock action that opened this
             // revision. We only record it on direct contract submissions so a
-            // later rate-link/rate-submission package snapshot does not
+            // later rate-link/linked-rate-update package snapshot does not
             // duplicate an old contract unlock.
             const unlockInfo = packageSubmission.contractRevision.unlockInfo
             if (unlockInfo) {
@@ -139,31 +165,41 @@ function buildContractSubmissionHistoryLog(
         }
 
         // Type guard: submittedRevisions can contain contract or rate revisions.
-        // This branch only handles linked rate submissions, so keep rate revisions.
+        // This branch only handles linked rate data updates, so keep rate revisions.
         const connectedSubmittedRates = connectedSubmittedRateRevisions.filter(
             (revision) => 'rateID' in revision
         )
 
-        // Add one RATE_SUBMISSION entry when any submitted linked rate was
-        // already attached in the previous package snapshot. A single package
-        // submission comes from one parent submit event, so multiple linked
-        // rates here should have been submitted together by the same parent
-        // contract. We log the parent submit event once, not once per linked
-        // rate. If none of the submitted rates existed on the previous package
-        // snapshot, the resolver would call this RATE_LINK; that is also
-        // relationship-only history until the current contract submits the new
-        // relationship, so this action log skips it.
+        if (!previousPackageSubmission) {
+            logError(
+                'buildContractSubmissionHistoryLog',
+                `Contract ${contract.id} has a non-contract package submission ${packageSubmission.contractRevision.id} with connected submitted rates but no previous package submission; skipping ambiguous linked rate update history`
+            )
+            continue
+        }
+
+        // Add one LINKED_RATE_UPDATE entry when any submitted linked rate was
+        // already attached in the previous package snapshot. For contract
+        // history, this means linked rate data changed while the rate remained
+        // linked; it is not a link or unlink event. A single package submission
+        // comes from one parent submit event, so multiple linked rates here
+        // should have been submitted together by the same parent contract. We
+        // log the parent submit event once, not once per linked rate. If none
+        // of the submitted rates existed on the previous package snapshot, the
+        // resolver would call this RATE_LINK; that is relationship-only history
+        // until the current contract submits the new relationship, so this
+        // action log skips it.
         const wasAnyRateAlreadyLinked = connectedSubmittedRates.some(
             (submittedRate) =>
-                previousPackageSubmission?.rateRevisions.some(
+                previousPackageSubmission.rateRevisions.some(
                     (rateRevision) =>
                         rateRevision.rateID === submittedRate.rateID
-                ) ?? false
+                )
         )
 
         if (wasAnyRateAlreadyLinked) {
             historyLog.push({
-                actionType: 'RATE_SUBMISSION',
+                actionType: 'LINKED_RATE_UPDATE',
                 updatedAt: submitInfo.updatedAt,
                 updatedBy: submitInfo.updatedBy,
                 updatedReason: submitInfo.updatedReason,
@@ -237,29 +273,112 @@ function buildContractSubmissionHistoryLog(
  */
 function buildRateSubmissionHistoryLog(
     rate: RateType
-): SubmissionHistoryLogEntry[] {
-    const historyLog: SubmissionHistoryLogEntry[] = []
+): RateSubmissionHistoryLogEntry[] {
+    const historyLog: RateSubmissionHistoryLogEntry[] = []
 
-    // Each packageSubmission is one submitted revision of the rate. The
-    // submitInfo is its submit event; the same revision's unlockInfo (when
-    // present) is the unlock that opened that revision before it was submitted.
-    // Order doesn't matter here because the log is sorted by updatedAt below.
-    for (const packageSubmission of rate.packageSubmissions) {
+    for (const [
+        index,
+        packageSubmission,
+    ] of rate.packageSubmissions.entries()) {
+        const previousPackageSubmission = rate.packageSubmissions[index + 1]
+
         const submitInfo = packageSubmission.submitInfo
-        historyLog.push({
-            actionType: 'RATE_SUBMISSION',
-            updatedAt: submitInfo.updatedAt,
-            updatedBy: submitInfo.updatedBy,
-            updatedReason: submitInfo.updatedReason,
-        })
 
-        const unlockInfo = packageSubmission.rateRevision.unlockInfo
-        if (unlockInfo) {
+        // Package submissions are perspective history, not always a submission
+        // of this rate's data. If the rate revision is in the set of revisions
+        // stamped by this updateInfo row, this rate's submitted data changed.
+        // Child rates usually get here through their parent contract's
+        // submit/resubmit, not through an independent rate submission workflow.
+        const isRateSubmission = packageSubmission.submittedRevisions.some(
+            (revision) => revision.id === packageSubmission.rateRevision.id
+        )
+
+        if (isRateSubmission) {
             historyLog.push({
-                actionType: 'UNLOCK',
-                updatedAt: unlockInfo.updatedAt,
-                updatedBy: unlockInfo.updatedBy,
-                updatedReason: unlockInfo.updatedReason,
+                actionType: 'RATE_SUBMISSION',
+                updatedAt: submitInfo.updatedAt,
+                updatedBy: submitInfo.updatedBy,
+                updatedReason: submitInfo.updatedReason,
+            })
+
+            // For submitted rate revisions, the unlockInfo on this submitted
+            // revision is the CMS action that opened this revision through the
+            // parent contract unlock path. We only record it when this rate's
+            // revision was submitted so a later
+            // contract-link/contract-submission package snapshot does not
+            // duplicate an old rate unlock.
+            const unlockInfo = packageSubmission.rateRevision.unlockInfo
+            if (unlockInfo) {
+                historyLog.push({
+                    actionType: 'UNLOCK',
+                    updatedAt: unlockInfo.updatedAt,
+                    updatedBy: unlockInfo.updatedBy,
+                    updatedReason: unlockInfo.updatedReason,
+                })
+            }
+
+            continue
+        }
+
+        // If this rate was not submitted, this package entry may still matter
+        // because one or more submitted contracts include this rate. Find the
+        // submitted contract revisions that are connected to this rate in this
+        // package snapshot. Start from contractRevisions because that collection
+        // is already typed as contract revisions; submittedRevisions is a mixed
+        // contract/rate union.
+        const submittedRevisionIDs = new Set(
+            packageSubmission.submittedRevisions.map((revision) => revision.id)
+        )
+        const connectedSubmittedContracts =
+            packageSubmission.contractRevisions.filter((contractRevision) =>
+                submittedRevisionIDs.has(contractRevision.id)
+            )
+
+        if (connectedSubmittedContracts.length === 0) {
+            // No connected submitted contract matches the resolver's
+            // RATE_UNLINK package cause from the rate perspective. This rate did
+            // not get a new revision, but submitted package history changed
+            // because a contract removed the rate relationship.
+            historyLog.push({
+                actionType: 'RATE_UNLINK',
+                updatedAt: submitInfo.updatedAt,
+                updatedBy: submitInfo.updatedBy,
+                updatedReason: submitInfo.updatedReason,
+            })
+            continue
+        }
+
+        if (!previousPackageSubmission) {
+            logError(
+                'buildRateSubmissionHistoryLog',
+                `Rate ${rate.id} has a non-rate package submission ${packageSubmission.rateRevision.id} with connected submitted contracts but no previous package submission; skipping ambiguous rate relationship history`
+            )
+            continue
+        }
+
+        // If any submitted related contract was already attached in the
+        // previous package snapshot, the resolver would call this
+        // CONTRACT_SUBMISSION from the rate perspective. That is contract-only
+        // activity and does not change the rate's data or relationship set, so
+        // rate history skips it. If none of the submitted contracts existed on
+        // the previous package snapshot, the resolver would call this RATE_LINK.
+        // We log that because a rate can gain submitted contract relationships
+        // without a new rate revision.
+        const wasAnyContractAlreadyLinked = connectedSubmittedContracts.some(
+            (submittedContract) =>
+                previousPackageSubmission.contractRevisions.some(
+                    (contractRevision) =>
+                        contractRevision.contract.id ===
+                        submittedContract.contract.id
+                )
+        )
+
+        if (!wasAnyContractAlreadyLinked) {
+            historyLog.push({
+                actionType: 'RATE_LINK',
+                updatedAt: submitInfo.updatedAt,
+                updatedBy: submitInfo.updatedBy,
+                updatedReason: submitInfo.updatedReason,
             })
         }
     }
@@ -315,4 +434,9 @@ function buildRateSubmissionHistoryLog(
 
 export { buildContractSubmissionHistoryLog, buildRateSubmissionHistoryLog }
 
-export type { SubmissionHistoryLogEntry, SubmissionHistoryActionType }
+export type {
+    ContractSubmissionHistoryLogEntry,
+    ContractSubmissionHistoryActionType,
+    RateSubmissionHistoryLogEntry,
+    RateSubmissionHistoryActionType,
+}
