@@ -85,7 +85,7 @@ describe('RateSummary', () => {
                 expect(
                     screen.getByRole('heading', {
                         name: 'Rate documents',
-                        level: 2,
+                        level: 3,
                     })
                 ).toBeInTheDocument()
             })
@@ -585,7 +585,7 @@ describe('RateSummary', () => {
             expect(
                 screen.getByRole('heading', {
                     name: 'Rate documents',
-                    level: 2,
+                    level: 3,
                 })
             ).toBeInTheDocument()
         })
