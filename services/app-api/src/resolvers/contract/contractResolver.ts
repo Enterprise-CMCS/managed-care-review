@@ -20,7 +20,6 @@ import { logResolverError } from '../../logger'
 import { resolveInitiallySubmittedAtOverride } from '../shared/overrideHelpers'
 import { latestDate } from '../helpers'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import { buildContractActionLog } from './contractActionLog'
 
 async function findQuestionsForContract(
     store: Store,
@@ -272,24 +271,6 @@ function genericContractResolver<
             }
 
             return gqlSubs
-        },
-
-        contractActionLog: async (
-            parent: ParentType,
-            _args: Record<string, never>,
-            context: Context
-        ) => {
-            const questionsForContract = await findQuestionsForContract(
-                store,
-                parent.id,
-                context,
-                'genericContractResolver.contractActionLog'
-            )
-
-            return buildContractActionLog({
-                ...parent,
-                questions: convertToIndexQuestionsPayload(questionsForContract),
-            })
         },
 
         questions: async (
