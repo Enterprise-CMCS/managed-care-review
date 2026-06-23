@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
     constructTestPostgresServer,
     executeGraphQLOperation,
-} from '../../testHelpers/gqlHelpers'
-import { UpdateDraftContractRatesDocument } from '../../gen/gqlClient'
-import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
+} from '../testHelpers/gqlHelpers'
+import { UpdateDraftContractRatesDocument } from '../gen/gqlClient'
+import { testAdminUser, testCMSUser } from '../testHelpers/userHelpers'
 import {
     approveTestContract,
     createAndSubmitTestContract,
@@ -17,7 +17,7 @@ import {
     submitTestContract,
     unlockTestContract,
     withdrawTestContract,
-} from '../../testHelpers/gqlContractHelpers'
+} from '../testHelpers/gqlContractHelpers'
 import {
     addLinkedRateToTestContract,
     addNewRateToTestContract,
@@ -26,11 +26,11 @@ import {
     overrideTestRateData,
     undoWithdrawTestRate,
     withdrawTestRate,
-} from '../../testHelpers/gqlRateHelpers'
-import { must } from '../../testHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { findContractWithHistory } from './findContractWithHistory'
-import { findRateWithHistory } from './findRateWithHistory'
+} from '../testHelpers/gqlRateHelpers'
+import { must } from '../testHelpers'
+import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
+import { findContractWithHistory } from './contractAndRates/findContractWithHistory'
+import { findRateWithHistory } from './contractAndRates/findRateWithHistory'
 import {
     buildContractSubmissionHistoryLog,
     buildRateSubmissionHistoryLog,
@@ -1192,7 +1192,7 @@ describe('buildRateSubmissionHistoryLog', () => {
         ).toBe(false)
     })
 
-    it('logs an under-review review action from undoing a rate withdraw', async () => {
+    it('logs undo rate withdraw actions on the rate and affected contract histories', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
             context: {
@@ -1204,6 +1204,10 @@ describe('buildRateSubmissionHistoryLog', () => {
             await createAndSubmitTestContractWithRate(stateServer)
         const rateID =
             submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+        const rateName =
+            submittedContract.packageSubmissions[0].rateRevisions[0].formData
+                .rateCertificationName
+        const undoWithdrawSubmitReason = `CMS has changed the status of rate ${rateName} to submitted. Undo rate withdraw back to under review`
 
         await withdrawTestRate(
             cmsServer,
@@ -1218,6 +1222,9 @@ describe('buildRateSubmissionHistoryLog', () => {
 
         const prismaClient = await sharedTestPrismaClient()
         const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const affectedContract = must(
+            await findContractWithHistory(prismaClient, submittedContract.id)
+        )
         const underReviewAction = rate.reviewStatusActions?.find(
             (action) =>
                 action.actionType === 'UNDER_REVIEW' &&
@@ -1231,6 +1238,25 @@ describe('buildRateSubmissionHistoryLog', () => {
                 entry.updatedReason ===
                     'Undo rate withdraw back to under review'
         )
+        const affectedContractHistoryLog =
+            buildContractSubmissionHistoryLog(affectedContract)
+        const restoreContractSubmitEntry = affectedContractHistoryLog.find(
+            (entry) =>
+                entry.actionType === 'CONTRACT_SUBMISSION' &&
+                entry.updatedReason === undoWithdrawSubmitReason
+        )
+        const restoreContractReviewAction =
+            affectedContract.reviewStatusActions?.find(
+                (action) =>
+                    action.actionType === 'UNDER_REVIEW' &&
+                    action.updatedReason === undefined
+            )
+        const restoreContractReviewEntry = affectedContractHistoryLog.find(
+            (entry) =>
+                entry.actionType === 'UNDER_REVIEW' &&
+                entry.updatedAt.getTime() ===
+                    restoreContractReviewAction?.updatedAt.getTime()
+        )
 
         expect(underReviewAction).toBeDefined()
         expect(underReviewEntry).toEqual(
@@ -1239,6 +1265,29 @@ describe('buildRateSubmissionHistoryLog', () => {
                 updatedAt: underReviewAction?.updatedAt,
                 updatedBy: underReviewAction?.updatedBy,
                 updatedReason: underReviewAction?.updatedReason,
+            })
+        )
+
+        // Undoing a rate withdraw also restores the rate to each affected
+        // contract by resubmitting that contract. The contract-side history
+        // should capture that submitted data change.
+        expect(restoreContractSubmitEntry).toEqual(
+            expect.objectContaining({
+                actionType: 'CONTRACT_SUBMISSION',
+                updatedReason: undoWithdrawSubmitReason,
+            })
+        )
+
+        // After the restore resubmit, undoWithdrawRate runs the same automated
+        // health-plan review determination as normal submit. That review action
+        // should also appear in the affected contract history.
+        expect(restoreContractReviewAction).toBeDefined()
+        expect(restoreContractReviewEntry).toEqual(
+            expect.objectContaining({
+                actionType: restoreContractReviewAction?.actionType,
+                updatedAt: restoreContractReviewAction?.updatedAt,
+                updatedBy: restoreContractReviewAction?.updatedBy,
+                updatedReason: restoreContractReviewAction?.updatedReason,
             })
         )
     })

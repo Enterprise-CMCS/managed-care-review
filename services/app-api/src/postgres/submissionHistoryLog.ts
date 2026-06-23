@@ -1,10 +1,6 @@
-import type {
-    ContractType,
-    RateType,
-    UpdateInfoType,
-} from '../../domain-models'
-import type { ReviewActionTypes } from '../../domain-models/contractAndRates/contractReviewActionType'
-import { logError } from '../../logger'
+import type { ContractType, RateType, UpdateInfoType } from '../domain-models'
+import type { ReviewActionTypes } from '../domain-models/contractAndRates/contractReviewActionType'
+import { logError } from '../logger'
 
 type BaseSubmissionHistoryLogEntry<TActionType extends string> = {
     actionType: TActionType
