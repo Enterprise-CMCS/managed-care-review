@@ -119,14 +119,11 @@ export const AdminUploadContractResponse = () => {
 
         const input: AdminCreateContractQuestionResponseInput = {
             questionID: questionID as string,
+            addedByUserID: data.addedByUserID,
             reason: data.reason.trim(),
             documents: responseDocs,
         }
 
-        //checks for empty strings as formik and forms need initial values to be ''
-        if (data.addedByUserID) {
-            input.addedByUserID = data.addedByUserID
-        }
         if (data.createdAt) {
             input.createdAt = data.createdAt
         }

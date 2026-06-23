@@ -61,7 +61,6 @@ export type AdminUploadResponseFormData = AdminResponseFormValues & {
 
 const userRoleDisplayNames: Record<string, string> = {
     STATE_USER: 'State User',
-    ADMIN_USER: 'Admin',
 }
 
 type AdminUploadResponseFormProps = {
@@ -111,10 +110,10 @@ const AdminUploadResponseForm = ({
         : undefined
     const questionRound = question?.round ?? 0
 
-    const userOptions: AdminSelectOption[] = [
-        { label: 'Myself (admin)', value: '' },
-        ...stateUsers.map((u) => ({ label: u.email, value: u.id })),
-    ]
+    const userOptions: AdminSelectOption[] = stateUsers.map((u) => ({
+        label: u.email,
+        value: u.id,
+    }))
 
     const initialValues: AdminResponseFormValues = {
         addedByUserID: '',
@@ -124,6 +123,7 @@ const AdminUploadResponseForm = ({
 
     // Field order matches the page so the error summary lists them in page order.
     const validationSchema = Yup.object().shape({
+        addedByUserID: Yup.string().required('You must select a state user'),
         createdAt: Yup.string()
             .test(
                 'not-future',
@@ -149,6 +149,7 @@ const AdminUploadResponseForm = ({
     // on hidden inputs, so a `#id` key (focus by id) is used rather than the
     // field name.
     const fieldFocusId: Record<string, string> = {
+        addedByUserID: 'response-user-select',
         reason: 'reason',
         createdAt: 'admin-response-createdAt',
     }
@@ -184,20 +185,15 @@ const AdminUploadResponseForm = ({
             onSubmit={(values) => onFormSubmit(values)}
         >
             {({ values, errors, setFieldValue, handleSubmit: submitForm }) => {
-                // The state user being recorded on behalf of (if any), otherwise
-                // the response is attributed to the admin.
+                // The state user being recorded on behalf of.
                 const selectedStateUser = stateUsers.find(
                     (u) => u.id === values.addedByUserID
                 )
-                const displayedUser = selectedStateUser ?? loggedInUser
-                const displayedUserState =
-                    displayedUser && 'state' in displayedUser
-                        ? displayedUser.state.code
-                        : undefined
+                const displayedUserState = selectedStateUser?.state.code
 
                 const selectedUserOption =
                     userOptions.find((o) => o.value === values.addedByUserID) ??
-                    userOptions[0]
+                    null
 
                 return (
                     <UswdsForm
@@ -277,16 +273,12 @@ const AdminUploadResponseForm = ({
                                 <Label htmlFor="response-user-select">
                                     Respond on behalf of
                                 </Label>
-                                <span className={styles.requiredOptionalText}>
-                                    Optional
-                                </span>
                                 <span
                                     className="usa-hint"
                                     id="response-user-select-hint"
                                 >
                                     Select a state user to attribute this
-                                    response to. Leave as "Myself" to attribute
-                                    it to your admin account.
+                                    response to.
                                 </span>
                                 <AccessibleSelect<AdminSelectOption>
                                     inputId="response-user-select"
@@ -295,6 +287,7 @@ const AdminUploadResponseForm = ({
                                     className={selectStyles.multiSelect}
                                     classNamePrefix="select"
                                     isSearchable
+                                    isClearable
                                     options={userOptions}
                                     value={selectedUserOption}
                                     onChange={(newValue) =>
@@ -304,35 +297,46 @@ const AdminUploadResponseForm = ({
                                         )
                                     }
                                 />
-                                {displayedUser && (
-                                    <address
-                                        className="margin-top-1"
+                                {selectedStateUser && (
+                                    <div
+                                        className={styles.selectedUserSummary}
                                         data-testid="selected-response-user-info"
                                     >
-                                        {displayedUser.givenName}{' '}
-                                        {displayedUser.familyName}
-                                        <br />
-                                        {userRoleDisplayNames[
-                                            displayedUser.role
-                                        ] ?? displayedUser.role}
-                                        <br />
-                                        <LinkWithLogging
-                                            href={`mailto:${displayedUser.email}`}
-                                            target="_blank"
-                                            variant="external"
-                                            rel="noreferrer"
-                                            event_name="contact_click"
-                                            contact_method="email"
+                                        <div
+                                            className={styles.selectedUserLabel}
                                         >
-                                            {displayedUser.email}
-                                        </LinkWithLogging>
-                                        {displayedUserState && (
-                                            <>
-                                                <br />
-                                                {displayedUserState}
-                                            </>
-                                        )}
-                                    </address>
+                                            Selected user
+                                        </div>
+                                        <address
+                                            className={
+                                                styles.selectedUserAddress
+                                            }
+                                        >
+                                            {selectedStateUser.givenName}{' '}
+                                            {selectedStateUser.familyName}
+                                            <br />
+                                            {userRoleDisplayNames[
+                                                selectedStateUser.role
+                                            ] ?? selectedStateUser.role}
+                                            <br />
+                                            <LinkWithLogging
+                                                href={`mailto:${selectedStateUser.email}`}
+                                                target="_blank"
+                                                variant="external"
+                                                rel="noreferrer"
+                                                event_name="contact_click"
+                                                contact_method="email"
+                                            >
+                                                {selectedStateUser.email}
+                                            </LinkWithLogging>
+                                            {displayedUserState && (
+                                                <>
+                                                    <br />
+                                                    {displayedUserState}
+                                                </>
+                                            )}
+                                        </address>
+                                    </div>
                                 )}
                             </FormGroup>
 

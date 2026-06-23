@@ -31,6 +31,7 @@ import {
     includeRateFormData,
 } from '../postgres/contractAndRates/prismaSharedContractRateHelpers'
 import { parseErrorToError } from '@mc-review/helpers'
+import { initTracer, flushTracer } from '../otel/otel_handler'
 
 export type RegenerateZipsEvent = {
     contractRevisionID?: string // Optional: regenerate for specific contract revision
@@ -59,6 +60,13 @@ export const main: Handler = async (
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required')
     }
+
+    // Initialize OpenTelemetry before creating the Prisma client so the Prisma
+    // instrumentation is registered and db spans nest under zip.generate. This
+    // emits spans under the same `app-api-<stage>` service as the submit path so
+    // failures here are caught by the same Datadog zip monitor. initTracer
+    // throws if `stage` or `DD_API_KEY` is missing, enforcing them at startup.
+    initTracer('app-api-' + process.env.stage)
 
     // Get database connection URL
     const dbConnResult = await getPostgresURL(dbURL, secretsManagerSecret)
@@ -218,6 +226,14 @@ export const main: Handler = async (
         response.success = false
         response.errors.push(errorMessage)
         return response
+    } finally {
+        // Flush queued zip.generate spans before the Lambda freezes. Swallow
+        // flush errors so telemetry failures never fail a regeneration run.
+        try {
+            await flushTracer()
+        } catch (flushErr) {
+            console.warn('otel: flush failed', flushErr)
+        }
     }
     // NOTE: Don't call $disconnect() - we use a singleton pattern to reuse connections
     // across warm Lambda invocations. AWS cleans up when the container terminates.

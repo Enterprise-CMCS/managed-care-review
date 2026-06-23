@@ -132,10 +132,8 @@ export function undoWithdrawContract(
 
                 const { contract, ratesForDisplay } = undoWithdrawResult
                 // Generate zips!
-                const contractZipRes = await documentZip.createContractZips(
-                    contract,
-                    span
-                )
+                const contractZipRes =
+                    await documentZip.createContractZips(contract)
                 if (contractZipRes instanceof Error) {
                     const errMessage = `Failed to zip files for contract revision with ID: ${contract.id}: ${contractZipRes.message}`
                     logResolverError(
@@ -145,10 +143,7 @@ export function undoWithdrawContract(
                     )
                     recordResolverError(span, errMessage)
                 }
-                const rateZipRes = await documentZip.createRateZips(
-                    contract,
-                    span
-                )
+                const rateZipRes = await documentZip.createRateZips(contract)
                 if (rateZipRes instanceof Array) {
                     const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${contract.id}`
                     logResolverError(

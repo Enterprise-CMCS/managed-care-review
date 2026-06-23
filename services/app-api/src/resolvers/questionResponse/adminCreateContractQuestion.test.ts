@@ -13,6 +13,7 @@ import {
     assertAnErrorCode,
     fetchTestContractWithQuestions,
 } from '../../testHelpers'
+
 import {
     createDBUsersWithFullData,
     testAdminUser,
@@ -114,7 +115,7 @@ describe('adminCreateContractQuestion', () => {
 
         const question = await adminCreateTestContractQuestion(adminServer, {
             contractID: contract.id,
-            division: 'DMCO',
+            addedByUserID: cmsUserWithDivision.id,
             createdAt: '2024-01-15',
             reason: 'Recording prior Q&A',
             documents: questionDocuments,
@@ -138,7 +139,7 @@ describe('adminCreateContractQuestion', () => {
             variables: {
                 input: {
                     contractID: contract.id,
-                    division: 'DMCO',
+                    addedByUserID: cmsUserWithDivision.id,
                     createdAt: '2999-01-01',
                     reason: 'Recording prior Q&A',
                     documents: questionDocuments,
@@ -163,7 +164,7 @@ describe('adminCreateContractQuestion', () => {
 
         const question = await adminCreateTestContractQuestion(adminServer, {
             contractID: contract.id,
-            division: 'DMCO',
+            addedByUserID: cmsUserWithDivision.id,
             createdAt: '2024-01-15',
             reason: 'Backfilling DMCO round 1',
             documents: questionDocuments,
@@ -198,7 +199,7 @@ describe('adminCreateContractQuestion', () => {
             variables: {
                 input: {
                     contractID: contract.id,
-                    division: 'DMCO',
+                    addedByUserID: cmsUserWithDivision.id,
                     reason: '   ',
                     documents: questionDocuments,
                 },
@@ -293,7 +294,7 @@ describe('adminCreateContractQuestion', () => {
         )
     })
 
-    it('creates an admin-authored question attributed to the chosen division', async () => {
+    it('creates a question attributed to a CMS user and their division', async () => {
         const stateServer = await constructTestPostgresServer()
         const adminServer = await constructTestPostgresServer({
             context: { user: adminUser },
@@ -303,7 +304,7 @@ describe('adminCreateContractQuestion', () => {
 
         const question = await adminCreateTestContractQuestion(adminServer, {
             contractID: contract.id,
-            division: 'OACT',
+            addedByUserID: cmsUserWithDivision.id,
             reason: 'Recording prior Q&A',
             documents: questionDocuments,
         })
@@ -312,10 +313,10 @@ describe('adminCreateContractQuestion', () => {
             expect.objectContaining({
                 id: expect.any(String),
                 contractID: contract.id,
-                division: 'OACT',
+                division: 'DMCP',
                 addedBy: expect.objectContaining({
-                    id: adminUser.id,
-                    role: 'ADMIN_USER',
+                    id: cmsUserWithDivision.id,
+                    role: 'CMS_USER',
                 }),
                 responses: [],
             })
@@ -332,7 +333,7 @@ describe('adminCreateContractQuestion', () => {
 
         await adminCreateTestContractQuestion(adminServer, {
             contractID: contract.id,
-            division: 'DMCO',
+            addedByUserID: cmsUserWithDivision.id,
             reason: 'Recording prior Q&A',
             documents: questionDocuments,
         })
@@ -341,7 +342,8 @@ describe('adminCreateContractQuestion', () => {
             stateServer,
             contract.id
         )
-        expect(withQuestions.questions?.DMCOQuestions.totalCount).toBe(1)
+        // cmsUserWithDivision has DMCP division
+        expect(withQuestions.questions?.DMCPQuestions.totalCount).toBe(1)
     })
 
     it.each([
@@ -376,7 +378,7 @@ describe('adminCreateContractQuestion', () => {
                 variables: {
                     input: {
                         contractID: contract.id,
-                        division: 'DMCO',
+                        addedByUserID: cmsUserWithDivision.id,
                         reason: 'Recording prior Q&A',
                         documents: questionDocuments,
                     },
@@ -404,7 +406,7 @@ describe('adminCreateContractQuestion', () => {
             variables: {
                 input: {
                     contractID: draftContract.id,
-                    division: 'DMCO',
+                    addedByUserID: cmsUserWithDivision.id,
                     reason: 'Recording prior Q&A',
                     documents: questionDocuments,
                 },
@@ -436,7 +438,7 @@ describe('adminCreateContractQuestion', () => {
             variables: {
                 input: {
                     contractID: withdrawnContract.id,
-                    division: 'DMCO',
+                    addedByUserID: cmsUserWithDivision.id,
                     reason: 'Recording prior Q&A',
                     documents: questionDocuments,
                 },
@@ -464,7 +466,7 @@ describe('adminCreateContractQuestion', () => {
 
         const question = await adminCreateTestContractQuestion(adminServer, {
             contractID: approved.id,
-            division: 'DMCO',
+            addedByUserID: cmsUserWithDivision.id,
             reason: 'Recording prior Q&A',
             documents: questionDocuments,
         })
@@ -472,7 +474,7 @@ describe('adminCreateContractQuestion', () => {
         expect(question).toEqual(
             expect.objectContaining({
                 contractID: approved.id,
-                division: 'DMCO',
+                division: 'DMCP',
             })
         )
     })
@@ -490,7 +492,7 @@ describe('adminCreateContractQuestion', () => {
             variables: {
                 input: {
                     contractID: contract.id,
-                    division: 'DMCO',
+                    addedByUserID: cmsUserWithDivision.id,
                     reason: 'Recording prior Q&A',
                     documents: [],
                 },

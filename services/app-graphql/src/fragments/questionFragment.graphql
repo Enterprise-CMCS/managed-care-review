@@ -9,9 +9,6 @@ fragment contractQuestionFragment on ContractQuestion {
         ... on CMSApproverUser {
             ...cmsApproverUserFragment
         }
-        ... on AdminUser {
-            ...adminUserFragment
-        }
     }
     division
     round
@@ -42,9 +39,6 @@ fragment rateQuestionFragment on RateQuestion {
         }
         ... on CMSApproverUser {
             ...cmsApproverUserFragment
-        }
-        ... on AdminUser {
-            ...adminUserFragment
         }
     }
     division

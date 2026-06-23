@@ -40,7 +40,11 @@ export const ZipDownloadLink = ({
     }
 
     return (
-        <LinkWithLogging href={zippedFilesURL} target="_blank">
+        <LinkWithLogging
+            href={zippedFilesURL}
+            target="_blank"
+            className={styles.downloadLink}
+        >
             <span data-testid="zipDownloadLink">
                 <Icon.FileDownload className={styles.downloadIcon} />
                 Download {`${contractOrRate}`} documents{' '}

@@ -151,7 +151,40 @@ const mockStateUser = (): User => ({
         __typename: 'State',
         code: 'MN',
         name: 'Minnesota',
-        programs: [],
+        programs: [
+            {
+                __typename: 'Program',
+                id: 'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                fullName: 'Special Needs Basic Care',
+                name: 'SNBC',
+                isRateProgram: false,
+                isDeprecated: false,
+            },
+            {
+                __typename: 'Program',
+                id: 'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                name: 'PMAP',
+                fullName: 'Prepaid Medical Assistance Program',
+                isRateProgram: false,
+                isDeprecated: false,
+            },
+            {
+                __typename: 'Program',
+                id: 'ea16a6c0-5fc6-4df8-adac-c627e76660ab',
+                fullName: 'Minnesota Senior Care Plus ',
+                name: 'MSC+',
+                isRateProgram: false,
+                isDeprecated: false,
+            },
+            {
+                __typename: 'Program',
+                id: '3fd36500-bf2c-47bc-80e8-e7aa417184c5',
+                fullName: 'Minnesota Senior Health Options',
+                name: 'MSHO',
+                isRateProgram: false,
+                isDeprecated: false,
+            },
+        ],
     },
 })
 
@@ -1145,11 +1178,113 @@ describe('ContractTable for CMS User (with filters)', () => {
             screen.getByText('Displaying 3 of 4 submissions')
         ).toBeInTheDocument()
     })
+
+    it('does not show Draft in the status filter for cms users', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        await userEvent.click(
+            screen.getByTestId('accordionButton_filterAccordionItems')
+        )
+
+        const statusFilter = await screen.findByTestId('status-filter')
+        const statusCombobox = within(statusFilter).getByRole('combobox')
+
+        selectEvent.openMenu(statusCombobox)
+        const statusOptions = screen.getByTestId('status-filter-options')
+
+        await waitFor(() => {
+            expect(
+                within(statusOptions).queryByText('Draft')
+            ).not.toBeInTheDocument()
+            expect(
+                within(statusOptions).getByText('Submitted')
+            ).toBeInTheDocument()
+        })
+    })
 })
 
 describe('ContractTable state user tests', () => {
     beforeEach(() => {
         window.location.assign('#')
+    })
+
+    it('can filter table by programs for state users', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockStateUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        await userEvent.click(
+            screen.getByTestId('accordionButton_filterAccordionItems')
+        )
+
+        const programsFilter = await screen.findByTestId('programs-filter')
+        const programsCombobox = within(programsFilter).getByRole('combobox')
+
+        selectEvent.openMenu(programsCombobox)
+        const programOptions = screen.getByTestId('programs-filter-options')
+
+        await waitFor(async () => {
+            expect(within(programOptions).getByText('MSHO')).toBeInTheDocument()
+            expect(within(programOptions).getByText('PMAP')).toBeInTheDocument()
+            expect(within(programOptions).getByText('SNBC')).toBeInTheDocument()
+            await selectEvent.select(programOptions, 'SNBC')
+        })
+
+        const rows = await screen.findAllByRole('row')
+        expect(rows).toHaveLength(2)
+        expect(screen.getByText('1 filter applied')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 1 of 5 submissions')
+        ).toBeInTheDocument()
+    })
+
+    it('shows Draft in the status filter for state users only', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockStateUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithStateUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        await userEvent.click(
+            screen.getByTestId('accordionButton_filterAccordionItems')
+        )
+
+        const statusFilter = await screen.findByTestId('status-filter')
+        const statusCombobox = within(statusFilter).getByRole('combobox')
+
+        selectEvent.openMenu(statusCombobox)
+        const statusOptions = screen.getByTestId('status-filter-options')
+
+        await waitFor(() => {
+            expect(within(statusOptions).getByText('Draft')).toBeInTheDocument()
+            expect(
+                within(statusOptions).getByText('Submitted')
+            ).toBeInTheDocument()
+        })
     })
 
     it('does not display State and Submission type columns for state users', async () => {
