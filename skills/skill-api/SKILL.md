@@ -63,6 +63,138 @@ For broad multi-area features (e.g. a new "undo unlock contract" mutation): read
 - **`DRAFT_PARENT_PLACEHOLDER`** (`'DRAFT_PARENT_REPLACE_ME'`): a never-submitted rate has no real parent, so the parser returns this placeholder; the outer parser patches it from `draftContracts[0].id`.
 - **Schema typo to know about**: `ContractRevisionTable.relatedSubmisions` (one `s`) vs `RateRevisionTable.relatedSubmissions` (correct). Both are valid relation names; code uses each side's spelling.
 
+## Submission history and freshness
+
+Use this model when changing `lastActionDate`, `submissionHistoryHelpers`, `fetchSubmissionHistory`, submit/unlock/withdraw flows, override flows, or Q&A writes.
+
+**Core rule**: `lastActionDate` should move when submitted-visible data changes for CMS users, or when a visible review, Q&A, or status action happens. Draft-only form edits should not move CMS-facing freshness unless the action itself is visible, such as an unlock.
+
+For contracts, submitted-visible data means the latest submitted contract package: contract form data plus submitted rate data attached to that package. For rates, submitted-visible data means the latest submitted rate revision plus submitted contract relationship changes, rate overrides, rate Q&A, and rate review/status actions.
+
+Write `lastActionDate` at the lowest-level store/transaction function that writes the user-visible action row or submission event to the database. Do not rely on a resolver or broad orchestration wrapper to recalculate it later. Examples: submit freshness belongs in `submitContractAndOrRates`, review freshness belongs where the review action row is appended, override freshness belongs where the override row is created, and Q&A freshness belongs where the question/response/action row is created.
+
+When one workflow writes multiple actions in one transaction, ordering matters: intermediate submit/unlock writes may happen first, but the final visible action should overwrite `lastActionDate`. For example, withdraw and undo-withdraw flows can submit/unlock first, then write a review/status action that becomes the stored freshness date.
+
+### Contract freshness
+
+Contract `lastActionDate` should update for:
+- Direct contract submit/resubmit.
+- Contract unlock.
+- Contract review actions such as `UNDER_REVIEW`, `NOT_SUBJECT_TO_REVIEW`, `MARK_AS_APPROVED`, `WITHDRAW`, reverse approve, and undo-withdraw restored review actions.
+- Contract data overrides.
+- Contract Q&A create/response/delete/restore actions.
+- Already-linked rate data updates when the rate's parent contract resubmits the rate.
+- Linked or child rate overrides while the rate is attached in submitted package history.
+- Linked or child rate Q&A while the rate is attached in submitted package history.
+- Rate withdraw/undo-withdraw when it changes the contract's submitted package or review state.
+
+Contract `lastActionDate` should not update for:
+- Draft-only form edits.
+- Draft-only rate links/unlinks.
+- Rate actions before the rate was attached to the contract in submitted history.
+- Rate actions after the rate was removed from the contract's submitted package.
+- Rate link/unlink as a separate contract event, because a submitted link/unlink is represented by the contract's own submit/resubmit history.
+
+### Rate freshness
+
+Rate `lastActionDate` should update for:
+- Rate submission through parent contract submit/resubmit.
+- Rate unlock through parent contract unlock.
+- Rate review/status actions such as `UNDER_REVIEW`, `WITHDRAW`, undo-withdraw restored actions, and future rate review actions if added.
+- Rate data overrides.
+- Rate Q&A create/response/delete/restore actions.
+- Rate link/unlink through contract submit/resubmit, because that changes the rate's submitted contract relationships even if the rate revision itself did not change.
+- Withdraw contract when child rates are withdrawn.
+- Withdraw rate and undo-withdraw rate.
+
+Rate `lastActionDate` should not update for:
+- A linked contract resubmitting without changing this rate relationship or rate data.
+- Draft-only rate links/unlinks that have not been submitted.
+
+### History builders
+
+`buildContractSubmissionHistoryLog` returns contract-level submitted history:
+- Includes `CONTRACT_SUBMISSION`, `UNLOCK`, `LINKED_RATE_UPDATE`, contract `OVERRIDE`, and contract review actions.
+- Skips `RATE_LINK` and `RATE_UNLINK` by design. From the contract perspective, submitted link/unlink changes are captured by the contract's own submit/resubmit. Separate link/unlink entries would duplicate contract submission history and are brittle for draft-only relationship changes.
+
+`buildRateSubmissionHistoryLog` returns rate-level submitted history:
+- Includes `RATE_SUBMISSION`, `UNLOCK`, `RATE_LINK`, `RATE_UNLINK`, rate `OVERRIDE`, and rate review actions.
+- Skips already-related contract submissions that do not change rate data or the submitted contract relationship for that rate.
+
+`buildQuestionResponseHistoryLog` returns scoped Q&A actions:
+- Contract scope uses `CONTRACT_QUESTION`, `CONTRACT_QUESTION_RESPONSE`, and contract question/response delete/restore action types.
+- Rate scope uses `RATE_QUESTION`, `RATE_QUESTION_RESPONSE`, and rate question/response delete/restore action types.
+- Cascade delete events should be skipped; the direct parent question/response action is the user-visible event.
+
+`buildCompleteHistoryLog` merges already-built histories and sorts newest-first. If two actions have the same JS millisecond, `actionTypeSortRank` breaks ties so later lifecycle actions such as overrides or review/status actions sort above submit, and submit sorts above unlock. Keep this tie-breaker in mind when adding action types that can share a DB transaction timestamp.
+
+History builders are best-effort readers over parsed domain data. They should not block fetching a contract/rate because history shape is imperfect; for example, ambiguous missing previous package data is logged/skipped rather than throwing.
+
+### Full submission history query
+
+`fetchSubmissionHistory` is the heavier explicit history query. The resolver should stay thin: check OAuth/read permissions, fetch the contract enough to enforce state/CMS/Admin access, then call `findSubmissionHistoryByContractID` for the assembled history and map the result to GraphQL. Keep the expensive history assembly in the store layer so resolver tests exercise the same data-building path other callers can reuse.
+
+`findSubmissionHistoryByContractID` merges contract submission history, contract Q&A history, and rate override/Q&A history filtered to windows where the rate was attached to the contract in submitted package history. This windowing matters because a linked rate can be linked, delinked, and relinked; rate actions only belong in contract history when CMS users could see that rate through the contract's latest submitted package.
+
+Important edge cases:
+- If Contract B links to Rate R owned by Contract A, and Contract A resubmits Rate R while B already has R in submitted history, then B's submitted-visible rate data changed. B history should get `LINKED_RATE_UPDATE`, and B `lastActionDate` should update to that parent submit timestamp.
+- If Contract B is unlocked when Rate R is overridden, the override can still affect B's submitted-visible data because CMS users see the latest submitted package, not B's draft. The linked rate override should move B `lastActionDate` and appear in explicit submission history while R is attached.
+
+### Related contract freshness helpers
+
+`updateRelatedContractsLastActionDateByRateID` resolves contracts from the rate's latest submitted package snapshot. It is appropriate for rate-visible changes that happen outside a contract submit, such as rate overrides and rate Q&A. It intentionally ignores draft-only links and previously removed links. It throws if no currently related submitted contracts exist, so callers should only use it when at least one related contract is expected.
+
+`submitContractAndOrRates` also updates related contracts when a submitted rate was already attached to those contracts in their previous submitted package. This keeps `lastActionDate` aligned with the `LINKED_RATE_UPDATE` history entry. Group these writes with contract freshness writes; rate freshness writes are separate and should only update rates whose own rate history changed.
+
+### Display and indexing
+
+`lastActionDate` is the stored CMS/Admin freshness date. CMS/Admin users do not see draft-only edits, so `lastUpdatedForDisplay` uses `lastActionDate` when present and falls back to `updatedAt`. State users can see draft changes, so display/index formatting considers the latest of `lastActionDate` and `draftRevision.updatedAt`.
+
+`indexContracts` should use the stored `lastActionDate` for CMS/Admin filtering/sorting rather than recalculating full history for every indexed contract.
+
+### Implementation checklist for new actions
+
+When adding a new action, status transition, override path, Q&A path, submit-like workflow, or relationship change, explicitly answer these questions in code review:
+
+1. **Is this action visible to CMS users?**
+   - If it changes submitted-visible contract/rate data, review/status state, Q&A, or override state, it probably belongs in history and should move `lastActionDate`.
+   - If it is draft-only form data or draft-only relationship state, it generally should not move CMS-facing `lastActionDate`.
+
+2. **Which record's freshness moves?**
+   - Contract action/data changes move `ContractTable.lastActionDate`.
+   - Rate action/data changes move `RateTable.lastActionDate`.
+   - Rate-visible changes can also move related contract `lastActionDate` when the rate is attached to those contracts in submitted package history.
+   - Contract relationship changes can move rate `lastActionDate` when the submitted relationship for the rate changes.
+
+3. **Where should the write happen?**
+   - Write `lastActionDate` in the lowest-level store/transaction function that writes the action row or submission event.
+   - Use the DB-created action timestamp (`createdAt` / `updatedAt`) instead of creating a separate timestamp when possible.
+   - If the same workflow writes several actions, make the final visible action write last so it becomes the stored freshness date.
+
+4. **Which history builder should emit the action?**
+   - Contract-only submitted-visible actions belong in `buildContractSubmissionHistoryLog`.
+   - Rate-only submitted-visible actions belong in `buildRateSubmissionHistoryLog`.
+   - Q&A actions belong in `buildQuestionResponseHistoryLog`.
+   - Cross-rate contract history that is too expensive or relationship-window dependent belongs in `fetchSubmissionHistory`, not in a lightweight field resolver.
+
+5. **Does `fetchSubmissionHistory` need relationship-window filtering?**
+   - If the action comes from a rate but is shown in contract history, include it only during windows where the rate was attached to the contract in submitted package history.
+   - Do not include rate actions before a link, during a delink gap, after unlink/withdraw removal, or from draft-only links.
+
+6. **Do GraphQL enums/types need updates?**
+   - New history action types must be added to the app GraphQL schema and generated types.
+   - Keep action names specific enough to distinguish contract-scoped and rate-scoped history when both can appear in a combined history response.
+
+7. **What tests prove freshness and history stay aligned?**
+   - Add resolver or store tests that assert the affected table's `lastActionDate` equals the timestamp of the newest relevant history entry.
+   - Include negative tests for actions that should not appear or should not move freshness, especially draft-only changes and out-of-window linked rate actions.
+   - For long workflows, add checkpoint assertions after high-risk intermediate actions, not only at the end.
+   - Prefer creating real submissions/actions through existing resolver helpers over hand-crafting domain history data when testing end-to-end behavior.
+
+8. **Does indexing/display behavior still hold?**
+   - If a new action should affect CMS/Admin freshness, confirm stored `lastActionDate` is enough for `indexContracts` and `lastUpdatedForDisplay`.
+   - If state users can see draft-side effects, confirm display code still considers draft revision updates separately from stored CMS freshness.
+
 ## Authorization patterns at a glance
 
 | Mutation | Who can do it | Source of rule |
@@ -90,6 +222,7 @@ OAuth `canWrite` (or `canOauthWrite`) is required on every write. State-vs-CMS c
 | Revision schemas | `revisionTypes.ts` (same dir) |
 | Status schemas | `statusType.ts` (same dir) |
 | `UpdateInfoType` | `updateInfoType.ts` (same dir) |
+| Submission history domain types | `services/app-api/src/domain-models/contractAndRates/submissionHistoryTypes.ts` |
 | Find entry points | `services/app-api/src/postgres/contractAndRates/findContractWithHistory.ts`, `findRateWithHistory.ts` |
 | Full include shapes | `prismaFullContractRateHelpers.ts` (same dir) |
 | Without-draft includes | `prismaSubmittedContractHelpers.ts`, `prismaSubmittedRateHelpers.ts` |
@@ -104,6 +237,10 @@ OAuth `canWrite` (or `canOauthWrite`) is required on every write. State-vs-CMS c
 | Submit resolver | `services/app-api/src/resolvers/contract/submitContract.ts` |
 | Submit postgres outer | `services/app-api/src/postgres/contractAndRates/submitContract.ts` |
 | Submit core engine | `submitContractAndOrRates.ts` (same dir) |
+| Submission history builders | `services/app-api/src/postgres/submissionHistoryHelpers.ts` |
+| Full submission history store reader | `services/app-api/src/postgres/contractAndRates/findSubmissionHistoryByContractID.ts` |
+| Full submission history resolver | `services/app-api/src/resolvers/contract/fetchSubmissionHistory.ts` |
+| lastActionDate helpers | `services/app-api/src/postgres/updateLastActionDateHelpers.ts` |
 | Resolver registration map (top-level + object-field resolvers) | `services/app-api/src/resolvers/configureResolvers.ts` |
 | Unlock resolver | `services/app-api/src/resolvers/contract/unlockContract.ts` |
 | Unlock postgres (contract) | `services/app-api/src/postgres/contractAndRates/unlockContract.ts` |
@@ -164,11 +301,12 @@ The repo's `docs/` directory has broader architecture and conventions docs that 
 4. **Trace the relevant mutation** (references 04–07) end-to-end if the task is an operation change. The resolver does authorization, validation, and formatting; the postgres layer does the actual DB work — they often have important guards in different places.
 5. **If the resolver calls a store function that writes a row in `ContractTable`, `RateTable`, `ContractQuestion`, or `RateQuestion`, default to `runTransactionWithRowLock`.** Only skip it when last-write-wins behavior is intentional and acceptable for that path.
 6. **Check `packageSubmissions` and cause impact** (reference 08) if the change involves an `UpdateInfoTable` event. The change may append entries to the package history from both contract and rate perspectives.
-7. **Don't include `sharedRateRevisions`** in any new design — deprecated.
-8. **Watch for `DRAFT_PARENT_PLACEHOLDER`** if the change involves draft rates without a submitted parent yet — the placeholder needs the outer parser to patch.
-9. **Verify file paths and code shapes against the current state of the repo** before depending on specifics. This reference was synthesized at a point in time; it can drift.
-10. **Never hand-write Prisma migrations.** If a schema change needs a migration, generate it with the Prisma CLI and review the generated SQL rather than manually creating `migration.sql` files.
-11. **Sandbox limitation for Prisma CLI.** In the Codex sandbox, Prisma CLI commands that need database access may fail because the sandbox cannot connect to local Postgres (for example `localhost:5432`). If a task requires `prisma migrate`, `prisma db push`, `prisma migrate reset`, or similar DB-connected Prisma commands, the human user should run them in their own shell and provide the results back for review.
-12. **Migration transaction wrapper.** When reviewing or adjusting generated Prisma migration SQL in this repo, make sure the migration statements are wrapped in an explicit `BEGIN;` / `COMMIT;` transaction block.
-13. **Never assume this skill is up-to-date.** Scan the relevant code areas during work and check if the skill is out of date with the codebase.
-14. **Prompt to update skill.** If the skill is out of date with the codebase, prompt the human user on if they want to update the skill.
+7. **Apply the submission history and freshness checklist** if the change writes a new action, status transition, override, Q&A action, submit-like event, or contract/rate relationship change. Decide whether the action is CMS-visible, update `lastActionDate` at the lowest-level DB write, update the relevant history builder/query, and add tests proving newest history aligns with stored freshness.
+8. **Don't include `sharedRateRevisions`** in any new design — deprecated.
+9. **Watch for `DRAFT_PARENT_PLACEHOLDER`** if the change involves draft rates without a submitted parent yet — the placeholder needs the outer parser to patch.
+10. **Verify file paths and code shapes against the current state of the repo** before depending on specifics. This reference was synthesized at a point in time; it can drift.
+11. **Never hand-write Prisma migrations.** If a schema change needs a migration, generate it with the Prisma CLI and review the generated SQL rather than manually creating `migration.sql` files.
+12. **Sandbox limitation for Prisma CLI.** In the Codex sandbox, Prisma CLI commands that need database access may fail because the sandbox cannot connect to local Postgres (for example `localhost:5432`). If a task requires `prisma migrate`, `prisma db push`, `prisma migrate reset`, or similar DB-connected Prisma commands, the human user should run them in their own shell and provide the results back for review.
+13. **Migration transaction wrapper.** When reviewing or adjusting generated Prisma migration SQL in this repo, make sure the migration statements are wrapped in an explicit `BEGIN;` / `COMMIT;` transaction block.
+14. **Never assume this skill is up-to-date.** Scan the relevant code areas during work and check if the skill is out of date with the codebase.
+15. **Prompt to update skill.** If the skill is out of date with the codebase, prompt the human user on if they want to update the skill.
