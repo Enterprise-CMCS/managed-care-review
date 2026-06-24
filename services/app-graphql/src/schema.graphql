@@ -96,6 +96,14 @@ type Query {
     fetchContract(input: FetchContractInput!): FetchContractPayload!
 
     """
+    fetchSubmissionHistory returns the combined action history for a submission,
+    including contract actions and rate actions that materially affect the submitted package.
+    """
+    fetchSubmissionHistory(
+        input: FetchSubmissionHistoryInput!
+    ): FetchSubmissionHistoryPayload!
+
+    """
     fetchDocument returns a single document
     given a documentID
     Optional parameters include:
@@ -1254,6 +1262,32 @@ enum RateActionType {
     WITHDRAW
 }
 
+enum SubmissionHistoryActionType {
+    CONTRACT_SUBMISSION
+    LINKED_RATE_UPDATE
+    RATE_SUBMISSION
+    RATE_LINK
+    RATE_UNLINK
+    UNLOCK
+    OVERRIDE
+    UNDER_REVIEW
+    NOT_SUBJECT_TO_REVIEW
+    MARK_AS_APPROVED
+    WITHDRAW
+    CONTRACT_QUESTION
+    CONTRACT_QUESTION_RESPONSE
+    CONTRACT_QUESTION_DELETE
+    CONTRACT_QUESTION_RESTORE
+    CONTRACT_QUESTION_RESPONSE_DELETE
+    CONTRACT_QUESTION_RESPONSE_RESTORE
+    RATE_QUESTION
+    RATE_QUESTION_RESPONSE
+    RATE_QUESTION_DELETE
+    RATE_QUESTION_RESTORE
+    RATE_QUESTION_RESPONSE_DELETE
+    RATE_QUESTION_RESPONSE_RESTORE
+}
+
 type UpdatedBy {
     role: String!
     email: String!
@@ -1304,6 +1338,22 @@ type RateReviewStatusActions {
     "type of action"
     actionType: RateActionType!
     rateID: ID!
+}
+
+"""
+SubmissionHistoryEntry is a combined action history item for submitted-visible changes,
+including contract submission/package actions, rate actions, review actions,
+overrides, and Q&A actions.
+"""
+type SubmissionHistoryEntry {
+    "the datetime when the action occurred"
+    updatedAt: DateTime!
+    "the user who performed the action"
+    updatedBy: UpdatedBy
+    "the reason provided by the user when performing the action"
+    updatedReason: String
+    "the type of submission history action"
+    actionType: SubmissionHistoryActionType!
 }
 
 enum PopulationCoveredType {
@@ -2598,6 +2648,17 @@ type FetchContractPayload {
 }
 
 input FetchContractInput {
+    contractID: ID!
+}
+
+type FetchSubmissionHistoryPayload {
+    "The contract submission the history was built for."
+    contractID: ID!
+    "Combined submission history sorted newest-first."
+    history: [SubmissionHistoryEntry!]!
+}
+
+input FetchSubmissionHistoryInput {
     contractID: ID!
 }
 
