@@ -56,6 +56,17 @@ export type {
     ContractReviewStatusType,
     UpdateInfoType,
     ContractSubmissionType,
+    BaseSubmissionHistoryEntry,
+    CompleteHistory,
+    ContractSubmissionHistoryActionType,
+    ContractSubmissionHistoryEntry,
+    QuestionResponseHistoryActionType,
+    QuestionResponseHistory,
+    RateSubmissionHistoryActionType,
+    RateSubmissionHistoryEntry,
+    SubmissionHistoryActionType,
+    SubmissionHistory,
+    SubmissionHistoryUserTypes,
 } from './contractAndRates'
 
 export type {

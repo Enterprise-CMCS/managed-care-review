@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
     constructTestPostgresServer,
+    createTestQuestion,
+    createTestQuestionResponse,
+    createTestRateQuestion,
+    createTestRateQuestionResponse,
+    deleteTestContractQuestion,
     executeGraphQLOperation,
 } from '../testHelpers/gqlHelpers'
 import { UpdateDraftContractRatesDocument } from '../gen/gqlClient'
@@ -31,10 +36,14 @@ import { must } from '../testHelpers'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
 import { findContractWithHistory } from './contractAndRates/findContractWithHistory'
 import { findRateWithHistory } from './contractAndRates/findRateWithHistory'
+import { findContractQuestionResponseHistory } from './questionResponse/findContractQuestionResponseHistory'
+import { findRateQuestionResponseHistory } from './questionResponse/findRateQuestionResponseHistory'
 import {
+    buildCompleteHistoryLog,
     buildContractSubmissionHistoryLog,
+    buildQuestionResponseHistoryLog,
     buildRateSubmissionHistoryLog,
-} from './submissionHistoryLog'
+} from './submissionHistoryHelpers'
 
 describe('buildContractSubmissionHistoryLog', () => {
     it('builds a complete action log from a complex contract history', async () => {
@@ -1422,5 +1431,223 @@ describe('buildRateSubmissionHistoryLog', () => {
                     entry.updatedReason === 'Resubmit already linked contract'
             )
         ).toBe(false)
+    })
+})
+
+describe('buildQuestionResponseHistoryLog', () => {
+    it('builds contract Q&A history with question deletes and skips cascade deletes', async () => {
+        const adminUser = testAdminUser()
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        // Create Q&A through the resolvers so question and response creation
+        // match the same rows production writes.
+        const question = await createTestQuestion(cmsServer, contract.id)
+        const questionWithResponse = await createTestQuestionResponse(
+            stateServer,
+            question.id
+        )
+
+        const prismaClient = await sharedTestPrismaClient()
+
+        // Deleting the question writes a direct question DELETE plus cascade
+        // response/document actions. The history fetcher should include only
+        // the direct question delete, because cascade actions are fallout from
+        // the parent delete and should not create separate history entries.
+        await deleteTestContractQuestion(adminServer, question.id)
+
+        const questionHistory = must(
+            await findContractQuestionResponseHistory(prismaClient, contract.id)
+        )
+        const historyLog = buildQuestionResponseHistoryLog(
+            questionHistory,
+            'CONTRACT'
+        )
+
+        expect(historyLog.map((entry) => entry.actionType)).toEqual([
+            'CONTRACT_QUESTION_DELETE',
+            'CONTRACT_QUESTION_RESPONSE',
+            'CONTRACT_QUESTION',
+        ])
+        expect(historyLog.map((entry) => entry.updatedReason)).toEqual([
+            'Some reason',
+            undefined,
+            undefined,
+        ])
+        expect(historyLog[1].updatedAt).toEqual(
+            questionWithResponse.responses[0].createdAt
+        )
+        expect(historyLog[2].updatedAt).toEqual(question.createdAt)
+    })
+
+    it('builds rate Q&A history from question and response actions', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contract.packageSubmissions[0].rateRevisions[0].rateID
+
+        // Rate Q&A is fetched through the history-specific store path because
+        // the display Q&A finder filters deletion state for UI rendering.
+        const question = await createTestRateQuestion(cmsServer, rateID)
+        await createTestRateQuestionResponse(stateServer, question.id)
+
+        const prismaClient = await sharedTestPrismaClient()
+        const questionHistory = must(
+            await findRateQuestionResponseHistory(prismaClient, rateID)
+        )
+        const historyLog = buildQuestionResponseHistoryLog(
+            questionHistory,
+            'RATE'
+        )
+
+        expect(historyLog.map((entry) => entry.actionType)).toEqual([
+            'RATE_QUESTION_RESPONSE',
+            'RATE_QUESTION',
+        ])
+    })
+})
+
+describe('buildCompleteHistoryLog', () => {
+    it('combines contract history with contract Q&A history and matches the contract lastActionDate', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        // Add Q&A after the contract submit so the complete history has to
+        // merge entries from separate builders instead of relying on one source
+        // already being newest.
+        const question = await createTestQuestion(
+            cmsServer,
+            submittedContract.id
+        )
+        await createTestQuestionResponse(stateServer, question.id)
+
+        const prismaClient = await sharedTestPrismaClient()
+        const contract = must(
+            await findContractWithHistory(prismaClient, submittedContract.id)
+        )
+        const questionHistory = must(
+            await findContractQuestionResponseHistory(
+                prismaClient,
+                submittedContract.id
+            )
+        )
+
+        const contractHistory = buildContractSubmissionHistoryLog(contract)
+        const qaHistory = buildQuestionResponseHistoryLog(
+            questionHistory,
+            'CONTRACT'
+        )
+        const completeHistory = buildCompleteHistoryLog([
+            contractHistory,
+            qaHistory,
+        ])
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: submittedContract.id },
+            select: { lastActionDate: true },
+        })
+
+        // The complete contract history should align with the stored
+        // lastActionDate. That validates the same composed history sources we
+        // expect a contract detail view or last-action repair job to use.
+        expect(completeHistory[0].updatedAt).toEqual(
+            contractTableRow?.lastActionDate
+        )
+        expect(completeHistory.map((entry) => entry.actionType)).toEqual([
+            'CONTRACT_QUESTION_RESPONSE',
+            'CONTRACT_QUESTION',
+            'CONTRACT_SUBMISSION',
+        ])
+        expect(
+            completeHistory
+                .slice(1)
+                .every(
+                    (entry, index) =>
+                        completeHistory[index].updatedAt.getTime() >=
+                        entry.updatedAt.getTime()
+                )
+        ).toBe(true)
+    })
+
+    it('combines rate history with rate Q&A history and matches the rate lastActionDate', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+
+        // Add rate Q&A after submit so the complete rate history has to merge
+        // the rate submission log with Q&A events and pick Q&A as latest.
+        const question = await createTestRateQuestion(cmsServer, rateID)
+        await createTestRateQuestionResponse(stateServer, question.id)
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const questionHistory = must(
+            await findRateQuestionResponseHistory(prismaClient, rateID)
+        )
+
+        const rateHistory = buildRateSubmissionHistoryLog(rate)
+        const qaHistory = buildQuestionResponseHistoryLog(
+            questionHistory,
+            'RATE'
+        )
+        const completeHistory = buildCompleteHistoryLog([
+            rateHistory,
+            qaHistory,
+        ])
+        const rateTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateID },
+            select: { lastActionDate: true },
+        })
+
+        // The complete rate history should align with the stored
+        // lastActionDate. This keeps rate Q&A and rate submission history in
+        // sync with the persisted freshness field.
+        expect(completeHistory[0].updatedAt).toEqual(
+            rateTableRow?.lastActionDate
+        )
+        expect(completeHistory.map((entry) => entry.actionType)).toEqual([
+            'RATE_QUESTION_RESPONSE',
+            'RATE_QUESTION',
+            'RATE_SUBMISSION',
+        ])
+        expect(
+            completeHistory
+                .slice(1)
+                .every(
+                    (entry, index) =>
+                        completeHistory[index].updatedAt.getTime() >=
+                        entry.updatedAt.getTime()
+                )
+        ).toBe(true)
     })
 })

@@ -23,6 +23,7 @@ import type {
     CreateRateQuestionInputType,
     AuditDocument,
     EmailSettingsType,
+    SubmissionHistory,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from './'
 import type { InsertUserArgsType, UpdateUserInfoArgsType } from './user'
@@ -36,6 +37,8 @@ import {
 } from './user'
 import {
     findAllQuestionsByContract,
+    findContractQuestionResponseHistory,
+    findRateQuestionResponseHistory,
     insertContractQuestion,
     insertContractQuestionResponse,
     insertRateQuestion,
@@ -43,6 +46,7 @@ import {
     insertRateQuestionResponse,
     softDeleteContractQuestion,
 } from './questionResponse'
+import type { QuestionHistoryInput } from './submissionHistoryHelpers'
 import { findAllSupportedStates } from './state'
 import {
     insertDraftContract,
@@ -58,6 +62,7 @@ import {
     updateDraftContract,
     findContractRevision,
     findRateRevision,
+    findSubmissionHistoryByContractID,
     approveContract,
     reverseApproveContract,
     overrideContractData,
@@ -190,6 +195,9 @@ type Store = {
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
+    findSubmissionHistoryByContractID: (
+        contractID: string
+    ) => Promise<SubmissionHistory | Error>
     findAllContractsWithHistoryByState: (
         stateCode: string
     ) => Promise<ContractOrErrorArrayType | Error>
@@ -283,6 +291,9 @@ type Store = {
     findAllQuestionsByContract: (
         pkgID: string
     ) => Promise<ContractQuestionType[] | Error>
+    findContractQuestionResponseHistory: (
+        contractID: string
+    ) => Promise<QuestionHistoryInput[] | Error>
     insertRateQuestion: (
         questionInput: CreateRateQuestionInputType,
         user: CMSUsersUnionType
@@ -294,6 +305,9 @@ type Store = {
     findAllQuestionsByRate: (
         rateID: string
     ) => Promise<RateQuestionType[] | Error>
+    findRateQuestionResponseHistory: (
+        rateID: string
+    ) => Promise<QuestionHistoryInput[] | Error>
 
     /** Documents **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>
@@ -383,6 +397,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
+        findSubmissionHistoryByContractID: (args) =>
+            findSubmissionHistoryByContractID(client, args),
         findAllContractsWithHistoryByState: (args) =>
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: (
@@ -437,12 +453,16 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             softDeleteContractQuestion(client, { questionID, user, reason }),
         findAllQuestionsByContract: (pkgID) =>
             findAllQuestionsByContract(client, pkgID),
+        findContractQuestionResponseHistory: (contractID) =>
+            findContractQuestionResponseHistory(client, contractID),
         insertRateQuestion: (questionInput, user) =>
             insertRateQuestion(client, questionInput, user),
         insertRateQuestionResponse: (questionInput, user) =>
             insertRateQuestionResponse(client, questionInput, user),
         findAllQuestionsByRate: (rateID) =>
             findAllQuestionsByRate(client, rateID),
+        findRateQuestionResponseHistory: (rateID) =>
+            findRateQuestionResponseHistory(client, rateID),
 
         /** Documents **/
         findAllDocuments: () => findAllDocuments(client),

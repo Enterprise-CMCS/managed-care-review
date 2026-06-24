@@ -1,46 +1,42 @@
-import type { ContractType, RateType, UpdateInfoType } from '../domain-models'
-import type { ReviewActionTypes } from '../domain-models/contractAndRates/contractReviewActionType'
+import type {
+    AdminUserType,
+    CMSUsersUnionType,
+    ContractType,
+    RateType,
+    StateUserType,
+} from '../domain-models'
+import type {
+    CompleteHistory,
+    ContractSubmissionHistoryActionType,
+    ContractSubmissionHistoryEntry,
+    QuestionResponseHistoryActionType,
+    QuestionResponseHistory,
+    RateSubmissionHistoryActionType,
+    RateSubmissionHistoryEntry,
+} from '../domain-models/contractAndRates/submissionHistoryTypes'
 import { logError } from '../logger'
 
-type BaseSubmissionHistoryLogEntry<TActionType extends string> = {
-    actionType: TActionType
-    updatedAt: Date
-    updatedBy?: UpdateInfoType['updatedBy']
-    updatedReason?: string
+type QuestionHistoryScope = 'CONTRACT' | 'RATE'
+
+type QuestionHistoryActionInput = {
+    createdAt: Date
+    action: 'DELETE' | 'RESTORE'
+    reason: string
+    updatedBy: AdminUserType
 }
 
-// Contract history tracks submitted-visible changes to the contract package.
-// Relationship-only rate link/unlink package events are skipped here because
-// the current contract's submitted relationship changes are captured by its own
-// CONTRACT_SUBMISSION.
-type ContractSubmissionHistoryActionType =
-    | 'CONTRACT_SUBMISSION'
-    | 'LINKED_RATE_UPDATE'
-    | 'UNLOCK'
-    | 'OVERRIDE'
-    | ReviewActionTypes
+type QuestionHistoryResponseInput = {
+    createdAt: Date
+    addedBy: StateUserType
+    actions: QuestionHistoryActionInput[]
+}
 
-type ContractSubmissionHistoryLogEntry =
-    BaseSubmissionHistoryLogEntry<ContractSubmissionHistoryActionType>
-
-// Rate history also tracks submitted-visible contract relationship changes.
-// A contract can link or unlink a rate without creating a new rate revision, so
-// RATE_LINK / RATE_UNLINK are meaningful rate history events when they appear
-// in rate.packageSubmissions.
-// Keep the review action side broad instead of narrowing to today's rate
-// actions (`UNDER_REVIEW` / `WITHDRAW`) because rate review workflows may grow
-// to approval or other contract-like review actions. The builder only emits
-// actions actually present on rate.reviewStatusActions at runtime.
-type RateSubmissionHistoryActionType =
-    | 'RATE_SUBMISSION'
-    | 'UNLOCK'
-    | 'OVERRIDE'
-    | ReviewActionTypes
-    | 'RATE_LINK'
-    | 'RATE_UNLINK'
-
-type RateSubmissionHistoryLogEntry =
-    BaseSubmissionHistoryLogEntry<RateSubmissionHistoryActionType>
+type QuestionHistoryInput = {
+    createdAt: Date
+    addedBy: CMSUsersUnionType
+    actions: QuestionHistoryActionInput[]
+    responses: QuestionHistoryResponseInput[]
+}
 
 /**
  * Same-millisecond tie-breaker for action log sorting.
@@ -60,6 +56,7 @@ function actionTypeSortRank(
     actionType:
         | ContractSubmissionHistoryActionType
         | RateSubmissionHistoryActionType
+        | QuestionResponseHistoryActionType
 ): number {
     switch (actionType) {
         case 'OVERRIDE':
@@ -68,18 +65,48 @@ function actionTypeSortRank(
         case 'NOT_SUBJECT_TO_REVIEW':
         case 'MARK_AS_APPROVED':
         case 'WITHDRAW':
+        case 'CONTRACT_QUESTION_DELETE':
+        case 'CONTRACT_QUESTION_RESTORE':
+        case 'CONTRACT_QUESTION_RESPONSE_DELETE':
+        case 'CONTRACT_QUESTION_RESPONSE_RESTORE':
+        case 'RATE_QUESTION_DELETE':
+        case 'RATE_QUESTION_RESTORE':
+        case 'RATE_QUESTION_RESPONSE_DELETE':
+        case 'RATE_QUESTION_RESPONSE_RESTORE':
             return 3
+        case 'CONTRACT_QUESTION_RESPONSE':
+        case 'RATE_QUESTION_RESPONSE':
+            return 2
         case 'RATE_LINK':
         case 'RATE_UNLINK':
         case 'CONTRACT_SUBMISSION':
         case 'LINKED_RATE_UPDATE':
         case 'RATE_SUBMISSION':
             return 2
+        case 'CONTRACT_QUESTION':
+        case 'RATE_QUESTION':
+            return 1
         case 'UNLOCK':
             return 1
         default:
             return 0
     }
+}
+
+function sortHistoryLog<TEntry extends CompleteHistory>(
+    historyLog: TEntry[]
+): TEntry[] {
+    return [...historyLog].sort(
+        (a, b) =>
+            b.updatedAt.getTime() - a.updatedAt.getTime() ||
+            actionTypeSortRank(b.actionType) - actionTypeSortRank(a.actionType)
+    )
+}
+
+function buildCompleteHistoryLog<THistoryLogs extends CompleteHistory[][]>(
+    historyLogs: THistoryLogs
+): THistoryLogs[number][number][] {
+    return sortHistoryLog(historyLogs.flat()) as THistoryLogs[number][number][]
 }
 
 /**
@@ -93,8 +120,8 @@ function actionTypeSortRank(
  */
 function buildContractSubmissionHistoryLog(
     contract: ContractType
-): ContractSubmissionHistoryLogEntry[] {
-    const historyLog: ContractSubmissionHistoryLogEntry[] = []
+): ContractSubmissionHistoryEntry[] {
+    const historyLog: ContractSubmissionHistoryEntry[] = []
 
     // Parse packageSubmission for submit and unlock logs
     for (const [
@@ -250,11 +277,57 @@ function buildContractSubmissionHistoryLog(
     // collapse to the same JS millisecond, so use a semantic tie-breaker:
     // automated review determinations are created after their submit, and a
     // submit is created after its unlock.
-    return [...historyLog].sort(
-        (a, b) =>
-            b.updatedAt.getTime() - a.updatedAt.getTime() ||
-            actionTypeSortRank(b.actionType) - actionTypeSortRank(a.actionType)
-    )
+    return sortHistoryLog(historyLog)
+}
+
+function buildQuestionResponseHistoryLog(
+    questions: QuestionHistoryInput[],
+    questionHistoryScope: QuestionHistoryScope
+): QuestionResponseHistory[] {
+    const historyLog: QuestionResponseHistory[] = []
+
+    for (const question of questions) {
+        historyLog.push({
+            actionType: `${questionHistoryScope}_QUESTION`,
+            updatedAt: question.createdAt,
+            updatedBy: question.addedBy,
+        })
+
+        // Question actions are direct admin lifecycle changes on the question.
+        // History input should exclude cascade actions so a parent delete does
+        // not create duplicate document/response cascade entries in this log.
+        for (const action of question.actions) {
+            historyLog.push({
+                actionType: `${questionHistoryScope}_QUESTION_${action.action}`,
+                updatedAt: action.createdAt,
+                updatedBy: action.updatedBy,
+                updatedReason: action.reason,
+            })
+        }
+
+        for (const response of question.responses) {
+            historyLog.push({
+                actionType: `${questionHistoryScope}_QUESTION_RESPONSE`,
+                updatedAt: response.createdAt,
+                updatedBy: response.addedBy,
+            })
+
+            // Response actions are direct admin lifecycle changes on a
+            // response. Cascade response actions are intentionally skipped by
+            // the store query because the parent question action is the
+            // user-visible event.
+            for (const action of response.actions) {
+                historyLog.push({
+                    actionType: `${questionHistoryScope}_QUESTION_RESPONSE_${action.action}`,
+                    updatedAt: action.createdAt,
+                    updatedBy: action.updatedBy,
+                    updatedReason: action.reason,
+                })
+            }
+        }
+    }
+
+    return sortHistoryLog(historyLog)
 }
 
 /**
@@ -269,8 +342,8 @@ function buildContractSubmissionHistoryLog(
  */
 function buildRateSubmissionHistoryLog(
     rate: RateType
-): RateSubmissionHistoryLogEntry[] {
-    const historyLog: RateSubmissionHistoryLogEntry[] = []
+): RateSubmissionHistoryEntry[] {
+    const historyLog: RateSubmissionHistoryEntry[] = []
 
     for (const [
         index,
@@ -421,18 +494,25 @@ function buildRateSubmissionHistoryLog(
     // Sort descending by timestamp so entry [0] is always the most recent
     // action regardless of which collection it came from. Use the same
     // tie-breaker as the contract builder for same-millisecond writes.
-    return [...historyLog].sort(
-        (a, b) =>
-            b.updatedAt.getTime() - a.updatedAt.getTime() ||
-            actionTypeSortRank(b.actionType) - actionTypeSortRank(a.actionType)
-    )
+    return sortHistoryLog(historyLog)
 }
 
-export { buildContractSubmissionHistoryLog, buildRateSubmissionHistoryLog }
+export {
+    buildCompleteHistoryLog,
+    buildContractSubmissionHistoryLog,
+    buildQuestionResponseHistoryLog,
+    buildRateSubmissionHistoryLog,
+}
 
 export type {
-    ContractSubmissionHistoryLogEntry,
+    CompleteHistory,
+    ContractSubmissionHistoryEntry,
     ContractSubmissionHistoryActionType,
-    RateSubmissionHistoryLogEntry,
+    QuestionHistoryActionInput,
+    QuestionHistoryInput,
+    QuestionHistoryResponseInput,
+    QuestionResponseHistoryActionType,
+    QuestionResponseHistory,
+    RateSubmissionHistoryEntry,
     RateSubmissionHistoryActionType,
 }

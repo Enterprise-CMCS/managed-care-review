@@ -1,4 +1,6 @@
 export { findAllQuestionsByContract } from './findAllQuestionsByContract'
+export { findContractQuestionResponseHistory } from './findContractQuestionResponseHistory'
+export { findRateQuestionResponseHistory } from './findRateQuestionResponseHistory'
 export { insertContractQuestion } from './insertContractQuestion'
 export { softDeleteContractQuestion } from './softDeleteContractQuestion'
 export {

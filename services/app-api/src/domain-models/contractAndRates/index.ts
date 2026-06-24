@@ -69,6 +69,20 @@ export type {
 } from './packageSubmissions'
 
 export type {
+    BaseSubmissionHistoryEntry,
+    CompleteHistory,
+    ContractSubmissionHistoryActionType,
+    ContractSubmissionHistoryEntry,
+    QuestionResponseHistoryActionType,
+    QuestionResponseHistory,
+    RateSubmissionHistoryActionType,
+    RateSubmissionHistoryEntry,
+    SubmissionHistoryActionType,
+    SubmissionHistory,
+    SubmissionHistoryUserTypes,
+} from './submissionHistoryTypes'
+
+export type {
     ContractReviewStatusType,
     ContractSubmissionType,
 } from './baseContractRateTypes'

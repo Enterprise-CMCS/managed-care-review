@@ -80,6 +80,9 @@ function mockStoreThatErrors(): Store {
         findAllQuestionsByContract: async (_pkgID) => {
             return genericError
         },
+        findContractQuestionResponseHistory: async (_pkgID) => {
+            return genericError
+        },
         insertContractQuestionResponse: async (_ID) => {
             return genericError
         },
@@ -92,10 +95,16 @@ function mockStoreThatErrors(): Store {
         findAllQuestionsByRate: async (_pkgID) => {
             return genericError
         },
+        findRateQuestionResponseHistory: async (_pkgID) => {
+            return genericError
+        },
         insertDraftContract: async (_ID) => {
             return genericError
         },
         findContractWithHistory: async (_ID) => {
+            return genericError
+        },
+        findSubmissionHistoryByContractID: async (_ID) => {
             return genericError
         },
 
