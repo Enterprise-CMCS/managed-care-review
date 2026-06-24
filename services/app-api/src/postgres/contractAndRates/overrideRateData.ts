@@ -201,9 +201,12 @@ const overrideRateDataInsideTransaction = async (
         },
     })
 
-    // Rate overrides also change submitted rate data shown inside currently
-    // related contracts, but they do not create contract package history.
-    // Propagate the same action date to those contracts directly.
+    // Rate overrides also change the submitted rate data shown inside currently
+    // related contracts, even when one of those contracts is unlocked. CMS users
+    // still see the latest submitted package data, not the unlocked draft data,
+    // so the linked contract's lastActionDate needs to move to this override.
+    // This does not create contract package history, so propagate the same
+    // action date to those contracts directly.
     await updateRelatedContractsLastActionDateByRateID(
         tx,
         rateID,

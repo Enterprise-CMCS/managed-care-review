@@ -348,6 +348,11 @@ async function submitContractAndOrRates(
     const submissionRelatedContractRevs: ContractRevisionTable[] = []
     const submissionRelatedRateRevs: RateRevisionTable[] = []
     const rateRelationshipChangeRevs: RateRevisionTable[] = []
+    // Related contracts are not submitted by this transaction, but a submitted
+    // child rate can still change the submitted rate data they show. Track those
+    // contract IDs so their stored lastActionDate matches LINKED_RATE_UPDATE
+    // entries produced from package history.
+    const linkedContractIDsForSubmittedRateUpdates: string[] = []
 
     const linksToCreate: {
         rateRevID: string
@@ -690,6 +695,16 @@ async function submitContractAndOrRates(
         }
 
         for (const previousConnection of prevRelatedSubmission.submissionPackages) {
+            if (rateIDs.includes(previousConnection.rateRevision.rateID)) {
+                // This related contract already had the submitted rate in its
+                // previous submitted package. Resubmitting the rate changes the
+                // rate data visible through that contract, so its history will
+                // include LINKED_RATE_UPDATE and lastActionDate must move with it.
+                linkedContractIDsForSubmittedRateUpdates.push(
+                    relatedContract.contractID
+                )
+            }
+
             if (!rateIDs.includes(previousConnection.rateRevision.rateID)) {
                 // this previous submission has a link to be forwarded.
 
@@ -767,6 +782,27 @@ async function submitContractAndOrRates(
         await tx.contractTable.update({
             where: {
                 id: submittedContractRev.contractID,
+            },
+            data: {
+                lastActionDate: submitInfo.updatedAt,
+            },
+        })
+    }
+
+    const uniqueLinkedContractIDsForSubmittedRateUpdates = [
+        ...new Set(linkedContractIDsForSubmittedRateUpdates),
+    ]
+
+    if (uniqueLinkedContractIDsForSubmittedRateUpdates.length > 0) {
+        // These contracts already had one of the submitted rates linked in
+        // their previous submitted package. The contract itself did not submit,
+        // but its visible submitted rate data changed, so freshness must move
+        // to the parent submit timestamp.
+        await tx.contractTable.updateMany({
+            where: {
+                id: {
+                    in: uniqueLinkedContractIDsForSubmittedRateUpdates,
+                },
             },
             data: {
                 lastActionDate: submitInfo.updatedAt,
