@@ -7,7 +7,7 @@ import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/submissions'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
 
 export function createRateQuestionResponseResolver(

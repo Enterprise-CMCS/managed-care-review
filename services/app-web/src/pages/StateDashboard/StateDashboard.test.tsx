@@ -418,21 +418,104 @@ describe('StateDashboard', () => {
         })
     })
 
-    it('should not display filters on state dashboard page', async () => {
+    it('displays state dashboard filters with contract type and status when eqro submissions are enabled', async () => {
+        const submitted = mockContractStripped({
+            id: 'test-abc-submitted',
+            lastUpdatedForDisplay: new Date('1991-01-01'),
+        })
+
+        const unlocked = mockUnlockedContractStripped({
+            id: 'test-abc-unlocked',
+            lastUpdatedForDisplay: new Date('2020-01-01'),
+        })
+
+        const draft = mockContractStripped({
+            id: 'test-abc-draft',
+            status: 'DRAFT',
+            consolidatedStatus: 'DRAFT',
+            contractSubmissionType: 'EQRO',
+            lastUpdatedForDisplay: new Date('2100-01-01'),
+            draftRevision: {
+                __typename: 'ContractRevisionStripped',
+                id: 'draft-rev-1',
+                contractID: 'test-abc-draft',
+                createdAt: new Date('2100-01-01'),
+                updatedAt: new Date('2100-01-01'),
+                contractName: 'MCR-MN-0005-EQRO',
+                submitInfo: null,
+                unlockInfo: null,
+                formData: {
+                    __typename: 'ContractFormDataStripped',
+                    programIDs: [],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_AND_RATES',
+                    contractType: 'BASE',
+                    contractDateStart: new Date('2024-01-01'),
+                    contractDateEnd: new Date('2025-01-01'),
+                    managedCareEntities: ['MCO'],
+                },
+            },
+            latestSubmittedRevision: null,
+        })
+
         renderWithProviders(<StateDashboard />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
-                    indexContractsStrippedMockSuccess([]),
+                    indexContractsStrippedMockSuccess([
+                        draft,
+                        submitted,
+                        unlocked,
+                    ]),
                 ],
             },
+            featureFlags: { 'eqro-submissions': true },
         })
 
-        await waitFor(() => {
-            expect(
-                screen.queryByTestId('state-dashboard-page')
-            ).toBeInTheDocument()
-            expect(screen.queryByTestId('accordion')).not.toBeInTheDocument()
+        expect(await screen.findByTestId('accordion')).toBeInTheDocument()
+        expect(screen.getByTestId('contractType-filter')).toBeInTheDocument()
+        expect(screen.getByTestId('programs-filter')).toBeInTheDocument()
+        expect(screen.getByTestId('status-filter')).toBeInTheDocument()
+        expect(screen.queryByTestId('state-filter')).not.toBeInTheDocument()
+        expect(
+            screen.queryByTestId('submissionType-filter')
+        ).not.toBeInTheDocument()
+        expect(screen.getByText('0 filters applied')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 3 of 3 submissions')
+        ).toBeInTheDocument()
+    })
+
+    it('displays only status filter on state dashboard when eqro submissions are disabled', async () => {
+        const submitted = mockContractStripped({
+            id: 'test-abc-submitted',
+            lastUpdatedForDisplay: new Date('1991-01-01'),
         })
+
+        const unlocked = mockUnlockedContractStripped({
+            id: 'test-abc-unlocked',
+            lastUpdatedForDisplay: new Date('2020-01-01'),
+        })
+
+        renderWithProviders(<StateDashboard />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    indexContractsStrippedMockSuccess([submitted, unlocked]),
+                ],
+            },
+            featureFlags: { 'eqro-submissions': false },
+        })
+
+        expect(await screen.findByTestId('accordion')).toBeInTheDocument()
+        expect(screen.getByTestId('programs-filter')).toBeInTheDocument()
+        expect(screen.getByTestId('status-filter')).toBeInTheDocument()
+        expect(
+            screen.queryByTestId('contractType-filter')
+        ).not.toBeInTheDocument()
+        expect(screen.queryByTestId('state-filter')).not.toBeInTheDocument()
+        expect(
+            screen.queryByTestId('submissionType-filter')
+        ).not.toBeInTheDocument()
     })
 })

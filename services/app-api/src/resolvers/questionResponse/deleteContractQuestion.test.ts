@@ -55,6 +55,9 @@ describe('deleteContractQuestion', () => {
                 ],
             }
         )
+        // Answer the first question to close its round so a second question
+        // can be created.
+        await createTestQuestionResponse(stateServer, questionToKeep.id)
 
         const questionToDelete = await createTestQuestion(
             cmsServer,

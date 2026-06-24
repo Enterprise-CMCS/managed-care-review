@@ -775,6 +775,7 @@ enum QuestionActionType {
   RESTORE
   CASCADE_DELETE
   CASCADE_RESTORE
+  ADMIN_CREATE
 }
 
 enum Division {
@@ -921,6 +922,7 @@ enum ContractSubmissionType {
 
 enum OAuthScope {
   CMS_SUBMISSION_ACTIONS
+  ADMIN_SUBMISSION_ACTIONS
 }
 
 enum ScalarFieldOverrideOperation {

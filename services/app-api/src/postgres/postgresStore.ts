@@ -13,6 +13,8 @@ import type {
     AdminUserType,
     ContractQuestionType,
     CreateContractQuestionInput,
+    AdminCreateContractQuestionInput,
+    AdminCreateContractQuestionResponseInput,
     InsertQuestionResponseArgs,
     StateType,
     RateType,
@@ -37,9 +39,12 @@ import {
 } from './user'
 import {
     findAllQuestionsByContract,
+    findContractQuestion,
     findContractQuestionResponseHistory,
     findRateQuestionResponseHistory,
     insertContractQuestion,
+    insertAdminContractQuestion,
+    insertAdminContractQuestionResponse,
     insertContractQuestionResponse,
     insertRateQuestion,
     findAllQuestionsByRate,
@@ -279,6 +284,12 @@ type Store = {
         questionInput: CreateContractQuestionInput,
         user: CMSUsersUnionType
     ) => Promise<ContractQuestionType | Error>
+    insertAdminContractQuestion: (
+        questionInput: AdminCreateContractQuestionInput
+    ) => Promise<ContractQuestionType | Error>
+    insertAdminContractQuestionResponse: (
+        questionInput: AdminCreateContractQuestionResponseInput
+    ) => Promise<ContractQuestionType | Error>
     insertContractQuestionResponse: (
         questionInput: InsertQuestionResponseArgs,
         user: StateUserType
@@ -291,6 +302,9 @@ type Store = {
     findAllQuestionsByContract: (
         pkgID: string
     ) => Promise<ContractQuestionType[] | Error>
+    findContractQuestion: (
+        questionID: string
+    ) => Promise<ContractQuestionType | Error>
     findContractQuestionResponseHistory: (
         contractID: string
     ) => Promise<QuestionHistoryInput[] | Error>
@@ -447,12 +461,18 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         /** Q&A functions **/
         insertContractQuestion: (questionInput, user) =>
             insertContractQuestion(client, questionInput, user),
+        insertAdminContractQuestion: (questionInput) =>
+            insertAdminContractQuestion(client, questionInput),
+        insertAdminContractQuestionResponse: (questionInput) =>
+            insertAdminContractQuestionResponse(client, questionInput),
         insertContractQuestionResponse: (questionInput, user) =>
             insertContractQuestionResponse(client, questionInput, user),
         softDeleteContractQuestion: (questionID, user, reason) =>
             softDeleteContractQuestion(client, { questionID, user, reason }),
         findAllQuestionsByContract: (pkgID) =>
             findAllQuestionsByContract(client, pkgID),
+        findContractQuestion: (questionID) =>
+            findContractQuestion(client, questionID),
         findContractQuestionResponseHistory: (contractID) =>
             findContractQuestionResponseHistory(client, contractID),
         insertRateQuestion: (questionInput, user) =>

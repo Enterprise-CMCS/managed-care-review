@@ -8,6 +8,7 @@ import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
+import { overrideTestRateData } from '../../testHelpers/gqlRateHelpers'
 import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { OverrideRateDataDocument } from '../../gen/gqlClient'
@@ -131,6 +132,118 @@ describe('overrideRateData resolver', () => {
         // contract view of that rate, so both stored action dates should move.
         expect(rateTableRow.lastActionDate).toEqual(overrideCreatedAt)
         expect(contractTableRow.lastActionDate).toEqual(overrideCreatedAt)
+    })
+
+    it('allows non-delegated admin OAuth clients with admin scope to override rate data', async () => {
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+        const oauthAdminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-admin-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: false,
+                },
+            },
+            ldService,
+        })
+        const overrideDate = '2020-01-15T00:00:00.000Z'
+
+        const result = await overrideTestRateData(oauthAdminServer, {
+            rateID,
+            description: 'Admin OAuth override initiallySubmittedAt',
+            overrides: {
+                initiallySubmittedAt: overrideDate,
+                initiallySubmittedAtOp: 'OVERRIDE',
+            },
+        })
+
+        expect(new Date(result.initiallySubmittedAt!).toISOString()).toBe(
+            overrideDate
+        )
+    })
+
+    it('rejects delegated admin OAuth clients from overriding rate data', async () => {
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+        const oauthAdminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-delegated-admin-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            },
+            ldService,
+        })
+
+        const result = await executeGraphQLOperation(oauthAdminServer, {
+            query: OverrideRateDataDocument,
+            variables: {
+                input: {
+                    rateID,
+                    description: 'Delegated admin OAuth override attempt',
+                    overrides: {
+                        initiallySubmittedAt: '2020-01-15T00:00:00.000Z',
+                        initiallySubmittedAtOp: 'OVERRIDE',
+                    },
+                },
+            },
+        })
+
+        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
+        expect(result.errors?.[0]?.message).toBe(
+            'OAuth client does not have write permissions'
+        )
+    })
+
+    it('rejects CMS-scoped OAuth clients from overriding rate data', async () => {
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+        const oauthAdminServer = await constructTestPostgresServer({
+            context: {
+                user: testAdminUser(),
+                oauthClient: {
+                    clientId: 'test-cms-oauth-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: false,
+                },
+            },
+            ldService,
+        })
+
+        const result = await executeGraphQLOperation(oauthAdminServer, {
+            query: OverrideRateDataDocument,
+            variables: {
+                input: {
+                    rateID,
+                    description: 'CMS OAuth override attempt',
+                    overrides: {
+                        initiallySubmittedAt: '2020-01-15T00:00:00.000Z',
+                        initiallySubmittedAtOp: 'OVERRIDE',
+                    },
+                },
+            },
+        })
+
+        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
+        expect(result.errors?.[0]?.message).toBe(
+            'OAuth client does not have write permissions'
+        )
     })
 
     it('returns BAD_USER_INPUT for invalid override input', async () => {

@@ -1,6 +1,16 @@
 import React from 'react'
 import { Program } from '../gen/gqlClient'
 
+const getAvailableContractPrograms = (
+    programs: Program[],
+    selectedProgramIDs: string[] = []
+): Program[] =>
+    programs.filter(
+        (program) =>
+            !program.isRateProgram &&
+            (!program.isDeprecated || selectedProgramIDs.includes(program.id))
+    )
+
 /**
  * Returns a span containing the program name, with an italic "(retired)"
  * suffix for deprecated programs.
@@ -57,4 +67,8 @@ const formattedProgramNames = (
     )
 }
 
-export { formattedProgramName, formattedProgramNames }
+export {
+    formattedProgramName,
+    formattedProgramNames,
+    getAvailableContractPrograms,
+}

@@ -20,7 +20,7 @@ import {
 } from '../attributeHelper'
 import { GraphQLError } from 'graphql/index'
 import type { ContractOrErrorArrayType } from '../../postgres/contractAndRates'
-import { canRead } from '../../authorization/oauthAuthorization'
+import { canRead } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { getLastUpdatedForDisplay, latestDate } from '../helpers'
 

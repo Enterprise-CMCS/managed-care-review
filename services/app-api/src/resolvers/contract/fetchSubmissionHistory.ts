@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { NotFoundError, type Store } from '../../postgres'
-import { canRead } from '../../authorization/oauthAuthorization'
+import { canRead } from '../../oauth/oauthAuthorization'
 import {
     hasAdminPermissions,
     hasCMSPermissions,

@@ -1,4 +1,4 @@
-fragment oauthUserFragment on CMSUsersUnion {
+fragment oauthUserFragment on OAuthUser {
     ... on CMSUser {
         id
         email
@@ -36,5 +36,12 @@ fragment oauthUserFragment on CMSUsersUnion {
                 deprecatedByProgramId
             }
         }
+    }
+    ... on AdminUser {
+        id
+        email
+        givenName
+        familyName
+        role
     }
 }

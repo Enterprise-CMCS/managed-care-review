@@ -1,4 +1,4 @@
-import opentelemetry, { SpanStatusCode } from '@opentelemetry/api'
+import opentelemetry, { ROOT_CONTEXT, SpanStatusCode } from '@opentelemetry/api'
 import {
     resourceFromAttributes,
     defaultResource,
@@ -32,6 +32,12 @@ function getDDHeaders() {
 }
 
 export function initTracer(serviceName: string) {
+    // Skip OTEL setup under unit tests (setupTests.ts sets stage='test'). This
+    // keeps tests hermetic: without a registered provider, recordException/
+    // recordSpanEvent use a no-op tracer and flushTracer() short-circuits, so
+    // no real OTLP exporter is created and no outbound spans are attempted.
+    if (process.env.stage === 'test') return
+
     // Guard against re-registration on warm Lambda invocations — registering
     // multiple providers causes duplicate spans and leaks span processors
     if (tracerProvider) return
@@ -96,6 +102,27 @@ export function recordException(
             message: typeof error === 'string' ? error : error.message,
         })
         console.error(error)
+    } finally {
+        span.end()
+    }
+}
+
+// Records a standalone, successful span carrying the given attributes.
+// Used to emit a queryable signal for events we want to track volume/trends
+// on (e.g. delegated-user requests) independent of the outcome of the
+// request that triggered them.
+export function recordSpanEvent(
+    serviceName: string,
+    spanName: string,
+    attributes: Record<string, string | number | boolean>
+) {
+    const tracer = opentelemetry.trace.getTracer(serviceName)
+    // Start from ROOT_CONTEXT so this span is not parented to the active
+    // request span — it must survive independently of that trace's sampling.
+    const span = tracer.startSpan(spanName, { attributes }, ROOT_CONTEXT)
+
+    try {
+        span.setStatus({ code: SpanStatusCode.OK })
     } finally {
         span.end()
     }

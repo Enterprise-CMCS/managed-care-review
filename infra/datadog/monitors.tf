@@ -1,5 +1,5 @@
 resource "datadog_monitor" "graphql_errors" {
-  name = "[${var.environment}] MCR - GraphQL API Errors"
+  name = "[${var.team}] GraphQL API Errors - ${var.environment}"
   type = "trace-analytics alert"
 
   query = "trace-analytics(\"service:app-api-${var.environment} status:error\").rollup(\"count\").last(\"5m\") > ${var.graphql_error_threshold}"
@@ -29,12 +29,12 @@ resource "datadog_monitor" "graphql_errors" {
     "env:${var.environment}",
     "service:app-api-${var.environment}",
     "managed-by:opentofu",
-    "project:mcr",
+    "team:${var.team}",
   ]
 }
 
 resource "datadog_monitor" "large_payload_alert" {
-  name = "[${var.environment}] MCR - Large GraphQL Request Payload"
+  name = "[${var.team}] Large GraphQL Request Payload - ${var.environment}"
   type = "trace-analytics alert"
 
   query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"Large request payload detected\\\"\").rollup(\"count\").last(\"5m\") > ${var.large_payload_threshold}"
@@ -66,18 +66,132 @@ resource "datadog_monitor" "large_payload_alert" {
     "env:${var.environment}",
     "service:app-api-${var.environment}",
     "managed-by:opentofu",
-    "project:mcr",
+    "team:${var.team}",
+  ]
+}
+
+resource "datadog_monitor" "impersonation_failed_attempts" {
+  name = "[${var.team}] Failed Impersonation Attempts - ${var.environment}"
+  type = "trace-analytics alert"
+
+  query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"delegated\\\"\").rollup(\"count\").last(\"5m\") > ${var.impersonation_failure_threshold}"
+
+  message = <<-EOT
+    Repeated failed delegated-user (impersonation) attempts detected in **${var.environment}**.
+
+    Triggered when >${var.impersonation_failure_threshold} failed "delegatedUserAuth" spans (user not found, unauthorized role, or header rejected) are recorded in 5 minutes.
+
+    - Review the `delegatedUserAuth` span details in Datadog APM for **${var.environment}**
+    - Identify the OAuth client and acting-as user(s) involved
+    - This may indicate a misconfigured client or an attempt at credential misuse
+
+    ${var.notify_slack}
+  EOT
+
+  monitor_thresholds {
+    critical = var.impersonation_failure_threshold
+  }
+
+  notify_no_data    = false
+  evaluation_delay  = 60
+  renotify_interval = 60
+  include_tags      = true
+
+  tags = [
+    "env:${var.environment}",
+    "service:app-api-${var.environment}",
+    "managed-by:opentofu",
+    "team:${var.team}",
+  ]
+}
+
+resource "datadog_monitor" "impersonation_volume_anomaly" {
+  name = "[${var.team}] Impersonation Request Volume Anomaly - ${var.environment}"
+  type = "trace-analytics alert"
+
+  query = "trace-analytics(\"service:app-api-${var.environment} \\\"delegatedUserRequest\\\"\").rollup(\"count\").last(\"5m\") > ${var.impersonation_volume_threshold}"
+
+  message = <<-EOT
+    Unusual volume of delegated-user (impersonation) requests detected in **${var.environment}**.
+
+    Triggered when >${var.impersonation_volume_threshold} "delegatedUserRequest" spans are recorded in 5 minutes, which may indicate credential misuse.
+
+    - Review `delegatedUserRequest` span details in Datadog APM for **${var.environment}**
+    - Confirm the volume is expected for legitimate CMS reviewer activity
+    - Check which OAuth clients and acting-as users are driving the volume
+
+    ${var.notify_slack}
+  EOT
+
+  monitor_thresholds {
+    critical = var.impersonation_volume_threshold
+  }
+
+  notify_no_data    = false
+  evaluation_delay  = 60
+  renotify_interval = 60
+  include_tags      = true
+
+  tags = [
+    "env:${var.environment}",
+    "service:app-api-${var.environment}",
+    "managed-by:opentofu",
+    "team:${var.team}",
+  ]
+}
+
+resource "datadog_monitor" "zip_generation_failures" {
+  name = "[${var.team}] Document Zip Generation Failures - ${var.environment}"
+  type = "trace-analytics alert"
+
+  # Matches the dedicated `zip.generate` spans emitted by the app-api zip service
+  # (services/app-api/src/zip/zipTracing.ts). Every failed contract or rate zip
+  # records an exception prefixed with the stable "Document zip generation failed"
+  # marker and sets the span status to error. Keep this phrase in sync with
+  # ZIP_FAILURE_MARKER in zipTracing.ts.
+  query = "trace-analytics(\"service:app-api-${var.environment} status:error \\\"Document zip generation failed\\\"\").rollup(\"count\").last(\"5m\") > ${var.zip_failure_threshold}"
+
+  message = <<-EOT
+    A document zip failed to generate in **${var.environment}**.
+
+    Triggered when >${var.zip_failure_threshold} contract or rate `zip.generate` spans fail (status:error) in 5 minutes. These zips are produced when a contract is submitted/withdrawn and by the batch zip-regeneration Lambda.
+
+    **There is no automatic retry today** — each failure means a submitted contract or rate is sitting without its document zip until someone regenerates it, so treat every alert as actionable:
+
+    - Find the failing `zip.generate` span in Datadog APM under service `app-api-${var.environment}` and note `@zip.type`, `@zip.revision_id`, and `@zip.document_type`
+    - Regenerate the missing zip by invoking the `app-api-${var.environment}-cdk-regenerate-zips` Lambda with that revision ID
+    - If failures are frequent, capture the underlying error (often S3 download/upload timeouts) to inform the planned worker-queue retry work
+
+    ${var.notify_slack}
+  EOT
+
+  monitor_thresholds {
+    critical = var.zip_failure_threshold
+  }
+
+  # No failing zips is the normal, healthy state, so absence of data is not an
+  # outage signal here (mirrors large_payload_alert / impersonation monitors).
+  notify_no_data    = false
+  evaluation_delay  = 60
+  renotify_interval = 60
+  include_tags      = true
+
+  tags = [
+    "env:${var.environment}",
+    "service:app-api-${var.environment}",
+    "managed-by:opentofu",
+    "team:${var.team}",
   ]
 }
 
 resource "datadog_monitor" "web_trace_errors" {
-  name = "[${var.environment}] MCR - Web Application Trace Errors"
+  name = "[${var.team}] Web Application Trace Errors - ${var.environment}"
   type = "trace-analytics alert"
 
   query = "trace-analytics(\"service:app-web-${var.environment} status:error\").rollup(\"count\").last(\"5m\") > ${var.web_error_threshold}"
 
   message = <<-EOT
-    Trace errors detected in the MCR web app in **${var.environment}**.
+    Trace errors detected in the ${var.team} web app in **${var.environment}**.
 
     Triggered when >${var.web_error_threshold} errors are recorded in OTEL spans from `app-web-${var.environment}` in 5 minutes.
 
@@ -101,6 +215,6 @@ resource "datadog_monitor" "web_trace_errors" {
     "env:${var.environment}",
     "service:app-web-${var.environment}",
     "managed-by:opentofu",
-    "project:mcr",
+    "team:${var.team}",
   ]
 }

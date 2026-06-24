@@ -7,10 +7,13 @@ import type {
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { updateRelatedContractsLastActionDateByRateID } from '../updateLastActionDateHelpers'
 import {
+    hasOpenQuestionRound,
+    OPEN_QUESTION_ROUND_ERROR_MESSAGE,
     questionInclude,
     rateQuestionPrismaToDomainType,
 } from './questionHelpers'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
+import { UserInputPostgresError } from '../postgresErrors'
 
 export async function insertRateQuestion(
     client: ExtendedPrismaClient,
@@ -24,46 +27,62 @@ export async function insertRateQuestion(
         s3Key: document.s3Key,
     }))
 
-    try {
-        const result = await client.rateQuestion.create({
-            data: {
-                rate: {
-                    connect: {
-                        id: questionInput.rateID,
-                    },
-                },
-                addedBy: {
-                    connect: {
-                        id: user.id,
-                    },
-                },
-                documents: {
-                    create: documents,
-                },
-                division: user.divisionAssignment as DivisionType,
-            },
-            include: questionInclude,
-        })
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'insertRateQuestion',
+        table: 'RateTable',
+        id: questionInput.rateID,
+        transactionOptions: { timeout: 20000 },
+        transaction: async (tx) => {
+            const existingQuestions = await tx.rateQuestion.findMany({
+                where: { rateID: questionInput.rateID },
+                include: questionInclude,
+            })
 
-        // Rate Q&A changes the rate-facing action history and is visible from
-        // submitted contracts that include this rate, so update both freshness
-        // markers from the question's DB-created timestamp.
-        await client.rateTable.update({
-            where: {
-                id: questionInput.rateID,
-            },
-            data: {
-                lastActionDate: result.createdAt,
-            },
-        })
-        await updateRelatedContractsLastActionDateByRateID(
-            client,
-            questionInput.rateID,
-            result.createdAt
-        )
+            if (hasOpenQuestionRound(existingQuestions)) {
+                return new UserInputPostgresError(
+                    OPEN_QUESTION_ROUND_ERROR_MESSAGE
+                )
+            }
 
-        return rateQuestionPrismaToDomainType(result)
-    } catch (e) {
-        return parseErrorToError(e)
-    }
+            const result = await tx.rateQuestion.create({
+                data: {
+                    rate: {
+                        connect: {
+                            id: questionInput.rateID,
+                        },
+                    },
+                    addedBy: {
+                        connect: {
+                            id: user.id,
+                        },
+                    },
+                    documents: {
+                        create: documents,
+                    },
+                    division: user.divisionAssignment as DivisionType,
+                },
+                include: questionInclude,
+            })
+
+            // Rate Q&A changes the rate-facing action history and is visible from
+            // submitted contracts that include this rate, so update both freshness
+            // markers from the question's DB-created timestamp.
+            await client.rateTable.update({
+                where: {
+                    id: questionInput.rateID,
+                },
+                data: {
+                    lastActionDate: result.createdAt,
+                },
+            })
+            await updateRelatedContractsLastActionDateByRateID(
+                client,
+                questionInput.rateID,
+                result.createdAt
+            )
+
+            return rateQuestionPrismaToDomainType(result)
+        },
+    })
 }

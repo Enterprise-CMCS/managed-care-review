@@ -1,4 +1,4 @@
-import {
+import type {
     ConsolidatedContractStatus,
     ContractQuestionList,
     RateQuestionList,
@@ -10,6 +10,8 @@ import { divisionFullNames } from '../QuestionResponseHelpers'
 import type { IndexQuestionType } from '../QuestionResponseHelpers'
 import { QuestionResponseRound, QuestionRounds } from './QuestionResponseRound'
 import { sortRoundsByDate } from './CMSQuestionResponseTable'
+import { NavLinkWithLogging } from '../../../components'
+import { isAdminQuestionResponseAllowedStatus } from '@mc-review/constants'
 
 type StateQuestionResponseTableProps = {
     indexQuestions: IndexQuestionType
@@ -27,6 +29,9 @@ export const StateQuestionResponseTable = ({
     const { loggedInUser } = useAuth()
     const answeredQuestions: QuestionRounds = []
     const unansweredQuestions: QuestionRounds = []
+    const canAdminAddQuestions =
+        loggedInUser?.__typename === 'AdminUser' &&
+        isAdminQuestionResponseAllowedStatus(contractStatus)
 
     // Bucket questions
     Object.entries(indexQuestions).forEach(([key, value]) => {
@@ -62,6 +67,13 @@ export const StateQuestionResponseTable = ({
     const sortedAnsweredQuestions = sortRoundsByDate(answeredQuestions)
     const sortedUnansweredQuestions = sortRoundsByDate(unansweredQuestions)
 
+    // Only the first question rendered on the page (outstanding questions are
+    // rendered before answered ones) gets the primary upload response button;
+    // all subsequent buttons use the secondary (outline) styling.
+    const firstQuestionId =
+        sortedUnansweredQuestions[0]?.[0]?.questionData.id ??
+        sortedAnsweredQuestions[0]?.[0]?.questionData.id
+
     return (
         <>
             {header && (
@@ -82,7 +94,19 @@ export const StateQuestionResponseTable = ({
                     headerId="outsandingContractQuestions"
                     headingLevel="h3"
                     hideBorderTop
-                />
+                >
+                    {canAdminAddQuestions && (
+                        <div>
+                            <NavLinkWithLogging
+                                className="usa-button"
+                                variant="unstyled"
+                                to="./admin-upload-questions"
+                            >
+                                Add questions
+                            </NavLinkWithLogging>
+                        </div>
+                    )}
+                </SectionHeader>
                 {sortedUnansweredQuestions.length ? (
                     sortedUnansweredQuestions.map((questionRound) =>
                         questionRound.map(({ roundTitle, questionData }) => (
@@ -94,6 +118,9 @@ export const StateQuestionResponseTable = ({
                                 questionType={questionType}
                                 contractStatus={contractStatus}
                                 qaSectionHeaderId="outsandingContractQuestions"
+                                isFirstQuestion={
+                                    questionData.id === firstQuestionId
+                                }
                             />
                         ))
                     )
@@ -122,6 +149,9 @@ export const StateQuestionResponseTable = ({
                                 questionType={questionType}
                                 contractStatus={contractStatus}
                                 qaSectionHeaderId="answeredContractQuestions"
+                                isFirstQuestion={
+                                    questionData.id === firstQuestionId
+                                }
                             />
                         ))
                     )

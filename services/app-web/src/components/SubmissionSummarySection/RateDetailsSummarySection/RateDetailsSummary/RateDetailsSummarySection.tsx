@@ -500,7 +500,7 @@ export const RateDetailsSummarySection = ({
                                   documentZipPackages={documentZipPackage}
                                   documentCount={rateDocumentCount}
                                   onDocumentError={onDocumentError}
-                                  headingLevel="h4"
+                                  removeTopBorder
                                   renderZipLink={
                                       !!(
                                           isSubmittedOrCMSUser &&
