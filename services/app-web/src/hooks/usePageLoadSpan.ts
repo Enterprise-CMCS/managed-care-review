@@ -55,10 +55,12 @@ export const usePageLoadSpan = ({
                 endedRef.current = true
             }
         }
-        // Only run on mount; currentRoute and startSpan are stable for the
-        // lifetime of a given page mount.
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+        // Restart the load timer if the route changes without unmounting (e.g. a
+        // shared layout reused across routes): the previous span is closed as
+        // abandoned above and a new one starts for the new route. currentRoute is
+        // a stable route-name string and startSpan is a stable callback, so this
+        // only re-runs on an actual route change, not on every render.
+    }, [currentRoute, startSpan])
 
     // End the span the first time the page is ready (or errors).
     useEffect(() => {
