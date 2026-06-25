@@ -1,6 +1,6 @@
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
-import { OAuthScope } from '../../generated/client'
+import { OAuthScope } from '../../generated/enums'
 import {
     createOAuthClient,
     getOAuthClientById,
