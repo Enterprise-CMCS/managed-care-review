@@ -55,19 +55,23 @@ describe(`indexContracts`, () => {
                 )
             // specific contracts by id exist
             expect(theseSubmissions).toHaveLength(2)
-            // confirm some contract data is correct too, first in list will be draft, second is the submitted
-            expect(theseSubmissions[0].initiallySubmittedAt).toBeNull()
-            expect(theseSubmissions[0].status).toBe('DRAFT')
-            expect(theseSubmissions[0].contractSubmissionType).toBe(
-                'HEALTH_PLAN'
+            // Legacy indexContracts does not guarantee a sort order, so assert
+            // each returned contract by ID instead of by array position.
+            const indexedDraft = theseSubmissions.find(
+                (sub) => sub.id === draft.id
             )
-            expect(theseSubmissions[1].initiallySubmittedAt).toEqual(
+            const indexedSubmitted = theseSubmissions.find(
+                (sub) => sub.id === submittedContract.id
+            )
+
+            expect(indexedDraft?.initiallySubmittedAt).toBeNull()
+            expect(indexedDraft?.status).toBe('DRAFT')
+            expect(indexedDraft?.contractSubmissionType).toBe('HEALTH_PLAN')
+            expect(indexedSubmitted?.initiallySubmittedAt).toEqual(
                 submittedContract.packageSubmissions[0].submitInfo.updatedAt
             )
-            expect(theseSubmissions[1].contractSubmissionType).toBe(
-                'HEALTH_PLAN'
-            )
-            expect(theseSubmissions[1].status).toBe('SUBMITTED')
+            expect(indexedSubmitted?.contractSubmissionType).toBe('HEALTH_PLAN')
+            expect(indexedSubmitted?.status).toBe('SUBMITTED')
         })
 
         it('synthesizes the right statuses as a contract is submitted/unlocked/etc', async () => {

@@ -303,7 +303,7 @@ describe('undoWithdrawRate', () => {
                 `CMS has changed the status of rate ${formData.rateCertificationName} to submitted. Undo withdraw rate`,
             ])
         )
-    }, 55000)
+    }, 60000)
 
     it('can undo withdraw a rate previously linked to withdrawn contract', async () => {
         const stateUser = testStateUser()

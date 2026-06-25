@@ -68,7 +68,7 @@ export async function insertContractQuestion(
             // A new contract question is a user-visible action on the contract.
             // Use the DB-created question timestamp so lastActionDate matches the
             // action users see in Q&A history.
-            await client.contractTable.update({
+            await tx.contractTable.update({
                 where: {
                     id: questionInput.contractID,
                 },

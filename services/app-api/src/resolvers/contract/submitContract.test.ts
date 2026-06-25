@@ -73,15 +73,8 @@ describe('submitContract', () => {
 
             const contract = await submitTestContract(stateServer, draft.id)
             // check contract metadata
-            const today = new Date()
-            // const expectedDate = today.toISOString().split('T')[0]
             expect(contract.draftRevision).toBeNull()
             expect(contract.initiallySubmittedAt).toBeDefined()
-            expect(
-                Math.abs(
-                    contract.initiallySubmittedAt.getTime() - today.getTime()
-                )
-            ).toBeLessThan(1000)
             expect(contract.packageSubmissions).toHaveLength(1)
             expect(contract.status).toBe('SUBMITTED')
             expect(contract.contractSubmissionType).toBe('HEALTH_PLAN')
@@ -90,6 +83,10 @@ describe('submitContract', () => {
             const sub = contract.packageSubmissions[0]
             expect(sub.cause).toBe('CONTRACT_SUBMISSION')
             expect(sub.submitInfo.updatedReason).toBe('Initial submission')
+            // initiallySubmittedAt should come from the first submit event.
+            expect(contract.initiallySubmittedAt).toEqual(
+                sub.submitInfo.updatedAt
+            )
             expect(sub.submittedRevisions).toHaveLength(2)
 
             // check form data is unchanged
@@ -2491,15 +2488,8 @@ describe('submitContract', () => {
 
             const contract = await submitTestContract(stateServer, draft.id)
             // check contract metadata
-            const today = new Date()
-            // const expectedDate = today.toISOString().split('T')[0]
             expect(contract.draftRevision).toBeNull()
             expect(contract.initiallySubmittedAt).toBeDefined()
-            expect(
-                Math.abs(
-                    contract.initiallySubmittedAt.getTime() - today.getTime()
-                )
-            ).toBeLessThan(1000)
             expect(contract.packageSubmissions).toHaveLength(1)
             expect(contract.status).toBe('SUBMITTED')
             expect(contract.contractSubmissionType).toBe('EQRO')
@@ -2508,6 +2498,10 @@ describe('submitContract', () => {
             const sub = contract.packageSubmissions[0]
             expect(sub.cause).toBe('CONTRACT_SUBMISSION')
             expect(sub.submitInfo.updatedReason).toBe('Initial submission')
+            // initiallySubmittedAt should come from the first submit event.
+            expect(contract.initiallySubmittedAt).toEqual(
+                sub.submitInfo.updatedAt
+            )
             expect(sub.submittedRevisions).toHaveLength(1)
 
             // check form data is unchanged

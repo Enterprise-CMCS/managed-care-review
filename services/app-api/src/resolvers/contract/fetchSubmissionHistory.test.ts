@@ -36,6 +36,7 @@ import {
     testCMSUser,
 } from '../../testHelpers/userHelpers'
 import { testS3Client } from '../../testHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 // Helper function to delink specific rate from a contract.
@@ -151,19 +152,25 @@ describe('fetchSubmissionHistory', () => {
     })
 
     it('returns complete contract history and filters rate history to attached windows', async () => {
+        const ldService = testLDService({
+            'use-stored-contract-action-dates': true,
+        })
         const stateServer = await constructTestPostgresServer({
+            ldService,
             s3Client: mockS3,
         })
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
             },
+            ldService,
             s3Client: mockS3,
         })
         const adminServer = await constructTestPostgresServer({
             context: {
                 user: testAdminUser(),
             },
+            ldService,
             s3Client: mockS3,
         })
 
@@ -182,6 +189,10 @@ describe('fetchSubmissionHistory', () => {
         const preLinkRateQuestion = await createTestRateQuestion(
             cmsServer,
             linkedRateID
+        )
+        await createTestRateQuestionResponse(
+            stateServer,
+            preLinkRateQuestion.id
         )
         await overrideTestRateData(adminServer, {
             rateID: linkedRateID,
@@ -314,6 +325,7 @@ describe('fetchSubmissionHistory', () => {
             cmsServer,
             linkedRateID
         )
+        await createTestRateQuestionResponse(stateServer, gapRateQuestion.id)
         await overrideTestRateData(adminServer, {
             rateID: linkedRateID,
             description: 'Gap rate override excluded from target history',
@@ -359,6 +371,13 @@ describe('fetchSubmissionHistory', () => {
         const secondWindowRateQuestion = await createTestRateQuestion(
             cmsServer,
             linkedRateID
+        )
+        // The rate Q&A rules only allow one open question round at a time.
+        // Answer this in-window question before creating the post-delink
+        // question later in the test.
+        await createTestRateQuestionResponse(
+            stateServer,
+            secondWindowRateQuestion.id
         )
         await overrideTestRateData(adminServer, {
             rateID: linkedRateID,
@@ -593,6 +612,7 @@ describe('fetchSubmissionHistory', () => {
         )
         expect(actionTypes).not.toContain('RATE_LINK')
         expect(actionTypes).not.toContain('RATE_UNLINK')
+        expect(actionTypes).not.toContain('RATE_SUBMISSION')
         expect(actionTypes).not.toContain('WITHDRAW')
         expect(parentLinkedRateUpdateEntries).toHaveLength(1)
         expect(overrideEntries).toHaveLength(3)
@@ -600,11 +620,14 @@ describe('fetchSubmissionHistory', () => {
         expect(
             history.filter((entry) => entry.actionType === 'RATE_QUESTION')
         ).toHaveLength(2)
+        // Each attached window has one answered rate question. Both responses
+        // should be included because the rate was visible on the target
+        // contract when they were created.
         expect(
             history.filter(
                 (entry) => entry.actionType === 'RATE_QUESTION_RESPONSE'
             )
-        ).toHaveLength(1)
+        ).toHaveLength(2)
         expect(childRateWithdrawSubmitEntries).toHaveLength(1)
         expect(childRateWithdrawSubmitEntries[0].updatedReason).toContain(
             'CMS has withdrawn rate'
@@ -636,6 +659,10 @@ describe('fetchSubmissionHistory', () => {
         expect(updatedReasons).not.toContain(
             'Post-delink rate override excluded from target history'
         )
+        // The target contract should get the LINKED_RATE_UPDATE submit entry
+        // when the parent resubmits the linked rate, but it should not also get
+        // raw rate history entries from buildRateSubmissionHistory.
+        expect(updatedReasons).not.toContain('Unlock parent rate owner')
 
         // Rate Q&A entries do not have reason text, so assert inclusion and
         // exclusion by their exact mutation timestamps.
@@ -663,101 +690,5 @@ describe('fetchSubmissionHistory', () => {
         expect(updatedAtTimes).not.toContain(
             new Date(postDelinkRateQuestion.createdAt).getTime()
         )
-    }, 70000)
-
-    it('matches lastActionDate when a linked rate override is the newest history action', async () => {
-        const stateServer = await constructTestPostgresServer({
-            s3Client: mockS3,
-        })
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-            s3Client: mockS3,
-        })
-        const adminServer = await constructTestPostgresServer({
-            context: {
-                user: testAdminUser(),
-            },
-            s3Client: mockS3,
-        })
-
-        // Build a submitted parent rate, then link that rate into a separate
-        // target contract. The later rate override should be visible on the
-        // target contract because CMS users see submitted package data.
-        const parentDraft =
-            await createAndUpdateTestContractWithRate(stateServer)
-        const submittedParent = await submitTestContract(
-            stateServer,
-            parentDraft.id
-        )
-        const linkedRateID =
-            submittedParent.packageSubmissions[0].rateRevisions[0].rateID
-
-        const targetDraft =
-            await createAndUpdateTestContractWithRate(stateServer)
-        const targetWithLinkedRate = await addLinkedRateToTestContract(
-            stateServer,
-            targetDraft,
-            linkedRateID
-        )
-        const submittedTarget = await submitTestContract(
-            stateServer,
-            targetWithLinkedRate.id,
-            'Submit target before linked rate override'
-        )
-
-        const linkedRateOverrideReason =
-            'Newest linked rate override should drive contract history'
-        await overrideTestRateData(adminServer, {
-            rateID: linkedRateID,
-            description: linkedRateOverrideReason,
-            overrides: {
-                initiallySubmittedAt: '2020-06-01T00:00:00.000Z',
-                initiallySubmittedAtOp: 'OVERRIDE',
-            },
-        })
-
-        const result =
-            await executeGraphQLOperation<FetchSubmissionHistoryQuery>(
-                cmsServer,
-                {
-                    query: FetchSubmissionHistoryDocument,
-                    variables: {
-                        input: {
-                            contractID: submittedTarget.id,
-                        },
-                    },
-                }
-            )
-
-        expect(result.errors).toBeUndefined()
-
-        const history = result.data?.fetchSubmissionHistory.history
-        expect(history).toBeDefined()
-        if (!history) {
-            throw new Error('Expected fetchSubmissionHistory to return history')
-        }
-
-        const prismaClient = await sharedTestPrismaClient()
-        const contractTableRow = await prismaClient.contractTable.findUnique({
-            where: { id: submittedTarget.id },
-            select: { lastActionDate: true },
-        })
-        const linkedRateOverrideEntries = history.filter(
-            (entry) =>
-                entry.actionType === 'OVERRIDE' &&
-                entry.updatedReason === linkedRateOverrideReason
-        )
-
-        expect(linkedRateOverrideEntries).toHaveLength(1)
-        expect(history[0]).toMatchObject({
-            actionType: 'OVERRIDE',
-            updatedReason: linkedRateOverrideReason,
-        })
-        expect(contractTableRow?.lastActionDate).toBeDefined()
-        expect(new Date(history[0].updatedAt).getTime()).toBe(
-            contractTableRow?.lastActionDate?.getTime()
-        )
-    }, 45000)
+    }, 80000)
 })

@@ -68,7 +68,7 @@ export async function insertRateQuestion(
             // Rate Q&A changes the rate-facing action history and is visible from
             // submitted contracts that include this rate, so update both freshness
             // markers from the question's DB-created timestamp.
-            await client.rateTable.update({
+            await tx.rateTable.update({
                 where: {
                     id: questionInput.rateID,
                 },

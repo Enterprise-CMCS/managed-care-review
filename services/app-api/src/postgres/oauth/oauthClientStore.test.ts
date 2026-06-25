@@ -25,8 +25,6 @@ describe('OAuthClient Store', () => {
 
     beforeEach(async () => {
         client = await sharedTestPrismaClient()
-        // Clean up any existing OAuth clients before each test
-        await client.oAuthClient.deleteMany()
 
         // Create a unique test user for this test run
         const testUser = await client.user.create({
@@ -221,8 +219,7 @@ describe('OAuthClient Store', () => {
                 givenName: 'Other',
                 familyName: 'User',
                 email: `otheruser-oauth-${uuidv4()}@example.com`,
-                role: 'STATE_USER',
-                stateCode: 'CA',
+                role: 'ADMIN_USER',
             },
         })
 
