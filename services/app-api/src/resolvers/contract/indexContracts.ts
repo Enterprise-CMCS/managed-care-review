@@ -62,6 +62,11 @@ const parseContracts = (
     return parsedContracts
 }
 
+const getLatestContractOverrideDate = (contract: ContractType) =>
+    latestDate(
+        contract.contractOverrides?.map((override) => override.createdAt) ?? []
+    )
+
 const formatContracts = (
     results: ContractType[],
     updatedWithin?: number | null,
@@ -78,7 +83,13 @@ const formatContracts = (
         const cutoff = new Date(now.getTime() - updatedWithin * 1000)
 
         contracts = contracts.filter((contract: ContractType) => {
-            const lastUpdated = getLastUpdatedForDisplay(contract)
+            // Legacy updatedWithin predates stored lastActionDate. Include
+            // override rows explicitly so submitted-data corrections are not
+            // filtered out just because the base contract revision is older.
+            const lastUpdated = latestDate([
+                getLastUpdatedForDisplay(contract),
+                getLatestContractOverrideDate(contract),
+            ])
             if (!lastUpdated) return false
             return lastUpdated.getTime() > cutoff.getTime()
         })
