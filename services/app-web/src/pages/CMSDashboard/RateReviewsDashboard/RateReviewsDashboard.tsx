@@ -5,6 +5,7 @@ import { IndexRatesStrippedDocument } from '../../../gen/gqlClient'
 import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import { recordJSException } from '@mc-review/otel'
+import { usePageLoadSpan } from '../../../hooks'
 import { Loading } from '../../../components'
 
 import { RateInDashboardType, RateReviewsTable } from './RateReviewsTable'
@@ -24,6 +25,16 @@ const RateReviewsDashboard = (): React.ReactElement => {
         },
         fetchPolicy: 'cache-and-network',
         pollInterval: 300000,
+    })
+
+    // Measure dashboard load time (mount -> data ready) for the Rate reviews tab.
+    usePageLoadSpan({
+        ready: !!data,
+        error,
+        attributes: {
+            'dashboard.tab': 'rates',
+            'dashboard.row_count': data?.indexRatesStripped.edges.length ?? 0,
+        },
     })
 
     // Handle loading and error states for fetching data while using cached data

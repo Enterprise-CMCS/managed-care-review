@@ -7,6 +7,7 @@ import { mostRecentDate } from '@mc-review/dates'
 import styles from '../../StateDashboard/StateDashboard.module.scss'
 import localStyles from './SubmissionsDashboard.module.scss'
 import { recordJSException } from '@mc-review/otel'
+import { usePageLoadSpan } from '../../../hooks'
 import {
     Loading,
     ContractTable,
@@ -20,6 +21,17 @@ const SubmissionsDashboard = (): React.ReactElement => {
     const { data, loading, error } = useQuery(IndexContractsStrippedDocument, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 120000,
+    })
+
+    // Measure dashboard load time (mount -> data ready) for the Submissions tab.
+    usePageLoadSpan({
+        ready: !!data,
+        error,
+        attributes: {
+            'dashboard.tab': 'submissions',
+            'dashboard.row_count':
+                data?.indexContractsStripped.edges.length ?? 0,
+        },
     })
 
     if (!data && loading) {
