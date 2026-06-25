@@ -36,6 +36,12 @@ variable "web_error_threshold" {
   default     = 5
 }
 
+variable "dashboard_load_threshold_ms" {
+  type        = number
+  description = "Alert when the rolling average CMS dashboard page-load span duration (page.load, measuring mount -> data-ready) exceeds this many milliseconds. Observed baseline is a few hundred ms; the default leaves generous headroom — tune down as the metric stabilizes in prod."
+  default     = 5000
+}
+
 variable "large_payload_threshold" {
   type        = number
   description = "Alert when more than this many \"Large request payload detected\" error spans occur in 5 minutes. Default 0 means any single occurrence triggers the alert."

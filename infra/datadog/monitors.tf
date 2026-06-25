@@ -218,3 +218,52 @@ resource "datadog_monitor" "web_trace_errors" {
     "team:${var.team}",
   ]
 }
+
+resource "datadog_monitor" "dashboard_load_time" {
+  # Dashboard load-time only matters against real production traffic, so this
+  # monitor is created in prod only — the dev/val deploys skip it entirely.
+  # (The `page.load` spans themselves are still emitted and viewable in every
+  # environment; only the alert is prod-scoped.)
+  count = var.environment == "prod" ? 1 : 0
+
+  name = "[${var.team}] Slow CMS Dashboard Page Load - ${var.environment}"
+  type = "trace-analytics alert"
+
+  # Rolling average duration of the `page.load` spans emitted by usePageLoadSpan
+  # (services/app-web/src/hooks/usePageLoadSpan.ts) on the CMS dashboard tabs,
+  # which measure mount -> data-ready. @duration is reported in nanoseconds, so
+  # the millisecond threshold is converted with * 1,000,000. Abandoned loads
+  # (user navigated away before data arrived, tagged @page.load.abandoned) are
+  # excluded so partial timings don't drag the average down.
+  query = "trace-analytics(\"service:app-web-${var.environment} @dashboard.tab:(submissions OR rates) -@page.load.abandoned:true\").rollup(\"avg\", \"@duration\").last(\"15m\") > ${var.dashboard_load_threshold_ms * 1000000}"
+
+  message = <<-EOT
+    The CMS dashboard is loading slowly in **${var.environment}**.
+
+    Triggered when the 15-minute average `page.load` duration for the Submissions / Rate reviews tabs exceeds ${var.dashboard_load_threshold_ms} ms.
+
+    - Review `page.load` spans in Datadog APM under service `app-web-${var.environment}` (filter on `@dashboard.tab`)
+    - Correlate with `@dashboard.row_count` — large result sets are the expected driver and point toward pagination/filtering work
+    - Check recent frontend deploys and `app-api-${var.environment}` for slow `indexContracts` / `indexRates` queries
+
+    ${var.notify_slack}
+  EOT
+
+  monitor_thresholds {
+    critical = var.dashboard_load_threshold_ms * 1000000
+  }
+
+  # A quiet dashboard (no loads in the window, e.g. off-hours) is normal, so
+  # absent data is not an outage signal here (mirrors the rare-event monitors).
+  notify_no_data    = false
+  evaluation_delay  = 60
+  renotify_interval = 60
+  include_tags      = true
+
+  tags = [
+    "env:${var.environment}",
+    "service:app-web-${var.environment}",
+    "managed-by:opentofu",
+    "team:${var.team}",
+  ]
+}
