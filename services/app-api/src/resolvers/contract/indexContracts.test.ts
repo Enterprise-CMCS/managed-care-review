@@ -6,6 +6,7 @@ import {
 import type { Contract, ContractEdge } from '../../gen/gqlServer'
 import {
     iterableCmsUsersMockData,
+    testAdminUser,
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
@@ -14,6 +15,7 @@ import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createTestContract,
+    overrideTestContractData,
     submitTestContract,
     unlockTestContract,
     withdrawTestContract,
@@ -459,7 +461,7 @@ describe(`indexContracts`, () => {
                 await createAndSubmitTestContractWithRate(stateServer)
 
             // simulate a time gap
-            await new Promise((resolve) => setTimeout(resolve, 5000))
+            await new Promise((resolve) => setTimeout(resolve, 7000))
 
             // create a recent contract
             const recentContract =
@@ -468,7 +470,7 @@ describe(`indexContracts`, () => {
             // then query with updatedWithin = 5 seconds
             const result = await executeGraphQLOperation(cmsServer, {
                 query: IndexContractsForDashboardDocument,
-                variables: { input: { updatedWithin: 5 } },
+                variables: { input: { updatedWithin: 7 } },
             })
 
             expect(result.errors).toBeUndefined()
@@ -485,6 +487,85 @@ describe(`indexContracts`, () => {
                 (n: any) => n.id === oldContract.id
             )
             expect(hasoldContract).toBe(false)
+        })
+
+        it('includes contracts with recent overrides in the legacy updatedWithin path', async () => {
+            const client = await sharedTestPrismaClient()
+            const cmsUser = testCMSUser()
+            const ldService = testLDService({
+                'use-stored-contract-action-dates': false,
+            })
+
+            const stateServer = await constructTestPostgresServer({
+                ldService,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+                ldService,
+            })
+            const adminServer = await constructTestPostgresServer({
+                context: { user: testAdminUser() },
+                ldService,
+            })
+
+            const contract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            await overrideTestContractData(adminServer, {
+                contractID: contract.id,
+                description: 'Recent override for legacy updatedWithin',
+                overrides: {
+                    revisionOverride: {
+                        contractType: 'AMENDMENT',
+                        contractTypeOp: 'OVERRIDE',
+                    },
+                },
+            })
+
+            const oldDate = new Date(Date.now() - 120_000)
+
+            // Backdate the legacy display timestamps so this contract can only
+            // pass updatedWithin because of the recent ContractOverrides row.
+            await client.$transaction([
+                client.contractTable.update({
+                    where: { id: contract.id },
+                    data: {
+                        updatedAt: oldDate,
+                        lastActionDate: oldDate,
+                    },
+                }),
+                client.updateInfoTable.updateMany({
+                    where: {
+                        submittedContracts: {
+                            some: {
+                                contractID: contract.id,
+                            },
+                        },
+                    },
+                    data: {
+                        updatedAt: oldDate,
+                    },
+                }),
+                client.contractActionTable.updateMany({
+                    where: { contractID: contract.id },
+                    data: {
+                        updatedAt: oldDate,
+                    },
+                }),
+            ])
+
+            const result = await executeGraphQLOperation(cmsServer, {
+                query: IndexContractsForDashboardDocument,
+                variables: { input: { updatedWithin: 60 } },
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const nodes =
+                result.data?.indexContracts.edges.map((e: any) => e.node) ?? []
+            const resultIDs = nodes.map((node: Contract) => node.id)
+
+            expect(resultIDs).toContain(contract.id)
         })
 
         it('filters CMS results by stored lastActionDate when the stored action dates flag is on', async () => {

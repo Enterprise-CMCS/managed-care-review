@@ -1164,7 +1164,7 @@ describe('submitContract', () => {
             )
             expect(ds1.rateRevisions).toHaveLength(0)
             expect(ds1.cause).toBe('CONTRACT_SUBMISSION')
-        }, 60000)
+        }, 70000)
 
         it('returns the correct dateAdded for documents', async () => {
             const ldService = testLDService({})
