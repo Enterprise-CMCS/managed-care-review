@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { Attributes, Span, SpanStatusCode } from '@opentelemetry/api'
+import { SpanStatusCode } from '@opentelemetry/api'
+import type { Attributes, Span } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import { useTracing } from '@mc-review/otel'
 import { useCurrentRoute } from './useCurrentRoute'
