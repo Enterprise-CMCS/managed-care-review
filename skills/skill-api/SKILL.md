@@ -113,20 +113,20 @@ Rate `lastActionDate` should not update for:
 
 ### History builders
 
-`buildContractSubmissionHistoryLog` returns contract-level submitted history:
+`buildContractSubmissionHistory` returns contract-level submitted history:
 - Includes `CONTRACT_SUBMISSION`, `UNLOCK`, `LINKED_RATE_UPDATE`, contract `OVERRIDE`, and contract review actions.
 - Skips `RATE_LINK` and `RATE_UNLINK` by design. From the contract perspective, submitted link/unlink changes are captured by the contract's own submit/resubmit. Separate link/unlink entries would duplicate contract submission history and are brittle for draft-only relationship changes.
 
-`buildRateSubmissionHistoryLog` returns rate-level submitted history:
+`buildRateSubmissionHistory` returns rate-level submitted history:
 - Includes `RATE_SUBMISSION`, `UNLOCK`, `RATE_LINK`, `RATE_UNLINK`, rate `OVERRIDE`, and rate review actions.
 - Skips already-related contract submissions that do not change rate data or the submitted contract relationship for that rate.
 
-`buildQuestionResponseHistoryLog` returns scoped Q&A actions:
+`buildQuestionResponseHistory` returns scoped Q&A actions:
 - Contract scope uses `CONTRACT_QUESTION`, `CONTRACT_QUESTION_RESPONSE`, and contract question/response delete/restore action types.
 - Rate scope uses `RATE_QUESTION`, `RATE_QUESTION_RESPONSE`, and rate question/response delete/restore action types.
 - Cascade delete events should be skipped; the direct parent question/response action is the user-visible event.
 
-`buildCompleteHistoryLog` merges already-built histories and sorts newest-first. If two actions have the same JS millisecond, `actionTypeSortRank` breaks ties so later lifecycle actions such as overrides or review/status actions sort above submit, and submit sorts above unlock. Keep this tie-breaker in mind when adding action types that can share a DB transaction timestamp.
+`buildCompleteHistory` merges already-built histories and sorts newest-first. If two actions have the same JS millisecond, `actionTypeSortRank` breaks ties so later lifecycle actions such as overrides or review/status actions sort above submit, and submit sorts above unlock. Keep this tie-breaker in mind when adding action types that can share a DB transaction timestamp.
 
 History builders are best-effort readers over parsed domain data. They should not block fetching a contract/rate because history shape is imperfect; for example, ambiguous missing previous package data is logged/skipped rather than throwing.
 
@@ -134,7 +134,11 @@ History builders are best-effort readers over parsed domain data. They should no
 
 `fetchSubmissionHistory` is the heavier explicit history query. The resolver should stay thin: check OAuth/read permissions, fetch the contract enough to enforce state/CMS/Admin access, then call `findSubmissionHistoryByContractID` for the assembled history and map the result to GraphQL. Keep the expensive history assembly in the store layer so resolver tests exercise the same data-building path other callers can reuse.
 
-`findSubmissionHistoryByContractID` merges contract submission history, contract Q&A history, and rate override/Q&A history filtered to windows where the rate was attached to the contract in submitted package history. This windowing matters because a linked rate can be linked, delinked, and relinked; rate actions only belong in contract history when CMS users could see that rate through the contract's latest submitted package.
+`findSubmissionHistoryByContractID` merges contract submission history, contract Q&A history, and selected rate-owned history filtered to windows where the rate was attached to the contract in submitted package history. This windowing matters because a linked rate can be linked, delinked, and relinked; rate actions only belong in contract history when CMS users could see that rate through the contract's latest submitted package.
+
+For contract history, derive attached-rate windows from the contract's own `packageSubmissions`, not from rate-wide package history. The contract package timeline is the source of truth for when a given rate was submitted as part of that contract. Rate package history can include parent submits and other linked contracts that are not relationship changes for this contract.
+
+Do not merge `buildRateSubmissionHistory` wholesale into contract `fetchSubmissionHistory`. Contract history should include attached-window-filtered rate overrides and rate Q&A because those can change CMS-visible submitted data without a contract submit. It should not include raw rate `RATE_SUBMISSION`, `RATE_LINK`, `RATE_UNLINK`, `UNLOCK`, or rate review/status entries from the rate builder; those are either represented by the contract package timeline or are not contract-scoped enough for this view.
 
 Important edge cases:
 - If Contract B links to Rate R owned by Contract A, and Contract A resubmits Rate R while B already has R in submitted history, then B's submitted-visible rate data changed. B history should get `LINKED_RATE_UPDATE`, and B `lastActionDate` should update to that parent submit timestamp.
@@ -150,7 +154,7 @@ Important edge cases:
 
 `lastActionDate` is the stored CMS/Admin freshness date. CMS/Admin users do not see draft-only edits, so `lastUpdatedForDisplay` uses `lastActionDate` when present and falls back to `updatedAt`. State users can see draft changes, so display/index formatting considers the latest of `lastActionDate` and `draftRevision.updatedAt`.
 
-`indexContracts` should use the stored `lastActionDate` for CMS/Admin filtering/sorting rather than recalculating full history for every indexed contract.
+`indexContracts` should use the stored `lastActionDate` for CMS/Admin filtering/sorting when the `use-stored-contract-action-dates` flag is on rather than recalculating full history for every indexed contract. The legacy flag-off `updatedWithin` path uses calculated display freshness and is incomplete compared with `lastActionDate`; keep compatibility fixes minimal and avoid treating it as canonical submission history.
 
 ### Implementation checklist for new actions
 
@@ -172,13 +176,14 @@ When adding a new action, status transition, override path, Q&A path, submit-lik
    - If the same workflow writes several actions, make the final visible action write last so it becomes the stored freshness date.
 
 4. **Which history builder should emit the action?**
-   - Contract-only submitted-visible actions belong in `buildContractSubmissionHistoryLog`.
-   - Rate-only submitted-visible actions belong in `buildRateSubmissionHistoryLog`.
-   - Q&A actions belong in `buildQuestionResponseHistoryLog`.
+   - Contract-only submitted-visible actions belong in `buildContractSubmissionHistory`.
+   - Rate-only submitted-visible actions belong in `buildRateSubmissionHistory`.
+   - Q&A actions belong in `buildQuestionResponseHistory`.
    - Cross-rate contract history that is too expensive or relationship-window dependent belongs in `fetchSubmissionHistory`, not in a lightweight field resolver.
 
 5. **Does `fetchSubmissionHistory` need relationship-window filtering?**
    - If the action comes from a rate but is shown in contract history, include it only during windows where the rate was attached to the contract in submitted package history.
+   - For contract history, only rate overrides and rate Q&A are currently merged from rate-owned history; do not add raw rate submit/link/unlink/unlock/review entries without revisiting the contract-scoped semantics.
    - Do not include rate actions before a link, during a delink gap, after unlink/withdraw removal, or from draft-only links.
 
 6. **Do GraphQL enums/types need updates?**
