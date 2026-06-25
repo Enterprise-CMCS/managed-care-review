@@ -34,18 +34,17 @@ import {
 } from '../testHelpers/gqlRateHelpers'
 import { must } from '../testHelpers'
 import { sharedTestPrismaClient } from '../testHelpers/storeHelpers'
-import { findContractWithHistory } from './contractAndRates/findContractWithHistory'
+import { findContractWithHistory } from './contractAndRates'
 import { findRateWithHistory } from './contractAndRates/findRateWithHistory'
-import { findContractQuestionResponseHistory } from './questionResponse/findContractQuestionResponseHistory'
-import { findRateQuestionResponseHistory } from './questionResponse/findRateQuestionResponseHistory'
+import { findContractQuestionResponseHistory } from './questionResponse'
+import { findRateQuestionResponseHistory } from './questionResponse'
 import {
-    buildCompleteHistoryLog,
-    buildContractSubmissionHistoryLog,
-    buildQuestionResponseHistoryLog,
-    buildRateSubmissionHistoryLog,
+    buildCompleteHistory,
+    buildContractSubmissionHistory,
+    buildRateSubmissionHistory,
 } from './submissionHistoryHelpers'
 
-describe('buildContractSubmissionHistoryLog', () => {
+describe('buildContractSubmissionHistory', () => {
     it('builds a complete action log from a complex contract history', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
@@ -144,7 +143,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         const contract = must(
             await findContractWithHistory(prismaClient, submittedTarget.id)
         )
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
 
         // The builder contract is newest-first ordering. Use a non-increasing
         // timestamp assertion instead of a hard-coded action list because some
@@ -277,7 +276,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         const contract = must(
             await findContractWithHistory(prismaClient, submittedContract.id)
         )
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
 
         expect(historyLog[0].actionType).toBe('UNLOCK')
         expect(historyLog[0].updatedReason).toBe('Unlock without resubmit')
@@ -308,7 +307,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         const withdrawAction = contract.reviewStatusActions?.find(
             (action) => action.actionType === 'WITHDRAW'
         )
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
         const withdrawEntry = historyLog.find(
             (entry) => entry.actionType === 'WITHDRAW'
         )
@@ -360,7 +359,7 @@ describe('buildContractSubmissionHistoryLog', () => {
                 action.actionType === 'UNDER_REVIEW' &&
                 action.updatedReason === 'Approval was made in error'
         )
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
         const underReviewEntry = historyLog.find(
             (entry) =>
                 entry.actionType === 'UNDER_REVIEW' &&
@@ -409,7 +408,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         const contract = must(
             await findContractWithHistory(prismaClient, submittedContract.id)
         )
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
         const resubmitEntryIndex = historyLog.findIndex(
             (entry) =>
                 entry.actionType === 'CONTRACT_SUBMISSION' &&
@@ -507,7 +506,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         // Multiple linked rates can be updated by one parent submit event, but
         // the log represents the parent submit event, so only one entry is
         // expected.
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
         const linkedRateUpdateEntries = historyLog.filter(
             (entry) => entry.actionType === 'LINKED_RATE_UPDATE'
         )
@@ -580,7 +579,7 @@ describe('buildContractSubmissionHistoryLog', () => {
             )
         )
 
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
 
         expect(
             historyLog.some(
@@ -667,7 +666,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         const contract = must(
             await findContractWithHistory(prismaClient, submittedTarget.id)
         )
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
 
         expect(
             historyLog.some(
@@ -712,7 +711,7 @@ describe('buildContractSubmissionHistoryLog', () => {
         const contract = must(
             await findContractWithHistory(prismaClient, submittedContract.id)
         )
-        const historyLog = buildContractSubmissionHistoryLog(contract)
+        const historyLog = buildContractSubmissionHistory(contract)
 
         expect(
             historyLog.filter(
@@ -797,7 +796,7 @@ describe('buildContractSubmissionHistoryLog', () => {
             await findContractWithHistory(prismaClient, firstLinkedSubmitted.id)
         )
         const firstLinkedHistoryLog =
-            buildContractSubmissionHistoryLog(firstLinkedContract)
+            buildContractSubmissionHistory(firstLinkedContract)
 
         expect(
             firstLinkedHistoryLog.filter(
@@ -815,7 +814,7 @@ describe('buildContractSubmissionHistoryLog', () => {
             )
         )
         const secondLinkedHistoryLog =
-            buildContractSubmissionHistoryLog(secondLinkedContract)
+            buildContractSubmissionHistory(secondLinkedContract)
 
         expect(
             secondLinkedHistoryLog.some(
@@ -825,7 +824,7 @@ describe('buildContractSubmissionHistoryLog', () => {
     })
 })
 
-describe('buildRateSubmissionHistoryLog', () => {
+describe('buildRateSubmissionHistory', () => {
     it('builds a child rate action log from parent contract submit, unlock, override, and withdraw', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
@@ -888,7 +887,7 @@ describe('buildRateSubmissionHistoryLog', () => {
 
         const prismaClient = await sharedTestPrismaClient()
         const rate = must(await findRateWithHistory(prismaClient, rateID))
-        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const historyLog = buildRateSubmissionHistory(rate)
         const rateSubmissionEntries = historyLog.filter(
             (entry) => entry.actionType === 'RATE_SUBMISSION'
         )
@@ -1082,7 +1081,7 @@ describe('buildRateSubmissionHistoryLog', () => {
 
         const prismaClient = await sharedTestPrismaClient()
         const rate = must(await findRateWithHistory(prismaClient, rateID))
-        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const historyLog = buildRateSubmissionHistory(rate)
 
         expect(historyLog[0].actionType).toBe('UNLOCK')
         expect(historyLog[0].updatedReason).toBe(
@@ -1139,7 +1138,7 @@ describe('buildRateSubmissionHistoryLog', () => {
 
         const prismaClient = await sharedTestPrismaClient()
         const rate = must(await findRateWithHistory(prismaClient, rateID))
-        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const historyLog = buildRateSubmissionHistory(rate)
         const rateSubmissionEntries = historyLog.filter(
             (entry) => entry.actionType === 'RATE_SUBMISSION'
         )
@@ -1187,7 +1186,7 @@ describe('buildRateSubmissionHistoryLog', () => {
 
         const prismaClient = await sharedTestPrismaClient()
         const rate = must(await findRateWithHistory(prismaClient, rateID))
-        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const historyLog = buildRateSubmissionHistory(rate)
 
         expect(
             historyLog.some((entry) => entry.actionType === 'RATE_LINK')
@@ -1240,7 +1239,7 @@ describe('buildRateSubmissionHistoryLog', () => {
                 action.updatedReason ===
                     'Undo rate withdraw back to under review'
         )
-        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const historyLog = buildRateSubmissionHistory(rate)
         const underReviewEntry = historyLog.find(
             (entry) =>
                 entry.actionType === 'UNDER_REVIEW' &&
@@ -1248,7 +1247,7 @@ describe('buildRateSubmissionHistoryLog', () => {
                     'Undo rate withdraw back to under review'
         )
         const affectedContractHistoryLog =
-            buildContractSubmissionHistoryLog(affectedContract)
+            buildContractSubmissionHistory(affectedContract)
         const restoreContractSubmitEntry = affectedContractHistoryLog.find(
             (entry) =>
                 entry.actionType === 'CONTRACT_SUBMISSION' &&
@@ -1400,7 +1399,7 @@ describe('buildRateSubmissionHistoryLog', () => {
 
         const prismaClient = await sharedTestPrismaClient()
         const rate = must(await findRateWithHistory(prismaClient, rateID))
-        const historyLog = buildRateSubmissionHistoryLog(rate)
+        const historyLog = buildRateSubmissionHistory(rate)
         const rateLinkEntries = historyLog.filter(
             (entry) => entry.actionType === 'RATE_LINK'
         )
@@ -1434,7 +1433,7 @@ describe('buildRateSubmissionHistoryLog', () => {
     })
 })
 
-describe('buildQuestionResponseHistoryLog', () => {
+describe('buildQuestionResponseHistory', () => {
     it('builds contract Q&A history with question deletes and skips cascade deletes', async () => {
         const adminUser = testAdminUser()
         const stateServer = await constructTestPostgresServer()
@@ -1467,12 +1466,8 @@ describe('buildQuestionResponseHistoryLog', () => {
         // the parent delete and should not create separate history entries.
         await deleteTestContractQuestion(adminServer, question.id)
 
-        const questionHistory = must(
+        const historyLog = must(
             await findContractQuestionResponseHistory(prismaClient, contract.id)
-        )
-        const historyLog = buildQuestionResponseHistoryLog(
-            questionHistory,
-            'CONTRACT'
         )
 
         expect(historyLog.map((entry) => entry.actionType)).toEqual([
@@ -1508,12 +1503,8 @@ describe('buildQuestionResponseHistoryLog', () => {
         await createTestRateQuestionResponse(stateServer, question.id)
 
         const prismaClient = await sharedTestPrismaClient()
-        const questionHistory = must(
+        const historyLog = must(
             await findRateQuestionResponseHistory(prismaClient, rateID)
-        )
-        const historyLog = buildQuestionResponseHistoryLog(
-            questionHistory,
-            'RATE'
         )
 
         expect(historyLog.map((entry) => entry.actionType)).toEqual([
@@ -1523,7 +1514,7 @@ describe('buildQuestionResponseHistoryLog', () => {
     })
 })
 
-describe('buildCompleteHistoryLog', () => {
+describe('buildCompleteHistory', () => {
     it('combines contract history with contract Q&A history and matches the contract lastActionDate', async () => {
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
@@ -1548,19 +1539,15 @@ describe('buildCompleteHistoryLog', () => {
         const contract = must(
             await findContractWithHistory(prismaClient, submittedContract.id)
         )
-        const questionHistory = must(
+        const qaHistory = must(
             await findContractQuestionResponseHistory(
                 prismaClient,
                 submittedContract.id
             )
         )
 
-        const contractHistory = buildContractSubmissionHistoryLog(contract)
-        const qaHistory = buildQuestionResponseHistoryLog(
-            questionHistory,
-            'CONTRACT'
-        )
-        const completeHistory = buildCompleteHistoryLog([
+        const contractHistory = buildContractSubmissionHistory(contract)
+        const completeHistory = buildCompleteHistory([
             contractHistory,
             qaHistory,
         ])
@@ -1611,19 +1598,12 @@ describe('buildCompleteHistoryLog', () => {
 
         const prismaClient = await sharedTestPrismaClient()
         const rate = must(await findRateWithHistory(prismaClient, rateID))
-        const questionHistory = must(
+        const qaHistory = must(
             await findRateQuestionResponseHistory(prismaClient, rateID)
         )
 
-        const rateHistory = buildRateSubmissionHistoryLog(rate)
-        const qaHistory = buildQuestionResponseHistoryLog(
-            questionHistory,
-            'RATE'
-        )
-        const completeHistory = buildCompleteHistoryLog([
-            rateHistory,
-            qaHistory,
-        ])
+        const rateHistory = buildRateSubmissionHistory(rate)
+        const completeHistory = buildCompleteHistory([rateHistory, qaHistory])
         const rateTableRow = await prismaClient.rateTable.findUnique({
             where: { id: rateID },
             select: { lastActionDate: true },

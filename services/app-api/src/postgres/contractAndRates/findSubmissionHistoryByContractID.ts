@@ -1,15 +1,29 @@
 import type { CompleteHistory, SubmissionHistory } from '../../domain-models'
-import { findContractQuestionResponseHistory } from '../questionResponse/findContractQuestionResponseHistory'
-import { findRateQuestionResponseHistory } from '../questionResponse/findRateQuestionResponseHistory'
+import { findContractQuestionResponseHistory } from '../questionResponse'
+import { findRateQuestionResponseHistory } from '../questionResponse'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import {
-    buildCompleteHistoryLog,
-    buildContractSubmissionHistoryLog,
-    buildQuestionResponseHistoryLog,
+    buildCompleteHistory,
+    buildContractSubmissionHistory,
 } from '../submissionHistoryHelpers'
 import { findContractWithHistory } from './findContractWithHistory'
 import { findRateWithHistory } from './findRateWithHistory'
 
+/**
+ * Builds the explicit submission history for a contract.
+ *
+ * This is broader than buildContractSubmissionHistory because the frontend view
+ * also needs Q&A plus rate-owned events that change submitted-visible data for
+ * this contract. We intentionally keep this as an explicit store query instead
+ * of a Contract field resolver because linked rate Q&A/override history needs
+ * extra rate fetches and relationship-window filtering.
+ *
+ * Rate submission history is not merged wholesale. From the contract
+ * perspective, rate link/unlink and linked-rate resubmits are already
+ * represented by this contract's package timeline. The only rate-owned events
+ * added here are rate overrides and rate Q&A, and only while the rate appears
+ * in this contract's submitted package history.
+ */
 async function findSubmissionHistoryByContractID(
     client: ExtendedPrismaClient,
     contractID: string
@@ -36,9 +50,9 @@ async function findSubmissionHistoryByContractID(
     }
 
     // Only inspect rates that have appeared in this contract's submitted
-    // package history. Draft-only links are intentionally ignored because CMS
-    // users do not see draft relationship changes and they should not affect
-    // submission history.
+    // package history. Draft-only rate links/unlinks are intentionally ignored:
+    // CMS users only see submitted package data, so draft-only relationships
+    // should not create contract history or move contract freshness.
     const rateIDs = [
         ...new Set(
             contractWithHistory.packageSubmissions.flatMap(
@@ -49,57 +63,50 @@ async function findSubmissionHistoryByContractID(
             )
         ),
     ]
-    const contractScopedRateHistory: CompleteHistory[] = []
+    const attachedWindowsByRateID = new Map<
+        string,
+        {
+            start: Date
+            end?: Date
+        }[]
+    >()
+    const oldestToNewestContractPackages = [
+        ...contractWithHistory.packageSubmissions,
+    ].reverse()
 
-    // Rate overrides and rate Q&A can change what CMS sees on this contract
-    // without creating a new contract package submission. Fetch the full rate
-    // history for rates that have appeared in this contract's submitted
-    // packages, then filter those rate events to the windows where the rate was
-    // attached here.
+    // Use this contract's submitted package snapshots as the source of truth
+    // for when each rate was visible through this contract. This is the main
+    // reason we do not derive windows from rate package submissions: rate
+    // package history is rate-wide and can include parent submits or unrelated
+    // linked contracts, while this query needs a contract-scoped view.
     for (const rateID of rateIDs) {
-        const rateWithHistory = await findRateWithHistory(client, rateID)
-
-        if (rateWithHistory instanceof Error) {
-            return rateWithHistory
-        }
-
-        // A contract can link a rate, delink it, then link it again. Store each
-        // attached time range separately and use these ranges below to decide
-        // whether rate override/Q&A timestamps should appear in this contract's
-        // history.
         const attachedWindows: {
             start: Date
             end?: Date
         }[] = []
         let currentAttachedWindowStart: Date | undefined
-        const oldestToNewestRatePackages = [
-            ...rateWithHistory.packageSubmissions,
-        ].reverse()
 
-        // Rate package submissions are submitted snapshots of all contracts
-        // related to the rate. Walking oldest-to-newest lets us derive
-        // attachment windows for this contract: start when the contract appears,
-        // end when it disappears.
-        for (const packageSubmission of oldestToNewestRatePackages) {
-            const isAttachedToContract =
-                packageSubmission.contractRevisions.some(
-                    (contractRevision) =>
-                        contractRevision.contract.id === contractWithHistory.id
+        // A contract can link a rate, delink it, then link it again. Each
+        // attached window represents a time range where rate-owned override/Q&A
+        // actions should be visible in this contract's history.
+        for (const packageSubmission of oldestToNewestContractPackages) {
+            const isRateAttachedToContract =
+                packageSubmission.rateRevisions.some(
+                    (rateRevision) => rateRevision.rateID === rateID
                 )
 
-            if (isAttachedToContract && !currentAttachedWindowStart) {
-                // The contract became attached to this rate in a submitted
-                // package, so rate-level events after this timestamp can be
-                // visible through this contract.
+            if (isRateAttachedToContract && !currentAttachedWindowStart) {
+                // The rate first appeared in this contract's submitted package,
+                // or it reappeared after a previous delink gap.
                 currentAttachedWindowStart =
                     packageSubmission.submitInfo.updatedAt
             }
 
-            if (!isAttachedToContract && currentAttachedWindowStart) {
-                // The contract disappeared from this rate's submitted
-                // relationship set. Use this package timestamp as an exclusive
-                // end boundary so the unlinking contract submit itself is not
-                // duplicated as rate Q&A/override history.
+            if (!isRateAttachedToContract && currentAttachedWindowStart) {
+                // The rate disappeared from this contract's submitted package.
+                // The end is exclusive so the contract submit that removed the
+                // relationship is represented by the contract submission entry,
+                // not duplicated as rate override/Q&A history.
                 attachedWindows.push({
                     start: currentAttachedWindowStart,
                     end: packageSubmission.submitInfo.updatedAt,
@@ -109,12 +116,36 @@ async function findSubmissionHistoryByContractID(
         }
 
         if (currentAttachedWindowStart) {
-            // No later package removed this contract, so the attachment window
-            // is still open.
+            // No later contract package removed this rate, so rate-level events
+            // remain visible through this contract after the start timestamp.
             attachedWindows.push({
                 start: currentAttachedWindowStart,
             })
         }
+
+        attachedWindowsByRateID.set(rateID, attachedWindows)
+    }
+
+    const contractScopedRateHistory: CompleteHistory[] = []
+
+    // Rate overrides and rate Q&A can change what CMS sees on this contract
+    // without creating a new contract package submission. Do not merge
+    // buildRateSubmissionHistory here: rate submit/link/unlink/unlock/review
+    // entries are either represented by this contract's package history or are
+    // not contract-scoped enough for this view. Only rate-owned override and
+    // Q&A entries are added below, filtered to the windows where the rate was
+    // attached here.
+    for (const rateID of rateIDs) {
+        const rateWithHistory = await findRateWithHistory(client, rateID)
+
+        if (rateWithHistory instanceof Error) {
+            return rateWithHistory
+        }
+
+        // These windows were derived from the contract package timeline above.
+        // The rate fetch is only for rate-owned events; it should not redefine
+        // whether the rate belonged to this contract.
+        const attachedWindows = attachedWindowsByRateID.get(rateID) ?? []
 
         // Rate overrides are direct data corrections. Include them only when
         // this contract was attached to the rate at the override timestamp. An
@@ -150,12 +181,7 @@ async function findSubmissionHistoryByContractID(
             return rateQuestionHistory
         }
 
-        const rateQuestionHistoryLog = buildQuestionResponseHistoryLog(
-            rateQuestionHistory,
-            'RATE'
-        )
-
-        for (const rateQuestionHistoryEntry of rateQuestionHistoryLog) {
+        for (const rateQuestionHistoryEntry of rateQuestionHistory) {
             // Reuse the same window check for every rate question, response, and
             // direct delete/restore action.
             const questionActionWasVisibleOnContract = attachedWindows.some(
@@ -171,14 +197,14 @@ async function findSubmissionHistoryByContractID(
         }
     }
 
-    const history = buildCompleteHistoryLog([
+    const history = buildCompleteHistory([
         // Contract submission history includes submit/unlock/review, contract
         // overrides, and linked-rate package updates that already exist in this
         // contract's package timeline.
-        buildContractSubmissionHistoryLog(contractWithHistory),
+        buildContractSubmissionHistory(contractWithHistory),
         // Contract Q&A is always contract-scoped, so it does not need the
         // relationship-window filtering used for rate Q&A.
-        buildQuestionResponseHistoryLog(questionHistory, 'CONTRACT'),
+        questionHistory,
         // Rate overrides and rate Q&A are included only after the per-rate
         // attachment-window filtering above.
         contractScopedRateHistory,

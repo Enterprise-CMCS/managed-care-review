@@ -25,6 +25,7 @@ import type {
     CreateRateQuestionInputType,
     AuditDocument,
     EmailSettingsType,
+    QuestionResponseHistory,
     SubmissionHistory,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from './'
@@ -51,7 +52,6 @@ import {
     insertRateQuestionResponse,
     softDeleteContractQuestion,
 } from './questionResponse'
-import type { QuestionHistoryInput } from './submissionHistoryHelpers'
 import { findAllSupportedStates } from './state'
 import {
     insertDraftContract,
@@ -307,7 +307,7 @@ type Store = {
     ) => Promise<ContractQuestionType | Error>
     findContractQuestionResponseHistory: (
         contractID: string
-    ) => Promise<QuestionHistoryInput[] | Error>
+    ) => Promise<QuestionResponseHistory[] | Error>
     insertRateQuestion: (
         questionInput: CreateRateQuestionInputType,
         user: CMSUsersUnionType
@@ -321,7 +321,7 @@ type Store = {
     ) => Promise<RateQuestionType[] | Error>
     findRateQuestionResponseHistory: (
         rateID: string
-    ) => Promise<QuestionHistoryInput[] | Error>
+    ) => Promise<QuestionResponseHistory[] | Error>
 
     /** Documents **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>

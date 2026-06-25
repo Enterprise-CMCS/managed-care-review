@@ -1,108 +1,39 @@
 import { parseErrorToError } from '@mc-review/helpers'
-import type {
-    QuestionHistoryActionInput,
-    QuestionHistoryInput,
-    QuestionHistoryResponseInput,
-} from '../submissionHistoryHelpers'
-import type {
-    AdminUserType,
-    CMSUsersUnionType,
-    StateUserType,
-} from '../../domain-models'
-import type { Prisma, QuestionActionType } from '../../generated/client'
+import { buildQuestionResponseHistory } from '../submissionHistoryHelpers'
+import type { QuestionResponseHistory } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
-
-type DirectQuestionAction = 'DELETE' | 'RESTORE'
-
-const directQuestionActionTypes: QuestionActionType[] = ['DELETE', 'RESTORE']
-
-// History should show direct question/response lifecycle actions. Cascade
-// actions are implementation fallout from a parent delete and would duplicate
-// the parent event in the action log.
-const directQuestionActionFilter = {
-    action: {
-        in: directQuestionActionTypes,
-    },
-}
-
-const contractQuestionHistoryInclude = {
-    addedBy: {
-        include: {
-            stateAssignments: true,
-        },
-    },
-    actions: {
-        where: directQuestionActionFilter,
-        include: {
-            updatedBy: true,
-        },
-        orderBy: {
-            createdAt: 'desc',
-        },
-    },
-    responses: {
-        include: {
-            addedBy: true,
-            actions: {
-                where: directQuestionActionFilter,
-                include: {
-                    updatedBy: true,
-                },
-                orderBy: {
-                    createdAt: 'desc',
-                },
-            },
-        },
-        orderBy: {
-            createdAt: 'desc',
-        },
-    },
-} satisfies Prisma.ContractQuestionInclude
-
-type ContractQuestionHistoryResult = Prisma.ContractQuestionGetPayload<{
-    include: typeof contractQuestionHistoryInclude
-}>
+import {
+    parseQuestionHistory,
+    questionResponseHistoryInclude,
+    type ContractQuestionHistoryPayload,
+} from './questionResponseHistoryHelpers'
 
 export async function findContractQuestionResponseHistory(
     client: ExtendedPrismaClient,
     contractID: string
-): Promise<QuestionHistoryInput[] | Error> {
+): Promise<QuestionResponseHistory[] | Error> {
     try {
         // Do not use findAllQuestionsByContract here. That function is shaped
         // for display and filters soft-deleted Q&A, but history needs deleted
         // questions/responses so their delete actions can still be logged.
-        const questions = (await client.contractQuestion.findMany({
-            where: {
-                contractID,
-            },
-            include: contractQuestionHistoryInclude,
-            orderBy: {
-                createdAt: 'desc',
-            },
-        })) as ContractQuestionHistoryResult[]
+        const questions: ContractQuestionHistoryPayload[] =
+            await client.contractQuestion.findMany({
+                where: {
+                    contractID,
+                },
+                include: questionResponseHistoryInclude,
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            })
 
-        // Return only the fields the history builder needs. This keeps the
-        // store return type separate from the full Q&A display domain model.
-        return questions.map((question) => ({
-            createdAt: question.createdAt,
-            addedBy: question.addedBy as CMSUsersUnionType,
-            actions: question.actions.map((action) => ({
-                createdAt: action.createdAt,
-                action: action.action as DirectQuestionAction,
-                reason: action.reason,
-                updatedBy: action.updatedBy as AdminUserType,
-            })) as QuestionHistoryActionInput[],
-            responses: question.responses.map((response) => ({
-                createdAt: response.createdAt,
-                addedBy: response.addedBy as StateUserType,
-                actions: response.actions.map((action) => ({
-                    createdAt: action.createdAt,
-                    action: action.action as DirectQuestionAction,
-                    reason: action.reason,
-                    updatedBy: action.updatedBy as AdminUserType,
-                })) as QuestionHistoryActionInput[],
-            })) as QuestionHistoryResponseInput[],
-        }))
+        // Map the database rows into the narrow input shape the history builder
+        // needs, then return the built contract-scoped history entries. The
+        // store return type is the action history, not the intermediate display
+        // or builder-input model.
+        const questionHistoryInput = parseQuestionHistory(questions)
+
+        return buildQuestionResponseHistory(questionHistoryInput, 'CONTRACT')
     } catch (e) {
         return parseErrorToError(e)
     }

@@ -13,10 +13,10 @@ import type {
     QuestionResponseHistory,
     RateSubmissionHistoryActionType,
     RateSubmissionHistoryEntry,
-} from '../domain-models/contractAndRates/submissionHistoryTypes'
+} from '../domain-models'
 import { logError } from '../logger'
 
-type QuestionHistoryScope = 'CONTRACT' | 'RATE'
+type QuestionHistoryType = 'CONTRACT' | 'RATE'
 
 type QuestionHistoryActionInput = {
     createdAt: Date
@@ -93,7 +93,7 @@ function actionTypeSortRank(
     }
 }
 
-function sortHistoryLog<TEntry extends CompleteHistory>(
+function sortHistory<TEntry extends CompleteHistory>(
     historyLog: TEntry[]
 ): TEntry[] {
     return [...historyLog].sort(
@@ -103,10 +103,10 @@ function sortHistoryLog<TEntry extends CompleteHistory>(
     )
 }
 
-function buildCompleteHistoryLog<THistoryLogs extends CompleteHistory[][]>(
+function buildCompleteHistory<THistoryLogs extends CompleteHistory[][]>(
     historyLogs: THistoryLogs
 ): THistoryLogs[number][number][] {
-    return sortHistoryLog(historyLogs.flat()) as THistoryLogs[number][number][]
+    return sortHistory(historyLogs.flat()) as THistoryLogs[number][number][]
 }
 
 /**
@@ -118,7 +118,7 @@ function buildCompleteHistoryLog<THistoryLogs extends CompleteHistory[][]>(
  * This reads from the parsed ContractType rather than the DB so it can run on
  * the in-transaction result a store function just produced.
  */
-function buildContractSubmissionHistoryLog(
+function buildContractSubmissionHistory(
     contract: ContractType
 ): ContractSubmissionHistoryEntry[] {
     const historyLog: ContractSubmissionHistoryEntry[] = []
@@ -195,7 +195,7 @@ function buildContractSubmissionHistoryLog(
 
         if (!previousPackageSubmission) {
             logError(
-                'buildContractSubmissionHistoryLog',
+                'buildContractSubmissionHistory',
                 `Contract ${contract.id} has a non-contract package submission ${packageSubmission.contractRevision.id} with connected submitted rates but no previous package submission; skipping ambiguous linked rate update history`
             )
             continue
@@ -277,18 +277,18 @@ function buildContractSubmissionHistoryLog(
     // collapse to the same JS millisecond, so use a semantic tie-breaker:
     // automated review determinations are created after their submit, and a
     // submit is created after its unlock.
-    return sortHistoryLog(historyLog)
+    return sortHistory(historyLog)
 }
 
-function buildQuestionResponseHistoryLog(
+function buildQuestionResponseHistory(
     questions: QuestionHistoryInput[],
-    questionHistoryScope: QuestionHistoryScope
+    questionHistoryType: QuestionHistoryType
 ): QuestionResponseHistory[] {
     const historyLog: QuestionResponseHistory[] = []
 
     for (const question of questions) {
         historyLog.push({
-            actionType: `${questionHistoryScope}_QUESTION`,
+            actionType: `${questionHistoryType}_QUESTION`,
             updatedAt: question.createdAt,
             updatedBy: question.addedBy,
         })
@@ -298,7 +298,7 @@ function buildQuestionResponseHistoryLog(
         // not create duplicate document/response cascade entries in this log.
         for (const action of question.actions) {
             historyLog.push({
-                actionType: `${questionHistoryScope}_QUESTION_${action.action}`,
+                actionType: `${questionHistoryType}_QUESTION_${action.action}`,
                 updatedAt: action.createdAt,
                 updatedBy: action.updatedBy,
                 updatedReason: action.reason,
@@ -307,7 +307,7 @@ function buildQuestionResponseHistoryLog(
 
         for (const response of question.responses) {
             historyLog.push({
-                actionType: `${questionHistoryScope}_QUESTION_RESPONSE`,
+                actionType: `${questionHistoryType}_QUESTION_RESPONSE`,
                 updatedAt: response.createdAt,
                 updatedBy: response.addedBy,
             })
@@ -318,7 +318,7 @@ function buildQuestionResponseHistoryLog(
             // user-visible event.
             for (const action of response.actions) {
                 historyLog.push({
-                    actionType: `${questionHistoryScope}_QUESTION_RESPONSE_${action.action}`,
+                    actionType: `${questionHistoryType}_QUESTION_RESPONSE_${action.action}`,
                     updatedAt: action.createdAt,
                     updatedBy: action.updatedBy,
                     updatedReason: action.reason,
@@ -327,20 +327,20 @@ function buildQuestionResponseHistoryLog(
         }
     }
 
-    return sortHistoryLog(historyLog)
+    return sortHistory(historyLog)
 }
 
 /**
  * Reconstructs the rate's submission action history from already-parsed domain
  * data, returning one entry per submit / unlock / review / override action,
  * sorted newest-first. This is the rate-side mirror of
- * buildContractSubmissionHistoryLog.
+ * buildContractSubmissionHistory.
  *
  * This reads from the parsed RateType rather than the DB so it can run on the
  * in-transaction result a store function just produced. Callers use entry [0]
  * (the latest action) as the rate's lastActionDate.
  */
-function buildRateSubmissionHistoryLog(
+function buildRateSubmissionHistory(
     rate: RateType
 ): RateSubmissionHistoryEntry[] {
     const historyLog: RateSubmissionHistoryEntry[] = []
@@ -419,7 +419,7 @@ function buildRateSubmissionHistoryLog(
 
         if (!previousPackageSubmission) {
             logError(
-                'buildRateSubmissionHistoryLog',
+                'buildRateSubmissionHistory',
                 `Rate ${rate.id} has a non-rate package submission ${packageSubmission.rateRevision.id} with connected submitted contracts but no previous package submission; skipping ambiguous rate relationship history`
             )
             continue
@@ -494,14 +494,14 @@ function buildRateSubmissionHistoryLog(
     // Sort descending by timestamp so entry [0] is always the most recent
     // action regardless of which collection it came from. Use the same
     // tie-breaker as the contract builder for same-millisecond writes.
-    return sortHistoryLog(historyLog)
+    return sortHistory(historyLog)
 }
 
 export {
-    buildCompleteHistoryLog,
-    buildContractSubmissionHistoryLog,
-    buildQuestionResponseHistoryLog,
-    buildRateSubmissionHistoryLog,
+    buildCompleteHistory,
+    buildContractSubmissionHistory,
+    buildQuestionResponseHistory,
+    buildRateSubmissionHistory,
 }
 
 export type {
