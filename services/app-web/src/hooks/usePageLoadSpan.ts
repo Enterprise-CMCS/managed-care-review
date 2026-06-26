@@ -64,10 +64,10 @@ export const usePageLoadSpan = ({
             }
         }
         // Restart the load timer if the route changes without unmounting (e.g. a
-        // shared layout reused across routes): the previous span is closed as
-        // abandoned above and a new one starts for the new route. currentRoute is
-        // a stable route-name string and startSpan is a stable callback, so this
-        // only re-runs on an actual route change, not on every render.
+        // shared layout reused across routes). If the previous span hasn't ended
+        // yet, the cleanup above will close it (marking it as abandoned) and a new
+        // span starts for the new route. currentRoute is a stable route-name string
+        // and startSpan is a stable callback, so this only re-runs on an actual route change.
     }, [currentRoute, startSpan, pageName])
 
     // End the span the first time the page is ready (or errors).
