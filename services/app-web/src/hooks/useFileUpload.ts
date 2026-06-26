@@ -1,6 +1,12 @@
 import { useState } from 'react'
 import { FileItemT } from '../components'
 
+// Error message shown when a document is in an error state (e.g. a duplicate
+// file name, a failed scan, or a failed upload). Exported so consumers can
+// detect and special-case this error without duplicating the string.
+export const DOCUMENTS_WITH_ERRORS_MESSAGE =
+    'You must remove all documents with error messages before continuing'
+
 // Intended for use with FileUpload component
 const useFileUpload = (shouldValidate = false) => {
     const [fileItems, setFileItems] = useState<FileItemT[]>([])
@@ -36,8 +42,7 @@ const useFileUpload = (shouldValidate = false) => {
     } else if (hasNoFiles) {
         fileUploadError = 'You must upload at least one document'
     } else if (!hasValidFiles) {
-        fileUploadError =
-            'You must remove all documents with error messages before continuing'
+        fileUploadError = DOCUMENTS_WITH_ERRORS_MESSAGE
     }
 
     // Transform React-based "file items" to database friendly documents

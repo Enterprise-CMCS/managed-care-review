@@ -378,6 +378,83 @@ describe('UploadRateQuestions', () => {
                 ).toHaveLength(2)
             })
 
+            it('duplicate files only show the file upload error after a submit attempt', async () => {
+                const rate = mockRateSubmittedWithQuestions({ id: '15' })
+                const { user } = renderWithProviders(renderUploadQuestionUI(), {
+                    routerProvider: {
+                        route: `/rates/15/question-and-answers/dmco/upload-questions`,
+                    },
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockUser(),
+                                statusCode: 200,
+                            }),
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    ...rate,
+                                    id: '15',
+                                },
+                            }),
+                            fetchRateWithQuestionsMockSuccess({
+                                rate: {
+                                    ...rate,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                })
+                await screen.findByRole('heading', {
+                    name: /Add questions/,
+                    level: 2,
+                })
+                const continueButton = screen.getByRole('button', {
+                    name: 'Add questions',
+                })
+                const input = screen.getByLabelText('Upload questions')
+
+                await userEvent.upload(input, [TEST_DOC_FILE])
+                await userEvent.upload(input, [TEST_DOC_FILE])
+
+                // The duplicate is flagged on the file row right away
+                await waitFor(() => {
+                    expect(
+                        screen.queryAllByText(
+                            'You already added a file with this name and extension. Remove one.'
+                        )
+                    ).toHaveLength(1)
+                })
+
+                // ...but the file upload's own visual error does not appear
+                // until the user attempts to submit
+                expect(
+                    screen.queryAllByText(
+                        'You must remove all documents with error messages before continuing'
+                    )
+                ).toHaveLength(0)
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
+
+                await user.click(continueButton)
+
+                await waitFor(() => {
+                    expect(continueButton).toHaveAttribute(
+                        'aria-disabled',
+                        'true'
+                    )
+                    // Shown as the file upload's inline visual error, but kept
+                    // out of the error summary banner
+                    expect(
+                        screen.getAllByText(
+                            'You must remove all documents with error messages before continuing'
+                        )
+                    ).toHaveLength(1)
+                    expect(
+                        screen.queryByTestId('error-summary')
+                    ).not.toBeInTheDocument()
+                })
+            })
+
             it('displays api error if createQuestion fails', async () => {
                 const rate = mockRateSubmittedWithQuestions({ id: '15' })
                 const { user } = renderWithProviders(renderUploadQuestionUI(), {
