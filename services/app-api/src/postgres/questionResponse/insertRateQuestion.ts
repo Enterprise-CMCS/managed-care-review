@@ -77,7 +77,7 @@ export async function insertRateQuestion(
                 },
             })
             await updateRelatedContractsLastActionDateByRateID(
-                client,
+                tx,
                 questionInput.rateID,
                 result.createdAt
             )
