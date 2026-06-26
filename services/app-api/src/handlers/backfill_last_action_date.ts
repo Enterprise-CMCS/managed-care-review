@@ -113,11 +113,9 @@ export const main: Handler = async (
         })
     }
 
-    const failed =
-        (response.results.contracts?.failed ?? 0) +
-        (response.results.rates?.failed ?? 0)
-
-    response.success = failed === 0
+    response.success =
+        (response.results.contracts?.failed ?? 0) === 0 &&
+        (response.results.rates?.failed ?? 0) === 0
 
     console.info('lastActionDate backfill complete', response)
 
@@ -204,10 +202,6 @@ async function backfillContracts(
             const message = parseErrorToError(error).message
             result.failed++
             result.errors.push(`${contract.id}: ${message}`)
-            console.error('Failed to backfill contract lastActionDate', {
-                contractID: contract.id,
-                error: message,
-            })
         }
     }
 
@@ -308,10 +302,6 @@ async function backfillRates(
             const message = parseErrorToError(error).message
             result.failed++
             result.errors.push(`${rate.id}: ${message}`)
-            console.error('Failed to backfill rate lastActionDate', {
-                rateID: rate.id,
-                error: message,
-            })
         }
     }
 
