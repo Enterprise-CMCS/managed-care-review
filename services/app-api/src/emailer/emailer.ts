@@ -39,6 +39,7 @@ import type {
     ContractSubmissionType,
 } from '../domain-models'
 import { SESServiceException } from '@aws-sdk/client-ses'
+import { withEmailSpan } from './emailTracing'
 import type { RateForDisplayType } from './templateHelpers'
 import { newEQROContractCMSEmail } from './emails/newEQROContractCMSEmail'
 
@@ -749,18 +750,37 @@ function emailer(
 const sendSESEmails = async (emailData: EmailData): Promise<void | Error> => {
     const emailRequestParams = getSESEmailParams(emailData)
 
-    try {
-        await sendSESEmail(emailRequestParams)
-        return
-    } catch (err) {
-        if (err instanceof SESServiceException) {
-            return new Error(
-                'SES email send failed. Error: ' + JSON.stringify(err)
-            )
-        }
+    return withEmailSpan(
+        {
+            toAddresses: emailData.toAddresses,
+            ccAddresses: emailData.ccAddresses ?? [],
+            bccAddresses: emailData.bccAddresses ?? [],
+            sourceEmail: emailData.sourceEmail,
+            subject: emailData.subject,
+        },
+        async (span) => {
+            try {
+                const response = await sendSESEmail(emailRequestParams)
+                // Capture the SES MessageId so a send can later be correlated
+                // with any bounce/complaint event for the same message.
+                if (response && 'MessageId' in response && response.MessageId) {
+                    span.setAttribute(
+                        'email.ses_message_id',
+                        response.MessageId
+                    )
+                }
+                return
+            } catch (err) {
+                if (err instanceof SESServiceException) {
+                    return new Error(
+                        'SES email send failed. Error: ' + JSON.stringify(err)
+                    )
+                }
 
-        return new Error('SES email send failed. Error: ' + err)
-    }
+                return new Error('SES email send failed. Error: ' + err)
+            }
+        }
+    )
 }
 
 function newSESEmailer(config: EmailConfiguration): Emailer {
@@ -815,5 +835,5 @@ function newLocalEmailer(config: EmailConfiguration): Emailer {
     return emailer(config, sendLocalEmails)
 }
 
-export { newLocalEmailer, newSESEmailer, emailer }
+export { newLocalEmailer, newSESEmailer, emailer, sendSESEmails }
 export type { Emailer, EmailConfiguration, EmailData, StateAnalystsEmails }
