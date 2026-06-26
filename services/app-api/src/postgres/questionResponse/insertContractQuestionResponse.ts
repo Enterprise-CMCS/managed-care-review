@@ -10,7 +10,7 @@ import {
 } from './questionHelpers'
 import { NotFoundError } from '../postgresErrors'
 import type { ExtendedPrismaClient } from '../prismaClient'
-import { parseErrorToError } from '@mc-review/helpers'
+import { runTransactionWithRowLock } from '../prismaHelpers'
 
 export async function insertContractQuestionResponse(
     client: ExtendedPrismaClient,
@@ -24,80 +24,78 @@ export async function insertContractQuestionResponse(
         s3Key: document.s3Key,
     }))
 
-    try {
-        const question = await client.contractQuestion.findFirst({
-            where: {
-                id: response.questionID,
-            },
-            include: {
-                actions: {
-                    orderBy: {
-                        createdAt: 'desc',
-                    },
-                    take: 1,
+    return runTransactionWithRowLock({
+        client,
+        operationName: 'insertContractQuestionResponse',
+        table: 'ContractQuestion',
+        id: response.questionID,
+        useRowLock: false,
+        transaction: async (tx) => {
+            const question = await tx.contractQuestion.findFirst({
+                where: {
+                    id: response.questionID,
                 },
-            },
-        })
+                include: {
+                    actions: {
+                        orderBy: {
+                            createdAt: 'desc',
+                        },
+                        take: 1,
+                    },
+                },
+            })
 
-        if (!question) {
-            return new NotFoundError('Question was not found to respond to')
-        }
+            if (!question) {
+                return new NotFoundError('Question was not found to respond to')
+            }
 
-        if (isDeleted(question)) {
-            return new Error(
-                `Cannot create response for question with the ID: ${response.questionID}. Question was deleted.`
-            )
-        }
+            if (isDeleted(question)) {
+                return new Error(
+                    `Cannot create response for question with the ID: ${response.questionID}. Question was deleted.`
+                )
+            }
 
-        const result = await client.contractQuestion.update({
-            where: {
-                id: response.questionID,
-            },
-            data: {
-                responses: {
-                    create: {
-                        addedBy: {
-                            connect: {
-                                id: user.id,
+            const result = await tx.contractQuestion.update({
+                where: {
+                    id: response.questionID,
+                },
+                data: {
+                    responses: {
+                        create: {
+                            addedBy: {
+                                connect: {
+                                    id: user.id,
+                                },
+                            },
+                            documents: {
+                                create: documents,
                             },
                         },
-                        documents: {
-                            create: documents,
-                        },
                     },
                 },
-            },
-            include: questionInclude,
-        })
+                include: questionInclude,
+            })
 
-        const latestResponse = result.responses[0]
-        if (!latestResponse) {
-            return new Error(
-                `Question response was not created for question with the ID: ${response.questionID}`
-            )
-        }
+            const latestResponse = result.responses[0]
+            if (!latestResponse) {
+                return new Error(
+                    `Question response was not created for question with the ID: ${response.questionID}`
+                )
+            }
 
-        // A response is a new action on the same contract question. Persist the
-        // response timestamp so contract lastActionDate reflects the Q&A thread
-        // update, not the original question date.
-        await client.contractTable.update({
-            where: {
-                id: result.contractID,
-            },
-            data: {
-                lastActionDate: latestResponse.createdAt,
-            },
-        })
+            // The response row and freshness write must commit together. If the
+            // freshness write fails, rollback the response so history and
+            // lastActionDate cannot drift.
+            await tx.contractTable.update({
+                where: {
+                    id: result.contractID,
+                },
+                data: {
+                    lastActionDate: latestResponse.createdAt,
+                },
+            })
 
-        return contractQuestionPrismaToDomainType(result)
-    } catch (e) {
-        const parsedError = parseErrorToError(e)
-        // Return a NotFoundError if prisma fails on the primary key constraint
-        // An operation failed because it depends on one or more records
-        // that were required but not found.
-        if ((parsedError as unknown as { code?: string }).code === 'P2025') {
-            return new NotFoundError('Question was not found to respond to')
-        }
-        return parsedError
-    }
+            return contractQuestionPrismaToDomainType(result)
+        },
+    })
 }
