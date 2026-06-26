@@ -25,6 +25,9 @@ const SubmissionsDashboard = (): React.ReactElement => {
 
     // Measure dashboard load time (mount -> data ready) for the Submissions tab.
     usePageLoadSpan({
+        // Explicit id: DASHBOARD_SUBMISSIONS is also the StateDashboard route, so
+        // the route alone can't identify this as the CMS submissions dashboard.
+        pageName: 'cms-dashboard-submissions',
         ready: !!data,
         error,
         attributes: {

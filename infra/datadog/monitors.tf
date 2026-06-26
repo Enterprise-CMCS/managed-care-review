@@ -231,18 +231,21 @@ resource "datadog_monitor" "dashboard_load_time" {
 
   # Rolling average duration of the `page.load` spans emitted by usePageLoadSpan
   # (services/app-web/src/hooks/usePageLoadSpan.ts) on the CMS dashboard tabs,
-  # which measure mount -> data-ready. @duration is reported in nanoseconds, so
-  # the millisecond threshold is converted with * 1,000,000. Abandoned loads
-  # (user navigated away before data arrived, tagged @page.load.abandoned) are
-  # excluded so partial timings don't drag the average down.
-  query = "trace-analytics(\"service:app-web-${var.environment} @dashboard.tab:(submissions OR rates) -@page.load.abandoned:true\").rollup(\"avg\", \"@duration\").last(\"15m\") > ${var.dashboard_load_threshold_ms * 1000000}"
+  # which measure mount -> data-ready. Spans are matched on the explicit
+  # `@page.name` rather than the route, because DASHBOARD_SUBMISSIONS is shared
+  # with the StateDashboard and so the route alone can't isolate the CMS
+  # dashboard. @duration is reported in nanoseconds, so the millisecond threshold
+  # is converted with * 1,000,000. Abandoned loads (user navigated away before
+  # data arrived, tagged @page.load.abandoned) are excluded so partial timings
+  # don't drag the average down.
+  query = "trace-analytics(\"service:app-web-${var.environment} @page.name:(cms-dashboard-submissions OR cms-dashboard-rates) -@page.load.abandoned:true\").rollup(\"avg\", \"@duration\").last(\"15m\") > ${var.dashboard_load_threshold_ms * 1000000}"
 
   message = <<-EOT
     The CMS dashboard is loading slowly in **${var.environment}**.
 
     Triggered when the 15-minute average `page.load` duration for the Submissions / Rate reviews tabs exceeds ${var.dashboard_load_threshold_ms} ms.
 
-    - Review `page.load` spans in Datadog APM under service `app-web-${var.environment}` (filter on `@dashboard.tab`)
+    - Review `page.load` spans in Datadog APM under service `app-web-${var.environment}` (filter on `@page.name`)
     - Correlate with `@dashboard.row_count` — large result sets are the expected driver and point toward pagination/filtering work
     - Check recent frontend deploys and `app-api-${var.environment}` for slow `indexContracts` / `indexRates` queries
 

@@ -6,6 +6,12 @@ import { useTracing } from '@mc-review/otel'
 import { useCurrentRoute } from './useCurrentRoute'
 
 interface PageLoadSpanArgs {
+    // Stable, explicit identifier for the page being measured (e.g.
+    // 'cms-dashboard-submissions'). Recorded as `page.name` so a trace reliably
+    // identifies its page even when the route is shared by more than one page —
+    // e.g. DASHBOARD_SUBMISSIONS serves the CMS SubmissionsDashboard and the
+    // StateDashboard depending on user type, so `page.route` alone is ambiguous.
+    pageName: string
     // True once the page's primary data has loaded and is ready to render.
     ready: boolean
     // Set if the load failed; ends the span with an error status.
@@ -17,9 +23,9 @@ interface PageLoadSpanArgs {
 
 /**
  * Measures how long a page takes to load its primary data and emits it as a
- * single `page.load` span whose duration is the load time, tagged with the
- * current route so it can be charted and alerted on per page in our telemetry
- * backend (Datadog).
+ * single `page.load` span whose duration is the load time, tagged with an
+ * explicit `page.name` (and the current route) so it can be charted and alerted
+ * on per page in our telemetry backend (Datadog).
  *
  * The span starts when the page mounts (the load begins) and ends the first time
  * `ready` becomes true — i.e. the user-perceived time to a usable page. This is
@@ -27,6 +33,7 @@ interface PageLoadSpanArgs {
  * (mount to unmount).
  */
 export const usePageLoadSpan = ({
+    pageName,
     ready,
     error,
     attributes,
@@ -41,6 +48,7 @@ export const usePageLoadSpan = ({
     useEffect(() => {
         endedRef.current = false
         spanRef.current = startSpan('page.load', {
+            'page.name': pageName,
             [SemanticAttributes.HTTP_ROUTE]: currentRoute.toString(),
             'page.route': currentRoute.toString(),
         })
@@ -60,7 +68,7 @@ export const usePageLoadSpan = ({
         // abandoned above and a new one starts for the new route. currentRoute is
         // a stable route-name string and startSpan is a stable callback, so this
         // only re-runs on an actual route change, not on every render.
-    }, [currentRoute, startSpan])
+    }, [currentRoute, startSpan, pageName])
 
     // End the span the first time the page is ready (or errors).
     useEffect(() => {

@@ -29,6 +29,9 @@ const RateReviewsDashboard = (): React.ReactElement => {
 
     // Measure dashboard load time (mount -> data ready) for the Rate reviews tab.
     usePageLoadSpan({
+        // Explicit id so the trace identifies this CMS dashboard tab regardless
+        // of route (see SubmissionsDashboard for why the route isn't sufficient).
+        pageName: 'cms-dashboard-rates',
         ready: !!data,
         error,
         attributes: {
