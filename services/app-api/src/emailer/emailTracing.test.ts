@@ -42,7 +42,7 @@ describe('emailTracing', () => {
     const attributes = {
         toAddresses: ['zuko@example.com', 'aang@example.com'],
         ccAddresses: ['iroh@example.com'],
-        bccAddresses: [],
+        bccAddresses: ['azula@example.com'],
         sourceEmail: 'no-reply@example.com',
         subject: 'New Submission',
     }
@@ -57,13 +57,16 @@ describe('emailTracing', () => {
                     attributes: expect.objectContaining({
                         'email.to_addresses': attributes.toAddresses,
                         'email.cc_addresses': attributes.ccAddresses,
-                        'email.bcc_addresses': attributes.bccAddresses,
-                        'email.recipient_count': 3,
+                        // BCC recipients are counted but never recorded as addresses.
+                        'email.recipient_count': 4,
                         'email.source': attributes.sourceEmail,
                         'email.subject': attributes.subject,
                     }),
                 })
             )
+
+            const spanAttributes = startSpan.mock.calls[0][1].attributes
+            expect(spanAttributes).not.toHaveProperty('email.bcc_addresses')
         })
 
         it('marks the span successful and ends it when the send resolves', async () => {

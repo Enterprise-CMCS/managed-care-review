@@ -41,7 +41,6 @@ function toSpanAttributes(attributes: EmailSpanAttributes): Attributes {
         // record of so we know who was (or was not) notified.
         'email.to_addresses': attributes.toAddresses,
         'email.cc_addresses': attributes.ccAddresses,
-        'email.bcc_addresses': attributes.bccAddresses,
         'email.recipient_count':
             attributes.toAddresses.length +
             attributes.ccAddresses.length +

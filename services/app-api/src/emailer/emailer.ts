@@ -38,8 +38,8 @@ import type {
     RateQuestionType,
     ContractSubmissionType,
 } from '../domain-models'
-import { SESServiceException } from '@aws-sdk/client-ses'
 import { withEmailSpan } from './emailTracing'
+import { parseErrorToError } from '@mc-review/helpers'
 import type { RateForDisplayType } from './templateHelpers'
 import { newEQROContractCMSEmail } from './emails/newEQROContractCMSEmail'
 
@@ -771,13 +771,8 @@ const sendSESEmails = async (emailData: EmailData): Promise<void | Error> => {
                 }
                 return
             } catch (err) {
-                if (err instanceof SESServiceException) {
-                    return new Error(
-                        'SES email send failed. Error: ' + JSON.stringify(err)
-                    )
-                }
-
-                return new Error('SES email send failed. Error: ' + err)
+                const message = parseErrorToError(err).message
+                return new Error('SES email send failed. Error: ' + message)
             }
         }
     )
