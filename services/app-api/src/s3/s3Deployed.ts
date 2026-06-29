@@ -12,6 +12,7 @@ import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 import { isS3Error } from './s3Error'
 import { parseErrorToError } from '@mc-review/helpers'
+import { withS3Span } from '../otel/s3Tracing'
 
 // newDeployedS3Client is used for calling S3 from app-api
 // app-api does not use amplify for interfacing with S3
@@ -41,7 +42,16 @@ export function newDeployedS3Client(
                     }
                     throw err
                 }
-                await s3Client.send(command)
+                // Traced so the S3 error identity (e.g. SlowDown) survives even
+                // though the catch below flattens failures to NETWORK_ERROR.
+                await withS3Span(
+                    {
+                        operation: 'PutObject',
+                        bucket: bucketConfig[bucket],
+                        key: filename,
+                    },
+                    () => s3Client.send(command)
+                )
 
                 return filename
             } catch (err) {

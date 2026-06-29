@@ -19,6 +19,7 @@ import type {
     RateRevisionType,
 } from '../domain-models'
 import { withZipSpan } from './zipTracing'
+import { withS3Span } from '../otel/s3Tracing'
 
 const s3Client = new S3Client({
     region: process.env.AWS_REGION || 'us-east-1',
@@ -201,13 +202,17 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         // Upload zip to S3
         const outputKey = outputPath
         try {
-            await s3Client.send(
-                new PutObjectCommand({
-                    Bucket: bucket,
-                    Key: outputKey,
-                    Body: fs.createReadStream(zipPath),
-                    ContentType: 'application/zip',
-                })
+            await withS3Span(
+                { operation: 'PutObject', bucket, key: outputKey },
+                () =>
+                    s3Client.send(
+                        new PutObjectCommand({
+                            Bucket: bucket,
+                            Key: outputKey,
+                            Body: fs.createReadStream(zipPath),
+                            ContentType: 'application/zip',
+                        })
+                    )
             )
         } catch (err) {
             return new Error(
@@ -302,12 +307,16 @@ async function downloadFile(
     const timeoutId = setTimeout(() => controller.abort(), timeout)
 
     try {
-        const response = await s3Client.send(
-            new GetObjectCommand({
-                Bucket: bucket,
-                Key: key,
-            }),
-            { abortSignal: controller.signal }
+        const response = await withS3Span(
+            { operation: 'GetObject', bucket, key },
+            () =>
+                s3Client.send(
+                    new GetObjectCommand({
+                        Bucket: bucket,
+                        Key: key,
+                    }),
+                    { abortSignal: controller.signal }
+                )
         )
 
         clearTimeout(timeoutId)
