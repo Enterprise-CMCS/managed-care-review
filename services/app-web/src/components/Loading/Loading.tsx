@@ -5,8 +5,10 @@ import styles from './Loading.module.scss'
 
 export const Loading = ({
     delayMS = 750,
+    fullPage = false,
 }: {
     delayMS?: number
+    fullPage?: boolean
 }): React.ReactElement | null => {
     const [showLoading, setShowLoading] = useState(false)
 
@@ -25,7 +27,7 @@ export const Loading = ({
     }
 
     return (
-        <div className={styles.loadingBox}>
+        <div className={fullPage ? styles.fullPageLoading : styles.loadingBox}>
             <h2 className={styles.loadingLabel}>Loading</h2>
             <Spinner />
         </div>
