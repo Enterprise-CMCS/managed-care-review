@@ -1398,6 +1398,7 @@ enum SubmissionHistoryActionType {
     RATE_LINK
     RATE_UNLINK
     UNLOCK
+    UNDO_UNLOCK
     OVERRIDE
     UNDER_REVIEW
     NOT_SUBJECT_TO_REVIEW

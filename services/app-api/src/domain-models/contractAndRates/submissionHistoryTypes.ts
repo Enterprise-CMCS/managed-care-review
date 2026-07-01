@@ -21,6 +21,7 @@ type ContractSubmissionHistoryActionType =
     | 'CONTRACT_SUBMISSION'
     | 'LINKED_RATE_UPDATE'
     | 'UNLOCK'
+    | 'UNDO_UNLOCK'
     | 'OVERRIDE'
     | ReviewActionTypes
 
@@ -35,6 +36,7 @@ type ContractSubmissionHistoryActionType =
 type RateSubmissionHistoryActionType =
     | 'RATE_SUBMISSION'
     | 'UNLOCK'
+    | 'UNDO_UNLOCK'
     | 'OVERRIDE'
     | ReviewActionTypes
     | 'RATE_LINK'
