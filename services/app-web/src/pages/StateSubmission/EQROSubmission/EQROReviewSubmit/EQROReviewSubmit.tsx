@@ -6,7 +6,6 @@ import {
     PageActionsContainer,
     DynamicStepIndicator,
     FormNotificationContainer,
-    Loading,
 } from '../../../../components'
 import { GridContainer, ModalRef } from '@trussworks/react-uswds'
 import {
@@ -21,12 +20,14 @@ import { useQuery } from '@apollo/client/react'
 import { FetchContractDocument } from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../Errors/Error404Page'
-import { GenericErrorPage } from '../../../Errors/GenericErrorPage'
 import {
     getVisibleLatestContractFormData,
     packageName,
 } from '@mc-review/submissions'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents'
+import {
+    PageBannerAlerts,
+    ErrorOrLoadingPage,
+} from '../../SharedSubmissionComponents'
 import { ContactsSummarySection } from '../../../../components/SubmissionSummarySection'
 import { EQROSubmissionTypeSummarySection } from '../../../../components/SubmissionSummarySection'
 import { EQROContractDetailsSummarySection } from '../../../../components/SubmissionSummarySection'
@@ -70,7 +71,7 @@ export const EQROReviewSubmit = (): React.ReactElement => {
     }, [activeMainContentId, updateActiveMainContent])
 
     if (loading) {
-        return <Loading fullPage />
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (error || !contract) {
         //error handling for a state user that tries to access rates for a different state
         const gqlError = toGQLError(error)
@@ -79,10 +80,10 @@ export const EQROReviewSubmit = (): React.ReactElement => {
         } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
-            return <GenericErrorPage />
+            return <ErrorOrLoadingPage state="GENERIC_ERROR" />
         }
     } else if (contract.contractSubmissionType !== 'EQRO') {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
@@ -91,7 +92,7 @@ export const EQROReviewSubmit = (): React.ReactElement => {
         isStateUser
     )
 
-    if (!contractFormData) return <GenericErrorPage />
+    if (!contractFormData) return <ErrorOrLoadingPage state="GENERIC_ERROR" />
 
     const submissionName =
         packageName(

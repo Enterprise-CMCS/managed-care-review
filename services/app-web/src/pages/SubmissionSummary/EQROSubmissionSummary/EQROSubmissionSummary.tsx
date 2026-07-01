@@ -16,7 +16,6 @@ import {
     ButtonWithLogging,
     DocumentWarningBanner,
     LinkWithLogging,
-    Loading,
     NavLinkWithLogging,
     SectionCard,
     MultiColumnGrid,
@@ -31,7 +30,7 @@ import {
 import { ModalOpenButton, UnlockSubmitModal } from '../../../components/Modal'
 import { ErrorForbiddenPage } from '../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../Errors/Error404Page'
-import { GenericErrorPage } from '../../Errors/GenericErrorPage'
+import { ErrorOrLoadingPage } from '../../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { getVisibleLatestContractFormData } from '@mc-review/submissions'
 import styles from '../SubmissionSummary.module.scss'
 import {
@@ -120,7 +119,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
-        return <Loading fullPage />
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (!data && error) {
         const gqlError = toGQLError(error)
         if (gqlError?.extensions.code === 'FORBIDDEN') {
@@ -128,10 +127,10 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
-            return <GenericErrorPage />
+            return <ErrorOrLoadingPage state="GENERIC_ERROR" />
         }
     } else if (!contract) {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     const submissionStatus = contract.status
@@ -224,7 +223,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         console.error(
             'missing fundamental contract data inside submission summary'
         )
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     const handleDocumentDownloadError = (error: boolean) => {

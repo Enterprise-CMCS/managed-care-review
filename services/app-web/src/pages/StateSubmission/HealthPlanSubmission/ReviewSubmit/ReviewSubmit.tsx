@@ -4,7 +4,6 @@ import { generatePath, useNavigate } from 'react-router-dom'
 import {
     DynamicStepIndicator,
     ActionButton,
-    Loading,
     FormNotificationContainer,
     PageActionsContainer,
 } from '../../../../components'
@@ -30,8 +29,10 @@ import { useQuery } from '@apollo/client/react'
 import { FetchContractDocument } from '../../../../gen/gqlClient'
 import { ErrorForbiddenPage } from '../../../Errors/ErrorForbiddenPage'
 import { Error404 } from '../../../Errors/Error404Page'
-import { GenericErrorPage } from '../../../Errors/GenericErrorPage'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents'
+import {
+    PageBannerAlerts,
+    ErrorOrLoadingPage,
+} from '../../SharedSubmissionComponents'
 import { usePage } from '../../../../contexts/PageContext'
 import { activeFormPages } from '../../submissionUtils'
 import { featureFlags } from '@mc-review/common-code'
@@ -83,7 +84,7 @@ export const ReviewSubmit = (): React.ReactElement => {
     }, [activeMainContentId, updateActiveMainContent])
 
     if (loading) {
-        return <Loading fullPage />
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (error || !contract) {
         //error handling for a state user that tries to access rates for a different state
         const gqlError = toGQLError(error)
@@ -92,7 +93,7 @@ export const ReviewSubmit = (): React.ReactElement => {
         } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
-            return <GenericErrorPage />
+            return <ErrorOrLoadingPage state="GENERIC_ERROR" />
         }
     }
 
@@ -101,7 +102,7 @@ export const ReviewSubmit = (): React.ReactElement => {
         contract,
         isStateUser
     )
-    if (!contractFormData) return <GenericErrorPage />
+    if (!contractFormData) return <ErrorOrLoadingPage state="GENERIC_ERROR" />
 
     const isContractActionAndRateCertification =
         contractFormData.submissionType === 'CONTRACT_AND_RATES'

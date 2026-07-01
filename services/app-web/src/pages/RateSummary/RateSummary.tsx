@@ -4,7 +4,6 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
     ButtonWithLogging,
     MultiColumnGrid,
-    Loading,
     NavLinkWithLogging,
     SectionCard,
 } from '../../components'
@@ -16,7 +15,7 @@ import {
 } from '../../gen/gqlClient'
 import { useMutation, useQuery } from '@apollo/client/react'
 import styles from '../SubmissionSummary/SubmissionSummary.module.scss'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { ErrorOrLoadingPage } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { ERROR_MESSAGES, RoutesRecord } from '@mc-review/constants'
 import { SingleRateSummarySection } from '../../components/SubmissionSummarySection'
 import { useAuth } from '../../contexts/AuthContext'
@@ -120,7 +119,7 @@ export const RateSummary = (): React.ReactElement => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
-        return <Loading fullPage />
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (!data && error) {
         const gqlError = toGQLError(error)
         if (gqlError?.extensions.code === 'FORBIDDEN') {
@@ -128,10 +127,10 @@ export const RateSummary = (): React.ReactElement => {
         } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
-            return <GenericErrorPage />
+            return <ErrorOrLoadingPage state="GENERIC_ERROR" />
         }
     } else if (!rate) {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     // Redirecting a state user to the edit page if rate is unlocked
@@ -147,7 +146,7 @@ export const RateSummary = (): React.ReactElement => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!fetchContractData && fetchContractLoading) {
-        return <Loading fullPage />
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (fetchContractError && !fetchContractData) {
         //error handling for a state user that tries to access contracts for a different state
         const contractGqlError = toGQLError(fetchContractError)
@@ -156,10 +155,10 @@ export const RateSummary = (): React.ReactElement => {
         } else if (contractGqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
-            return <GenericErrorPage />
+            return <ErrorOrLoadingPage state="GENERIC_ERROR" />
         }
     } else if (!contract) {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     const handleUnlockRate = async () => {

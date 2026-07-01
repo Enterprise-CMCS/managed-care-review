@@ -17,11 +17,11 @@ import {
     ContractRevision,
     FetchContractWithQuestionsDocument,
 } from '../../gen/gqlClient'
-import { Loading, NavLinkWithLogging } from '../../components'
+import { NavLinkWithLogging } from '../../components'
 import { useQuery } from '@apollo/client/react'
 import { handleApolloError, toGQLError } from '@mc-review/helpers'
 import { recordJSException } from '@mc-review/otel'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { ErrorOrLoadingPage } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { Error404 } from '../Errors/Error404Page'
 import { Contract, User } from '../../gen/gqlClient'
 import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
@@ -85,7 +85,7 @@ export const SubmissionSideNav = () => {
     const contract = data?.fetchContract.contract
 
     if (!data && loading) {
-        return <Loading fullPage />
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (!data && error) {
         const err = error
         console.error('Error from API fetch', error)
@@ -96,9 +96,9 @@ export const SubmissionSideNav = () => {
         }
 
         recordJSException(err)
-        return <GenericErrorPage /> // api failure
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" /> // api failure
     } else if (!loggedInUser || !contract) {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     const submissionStatus = contract.status
@@ -124,7 +124,7 @@ export const SubmissionSideNav = () => {
     const isStateUser = loggedInUser?.role === 'STATE_USER'
     // Only State users can see a draft submission
     if (submissionStatus === 'DRAFT' && !isStateUser) {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     // Current Revision is either the last submitted revision (cms users) or the most recent revision (for state users looking submission form)
@@ -138,7 +138,7 @@ export const SubmissionSideNav = () => {
     if (!submittedEdge && !draftEdge) {
         const errMsg = `Not able to determine current revision for sidebar: ${contract.id}, programming error.`
         recordJSException(errMsg)
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
     const currentRevision = submittedEdge || draftEdge
     const contractFormData = submittedEdge
@@ -150,7 +150,7 @@ export const SubmissionSideNav = () => {
     if (!contractName || !contractFormData || !currentRevision) {
         const errMsg = `Not able to derive data from current revision for sidebar: ${contract.id}, programming error.`
         recordJSException(errMsg)
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     // All of this logic is to enable conditional styles with sidenabv
