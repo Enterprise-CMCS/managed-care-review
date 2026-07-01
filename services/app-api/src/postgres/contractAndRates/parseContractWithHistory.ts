@@ -7,7 +7,10 @@ import { z } from 'zod'
 import type { StrippedContractType } from '../../domain-models'
 import { contractSchema } from '../../domain-models/contractAndRates'
 import type { ContractWithoutDraftRatesType } from '../../domain-models/contractAndRates/baseContractRateTypes'
-import type { ContractPackageSubmissionType } from '../../domain-models'
+import type {
+    ContractPackageSubmissionType,
+    ContractUndoUnlockPackageType,
+} from '../../domain-models'
 import { rateWithoutDraftContractsToDomainModel } from './parseRateWithHistory'
 import type {
     ContractRevisionTableWithFormData,
@@ -21,6 +24,7 @@ import {
     getContractReviewStatus,
     DRAFT_PARENT_PLACEHOLDER,
     isDraftRevision,
+    isReversedUnlockedRevision,
     isSubmittedRevision,
     rateRevisionToDomainModel,
     unsortedRatesRevisionsToDomainModel,
@@ -102,6 +106,7 @@ function contractRevisionToDomainModel(
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+        undoUnlockInfo: convertUpdateInfoToDomainModel(revision.undoUnlockInfo),
 
         formData: contractFormDataToDomainModel(revision),
     }
@@ -225,7 +230,8 @@ function contractWithHistoryToDomainModelWithoutRates(
 
     for (const contractRev of contractRevisions) {
         // If we have a draft revision
-        // We set the draft revision aside, format it properly
+        // We set the draft revision aside, format it properly. This ignores
+        // draft revisions from undo unlock
         if (isDraftRevision(contractRev)) {
             if (draftRevision) {
                 return new Error(
@@ -246,6 +252,7 @@ function contractWithHistoryToDomainModelWithoutRates(
 
     // Every revision has a set of submissions it was part of.
     const packageSubmissions: ContractPackageSubmissionType[] = []
+    const undoUnlockPackages: ContractUndoUnlockPackageType[] = []
     for (const revision of contract.revisions) {
         for (const submission of revision.relatedSubmisions) {
             // submittedThings
@@ -284,6 +291,28 @@ function contractWithHistoryToDomainModelWithoutRates(
                 rateRevisions: rateRevisions,
             })
         }
+
+        if (isReversedUnlockedRevision(revision)) {
+            const undoUnlockInfo = convertUpdateInfoToDomainModel(
+                revision.undoUnlockInfo
+            )
+
+            if (!undoUnlockInfo) {
+                return new Error(
+                    `PROGRAMMING ERROR: reversed unlocked contract revision ${revision.id} is missing undo unlock info`
+                )
+            }
+
+            // This only includes draft contract snapshot so we do not make
+            // this parser larger by having to query more rate data. To fetch
+            // the draft rate revision snapshots we likely want to do this in
+            // the field resolvers only if the query requests the data.
+            undoUnlockPackages.push({
+                undoUnlockInfo,
+                draftContractRevisionSnapshot:
+                    contractRevisionToDomainModel(revision),
+            })
+        }
     }
 
     const status = getContractRateStatus(contract.revisions)
@@ -312,6 +341,7 @@ function contractWithHistoryToDomainModelWithoutRates(
         draftRevision,
         revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
+        undoUnlockPackages: undoUnlockPackages.reverse(),
         contractOverrides: contractOverridesToDomainModel(
             contract.contractOverrides
         ),
