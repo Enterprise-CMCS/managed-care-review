@@ -1,0 +1,20 @@
+query FetchSubmissionDiff($input: FetchSubmissionDiffInput!) {
+  fetchSubmissionDiff(input: $input) {
+    contractID
+    comparison {
+      olderRevisionID
+      newerRevisionID
+      olderSubmittedAt
+      newerSubmittedAt
+      sections {
+        title
+        changes {
+          fieldPath
+          label
+          oldValue
+          newValue
+        }
+      }
+    }
+  }
+}

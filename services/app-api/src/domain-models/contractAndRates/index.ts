@@ -69,6 +69,12 @@ export type {
 } from './packageSubmissions'
 
 export type {
+    SubmissionDiff,
+    SubmissionDiffFieldChange,
+    SubmissionDiffSection,
+} from './submissionDiffTypes'
+
+export type {
     ContractReviewStatusType,
     ContractSubmissionType,
 } from './baseContractRateTypes'

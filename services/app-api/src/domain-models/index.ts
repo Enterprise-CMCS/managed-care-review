@@ -56,6 +56,9 @@ export type {
     ContractReviewStatusType,
     UpdateInfoType,
     ContractSubmissionType,
+    SubmissionDiff,
+    SubmissionDiffFieldChange,
+    SubmissionDiffSection,
 } from './contractAndRates'
 
 export type {

@@ -25,6 +25,7 @@ import type {
     CreateRateQuestionInputType,
     AuditDocument,
     EmailSettingsType,
+    SubmissionDiff,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from './'
 import type { InsertUserArgsType, UpdateUserInfoArgsType } from './user'
@@ -63,6 +64,7 @@ import {
     updateDraftContract,
     findContractRevision,
     findRateRevision,
+    findSubmissionDiffByContractID,
     approveContract,
     reverseApproveContract,
     overrideContractData,
@@ -195,6 +197,11 @@ type Store = {
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
+    findSubmissionDiffByContractID: (args: {
+        contractID: string
+        olderContractRevisionID?: string | null
+        newerContractRevisionID?: string | null
+    }) => Promise<SubmissionDiff | Error>
     findAllContractsWithHistoryByState: (
         stateCode: string
     ) => Promise<ContractOrErrorArrayType | Error>
@@ -396,6 +403,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
+        findSubmissionDiffByContractID: (args) =>
+            findSubmissionDiffByContractID(client, args),
         findAllContractsWithHistoryByState: (args) =>
             findAllContractsWithHistoryByState(client, args),
         findAllContractsWithHistoryBySubmitInfo: (args) =>

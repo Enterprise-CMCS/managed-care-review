@@ -96,6 +96,13 @@ type Query {
     fetchContract(input: FetchContractInput!): FetchContractPayload!
 
     """
+    fetchSubmissionDiff returns the field-level differences between two submitted
+    contract revisions. When revision IDs are omitted, it compares the latest
+    submitted contract revision to the previous submitted contract revision.
+    """
+    fetchSubmissionDiff(input: FetchSubmissionDiffInput!): FetchSubmissionDiffPayload!
+
+    """
     fetchDocument returns a single document
     given a documentID
     Optional parameters include:
@@ -1465,6 +1472,29 @@ type Document {
 }
 
 """
+SubmissionDiff is a display-ready comparison between two submitted contract revisions.
+"""
+type SubmissionDiff {
+    olderRevisionID: ID!
+    newerRevisionID: ID!
+    olderSubmittedAt: DateTime!
+    newerSubmittedAt: DateTime!
+    sections: [SubmissionDiffSection!]!
+}
+
+type SubmissionDiffSection {
+    title: String!
+    changes: [SubmissionDiffFieldChange!]!
+}
+
+type SubmissionDiffFieldChange {
+    fieldPath: String!
+    label: String!
+    oldValue: String
+    newValue: String
+}
+
+"""
 SharedDocument represents a document that has been uploaded to S3. Use s3Key and s3BucketName to
 locate the document; s3URL is deprecated. Can be used to represent either QA or state submission docs.
 """
@@ -2730,6 +2760,17 @@ type FetchContractPayload {
 
 input FetchContractInput {
     contractID: ID!
+}
+
+input FetchSubmissionDiffInput {
+    contractID: ID!
+    olderContractRevisionID: ID
+    newerContractRevisionID: ID
+}
+
+type FetchSubmissionDiffPayload {
+    contractID: ID!
+    comparison: SubmissionDiff!
 }
 
 type FetchDocumentPayload {
