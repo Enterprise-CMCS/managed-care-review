@@ -10,16 +10,9 @@ export const Loading = ({
     delayMS?: number
     fullPage?: boolean
 }): React.ReactElement | null => {
-    // Full-page loaders only render on a cold load (no cached data), so show
-    // the spinner immediately to hide the sidebar and avoid a flicker where
-    // the page is blank with no indicator. Inline loaders keep the delay to
-    // avoid a spinner flash on quick loads.
-    const [showLoading, setShowLoading] = useState(fullPage)
+    const [showLoading, setShowLoading] = useState(false)
 
     useEffect(() => {
-        if (fullPage) {
-            return
-        }
         const timeout = setTimeout(() => {
             setShowLoading(true)
         }, delayMS)
@@ -27,7 +20,7 @@ export const Loading = ({
         return function cleanup() {
             clearTimeout(timeout)
         }
-    }, [delayMS, fullPage])
+    }, [delayMS])
 
     if (!showLoading) {
         return null
