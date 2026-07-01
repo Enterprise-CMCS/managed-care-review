@@ -13,7 +13,9 @@ function toDate(d?: Date | string | null): Date | undefined {
     return d instanceof Date ? d : new Date(d)
 }
 
-function latestDate(dates: Array<Date | undefined>): Date | undefined {
+export function latestDate(
+    dates: Array<Date | null | undefined>
+): Date | undefined {
     let max: Date | undefined
     for (const d of dates)
         if (d && (!max || d.getTime() > max.getTime())) max = d

@@ -248,6 +248,7 @@ const includeRateRevisionWithRelatedSubmissionContracts = {
                                         include:
                                             includeSubmissionPackageContractRevision,
                                     },
+                                    contractSubmissionType: true,
                                     reviewStatusActions: {
                                         orderBy: {
                                             updatedAt: 'desc',

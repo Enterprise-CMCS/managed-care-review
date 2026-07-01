@@ -13,7 +13,10 @@ import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
 import type { UpdateDraftContractRatesArgsType } from './updateDraftContractRates'
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
 import type { SubmitContractArgsType } from './submitContract'
-import { submitContractInsideTransaction } from './submitContract'
+import {
+    healthPlanContractReviewDeterminationAction,
+    submitContractInsideTransaction,
+} from './submitContract'
 import { submitRateInsideTransaction } from './submitRate'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import type { ExtendedPrismaClient } from '../prismaClient'
@@ -293,6 +296,24 @@ const withdrawRateInsideTransaction = async (
             if (resubmitResult instanceof Error) {
                 throw resubmitResult
             }
+
+            // Withdrawing a rate can resubmit the affected health plan
+            // contract. Run the same review determination as normal submit so
+            // the contract action history and lastActionDate reflect the final
+            // visible action. Skip the withdrawn-contract edge case because the
+            // review helper intentionally rejects currently withdrawn review
+            // status.
+            if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
+                const reviewDetermination =
+                    await healthPlanContractReviewDeterminationAction(
+                        tx,
+                        resubmitResult
+                    )
+
+                if (reviewDetermination instanceof Error) {
+                    throw reviewDetermination
+                }
+            }
         }
     }
 
@@ -316,7 +337,12 @@ const withdrawRateInsideTransaction = async (
         },
     })
 
-    // Add review status action to rate and create new joins on withdrawn rate join table
+    const syncedTimestamp = new Date()
+
+    // This review action is what makes the rate withdrawn, so it is the action
+    // date we persist for lastActionDate. The submit above already captured
+    // the submitted-data change for the rate. Also create new joins on the
+    // withdrawn rate join table
     await tx.rateTable.update({
         where: {
             id: rateID,
@@ -326,9 +352,11 @@ const withdrawRateInsideTransaction = async (
                 create: {
                     updatedByID,
                     updatedReason,
+                    updatedAt: syncedTimestamp,
                     actionType: 'WITHDRAW',
                 },
             },
+            lastActionDate: syncedTimestamp,
             withdrawnFromContracts: {
                 create: withdrawnFromContracts,
             },

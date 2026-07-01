@@ -132,6 +132,22 @@ const softDeleteContractQuestionInsideTransaction = async (
         include: questionInclude,
     })
 
+    const deleteAction = result.actions[0]
+    if (!deleteAction) {
+        return new Error(
+            `Delete action was not created for question with id ${questionID}`
+        )
+    }
+
+    // Deleting a contract question removes visible Q&A data, so it should move
+    // the contract lastActionDate to the delete action timestamp.
+    await tx.contractTable.update({
+        where: { id: existing.contractID },
+        data: {
+            lastActionDate: deleteAction.createdAt,
+        },
+    })
+
     return contractQuestionPrismaToDomainType(result)
 }
 

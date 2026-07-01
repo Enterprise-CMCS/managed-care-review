@@ -196,6 +196,13 @@ describe('overrideContractData', () => {
         expect(overriddenContract.revisions[0].formData.contractType).toBe(
             'AMENDMENT'
         )
+        const contractTableRow = await client.contractTable.findUniqueOrThrow({
+            where: { id: submittedContract.id },
+            select: { lastActionDate: true },
+        })
+        expect(contractTableRow.lastActionDate).toEqual(
+            overriddenContract.contractOverrides?.[0]?.createdAt
+        )
     })
 
     it('rejects overrides unless the contract is submitted, resubmitted, or approved', async () => {

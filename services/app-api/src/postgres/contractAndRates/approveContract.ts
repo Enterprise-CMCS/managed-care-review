@@ -52,14 +52,13 @@ async function approveContractInsideTransaction(
         },
     })
 
+    // Update lastActionDate for approval
     await tx.contractTable.update({
         where: {
             id: contractID,
         },
         data: {
-            reviewStatusActions: {
-                connect: { id: approvalNotice.id },
-            },
+            lastActionDate: approvalNotice.updatedAt,
         },
     })
 

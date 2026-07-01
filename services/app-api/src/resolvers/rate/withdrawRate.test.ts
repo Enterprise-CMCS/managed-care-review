@@ -136,6 +136,27 @@ describe('withdrawRate', () => {
             ])
         )
 
+        const prismaClient = await sharedTestPrismaClient()
+
+        // Withdrawing the rate writes the WITHDRAW review action and the
+        // rate's lastActionDate in the same DB update. Assert the stored date
+        // matches that final visible rate action.
+        const rateTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateID },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(rateTableRow?.reviewStatusActions[0].actionType).toBe('WITHDRAW')
+        expect(rateTableRow?.lastActionDate).toEqual(
+            rateTableRow?.reviewStatusActions[0].updatedAt
+        )
+
         const latestRateRev = withdrawnRate.packageSubmissions[0].rateRevision
         const rateUnlockInfo = latestRateRev.unlockInfo
         const rateSubmitInfo = latestRateRev.submitInfo
@@ -159,6 +180,28 @@ describe('withdrawRate', () => {
         // expect contract to be RESUBMITTED
         expect(contractWithWithdrawnRate.consolidatedStatus).toEqual(
             'RESUBMITTED'
+        )
+
+        // The affected contract is automatically resubmitted without the
+        // withdrawn rate, then gets a review determination. Assert the
+        // contract's lastActionDate tracks that review action, not just the
+        // lower-level resubmit event.
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractTableRow?.lastActionDate).toEqual(
+            contractTableRow?.reviewStatusActions[0].updatedAt
         )
 
         // expect contract to contain the withdrawn rate
@@ -445,6 +488,7 @@ describe('withdrawRate', () => {
     it('can withdraw with a multiple rates in a contract', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
+        const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -525,6 +569,46 @@ describe('withdrawRate', () => {
         // expect contract to be RESUBMITTED
         expect(contractWithWithdrawnRate.consolidatedStatus).toEqual(
             'RESUBMITTED'
+        )
+
+        // In a multi-rate submission, only the withdrawn rate should receive
+        // the final WITHDRAW action date as its lastActionDate.
+        const withdrawnRateTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateAID },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(withdrawnRateTableRow?.reviewStatusActions[0].actionType).toBe(
+            'WITHDRAW'
+        )
+        expect(withdrawnRateTableRow?.lastActionDate).toEqual(
+            withdrawnRateTableRow?.reviewStatusActions[0].updatedAt
+        )
+
+        // The parent contract is resubmitted after rateA is removed. The
+        // automated review determination is the final visible contract action.
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractTableRow?.lastActionDate).toEqual(
+            contractTableRow?.reviewStatusActions[0].updatedAt
         )
 
         // expect contract to contain the withdrawn rate
@@ -653,6 +737,7 @@ describe('withdrawRate', () => {
     it('withdraws rate when linked to other multi-rate contracts', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
+        const prismaClient = await sharedTestPrismaClient()
         const stateServer = await constructTestPostgresServer({
             context: {
                 user: stateUser,
@@ -770,6 +855,67 @@ describe('withdrawRate', () => {
                     id: rateID,
                 }),
             ])
+        )
+
+        // This rate is visible through two submitted contracts. Withdrawing it
+        // should still write one final WITHDRAW action date on the rate.
+        const withdrawnRateTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateID },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(withdrawnRateTableRow?.reviewStatusActions[0].actionType).toBe(
+            'WITHDRAW'
+        )
+        expect(withdrawnRateTableRow?.lastActionDate).toEqual(
+            withdrawnRateTableRow?.reviewStatusActions[0].updatedAt
+        )
+
+        // Contract A submitted the rate as a child rate. Its package is
+        // resubmitted without the withdrawn rate, then review determination
+        // becomes the latest visible contract action.
+        const contractATableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contractA.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractATableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractATableRow?.lastActionDate).toEqual(
+            contractATableRow?.reviewStatusActions[0].updatedAt
+        )
+
+        // Contract B submitted the same rate as a linked rate. It should get
+        // the same resubmit-plus-review treatment as the parent contract.
+        const contractBTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contractB.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractBTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractBTableRow?.lastActionDate).toEqual(
+            contractBTableRow?.reviewStatusActions[0].updatedAt
         )
     })
 
@@ -1189,7 +1335,7 @@ describe('withdrawRate', () => {
                 }),
             ])
         )
-    }, 40000)
+    }, 55000)
 
     it('sends emails to state and CMS when a rate is withdrawn', async () => {
         const emailConfig = testEmailConfig()

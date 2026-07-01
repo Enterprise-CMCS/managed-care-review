@@ -297,6 +297,10 @@ function contractWithHistoryToDomainModelWithoutRates(
         id: contract.id,
         createdAt: contract.createdAt,
         updatedAt: contract.updatedAt,
+        // Preserve null until a tracked contract action occurs.
+        lastActionDate:
+            (contract as { lastActionDate?: Date | null }).lastActionDate ??
+            null,
         mccrsID: contract.mccrsID || undefined,
         status,
         reviewStatus,
@@ -506,6 +510,10 @@ function strippedContractToDomainModel(
         id: contract.id,
         createdAt: contract.createdAt,
         updatedAt: contract.updatedAt,
+        // Preserve null until a tracked contract action occurs.
+        lastActionDate:
+            (contract as { lastActionDate?: Date | null }).lastActionDate ??
+            null,
         initiallySubmittedAt,
         status,
         reviewStatus,

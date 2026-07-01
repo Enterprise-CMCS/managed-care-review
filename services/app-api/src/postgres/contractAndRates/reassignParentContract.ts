@@ -6,6 +6,8 @@ import { unlockContractInsideTransaction } from './unlockContract'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ProgramType } from '../../domain-models'
 import { packageName } from '@mc-review/submissions'
+import { findContractWithHistory } from './findContractWithHistory'
+import { healthPlanContractReviewDeterminationAction } from './submitContract'
 
 type RatesToReassign = {
     rateID: string
@@ -187,6 +189,41 @@ const reassignParentContractInTransaction = async (
         throw new Error(
             `Unable to reassign rate(s) ${rateNames.join(', ')}, new parent Contract ${contractID} could not be resubmitted. ${resubmitContract.message}`
         )
+    }
+
+    const resubmittedContract = await findContractWithHistory(tx, contractID)
+    if (resubmittedContract instanceof Error) {
+        throw new Error(
+            `Unable to reassign rate(s) ${rateNames.join(', ')}, new parent Contract ${contractID} could not be fetched after resubmit. ${resubmittedContract.message}`
+        )
+    }
+
+    if (resubmittedContract.contractSubmissionType === 'EQRO') {
+        throw new Error(
+            `Unable to reassign rate(s) ${rateNames.join(', ')}, EQRO contract ${contractID} cannot be a rate parent.`
+        )
+    }
+
+    // Reparenting resubmits the new parent contract through the low-level
+    // package writer, so it bypasses submitContract's review determination.
+    // Add the same health plan review action here so the parent contract's
+    // action history and lastActionDate match a normal contract submit.
+    // Reparenting only applies to rates, so EQRO submissions cannot be the new
+    // parent.
+    if (
+        ['SUBMITTED', 'RESUBMITTED'].includes(
+            resubmittedContract.consolidatedStatus
+        )
+    ) {
+        const reviewDetermination =
+            await healthPlanContractReviewDeterminationAction(
+                tx,
+                resubmittedContract
+            )
+
+        if (reviewDetermination instanceof Error) {
+            throw reviewDetermination
+        }
     }
 
     // If this contract was originally unlocked, we want to put it back into that status with the new child rates.

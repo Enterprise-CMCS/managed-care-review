@@ -538,11 +538,15 @@ const clearRatesOnDraftContract = async (
     server: ApolloServer,
     contractID: string
 ): Promise<ContractType> => {
+    const draftContract = await fetchTestContract(server, contractID)
     const response = await executeGraphQLOperation(server, {
         query: UpdateDraftContractRatesDocument,
         variables: {
             input: {
                 contractID: contractID,
+                lastSeenUpdatedAt:
+                    draftContract.draftRevision?.updatedAt ??
+                    draftContract.updatedAt,
                 updatedRates: [],
             },
         },
@@ -657,7 +661,9 @@ const withdrawTestContract = async (
     })
 
     if (withdrawResult.errors) {
-        console.info('errors', withdrawResult.errors)
+        throw new Error(
+            `withdrawContract mutation failed with errors ${JSON.stringify(withdrawResult.errors)}`
+        )
     }
 
     if (!withdrawResult.data.withdrawContract.contract) {

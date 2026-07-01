@@ -7,6 +7,7 @@ import type {
     RateRevisionType,
     UnlockedContractType,
 } from '../../domain-models'
+import { isStateUser } from '../../domain-models'
 import type { StrippedContractType } from '../../domain-models'
 import path from 'path'
 import type { Store } from '../../postgres'
@@ -17,13 +18,57 @@ import type { Context } from '../../handlers/apollo_gql'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 import { logResolverError } from '../../logger'
 import { resolveInitiallySubmittedAtOverride } from '../shared/overrideHelpers'
+import { latestDate } from '../helpers'
+import type { LDService } from '../../launchDarkly/launchDarkly'
+
+function getStoredActionDateForDisplay(
+    contract: Pick<
+        ContractType | UnlockedContractType | StrippedContractType,
+        'lastActionDate' | 'draftRevision' | 'updatedAt'
+    >,
+    context: Context
+): Date {
+    // Include draft update dates for state users.
+    if (isStateUser(context.user)) {
+        return (
+            latestDate([
+                contract.lastActionDate,
+                contract.draftRevision?.updatedAt,
+            ]) ?? contract.updatedAt
+        )
+    }
+
+    // CMS/Admin users use lastActionDate, they do no have visibility of draft
+    // changes.
+    if (contract.lastActionDate) {
+        return contract.lastActionDate
+    }
+
+    // Fallback to updatedAt date
+    return contract.updatedAt
+}
 
 // this is probably a little delicate type-wise. But seems worth it not to be duplicating the same resolver in two places.
 function genericContractResolver<
     ParentType extends ContractType | UnlockedContractType,
->(store: Store, applicationEndpoint: string) {
+>(store: Store, applicationEndpoint: string, launchDarkly: LDService) {
     return {
-        lastUpdatedForDisplay(parent: ParentType) {
+        async lastUpdatedForDisplay(
+            parent: ParentType,
+            _args: unknown,
+            context: Context
+        ) {
+            const useStoredContractActionDate =
+                await launchDarkly.getFeatureFlag({
+                    key: context.user.email,
+                    flag: 'use-stored-contract-action-dates',
+                })
+
+            // If feature flag is on use stored lastActionDate timestamp
+            if (useStoredContractActionDate) {
+                return getStoredActionDateForDisplay(parent, context)
+            }
+
             // These dates are mechanical, draft vs. submit vs. unlock, whatever is latest is latest
             const contractUpdated = parent.updatedAt
             const draftUpdated = parent.draftRevision?.updatedAt
@@ -256,9 +301,26 @@ function genericContractResolver<
     }
 }
 
-export function contractStrippedResolver(): Resolvers['ContractStripped'] {
+export function contractStrippedResolver(
+    launchDarkly: LDService
+): Resolvers['ContractStripped'] {
     return {
-        lastUpdatedForDisplay(parent: StrippedContractType) {
+        async lastUpdatedForDisplay(
+            parent: StrippedContractType,
+            _args: unknown,
+            context: Context
+        ) {
+            const useStoredContractActionDate =
+                await launchDarkly.getFeatureFlag({
+                    key: context.user.email,
+                    flag: 'use-stored-contract-action-dates',
+                })
+
+            // If feature flag is on use stored lastActionDate timestamp
+            if (useStoredContractActionDate) {
+                return getStoredActionDateForDisplay(parent, context)
+            }
+
             const contractUpdated = parent.updatedAt
             const draftUpdated = parent.draftRevision?.updatedAt
 
@@ -325,14 +387,16 @@ export function contractStrippedResolver(): Resolvers['ContractStripped'] {
 
 export function unlockedContractResolver(
     store: Store,
-    applicationEndpoint: string
+    applicationEndpoint: string,
+    launchDarkly: LDService
 ): Resolvers['UnlockedContract'] {
-    return genericContractResolver(store, applicationEndpoint)
+    return genericContractResolver(store, applicationEndpoint, launchDarkly)
 }
 
 export function contractResolver(
     store: Store,
-    applicationEndpoint: string
+    applicationEndpoint: string,
+    launchDarkly: LDService
 ): Resolvers['Contract'] {
-    return genericContractResolver(store, applicationEndpoint)
+    return genericContractResolver(store, applicationEndpoint, launchDarkly)
 }

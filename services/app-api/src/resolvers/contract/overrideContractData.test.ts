@@ -14,6 +14,7 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { OverrideContractDataDocument } from '../../gen/gqlClient'
 import { assertAnErrorCode } from '../../testHelpers'
 import type { GenericDocument } from '../../gen/gqlServer'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('overrideContractData resolver', () => {
     const ldService = testLDService({
@@ -87,6 +88,7 @@ describe('overrideContractData resolver', () => {
     })
 
     it('creates a contract override and returns effective contract data', async () => {
+        const client = await sharedTestPrismaClient()
         const submittedContract =
             await createAndSubmitTestContractWithRate(stateServer)
 
@@ -104,6 +106,17 @@ describe('overrideContractData resolver', () => {
         expect(
             result.packageSubmissions[0].contractRevision.formData.contractType
         ).toBe('AMENDMENT')
+
+        const contractTableRow = await client.contractTable.findUniqueOrThrow({
+            where: { id: submittedContract.id },
+            select: { lastActionDate: true },
+        })
+
+        // Contract overrides are submitted-data corrections, so the stored
+        // action date should match the override action timestamp.
+        expect(contractTableRow.lastActionDate).toEqual(
+            result.contractOverrides?.[0]?.createdAt
+        )
     })
 
     it('allows non-delegated admin OAuth clients with admin scope to override contract data', async () => {

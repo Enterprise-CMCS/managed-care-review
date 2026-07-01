@@ -1,4 +1,6 @@
 import React from 'react'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 import { SubmissionTypeRecord } from '@mc-review/submissions'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useQuery } from '@apollo/client/react'
@@ -18,6 +20,11 @@ import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 
 const SubmissionsDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
+    const ldClient = useLDClient()
+    const useStoredContractActionDates = ldClient?.variation(
+        featureFlags.USE_STORED_CONTRACT_ACTION_DATES.flag,
+        featureFlags.USE_STORED_CONTRACT_ACTION_DATES.defaultValue
+    )
     const { data, loading, error } = useQuery(IndexContractsStrippedDocument, {
         fetchPolicy: 'cache-and-network',
         pollInterval: 120000,
@@ -131,7 +138,9 @@ const SubmissionsDashboard = (): React.ReactElement => {
                 ),
                 submittedAt: sub.initiallySubmittedAt,
                 status: sub.consolidatedStatus,
-                updatedAt: lastUpdated,
+                updatedAt: useStoredContractActionDates
+                    ? new Date(sub.lastUpdatedForDisplay)
+                    : lastUpdated,
                 submissionType:
                     SubmissionTypeRecord[displayRateFormData.submissionType],
                 stateName: sub.state.name,

@@ -25,6 +25,8 @@ import type {
     CreateRateQuestionInputType,
     AuditDocument,
     EmailSettingsType,
+    QuestionResponseHistory,
+    SubmissionHistory,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from './'
 import type { InsertUserArgsType, UpdateUserInfoArgsType } from './user'
@@ -39,6 +41,8 @@ import {
 import {
     findAllQuestionsByContract,
     findContractQuestion,
+    findContractQuestionResponseHistory,
+    findRateQuestionResponseHistory,
     insertContractQuestion,
     insertAdminContractQuestion,
     insertAdminContractQuestionResponse,
@@ -63,6 +67,7 @@ import {
     updateDraftContract,
     findContractRevision,
     findRateRevision,
+    findSubmissionHistoryByContractID,
     approveContract,
     reverseApproveContract,
     overrideContractData,
@@ -195,12 +200,16 @@ type Store = {
     findContractWithHistory: (
         contractID: string
     ) => Promise<ContractType | Error>
+    findSubmissionHistoryByContractID: (
+        contractID: string
+    ) => Promise<SubmissionHistory | Error>
     findAllContractsWithHistoryByState: (
         stateCode: string
     ) => Promise<ContractOrErrorArrayType | Error>
     findAllContractsWithHistoryBySubmitInfo: (
         useZod?: boolean,
-        skipFindingLatest?: boolean
+        skipFindingLatest?: boolean,
+        filterLastActionDateAfter?: Date
     ) => Promise<ContractOrErrorArrayType | Error>
     findAllContractsStripped: (
         args?: FindAllContractsStrippedType
@@ -296,6 +305,9 @@ type Store = {
     findContractQuestion: (
         questionID: string
     ) => Promise<ContractQuestionType | Error>
+    findContractQuestionResponseHistory: (
+        contractID: string
+    ) => Promise<QuestionResponseHistory[] | Error>
     insertRateQuestion: (
         questionInput: CreateRateQuestionInputType,
         user: CMSUsersUnionType
@@ -307,6 +319,9 @@ type Store = {
     findAllQuestionsByRate: (
         rateID: string
     ) => Promise<RateQuestionType[] | Error>
+    findRateQuestionResponseHistory: (
+        rateID: string
+    ) => Promise<QuestionResponseHistory[] | Error>
 
     /** Documents **/
     findAllDocuments: () => Promise<AuditDocument[] | Error>
@@ -396,10 +411,21 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertDraftContract: (args) => insertDraftContract(client, args),
         findContractWithHistory: (args) =>
             findContractWithHistory(client, args),
+        findSubmissionHistoryByContractID: (args) =>
+            findSubmissionHistoryByContractID(client, args),
         findAllContractsWithHistoryByState: (args) =>
             findAllContractsWithHistoryByState(client, args),
-        findAllContractsWithHistoryBySubmitInfo: (args) =>
-            findAllContractsWithHistoryBySubmitInfo(client, args),
+        findAllContractsWithHistoryBySubmitInfo: (
+            useZod,
+            skipFindingLatest,
+            filterLastActionDateAfter
+        ) =>
+            findAllContractsWithHistoryBySubmitInfo(
+                client,
+                useZod,
+                skipFindingLatest,
+                filterLastActionDateAfter
+            ),
         findAllContractsStripped: (args) =>
             findAllContractsStripped(client, args),
         findContractRevision: (args) => findContractRevision(client, args),
@@ -447,12 +473,16 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             findAllQuestionsByContract(client, pkgID),
         findContractQuestion: (questionID) =>
             findContractQuestion(client, questionID),
+        findContractQuestionResponseHistory: (contractID) =>
+            findContractQuestionResponseHistory(client, contractID),
         insertRateQuestion: (questionInput, user) =>
             insertRateQuestion(client, questionInput, user),
         insertRateQuestionResponse: (questionInput, user) =>
             insertRateQuestionResponse(client, questionInput, user),
         findAllQuestionsByRate: (rateID) =>
             findAllQuestionsByRate(client, rateID),
+        findRateQuestionResponseHistory: (rateID) =>
+            findRateQuestionResponseHistory(client, rateID),
 
         /** Documents **/
         findAllDocuments: () => findAllDocuments(client),

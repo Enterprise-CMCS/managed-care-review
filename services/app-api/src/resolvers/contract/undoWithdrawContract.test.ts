@@ -29,6 +29,7 @@ import {
 } from '../../gen/gqlClient'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -103,6 +104,26 @@ describe('undoWithdrawContract', () => {
         )
         expect(undoWithdrawnContract.consolidatedStatus).toBe('RESUBMITTED')
         expect(undoWithdrawnContract.contractSubmissionType).toBe('HEALTH_PLAN')
+
+        const prismaClient = await sharedTestPrismaClient()
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractTableRow?.lastActionDate).toEqual(
+            contractTableRow?.reviewStatusActions[0].updatedAt
+        )
+
         expect(contractHistory).toStrictEqual(
             expect.arrayContaining([
                 'Initial submission',
@@ -205,6 +226,59 @@ describe('undoWithdrawContract', () => {
         expect(undoWithdrawnContract.consolidatedStatus).toBe('RESUBMITTED')
         expect(undoWithdrawnARate.consolidatedStatus).toBe('RESUBMITTED')
         expect(undoWithdrawnBRate.consolidatedStatus).toBe('RESUBMITTED')
+
+        const prismaClient = await sharedTestPrismaClient()
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        const rateATableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateAID },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        const rateBTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateBID },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractTableRow?.lastActionDate).toEqual(
+            contractTableRow?.reviewStatusActions[0].updatedAt
+        )
+        expect(rateATableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(rateATableRow?.lastActionDate).toEqual(
+            rateATableRow?.reviewStatusActions[0].updatedAt
+        )
+        expect(rateBTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(rateBTableRow?.lastActionDate).toEqual(
+            rateBTableRow?.reviewStatusActions[0].updatedAt
+        )
 
         // expect withdraw again without errors
         must(
@@ -867,6 +941,45 @@ describe('undoWithdrawContract', () => {
             'undo withdraw CHIP submission'
         )
         expect(chipUndone.consolidatedStatus).toBe('NOT_SUBJECT_TO_REVIEW')
+
+        const prismaClient = await sharedTestPrismaClient()
+        const eqroTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: eqroSubmitted.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        const chipTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: chipSubmitted.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+
+        // Undo-withdraw restores NOT_SUBJECT_TO_REVIEW by appending a new
+        // review action, and lastActionDate should point at that action.
+        expect(eqroTableRow?.reviewStatusActions[0].actionType).toBe(
+            'NOT_SUBJECT_TO_REVIEW'
+        )
+        expect(eqroTableRow?.lastActionDate).toEqual(
+            eqroTableRow?.reviewStatusActions[0].updatedAt
+        )
+        expect(chipTableRow?.reviewStatusActions[0].actionType).toBe(
+            'NOT_SUBJECT_TO_REVIEW'
+        )
+        expect(chipTableRow?.lastActionDate).toEqual(
+            chipTableRow?.reviewStatusActions[0].updatedAt
+        )
     })
 })
 

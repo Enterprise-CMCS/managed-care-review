@@ -29,50 +29,68 @@ const authorizedUserTests = [
     {
         userType: 'ADMIN user',
         mockUser: testAdminUser(),
+        primaryStateCode: 'AS',
+        secondaryStateCode: 'AK',
     },
     {
         userType: 'DMCO CMS user',
         mockUser: testCMSUser({
             divisionAssignment: 'DMCO',
         }),
+        primaryStateCode: 'AL',
+        secondaryStateCode: 'AR',
     },
     {
         userType: 'DMCO CMS approver user',
         mockUser: testCMSApproverUser({
             divisionAssignment: 'DMCO',
         }),
+        primaryStateCode: 'AZ',
+        secondaryStateCode: 'CO',
     },
     {
         userType: 'Business owner user',
         mockUser: testBusinessOwnerUser(),
+        primaryStateCode: 'CT',
+        secondaryStateCode: 'DC',
     },
     {
         userType: 'Helpdesk user',
         mockUser: testHelpdeskUser(),
+        primaryStateCode: 'DE',
+        secondaryStateCode: 'FL',
     },
     {
         userType: 'OACT CMS user',
         mockUser: testCMSUser({
             divisionAssignment: 'OACT',
         }),
+        primaryStateCode: 'GA',
+        secondaryStateCode: 'HI',
     },
     {
         userType: 'DMCP CMS user',
         mockUser: testCMSUser({
             divisionAssignment: 'DMCP',
         }),
+        primaryStateCode: 'IA',
+        secondaryStateCode: 'ID',
     },
     {
         userType: 'DMCP CMS approver user',
         mockUser: testCMSApproverUser({
             divisionAssignment: 'DMCP',
         }),
+        primaryStateCode: 'IL',
+        secondaryStateCode: 'IN',
     },
     {
         userType: 'OACT CMS approver user',
         mockUser: testCMSApproverUser({
             divisionAssignment: 'OACT',
         }),
+        primaryStateCode: 'KS',
+        secondaryStateCode: 'KY',
     },
 ]
 
@@ -85,7 +103,7 @@ const unauthorizedUserTests = [
 
 describe.each(authorizedUserTests)(
     'updateStateAssignmentByState as $userType tests',
-    ({ mockUser }) => {
+    ({ mockUser, primaryStateCode, secondaryStateCode }) => {
         // setup a user in the db for us to modify
         const mockTestCMSUser = (): InsertUserArgsType => ({
             userID: uuidv4(),
@@ -129,7 +147,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: primaryStateCode,
                         assignedUsers: [newUser.id],
                     },
                 },
@@ -147,7 +165,7 @@ describe.each(authorizedUserTests)(
             expect(users).toHaveLength(1)
             const user = users[0]
             expect(user.id).toBe(newUser.id)
-            expect(user.stateAssignments[0].code).toBe('CA')
+            expect(user.stateAssignments[0].code).toBe(primaryStateCode)
             expect(user.divisionAssignment).toBe('OACT')
 
             // change the value and see if it updates
@@ -155,7 +173,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: primaryStateCode,
                         assignedUsers: [secondUser.id, thirdUser.id],
                     },
                 },
@@ -184,7 +202,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'NC',
+                        stateCode: secondaryStateCode,
                         assignedUsers: [secondUser.id],
                     },
                 },
@@ -254,7 +272,7 @@ describe.each(authorizedUserTests)(
                 throw new Error('got back a weird type from JSON')
             }
             expect(firstPriorVal).toHaveLength(1)
-            expect(firstPriorVal[0].stateCode).toBe('CA')
+            expect(firstPriorVal[0].stateCode).toBe(primaryStateCode)
             // 2, add, add
             const secondAudits = allAudits.filter(
                 (a) => a.modifiedUserId === secondUser.id
@@ -290,7 +308,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: 'LA',
                         assignedUsers: [],
                     },
                 },
@@ -308,7 +326,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: 'LA',
                         assignedUsers: undefined,
                     },
                 },
@@ -323,7 +341,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: 'LA',
                         assignedUsers: null,
                     },
                 },
@@ -388,7 +406,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: 'MA',
                         assignedUsers: [newStateUser.id],
                     },
                 },
@@ -415,7 +433,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: 'MD',
                         assignedUsers: ['not-existing-user-id'],
                     },
                 },
@@ -447,7 +465,7 @@ describe.each(authorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: 'ME',
                         assignedUsers: [newCMSUser.id, newCMSUser.id],
                     },
                 },
@@ -480,7 +498,7 @@ describe.each(unauthorizedUserTests)(
                 query: UpdateStateAssignmentsByStateDocument,
                 variables: {
                     input: {
-                        stateCode: 'CA',
+                        stateCode: 'MI',
                         assignedUsers: ['not-existing-user-id'],
                     },
                 },
