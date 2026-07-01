@@ -143,11 +143,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <Loading fullPage />
     } else if (!data && error) {
         const gqlError = toGQLError(error)
         if (gqlError?.extensions.code === 'FORBIDDEN') {

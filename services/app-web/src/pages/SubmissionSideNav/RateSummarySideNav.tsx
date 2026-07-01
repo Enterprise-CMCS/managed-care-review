@@ -71,11 +71,7 @@ export const RateSummarySideNav = () => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <Loading fullPage />
     } else if (!data && error) {
         const err = error
         console.error('Error from API fetch', error)

@@ -120,11 +120,7 @@ export const RateSummary = (): React.ReactElement => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <Loading fullPage />
     } else if (!data && error) {
         const gqlError = toGQLError(error)
         if (gqlError?.extensions.code === 'FORBIDDEN') {
@@ -151,11 +147,7 @@ export const RateSummary = (): React.ReactElement => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!fetchContractData && fetchContractLoading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <Loading fullPage />
     } else if (fetchContractError && !fetchContractData) {
         //error handling for a state user that tries to access contracts for a different state
         const contractGqlError = toGQLError(fetchContractError)

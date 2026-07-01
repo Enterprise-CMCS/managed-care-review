@@ -70,11 +70,7 @@ export const EQROReviewSubmit = (): React.ReactElement => {
     }, [activeMainContentId, updateActiveMainContent])
 
     if (loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <Loading fullPage />
     } else if (error || !contract) {
         //error handling for a state user that tries to access rates for a different state
         const gqlError = toGQLError(error)
