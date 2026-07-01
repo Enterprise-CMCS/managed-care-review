@@ -26,6 +26,8 @@ import {
 } from '../../testHelpers/gqlRateHelpers'
 import { testS3Client } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('undoUnlockContract', () => {
     const mockS3 = testS3Client()
@@ -451,9 +453,13 @@ describe('undoUnlockContract', () => {
     })
 
     it('restores child rates to their submitted state after undo unlock', async () => {
+        const ldService = testLDService({
+            'use-stored-contract-action-dates': true,
+        })
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             emailer: mockEmailer,
+            ldService,
             context: {
                 user: testCMSUser(),
             },
@@ -462,6 +468,7 @@ describe('undoUnlockContract', () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
             emailer: mockEmailer,
+            ldService,
         })
 
         const submittedContract =
@@ -492,6 +499,40 @@ describe('undoUnlockContract', () => {
         expect(reversedContract.draftRevision).toBeNull()
         expect(reversedContract.draftRates).toBeNull()
         expect(reversedContract.packageSubmissions).toHaveLength(1)
+        expect(reversedContract.lastUpdatedForDisplay).toBeDefined()
+
+        const prismaClient = await sharedTestPrismaClient()
+        const reversedContractRevision =
+            await prismaClient.contractRevisionTable.findFirst({
+                where: {
+                    contractID: submittedContract.id,
+                    undoUnlockInfoID: {
+                        not: null,
+                    },
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                include: {
+                    undoUnlockInfo: true,
+                },
+            })
+
+        expect(reversedContractRevision?.undoUnlockInfo).toBeDefined()
+
+        const undoUnlockDate =
+            reversedContractRevision?.undoUnlockInfo?.updatedAt
+
+        // Assert the date populated by lastAction date seen by clients match
+        // the undo unlock record in DB.
+        expect(reversedContract.lastUpdatedForDisplay).toEqual(undoUnlockDate)
+
+        const fetchedContract = await fetchTestContract(
+            stateServer,
+            submittedContract.id
+        )
+
+        expect(fetchedContract.lastUpdatedForDisplay).toEqual(undoUnlockDate)
 
         const fetchedChildRate = await fetchTestRateById(
             stateServer,
