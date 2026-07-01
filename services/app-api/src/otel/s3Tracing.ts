@@ -1,6 +1,7 @@
 import {
     trace,
     context as otelContext,
+    SpanKind,
     SpanStatusCode,
     type Span,
 } from '@opentelemetry/api'
@@ -74,10 +75,15 @@ export async function withS3Span<T extends WithS3Metadata>(
     fn: () => Promise<T>
 ): Promise<T> {
     const tracer = trace.getTracer(S3_TRACER_SCOPE)
+    // SpanKind.CLIENT so S3 registers as an outbound dependency call in APM
+    // service-map / dependency views rather than an internal span.
     const span = tracer.startSpan(`s3.${attributes.operation}`, {
+        kind: SpanKind.CLIENT,
         attributes: {
             'aws.s3.operation': attributes.operation,
             'aws.s3.bucket': attributes.bucket,
+            // Safe to record raw: keys are UUID + revision-ID based
+            // (e.g. `allusers/<uuid>.<ext>`, `zips/rates/<rateRevisionID>/...`),
             'aws.s3.key': attributes.key,
         },
     })
