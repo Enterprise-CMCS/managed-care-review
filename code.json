@@ -23,7 +23,7 @@
   "disclaimerURL": "",
   "disclaimerText": "",
   "vcs": "git",
-  "laborHours": 21478,
+  "laborHours": 22056,
   "reuseFrequency": {
     "forks": 7,
     "clones": 0
@@ -43,6 +43,7 @@
     "PLpgSQL",
     "Shell",
     "JavaScript",
+    "HCL",
     "CSS",
     "HTML",
     "Dockerfile"
@@ -57,8 +58,8 @@
   "partners": [],
   "date": {
     "created": "2020-07-27T19:02:24Z",
-    "lastModified": "2026-05-29T20:32:17Z",
-    "metadataLastUpdated": "2026-06-01T00:35:59.290Z"
+    "lastModified": "2026-06-29T18:09:47Z",
+    "metadataLastUpdated": "2026-07-01T00:36:32.748Z"
   },
   "tags": [
     "CMS",
