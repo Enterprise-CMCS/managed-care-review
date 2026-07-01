@@ -49,6 +49,7 @@ type QuestionHistoryInput = {
  * The rank follows lifecycle order:
  * - overrides are explicit corrections to submitted data and should win ties
  * - review actions can be created after submit, so they sort above submit
+ * - undo unlocks reverse the in-flight unlock and should sort above unlock
  * - contract/rate submissions sort above the unlock that opened the revision
  * - unlocks are the earliest action in a normal unlock -> submit lifecycle
  */
@@ -60,7 +61,7 @@ function actionTypeSortRank(
 ): number {
     switch (actionType) {
         case 'OVERRIDE':
-            return 4
+            return 5
         case 'UNDER_REVIEW':
         case 'NOT_SUBJECT_TO_REVIEW':
         case 'MARK_AS_APPROVED':
@@ -73,15 +74,17 @@ function actionTypeSortRank(
         case 'RATE_QUESTION_RESTORE':
         case 'RATE_QUESTION_RESPONSE_DELETE':
         case 'RATE_QUESTION_RESPONSE_RESTORE':
-            return 3
+            return 4
         case 'CONTRACT_QUESTION_RESPONSE':
         case 'RATE_QUESTION_RESPONSE':
-            return 2
+            return 3
         case 'RATE_LINK':
         case 'RATE_UNLINK':
         case 'CONTRACT_SUBMISSION':
         case 'LINKED_RATE_UPDATE':
         case 'RATE_SUBMISSION':
+            return 3
+        case 'UNDO_UNLOCK':
             return 2
         case 'CONTRACT_QUESTION':
         case 'RATE_QUESTION':
@@ -244,6 +247,18 @@ function buildContractSubmissionHistory(
             updatedAt: draftUnlockInfo.updatedAt,
             updatedBy: draftUnlockInfo.updatedBy,
             updatedReason: draftUnlockInfo.updatedReason,
+        })
+    }
+
+    // Undo unlock is revision lifecycle history, not a package submission. It
+    // reverses the in-flight unlocked draft and restores the latest submitted
+    // state, so it is recorded from undoUnlockPackages.
+    for (const undoUnlockPackage of contract.undoUnlockPackages ?? []) {
+        historyLog.push({
+            actionType: 'UNDO_UNLOCK',
+            updatedAt: undoUnlockPackage.undoUnlockInfo.updatedAt,
+            updatedBy: undoUnlockPackage.undoUnlockInfo.updatedBy,
+            updatedReason: undoUnlockPackage.undoUnlockInfo.updatedReason,
         })
     }
 
@@ -463,6 +478,19 @@ function buildRateSubmissionHistory(
             updatedAt: draftUnlockInfo.updatedAt,
             updatedBy: draftUnlockInfo.updatedBy,
             updatedReason: draftUnlockInfo.updatedReason,
+        })
+    }
+
+    // Rate undo unlocks are rate-level revision lifecycle history. Contract
+    // fetchSubmissionHistory does not merge these wholesale because child rates
+    // share the parent contract undo-unlock event and linked rates are not
+    // reversed by the linked contract's undo unlock.
+    for (const undoUnlockPackage of rate.undoUnlockPackages ?? []) {
+        historyLog.push({
+            actionType: 'UNDO_UNLOCK',
+            updatedAt: undoUnlockPackage.undoUnlockInfo.updatedAt,
+            updatedBy: undoUnlockPackage.undoUnlockInfo.updatedBy,
+            updatedReason: undoUnlockPackage.undoUnlockInfo.updatedReason,
         })
     }
 
