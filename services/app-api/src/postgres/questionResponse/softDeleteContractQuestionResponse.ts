@@ -79,12 +79,21 @@ const softDeleteContractQuestionResponseInsideTransaction = async (
         })
     }
 
-    await tx.contractQuestionResponseAction.create({
+    const deleteAction = await tx.contractQuestionResponseAction.create({
         data: {
             action: 'DELETE',
             reason,
             responseID,
             updatedByID: user.id,
+        },
+    })
+
+    // Deleting a contract question response removes visible Q&A data, so it
+    // should move the contract lastActionDate to the delete action timestamp.
+    await tx.contractTable.update({
+        where: { id: existing.contractID },
+        data: {
+            lastActionDate: deleteAction.createdAt,
         },
     })
 
