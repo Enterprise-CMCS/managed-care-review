@@ -11,6 +11,7 @@ import {
     createTestQuestionResponse,
     createTestRateQuestion,
     createTestRateQuestionResponse,
+    deleteTestContractQuestionResponse,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -497,6 +498,12 @@ describe('fetchSubmissionHistory', () => {
             stateServer,
             contractQuestion.id
         )
+        const contractQuestionResponseDeleteReason = 'Delete question response'
+        await deleteTestContractQuestionResponse(
+            adminServer,
+            contractQuestionWithResponse.responses[0].id,
+            contractQuestionResponseDeleteReason
+        )
         await overrideTestContractData(adminServer, {
             contractID: finalSubmittedTarget.id,
             description: 'Contract override included in target history',
@@ -602,6 +609,7 @@ describe('fetchSubmissionHistory', () => {
                 'OVERRIDE',
                 'CONTRACT_QUESTION',
                 'CONTRACT_QUESTION_RESPONSE',
+                'CONTRACT_QUESTION_RESPONSE_DELETE',
                 'LINKED_RATE_UPDATE',
                 'RATE_QUESTION',
                 'RATE_QUESTION_RESPONSE',
@@ -648,6 +656,7 @@ describe('fetchSubmissionHistory', () => {
                 'Target relink submit',
                 'Target resubmit with replacement child rate',
                 'Target final delink submit',
+                contractQuestionResponseDeleteReason,
             ])
         )
         expect(updatedReasons).not.toContain(

@@ -48,6 +48,7 @@ import {
     ContractQuestionResponse,
     UploadContractResponse,
     DeleteContractQuestion,
+    DeleteContractQuestionResponse,
 } from '../QuestionResponse'
 import { GraphQLExplorer } from '../GraphQLExplorer/GraphQLExplorer'
 import { RateSummary } from '../RateSummary'
@@ -354,6 +355,12 @@ const CMSUserRoutes = ({
                                     RoutesRecord.SUBMISSIONS_DELETE_CONTRACT_QUESTION
                                 }
                                 element={<DeleteContractQuestion />}
+                            />
+                            <Route
+                                path={
+                                    RoutesRecord.SUBMISSIONS_DELETE_CONTRACT_QUESTION_RESPONSE
+                                }
+                                element={<DeleteContractQuestionResponse />}
                             />
                             <Route
                                 path={

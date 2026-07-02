@@ -49,6 +49,7 @@ const ROUTES = [
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
     'SUBMISSIONS_DELETE_CONTRACT_QUESTION',
+    'SUBMISSIONS_DELETE_CONTRACT_QUESTION_RESPONSE',
     'SUBMISSIONS_RELEASED_TO_STATE',
     'SUBMISSION_WITHDRAW',
     'UNDO_SUBMISSION_WITHDRAW',
@@ -138,6 +139,8 @@ const RoutesRecord: Record<RouteT, string> = {
         '/submissions/:contractSubmissionType/:id/rates/:rateID/question-and-answers/:division/:questionID/upload-response',
     SUBMISSIONS_DELETE_CONTRACT_QUESTION:
         '/submissions/:contractSubmissionType/:id/question-and-answers/:division/:questionID/delete-question',
+    SUBMISSIONS_DELETE_CONTRACT_QUESTION_RESPONSE:
+        '/submissions/:contractSubmissionType/:id/question-and-answers/:division/:questionID/:responseID/delete-response',
     SUBMISSIONS_RELEASED_TO_STATE:
         '/submissions/:contractSubmissionType/:id/released-to-state',
     SUBMISSION_WITHDRAW:
@@ -205,6 +208,7 @@ const QUESTION_RESPONSE_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
     'SUBMISSIONS_DELETE_CONTRACT_QUESTION',
+    'SUBMISSIONS_DELETE_CONTRACT_QUESTION_RESPONSE',
 ]
 
 // Collect CMS review or workflow related forms
@@ -241,6 +245,7 @@ const SUBMISSION_PAGE_HEADING_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE',
     'SUBMISSIONS_UPLOAD_RATE_RESPONSE',
     'SUBMISSIONS_DELETE_CONTRACT_QUESTION',
+    'SUBMISSIONS_DELETE_CONTRACT_QUESTION_RESPONSE',
     'SUBMISSIONS_RELEASED_TO_STATE',
     'SUBMISSION_WITHDRAW',
     'UNDO_SUBMISSION_WITHDRAW',
@@ -307,6 +312,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_ADMIN_UPLOAD_CONTRACT_RESPONSE: 'Add response',
     SUBMISSIONS_UPLOAD_CONTRACT_RESPONSE: 'Add response',
     SUBMISSIONS_DELETE_CONTRACT_QUESTION: 'Delete question',
+    SUBMISSIONS_DELETE_CONTRACT_QUESTION_RESPONSE: 'Delete response',
     SUBMISSIONS_RATE_QUESTIONS_AND_ANSWERS: 'Rate Q&A',
     SUBMISSIONS_UPLOAD_RATE_RESPONSE: 'Add rate response',
     SUBMISSIONS_RELEASED_TO_STATE: 'Released to state',

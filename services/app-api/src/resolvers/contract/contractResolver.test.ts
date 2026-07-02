@@ -3,6 +3,7 @@ import {
     constructTestPostgresServer,
     createTestQuestion,
     createTestQuestionResponse,
+    deleteTestContractQuestionResponse,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
@@ -13,6 +14,7 @@ import {
 import { testS3Client } from '../../testHelpers'
 import {
     createDBUsersWithFullData,
+    testAdminUser,
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
@@ -27,11 +29,17 @@ describe('contractResolver', () => {
     const oactCMSUser = testCMSUser({
         divisionAssignment: 'OACT',
     })
+    const adminUser = testAdminUser()
     const mockS3 = testS3Client()
 
     beforeAll(async () => {
         //Inserting a new CMS user, with division assigned, in postgres in order to create the question to user relationship.
-        await createDBUsersWithFullData([dmcoCMSUser, dmcpCMSUser, oactCMSUser])
+        await createDBUsersWithFullData([
+            dmcoCMSUser,
+            dmcpCMSUser,
+            oactCMSUser,
+            adminUser,
+        ])
     })
 
     it('returns questions associated with a contract', async () => {
@@ -211,6 +219,58 @@ describe('contractResolver', () => {
                 }),
             })
         )
+    })
+
+    it('excludes soft-deleted question responses when fetching contract questions', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const dmcoCMSServer = await constructTestPostgresServer({
+            context: {
+                user: dmcoCMSUser,
+            },
+            s3Client: mockS3,
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
+            },
+            s3Client: mockS3,
+        })
+
+        const draft = await createAndUpdateTestContractWithRate(stateServer)
+        const stateSubmission = await submitTestContract(stateServer, draft.id)
+        const question = await createTestQuestion(
+            dmcoCMSServer,
+            stateSubmission.id
+        )
+        const responseToDelete = await createTestQuestionResponse(
+            stateServer,
+            question.id
+        )
+        const responseToKeep = await createTestQuestionResponse(
+            stateServer,
+            question.id
+        )
+        const deletedResponseID = responseToDelete.responses[0].id
+        const keptResponseID = responseToKeep.responses[0].id
+
+        await deleteTestContractQuestionResponse(adminServer, deletedResponseID)
+
+        const fetched = await fetchTestContractWithQuestions(
+            stateServer,
+            stateSubmission.id
+        )
+        const fetchedQuestion = fetched.questions?.DMCOQuestions.edges.find(
+            (edge) => edge.node.id === question.id
+        )?.node
+
+        // Assert that the fetch still returns the question after one of its responses is soft deleted.
+        expect(fetchedQuestion).toBeDefined()
+        // Assert that fetchContract filters out the soft-deleted response and keeps the active response.
+        expect(fetchedQuestion?.responses.map((r) => r.id)).toEqual([
+            keptResponseID,
+        ])
     })
 
     it('errors if the wrong state user calls it', async () => {

@@ -383,6 +383,24 @@ type Mutation {
         input: DeleteContractQuestionInput!
     ): DeleteContractQuestionPayload!
 
+    """
+    deleteContractQuestionResponse soft-deletes a contract question response by recording a DELETE action
+    in the response's audit log and CASCADE_DELETE actions for active response documents. The response
+    itself is not removed from the database; subsequent reads filter it out via the audit log's latest action.
+
+    This can only be called by an AdminUser.
+
+    Errors:
+    - ForbiddenError:
+        - A non-AdminUser called this
+    - UserInputError:
+        - A response cannot be found with the given responseID
+        - The response has already been deleted
+    """
+    deleteContractQuestionResponse(
+        input: DeleteContractQuestionResponseInput!
+    ): DeleteContractQuestionResponsePayload!
+
     #    """
     #    updateQuestion updates a Question for the given Contract
     #    Only the due date can be changed
@@ -963,6 +981,18 @@ input DeleteContractQuestionInput {
 
 type DeleteContractQuestionPayload {
     "The soft-deleted contract question"
+    question: ContractQuestion!
+}
+
+input DeleteContractQuestionResponseInput {
+    "The ID of the contract question response to soft delete"
+    responseID: ID!
+    "Reason recorded on the delete action"
+    reason: String!
+}
+
+type DeleteContractQuestionResponsePayload {
+    "The contract question with the soft-deleted response"
     question: ContractQuestion!
 }
 
