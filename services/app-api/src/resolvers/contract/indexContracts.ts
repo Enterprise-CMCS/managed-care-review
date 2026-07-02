@@ -67,6 +67,13 @@ const getLatestContractOverrideDate = (contract: ContractType) =>
         contract.contractOverrides?.map((override) => override.createdAt) ?? []
     )
 
+const getLatestContractUndoUnlockDate = (contract: ContractType) =>
+    latestDate(
+        contract.undoUnlockPackages?.map(
+            (undoUnlockPackage) => undoUnlockPackage.undoUnlockInfo.updatedAt
+        ) ?? []
+    )
+
 const formatContracts = (
     results: ContractType[],
     updatedWithin?: number | null,
@@ -89,6 +96,7 @@ const formatContracts = (
             const lastUpdated = latestDate([
                 getLastUpdatedForDisplay(contract),
                 getLatestContractOverrideDate(contract),
+                getLatestContractUndoUnlockDate(contract),
             ])
             if (!lastUpdated) return false
             return lastUpdated.getTime() > cutoff.getTime()
