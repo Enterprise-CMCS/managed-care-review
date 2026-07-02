@@ -1,4 +1,8 @@
-import { DeleteContractQuestionResponseDocument } from '../../gen/gqlClient'
+import {
+    DeleteContractQuestionResponseDocument,
+    FetchSubmissionHistoryDocument,
+    type FetchSubmissionHistoryQuery,
+} from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
@@ -13,6 +17,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import {
     createAndSubmitTestContractWithRate,
+    fetchTestContract,
     fetchTestContractWithQuestions,
 } from '../../testHelpers/gqlContractHelpers'
 import {
@@ -21,6 +26,7 @@ import {
     testS3Client,
 } from '../../testHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 
 describe('deleteContractQuestionResponse', () => {
     const mockS3 = testS3Client()
@@ -120,6 +126,87 @@ describe('deleteContractQuestionResponse', () => {
             fetched.questions?.DMCOQuestions.edges[0].node.responses ?? []
         // Assert that future contract-question reads hide the soft-deleted response.
         expect(responses.map((r) => r.id)).toEqual([keptResponseID])
+    })
+
+    it('captures response deletes in submission history and lastUpdatedForDisplay', async () => {
+        const ldService = testLDService({
+            'use-stored-contract-action-dates': true,
+        })
+        const cmsUser = testCMSUser()
+        const adminUser = testAdminUser()
+        await createDBUsersWithFullData([cmsUser, adminUser])
+
+        const stateServer = await constructTestPostgresServer({
+            ldService,
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: { user: cmsUser },
+            ldService,
+            s3Client: mockS3,
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: { user: adminUser },
+            ldService,
+            s3Client: mockS3,
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+        const question = await createTestQuestion(cmsServer, contract.id)
+        const questionWithResponse = await createTestQuestionResponse(
+            stateServer,
+            question.id
+        )
+        const responseID = questionWithResponse.responses[0].id
+        const deleteReason = 'Delete question response'
+
+        await deleteTestContractQuestionResponse(
+            adminServer,
+            responseID,
+            deleteReason
+        )
+
+        const prismaClient = await sharedTestPrismaClient()
+        const responseAction =
+            await prismaClient.contractQuestionResponseAction.findFirst({
+                where: { responseID, action: 'DELETE' },
+                orderBy: { createdAt: 'desc' },
+            })
+        if (!responseAction) {
+            throw new Error('Expected response delete action to exist')
+        }
+
+        const historyResult =
+            await executeGraphQLOperation<FetchSubmissionHistoryQuery>(
+                stateServer,
+                {
+                    query: FetchSubmissionHistoryDocument,
+                    variables: {
+                        input: {
+                            contractID: contract.id,
+                        },
+                    },
+                }
+            )
+        expect(historyResult.errors).toBeUndefined()
+
+        const latestHistoryEntry =
+            historyResult.data?.fetchSubmissionHistory.history[0]
+        expect(latestHistoryEntry?.actionType).toBe(
+            'CONTRACT_QUESTION_RESPONSE_DELETE'
+        )
+        expect(latestHistoryEntry?.updatedReason).toBe(deleteReason)
+        expect(new Date(latestHistoryEntry?.updatedAt ?? '').getTime()).toBe(
+            responseAction.createdAt.getTime()
+        )
+
+        const fetchedContract = await fetchTestContract(
+            stateServer,
+            contract.id
+        )
+        expect(fetchedContract.lastUpdatedForDisplay.getTime()).toBe(
+            responseAction.createdAt.getTime()
+        )
     })
 
     it('rejects non-admin users with FORBIDDEN', async () => {

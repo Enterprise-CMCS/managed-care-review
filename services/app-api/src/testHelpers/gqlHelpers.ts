@@ -438,11 +438,12 @@ const deleteTestContractQuestion = async (
 
 const deleteTestContractQuestionResponse = async (
     server: ApolloServer,
-    responseID: string
+    responseID: string,
+    reason = 'Some reason'
 ): Promise<ContractQuestion> => {
     const result = await executeGraphQLOperation(server, {
         query: DeleteContractQuestionResponseDocument,
-        variables: { input: { responseID, reason: 'Some reason' } },
+        variables: { input: { responseID, reason } },
     })
 
     if (result.errors)
