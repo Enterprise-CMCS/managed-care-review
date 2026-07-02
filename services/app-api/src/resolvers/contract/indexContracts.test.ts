@@ -17,6 +17,7 @@ import {
     createTestContract,
     overrideTestContractData,
     submitTestContract,
+    undoUnlockTestContract,
     unlockTestContract,
     withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
@@ -526,6 +527,81 @@ describe(`indexContracts`, () => {
 
             // Backdate the legacy display timestamps so this contract can only
             // pass updatedWithin because of the recent ContractOverrides row.
+            await client.$transaction([
+                client.contractTable.update({
+                    where: { id: contract.id },
+                    data: {
+                        updatedAt: oldDate,
+                        lastActionDate: oldDate,
+                    },
+                }),
+                client.updateInfoTable.updateMany({
+                    where: {
+                        submittedContracts: {
+                            some: {
+                                contractID: contract.id,
+                            },
+                        },
+                    },
+                    data: {
+                        updatedAt: oldDate,
+                    },
+                }),
+                client.contractActionTable.updateMany({
+                    where: { contractID: contract.id },
+                    data: {
+                        updatedAt: oldDate,
+                    },
+                }),
+            ])
+
+            const result = await executeGraphQLOperation(cmsServer, {
+                query: IndexContractsForDashboardDocument,
+                variables: { input: { updatedWithin: 60 } },
+            })
+
+            expect(result.errors).toBeUndefined()
+
+            const nodes =
+                result.data?.indexContracts.edges.map((e: any) => e.node) ?? []
+            const resultIDs = nodes.map((node: Contract) => node.id)
+
+            expect(resultIDs).toContain(contract.id)
+        })
+
+        it('includes contracts with recent undo unlocks in the legacy updatedWithin path', async () => {
+            const client = await sharedTestPrismaClient()
+            const cmsUser = testCMSUser()
+            const ldService = testLDService({
+                'use-stored-contract-action-dates': false,
+            })
+
+            const stateServer = await constructTestPostgresServer({
+                ldService,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: { user: cmsUser },
+                ldService,
+            })
+
+            const contract =
+                await createAndSubmitTestContractWithRate(stateServer)
+
+            await unlockTestContract(
+                cmsServer,
+                contract.id,
+                'Unlock before legacy updatedWithin undo unlock'
+            )
+            await undoUnlockTestContract(
+                cmsServer,
+                contract.id,
+                'Recent undo unlock for legacy updatedWithin'
+            )
+
+            const oldDate = new Date(Date.now() - 120_000)
+
+            // Backdate legacy display timestamps so this contract can only pass
+            // updatedWithin because of the undoUnlockPackages timestamp.
             await client.$transaction([
                 client.contractTable.update({
                     where: { id: contract.id },

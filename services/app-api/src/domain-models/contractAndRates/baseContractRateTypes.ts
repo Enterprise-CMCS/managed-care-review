@@ -3,6 +3,9 @@ import {
     contractPackageSubmissionSchema,
     ratePackageSubmissionSchema,
     eqroContractPackageSubmissionSchema,
+    contractUndoUnlockPackageSchema,
+    eqroContractUndoUnlockPackageSchema,
+    rateUndoUnlockPackageSchema,
 } from './packageSubmissions'
 import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 import {
@@ -47,6 +50,7 @@ const contractWithoutDraftRatesSchema = z.object({
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(contractRevisionSchema),
     packageSubmissions: z.array(contractPackageSubmissionSchema),
+    undoUnlockPackages: z.array(contractUndoUnlockPackageSchema).optional(),
     questions: indexContractQuestionsPayload.optional(),
     // Contract meta data overrides
     contractOverrides: z.array(contractDataOverrideSchema).optional(),
@@ -69,6 +73,7 @@ const eqroContractDraftSchema = z.object({
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(eqroContractRevisionSchema),
     packageSubmissions: z.array(eqroContractPackageSubmissionSchema),
+    undoUnlockPackages: z.array(eqroContractUndoUnlockPackageSchema).optional(),
     questions: indexContractQuestionsPayload.optional(),
 })
 
@@ -98,6 +103,7 @@ const rateWithoutDraftContractsSchema = z.object({
     // All revisions are submitted and in reverse chronological order
     revisions: z.array(rateRevisionSchema),
     packageSubmissions: z.array(ratePackageSubmissionSchema),
+    undoUnlockPackages: z.array(rateUndoUnlockPackageSchema).optional(),
     questions: indexRateQuestionsPayload.optional(),
     // Rate meta data overrides
     rateOverrides: z.array(rateDataOverrideSchema).optional(),

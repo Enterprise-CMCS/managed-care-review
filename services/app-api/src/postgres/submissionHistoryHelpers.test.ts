@@ -21,6 +21,7 @@ import {
     reverseApproveTestContract,
     submitTestContract,
     unlockTestContract,
+    undoUnlockTestContract,
     withdrawTestContract,
 } from '../testHelpers/gqlContractHelpers'
 import {
@@ -280,6 +281,38 @@ describe('buildContractSubmissionHistory', () => {
 
         expect(historyLog[0].actionType).toBe('UNLOCK')
         expect(historyLog[0].updatedReason).toBe('Unlock without resubmit')
+    })
+
+    it('logs contract undo unlock from undoUnlockPackages', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+
+        await unlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Unlock before undo unlock history test'
+        )
+        await undoUnlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Undo unlock history test'
+        )
+
+        const prismaClient = await sharedTestPrismaClient()
+        const contract = must(
+            await findContractWithHistory(prismaClient, submittedContract.id)
+        )
+        const historyLog = buildContractSubmissionHistory(contract)
+
+        expect(historyLog[0].actionType).toBe('UNDO_UNLOCK')
+        expect(historyLog[0].updatedReason).toBe('Undo unlock history test')
     })
 
     it('logs a contract withdraw review action', async () => {
@@ -1086,6 +1119,40 @@ describe('buildRateSubmissionHistory', () => {
         expect(historyLog[0].actionType).toBe('UNLOCK')
         expect(historyLog[0].updatedReason).toBe(
             'Unlock parent contract without rate resubmit'
+        )
+    })
+
+    it('logs rate undo unlock from undoUnlockPackages', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const rateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+
+        await unlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Unlock parent contract before rate undo unlock history test'
+        )
+        await undoUnlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Undo parent unlock for rate history test'
+        )
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rate = must(await findRateWithHistory(prismaClient, rateID))
+        const historyLog = buildRateSubmissionHistory(rate)
+
+        expect(historyLog[0].actionType).toBe('UNDO_UNLOCK')
+        expect(historyLog[0].updatedReason).toBe(
+            'Undo parent unlock for rate history test'
         )
     })
 
