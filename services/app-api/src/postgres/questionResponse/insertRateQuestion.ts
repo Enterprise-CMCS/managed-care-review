@@ -5,6 +5,7 @@ import type {
     CreateRateQuestionInputType,
 } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
+import { updateRelatedContractsLastActionDateByRateID } from '../updateLastActionDateHelpers'
 import {
     hasOpenQuestionRound,
     OPEN_QUESTION_ROUND_ERROR_MESSAGE,
@@ -63,6 +64,23 @@ export async function insertRateQuestion(
                 },
                 include: questionInclude,
             })
+
+            // Rate Q&A changes the rate-facing action history and is visible from
+            // submitted contracts that include this rate, so update both freshness
+            // markers from the question's DB-created timestamp.
+            await tx.rateTable.update({
+                where: {
+                    id: questionInput.rateID,
+                },
+                data: {
+                    lastActionDate: result.createdAt,
+                },
+            })
+            await updateRelatedContractsLastActionDateByRateID(
+                tx,
+                questionInput.rateID,
+                result.createdAt
+            )
 
             return rateQuestionPrismaToDomainType(result)
         },

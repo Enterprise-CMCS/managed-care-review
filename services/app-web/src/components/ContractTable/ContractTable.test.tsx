@@ -223,8 +223,8 @@ describe('getConsolidatedContractStatusText', () => {
 describe('ContractTable for CMS User (with filters)', () => {
     beforeEach(() => {
         // post implementation of creating default status filter for CMS users
-        // #filters= is the default hash to use no filters
-        window.location.assign('#filters=')
+        // ?filters= is the default query param to use no filters
+        window.history.replaceState({}, '', '?filters=')
         vi.clearAllMocks()
     })
 
@@ -265,7 +265,11 @@ describe('ContractTable for CMS User (with filters)', () => {
     })
 
     it('Filter out approved submission', async () => {
-        window.location.assign('#filters=status%3DSUBMITTED%2CUNLOCKED')
+        window.history.replaceState(
+            {},
+            '',
+            '?filters=status%3DSUBMITTED%2CUNLOCKED'
+        )
 
         renderWithProviders(
             <ContractTable
@@ -794,8 +798,51 @@ describe('ContractTable for CMS User (with filters)', () => {
             screen.getByText('Displaying 1 of 3 submissions')
         ).toBeInTheDocument()
         expect(global.window.location.href).toContain(
-            '#filters=stateName%3DMinnesota%26submissionType%3DContract+action+and+rate+certification'
+            '?filters=stateName%3DMinnesota%26submissionType%3DContract+action+and+rate+certification'
         )
+    })
+
+    it('preserves filters when the hash changes for skip links', async () => {
+        renderWithProviders(
+            <ContractTable
+                tableData={submissions}
+                user={mockCMSUser()}
+                showFilters
+            />,
+            {
+                apolloProvider: apolloProviderWithCMSUser(),
+                featureFlags: { 'eqro-submissions': true },
+            }
+        )
+
+        const accordionButton = screen.getByTestId(
+            'accordionButton_filterAccordionItems'
+        )
+        await userEvent.click(accordionButton)
+
+        const statusFilter = screen.getByTestId('status-filter')
+        const statusCombobox = within(statusFilter).getByRole('combobox')
+
+        selectEvent.openMenu(statusCombobox)
+        const statusOptions = screen.getByTestId('status-filter-options')
+
+        await waitFor(async () => {
+            await selectEvent.select(statusOptions, 'Approved')
+        })
+
+        expect(screen.getByText('1 filter applied')).toBeInTheDocument()
+        expect(
+            screen.getByText('Displaying 1 of 5 submissions')
+        ).toBeInTheDocument()
+
+        window.location.hash = '#cmsDashboardMainContent'
+
+        await waitFor(() => {
+            expect(screen.getByText('1 filter applied')).toBeInTheDocument()
+            expect(
+                screen.getByText('Displaying 1 of 5 submissions')
+            ).toBeInTheDocument()
+        })
     })
 
     it('can filter table by submission status', async () => {
@@ -1215,7 +1262,7 @@ describe('ContractTable for CMS User (with filters)', () => {
 
 describe('ContractTable state user tests', () => {
     beforeEach(() => {
-        window.location.assign('#')
+        window.history.replaceState({}, '', '/')
     })
 
     it('can filter table by programs for state users', async () => {

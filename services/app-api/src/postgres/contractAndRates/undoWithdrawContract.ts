@@ -147,24 +147,30 @@ const undoWithdrawContractInsideTransaction = async (
             : 'NOT_SUBJECT_TO_REVIEW'
     }
 
+    // This restored review action is what makes the contract no longer
+    // withdrawn, so it is the action date we persist for lastActionDate.
+    const contractReviewAction = await tx.contractActionTable.create({
+        data: {
+            contractID: contract.id,
+            updatedByID,
+            updatedReason,
+            actionType: restoredActionType,
+        },
+    })
+
     await tx.contractTable.update({
         where: {
             id: contract.id,
         },
         data: {
-            reviewStatusActions: {
-                create: {
-                    updatedByID,
-                    updatedReason,
-                    actionType: restoredActionType,
-                },
-            },
+            lastActionDate: contractReviewAction.updatedAt,
         },
     })
 
     for (const rate of ratesForDisplay) {
-        // Add UNDER_REVIEW action to all rates that are withdrawn with this submission
-        await tx.rateActionTable.create({
+        // This restored review action is what makes the rate no longer
+        // withdrawn, so it is the action date we persist for lastActionDate.
+        const rateReviewAction = await tx.rateActionTable.create({
             data: {
                 updatedReason,
                 updatedBy: {
@@ -178,6 +184,15 @@ const undoWithdrawContractInsideTransaction = async (
                         id: rate.id,
                     },
                 },
+            },
+        })
+
+        await tx.rateTable.update({
+            where: {
+                id: rate.id,
+            },
+            data: {
+                lastActionDate: rateReviewAction.updatedAt,
             },
         })
     }

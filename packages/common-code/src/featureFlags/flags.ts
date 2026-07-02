@@ -90,6 +90,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Uses stored contract action dates for contract lastUpdatedForDisplay and updatedWithin filtering.
+     */
+    USE_STORED_CONTRACT_ACTION_DATES: {
+        flag: 'use-stored-contract-action-dates',
+        defaultValue: false,
+    },
+    /**
      * This flag toggles availability of resources navigation bar and related pages.
      */
     RESOURCES_NAV_PAGES: {

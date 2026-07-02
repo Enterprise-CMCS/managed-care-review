@@ -96,6 +96,14 @@ export const CMSQuestionResponseTable = ({
         userDivision
     )
 
+    // Only the first question rendered on the page (the user's division
+    // questions are rendered before other divisions') gets the primary upload
+    // response button; all subsequent buttons use the secondary (outline)
+    // styling.
+    const firstQuestionId =
+        usersRounds[0]?.[0]?.questionData.id ??
+        otherRounds[0]?.[0]?.questionData.id
+
     return (
         <>
             <section
@@ -126,6 +134,9 @@ export const CMSQuestionResponseTable = ({
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
                                 questionType={questionType}
+                                isFirstQuestion={
+                                    questionData.id === firstQuestionId
+                                }
                             />
                         ))
                     )
@@ -151,6 +162,9 @@ export const CMSQuestionResponseTable = ({
                                 roundTitle={roundTitle}
                                 currentUser={loggedInUser!}
                                 questionType={questionType}
+                                isFirstQuestion={
+                                    questionData.id === firstQuestionId
+                                }
                             />
                         ))
                     )

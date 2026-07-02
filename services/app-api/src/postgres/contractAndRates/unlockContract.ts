@@ -361,6 +361,31 @@ async function unlockContractInsideTransaction(
         skipDuplicates: true,
     })
 
+    // Unlocking changes the visible action history for this contract. Child
+    // rates unlocked with the contract get the same action date; linked rates
+    // are intentionally excluded because their own revisions were not unlocked.
+    await tx.contractTable.update({
+        where: {
+            id: contractID,
+        },
+        data: {
+            lastActionDate: unlockInfo.updatedAt,
+        },
+    })
+
+    if (childRateIDs.length > 0) {
+        await tx.rateTable.updateMany({
+            where: {
+                id: {
+                    in: childRateIDs,
+                },
+            },
+            data: {
+                lastActionDate: unlockInfo.updatedAt,
+            },
+        })
+    }
+
     const contract = await findContractWithHistory(tx, contractID)
     if (contract instanceof Error) {
         return contract

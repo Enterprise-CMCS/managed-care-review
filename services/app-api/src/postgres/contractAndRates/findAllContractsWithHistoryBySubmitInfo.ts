@@ -21,11 +21,13 @@ type WithLatest = {
  * @param client Prisma transaction/client
  * @param useZod defaults to true (existing behavior)
  * @param skipFindingLatest if true, SKIP computing all the “latest*” helper timestamps
+ * @param filterLastActionDateAfter when provided, filter by ContractTable.lastActionDate
  */
 async function findAllContractsWithHistoryBySubmitInfoInsideTransaction(
     client: PrismaTransactionType,
     useZod: boolean = true,
-    skipFindingLatest: boolean = false
+    skipFindingLatest: boolean = false,
+    filterLastActionDateAfter?: Date
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
         const whereClause: any = {
@@ -34,6 +36,11 @@ async function findAllContractsWithHistoryBySubmitInfoInsideTransaction(
 
         if (process.env.stage === 'prod') {
             whereClause.stateCode = { not: 'AS' } // exclude test state as per ADR 019
+        }
+        if (filterLastActionDateAfter) {
+            whereClause.lastActionDate = {
+                gt: filterLastActionDateAfter,
+            }
         }
         const contracts = await client.contractTable.findMany({
             where: whereClause,
@@ -52,6 +59,7 @@ async function findAllContractsWithHistoryBySubmitInfoInsideTransaction(
             parsedBase.push({ contractID: raw.id, contract: parsed })
         }
 
+        // TODO: Once we move to using lastActionDate from the DB, the code below can be removed
         if (skipFindingLatest) {
             return parsedBase
         }
@@ -369,7 +377,8 @@ async function findAllContractsWithHistoryBySubmitInfoInsideTransaction(
 async function findAllContractsWithHistoryBySubmitInfo(
     client: ExtendedPrismaClient,
     useZod: boolean = true,
-    skipFindingLatest: boolean = false
+    skipFindingLatest: boolean = false,
+    filterLastActionDateAfter?: Date
 ): Promise<ContractOrErrorArrayType | NotFoundError | Error> {
     try {
         return await client.$transaction(
@@ -377,7 +386,8 @@ async function findAllContractsWithHistoryBySubmitInfo(
                 findAllContractsWithHistoryBySubmitInfoInsideTransaction(
                     tx,
                     useZod,
-                    skipFindingLatest
+                    skipFindingLatest,
+                    filterLastActionDateAfter
                 ),
             {
                 timeout: 20000,

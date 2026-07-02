@@ -347,6 +347,12 @@ async function submitContractAndOrRates(
 
     const submissionRelatedContractRevs: ContractRevisionTable[] = []
     const submissionRelatedRateRevs: RateRevisionTable[] = []
+    const rateRelationshipChangeRevs: RateRevisionTable[] = []
+    // Related contracts are not submitted by this transaction, but a submitted
+    // child rate can still change the submitted rate data they show. Track those
+    // contract IDs so their stored lastActionDate matches LINKED_RATE_UPDATE
+    // entries produced from package history.
+    const linkedContractIDsForSubmittedRateUpdates: string[] = []
 
     const linksToCreate: {
         rateRevID: string
@@ -382,27 +388,6 @@ async function submitContractAndOrRates(
             },
         })
         const theseDraftRateIDs = draftRates.map((r) => r.rateID)
-        for (const draftRateJoin of draftRates) {
-            const draftRate = draftRateJoin.rate
-            const draftRateRev = draftRate.revisions[0]
-            if (!draftRateRev) {
-                const msg = `attempted to submit connected to an UNsubmitted rate. contractID: ${contractID} rateID: ${draftRate.id}`
-                console.error(msg)
-                return new Error(msg)
-            }
-
-            // if not a newly submitted rate, add it to related rates.
-            if (draftRateRev.submitInfoID !== submitInfo.id) {
-                submissionRelatedRateRevs.push(draftRateRev)
-            }
-
-            // add a link.
-            linksToCreate.push({
-                contractRevID: submittedContractRev.id,
-                rateRevID: draftRateRev.id,
-                ratePosition: draftRateJoin.ratePosition,
-            })
-        }
 
         // -- get previous connections, disconnected rate: mark related
         const prevRelatedSubmission = await tx.updateInfoTable.findFirst({
@@ -429,6 +414,42 @@ async function submitContractAndOrRates(
                 },
             },
         })
+        const previousRateIDs = new Set(
+            prevRelatedSubmission?.submissionPackages.map(
+                (previousConnection) => previousConnection.rateRevision.rateID
+            ) ?? []
+        )
+
+        for (const draftRateJoin of draftRates) {
+            const draftRate = draftRateJoin.rate
+            const draftRateRev = draftRate.revisions[0]
+            if (!draftRateRev) {
+                const msg = `attempted to submit connected to an UNsubmitted rate. contractID: ${contractID} rateID: ${draftRate.id}`
+                console.error(msg)
+                return new Error(msg)
+            }
+
+            // If not a newly submitted rate, add it to related rates so package
+            // history captures the contract/rate relationship for this submit.
+            if (draftRateRev.submitInfoID !== submitInfo.id) {
+                submissionRelatedRateRevs.push(draftRateRev)
+
+                // Only new links are material rate relationship changes. Rates
+                // that were already linked to this contract get package history,
+                // but their rate lastActionDate should not move for a
+                // contract-only resubmission.
+                if (!previousRateIDs.has(draftRateRev.rateID)) {
+                    rateRelationshipChangeRevs.push(draftRateRev)
+                }
+            }
+
+            // add a link.
+            linksToCreate.push({
+                contractRevID: submittedContractRev.id,
+                rateRevID: draftRateRev.id,
+                ratePosition: draftRateJoin.ratePosition,
+            })
+        }
 
         if (prevRelatedSubmission) {
             for (const previousConnection of prevRelatedSubmission.submissionPackages) {
@@ -439,6 +460,9 @@ async function submitContractAndOrRates(
                 ) {
                     // this previous submission was connected to a now disconnected rate.
                     submissionRelatedRateRevs.push(
+                        previousConnection.rateRevision
+                    )
+                    rateRelationshipChangeRevs.push(
                         previousConnection.rateRevision
                     )
                 }
@@ -671,6 +695,16 @@ async function submitContractAndOrRates(
         }
 
         for (const previousConnection of prevRelatedSubmission.submissionPackages) {
+            if (rateIDs.includes(previousConnection.rateRevision.rateID)) {
+                // This related contract already had the submitted rate in its
+                // previous submitted package. Resubmitting the rate changes the
+                // rate data visible through that contract, so its history will
+                // include LINKED_RATE_UPDATE and lastActionDate must move with it.
+                linkedContractIDsForSubmittedRateUpdates.push(
+                    relatedContract.contractID
+                )
+            }
+
             if (!rateIDs.includes(previousConnection.rateRevision.rateID)) {
                 // this previous submission has a link to be forwarded.
 
@@ -740,6 +774,66 @@ async function submitContractAndOrRates(
             },
         },
     })
+
+    // Update contracts lastActionDate on submit action. Lowest level, so
+    // any store functions, like withdrawContract. calling this will automatically
+    // update the date for this action.
+    if (submittedContractRev) {
+        await tx.contractTable.update({
+            where: {
+                id: submittedContractRev.contractID,
+            },
+            data: {
+                lastActionDate: submitInfo.updatedAt,
+            },
+        })
+    }
+
+    const uniqueLinkedContractIDsForSubmittedRateUpdates = [
+        ...new Set(linkedContractIDsForSubmittedRateUpdates),
+    ]
+
+    if (uniqueLinkedContractIDsForSubmittedRateUpdates.length > 0) {
+        // These contracts already had one of the submitted rates linked in
+        // their previous submitted package. The contract itself did not submit,
+        // but its visible submitted rate data changed, so freshness must move
+        // to the parent submit timestamp.
+        await tx.contractTable.updateMany({
+            where: {
+                id: {
+                    in: uniqueLinkedContractIDsForSubmittedRateUpdates,
+                },
+            },
+            data: {
+                lastActionDate: submitInfo.updatedAt,
+            },
+        })
+    }
+
+    // Update rate lastActionDate only when this submit changes the rate action
+    // log: the rate's own revision was submitted, or this contract submit linked
+    // or unlinked the rate. Already-linked rates still receive package history
+    // above, but a contract-only resubmission does not change the rate's action log.
+    const rateIDsForSubmitLastActionDate = [
+        ...submittedRateRevs.map((revision) => revision.rateID),
+        ...rateRelationshipChangeRevs.map((revision) => revision.rateID),
+    ]
+    const uniqueRateIDsForSubmitLastActionDate = [
+        ...new Set(rateIDsForSubmitLastActionDate),
+    ]
+
+    if (uniqueRateIDsForSubmitLastActionDate.length > 0) {
+        await tx.rateTable.updateMany({
+            where: {
+                id: {
+                    in: uniqueRateIDsForSubmitLastActionDate,
+                },
+            },
+            data: {
+                lastActionDate: submitInfo.updatedAt,
+            },
+        })
+    }
 
     // delete draftRate Connections iff not still connected to other draft revisions.
     // we know that all of these submitted contract + rate pairs can be deleted.

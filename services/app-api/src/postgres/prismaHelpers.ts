@@ -16,6 +16,7 @@ type RunTransactionWithRowLockArgs<T> = {
     table: LockableTables
     id: string
     transaction: (tx: PrismaTransactionType) => Promise<T | Error>
+    useRowLock?: boolean
     transactionOptions?: {
         maxWait?: number
         timeout?: number
@@ -36,16 +37,27 @@ type RunTransactionWithRowLockArgs<T> = {
  * @param args.table Table containing the row to lock before writes begin.
  * @param args.id Identifier of the row to lock.
  * @param args.transaction Store write logic to run after the row lock is acquired.
+ * @param args.useRowLock Optional toggle for callers that need transaction
+ * atomicity but do not need row-level serialization.
  * @param args.transactionOptions Optional Prisma transaction settings.
  */
 async function runTransactionWithRowLock<T>(
     args: RunTransactionWithRowLockArgs<T>
 ): Promise<T | Error> {
-    const { client, table, id, transaction, transactionOptions } = args
+    const {
+        client,
+        table,
+        id,
+        transaction,
+        transactionOptions,
+        useRowLock = true,
+    } = args
 
     try {
         return await client.$transaction(async (tx) => {
-            await lockTableRowForUpdate(tx, table, id)
+            if (useRowLock) {
+                await lockTableRowForUpdate(tx, table, id)
+            }
 
             const result = await transaction(tx)
             if (result instanceof Error) {

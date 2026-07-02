@@ -191,8 +191,35 @@ describe('FileUpload component', () => {
             expect(screen.queryAllByText(TEST_PDF_FILE.name)).toHaveLength(1)
             expect(screen.queryAllByText(TEST_DOC_FILE.name)).toHaveLength(2)
             expect(
-                screen.queryAllByText('Duplicate file, please remove')
+                screen.queryAllByText(
+                    'You already added a file with this name and extension. Remove one.'
+                )
             ).toHaveLength(1)
+        })
+    })
+
+    it('does not display a duplicate file error for single-upload fields', async () => {
+        renderWithProviders(
+            <FileUpload
+                {...testProps}
+                accept=".pdf,.txt,.doc"
+                allowMultipleUploads={false}
+            />
+        )
+
+        const input = screen.getByTestId('file-input-input')
+        await userEvent.upload(input, [TEST_DOC_FILE])
+        await userEvent.upload(input, [TEST_DOC_FILE])
+
+        await waitFor(() => {
+            // The repeat upload replaces the file rather than being flagged as a
+            // duplicate, so only one file is shown and no error is displayed.
+            expect(screen.queryAllByText(TEST_DOC_FILE.name)).toHaveLength(1)
+            expect(
+                screen.queryByText(
+                    'You already added a file with this name and extension. Remove one.'
+                )
+            ).not.toBeInTheDocument()
         })
     })
 

@@ -23,6 +23,7 @@ export type QuestionResponseRoundPropType = {
     questionType: 'contract' | 'rate'
     contractStatus?: ConsolidatedContractStatus
     qaSectionHeaderId?: string
+    isFirstQuestion?: boolean
 }
 
 /**
@@ -35,6 +36,7 @@ export type QuestionResponseRoundPropType = {
  * @param {User} props.currentUser - Current user viewing the page
  * @param {ConsolidatedContractStatus} [props.contractStatus] - Consolidated contract status.
  * @param {string} [props.qaSectionHeaderId] - ID to the Q&A section header, used for describing the upload response button.
+ * @param {boolean} [props.isFirstQuestion] - Whether this is the first question rendered on the page. Only the first question's upload response button uses the primary (solid) styling; all subsequent buttons use the secondary (outline) styling.
  */
 export const QuestionResponseRound = ({
     question,
@@ -43,12 +45,13 @@ export const QuestionResponseRound = ({
     questionType,
     contractStatus,
     qaSectionHeaderId,
+    isFirstQuestion = false,
 }: QuestionResponseRoundPropType) => {
     const isStateUser = currentUser?.__typename === 'StateUser'
     const isAdminUser = currentUser?.__typename === 'AdminUser'
     const isApprovedContract = contractStatus === 'APPROVED'
     const buttonClass = classNames('usa-button', {
-        'usa-button--outline': question.responses.length > 0,
+        'usa-button--outline': !isFirstQuestion,
     })
 
     const deleteButtonClass = classNames('usa-button', 'usa-button--secondary')

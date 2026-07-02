@@ -169,7 +169,7 @@ async function setupSubmittedRateWithDocs() {
     const submittedRateRevision =
         submittedContract.packageSubmissions[0].rateRevisions[0]
 
-    return { client, cmsUser, rateID, submittedRateRevision }
+    return { client, cmsUser, rateID, submittedRateRevision, submittedContract }
 }
 
 async function applyRateOverride(input: {
@@ -229,7 +229,8 @@ describe('overrideRateData', () => {
     })
 
     it('creates rate metadata override and applies it in history', async () => {
-        const { client, cmsUser, rateID } = await setupSubmittedRateWithDocs()
+        const { client, cmsUser, rateID, submittedContract } =
+            await setupSubmittedRateWithDocs()
         const initiallySubmittedAt = new Date('2025-02-02')
 
         const overriddenRate = await applyRateOverride({
@@ -250,6 +251,20 @@ describe('overrideRateData', () => {
                 initiallySubmittedAtOp: 'OVERRIDE',
             },
         })
+        const contractTableRow = await client.contractTable.findUniqueOrThrow({
+            where: { id: submittedContract.id },
+            select: { lastActionDate: true },
+        })
+        expect(contractTableRow.lastActionDate).toEqual(
+            overriddenRate.rateOverrides?.[0]?.createdAt
+        )
+        const rateTableRow = await client.rateTable.findUniqueOrThrow({
+            where: { id: rateID },
+            select: { lastActionDate: true },
+        })
+        expect(rateTableRow.lastActionDate).toEqual(
+            overriddenRate.rateOverrides?.[0]?.createdAt
+        )
     })
 
     it('clears scalar rate metadata overrides', async () => {

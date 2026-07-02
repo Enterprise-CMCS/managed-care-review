@@ -186,7 +186,7 @@ export const EqroReviewDeterminationBanners = ({
             role="status"
             type="info"
             heading={heading}
-            headingLevel="h3"
+            headingLevel="h4"
             data-testid="eqroSummaryBanner"
             className={className}
             validation
