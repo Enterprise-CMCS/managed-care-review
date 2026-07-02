@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Positional-arg wrapper around the DSNP report (which runs via vitest so it can
+# reuse the app's tested Store/domain layer -- see README.md).
+#
+# Usage (run from anywhere in the repo, DATABASE_URL must be set via direnv):
+#   ./generate-dsnp-report                          # all DSNP contracts, up to today
+#   ./generate-dsnp-report 2025-11-04               # submitted on/after a date
+#   ./generate-dsnp-report 2025-11-04 2025-12-31    # within a date range
+#   ./generate-dsnp-report 2025-11-04 --by latest   # filter window on latest submission
+#   ./generate-dsnp-report -o ~/Downloads/dsnp.csv  # custom output path
+#
+# Default output: ~/Documents/DSNP_Contracts.csv
+set -euo pipefail
+
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_API="$(cd "$DIR/../.." && pwd)"
+
+if [[ -z "${DATABASE_URL:-}" ]]; then
+    echo "DATABASE_URL is not set. Run 'direnv allow' or export it, then retry." >&2
+    exit 1
+fi
+
+by="initial"
+out=""
+positional=()
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --by) by="$2"; shift 2 ;;
+        -o | --out) out="$2"; shift 2 ;;
+        -*) echo "unknown option: $1" >&2; exit 1 ;;
+        *) positional+=("$1"); shift ;;
+    esac
+done
+
+export NODE_NO_WARNINGS=1
+export DSNP_REPORT=1
+export DSNP_BY="$by"
+[[ ${#positional[@]} -ge 1 ]] && export DSNP_FROM="${positional[0]}"
+[[ ${#positional[@]} -ge 2 ]] && export DSNP_TO="${positional[1]}"
+[[ -n "$out" ]] && export DSNP_OUT="$out"
+
+cd "$APP_API"
+exec ./node_modules/.bin/vitest run --silent=true src/scripts/dsnpReport.test.ts
