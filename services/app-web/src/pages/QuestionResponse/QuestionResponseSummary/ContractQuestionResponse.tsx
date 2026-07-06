@@ -92,10 +92,15 @@ export const ContractQuestionResponse = () => {
             <GridContainer className={styles.container}>
                 <h1>Contract questions</h1>
 
-                {hasCMSPermissions && !division && <UserAccountWarningBanner />}
+                {hasCMSPermissions && !division && (
+                    <UserAccountWarningBanner className={styles.banner} />
+                )}
 
                 {submitType && (
-                    <QuestionResponseSubmitBanner submitType={submitType} />
+                    <QuestionResponseSubmitBanner
+                        submitType={submitType}
+                        className={styles.banner}
+                    />
                 )}
 
                 {hasCMSPermissions ? (
