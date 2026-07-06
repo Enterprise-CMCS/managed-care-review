@@ -529,6 +529,11 @@ jobs:
           stage-name: ${{ needs.begin-deployment.outputs.stage-name }}
           use-cdk-role: 'true'
 
+      # The review environment's logical database must exist before this stack
+      # deploys: the stack's migration Trigger runs `prisma migrate deploy`
+      # against it during stack creation. It is created by the "Create logical
+      # database for review environment" step in the infrastructure job, which
+      # this job depends on.
       - name: Deploy AppApi stack
         working-directory: services/infra-cdk
         env:
@@ -551,63 +556,6 @@ jobs:
           cd scripts
           pnpm tsc
           node ./add_cypress_test_users_cdk.js $STAGE_NAME $TEST_USERS_PASS
-
-      - name: Create logical database
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          echo "=== Creating logical database for review environment ==="
-
-          # Get the CDK dev Aurora secret ARN from CloudFormation exports
-          DEV_DB_SECRET_ARN=$(aws cloudformation list-exports \
-            --query "Exports[?Name=='postgres-dev-cdk-PostgresSecretArn'].Value" \
-            --output text)
-
-          if [ -z "$DEV_DB_SECRET_ARN" ] || [ "$DEV_DB_SECRET_ARN" = "None" ]; then
-            echo "Error: Could not find CDK dev Aurora secret ARN"
-            exit 1
-          fi
-
-          echo "Using CDK dev Aurora secret: $DEV_DB_SECRET_ARN"
-
-          # Use CDK function naming pattern: postgres-{stage}-dbManager-cdk
-          db_manager_function="postgres-${STAGE_NAME}-dbManager-cdk"
-
-          echo "Using CDK logical database manager function: $db_manager_function"
-
-          # Create payload for the Lambda function
-          payload=$(cat <<EOF
-          {
-            "action": "create",
-            "stageName": "$STAGE_NAME",
-            "devDbSecretArn": "$DEV_DB_SECRET_ARN"
-          }
-          EOF
-          )
-
-          echo "Creating logical database..."
-          aws lambda invoke \
-            --function-name "$db_manager_function" \
-            --payload "$payload" \
-            --cli-binary-format raw-in-base64-out \
-            lambda_response.json
-
-          # Check response
-          if jq -e '.FunctionError' lambda_response.json > /dev/null; then
-            echo "Error: Database creation failed"
-            cat lambda_response.json
-            exit 1
-          fi
-
-          echo "Logical database creation completed successfully!"
-
-      - name: Run database migrations
-        env:
-          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
-        run: |
-          echo "=== Running database migrations ==="
-          cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh app-api-${STAGE_NAME}-cdk-migrate
 
   extract-endpoints:
     needs: [begin-deployment, deploy-cdk-app, deploy-frontend-app]

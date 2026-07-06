@@ -587,7 +587,10 @@ export class AppApiStack extends BaseStack {
         new Trigger(this, 'RunMigrations', {
             handler: this.migrateFunction,
             invocationType: InvocationType.REQUEST_RESPONSE,
-            // Allow for Aurora cold start plus the migrate Lambda's own 60s timeout.
+            // Upper bound on how long CloudFormation waits for the invocation.
+            // This does not extend the migrate Lambda's own 60s function
+            // timeout, which is the real cap on migration time; the headroom
+            // covers the trigger provider's invoke overhead and retries.
             timeout: Duration.minutes(2),
             executeAfter: [this.migrateFunction],
             executeBefore: [this.graphqlFunction],
