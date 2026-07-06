@@ -18,8 +18,8 @@ import type {
     ContractType,
     RateRevisionType,
 } from '../domain-models'
-import type { Span } from '@opentelemetry/api'
-import { setErrorAttributesOnActiveSpan } from '../resolvers/attributeHelper'
+import { withZipSpan } from './zipTracing'
+import { withS3Span } from '../otel/s3Tracing'
 
 const s3Client = new S3Client({
     region: process.env.AWS_REGION || 'us-east-1',
@@ -202,13 +202,17 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         // Upload zip to S3
         const outputKey = outputPath
         try {
-            await s3Client.send(
-                new PutObjectCommand({
-                    Bucket: bucket,
-                    Key: outputKey,
-                    Body: fs.createReadStream(zipPath),
-                    ContentType: 'application/zip',
-                })
+            await withS3Span(
+                { operation: 'PutObject', bucket, key: outputKey },
+                () =>
+                    s3Client.send(
+                        new PutObjectCommand({
+                            Bucket: bucket,
+                            Key: outputKey,
+                            Body: fs.createReadStream(zipPath),
+                            ContentType: 'application/zip',
+                        })
+                    )
             )
         } catch (err) {
             return new Error(
@@ -303,12 +307,16 @@ async function downloadFile(
     const timeoutId = setTimeout(() => controller.abort(), timeout)
 
     try {
-        const response = await s3Client.send(
-            new GetObjectCommand({
-                Bucket: bucket,
-                Key: key,
-            }),
-            { abortSignal: controller.signal }
+        const response = await withS3Span(
+            { operation: 'GetObject', bucket, key },
+            () =>
+                s3Client.send(
+                    new GetObjectCommand({
+                        Bucket: bucket,
+                        Key: key,
+                    }),
+                    { abortSignal: controller.signal }
+                )
         )
 
         clearTimeout(timeoutId)
@@ -374,21 +382,13 @@ function calculateSHA256(filePath: string): Promise<string | Error> {
 }
 
 export type DocumentZipService = {
-    createContractZips: (
-        contract: ContractType,
-        span?: Span
-    ) => Promise<Error | undefined>
-    createRateZips: (
-        contract: ContractType,
-        span?: Span
-    ) => Promise<Error[] | undefined>
+    createContractZips: (contract: ContractType) => Promise<Error | undefined>
+    createRateZips: (contract: ContractType) => Promise<Error[] | undefined>
     generateRateDocumentsZip: (
-        rateRevision: RateRevisionType,
-        span?: Span
+        rateRevision: RateRevisionType
     ) => Promise<void | Error>
     generateContractDocumentsZip: (
-        contractRevision: ContractRevisionType,
-        span?: Span
+        contractRevision: ContractRevisionType
     ) => Promise<void | Error>
 }
 
@@ -397,7 +397,7 @@ export function documentZipService(
     generateDocumentZip: GenerateDocumentZipFunctionType
 ): DocumentZipService {
     const documentZipMethods: DocumentZipService = {
-        createContractZips: async (contract, span) => {
+        createContractZips: async (contract) => {
             const contractRevision =
                 contract.packageSubmissions[0]?.contractRevision
 
@@ -416,8 +416,7 @@ export function documentZipService(
 
                 const zipResult =
                     await documentZipMethods.generateContractDocumentsZip(
-                        contractRevision,
-                        span
+                        contractRevision
                     )
 
                 if (zipResult instanceof Error) {
@@ -425,13 +424,13 @@ export function documentZipService(
                         `Contract document zip generation failed for revision ${contractRevision.id}: ${zipResult.message}`
                     )
 
+                    // The dedicated zip.generate span already recorded this
+                    // failure (see generateContractDocumentsZip). We just log and
+                    // propagate; the calling resolver marks its own resolver span
+                    // via recordResolverError.
                     logError(
                         'createContractZips - contract documents zip generation failed',
                         errorWithContext
-                    )
-                    setErrorAttributesOnActiveSpan(
-                        'contract documents zip generation failed',
-                        span
                     )
                     console.warn(
                         `Contract document zip generation failed for revision ${contractRevision.id}, but continuing with submission process`
@@ -450,7 +449,7 @@ export function documentZipService(
             }
             return
         },
-        createRateZips: async (contract, span) => {
+        createRateZips: async (contract) => {
             if (!contract.packageSubmissions[0]?.rateRevisions) {
                 return
             }
@@ -478,8 +477,7 @@ export function documentZipService(
 
                     const zipResult =
                         await documentZipMethods.generateRateDocumentsZip(
-                            rateRev,
-                            span
+                            rateRev
                         )
 
                     if (zipResult instanceof Error) {
@@ -488,13 +486,13 @@ export function documentZipService(
                         )
                         errors.push(errorWithContext)
 
+                        // The dedicated zip.generate span already recorded this
+                        // failure (see generateRateDocumentsZip). We just log and
+                        // collect; the calling resolver marks its own resolver
+                        // span via recordResolverError.
                         logError(
                             'createRateZips - rate documents zip generation failed',
                             errorWithContext
-                        )
-                        setErrorAttributesOnActiveSpan(
-                            'rate documents zip generation failed',
-                            span
                         )
                         console.warn(
                             `Rate document zip generation failed for revision ${rateRev.id}, but continuing with other revisions`
@@ -514,7 +512,7 @@ export function documentZipService(
             // Return errors if any occurred, otherwise return void
             return errors.length > 0 ? errors : undefined
         },
-        generateRateDocumentsZip: async (rateRevision, span) => {
+        generateRateDocumentsZip: async (rateRevision) => {
             const rateRevisionID = rateRevision.id
 
             // Get all rate-related documents
@@ -529,70 +527,66 @@ export function documentZipService(
                 return
             }
 
-            try {
-                // Create an S3 key (destination path) for the zip file
-                const s3DestinationKey = `zips/rates/${rateRevisionID}/rate-documents.zip`
-
-                // Generate the zip file and upload it to S3
-                const zipResult = await generateDocumentZip(
-                    rateDocuments,
-                    s3DestinationKey
-                )
-
-                if (zipResult instanceof Error) {
-                    logError('generateRateDocumentsZip', zipResult)
-                    if (span) {
-                        setErrorAttributesOnActiveSpan(
-                            'rate documents zip generation failed',
-                            span
-                        )
-                    }
-                    return zipResult
-                }
-
-                // Store zip information in database
-                const createResult = await store.createDocumentZipPackage({
-                    s3URL: zipResult.s3URL,
-                    sha256: zipResult.sha256,
-                    s3BucketName: zipResult.s3BucketName,
-                    s3Key: zipResult.s3Key,
-                    rateRevisionID,
+            // Trace this attempt on a dedicated zip.generate span. withZipSpan
+            // records any Error we return (or throw) as a span error, so we no
+            // longer manage span state by hand on each branch.
+            return withZipSpan(
+                {
+                    zipType: 'rate',
                     documentType: 'RATE_DOCUMENTS',
-                })
+                    revisionID: rateRevisionID,
+                    documentCount: rateDocuments.length,
+                },
+                async () => {
+                    try {
+                        // Create an S3 key (destination path) for the zip file
+                        const s3DestinationKey = `zips/rates/${rateRevisionID}/rate-documents.zip`
 
-                if (createResult instanceof Error) {
-                    logError(
-                        'generateRateDocumentsZip - database storage failed',
-                        createResult
-                    )
-                    if (span) {
-                        setErrorAttributesOnActiveSpan(
-                            'rate documents zip database storage failed',
-                            span
+                        // Generate the zip file and upload it to S3
+                        const zipResult = await generateDocumentZip(
+                            rateDocuments,
+                            s3DestinationKey
                         )
-                    }
-                    return createResult
-                }
 
-                console.info(
-                    `Successfully generated zip for rate documents: ${zipResult.s3URL}`
-                )
-                return
-            } catch (error: unknown) {
-                const err = new Error(
-                    `Unexpected error in generateRateDocumentsZip: ${parseErrorToError(error).message}`
-                )
-                logError('generateRateDocumentsZip', err)
-                if (span) {
-                    setErrorAttributesOnActiveSpan(
-                        'rate documents zip generation failed',
-                        span
-                    )
+                        if (zipResult instanceof Error) {
+                            logError('generateRateDocumentsZip', zipResult)
+                            return zipResult
+                        }
+
+                        // Store zip information in database
+                        const createResult =
+                            await store.createDocumentZipPackage({
+                                s3URL: zipResult.s3URL,
+                                sha256: zipResult.sha256,
+                                s3BucketName: zipResult.s3BucketName,
+                                s3Key: zipResult.s3Key,
+                                rateRevisionID,
+                                documentType: 'RATE_DOCUMENTS',
+                            })
+
+                        if (createResult instanceof Error) {
+                            logError(
+                                'generateRateDocumentsZip - database storage failed',
+                                createResult
+                            )
+                            return createResult
+                        }
+
+                        console.info(
+                            `Successfully generated zip for rate documents: ${zipResult.s3URL}`
+                        )
+                        return
+                    } catch (error: unknown) {
+                        const err = new Error(
+                            `Unexpected error in generateRateDocumentsZip: ${parseErrorToError(error).message}`
+                        )
+                        logError('generateRateDocumentsZip', err)
+                        return err
+                    }
                 }
-                return err
-            }
+            )
         },
-        generateContractDocumentsZip: async (contractRevision, span) => {
+        generateContractDocumentsZip: async (contractRevision) => {
             const contractRevisionID = contractRevision.id
             const contractDocuments = [
                 ...(contractRevision.formData.contractDocuments || []),
@@ -604,70 +598,66 @@ export function documentZipService(
                 return
             }
 
-            try {
-                // Create an S3 key (destination path) for the zip file. This is where
-                // we are storing it in the S3 bucket.
-                const s3DestinationKey = `zips/contracts/${contractRevisionID}/contract-documents.zip`
-
-                // Generate the zip file and upload it to S3
-                const zipResult = await generateDocumentZip(
-                    contractDocuments,
-                    s3DestinationKey
-                )
-
-                if (zipResult instanceof Error) {
-                    // Return the error to the caller
-                    logError('generateContractDocumentsZip', zipResult)
-                    if (span) {
-                        setErrorAttributesOnActiveSpan(
-                            'contract documents zip generation failed',
-                            span
-                        )
-                    }
-                    return zipResult
-                }
-
-                // Store zip information in database
-                const createResult = await store.createDocumentZipPackage({
-                    s3URL: zipResult.s3URL,
-                    sha256: zipResult.sha256,
-                    s3BucketName: zipResult.s3BucketName,
-                    s3Key: zipResult.s3Key,
-                    contractRevisionID,
+            // Trace this attempt on a dedicated zip.generate span. withZipSpan
+            // records any Error we return (or throw) as a span error, so we no
+            // longer manage span state by hand on each branch.
+            return withZipSpan(
+                {
+                    zipType: 'contract',
                     documentType: 'CONTRACT_DOCUMENTS',
-                })
+                    revisionID: contractRevisionID,
+                    documentCount: contractDocuments.length,
+                },
+                async () => {
+                    try {
+                        // Create an S3 key (destination path) for the zip file. This is where
+                        // we are storing it in the S3 bucket.
+                        const s3DestinationKey = `zips/contracts/${contractRevisionID}/contract-documents.zip`
 
-                if (createResult instanceof Error) {
-                    logError(
-                        'generateContractDocumentsZip - database storage failed',
-                        createResult
-                    )
-                    if (span) {
-                        setErrorAttributesOnActiveSpan(
-                            'contract documents zip database storage failed',
-                            span
+                        // Generate the zip file and upload it to S3
+                        const zipResult = await generateDocumentZip(
+                            contractDocuments,
+                            s3DestinationKey
                         )
-                    }
-                    return createResult
-                }
 
-                console.info(
-                    `Successfully generated zip for contract documents: ${zipResult.s3URL}`
-                )
-                return
-            } catch (error: unknown) {
-                const err = new Error(
-                    `Unexpected error in generateContractDocumentsZip: ${parseErrorToError(error).message}`
-                )
-                logError('generateContractDocumentsZip', err)
-                if (span) {
-                    setErrorAttributesOnActiveSpan(
-                        'contract documents zip generation failed',
-                        span
-                    )
+                        if (zipResult instanceof Error) {
+                            // Return the error to the caller
+                            logError('generateContractDocumentsZip', zipResult)
+                            return zipResult
+                        }
+
+                        // Store zip information in database
+                        const createResult =
+                            await store.createDocumentZipPackage({
+                                s3URL: zipResult.s3URL,
+                                sha256: zipResult.sha256,
+                                s3BucketName: zipResult.s3BucketName,
+                                s3Key: zipResult.s3Key,
+                                contractRevisionID,
+                                documentType: 'CONTRACT_DOCUMENTS',
+                            })
+
+                        if (createResult instanceof Error) {
+                            logError(
+                                'generateContractDocumentsZip - database storage failed',
+                                createResult
+                            )
+                            return createResult
+                        }
+
+                        console.info(
+                            `Successfully generated zip for contract documents: ${zipResult.s3URL}`
+                        )
+                        return
+                    } catch (error: unknown) {
+                        const err = new Error(
+                            `Unexpected error in generateContractDocumentsZip: ${parseErrorToError(error).message}`
+                        )
+                        logError('generateContractDocumentsZip', err)
+                        return err
+                    }
                 }
-                return err
-            }
+            )
         },
     }
 

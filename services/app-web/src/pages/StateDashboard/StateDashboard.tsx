@@ -1,6 +1,8 @@
 import { GridContainer } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     ContractSubmissionType,
@@ -31,6 +33,11 @@ export const StateDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const location = useLocation()
     const { updateActiveMainContent } = usePage()
+    const ldClient = useLDClient()
+    const useStoredContractActionDates = ldClient?.variation(
+        featureFlags.USE_STORED_CONTRACT_ACTION_DATES.flag,
+        featureFlags.USE_STORED_CONTRACT_ACTION_DATES.defaultValue
+    )
 
     const { loading, data, error } = useQuery(IndexContractsStrippedDocument, {
         fetchPolicy: 'cache-and-network',
@@ -101,9 +108,11 @@ export const StateDashboard = (): React.ReactElement => {
                     }),
                     submittedAt: sub.initiallySubmittedAt,
                     status: sub.consolidatedStatus,
-                    updatedAt: subReviewActions
-                        ? subReviewActions.updatedAt
-                        : currentRevision.updatedAt,
+                    updatedAt: useStoredContractActionDates
+                        ? new Date(sub.lastUpdatedForDisplay)
+                        : subReviewActions
+                          ? subReviewActions.updatedAt
+                          : currentRevision.updatedAt,
                     contractSubmissionType: sub.contractSubmissionType,
                 })
             } else {
@@ -126,7 +135,9 @@ export const StateDashboard = (): React.ReactElement => {
                     }),
                     submittedAt: sub.initiallySubmittedAt,
                     status: sub.consolidatedStatus,
-                    updatedAt: currentRevision.updatedAt,
+                    updatedAt: useStoredContractActionDates
+                        ? new Date(sub.lastUpdatedForDisplay)
+                        : currentRevision.updatedAt,
                     contractSubmissionType: sub.contractSubmissionType,
                 })
             }
@@ -177,7 +188,7 @@ export const StateDashboard = (): React.ReactElement => {
                             <ContractTable
                                 tableData={submissionRows}
                                 user={loggedInUser}
-                                filterCountClassName={styles.filterCount}
+                                showFilters
                             />
                         </section>
                     ) : (

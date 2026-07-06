@@ -74,10 +74,25 @@ function mockStoreThatErrors(): Store {
         insertContractQuestion: async (_ID) => {
             return genericError
         },
+        insertAdminContractQuestion: async (_ID) => {
+            return genericError
+        },
+        insertAdminContractQuestionResponse: async (_ID) => {
+            return genericError
+        },
         softDeleteContractQuestion: async (_ID) => {
             return genericError
         },
+        softDeleteContractQuestionResponse: async (_ID) => {
+            return genericError
+        },
         findAllQuestionsByContract: async (_pkgID) => {
+            return genericError
+        },
+        findContractQuestion: async (_questionID) => {
+            return genericError
+        },
+        findContractQuestionResponseHistory: async (_pkgID) => {
             return genericError
         },
         insertContractQuestionResponse: async (_ID) => {
@@ -92,10 +107,16 @@ function mockStoreThatErrors(): Store {
         findAllQuestionsByRate: async (_pkgID) => {
             return genericError
         },
+        findRateQuestionResponseHistory: async (_pkgID) => {
+            return genericError
+        },
         insertDraftContract: async (_ID) => {
             return genericError
         },
         findContractWithHistory: async (_ID) => {
+            return genericError
+        },
+        findSubmissionHistoryByContractID: async (_ID) => {
             return genericError
         },
 

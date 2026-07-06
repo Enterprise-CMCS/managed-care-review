@@ -1,4 +1,5 @@
 import {
+    AdminUser,
     CmsUser,
     CmsUsersUnion,
     ContractQuestion,
@@ -22,10 +23,18 @@ type QuestionData = {
 
 type QuestionDisplayDocument = {
     createdAt: Date
-    addedBy: CmsUsersUnion | StateUser
+    // Admins can author Q&A on behalf of CMS and the state, so a document's
+    // author may be a CMS user, a state user, or an admin.
+    addedBy: CmsUsersUnion | StateUser | AdminUser
     downloadURL: string | null
     name: string
     s3URL: string
+    // Set only for documents that belong to a response. Question (CMS) documents
+    // leave these undefined. The admin Q&A view uses them to build the
+    // delete-response link in QuestionDisplayTable; other consumers ignore them.
+    responseID?: string
+    questionID?: string
+    division?: Division
 }
 
 type DivisionQuestionDataType = {
@@ -92,6 +101,9 @@ const extractDocumentsFromQuestion = (
                 createdAt: response.createdAt,
                 addedBy: response.addedBy,
                 downloadURL: doc.downloadURL ?? null,
+                responseID: response.id,
+                questionID: question.id,
+                division: question.division,
             }))
         ),
     ].sort((a, b) =>
@@ -161,6 +173,11 @@ const getAddedByName = (currentUser: User, addedBy: User) => {
     }
     if (addedBy.__typename === 'StateUser') {
         return `${addedBy.givenName} (${addedBy.state.code})`
+    }
+    // Admins can record Q&A rounds on behalf of CMS and the state; mark them so
+    // it is clear the entry was made by an admin rather than the named user.
+    if (addedBy.__typename === 'AdminUser') {
+        return `${addedBy.givenName} (Admin)`
     }
     return `${addedBy.givenName}`
 }

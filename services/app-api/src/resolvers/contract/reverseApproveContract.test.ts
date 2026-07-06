@@ -14,11 +14,13 @@ import {
     withdrawTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('reverseApproveContract', () => {
     const mockS3 = testS3Client()
 
     it('admin user can reverse an approved contract', async () => {
+        const client = await sharedTestPrismaClient()
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
@@ -53,6 +55,17 @@ describe('reverseApproveContract', () => {
         )
         expect(reversedContract.reviewStatusActions![0].updatedReason).toBe(
             'Approval was made in error'
+        )
+
+        const contractTableRow = await client.contractTable.findUniqueOrThrow({
+            where: { id: reversedContract.id },
+            select: { lastActionDate: true },
+        })
+
+        // Reverse approval creates an UNDER_REVIEW review action, so the
+        // stored action date should match that action timestamp.
+        expect(contractTableRow.lastActionDate).toEqual(
+            reversedContract.reviewStatusActions![0].updatedAt
         )
     })
 

@@ -21,3 +21,10 @@
         margin: 0;
     }
 }
+
+.tableFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: uswds.units(3);
+}

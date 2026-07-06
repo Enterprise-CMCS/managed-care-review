@@ -90,6 +90,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * Uses stored contract action dates for contract lastUpdatedForDisplay and updatedWithin filtering.
+     */
+    USE_STORED_CONTRACT_ACTION_DATES: {
+        flag: 'use-stored-contract-action-dates',
+        defaultValue: false,
+    },
+    /**
      * This flag toggles availability of resources navigation bar and related pages.
      */
     RESOURCES_NAV_PAGES: {
@@ -97,8 +104,12 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
-     The number of minutes before the session expires and countdown modal appears
-    */
+     * This flag toggles the ability for external API users to send write requests.
+     */
+    EXTERNAL_API_WRITE_REQUEST: {
+        flag: 'external-api-write-request',
+        defaultValue: true,
+    },
     MINUTES_UNTIL_SESSION_EXPIRES: {
         flag: 'session-expiration-minutes',
         defaultValue: 30,

@@ -32,7 +32,7 @@ import {
     generateApplicableProvisionsList,
 } from '../../domain-models/contractAndRates'
 import type { GeneralizedProvisionType } from '@mc-review/submissions'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 
 const validateStatusAndUpdateInfo = (
@@ -499,20 +499,16 @@ export function submitContract(
                 }
 
                 // Generate zips!
-                const contractZipRes = await documentZip.createContractZips(
-                    submitContractResult,
-                    span
-                )
+                const contractZipRes =
+                    await documentZip.createContractZips(submitContractResult)
                 if (contractZipRes instanceof Error) {
                     const errMessage = `Failed to zip files for contract revision with ID: ${contractRevisionID}: ${contractZipRes.message}`
                     logResolverError('submitContract', errMessage, context)
                     recordResolverError(span, errMessage)
                 }
 
-                const rateZipRes = await documentZip.createRateZips(
-                    submitContractResult,
-                    span
-                )
+                const rateZipRes =
+                    await documentZip.createRateZips(submitContractResult)
                 if (rateZipRes instanceof Array) {
                     const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${contractRevisionID}`
                     logResolverError('submitContract', errorMessage, context)

@@ -10,6 +10,7 @@ import {
     CreateRateQuestionDocument,
     CreateRateQuestionResponseDocument,
     DeleteContractQuestionDocument,
+    DeleteContractQuestionResponseDocument,
     UpdateStateAssignmentsByStateDocument,
 } from '../gen/gqlClient'
 import typeDefs from 'app-graphql/src/schema.graphql'
@@ -435,6 +436,28 @@ const deleteTestContractQuestion = async (
     return result.data.deleteContractQuestion.question
 }
 
+const deleteTestContractQuestionResponse = async (
+    server: ApolloServer,
+    responseID: string,
+    reason = 'Some reason'
+): Promise<ContractQuestion> => {
+    const result = await executeGraphQLOperation(server, {
+        query: DeleteContractQuestionResponseDocument,
+        variables: { input: { responseID, reason } },
+    })
+
+    if (result.errors)
+        throw new Error(
+            `deleteTestContractQuestionResponse mutation failed with errors ${JSON.stringify(result.errors)}`
+        )
+
+    if (!result.data.deleteContractQuestionResponse.question) {
+        throw new Error('deleteTestContractQuestionResponse returned nothing')
+    }
+
+    return result.data.deleteContractQuestionResponse.question
+}
+
 const updateTestStateAssignments = async (
     server: ApolloServer,
     stateCode: string,
@@ -470,6 +493,7 @@ export {
     createTestQuestion,
     createTestQuestionResponse,
     deleteTestContractQuestion,
+    deleteTestContractQuestionResponse,
     updateTestStateAssignments,
     createTestRateQuestion,
     createTestRateQuestionResponse,

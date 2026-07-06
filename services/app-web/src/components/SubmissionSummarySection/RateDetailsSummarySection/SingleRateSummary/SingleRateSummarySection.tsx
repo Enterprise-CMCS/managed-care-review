@@ -363,7 +363,6 @@ export const SingleRateSummarySection = ({
                     documentCount={rateDocumentCount}
                     renderZipLink={isSubmittedOrCMSUser}
                     removeTopBorder
-                    headingLevel="h2"
                 />
                 <UploadedDocumentsTable
                     documents={formData.rateDocuments}

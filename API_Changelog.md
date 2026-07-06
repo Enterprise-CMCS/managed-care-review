@@ -1,6 +1,14 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### June 12, 2026
+#### Updated
+- `createContractQuestion` and `createRateQuestion` now reject a new question while a previous question round is still open.
+    - A question round is considered open when any existing question on the same contract (for `createContractQuestion`) or rate (for `createRateQuestion`) has not yet received a response.
+    - All existing questions must be answered before a new question can be created. 
+    - New `BAD_USER_INPUT` error when createContractQuestion or createRateQuestion are called when an open round exists
+    - The open-round check is enforced at the database level with a row lock on the parent contract or rate, so two concurrent requests cannot both create a question round.
+
 ### May 28, 2026
 #### Updated
 - `createContractQuestion` now rejects EQRO contract questions from CMS users who are not assigned to the `DMCO` division.

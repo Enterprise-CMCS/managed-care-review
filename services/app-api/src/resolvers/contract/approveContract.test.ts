@@ -11,11 +11,13 @@ import {
     createAndSubmitTestContractWithRate,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('approveContract', () => {
     const mockS3 = testS3Client()
 
     it('approves the contract', async () => {
+        const client = await sharedTestPrismaClient()
         const cmsServer = await constructTestPostgresServer({
             s3Client: mockS3,
             context: {
@@ -45,6 +47,17 @@ describe('approveContract', () => {
             'MARK_AS_APPROVED'
         )
         expect(approvedContract.reviewStatus).toBe('APPROVED')
+
+        const contractTableRow = await client.contractTable.findUniqueOrThrow({
+            where: { id: approvedContract.id },
+            select: { lastActionDate: true },
+        })
+
+        // Approval is a review action, so the stored action date should match
+        // the approval action timestamp.
+        expect(contractTableRow.lastActionDate).toEqual(
+            approvedContract.reviewStatusActions![0]?.updatedAt
+        )
     })
 
     it('stores approval reason when provided', async () => {

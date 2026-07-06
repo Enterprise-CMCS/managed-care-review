@@ -8,7 +8,7 @@ import { GraphQLError } from 'graphql/index'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { generateRateCertificationName } from './generateRateCertificationName'
 import { findStatePrograms } from '@mc-review/submissions'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 import { parseAndValidateDocuments } from '../documentHelpers'
 

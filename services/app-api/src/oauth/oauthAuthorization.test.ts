@@ -6,6 +6,7 @@ import {
     canRead,
     canWrite,
     canOauthWrite,
+    canOauthAdminWrite,
 } from './oauthAuthorization'
 
 // Mock users for testing
@@ -26,6 +27,14 @@ const mockCMSUser: UserType = {
     role: 'CMS_USER',
     divisionAssignment: 'DMCO',
     stateAssignments: [],
+}
+
+const mockAdminUser: UserType = {
+    id: 'admin-user-1',
+    email: 'admin@example.com',
+    givenName: 'Admin',
+    familyName: 'User',
+    role: 'ADMIN_USER',
 }
 
 describe('OAuth Authorization', () => {
@@ -120,7 +129,7 @@ describe('OAuth Authorization', () => {
     })
 
     describe('canOauthWrite', () => {
-        it('allows writing for OAuth client with scopes', () => {
+        it('allows writing for OAuth client with scopes when the feature flag is on', () => {
             const context: Context = {
                 user: mockCMSUser,
                 oauthClient: {
@@ -132,7 +141,11 @@ describe('OAuth Authorization', () => {
                 },
             }
 
-            expect(canOauthWrite(context)).toBe(true)
+            expect(
+                canOauthWrite(context, {
+                    'external-api-write-request': true,
+                })
+            ).toBe(true)
         })
 
         it('allows writing for regular users', () => {
@@ -158,9 +171,7 @@ describe('OAuth Authorization', () => {
             expect(canOauthWrite(context)).toBe(false)
         })
 
-        it('denies writing for OAuth client when stage is prod', () => {
-            process.env.stage = 'prod'
-
+        it('denies writing for OAuth client when the feature flag is off', () => {
             const context: Context = {
                 user: mockCMSUser,
                 oauthClient: {
@@ -172,7 +183,58 @@ describe('OAuth Authorization', () => {
                 },
             }
 
-            expect(canOauthWrite(context)).toBe(false)
+            expect(
+                canOauthWrite(context, {
+                    'external-api-write-request': false,
+                })
+            ).toBe(false)
+        })
+    })
+
+    describe('canOauthAdminWrite', () => {
+        it('denies writing for delegated OAuth client with admin submission actions scope', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(canOauthAdminWrite(context)).toBe(false)
+        })
+
+        it('denies writing for delegated OAuth client without admin submission actions scope', () => {
+            const context: Context = {
+                user: mockCMSUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['CMS_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(canOauthAdminWrite(context)).toBe(false)
+        })
+
+        it('allows writing for non-delegated OAuth client with admin submission actions scope', () => {
+            const context: Context = {
+                user: mockAdminUser,
+                oauthClient: {
+                    clientId: 'test-client',
+                    grants: ['client_credentials'],
+                    iss: 'mcreview-test',
+                    scopes: ['ADMIN_SUBMISSION_ACTIONS'],
+                    isDelegatedUser: false,
+                },
+            }
+
+            expect(canOauthAdminWrite(context)).toBe(true)
         })
     })
 })

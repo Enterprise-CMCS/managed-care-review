@@ -12,13 +12,15 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import type { StateCodeType } from '@mc-review/submissions'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function withdrawContract(
     store: Store,
     emailer: Emailer,
-    documentZip: DocumentZipService
+    documentZip: DocumentZipService,
+    launchDarkly: LDService
 ): MutationResolvers['withdrawContract'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -31,8 +33,12 @@ export function withdrawContract(
             async (span) => {
                 setResolverDetails(span, user)
 
-                // Check OAuth client read permissions
-                if (!canOauthWrite(context)) {
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
+                // Check OAuth client write permissions
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('withdrawContract', errMessage, context)
 
@@ -116,19 +122,15 @@ export function withdrawContract(
                 const { withdrawnContract, ratesForDisplay } = withdrawResult
 
                 // Generate zips!
-                const contractZipRes = await documentZip.createContractZips(
-                    withdrawnContract,
-                    span
-                )
+                const contractZipRes =
+                    await documentZip.createContractZips(withdrawnContract)
                 if (contractZipRes instanceof Error) {
                     const errMessage = `Failed to zip files for contract revision with ID: ${withdrawnContract.id}: ${contractZipRes.message}`
                     logResolverError('withdrawContract', errMessage, context)
                     recordResolverError(span, errMessage)
                 }
-                const rateZipRes = await documentZip.createRateZips(
-                    withdrawnContract,
-                    span
-                )
+                const rateZipRes =
+                    await documentZip.createRateZips(withdrawnContract)
                 if (rateZipRes instanceof Array) {
                     const errorMessage = `Failed to zip files for ${rateZipRes.length} rate revision(s) on contract ${withdrawnContract.id}`
                     logResolverError('withdrawContract', errorMessage, context)

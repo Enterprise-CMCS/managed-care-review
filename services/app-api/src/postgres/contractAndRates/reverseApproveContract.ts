@@ -36,12 +36,23 @@ async function reverseApproveContractInsideTransaction(
         )
     }
 
-    await tx.contractActionTable.create({
+    const reverseApprovalAction = await tx.contractActionTable.create({
         data: {
             updatedByID: updatedByID,
             updatedReason: updatedReason,
             actionType: 'UNDER_REVIEW',
             contractID: contractID,
+        },
+    })
+
+    // Reverse approval is a review action visible to CMS/Admin users, so it
+    // becomes the contract's latest action date.
+    await tx.contractTable.update({
+        where: {
+            id: contractID,
+        },
+        data: {
+            lastActionDate: reverseApprovalAction.updatedAt,
         },
     })
 

@@ -11,7 +11,7 @@ import {
     validateContractDraftRevisionInput,
     validateEQROContractDraftRevisionInput,
 } from '../../domain-models/contractAndRates'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 import {
     parseAndUpdateChipOnlyFields,
     parseAndUpdateEqroFields,

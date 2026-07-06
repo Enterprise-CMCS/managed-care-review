@@ -66,6 +66,7 @@ export class AppApiStack extends BaseStack {
     public readonly migrateFunction: NodejsFunction
     public readonly regenerateZipsFunction: NodejsFunction
     public readonly migrateS3UrlsFunction: NodejsFunction
+    public readonly backfillLastActionDateFunction: NodejsFunction
     public readonly restoreIAToStandardFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
@@ -438,6 +439,35 @@ export class AppApiStack extends BaseStack {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling('migrate-s3-urls', [
+                        this.getPrismaCleanupCommands(),
+                    ]),
+                },
+            }
+        )
+
+        /**
+         * This is a migration to backfill lastActionDate for existing
+         * contract/rate rows after adding ContractTable.lastActionDate and
+         * RateTable.lastActionDate.
+         */
+        this.backfillLastActionDateFunction = this.createLambdaFunction(
+            'backfill-last-action-date',
+            'backfill_last_action_date',
+            'main',
+            {
+                timeout: Duration.minutes(15),
+                memorySize: 2048,
+                environment,
+                role,
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    ...this.createBundling('backfill-last-action-date', [
                         this.getPrismaCleanupCommands(),
                     ]),
                 },
@@ -1134,6 +1164,7 @@ export class AppApiStack extends BaseStack {
             this.migrateFunction,
             this.regenerateZipsFunction,
             this.migrateS3UrlsFunction,
+            this.backfillLastActionDateFunction,
             this.graphqlFunction,
         ]
 
@@ -1264,6 +1295,12 @@ export class AppApiStack extends BaseStack {
             value: this.migrateS3UrlsFunction.functionName,
             exportName: this.exportName('MigrateS3UrlsFunctionName'),
             description: 'Migrate S3 URLs Lambda function name',
+        })
+
+        new CfnOutput(this, 'BackfillLastActionDateFunctionName', {
+            value: this.backfillLastActionDateFunction.functionName,
+            exportName: this.exportName('BackfillLastActionDateFunctionName'),
+            description: 'Backfill lastActionDate Lambda function name',
         })
 
         new CfnOutput(this, 'ApiGatewayUrl', {

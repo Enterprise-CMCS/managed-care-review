@@ -1,5 +1,5 @@
 import { GraphQLError } from 'graphql'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthAdminWrite } from '../../oauth/oauthAuthorization'
 import { isAdminUser } from '../../domain-models'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { logResolverError, logResolverSuccess } from '../../logger'
@@ -25,7 +25,7 @@ export function overrideRateData(
             async (span) => {
                 setResolverDetails(span, user)
 
-                if (!canOauthWrite(context)) {
+                if (!canOauthAdminWrite(context)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('overrideRateData', errMessage, context)
                     throw new GraphQLError(errMessage, {

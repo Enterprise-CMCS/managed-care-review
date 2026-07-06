@@ -678,7 +678,7 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
 
 Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText(/Upload failed/).should('not.exist')
-    cy.findByText('Duplicate file, please remove').should('not.exist')
+    cy.findByText('You already added a file with this name and extension. Remove one.').should('not.exist')
     cy.findByText('Failed security scan, please remove').should('not.exist')
     cy.findByText('Remove files with errors').should('not.exist')
 })
