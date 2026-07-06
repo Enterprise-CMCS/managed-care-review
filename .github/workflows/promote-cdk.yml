@@ -501,14 +501,6 @@ jobs:
           pnpm tsc
           node ./add_cypress_test_users_cdk.js dev $TEST_USERS_PASS
 
-      - name: Run database migrations
-        env:
-          STAGE_NAME: dev
-        run: |
-          echo "=== Running database migrations ==="
-          cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
-
   end-deployment-dev:
     needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
     if: always() && needs.begin-deployment.result == 'success'
@@ -763,14 +755,6 @@ jobs:
             --app 'pnpm tsx bin/app-api.ts' \
             --context stage=val \
             --require-approval never
-
-      - name: Run database migrations
-        env:
-          STAGE_NAME: val
-        run: |
-          echo "=== Running database migrations ==="
-          cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh app-api-val-cdk-migrate
 
   deploy-frontend-app-val:
     needs:
@@ -1113,14 +1097,6 @@ jobs:
             --app 'pnpm tsx bin/app-api.ts' \
             --context stage=prod \
             --require-approval never
-
-      - name: Run database migrations
-        env:
-          STAGE_NAME: prod
-        run: |
-          echo "=== Running database migrations ==="
-          cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh app-api-prod-cdk-migrate
 
   deploy-frontend-app-prod:
     needs:
