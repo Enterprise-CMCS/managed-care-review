@@ -5,6 +5,7 @@ import type {
     StrippedRateRevisionType,
     ContractPackageSubmissionType,
     RatePackageSubmissionType,
+    RateUndoUnlockPackageType,
 } from '../../domain-models'
 import { z } from 'zod'
 import { rateSchema } from '../../domain-models/contractAndRates'
@@ -27,6 +28,7 @@ import {
     getParentContractID,
     DRAFT_PARENT_PLACEHOLDER,
     isDraftRevision,
+    isReversedUnlockedRevision,
     isSubmittedRevision,
 } from './prismaSharedContractRateHelpers'
 import { mergeScalarFieldOverrides } from '../prismaOverrideMergeHelpers'
@@ -83,6 +85,7 @@ function rateRevisionToDomainModel(
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+        undoUnlockInfo: convertUpdateInfoToDomainModel(revision.undoUnlockInfo),
         formData,
     }
 }
@@ -198,6 +201,7 @@ function rateWithoutDraftContractsToDomainModel(
     // New C+R package history code
     // Every revision has a set of submissions it was part of.
     const packageSubmissions: RatePackageSubmissionType[] = []
+    const undoUnlockPackages: RateUndoUnlockPackageType[] = []
     for (const revision of rate.revisions) {
         for (const submission of revision.relatedSubmissions) {
             // submittedThings
@@ -243,6 +247,26 @@ function rateWithoutDraftContractsToDomainModel(
                 contractRevisions,
             })
         }
+
+        if (isReversedUnlockedRevision(revision)) {
+            const undoUnlockInfo = convertUpdateInfoToDomainModel(
+                revision.undoUnlockInfo
+            )
+
+            if (!undoUnlockInfo) {
+                return new Error(
+                    `PROGRAMMING ERROR: reversed unlocked rate revision ${revision.id} is missing undo unlock info`
+                )
+            }
+
+            // This only includes the draft rate snapshot so we do not make this
+            // query larger. To fetch draft contract revision snapshots, do it
+            // in the field resolver only if the query requests the data.
+            undoUnlockPackages.push({
+                undoUnlockInfo,
+                draftRateRevisionSnapshot: rateRevisionToDomainModel(revision),
+            })
+        }
     }
 
     const parentContractID = getParentContractID(rateRevisions)
@@ -270,6 +294,7 @@ function rateWithoutDraftContractsToDomainModel(
         draftRevision,
         revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
+        undoUnlockPackages: undoUnlockPackages.reverse(),
         reviewStatusActions: rate.reviewStatusActions.reverse(),
         rateOverrides: rateOverridesToDomainModel(rate.rateOverrides),
     }

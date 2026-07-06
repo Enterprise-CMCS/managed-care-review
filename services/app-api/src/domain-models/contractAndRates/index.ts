@@ -64,8 +64,10 @@ export type {
 export type {
     ContractPackageSubmissionType,
     ContractPackageSubmissionWithCauseType,
+    ContractUndoUnlockPackageType,
     RatePackageSubmissionType,
     RatePackageSubmissionWithCauseType,
+    RateUndoUnlockPackageType,
 } from './packageSubmissions'
 
 export type {
