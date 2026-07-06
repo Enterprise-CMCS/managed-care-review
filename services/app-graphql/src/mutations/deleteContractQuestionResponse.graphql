@@ -1,0 +1,9 @@
+mutation deleteContractQuestionResponse(
+    $input: DeleteContractQuestionResponseInput!
+) {
+    deleteContractQuestionResponse(input: $input) {
+        question {
+            ...contractQuestionFragment
+        }
+    }
+}

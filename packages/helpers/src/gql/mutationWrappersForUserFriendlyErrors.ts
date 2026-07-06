@@ -35,6 +35,9 @@ import {
     DeleteContractQuestionMutation,
     DeleteContractQuestionMutationVariables,
     DeleteContractQuestionInput,
+    DeleteContractQuestionResponseMutation,
+    DeleteContractQuestionResponseMutationVariables,
+    DeleteContractQuestionResponseInput,
 } from '../gen/gqlClient'
 import type { GraphQLFormattedError } from 'graphql'
 import { CombinedGraphQLErrors } from '@apollo/client/errors'
@@ -740,6 +743,34 @@ export const deleteContractQuestionWrapper = async (
                 `[UNEXPECTED]: Error attempting to delete question, no data present but returning 200.`
             )
             return new Error(ERROR_MESSAGES.question_error_generic)
+        }
+    } catch (error) {
+        return parseErrorToError(error)
+    }
+}
+
+export const deleteContractQuestionResponseWrapper = async (
+    deleteResponse: useMutation.MutationFunction<DeleteContractQuestionResponseMutation, DeleteContractQuestionResponseMutationVariables>,
+    input: DeleteContractQuestionResponseInput
+): Promise<DeleteContractQuestionResponseMutation | GraphQLErrors | Error> => {
+    try {
+        // No manual cache surgery is needed here: unlike deleting a whole
+        // question, the parent question remains in the list. The mutation returns
+        // the updated question (with the deleted response filtered out), and
+        // Apollo normalizes it by id, so the cached question's responses update
+        // automatically.
+        const result = await deleteResponse({
+            variables: { input },
+            onQueryUpdated: () => true,
+        })
+
+        if (result.data?.deleteContractQuestionResponse) {
+            return result.data
+        } else {
+            recordJSException(
+                `[UNEXPECTED]: Error attempting to delete question response, no data present but returning 200.`
+            )
+            return new Error(ERROR_MESSAGES.response_error_generic)
         }
     } catch (error) {
         return parseErrorToError(error)
