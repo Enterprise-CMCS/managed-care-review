@@ -31,6 +31,17 @@ function getDDHeaders() {
     }
 }
 
+// Local dev sets OTEL_EXPORTER_OTLP_TRACES_ENDPOINT (in .envrc) to point at
+// the local Jaeger container's OTLP port. Deployed environments leave it
+// unset and export directly to Datadog.
+function getExporterConfig() {
+    const localEndpoint = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+    if (localEndpoint) {
+        return { url: localEndpoint, headers: {} }
+    }
+    return { url: DD_TRACES_URL, headers: getDDHeaders() }
+}
+
 export function initTracer(serviceName: string) {
     // Skip OTEL setup under unit tests (setupTests.ts sets stage='test'). This
     // keeps tests hermetic: without a registered provider, recordException/
@@ -57,10 +68,7 @@ export function initTracer(serviceName: string) {
         })
     )
 
-    const exporter = new OTLPTraceExporter({
-        url: DD_TRACES_URL,
-        headers: getDDHeaders(),
-    })
+    const exporter = new OTLPTraceExporter(getExporterConfig())
     const provider = new NodeTracerProvider({
         resource,
         spanProcessors: [new BatchSpanProcessor(exporter)],
