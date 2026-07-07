@@ -982,216 +982,257 @@ export const ContractDetails = ({
                                             />
                                         </Fieldset>
                                     </FormGroup>
-                                    {
-                                        <>
-                                            <FormGroup
-                                                error={
-                                                    Boolean(
-                                                        showFieldErrors(
-                                                            'contractDateStart',
-                                                            errors
-                                                        )
-                                                    ) ||
-                                                    Boolean(
-                                                        showFieldErrors(
-                                                            'contractDateEnd',
-                                                            errors
-                                                        )
-                                                    )
+                                    <Fieldset
+                                        aria-required
+                                        legend={
+                                            isContractAmendment(draftSubmission)
+                                                ? 'Amendment effective dates'
+                                                : 'Contract effective dates'
+                                        }
+                                    >
+                                        <span
+                                            className={
+                                                styles.requiredOptionalText
+                                            }
+                                        >
+                                            Required
+                                        </span>
+                                        <LinkWithLogging
+                                            aria-label="Effective date guidance (opens in new window)"
+                                            href={
+                                                '/resources/help#effective-date-guidance'
+                                            }
+                                            variant="external"
+                                            target="_blank"
+                                        >
+                                            Effective date guidance
+                                        </LinkWithLogging>
+                                        <CustomDateRangePicker
+                                            className={styles.dateRangePicker}
+                                            startDateHint="mm/dd/yyyy"
+                                            startDateLabel="Start date"
+                                            startDateError={showFieldErrors(
+                                                'contractDateStart',
+                                                errors
+                                            )}
+                                            startDatePickerProps={{
+                                                id: 'contractDateStart',
+                                                name: 'contractDateStart',
+                                                'aria-required': true,
+                                                disabled: false,
+                                                defaultValue:
+                                                    values.contractDateStart,
+                                                maxDate:
+                                                    formattedDateMinusOneDay(
+                                                        values.contractDateEnd
+                                                    ),
+                                                onChange: (val) =>
+                                                    setFieldValue(
+                                                        'contractDateStart',
+                                                        formatUserInputDate(val)
+                                                    ),
+                                            }}
+                                            endDateHint="mm/dd/yyyy"
+                                            endDateLabel="End date"
+                                            endDateError={showFieldErrors(
+                                                'contractDateEnd',
+                                                errors
+                                            )}
+                                            endDatePickerProps={{
+                                                disabled: false,
+                                                id: 'contractDateEnd',
+                                                name: 'contractDateEnd',
+                                                'aria-required': true,
+                                                defaultValue:
+                                                    values.contractDateEnd,
+                                                minDate:
+                                                    formattedDatePlusOneDay(
+                                                        values.contractDateStart
+                                                    ),
+                                                onChange: (val) =>
+                                                    setFieldValue(
+                                                        'contractDateEnd',
+                                                        formatUserInputDate(val)
+                                                    ),
+                                            }}
+                                        />
+                                    </Fieldset>
+                                    <FormGroup
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'managedCareEntities',
+                                                errors
+                                            )
+                                        )}
+                                    >
+                                        <Fieldset
+                                            aria-required
+                                            legend="Managed Care entities"
+                                        >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
                                                 }
                                             >
-                                                <Fieldset
-                                                    aria-required
-                                                    legend={
-                                                        isContractAmendment(
-                                                            draftSubmission
-                                                        )
-                                                            ? 'Amendment effective dates'
-                                                            : 'Contract effective dates'
-                                                    }
-                                                >
-                                                    <span
-                                                        className={
-                                                            styles.requiredOptionalText
-                                                        }
-                                                    >
-                                                        Required
-                                                    </span>
-                                                    <LinkWithLogging
-                                                        aria-label="Effective date guidance (opens in new window)"
-                                                        href={
-                                                            '/resources/help#effective-date-guidance'
-                                                        }
-                                                        variant="external"
-                                                        target="_blank"
-                                                    >
-                                                        Effective date guidance
-                                                    </LinkWithLogging>
-                                                    <CustomDateRangePicker
-                                                        className={
-                                                            styles.dateRangePicker
-                                                        }
-                                                        startDateHint="mm/dd/yyyy"
-                                                        startDateLabel="Start date"
-                                                        startDateError={showFieldErrors(
-                                                            'contractDateStart',
-                                                            errors
-                                                        )}
-                                                        startDatePickerProps={{
-                                                            id: 'contractDateStart',
-                                                            name: 'contractDateStart',
-                                                            'aria-required': true,
-                                                            disabled: false,
-                                                            defaultValue:
-                                                                values.contractDateStart,
-                                                            maxDate:
-                                                                formattedDateMinusOneDay(
-                                                                    values.contractDateEnd
-                                                                ),
-                                                            onChange: (val) =>
-                                                                setFieldValue(
-                                                                    'contractDateStart',
-                                                                    formatUserInputDate(
-                                                                        val
-                                                                    )
-                                                                ),
-                                                        }}
-                                                        endDateHint="mm/dd/yyyy"
-                                                        endDateLabel="End date"
-                                                        endDateError={showFieldErrors(
-                                                            'contractDateEnd',
-                                                            errors
-                                                        )}
-                                                        endDatePickerProps={{
-                                                            disabled: false,
-                                                            id: 'contractDateEnd',
-                                                            name: 'contractDateEnd',
-                                                            'aria-required': true,
-                                                            defaultValue:
-                                                                values.contractDateEnd,
-                                                            minDate:
-                                                                formattedDatePlusOneDay(
-                                                                    values.contractDateStart
-                                                                ),
-                                                            onChange: (val) =>
-                                                                setFieldValue(
-                                                                    'contractDateEnd',
-                                                                    formatUserInputDate(
-                                                                        val
-                                                                    )
-                                                                ),
-                                                        }}
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
-                                            <FormGroup
-                                                error={Boolean(
-                                                    showFieldErrors(
-                                                        'managedCareEntities',
-                                                        errors
-                                                    )
-                                                )}
+                                                Required
+                                            </span>
+                                            <Link
+                                                variant="external"
+                                                href={
+                                                    'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
+                                                }
+                                                target="_blank"
                                             >
-                                                <Fieldset
-                                                    aria-required
-                                                    legend="Managed Care entities"
-                                                >
-                                                    <span
-                                                        className={
-                                                            styles.requiredOptionalText
-                                                        }
-                                                    >
-                                                        Required
-                                                    </span>
-                                                    <Link
-                                                        variant="external"
-                                                        href={
-                                                            'https://www.medicaid.gov/medicaid/managed-care/managed-care-entities/index.html'
-                                                        }
-                                                        target="_blank"
-                                                    >
-                                                        Managed Care entity
-                                                        definitions
-                                                    </Link>
-                                                    <div className="usa-hint">
-                                                        <span>
-                                                            Check all that apply
-                                                        </span>
-                                                    </div>
-                                                    {Boolean(
-                                                        showFieldErrors(
-                                                            'managedCareEntities',
-                                                            errors
-                                                        )
-                                                    ) && (
-                                                        <PoliteErrorMessage formFieldLabel="Managed Care entities">
-                                                            {
-                                                                errors.managedCareEntities
-                                                            }
-                                                        </PoliteErrorMessage>
-                                                    )}
-                                                    <FieldCheckbox
-                                                        id="managedCareOrganization"
-                                                        name="managedCareEntities"
-                                                        label={
-                                                            ManagedCareEntityRecord.MCO
-                                                        }
-                                                        value="MCO"
-                                                        heading="Managed Care entities"
-                                                        parent_component_heading={
-                                                            formHeading
-                                                        }
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="prepaidInpatientHealthPlan"
-                                                        name="managedCareEntities"
-                                                        label={
-                                                            ManagedCareEntityRecord.PIHP
-                                                        }
-                                                        value="PIHP"
-                                                        heading="Managed Care entities"
-                                                        parent_component_heading={
-                                                            formHeading
-                                                        }
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="prepaidAmbulatoryHealthPlans"
-                                                        name="managedCareEntities"
-                                                        label={
-                                                            ManagedCareEntityRecord.PAHP
-                                                        }
-                                                        value="PAHP"
-                                                        heading="Managed Care entities"
-                                                        parent_component_heading={
-                                                            formHeading
-                                                        }
-                                                    />
-                                                    <FieldCheckbox
-                                                        id="primaryCareCaseManagementEntity"
-                                                        name="managedCareEntities"
-                                                        label={
-                                                            ManagedCareEntityRecord.PCCM
-                                                        }
-                                                        value="PCCM"
-                                                        heading="Managed Care entities"
-                                                        parent_component_heading={
-                                                            formHeading
-                                                        }
-                                                    />
-                                                </Fieldset>
-                                            </FormGroup>
+                                                Managed Care entity definitions
+                                            </Link>
+                                            <div className="usa-hint">
+                                                <span>
+                                                    Check all that apply
+                                                </span>
+                                            </div>
+                                            {Boolean(
+                                                showFieldErrors(
+                                                    'managedCareEntities',
+                                                    errors
+                                                )
+                                            ) && (
+                                                <PoliteErrorMessage formFieldLabel="Managed Care entities">
+                                                    {errors.managedCareEntities}
+                                                </PoliteErrorMessage>
+                                            )}
+                                            <FieldCheckbox
+                                                id="managedCareOrganization"
+                                                name="managedCareEntities"
+                                                label={
+                                                    ManagedCareEntityRecord.MCO
+                                                }
+                                                value="MCO"
+                                                heading="Managed Care entities"
+                                                parent_component_heading={
+                                                    formHeading
+                                                }
+                                            />
+                                            <FieldCheckbox
+                                                id="prepaidInpatientHealthPlan"
+                                                name="managedCareEntities"
+                                                label={
+                                                    ManagedCareEntityRecord.PIHP
+                                                }
+                                                value="PIHP"
+                                                heading="Managed Care entities"
+                                                parent_component_heading={
+                                                    formHeading
+                                                }
+                                            />
+                                            <FieldCheckbox
+                                                id="prepaidAmbulatoryHealthPlans"
+                                                name="managedCareEntities"
+                                                label={
+                                                    ManagedCareEntityRecord.PAHP
+                                                }
+                                                value="PAHP"
+                                                heading="Managed Care entities"
+                                                parent_component_heading={
+                                                    formHeading
+                                                }
+                                            />
+                                            <FieldCheckbox
+                                                id="primaryCareCaseManagementEntity"
+                                                name="managedCareEntities"
+                                                label={
+                                                    ManagedCareEntityRecord.PCCM
+                                                }
+                                                value="PCCM"
+                                                heading="Managed Care entities"
+                                                parent_component_heading={
+                                                    formHeading
+                                                }
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
 
+                                    <FormGroup
+                                        error={Boolean(
+                                            showFieldErrors(
+                                                'federalAuthorities',
+                                                errors
+                                            )
+                                        )}
+                                    >
+                                        <Fieldset
+                                            aria-required
+                                            legend="Active federal operating authority"
+                                        >
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
+                                            <Link
+                                                variant="external"
+                                                href={
+                                                    'https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html'
+                                                }
+                                                target="_blank"
+                                            >
+                                                Managed Care authority
+                                                definitions
+                                            </Link>
+                                            <div className="usa-hint">
+                                                <span>
+                                                    Check all that apply
+                                                </span>
+                                            </div>
+                                            {Boolean(
+                                                showFieldErrors(
+                                                    'federalAuthorities',
+                                                    errors
+                                                )
+                                            ) && (
+                                                <PoliteErrorMessage formFieldLabel="Active federal operating authority">
+                                                    {errors.federalAuthorities}
+                                                </PoliteErrorMessage>
+                                            )}
+                                            {applicableFederalAuthorities.map(
+                                                (federalAuthority) => (
+                                                    <FieldCheckbox
+                                                        id={federalAuthority.toLowerCase()}
+                                                        key={federalAuthority.toLowerCase()}
+                                                        name="federalAuthorities"
+                                                        label={
+                                                            FederalAuthorityRecord[
+                                                                federalAuthority
+                                                            ]
+                                                        }
+                                                        value={federalAuthority}
+                                                        heading="Managed Care entities"
+                                                        parent_component_heading={
+                                                            formHeading
+                                                        }
+                                                    />
+                                                )
+                                            )}
+                                        </Fieldset>
+                                    </FormGroup>
+                                    {enableDSNPs &&
+                                        !hideDsnpForChipOnly &&
+                                        values.federalAuthorities.some((type) =>
+                                            dsnpTriggers.includes(type)
+                                        ) && (
                                             <FormGroup
                                                 error={Boolean(
                                                     showFieldErrors(
-                                                        'federalAuthorities',
+                                                        'dsnpContract',
                                                         errors
                                                     )
                                                 )}
                                             >
                                                 <Fieldset
                                                     aria-required
-                                                    legend="Active federal operating authority"
+                                                    id="dsnpContract"
+                                                    legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
                                                 >
                                                     <span
                                                         className={
@@ -1200,172 +1241,89 @@ export const ContractDetails = ({
                                                     >
                                                         Required
                                                     </span>
-                                                    <Link
+                                                    <div
+                                                        role="note"
+                                                        aria-labelledby="dsnpContract"
+                                                        className="mcr-note margin-top-1"
+                                                    >
+                                                        See 42 CFR § 422.2
+                                                    </div>
+                                                    <LinkWithLogging
                                                         variant="external"
                                                         href={
-                                                            'https://www.medicaid.gov/medicaid/managed-care/managed-care-authorities/index.html'
+                                                            '/resources/help#dual-eligible-special-needs-plans'
                                                         }
                                                         target="_blank"
+                                                        data-testid="dsnpGuidanceLink"
+                                                        aria-label="D-SNP guidance (opens in new window)"
                                                     >
-                                                        Managed Care authority
-                                                        definitions
-                                                    </Link>
-                                                    <div className="usa-hint">
-                                                        <span>
-                                                            Check all that apply
-                                                        </span>
-                                                    </div>
-                                                    {Boolean(
-                                                        showFieldErrors(
-                                                            'federalAuthorities',
-                                                            errors
-                                                        )
-                                                    ) && (
-                                                        <PoliteErrorMessage formFieldLabel="Active federal operating authority">
-                                                            {
-                                                                errors.federalAuthorities
-                                                            }
-                                                        </PoliteErrorMessage>
-                                                    )}
-                                                    {applicableFederalAuthorities.map(
-                                                        (federalAuthority) => (
-                                                            <FieldCheckbox
-                                                                id={federalAuthority.toLowerCase()}
-                                                                key={federalAuthority.toLowerCase()}
-                                                                name="federalAuthorities"
-                                                                label={
-                                                                    FederalAuthorityRecord[
-                                                                        federalAuthority
-                                                                    ]
-                                                                }
-                                                                value={
-                                                                    federalAuthority
-                                                                }
-                                                                heading="Managed Care entities"
-                                                                parent_component_heading={
-                                                                    formHeading
-                                                                }
-                                                            />
-                                                        )
-                                                    )}
-                                                </Fieldset>
-                                            </FormGroup>
-                                            {enableDSNPs &&
-                                                !hideDsnpForChipOnly &&
-                                                values.federalAuthorities.some(
-                                                    (type) =>
-                                                        dsnpTriggers.includes(
-                                                            type
-                                                        )
-                                                ) && (
-                                                    <FormGroup
-                                                        error={Boolean(
+                                                        D-SNP guidance
+                                                    </LinkWithLogging>
+                                                    <FieldYesNo
+                                                        id="dsnpContract"
+                                                        name="dsnpContract"
+                                                        label="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
+                                                        showError={Boolean(
                                                             showFieldErrors(
                                                                 'dsnpContract',
                                                                 errors
                                                             )
                                                         )}
-                                                    >
-                                                        <Fieldset
-                                                            aria-required
-                                                            id="dsnpContract"
-                                                            legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
-                                                        >
-                                                            <span
-                                                                className={
-                                                                    styles.requiredOptionalText
-                                                                }
-                                                            >
-                                                                Required
-                                                            </span>
-                                                            <div
-                                                                role="note"
-                                                                aria-labelledby="dsnpContract"
-                                                                className="mcr-note margin-top-1"
-                                                            >
-                                                                See 42 CFR §
-                                                                422.2
-                                                            </div>
-                                                            <LinkWithLogging
-                                                                variant="external"
-                                                                href={
-                                                                    '/resources/help#dual-eligible-special-needs-plans'
-                                                                }
-                                                                target="_blank"
-                                                                data-testid="dsnpGuidanceLink"
-                                                                aria-label="D-SNP guidance (opens in new window)"
-                                                            >
-                                                                D-SNP guidance
-                                                            </LinkWithLogging>
-                                                            <FieldYesNo
-                                                                id="dsnpContract"
-                                                                name="dsnpContract"
-                                                                label="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
-                                                                showError={Boolean(
-                                                                    showFieldErrors(
-                                                                        'dsnpContract',
-                                                                        errors
-                                                                    )
-                                                                )}
-                                                                legendStyle="srOnly"
-                                                            />
-                                                        </Fieldset>
-                                                    </FormGroup>
-                                                )}
-                                            {isContractWithProvisions(
-                                                draftSubmission
-                                            ) && (
-                                                <FormGroup data-testid="yes-no-group">
-                                                    <Fieldset
-                                                        aria-required
-                                                        legend={
-                                                            isBaseContract(
-                                                                draftSubmission
-                                                            )
-                                                                ? 'Does this contract action include provisions related to any of the following'
-                                                                : 'Does this contract action include new or modified provisions related to any of the following'
-                                                        }
-                                                    >
-                                                        <span
-                                                            className={
-                                                                styles.requiredOptionalText
-                                                            }
-                                                        >
-                                                            Required
-                                                        </span>
-                                                        {applicableProvisions.map(
-                                                            (
+                                                        legendStyle="srOnly"
+                                                    />
+                                                </Fieldset>
+                                            </FormGroup>
+                                        )}
+                                    {isContractWithProvisions(
+                                        draftSubmission
+                                    ) && (
+                                        <FormGroup data-testid="yes-no-group">
+                                            <Fieldset
+                                                aria-required
+                                                legend={
+                                                    isBaseContract(
+                                                        draftSubmission
+                                                    )
+                                                        ? 'Does this contract action include provisions related to any of the following'
+                                                        : 'Does this contract action include new or modified provisions related to any of the following'
+                                                }
+                                            >
+                                                <span
+                                                    className={
+                                                        styles.requiredOptionalText
+                                                    }
+                                                >
+                                                    Required
+                                                </span>
+                                                {applicableProvisions.map(
+                                                    (modifiedProvisionName) => (
+                                                        <FieldYesNo
+                                                            id={
                                                                 modifiedProvisionName
-                                                            ) => (
-                                                                <FieldYesNo
-                                                                    id={
-                                                                        modifiedProvisionName
-                                                                    }
-                                                                    key={
-                                                                        modifiedProvisionName
-                                                                    }
-                                                                    name={
-                                                                        modifiedProvisionName
-                                                                    }
-                                                                    label={generateProvisionLabel(
-                                                                        draftSubmission,
-                                                                        modifiedProvisionName
-                                                                    )}
-                                                                    showError={Boolean(
-                                                                        showFieldErrors(
-                                                                            modifiedProvisionName,
-                                                                            errors
-                                                                        )
-                                                                    )}
-                                                                    variant="SUBHEAD"
-                                                                />
-                                                            )
-                                                        )}
-                                                    </Fieldset>
-                                                </FormGroup>
-                                            )}
-                                        </>
-                                    }
+                                                            }
+                                                            key={
+                                                                modifiedProvisionName
+                                                            }
+                                                            name={
+                                                                modifiedProvisionName
+                                                            }
+                                                            label={generateProvisionLabel(
+                                                                draftSubmission,
+                                                                modifiedProvisionName
+                                                            )}
+                                                            showError={Boolean(
+                                                                showFieldErrors(
+                                                                    modifiedProvisionName,
+                                                                    errors
+                                                                )
+                                                            )}
+                                                            variant="SUBHEAD"
+                                                        />
+                                                    )
+                                                )}
+                                            </Fieldset>
+                                        </FormGroup>
+                                    )}
                                 </fieldset>
 
                                 <PageActions
