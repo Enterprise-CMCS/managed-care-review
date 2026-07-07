@@ -399,12 +399,7 @@ export const SingleRateFormFields = ({
 
             {!isRateTypeEmpty(rateForm) && (
                 <>
-                    <FormGroup
-                        error={Boolean(
-                            showFieldErrors('rateDateStart') ??
-                            showFieldErrors('rateDateEnd')
-                        )}
-                    >
+                    <FormGroup>
                         <Fieldset
                             aria-required
                             legend={
@@ -457,12 +452,7 @@ export const SingleRateFormFields = ({
 
                     {isRateTypeAmendment(rateForm) && (
                         <>
-                            <FormGroup
-                                error={Boolean(
-                                    showFieldErrors('effectiveDateStart') ??
-                                    showFieldErrors('effectiveDateEnd')
-                                )}
-                            >
+                            <FormGroup>
                                 <Fieldset
                                     aria-required
                                     legend="Effective dates of rate amendment"
