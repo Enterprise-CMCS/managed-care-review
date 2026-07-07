@@ -27,6 +27,7 @@ import {
     createSubmitAndUnlockTestRate,
     fetchTestRateById,
     formatRateDataForSending,
+    overrideTestRateData,
     unlockTestRate,
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
@@ -40,7 +41,6 @@ import {
 } from '../../testHelpers/gqlContractHelpers'
 import { submitRate } from '../../postgres/contractAndRates'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { NewPostgresStore } from '../../postgres'
 
 describe('submitRate', () => {
     const ldService = testLDService({
@@ -657,8 +657,6 @@ describe('submitRate', () => {
         )
     })
     it('resubmit applies rate overrides to latest rate data', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
         const cmsUser = testCMSUser()
         const adminUser = testAdminUser()
         const stateServer = await constructTestPostgresServer({
@@ -705,19 +703,25 @@ describe('submitRate', () => {
         const newDate = new Date('2025-05-05')
 
         // add overrides to rate
-        await store.overrideRateData({
+        await overrideTestRateData(adminServer, {
             rateID,
-            updatedByID: adminUser.id,
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newDate,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: {
                     rateDocuments: rateDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                     supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                 },

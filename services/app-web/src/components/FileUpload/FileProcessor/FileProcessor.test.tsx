@@ -367,7 +367,9 @@ describe('FileProcessor component', () => {
         const imageEl = screen.getByTestId('file-input-preview-image')
         expect(imageEl).not.toHaveClass('is-loading')
         expect(
-            screen.getByText('Duplicate file, please remove')
+            screen.getByText(
+                'You already added a file with this name and extension. Remove one.'
+            )
         ).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: /Remove/ })
@@ -392,7 +394,9 @@ describe('FileProcessor component', () => {
         ).toBeNull()
 
         expect(
-            screen.getByText('Duplicate file, please remove')
+            screen.getByText(
+                'You already added a file with this name and extension. Remove one.'
+            )
         ).toBeInTheDocument()
         expect(screen.getByText('Remove')).toBeInTheDocument()
         expect(screen.queryByText('Retry')).not.toBeInTheDocument()

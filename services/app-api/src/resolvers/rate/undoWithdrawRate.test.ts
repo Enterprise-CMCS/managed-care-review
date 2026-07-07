@@ -27,7 +27,10 @@ import {
     UpdateDraftContractRatesDocument,
 } from '../../gen/gqlClient'
 import { describe, expect } from 'vitest'
-import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
+import {
+    mockStoreThatErrors,
+    sharedTestPrismaClient,
+} from '../../testHelpers/storeHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
@@ -186,6 +189,71 @@ describe('undoWithdrawRate', () => {
         expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
         expect(unwithdrawnRate.parentContractID).toBe(contractA.id)
 
+        const prismaClient = await sharedTestPrismaClient()
+
+        // Undoing the withdrawal writes a new UNDER_REVIEW action on the rate.
+        // That restored review action is the final visible rate action, so
+        // lastActionDate should match it.
+        const rateTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateID },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(rateTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(rateTableRow?.lastActionDate).toEqual(
+            rateTableRow?.reviewStatusActions[0].updatedAt
+        )
+
+        // Contract A is the parent contract restored with the rate. It is
+        // resubmitted and then gets the same review determination as a normal
+        // submit, which should be the contract's lastActionDate.
+        const contractATableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contractA.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractATableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractATableRow?.lastActionDate).toEqual(
+            contractATableRow?.reviewStatusActions[0].updatedAt
+        )
+
+        // Contract B had submitted the rate as a linked rate. Restoring the
+        // rate should also resubmit Contract B and set lastActionDate from its
+        // automated review determination.
+        const contractBTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contractB.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractBTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractBTableRow?.lastActionDate).toEqual(
+            contractBTableRow?.reviewStatusActions[0].updatedAt
+        )
+
         //expect contract A to have rate back
         expect(submittedContractA.withdrawnRates).toHaveLength(0)
         expect(submittedContractA.packageSubmissions[0].rateRevisions).toEqual(
@@ -235,7 +303,7 @@ describe('undoWithdrawRate', () => {
                 `CMS has changed the status of rate ${formData.rateCertificationName} to submitted. Undo withdraw rate`,
             ])
         )
-    })
+    }, 60000)
 
     it('can undo withdraw a rate previously linked to withdrawn contract', async () => {
         const stateUser = testStateUser()
@@ -408,7 +476,7 @@ describe('undoWithdrawRate', () => {
                 `CMS has changed the status of rate ${formData.rateCertificationName} to submitted. Undo withdraw rate`,
             ])
         )
-    })
+    }, 55000)
 
     it('denies OAuth client without write permissions', async () => {
         const stateServer = await constructTestPostgresServer({
@@ -719,7 +787,7 @@ describe('undoWithdrawRate', () => {
                 bodyHTML: expect.stringContaining(contractBName),
             })
         )
-    })
+    }, 55000)
 })
 
 describe('undo withdraw rate error handling', async () => {

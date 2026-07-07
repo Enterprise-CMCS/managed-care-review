@@ -2245,6 +2245,11 @@ describe('SubmissionSummary', () => {
                 await screen.findByTestId('chipOnlySubmissionBanner')
             ).toBeInTheDocument()
             expect(
+                screen.getByText(
+                    /MCR-MN-0005-SNBC is not subject to DMCO review and validation/
+                )
+            ).toBeInTheDocument()
+            expect(
                 screen.getAllByText('Not subject to review').length
             ).toBeGreaterThan(0)
         })

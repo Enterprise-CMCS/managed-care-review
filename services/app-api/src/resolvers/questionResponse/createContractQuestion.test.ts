@@ -2,6 +2,7 @@ import { CreateContractQuestionDocument } from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
+    createTestQuestionResponse,
     executeGraphQLOperation,
     updateTestStateAssignments,
 } from '../../testHelpers/gqlHelpers'
@@ -24,6 +25,7 @@ import {
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createQuestion', () => {
     const cmsUser = testCMSUser()
@@ -54,6 +56,15 @@ describe('createQuestion', () => {
 
         const createdQuestion = await createTestQuestion(cmsServer, contract.id)
 
+        const prismaClient = await sharedTestPrismaClient()
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: { lastActionDate: true },
+        })
+        expect(contractTableRow?.lastActionDate).toEqual(
+            createdQuestion.createdAt
+        )
+
         expect(createdQuestion).toEqual(
             expect.objectContaining({
                 id: expect.any(String),
@@ -83,8 +94,11 @@ describe('createQuestion', () => {
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         await unlockTestContract(cmsServer, contract.id, 'test unlock')
-        await createTestQuestion(cmsServer, contract.id)
+        const firstQuestion = await createTestQuestion(cmsServer, contract.id)
         await submitTestContract(stateServer, contract.id, 'resubmit reason')
+        // Answer the first question so the round is closed and a new question
+        // can be created.
+        await createTestQuestionResponse(stateServer, firstQuestion.id)
         await createTestQuestion(cmsServer, contract.id, {
             documents: [
                 {
@@ -222,6 +236,116 @@ describe('createQuestion', () => {
         expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
         expect(assertAnError(createdQuestion).message).toBe(
             'Issue creating question for contract. Message: Cannot create question for contract in APPROVED status'
+        )
+    })
+    it('returns an error if there is an open question round (unanswered questions)', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        // Create a first question and leave it unanswered to keep the round open
+        await createTestQuestion(cmsServer, contract.id)
+
+        // Attempting to create another question while the round is open should fail
+        const createdQuestion = await executeGraphQLOperation(cmsServer, {
+            query: CreateContractQuestionDocument,
+            variables: {
+                input: {
+                    contractID: contract.id,
+                    documents: [
+                        {
+                            name: 'Test Question 2',
+                            s3URL: 's3://bucketname/key/test2',
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(createdQuestion.errors).toBeDefined()
+        expect(assertAnErrorCode(createdQuestion)).toBe('BAD_USER_INPUT')
+        expect(assertAnError(createdQuestion).message).toBe(
+            'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
+        )
+    })
+    it('allows a new question once the open round has been answered', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const firstQuestion = await createTestQuestion(cmsServer, contract.id)
+        // Answer the question to close the round
+        await createTestQuestionResponse(stateServer, firstQuestion.id)
+
+        const secondQuestion = await createTestQuestion(
+            cmsServer,
+            contract.id,
+            {
+                documents: [
+                    {
+                        name: 'Test Question 2',
+                        s3URL: 's3://bucketname/key/test2',
+                    },
+                ],
+            }
+        )
+
+        expect(secondQuestion).toEqual(
+            expect.objectContaining({
+                id: expect.any(String),
+                contractID: contract.id,
+                division: 'DMCO',
+            })
+        )
+    })
+    it('prevents concurrent requests from creating two open question rounds', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(stateServer)
+
+        const createQuestion = () =>
+            executeGraphQLOperation(cmsServer, {
+                query: CreateContractQuestionDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        documents: [
+                            {
+                                name: 'Test Question',
+                                s3URL: 's3://bucketname/key/test1',
+                            },
+                        ],
+                    },
+                },
+            })
+
+        // Fire two requests at once. The parent contract row lock serializes
+        // them so only one question round can be created.
+        const results = await Promise.all([createQuestion(), createQuestion()])
+
+        const succeeded = results.filter((r) => !r.errors)
+        const failed = results.filter((r) => r.errors)
+
+        expect(succeeded).toHaveLength(1)
+        expect(failed).toHaveLength(1)
+        expect(assertAnErrorCode(failed[0])).toBe('BAD_USER_INPUT')
+        expect(assertAnError(failed[0]).message).toBe(
+            'Cannot create a new question while a previous question round is open. All questions must be answered before a new question can be created.'
         )
     })
     it('returns an error if a state user attempts to create a question for a package', async () => {
@@ -586,8 +710,20 @@ describe('createQuestion', () => {
         const stateSubmission =
             await createAndSubmitTestContractWithRate(stateServer)
 
-        await createTestQuestion(cmsDMCPServer, stateSubmission.id)
-        await createTestQuestion(cmsServer, stateSubmission.id)
+        // Each question round must be answered before a new question can be
+        // created, so respond to each question before asking the next.
+        const dmcpQuestion = await createTestQuestion(
+            cmsDMCPServer,
+            stateSubmission.id
+        )
+        await createTestQuestionResponse(stateServer, dmcpQuestion.id)
+
+        const dmcoQuestionRound1 = await createTestQuestion(
+            cmsServer,
+            stateSubmission.id
+        )
+        await createTestQuestionResponse(stateServer, dmcoQuestionRound1.id)
+
         await createTestQuestion(cmsServer, stateSubmission.id)
 
         const contractName =
@@ -602,10 +738,9 @@ describe('createQuestion', () => {
         // email subject line is correct for CMS email
         // email is sent to the state anaylsts since it
         // was submitted by a DCMO user
-        // Mock emailer is called 4 times,
-        // first called to send the state email, then to CMS, two times each
-        expect(mockEmailer.sendEmail).toHaveBeenNthCalledWith(
-            6,
+        // The last email sent is the CMS email for the second DMCO question,
+        // which should report round 2.
+        expect(mockEmailer.sendEmail).toHaveBeenLastCalledWith(
             expect.objectContaining({
                 subject: expect.stringContaining(
                     `[LOCAL] Questions sent for ${contractName}`

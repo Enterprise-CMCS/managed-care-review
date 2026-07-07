@@ -13,6 +13,7 @@ const defaultRateData = () => ({
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
+    lastActionDate: new Date(),
     stateCode: 'MN',
     stateNumber: 111,
 })
@@ -32,6 +33,7 @@ const mockDraftRate = (
     id: '24fb2a5f-6d0d-4e26-9906-4de28927c882',
     createdAt: new Date(),
     updatedAt: new Date(),
+    lastActionDate: new Date(),
     stateCode: 'MN',
     stateNumber: 111,
     draftContracts: [],

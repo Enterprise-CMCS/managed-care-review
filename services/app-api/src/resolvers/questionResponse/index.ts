@@ -1,5 +1,8 @@
 export { createContractQuestionResolver } from './createContractQuestion'
+export { adminCreateContractQuestionResolver } from './adminCreateContractQuestion'
+export { adminCreateContractQuestionResponseResolver } from './adminCreateContractQuestionResponse'
 export { deleteContractQuestionResolver } from './deleteContractQuestion'
+export { deleteContractQuestionResponseResolver } from './deleteContractQuestionResponse'
 export { createContractQuestionResponseResolver } from './createContractQuestionResponse'
 export { questionResponseDocumentResolver } from './questionResponseDocumentResolver'
 export { createRateQuestionResolver } from './createRateQuestion'

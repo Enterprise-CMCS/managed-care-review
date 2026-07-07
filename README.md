@@ -31,9 +31,11 @@ For monorepo tooling we just rely on the workspace configuration of `pnpm`. If g
 To get the tools needed for local development, you can run:
 
 ```bash
-brew install pnpm direnv entr shellcheck detect-secrets
+brew install pnpm direnv entr shellcheck detect-secrets opentofu
 pnpm install husky
 ```
+
+[OpenTofu](https://opentofu.org/) is used to manage Datadog monitor definitions as infrastructure as code (see `infra/datadog/`). The `tofu` binary is required for pre-commit checks when editing those files.
 
 We use [direnv](https://direnv.net/) to automatically set required environment variables when you enter this directory or its children. This will be used when running the application locally, or when using tools like the `aws` or `serverless` CLIs locally.
 

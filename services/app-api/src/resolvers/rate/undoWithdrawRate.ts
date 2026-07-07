@@ -6,13 +6,15 @@ import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import { NotFoundError } from '../../postgres/postgresErrors'
+import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-import { canOauthWrite } from '../../authorization/oauthAuthorization'
+import { canOauthWrite } from '../../oauth/oauthAuthorization'
+import type { LDService } from '../../launchDarkly/launchDarkly'
 
 export function undoWithdrawRate(
     store: Store,
-    emailer: Emailer
+    emailer: Emailer,
+    launchDarkly: LDService
 ): MutationResolvers['undoWithdrawRate'] {
     return async (_parent, { input }, context) => {
         const { user } = context
@@ -26,8 +28,12 @@ export function undoWithdrawRate(
 
                 const { rateID, updatedReason } = input
 
+                const featureFlags = await launchDarkly.allFlags({
+                    key: context.user.email,
+                })
+
                 // Check OAuth client write permissions
-                if (!canOauthWrite(context)) {
+                if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('undoWithdrawRate', errMessage, context)
                     throw new GraphQLError(errMessage, {

@@ -220,7 +220,7 @@ describe('state user in health plan submission form', () => {
             //singleDocRateCertField.should('exist').attachFile([
             //     'documents/trussel-guide.pdf',
             // ])
-            // cy.findByText('Duplicate file, please remove').should('not.exist')
+            // cy.findByText('You already added a file with this name and extension. Remove one.').should('not.exist')
 
             multiSuppportingDocsField.attachFile([
                 'documents/trussel-guide.pdf',
@@ -241,7 +241,7 @@ describe('state user in health plan submission form', () => {
             // Add one more file, a duplicate
             multiSuppportingDocsField.attachFile('documents/trussel-guide.pdf')
             // Files show correct loading states then complete
-            cy.findByText('Duplicate file, please remove').should('exist')
+            cy.findByText('You already added a file with this name and extension. Remove one.').should('exist')
 
             cy.findAllByTestId('file-input-preview-list')
                 .last()

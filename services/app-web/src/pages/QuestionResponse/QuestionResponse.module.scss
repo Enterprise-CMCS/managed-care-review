@@ -6,6 +6,13 @@
     width: 100%;
 }
 
+// Matches the Required/Optional indicator used by FieldTextarea in the state
+// submission forms, for required fields on the plain-state admin Q&A form.
+.requiredOptionalText {
+    display: block;
+    color: custom.$mcr-foundation-hint;
+}
+
 .container {
     max-width: custom.$mcr-container-standard-width-fixed;
     padding-bottom: 2rem;
@@ -73,6 +80,22 @@
     background: none;
     margin: uswds.units(2) auto;
 }
+.selectedUserSummary {
+    margin-bottom: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.selectedUserLabel {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+}
+
+.selectedUserAddress {
+    font-style: normal;
+}
+
 .formContainer {
     > [class^='usa-fieldset'] {
         padding: uswds.units(4);

@@ -10,7 +10,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { z } from 'zod'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
 
 // Zod schemas to parse the updatedRates param since the types are not fully defined in GQL

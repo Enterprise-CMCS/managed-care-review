@@ -31,7 +31,7 @@ jobs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 
@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 
@@ -118,7 +118,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 
@@ -164,7 +164,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 
@@ -195,7 +195,7 @@ jobs:
       name: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 
@@ -242,7 +242,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 
@@ -416,7 +416,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 
@@ -461,14 +461,6 @@ jobs:
           pnpm tsc
           node ./add_cypress_test_users_cdk.js dev $TEST_USERS_PASS
 
-      - name: Run database migrations
-        env:
-          STAGE_NAME: dev
-        run: |
-          echo "=== Running database migrations ==="
-          cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
-
   deploy-frontend-app-dev:
     needs:
       [
@@ -492,7 +484,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 
@@ -561,7 +553,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
 

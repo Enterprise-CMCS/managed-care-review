@@ -9,8 +9,10 @@ export type { UndoUnlockContractArgsType } from './undoUnlockContract'
 export type { UpdateMCCRSIDFormArgsType } from './updateMCCRSID'
 export type { SubmitContractArgsType } from './submitContract'
 export type { SubmitRateArgsType } from './submitRate'
+export type { OverrideContractDataArgsType } from './overrideContractData'
 export { submitContract } from './submitContract'
 export { submitRate } from './submitRate'
+export { overrideContractData } from './overrideContractData'
 export {
     unlockContract,
     unlockContractInsideTransaction,
@@ -20,6 +22,7 @@ export { approveContract } from './approveContract'
 export { reverseApproveContract } from './reverseApproveContract'
 export { undoUnlockContract } from './undoUnlockContract'
 export { findContractWithHistory } from './findContractWithHistory'
+export { findSubmissionHistoryByContractID } from './findSubmissionHistoryByContractID'
 export { updateDraftContractFormData as updateDraftContractWithRates } from './updateDraftContractWithRates'
 export { updateMCCRSID } from './updateMCCRSID'
 export { findAllContractsWithHistoryByState } from './findAllContractsWithHistoryByState'

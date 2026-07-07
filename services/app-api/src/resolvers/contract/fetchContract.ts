@@ -7,7 +7,7 @@ import {
     hasCMSPermissions,
     hasAdminPermissions,
 } from '../../domain-models'
-import { canRead } from '../../authorization/oauthAuthorization'
+import { canRead } from '../../oauth/oauthAuthorization'
 import { logResolverError, logResolverSuccess } from '../../logger'
 
 export function fetchContractResolver(

@@ -1,0 +1,25 @@
+fragment contractOverridesFragment on ContractOverrideType {
+    id
+    createdAt
+    updatedBy {
+        ...adminUserFragment
+    }
+    description
+    overrides {
+        initiallySubmittedAt
+        initiallySubmittedAtOp
+        revisionOverride {
+            id
+            createdAt
+            contractRevisionID
+            contractType
+            contractTypeOp
+            contractDocuments {
+                ...genericDocumentOverrideFragment
+            }
+            supportingDocuments {
+                ...genericDocumentOverrideFragment
+            }
+        }
+    }
+}

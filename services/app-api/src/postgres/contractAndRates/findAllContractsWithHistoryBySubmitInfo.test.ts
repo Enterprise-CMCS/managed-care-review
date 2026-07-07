@@ -546,4 +546,80 @@ describe('findAllContractsWithHistoryBySubmitInfo - with query params', () => {
         expect(augmented.latestQuestionResponseCreatedAt).toBeUndefined()
         expect(augmented.latestRateQuestionResponseCreatedAt).toBeUndefined()
     })
+
+    it('filters by stored lastActionDate when filterLastActionDateAfter is provided', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Mai',
+                familyName: 'Knife',
+                email: `mai-${uuidv4()}@example.com`,
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+
+        const oldDraft = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({ submissionDescription: 'old action' })
+            )
+        )
+        const recentDraft = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({
+                    submissionDescription: 'recent action',
+                })
+            )
+        )
+
+        const oldContract = must(
+            await submitContract(client, {
+                contractID: oldDraft.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'old submit',
+            })
+        )
+        const recentContract = must(
+            await submitContract(client, {
+                contractID: recentDraft.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'recent submit',
+            })
+        )
+
+        const cutoff = new Date('2026-01-01T00:00:00.000Z')
+        await client.contractTable.update({
+            where: {
+                id: oldContract.id,
+            },
+            data: {
+                lastActionDate: new Date('2025-12-31T23:59:59.000Z'),
+            },
+        })
+        await client.contractTable.update({
+            where: {
+                id: recentContract.id,
+            },
+            data: {
+                lastActionDate: new Date('2026-01-01T00:00:01.000Z'),
+            },
+        })
+
+        const results = must(
+            await findAllContractsWithHistoryBySubmitInfo(
+                client,
+                true,
+                true,
+                cutoff
+            )
+        )
+        const resultIDs = results.map((r) => r.contractID)
+
+        expect(resultIDs).toContain(recentContract.id)
+        expect(resultIDs).not.toContain(oldContract.id)
+    })
 })

@@ -4,7 +4,8 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
+import { getAvailableOAuthScopesForUserRole } from '@mc-review/common-code'
 
 export function createOauthClientResolver(
     store: Store
@@ -37,7 +38,7 @@ export function createOauthClientResolver(
                     throw createForbiddenError(msg)
                 }
 
-                // Validate that the provided userID exists and is a valid CMS user
+                // Validate that the provided userID exists and is eligible for OAuth association.
                 const targetUser = await store.findUser(input.userID)
                 if (targetUser instanceof Error) {
                     logResolverError(
@@ -62,14 +63,28 @@ export function createOauthClientResolver(
                     )
                 }
 
-                // Ensure the target user is a CMS user (CMSUser or CMSApproverUser)
+                // Ensure the target user is a CMS, CMS approver, or admin user.
                 if (
                     targetUser.role !== 'CMS_USER' &&
-                    targetUser.role !== 'CMS_APPROVER_USER'
+                    targetUser.role !== 'CMS_APPROVER_USER' &&
+                    targetUser.role !== 'ADMIN_USER'
                 ) {
-                    const msg = `OAuth clients can only be associated with CMS users`
+                    const msg = `OAuth clients can only be associated with CMS or admin users`
                     logResolverError('createOauthClient', msg, context)
                     throw createUserInputError(msg, 'userID')
+                }
+
+                const availableScopes = getAvailableOAuthScopesForUserRole(
+                    targetUser.role
+                )
+                if (
+                    input.scopes?.some(
+                        (scope) => !availableScopes.includes(scope)
+                    )
+                ) {
+                    const msg = `OAuth scopes are not valid for the selected user role`
+                    logResolverError('createOauthClient', msg, context)
+                    throw createUserInputError(msg, 'scopes')
                 }
 
                 const oauthClient = await store.createOAuthClient({

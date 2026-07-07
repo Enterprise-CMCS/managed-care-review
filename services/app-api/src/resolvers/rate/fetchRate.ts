@@ -10,7 +10,7 @@ import {
 } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
-import { canRead } from '../../authorization/oauthAuthorization'
+import { canRead } from '../../oauth/oauthAuthorization'
 
 export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
     return async (_parent, { input }, context) => {

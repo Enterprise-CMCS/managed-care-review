@@ -5,7 +5,9 @@ import type {
     StrippedRateRevisionType,
     ContractPackageSubmissionType,
     RatePackageSubmissionType,
+    RateUndoUnlockPackageType,
 } from '../../domain-models'
+import { z } from 'zod'
 import { rateSchema } from '../../domain-models/contractAndRates'
 import type { RateWithoutDraftContractsType } from '../../domain-models/contractAndRates/baseContractRateTypes'
 import {
@@ -26,8 +28,10 @@ import {
     getParentContractID,
     DRAFT_PARENT_PLACEHOLDER,
     isDraftRevision,
+    isReversedUnlockedRevision,
     isSubmittedRevision,
 } from './prismaSharedContractRateHelpers'
+import { mergeScalarFieldOverrides } from '../prismaOverrideMergeHelpers'
 import type {
     RateTableWithoutDraftContractsPayload,
     RateTableWithoutDraftContractsStrippedPayload,
@@ -81,6 +85,7 @@ function rateRevisionToDomainModel(
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
+        undoUnlockInfo: convertUpdateInfoToDomainModel(revision.undoUnlockInfo),
         formData,
     }
 }
@@ -112,6 +117,8 @@ function rateOverridesToDomainModel(
                 overrides: {
                     initiallySubmittedAt:
                         override.initiallySubmittedAt ?? undefined,
+                    initiallySubmittedAtOp:
+                        override.initiallySubmittedAtOp ?? undefined,
                     revisionOverride: revisionOverride
                         ? {
                               id: revisionOverride.id,
@@ -120,14 +127,32 @@ function rateOverridesToDomainModel(
                               rateDocuments: revisionOverride.rateDocuments.map(
                                   (doc) => ({
                                       ...doc,
+                                      documentID: doc.documentID ?? undefined,
+                                      name: doc.name ?? undefined,
+                                      sha256: doc.sha256 ?? undefined,
+                                      s3URL: doc.s3URL ?? undefined,
+                                      s3BucketName:
+                                          doc.s3BucketName ?? undefined,
+                                      s3Key: doc.s3Key ?? undefined,
                                       dateAdded: doc.dateAdded ?? undefined,
+                                      dateAddedOp: doc.dateAddedOp ?? undefined,
                                   })
                               ),
-                              supportingDocument:
+                              supportingDocuments:
                                   revisionOverride.supportingDocuments.map(
                                       (doc) => ({
                                           ...doc,
+                                          documentID:
+                                              doc.documentID ?? undefined,
+                                          name: doc.name ?? undefined,
+                                          sha256: doc.sha256 ?? undefined,
+                                          s3URL: doc.s3URL ?? undefined,
+                                          s3BucketName:
+                                              doc.s3BucketName ?? undefined,
+                                          s3Key: doc.s3Key ?? undefined,
                                           dateAdded: doc.dateAdded ?? undefined,
+                                          dateAddedOp:
+                                              doc.dateAddedOp ?? undefined,
                                       })
                                   ),
                           }
@@ -176,6 +201,7 @@ function rateWithoutDraftContractsToDomainModel(
     // New C+R package history code
     // Every revision has a set of submissions it was part of.
     const packageSubmissions: RatePackageSubmissionType[] = []
+    const undoUnlockPackages: RateUndoUnlockPackageType[] = []
     for (const revision of rate.revisions) {
         for (const submission of revision.relatedSubmissions) {
             // submittedThings
@@ -221,6 +247,26 @@ function rateWithoutDraftContractsToDomainModel(
                 contractRevisions,
             })
         }
+
+        if (isReversedUnlockedRevision(revision)) {
+            const undoUnlockInfo = convertUpdateInfoToDomainModel(
+                revision.undoUnlockInfo
+            )
+
+            if (!undoUnlockInfo) {
+                return new Error(
+                    `PROGRAMMING ERROR: reversed unlocked rate revision ${revision.id} is missing undo unlock info`
+                )
+            }
+
+            // This only includes the draft rate snapshot so we do not make this
+            // query larger. To fetch draft contract revision snapshots, do it
+            // in the field resolver only if the query requests the data.
+            undoUnlockPackages.push({
+                undoUnlockInfo,
+                draftRateRevisionSnapshot: rateRevisionToDomainModel(revision),
+            })
+        }
     }
 
     const parentContractID = getParentContractID(rateRevisions)
@@ -237,6 +283,8 @@ function rateWithoutDraftContractsToDomainModel(
         id: rate.id,
         createdAt: rate.createdAt,
         updatedAt: rate.updatedAt,
+        lastActionDate:
+            (rate as { lastActionDate?: Date | null }).lastActionDate ?? null,
         status,
         reviewStatus,
         consolidatedStatus,
@@ -246,6 +294,7 @@ function rateWithoutDraftContractsToDomainModel(
         draftRevision,
         revisions: submittedRevisions.reverse(),
         packageSubmissions: packageSubmissions.reverse(),
+        undoUnlockPackages: undoUnlockPackages.reverse(),
         reviewStatusActions: rate.reviewStatusActions.reverse(),
         rateOverrides: rateOverridesToDomainModel(rate.rateOverrides),
     }
@@ -388,11 +437,22 @@ function strippedRateWithoutDraftContractsToDomainModel(
 
     const submittedRevisionsDescending = submittedRevisions.reverse()
 
-    const latestOverride = rateOverridesToDomainModel(rate.rateOverrides)[0]
+    const initiallySubmittedAtOverride = mergeScalarFieldOverrides<
+        Date,
+        RateTableWithoutDraftContractsStrippedPayload['rateOverrides'][number]
+    >({
+        rows: rate.rateOverrides,
+        getOperation: (row) => row.initiallySubmittedAtOp,
+        getValue: (row) => row.initiallySubmittedAt,
+        valueSchema: z.date(),
+        fieldPath: 'RateOverrides.initiallySubmittedAt',
+    })
 
     // Use override or calculate initial rate submission.
     const initiallySubmittedAt =
-        latestOverride?.overrides.initiallySubmittedAt ||
+        (initiallySubmittedAtOverride.hasOverride
+            ? initiallySubmittedAtOverride.value
+            : undefined) ||
         submittedRevisionsDescending[submittedRevisionsDescending.length - 1]
             .submitInfo?.updatedAt
 
@@ -400,6 +460,8 @@ function strippedRateWithoutDraftContractsToDomainModel(
         id: rate.id,
         createdAt: rate.createdAt,
         updatedAt: rate.updatedAt,
+        lastActionDate:
+            (rate as { lastActionDate?: Date | null }).lastActionDate ?? null,
         initiallySubmittedAt,
         status,
         reviewStatus,
@@ -461,6 +523,7 @@ export {
     rateRevisionToDomainModel,
     rateWithHistoryToDomainModel,
     rateWithoutDraftContractsToDomainModel,
+    rateOverridesToDomainModel,
     parseStrippedRateWithHistory,
     strippedRateToDomainModel,
     strippedRateWithoutDraftContractsToDomainModel,

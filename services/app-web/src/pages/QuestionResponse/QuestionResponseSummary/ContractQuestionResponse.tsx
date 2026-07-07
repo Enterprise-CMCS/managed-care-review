@@ -16,7 +16,10 @@ import {
 } from '../../../gen/gqlClient'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
-import { extractQuestions, getUserDivision } from '../QuestionResponseHelpers'
+import {
+    allQuestionsAnswered,
+    getUserDivision,
+} from '../QuestionResponseHelpers'
 import { CMSQuestionResponseTable } from '../QATable/CMSQuestionResponseTable'
 import { StateQuestionResponseTable } from '../QATable/StateQuestionResponseTable'
 import { ErrorOrLoadingPage } from '../../StateSubmission'
@@ -82,11 +85,7 @@ export const ContractQuestionResponse = () => {
         division = getUserDivision(loggedInUser as CmsUser)
     }
 
-    const canAddQuestions = contract.questions
-        ? extractQuestions(contract.questions).every(
-              (question) => question.responses.length > 0
-          )
-        : false
+    const canAddQuestions = allQuestionsAnswered(contract.questions)
 
     return (
         <div className={styles.background} id={activeMainContentId}>

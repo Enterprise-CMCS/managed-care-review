@@ -4,7 +4,10 @@ import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
 import {
     createContractQuestionResolver,
+    adminCreateContractQuestionResolver,
+    adminCreateContractQuestionResponseResolver,
     deleteContractQuestionResolver,
+    deleteContractQuestionResponseResolver,
     createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
     createRateQuestionResolver,
@@ -34,9 +37,11 @@ import {
     unlockRate,
     withdrawRate,
     undoWithdrawRate,
+    overrideRateData,
 } from './rate'
 import { genericDocumentResolver } from './shared/genericDocumentResolver'
 import { updateContract } from './contract/updateContract'
+import { overrideContractData } from './contract/overrideContractData'
 import { indexContractsResolver } from './contract/indexContracts'
 import { indexContractsStripped } from './contract/indexContractsStripped'
 import { unlockContractResolver } from './contract/unlockContract'
@@ -51,6 +56,7 @@ import {
     contractRevisionStrippedResolver,
 } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
+import { fetchSubmissionHistoryResolver } from './contract/fetchSubmissionHistory'
 import { submitContract } from './contract/submitContract'
 import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
@@ -88,7 +94,7 @@ export function configureResolvers(
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),
-            indexContracts: indexContractsResolver(store),
+            indexContracts: indexContractsResolver(store, launchDarkly),
             indexContractsStripped: indexContractsStripped(store),
             indexUsers: indexUsersResolver(store),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
@@ -98,6 +104,7 @@ export function configureResolvers(
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
+            fetchSubmissionHistory: fetchSubmissionHistoryResolver(store),
             fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {
@@ -107,7 +114,11 @@ export function configureResolvers(
                 launchDarkly,
                 documentZip
             ),
-            unlockContract: unlockContractResolver(store, emailer),
+            unlockContract: unlockContractResolver(
+                store,
+                emailer,
+                launchDarkly
+            ),
             createContract: createContract(store),
             updateContract: updateContract(store),
             updateContractDraftRevision: updateContractDraftRevision(
@@ -115,25 +126,43 @@ export function configureResolvers(
                 launchDarkly
             ),
             updateDraftContractRates: updateDraftContractRates(store),
-            approveContract: approveContract(store),
-            reverseApproveContract: reverseApproveContract(store),
-            undoUnlockContract: undoUnlockContract(store),
-            withdrawContract: withdrawContract(store, emailer, documentZip),
+            approveContract: approveContract(store, launchDarkly),
+            reverseApproveContract: reverseApproveContract(store, launchDarkly),
+            undoUnlockContract: undoUnlockContract(store, launchDarkly),
+            withdrawContract: withdrawContract(
+                store,
+                emailer,
+                documentZip,
+                launchDarkly
+            ),
             undoWithdrawContract: undoWithdrawContract(
                 store,
                 emailer,
-                documentZip
+                documentZip,
+                launchDarkly
             ),
-            withdrawRate: withdrawRate(store, emailer),
-            undoWithdrawRate: undoWithdrawRate(store, emailer),
+            withdrawRate: withdrawRate(store, emailer, launchDarkly),
+            undoWithdrawRate: undoWithdrawRate(store, emailer, launchDarkly),
+            overrideContractData: overrideContractData(store),
+            overrideRateData: overrideRateData(store),
             updateDivisionAssignment: updateDivisionAssignment(store),
             updateStateAssignment: updateStateAssignment(store),
             updateStateAssignmentsByState: updateStateAssignmentsByState(store),
             createContractQuestion: createContractQuestionResolver(
                 store,
-                emailer
+                emailer,
+                launchDarkly
             ),
-            deleteContractQuestion: deleteContractQuestionResolver(store),
+            deleteContractQuestion: deleteContractQuestionResolver(
+                store,
+                launchDarkly
+            ),
+            deleteContractQuestionResponse:
+                deleteContractQuestionResponseResolver(store),
+            adminCreateContractQuestion:
+                adminCreateContractQuestionResolver(store),
+            adminCreateContractQuestionResponse:
+                adminCreateContractQuestionResponseResolver(store),
             createContractQuestionResponse:
                 createContractQuestionResponseResolver(store, emailer),
             createRateQuestion: createRateQuestionResolver(store, emailer),
@@ -147,7 +176,11 @@ export function configureResolvers(
             createOauthClient: createOauthClientResolver(store),
             deleteOauthClient: deleteOauthClientResolver(store),
             updateOauthClient: updateOauthClientResolver(store),
-            generateUploadURL: generateUploadURLResolver(store, s3Client),
+            generateUploadURL: generateUploadURLResolver(
+                store,
+                s3Client,
+                launchDarkly
+            ),
         },
         User: {
             // resolveType is required to differentiate Unions
@@ -173,8 +206,23 @@ export function configureResolvers(
             __resolveType(obj) {
                 if (obj.role === 'CMS_USER') {
                     return 'CMSUser'
-                } else {
+                } else if (obj.role === 'CMS_APPROVER_USER') {
                     return 'CMSApproverUser'
+                } else {
+                    return null
+                }
+            },
+        },
+        OAuthUser: {
+            __resolveType(obj) {
+                if (obj.role === 'CMS_USER') {
+                    return 'CMSUser'
+                } else if (obj.role === 'CMS_APPROVER_USER') {
+                    return 'CMSApproverUser'
+                } else if (obj.role === 'ADMIN_USER') {
+                    return 'AdminUser'
+                } else {
+                    return null
                 }
             },
         },
@@ -196,9 +244,13 @@ export function configureResolvers(
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
         RateQuestion: questionResolver(store),
-        ContractStripped: contractStrippedResolver(),
-        Contract: contractResolver(store, applicationEndpoint),
-        UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
+        ContractStripped: contractStrippedResolver(launchDarkly),
+        Contract: contractResolver(store, applicationEndpoint, launchDarkly),
+        UnlockedContract: unlockedContractResolver(
+            store,
+            applicationEndpoint,
+            launchDarkly
+        ),
         ContractRevision: contractRevisionResolver(store),
         ContractRevisionStripped: contractRevisionStrippedResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),

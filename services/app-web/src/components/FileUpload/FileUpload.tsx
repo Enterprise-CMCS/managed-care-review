@@ -105,7 +105,10 @@ export const FileUpload = ({
                 status: 'PENDING',
             }
 
-            if (isDuplicateItem(fileItems, newItem)) {
+            // Single-upload fields replace their file on each add, so a repeat
+            // upload is just a replacement, not a duplicate. Only flag duplicate
+            // names when multiple uploads are allowed.
+            if (allowMultipleUploads && isDuplicateItem(fileItems, newItem)) {
                 newItem.status = 'DUPLICATE_NAME_ERROR'
             }
 

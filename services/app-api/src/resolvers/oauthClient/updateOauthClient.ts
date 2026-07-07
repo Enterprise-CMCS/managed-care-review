@@ -3,10 +3,11 @@ import type { Store } from '../../postgres'
 import type { Context } from '../../handlers/apollo_gql'
 import type { OAuthScope } from '../../generated/enums'
 import { logResolverError, logResolverSuccess } from '../../logger'
-import { createForbiddenError } from '../errorUtils'
+import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { canWrite } from '../../authorization/oauthAuthorization'
+import { canWrite } from '../../oauth/oauthAuthorization'
+import { getAvailableOAuthScopesForUserRole } from '@mc-review/common-code'
 
 export function updateOauthClientResolver(
     store: Store
@@ -38,6 +39,45 @@ export function updateOauthClientResolver(
                         'user not authorized to update OAuth clients'
                     logResolverError('updateOauthClient', message, context)
                     throw createForbiddenError(message)
+                }
+
+                if (input.scopes && input.scopes.length > 0) {
+                    const oauthClient = await store.getOAuthClientByClientId(
+                        input.clientId
+                    )
+
+                    if (oauthClient instanceof Error) {
+                        const message = `Failed to fetch OAuth client: ${oauthClient.message}`
+                        logResolverError('updateOauthClient', message, context)
+                        throw new GraphQLError(message, {
+                            extensions: {
+                                code: 'INTERNAL_SERVER_ERROR',
+                                cause: 'DB_ERROR',
+                            },
+                        })
+                    }
+
+                    if (!oauthClient) {
+                        throw new GraphQLError('OAuth client not found', {
+                            extensions: {
+                                code: 'NOT_FOUND',
+                                cause: 'CLIENT_NOT_FOUND',
+                            },
+                        })
+                    }
+
+                    const availableScopes = getAvailableOAuthScopesForUserRole(
+                        oauthClient.user.role
+                    )
+                    if (
+                        input.scopes.some(
+                            (scope) => !availableScopes.includes(scope)
+                        )
+                    ) {
+                        const message = `OAuth scopes are not valid for the selected user role`
+                        logResolverError('updateOauthClient', message, context)
+                        throw createUserInputError(message, 'scopes')
+                    }
                 }
 
                 // Build update data object with only provided fields

@@ -307,6 +307,7 @@ describe('sendUndoWithdrawnRateCMSEmail error handling', () => {
                             }),
                         },
                         unlockInfo: undefined,
+                        undoUnlockInfo: undefined,
                         createdAt: new Date('2025-03-05'),
                         updatedAt: new Date('2025-03-05'),
                         formData: {

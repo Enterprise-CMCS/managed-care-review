@@ -1,0 +1,5 @@
+BEGIN;
+-- AlterEnum
+ALTER TYPE "QuestionActionType" ADD VALUE 'ADMIN_CREATE';
+
+COMMIT;

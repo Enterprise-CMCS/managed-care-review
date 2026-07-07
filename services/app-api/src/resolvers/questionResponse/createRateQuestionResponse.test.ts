@@ -14,6 +14,7 @@ import { assertAnError, assertAnErrorCode, must } from '../../testHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { CreateRateQuestionResponseDocument } from '../../gen/gqlClient'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createRateQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -40,6 +41,20 @@ describe('createRateQuestionResponse', () => {
             stateServer,
             question.id
         )
+        const responseCreatedAt = questionWithResponse.responses[0].createdAt
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rateTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateID },
+            select: { lastActionDate: true },
+        })
+        expect(rateTableRow?.lastActionDate).toEqual(responseCreatedAt)
+
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contractWithRate.id },
+            select: { lastActionDate: true },
+        })
+        expect(contractTableRow?.lastActionDate).toEqual(responseCreatedAt)
 
         expect(questionWithResponse).toEqual(
             expect.objectContaining({

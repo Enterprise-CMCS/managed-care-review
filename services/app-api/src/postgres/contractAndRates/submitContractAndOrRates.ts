@@ -5,6 +5,10 @@ import type {
     RateRevisionTable,
 } from '../../generated/client'
 import { getLatestActiveRevision } from './prismaSharedContractRateHelpers'
+import {
+    mergeContractDocumentOverrides,
+    mergeRateRevisionOverrides,
+} from '../prismaOverrideMergeHelpers'
 
 const includeContractRevWithOnlyDocs = {
     submitInfo: true,
@@ -16,6 +20,24 @@ const includeContractRevWithOnlyDocs = {
     supportingDocuments: {
         orderBy: {
             position: 'asc',
+        },
+    },
+    revisionOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            contractRevisionID: true,
+            contractType: true,
+            contractTypeOp: true,
+            // These document override rows are needed when resubmitting an
+            // unlocked contract. Unlock materializes override-added docs into
+            // the draft, but previous submitted revisions still carry the
+            // override history that determines the original effective dateAdded.
+            contractDocuments: true,
+            supportingDocuments: true,
         },
     },
 } satisfies Prisma.ContractRevisionTableInclude
@@ -73,28 +95,53 @@ async function submitContractAndOrRates(
         // order. We need to find the first time docs are submitted.
         const previousRevisions = allRevisions.slice(1).reverse()
 
-        // Collect first date added for our documents from previous submissions
+        // Build a first-submitted date lookup by document sha. Previous
+        // revisions may have submitted document overrides, so merge those
+        // override rows before reading dateAdded. This prevents resubmit from
+        // losing the original effective dateAdded for override-added or
+        // override-updated documents.
         const prevDocs: { [key: string]: Date | undefined } = {}
         for (const rev of previousRevisions) {
-            const allRevDocs = [
-                ...rev.contractDocuments,
-                ...rev.supportingDocuments,
+            const docKinds = [
+                {
+                    docs: rev.contractDocuments,
+                    overrides: (rev.revisionOverrides ?? []).flatMap(
+                        (override) => override.contractDocuments
+                    ),
+                },
+                {
+                    docs: rev.supportingDocuments,
+                    overrides: (rev.revisionOverrides ?? []).flatMap(
+                        (override) => override.supportingDocuments
+                    ),
+                },
             ]
-            allRevDocs.forEach((doc) => {
-                if (!prevDocs[doc.sha256]) {
-                    if (!doc.dateAdded && !rev.submitInfo?.updatedAt) {
-                        return new Error(
-                            'error attempting to set contracts document date added. A previous submission document has no date added or submitted date.'
-                        )
+            for (const { docs, overrides } of docKinds) {
+                // Contract docs and supporting docs are separate arrays, so
+                // merge each array independently before recording first-seen
+                // dateAdded values.
+                const effectiveDocs = mergeContractDocumentOverrides(
+                    docs,
+                    overrides,
+                    rev.id
+                )
+                for (const doc of effectiveDocs) {
+                    if (prevDocs[doc.sha256]) continue
+                    const effective = doc.dateAdded ?? rev.submitInfo?.updatedAt
+                    if (!effective) {
+                        // Preserve pre-existing behavior: skip docs with no
+                        // dateAdded source. Final update step will fall back
+                        // to currentDateTime.
+                        continue
                     }
-                    prevDocs[doc.sha256] =
-                        doc.dateAdded ?? rev.submitInfo?.updatedAt
+                    prevDocs[doc.sha256] = effective
                 }
-            })
+            }
         }
 
-        // Update the contract to include the submitInfo ID and set date added.
-        // doc dateAdded defaults to the first submission of this document, then fallback to current date time.
+        // Stamp the draft revision as submitted and write effective dateAdded.
+        // Existing docs keep the earliest effective date from previous
+        // submissions; newly submitted docs fall back to this submit time.
         await tx.contractRevisionTable.update({
             where: {
                 id: submittedContractRev.id,
@@ -184,7 +231,6 @@ async function submitContractAndOrRates(
                 },
             },
             revisionOverrides: {
-                // Get overrides for revision to apply to submitted revision.
                 orderBy: {
                     createdAt: 'desc',
                 },
@@ -192,6 +238,9 @@ async function submitContractAndOrRates(
                     id: true,
                     createdAt: true,
                     rateRevisionID: true,
+                    // Previous submitted rate revisions may have document
+                    // overrides that affect effective dateAdded. Include them
+                    // so we can rebuild the effective document arrays below.
                     rateDocuments: true,
                     supportingDocuments: true,
                 },
@@ -202,63 +251,65 @@ async function submitContractAndOrRates(
         },
     })
 
-    // hashmap of unique docs by sha256 and dateAdded.
-    // key of property is formatted as rateID-sha256. This narrows documents to the rate it was uploaded on.
+    // Build a first-submitted date lookup for rate documents. The key includes
+    // rateID because the same file sha can appear on multiple rates and should
+    // not share dateAdded history across rates.
     const prevRateDocs: { [key: string]: Date | undefined } = {}
     for (const rev of previousSubmissions) {
-        const allRevDocs = [...rev.rateDocuments, ...rev.supportingDocuments]
+        // Merge the full previous rate revision override history before reading
+        // documents. This makes resubmit preserve dateAdded from override-added
+        // or override-updated documents on earlier submissions.
+        const mergedRateOverride = mergeRateRevisionOverrides({
+            revisionOverrides: rev.revisionOverrides ?? [],
+            rateRevision: rev,
+        })
 
-        //Gather all rate document overrides
-        const rateDocumentOverrides =
-            rev.revisionOverrides?.[0]?.rateDocuments ?? []
-        const supportingDocumentOverrides =
-            rev.revisionOverrides?.[0]?.supportingDocuments ?? []
-
-        const overrideDocs = [
-            ...rateDocumentOverrides,
-            ...supportingDocumentOverrides,
+        // Process each document array independently. Rate documents and
+        // supporting documents have the same merge rules, but they should not
+        // affect each other's first-submitted date lookup.
+        const docKinds = [
+            {
+                docs: mergedRateOverride.rateDocuments,
+            },
+            {
+                docs: mergedRateOverride.supportingDocuments,
+            },
         ]
 
-        allRevDocs.forEach((doc) => {
-            const hashKey = `${rev.rateID}-${doc.sha256}`
-            // set date to current documents dateAdded
-            let dateAdded: Date | null | undefined = doc.dateAdded
-            const docOverride = overrideDocs.find(
-                (overrideDoc) => overrideDoc.documentID === doc.id
-            )
+        for (const { docs } of docKinds) {
+            for (const doc of docs) {
+                const hashKey = `${rev.rateID}-${doc.sha256}`
+                let dateAdded: Date | null | undefined = doc.dateAdded
 
-            // Use override dateAdded if it exists
-            if (docOverride?.dateAdded) {
-                dateAdded = docOverride.dateAdded
-            }
+                // If both do not exist, use the revision submitted at date.
+                if (!dateAdded) {
+                    dateAdded = rev.submitInfo?.updatedAt
+                }
 
-            // If both do not exist, use the revision submitted at date.
-            if (!dateAdded) {
-                dateAdded = rev.submitInfo?.updatedAt
-            }
+                if (!dateAdded) {
+                    return new Error(
+                        `error attempting to set rate documents date added. A previous submission document has no date added or submitted date. Rate: ${rev.rateID} Revision: ${rev.id}`
+                    )
+                }
 
-            if (!dateAdded) {
-                return new Error(
-                    `error attempting to set rate documents date added. A previous submission document has no date added or submitted date. Rate: ${rev.rateID} Revision: ${rev.id}`
-                )
-            }
-
-            // If no previous date, then use the date we parsed out
-            if (!prevRateDocs[hashKey]) {
-                prevRateDocs[hashKey] = dateAdded
-            } else {
-                // If there is a previous date, then override it if parsed dateAdded is earlier
-                // Revision are in ascending order, but overrides can be earlier so we need to
-                // check which on is earlier.
-                if (prevRateDocs[hashKey]?.getTime() > dateAdded.getTime()) {
+                // If no previous date, then use the date we parsed out
+                if (!prevRateDocs[hashKey]) {
+                    prevRateDocs[hashKey] = dateAdded
+                } else if (
+                    prevRateDocs[hashKey]!.getTime() > dateAdded.getTime()
+                ) {
+                    // If there is a previous date, then override it if parsed
+                    // dateAdded is earlier. Revisions are in ascending order,
+                    // but overrides can be earlier so we need to check.
                     prevRateDocs[hashKey] = dateAdded
                 }
             }
-        })
+        }
     }
 
-    // Loop through each rate rev and add submit info and document date added.
-    // Fallback on submission date if this doc was not previously submitted.
+    // Stamp each draft rate revision as submitted and write effective
+    // dateAdded. Existing docs keep the earliest effective date from previous
+    // submissions; newly submitted docs fall back to this submit time.
     for (const rev of submittedRateRevs) {
         await tx.rateRevisionTable.update({
             where: {
@@ -296,6 +347,12 @@ async function submitContractAndOrRates(
 
     const submissionRelatedContractRevs: ContractRevisionTable[] = []
     const submissionRelatedRateRevs: RateRevisionTable[] = []
+    const rateRelationshipChangeRevs: RateRevisionTable[] = []
+    // Related contracts are not submitted by this transaction, but a submitted
+    // child rate can still change the submitted rate data they show. Track those
+    // contract IDs so their stored lastActionDate matches LINKED_RATE_UPDATE
+    // entries produced from package history.
+    const linkedContractIDsForSubmittedRateUpdates: string[] = []
 
     const linksToCreate: {
         rateRevID: string
@@ -331,27 +388,6 @@ async function submitContractAndOrRates(
             },
         })
         const theseDraftRateIDs = draftRates.map((r) => r.rateID)
-        for (const draftRateJoin of draftRates) {
-            const draftRate = draftRateJoin.rate
-            const draftRateRev = draftRate.revisions[0]
-            if (!draftRateRev) {
-                const msg = `attempted to submit connected to an UNsubmitted rate. contractID: ${contractID} rateID: ${draftRate.id}`
-                console.error(msg)
-                return new Error(msg)
-            }
-
-            // if not a newly submitted rate, add it to related rates.
-            if (draftRateRev.submitInfoID !== submitInfo.id) {
-                submissionRelatedRateRevs.push(draftRateRev)
-            }
-
-            // add a link.
-            linksToCreate.push({
-                contractRevID: submittedContractRev.id,
-                rateRevID: draftRateRev.id,
-                ratePosition: draftRateJoin.ratePosition,
-            })
-        }
 
         // -- get previous connections, disconnected rate: mark related
         const prevRelatedSubmission = await tx.updateInfoTable.findFirst({
@@ -378,6 +414,42 @@ async function submitContractAndOrRates(
                 },
             },
         })
+        const previousRateIDs = new Set(
+            prevRelatedSubmission?.submissionPackages.map(
+                (previousConnection) => previousConnection.rateRevision.rateID
+            ) ?? []
+        )
+
+        for (const draftRateJoin of draftRates) {
+            const draftRate = draftRateJoin.rate
+            const draftRateRev = draftRate.revisions[0]
+            if (!draftRateRev) {
+                const msg = `attempted to submit connected to an UNsubmitted rate. contractID: ${contractID} rateID: ${draftRate.id}`
+                console.error(msg)
+                return new Error(msg)
+            }
+
+            // If not a newly submitted rate, add it to related rates so package
+            // history captures the contract/rate relationship for this submit.
+            if (draftRateRev.submitInfoID !== submitInfo.id) {
+                submissionRelatedRateRevs.push(draftRateRev)
+
+                // Only new links are material rate relationship changes. Rates
+                // that were already linked to this contract get package history,
+                // but their rate lastActionDate should not move for a
+                // contract-only resubmission.
+                if (!previousRateIDs.has(draftRateRev.rateID)) {
+                    rateRelationshipChangeRevs.push(draftRateRev)
+                }
+            }
+
+            // add a link.
+            linksToCreate.push({
+                contractRevID: submittedContractRev.id,
+                rateRevID: draftRateRev.id,
+                ratePosition: draftRateJoin.ratePosition,
+            })
+        }
 
         if (prevRelatedSubmission) {
             for (const previousConnection of prevRelatedSubmission.submissionPackages) {
@@ -388,6 +460,9 @@ async function submitContractAndOrRates(
                 ) {
                     // this previous submission was connected to a now disconnected rate.
                     submissionRelatedRateRevs.push(
+                        previousConnection.rateRevision
+                    )
+                    rateRelationshipChangeRevs.push(
                         previousConnection.rateRevision
                     )
                 }
@@ -620,6 +695,16 @@ async function submitContractAndOrRates(
         }
 
         for (const previousConnection of prevRelatedSubmission.submissionPackages) {
+            if (rateIDs.includes(previousConnection.rateRevision.rateID)) {
+                // This related contract already had the submitted rate in its
+                // previous submitted package. Resubmitting the rate changes the
+                // rate data visible through that contract, so its history will
+                // include LINKED_RATE_UPDATE and lastActionDate must move with it.
+                linkedContractIDsForSubmittedRateUpdates.push(
+                    relatedContract.contractID
+                )
+            }
+
             if (!rateIDs.includes(previousConnection.rateRevision.rateID)) {
                 // this previous submission has a link to be forwarded.
 
@@ -689,6 +774,66 @@ async function submitContractAndOrRates(
             },
         },
     })
+
+    // Update contracts lastActionDate on submit action. Lowest level, so
+    // any store functions, like withdrawContract. calling this will automatically
+    // update the date for this action.
+    if (submittedContractRev) {
+        await tx.contractTable.update({
+            where: {
+                id: submittedContractRev.contractID,
+            },
+            data: {
+                lastActionDate: submitInfo.updatedAt,
+            },
+        })
+    }
+
+    const uniqueLinkedContractIDsForSubmittedRateUpdates = [
+        ...new Set(linkedContractIDsForSubmittedRateUpdates),
+    ]
+
+    if (uniqueLinkedContractIDsForSubmittedRateUpdates.length > 0) {
+        // These contracts already had one of the submitted rates linked in
+        // their previous submitted package. The contract itself did not submit,
+        // but its visible submitted rate data changed, so freshness must move
+        // to the parent submit timestamp.
+        await tx.contractTable.updateMany({
+            where: {
+                id: {
+                    in: uniqueLinkedContractIDsForSubmittedRateUpdates,
+                },
+            },
+            data: {
+                lastActionDate: submitInfo.updatedAt,
+            },
+        })
+    }
+
+    // Update rate lastActionDate only when this submit changes the rate action
+    // log: the rate's own revision was submitted, or this contract submit linked
+    // or unlinked the rate. Already-linked rates still receive package history
+    // above, but a contract-only resubmission does not change the rate's action log.
+    const rateIDsForSubmitLastActionDate = [
+        ...submittedRateRevs.map((revision) => revision.rateID),
+        ...rateRelationshipChangeRevs.map((revision) => revision.rateID),
+    ]
+    const uniqueRateIDsForSubmitLastActionDate = [
+        ...new Set(rateIDsForSubmitLastActionDate),
+    ]
+
+    if (uniqueRateIDsForSubmitLastActionDate.length > 0) {
+        await tx.rateTable.updateMany({
+            where: {
+                id: {
+                    in: uniqueRateIDsForSubmitLastActionDate,
+                },
+            },
+            data: {
+                lastActionDate: submitInfo.updatedAt,
+            },
+        })
+    }
 
     // delete draftRate Connections iff not still connected to other draft revisions.
     // we know that all of these submitted contract + rate pairs can be deleted.

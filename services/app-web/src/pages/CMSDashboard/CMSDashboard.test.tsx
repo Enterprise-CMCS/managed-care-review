@@ -239,8 +239,8 @@ describe('CMSDashboard', () => {
                         reviewStatus: 'APPROVED',
                     })
                     // post implementation of creating default status filter for CMS users
-                    // #filters= is the default hash to use no filters
-                    window.location.assign('#filters=')
+                    // ?filters= is the default query param to use no filters
+                    window.history.replaceState({}, '', '?filters=')
 
                     const submissions = [unlocked, submitted, approved]
                     renderWithProviders(<CMSDashboardNestedRoutes />, {

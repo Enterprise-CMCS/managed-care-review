@@ -28,7 +28,7 @@ jobs:
       deploy-id: ${{ steps.ghdeployment.outputs.deployment_id }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Check for secrets
         uses: ./.github/actions/check_secrets
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -115,7 +115,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -159,7 +159,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -188,7 +188,7 @@ jobs:
       name: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -235,7 +235,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -339,6 +339,17 @@ jobs:
             --context stage=dev \
             --require-approval never
 
+      - name: Deploy Datadog infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Deploying Datadog infrastructure stack ==="
+          pnpm cdk deploy datadog-infra-dev-cdk \
+            --app 'pnpm tsx bin/datadog-infra.ts' \
+            --context stage=dev \
+            --require-approval never
+
   deploy-frontend-app-dev:
     needs:
       [
@@ -362,7 +373,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -447,7 +458,7 @@ jobs:
     environment: dev
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -490,14 +501,6 @@ jobs:
           pnpm tsc
           node ./add_cypress_test_users_cdk.js dev $TEST_USERS_PASS
 
-      - name: Run database migrations
-        env:
-          STAGE_NAME: dev
-        run: |
-          echo "=== Running database migrations ==="
-          cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh app-api-dev-cdk-migrate
-
   end-deployment-dev:
     needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
     if: always() && needs.begin-deployment.result == 'success'
@@ -506,7 +509,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
@@ -537,7 +540,7 @@ jobs:
       name: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -583,7 +586,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -687,6 +690,17 @@ jobs:
             --context stage=val \
             --require-approval never
 
+      - name: Deploy Datadog infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: val
+        run: |
+          echo "=== Deploying Datadog infrastructure stack ==="
+          pnpm cdk deploy datadog-infra-val-cdk \
+            --app 'pnpm tsx bin/datadog-infra.ts' \
+            --context stage=val \
+            --require-approval never
+
   deploy-cdk-app-val:
     needs:
       [
@@ -708,7 +722,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -742,14 +756,6 @@ jobs:
             --context stage=val \
             --require-approval never
 
-      - name: Run database migrations
-        env:
-          STAGE_NAME: val
-        run: |
-          echo "=== Running database migrations ==="
-          cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh app-api-val-cdk-migrate
-
   deploy-frontend-app-val:
     needs:
       [
@@ -773,7 +779,7 @@ jobs:
     environment: val
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -845,7 +851,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'
@@ -876,7 +882,7 @@ jobs:
       name: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -922,7 +928,7 @@ jobs:
     environment: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -1026,6 +1032,17 @@ jobs:
             --context stage=prod \
             --require-approval never
 
+      - name: Deploy Datadog infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          echo "=== Deploying Datadog infrastructure stack ==="
+          pnpm cdk deploy datadog-infra-prod-cdk \
+            --app 'pnpm tsx bin/datadog-infra.ts' \
+            --context stage=prod \
+            --require-approval never
+
   deploy-cdk-app-prod:
     needs:
       [
@@ -1047,7 +1064,7 @@ jobs:
     environment: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -1081,14 +1098,6 @@ jobs:
             --context stage=prod \
             --require-approval never
 
-      - name: Run database migrations
-        env:
-          STAGE_NAME: prod
-        run: |
-          echo "=== Running database migrations ==="
-          cd services/app-api
-          ./scripts/invoke-migrate-lambda.sh app-api-prod-cdk-migrate
-
   deploy-frontend-app-prod:
     needs:
       [
@@ -1112,7 +1121,7 @@ jobs:
     environment: prod
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup env
         uses: ./.github/actions/setup_env
@@ -1189,7 +1198,7 @@ jobs:
     outputs:
       application-endpoint: ${{ steps.save-app-endpoint.outputs.app-endpoint }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Get AWS credentials
         uses: ./.github/actions/get_aws_credentials
@@ -1229,7 +1238,7 @@ jobs:
       id-token: write
       contents: read
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Generate unique ID for Cypress
         id: uuid
@@ -1305,7 +1314,7 @@ jobs:
     permissions:
       deployments: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Update deployment status (failure)
         if: failure() && needs.begin-deployment.result == 'success'

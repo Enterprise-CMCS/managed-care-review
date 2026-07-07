@@ -1,0 +1,227 @@
+name: Deploy Datadog Monitors
+
+on:
+  workflow_run:
+    workflows: ['Promote (CDK)']
+    types: [completed]
+    branches: [main]
+  pull_request:
+    paths:
+      - 'infra/datadog/**'
+
+# Deploy runs are serialized to prevent concurrent tofu apply from contending on S3 state lock.
+# PR validate/plan runs cancel-and-replace on new pushes.
+concurrency:
+  group: datadog-monitors-${{ github.event_name == 'workflow_run' && 'deploy' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_run' }}
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  validate:
+    name: validate - Datadog monitors
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_version: '1.9.0'
+
+      - name: Validate
+        working-directory: infra/datadog
+        run: |
+          tofu init -backend=false -input=false
+          tofu validate
+          tofu fmt -check
+
+  plan:
+    if: ${{ github.event_name == 'pull_request' }}
+    needs: [validate]
+    name: plan - Datadog monitors (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Get AWS credentials (dev)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: 'true'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_version: '1.9.0'
+
+      - name: Plan monitors (dev)
+        working-directory: infra/datadog
+        env:
+          TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
+          TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
+        run: |
+          set -eo pipefail
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name datadog-infra-dev-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
+            --output text)
+          tofu init -backend-config="bucket=$BUCKET" -input=false
+          tofu plan -var-file=environments/dev.tfvars -no-color -input=false 2>&1 | tee plan_output.txt
+
+      - name: Post plan as PR comment
+        uses: actions/github-script@v9
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const planFile = 'infra/datadog/plan_output.txt';
+            const plan = fs.existsSync(planFile)
+              ? fs.readFileSync(planFile, 'utf8')
+              : '(plan output unavailable — check CI logs for init/auth errors)';
+            const marker = '<!-- datadog-monitors-plan -->';
+            const body = `${marker}\n#### Datadog Monitors Plan (dev)\n\`\`\`\n${plan}\n\`\`\``;
+
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+            });
+            const existing = comments.data.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                comment_id: existing.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: body,
+              });
+            }
+
+  deploy-monitors-dev:
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
+    needs: [validate]
+    name: deploy - Datadog monitors (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Get AWS credentials (dev)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: 'true'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_version: '1.9.0'
+
+      - name: Apply monitors (dev)
+        working-directory: infra/datadog
+        env:
+          TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
+          TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
+        run: |
+          set -eo pipefail
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name datadog-infra-dev-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
+            --output text)
+          tofu init -backend-config="bucket=$BUCKET" -input=false
+          tofu apply -var-file=environments/dev.tfvars -auto-approve -input=false -no-color
+
+  deploy-monitors-val:
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
+    needs: [deploy-monitors-dev]
+    name: deploy - Datadog monitors (val)
+    runs-on: ubuntu-24.04
+    environment: val
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Get AWS credentials (val)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
+          stage-name: val
+          use-cdk-role: 'true'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_version: '1.9.0'
+
+      - name: Apply monitors (val)
+        working-directory: infra/datadog
+        env:
+          TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
+          TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
+        run: |
+          set -eo pipefail
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name datadog-infra-val-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
+            --output text)
+          tofu init -backend-config="bucket=$BUCKET" -input=false
+          tofu apply -var-file=environments/val.tfvars -auto-approve -input=false -no-color
+
+  deploy-monitors-prod:
+    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
+    needs: [deploy-monitors-val]
+    name: deploy - Datadog monitors (prod)
+    runs-on: ubuntu-24.04
+    environment: prod
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Get AWS credentials (prod)
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+          use-cdk-role: 'true'
+
+      - name: Setup OpenTofu
+        uses: opentofu/setup-opentofu@v2
+        with:
+          tofu_version: '1.9.0'
+
+      - name: Apply monitors (prod)
+        working-directory: infra/datadog
+        env:
+          TF_VAR_dd_api_key: ${{ secrets.DD_API_KEY }}
+          TF_VAR_dd_app_key: ${{ secrets.DD_APP_KEY }}
+        run: |
+          set -eo pipefail
+          BUCKET=$(aws cloudformation describe-stacks \
+            --stack-name datadog-infra-prod-cdk \
+            --query 'Stacks[0].Outputs[?OutputKey==`TfStateBucketName`].OutputValue' \
+            --output text)
+          tofu init -backend-config="bucket=$BUCKET" -input=false
+          tofu apply -var-file=environments/prod.tfvars -auto-approve -input=false -no-color

@@ -7,6 +7,7 @@ import type {
 import { decode } from 'jsonwebtoken'
 import { parseErrorToError } from '@mc-review/helpers'
 import { newJWTLib } from '../jwt'
+import { initTracer, recordException, flushTracer } from '../otel/otel_handler'
 
 const stageName = process.env.stage
 const jwtSecret = process.env.JWT_SECRET
@@ -115,62 +116,77 @@ function validateToken(token: string): ValidatedTokenData | Error {
 export const main: APIGatewayTokenAuthorizerHandler = async (
     event
 ): Promise<APIGatewayAuthorizerResult> => {
-    const denyToken = () => generatePolicy(undefined, event)
-    const extractedToken = extractBearerToken(event.authorizationToken)
-
-    if (extractedToken instanceof Error) {
-        console.error({
-            message: 'Bearer token extraction failed',
-            operation: 'third_party_API_authorizer',
-            status: 'ERROR',
-            error: extractedToken,
-        })
-        return denyToken()
-    }
-
-    const authToken = extractedToken
+    const serviceName = 'app-api-authorizer-' + stageName
+    initTracer(serviceName)
 
     try {
-        const validatedToken = validateToken(authToken)
+        const denyToken = () => generatePolicy(undefined, event)
+        const extractedToken = extractBearerToken(event.authorizationToken)
 
-        if (validatedToken instanceof Error) {
-            const tokenAuditContext = getTokenAuditContext(authToken)
+        if (extractedToken instanceof Error) {
             console.error({
-                message: 'Token validation failed',
+                message: 'Bearer token extraction failed',
                 operation: 'third_party_API_authorizer',
                 status: 'ERROR',
-                error: validatedToken,
-                clientId: tokenAuditContext.clientId,
-                iss: tokenAuditContext.iss,
+                error: extractedToken,
             })
+            recordException(extractedToken, serviceName, 'extractBearerToken')
             return denyToken()
         }
 
-        console.info({
-            message: `third_party_API_authorizer succeeded with OAuth token: ${validatedToken.iss}`,
-            operation: 'third_party_API_authorizer',
-            status: 'SUCCESS',
-            clientId: validatedToken.clientId,
-            iss: validatedToken.iss,
-        })
+        const authToken = extractedToken
 
-        return generatePolicy(validatedToken.user_id, event, {
-            clientId: validatedToken.clientId,
-            iss: validatedToken.iss,
-            grants: validatedToken.grants.join(','),
-        })
-    } catch (err) {
-        const tokenAuditContext = getTokenAuditContext(authToken)
-        console.error({
-            message:
-                'unexpected exception attempting to validate authorization',
-            operation: 'third_party_API_authorizer',
-            status: 'ERROR',
-            error: parseErrorToError(err),
-            clientId: tokenAuditContext.clientId,
-            iss: tokenAuditContext.iss,
-        })
-        return denyToken()
+        try {
+            const validatedToken = validateToken(authToken)
+
+            if (validatedToken instanceof Error) {
+                const tokenAuditContext = getTokenAuditContext(authToken)
+                console.error({
+                    message: 'Token validation failed',
+                    operation: 'third_party_API_authorizer',
+                    status: 'ERROR',
+                    error: validatedToken,
+                    clientId: tokenAuditContext.clientId,
+                    iss: tokenAuditContext.iss,
+                })
+                recordException(validatedToken, serviceName, 'validateToken')
+                return denyToken()
+            }
+
+            console.info({
+                message: `third_party_API_authorizer succeeded with OAuth token: ${validatedToken.iss}`,
+                operation: 'third_party_API_authorizer',
+                status: 'SUCCESS',
+                clientId: validatedToken.clientId,
+                iss: validatedToken.iss,
+            })
+
+            return generatePolicy(validatedToken.user_id, event, {
+                clientId: validatedToken.clientId,
+                iss: validatedToken.iss,
+                grants: validatedToken.grants.join(','),
+            })
+        } catch (err) {
+            const tokenAuditContext = getTokenAuditContext(authToken)
+            const error = parseErrorToError(err)
+            console.error({
+                message:
+                    'unexpected exception attempting to validate authorization',
+                operation: 'third_party_API_authorizer',
+                status: 'ERROR',
+                error,
+                clientId: tokenAuditContext.clientId,
+                iss: tokenAuditContext.iss,
+            })
+            recordException(error, serviceName, 'validateToken')
+            return denyToken()
+        }
+    } finally {
+        try {
+            await flushTracer()
+        } catch (flushErr) {
+            console.warn('otel: flush failed', flushErr)
+        }
     }
 }
 

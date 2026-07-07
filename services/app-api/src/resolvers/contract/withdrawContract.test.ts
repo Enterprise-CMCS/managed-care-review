@@ -29,11 +29,11 @@ import {
 import {
     addNewRateToTestContract,
     fetchTestIndexRatesStripped,
+    overrideTestRateData,
 } from '../../testHelpers/gqlRateHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
-import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
-import { NewPostgresStore } from '../../postgres'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 const testRateFormInputData = (): RateFormDataInput => ({
     rateType: 'AMENDMENT',
@@ -98,6 +98,25 @@ describe('withdrawContract', () => {
             'withdraw submission'
         )
 
+        const prismaClient = await sharedTestPrismaClient()
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractTableRow?.reviewStatusActions[0].actionType).toBe(
+            'WITHDRAW'
+        )
+        expect(contractTableRow?.lastActionDate).toEqual(
+            contractTableRow?.reviewStatusActions[0].updatedAt
+        )
+
         const contractHistory = contractHistoryToDescriptions(withdrawnContract)
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
         expect(withdrawnContract.contractSubmissionType).toBe('HEALTH_PLAN')
@@ -154,6 +173,59 @@ describe('withdrawContract', () => {
 
         const rateA = await fetchTestRateById(cmsServer, rateARevision.rateID)
         const rateB = await fetchTestRateById(cmsServer, rateBRevision.rateID)
+
+        const prismaClient = await sharedTestPrismaClient()
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        const rateATableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateARevision.rateID },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        const rateBTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateBRevision.rateID },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractTableRow?.reviewStatusActions[0].actionType).toBe(
+            'WITHDRAW'
+        )
+        expect(contractTableRow?.lastActionDate).toEqual(
+            contractTableRow?.reviewStatusActions[0].updatedAt
+        )
+        expect(rateATableRow?.reviewStatusActions[0].actionType).toBe(
+            'WITHDRAW'
+        )
+        expect(rateATableRow?.lastActionDate).toEqual(
+            rateATableRow?.reviewStatusActions[0].updatedAt
+        )
+        expect(rateBTableRow?.reviewStatusActions[0].actionType).toBe(
+            'WITHDRAW'
+        )
+        expect(rateBTableRow?.lastActionDate).toEqual(
+            rateBTableRow?.reviewStatusActions[0].updatedAt
+        )
 
         expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
         expect(rateA.consolidatedStatus).toBe('WITHDRAWN')
@@ -338,6 +410,25 @@ describe('withdrawContract', () => {
         // expect rateB to be resubmitted and contract B to be the parent
         expect(rateB.consolidatedStatus).toBe('RESUBMITTED')
         expect(rateB.parentContractID).toBe(draftContractB.id)
+
+        const prismaClient = await sharedTestPrismaClient()
+        const contractBTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: draftContractB.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(contractBTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(contractBTableRow?.lastActionDate).toEqual(
+            contractBTableRow?.reviewStatusActions[0].updatedAt
+        )
 
         // expect rateB to be resubmitted and contract C to be the parent
         expect(rateC.consolidatedStatus).toBe('RESUBMITTED')
@@ -1374,19 +1465,7 @@ describe('withdrawContract', () => {
     })
 
     it('can withdraw and undo withdraw contract and rate submission with rate overrides', async () => {
-        const prismaClient = await sharedTestPrismaClient()
-        const store = NewPostgresStore(prismaClient)
         const adminUser = testAdminUser()
-
-        await prismaClient.user.create({
-            data: {
-                id: adminUser.id,
-                givenName: adminUser.givenName,
-                familyName: adminUser.familyName,
-                email: adminUser.email,
-                role: adminUser.role,
-            },
-        })
 
         const stateServer = await constructTestPostgresServer({
             context: {
@@ -1397,6 +1476,11 @@ describe('withdrawContract', () => {
         const cmsServer = await constructTestPostgresServer({
             context: {
                 user: cmsUser,
+            },
+        })
+        const adminServer = await constructTestPostgresServer({
+            context: {
+                user: adminUser,
             },
         })
 
@@ -1424,19 +1508,25 @@ describe('withdrawContract', () => {
         const supportingDocuments = rateARevision.formData.supportingDocuments
 
         // add overrides to rate
-        await store.overrideRateData({
+        await overrideTestRateData(adminServer, {
             rateID: rateID,
-            updatedByID: adminUser.id,
             description: 'Add overrides',
             overrides: {
                 initiallySubmittedAt: newDate,
+                initiallySubmittedAtOp: 'OVERRIDE',
                 revisionOverride: {
                     rateDocuments: rateDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                     supportingDocuments: supportingDocuments.map((doc) => ({
+                        documentOp: 'OVERRIDE',
+                        documentSha256: doc.sha256!,
                         documentID: doc.id!,
+                        dateAddedOp: 'OVERRIDE',
                         dateAdded: newDate,
                     })),
                 },

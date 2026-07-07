@@ -11,7 +11,10 @@ import {
 import { useField } from 'formik'
 import { useStatePrograms, useTealium } from '../../../hooks'
 import { AccessibleSelect } from '../AccessibleSelect/AccessibleSelect'
-import { formattedProgramName } from '../../../formHelpers'
+import {
+    formattedProgramName,
+    getAvailableContractPrograms,
+} from '../../../formHelpers'
 import { Program } from '../../../gen/gqlClient'
 
 export type ProgramSelectPropType = {
@@ -77,15 +80,11 @@ export const ProgramSelect = ({
     const [_field, _meta, helpers] = useField({ name })
     const allPrograms = useStatePrograms()
     const statePrograms = contractProgramsOnly
-        ? allPrograms.filter((program) => !program.isRateProgram)
+        ? getAvailableContractPrograms(allPrograms, programIDs)
         : allPrograms
 
-    const programOptions: ProgramOptionType[] = statePrograms
-        .filter(
-            (program) =>
-                !program.isDeprecated || programIDs.includes(program.id)
-        )
-        .map(toProgramOption)
+    const programOptions: ProgramOptionType[] =
+        statePrograms.map(toProgramOption)
 
     const { logDropdownSelectionEvent } = useTealium()
 

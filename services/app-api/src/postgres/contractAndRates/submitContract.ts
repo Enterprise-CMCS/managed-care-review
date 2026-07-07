@@ -120,23 +120,26 @@ async function eqroContractReviewDeterminationAction(
         return reviewDetermination
     }
 
-    if (reviewDetermination) {
-        await tx.contractActionTable.create({
-            data: {
-                updatedByID: undefined,
-                actionType: 'UNDER_REVIEW',
-                contractID: contract.id,
-            },
-        })
-    } else {
-        await tx.contractActionTable.create({
-            data: {
-                updatedByID: undefined,
-                actionType: 'NOT_SUBJECT_TO_REVIEW',
-                contractID: contract.id,
-            },
-        })
-    }
+    const reviewAction = await tx.contractActionTable.create({
+        data: {
+            updatedByID: undefined,
+            actionType: reviewDetermination
+                ? 'UNDER_REVIEW'
+                : 'NOT_SUBJECT_TO_REVIEW',
+            contractID: contract.id,
+        },
+    })
+
+    // Review determination is created after the submit event and becomes the
+    // latest visible action for this contract.
+    await tx.contractTable.update({
+        where: {
+            id: contract.id,
+        },
+        data: {
+            lastActionDate: reviewAction.updatedAt,
+        },
+    })
 
     const updatedContract = await findContractWithHistory(tx, contract.id)
     if (updatedContract instanceof Error) {
@@ -175,13 +178,24 @@ async function healthPlanContractReviewDeterminationAction(
         latestSubmission.contractRevision.formData
     )
 
-    await tx.contractActionTable.create({
+    const reviewAction = await tx.contractActionTable.create({
         data: {
             updatedByID: undefined,
             actionType: subjectToReview
                 ? 'UNDER_REVIEW'
                 : 'NOT_SUBJECT_TO_REVIEW',
             contractID: contract.id,
+        },
+    })
+
+    // Review determination is created after the submit event and becomes the
+    // latest visible action for this contract.
+    await tx.contractTable.update({
+        where: {
+            id: contract.id,
+        },
+        data: {
+            lastActionDate: reviewAction.updatedAt,
         },
     })
 
@@ -220,6 +234,9 @@ async function submitContract(
         operationName: 'submitContract',
         table: 'ContractTable',
         id: contractID,
+        transactionOptions: {
+            timeout: 10000,
+        },
         transaction: async (tx) => {
             const result = await submitContractInsideTransaction(tx, {
                 contractID,

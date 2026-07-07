@@ -55,6 +55,9 @@ describe('deleteContractQuestion', () => {
                 ],
             }
         )
+        // Answer the first question to close its round so a second question
+        // can be created.
+        await createTestQuestionResponse(stateServer, questionToKeep.id)
 
         const questionToDelete = await createTestQuestion(
             cmsServer,
@@ -128,6 +131,14 @@ describe('deleteContractQuestion', () => {
         expect(questionAction?.action).toBe('DELETE')
         expect(questionAction?.updatedByID).toBe(adminUser.id)
         expect(questionAction?.reason).toBe('Some reason')
+
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: { lastActionDate: true },
+        })
+        expect(contractTableRow?.lastActionDate).toEqual(
+            questionAction?.createdAt
+        )
 
         const responseActions =
             await prismaClient.contractQuestionResponseAction.findMany({

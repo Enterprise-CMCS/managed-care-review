@@ -17,6 +17,8 @@ const defaultContractData = () => ({
     id: uuidv4(),
     createdAt: new Date(),
     updatedAt: new Date(),
+    // Default stored contract action timestamp for generated contract payloads.
+    lastActionDate: new Date(),
     mccrsID: null,
     stateCode: 'MN',
     stateNumber: 111,
@@ -82,6 +84,7 @@ const mockContractRevision = (
         },
         dsnpContract: null,
         unlockInfo: null,
+        revisionOverrides: [],
         undoUnlockInfo: null,
         contractID: 'contractID',
         submitInfoID: null,
