@@ -228,7 +228,6 @@ export const SingleRateFormFields = ({
                 >
                     <Fieldset
                         legend="Which Medicaid populations are included in this rate certification?"
-                        aria-required
                         id={`${fieldNamePrefix}.rateMedicaidPopulations`}
                     >
                         <span className={styles.requiredOptionalText}>
@@ -301,7 +300,6 @@ export const SingleRateFormFields = ({
                     className={styles.radioGroup}
                     legend="Rate certification type"
                     role="radiogroup"
-                    aria-required
                 >
                     <span className={styles.requiredOptionalText}>
                         Required
@@ -401,7 +399,6 @@ export const SingleRateFormFields = ({
                 <>
                     <FormGroup>
                         <Fieldset
-                            aria-required
                             legend={
                                 isRateTypeAmendment(rateForm)
                                     ? 'Rating period of original rate certification'
@@ -453,10 +450,7 @@ export const SingleRateFormFields = ({
                     {isRateTypeAmendment(rateForm) && (
                         <>
                             <FormGroup>
-                                <Fieldset
-                                    aria-required
-                                    legend="Effective dates of rate amendment"
-                                >
+                                <Fieldset legend="Effective dates of rate amendment">
                                     <span
                                         className={styles.requiredOptionalText}
                                     >
@@ -619,7 +613,6 @@ export const SingleRateFormFields = ({
                     className={styles.radioGroup}
                     legend="Actuaries' communication preference"
                     role="radiogroup"
-                    aria-required
                 >
                     <span
                         className={styles.requiredOptionalText}

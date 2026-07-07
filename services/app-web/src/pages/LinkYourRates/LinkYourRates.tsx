@@ -66,7 +66,6 @@ export const LinkYourRates = ({
             <Fieldset
                 role="radiogroup"
                 className={styles.radioGroup}
-                aria-required
                 legend={
                     'Was this rate certification included with another submission?'
                 }

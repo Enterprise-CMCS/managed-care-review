@@ -787,7 +787,6 @@ export const ContractDetails = ({
                                         >
                                             <Fieldset
                                                 role="radiogroup"
-                                                aria-required
                                                 className={
                                                     styles.contractAttestation
                                                 }
@@ -935,7 +934,6 @@ export const ContractDetails = ({
                                     >
                                         <Fieldset
                                             role="radiogroup"
-                                            aria-required
                                             className={styles.radioGroup}
                                             legend="Contract status"
                                         >
@@ -984,7 +982,6 @@ export const ContractDetails = ({
                                     </FormGroup>
                                     <FormGroup>
                                         <Fieldset
-                                            aria-required
                                             legend={
                                                 isContractAmendment(
                                                     draftSubmission
@@ -1075,10 +1072,7 @@ export const ContractDetails = ({
                                             )
                                         )}
                                     >
-                                        <Fieldset
-                                            aria-required
-                                            legend="Managed Care entities"
-                                        >
+                                        <Fieldset legend="Managed Care entities">
                                             <span
                                                 className={
                                                     styles.requiredOptionalText
@@ -1169,10 +1163,7 @@ export const ContractDetails = ({
                                             )
                                         )}
                                     >
-                                        <Fieldset
-                                            aria-required
-                                            legend="Active federal operating authority"
-                                        >
+                                        <Fieldset legend="Active federal operating authority">
                                             <span
                                                 className={
                                                     styles.requiredOptionalText
@@ -1240,7 +1231,6 @@ export const ContractDetails = ({
                                                 )}
                                             >
                                                 <Fieldset
-                                                    aria-required
                                                     id="dsnpContract"
                                                     legend="Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?"
                                                 >
@@ -1289,7 +1279,6 @@ export const ContractDetails = ({
                                     ) && (
                                         <FormGroup data-testid="yes-no-group">
                                             <Fieldset
-                                                aria-required
                                                 legend={
                                                     isBaseContract(
                                                         draftSubmission
