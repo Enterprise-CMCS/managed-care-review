@@ -16,16 +16,34 @@ const main: APIGatewayProxyHandler = async (event) => {
         `otel_proxy: received trace payload, body=${bodyBytes} bytes, content-type=${contentType}`
     )
 
-    // Local dev sets OTEL_EXPORTER_OTLP_TRACES_ENDPOINT (in .envrc) to point
-    // at the local Jaeger container's OTLP port. Deployed environments leave
-    // it unset and forward directly to Datadog.
-    const localEndpoint = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-    const tracesUrl = localEndpoint ?? DD_TRACES_URL
-
+    // Local dev (stage === 'local') forwards traces to the local Jaeger
+    // container's OTLP port, set via OTEL_EXPORTER_OTLP_TRACES_ENDPOINT in
+    // .envrc. All other environments forward directly to Datadog; the
+    // endpoint override is ignored there so a stray env var can't redirect
+    // traces.
+    let tracesUrl: string
     const headers: Record<string, string> = {
         'content-type': contentType,
     }
-    if (!localEndpoint) {
+    if (process.env.stage === 'local') {
+        const localEndpoint = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+        if (!localEndpoint) {
+            console.error(
+                'otel_proxy: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT is not set'
+            )
+            return {
+                statusCode: 500,
+                body: JSON.stringify(
+                    'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT is required for local tracing'
+                ),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
+        }
+        tracesUrl = localEndpoint
+    } else {
         if (!process.env.DD_API_KEY) {
             console.error('otel_proxy: DD_API_KEY is not set')
             return {
@@ -37,6 +55,7 @@ const main: APIGatewayProxyHandler = async (event) => {
                 },
             }
         }
+        tracesUrl = DD_TRACES_URL
         headers['dd-api-key'] = process.env.DD_API_KEY
         headers['dd-otlp-source'] = 'datadog'
         headers['dd-otel-span-mapping'] = '{span_name_as_resource_name: false}'
