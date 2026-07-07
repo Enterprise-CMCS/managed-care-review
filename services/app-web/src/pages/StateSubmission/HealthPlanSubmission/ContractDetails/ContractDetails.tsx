@@ -982,81 +982,91 @@ export const ContractDetails = ({
                                             />
                                         </Fieldset>
                                     </FormGroup>
-                                    <Fieldset
-                                        aria-required
-                                        legend={
-                                            isContractAmendment(draftSubmission)
-                                                ? 'Amendment effective dates'
-                                                : 'Contract effective dates'
-                                        }
-                                    >
-                                        <span
-                                            className={
-                                                styles.requiredOptionalText
+                                    <FormGroup>
+                                        <Fieldset
+                                            aria-required
+                                            legend={
+                                                isContractAmendment(
+                                                    draftSubmission
+                                                )
+                                                    ? 'Amendment effective dates'
+                                                    : 'Contract effective dates'
                                             }
                                         >
-                                            Required
-                                        </span>
-                                        <LinkWithLogging
-                                            aria-label="Effective date guidance (opens in new window)"
-                                            href={
-                                                '/resources/help#effective-date-guidance'
-                                            }
-                                            variant="external"
-                                            target="_blank"
-                                        >
-                                            Effective date guidance
-                                        </LinkWithLogging>
-                                        <CustomDateRangePicker
-                                            className={styles.dateRangePicker}
-                                            startDateHint="mm/dd/yyyy"
-                                            startDateLabel="Start date"
-                                            startDateError={showFieldErrors(
-                                                'contractDateStart',
-                                                errors
-                                            )}
-                                            startDatePickerProps={{
-                                                id: 'contractDateStart',
-                                                name: 'contractDateStart',
-                                                'aria-required': true,
-                                                disabled: false,
-                                                defaultValue:
-                                                    values.contractDateStart,
-                                                maxDate:
-                                                    formattedDateMinusOneDay(
-                                                        values.contractDateEnd
-                                                    ),
-                                                onChange: (val) =>
-                                                    setFieldValue(
-                                                        'contractDateStart',
-                                                        formatUserInputDate(val)
-                                                    ),
-                                            }}
-                                            endDateHint="mm/dd/yyyy"
-                                            endDateLabel="End date"
-                                            endDateError={showFieldErrors(
-                                                'contractDateEnd',
-                                                errors
-                                            )}
-                                            endDatePickerProps={{
-                                                disabled: false,
-                                                id: 'contractDateEnd',
-                                                name: 'contractDateEnd',
-                                                'aria-required': true,
-                                                defaultValue:
-                                                    values.contractDateEnd,
-                                                minDate:
-                                                    formattedDatePlusOneDay(
-                                                        values.contractDateStart
-                                                    ),
-                                                onChange: (val) =>
-                                                    setFieldValue(
-                                                        'contractDateEnd',
-                                                        formatUserInputDate(val)
-                                                    ),
-                                            }}
-                                        />
-                                    </Fieldset>
+                                            <span
+                                                className={
+                                                    styles.requiredOptionalText
+                                                }
+                                            >
+                                                Required
+                                            </span>
+                                            <LinkWithLogging
+                                                aria-label="Effective date guidance (opens in new window)"
+                                                href={
+                                                    '/resources/help#effective-date-guidance'
+                                                }
+                                                variant="external"
+                                                target="_blank"
+                                            >
+                                                Effective date guidance
+                                            </LinkWithLogging>
+                                            <CustomDateRangePicker
+                                                className={
+                                                    styles.dateRangePicker
+                                                }
+                                                startDateHint="mm/dd/yyyy"
+                                                startDateLabel="Start date"
+                                                startDateError={showFieldErrors(
+                                                    'contractDateStart',
+                                                    errors
+                                                )}
+                                                startDatePickerProps={{
+                                                    id: 'contractDateStart',
+                                                    name: 'contractDateStart',
+                                                    'aria-required': true,
+                                                    disabled: false,
+                                                    defaultValue:
+                                                        values.contractDateStart,
+                                                    maxDate:
+                                                        formattedDateMinusOneDay(
+                                                            values.contractDateEnd
+                                                        ),
+                                                    onChange: (val) =>
+                                                        setFieldValue(
+                                                            'contractDateStart',
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
+                                                        ),
+                                                }}
+                                                endDateHint="mm/dd/yyyy"
+                                                endDateLabel="End date"
+                                                endDateError={showFieldErrors(
+                                                    'contractDateEnd',
+                                                    errors
+                                                )}
+                                                endDatePickerProps={{
+                                                    disabled: false,
+                                                    id: 'contractDateEnd',
+                                                    name: 'contractDateEnd',
+                                                    'aria-required': true,
+                                                    defaultValue:
+                                                        values.contractDateEnd,
+                                                    minDate:
+                                                        formattedDatePlusOneDay(
+                                                            values.contractDateStart
+                                                        ),
+                                                    onChange: (val) =>
+                                                        setFieldValue(
+                                                            'contractDateEnd',
+                                                            formatUserInputDate(
+                                                                val
+                                                            )
+                                                        ),
+                                                }}
+                                            />
+                                        </Fieldset>
+                                    </FormGroup>
                                     <FormGroup
                                         error={Boolean(
                                             showFieldErrors(
