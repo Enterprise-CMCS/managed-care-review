@@ -17,6 +17,8 @@ import {
     typedStatePrograms,
 } from '@mc-review/submissions'
 import type { ContractType } from '../domain-models'
+import { resolveInitiallySubmittedAtOverride } from '../resolvers/shared/overrideHelpers'
+import { latestDate } from '../resolvers/helpers'
 
 export type Basis = 'initial' | 'latest'
 
@@ -89,8 +91,20 @@ function toRow(contract: ContractType): Row {
         federalAuthorities: (formData.federalAuthorities ?? []).join(','),
         rateMedicaidPopulations: POP_ORDER.filter((p) => pops.has(p)).join(','),
         dsnp: formData.dsnpContract === true,
-        initialDate: ymd(initial.submitInfo.updatedAt),
-        latestDate: ymd(latest.submitInfo.updatedAt),
+        initialDate: ymd(
+            resolveInitiallySubmittedAtOverride(
+                initial.submitInfo.updatedAt,
+                contract.contractOverrides
+            )
+        ),
+        latestDate: ymd(
+            latestDate([
+                latest.submitInfo.updatedAt,
+                ...(contract.reviewStatusActions ?? []).map(
+                    (a) => a.updatedAt
+                ),
+            ]) ?? latest.submitInfo.updatedAt
+        ),
     }
 }
 
