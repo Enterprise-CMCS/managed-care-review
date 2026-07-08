@@ -123,7 +123,6 @@ export const NewSubmission = () => {
                             >
                                 <Fieldset
                                     role="radiogroup"
-                                    aria-required
                                     className={styles.radioGroup}
                                     legend="Submission type"
                                 >

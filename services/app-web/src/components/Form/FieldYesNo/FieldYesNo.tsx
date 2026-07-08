@@ -54,7 +54,6 @@ export const FieldYesNo = ({
     return (
         <Fieldset
             role="radiogroup"
-            aria-required={isRequired}
             id={id}
             legend={label}
             className={classes}

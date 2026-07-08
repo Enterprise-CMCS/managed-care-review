@@ -297,7 +297,6 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                     <Fieldset
                                         className={styles.radioGroup}
                                         role="radiogroup"
-                                        aria-required
                                         legend="Populations included in EQRO activities"
                                     >
                                         <span
@@ -406,10 +405,7 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                         )
                                     )}
                                 >
-                                    <Fieldset
-                                        aria-required
-                                        legend="Managed Care entities reviewed by this EQRO"
-                                    >
+                                    <Fieldset legend="Managed Care entities reviewed by this EQRO">
                                         <span
                                             className={
                                                 styles.requiredOptionalText
@@ -483,7 +479,6 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                 >
                                     <Fieldset
                                         role="radiogroup"
-                                        aria-required
                                         className={styles.radioGroup}
                                         legend="Contract action type"
                                         id="contractType"
