@@ -29,6 +29,12 @@ type QuestionDisplayDocument = {
     downloadURL: string | null
     name: string
     s3URL: string
+    // Set only for documents that belong to a response. Question (CMS) documents
+    // leave these undefined. The admin Q&A view uses them to build the
+    // delete-response link in QuestionDisplayTable; other consumers ignore them.
+    responseID?: string
+    questionID?: string
+    division?: Division
 }
 
 type DivisionQuestionDataType = {
@@ -95,6 +101,9 @@ const extractDocumentsFromQuestion = (
                 createdAt: response.createdAt,
                 addedBy: response.addedBy,
                 downloadURL: doc.downloadURL ?? null,
+                responseID: response.id,
+                questionID: question.id,
+                division: question.division,
             }))
         ),
     ].sort((a, b) =>

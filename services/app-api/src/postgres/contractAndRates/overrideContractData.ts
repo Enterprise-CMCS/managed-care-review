@@ -189,7 +189,7 @@ const overrideContractDataInsideTransaction = async (
         }
     }
 
-    await tx.contractOverrides.create({
+    const contractOverride = await tx.contractOverrides.create({
         data: {
             contractID,
             updatedByID,
@@ -224,6 +224,17 @@ const overrideContractDataInsideTransaction = async (
                       },
                   }
                 : undefined,
+        },
+    })
+
+    // Contract overrides update the lastActionDate so users can see data has
+    // changed.
+    await tx.contractTable.update({
+        where: {
+            id: contractID,
+        },
+        data: {
+            lastActionDate: contractOverride.createdAt,
         },
     })
 

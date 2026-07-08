@@ -1,0 +1,14 @@
+query fetchSubmissionHistory($input: FetchSubmissionHistoryInput!) {
+    fetchSubmissionHistory(input: $input) {
+        contractID
+        history {
+            actionType
+            updatedAt
+            updatedReason
+            updatedBy {
+                email
+                role
+            }
+        }
+    }
+}

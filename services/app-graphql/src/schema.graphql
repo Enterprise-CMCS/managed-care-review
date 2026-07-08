@@ -96,6 +96,14 @@ type Query {
     fetchContract(input: FetchContractInput!): FetchContractPayload!
 
     """
+    fetchSubmissionHistory returns the combined action history for a submission,
+    including contract actions and rate actions that materially affect the submitted package.
+    """
+    fetchSubmissionHistory(
+        input: FetchSubmissionHistoryInput!
+    ): FetchSubmissionHistoryPayload!
+
+    """
     fetchDocument returns a single document
     given a documentID
     Optional parameters include:
@@ -374,6 +382,24 @@ type Mutation {
     deleteContractQuestion(
         input: DeleteContractQuestionInput!
     ): DeleteContractQuestionPayload!
+
+    """
+    deleteContractQuestionResponse soft-deletes a contract question response by recording a DELETE action
+    in the response's audit log and CASCADE_DELETE actions for active response documents. The response
+    itself is not removed from the database; subsequent reads filter it out via the audit log's latest action.
+
+    This can only be called by an AdminUser.
+
+    Errors:
+    - ForbiddenError:
+        - A non-AdminUser called this
+    - UserInputError:
+        - A response cannot be found with the given responseID
+        - The response has already been deleted
+    """
+    deleteContractQuestionResponse(
+        input: DeleteContractQuestionResponseInput!
+    ): DeleteContractQuestionResponsePayload!
 
     #    """
     #    updateQuestion updates a Question for the given Contract
@@ -958,6 +984,18 @@ type DeleteContractQuestionPayload {
     question: ContractQuestion!
 }
 
+input DeleteContractQuestionResponseInput {
+    "The ID of the contract question response to soft delete"
+    responseID: ID!
+    "Reason recorded on the delete action"
+    reason: String!
+}
+
+type DeleteContractQuestionResponsePayload {
+    "The contract question with the soft-deleted response"
+    question: ContractQuestion!
+}
+
 input CreateRateQuestionInput {
     "The ID of the rate for which to create a question"
     rateID: ID!
@@ -1383,6 +1421,33 @@ enum RateActionType {
     WITHDRAW
 }
 
+enum SubmissionHistoryActionType {
+    CONTRACT_SUBMISSION
+    LINKED_RATE_UPDATE
+    RATE_SUBMISSION
+    RATE_LINK
+    RATE_UNLINK
+    UNLOCK
+    UNDO_UNLOCK
+    OVERRIDE
+    UNDER_REVIEW
+    NOT_SUBJECT_TO_REVIEW
+    MARK_AS_APPROVED
+    WITHDRAW
+    CONTRACT_QUESTION
+    CONTRACT_QUESTION_RESPONSE
+    CONTRACT_QUESTION_DELETE
+    CONTRACT_QUESTION_RESTORE
+    CONTRACT_QUESTION_RESPONSE_DELETE
+    CONTRACT_QUESTION_RESPONSE_RESTORE
+    RATE_QUESTION
+    RATE_QUESTION_RESPONSE
+    RATE_QUESTION_DELETE
+    RATE_QUESTION_RESTORE
+    RATE_QUESTION_RESPONSE_DELETE
+    RATE_QUESTION_RESPONSE_RESTORE
+}
+
 type UpdatedBy {
     role: String!
     email: String!
@@ -1433,6 +1498,22 @@ type RateReviewStatusActions {
     "type of action"
     actionType: RateActionType!
     rateID: ID!
+}
+
+"""
+SubmissionHistoryEntry is a combined action history item for submitted-visible changes,
+including contract submission/package actions, rate actions, review actions,
+overrides, and Q&A actions.
+"""
+type SubmissionHistoryEntry {
+    "the datetime when the action occurred"
+    updatedAt: DateTime!
+    "the user who performed the action"
+    updatedBy: UpdatedBy
+    "the reason provided by the user when performing the action"
+    updatedReason: String
+    "the type of submission history action"
+    actionType: SubmissionHistoryActionType!
 }
 
 enum PopulationCoveredType {
@@ -2729,6 +2810,17 @@ type FetchContractPayload {
 }
 
 input FetchContractInput {
+    contractID: ID!
+}
+
+type FetchSubmissionHistoryPayload {
+    "The contract submission the history was built for."
+    contractID: ID!
+    "Combined submission history sorted newest-first."
+    history: [SubmissionHistoryEntry!]!
+}
+
+input FetchSubmissionHistoryInput {
     contractID: ID!
 }
 

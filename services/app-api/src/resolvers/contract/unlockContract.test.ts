@@ -370,6 +370,101 @@ describe('unlockContract', () => {
             )
         })
 
+        it('updates lastActionDate for unlocked contracts and child rates only', async () => {
+            const client = await sharedTestPrismaClient()
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                },
+                s3Client: mockS3,
+            })
+
+            const parentDraft =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+            const parentDraftWithRate = await addNewRateToTestContract(
+                stateServer,
+                parentDraft
+            )
+            const parentSubmit = await submitTestContract(
+                stateServer,
+                parentDraftWithRate.id
+            )
+            const childRateID =
+                parentSubmit.packageSubmissions[0].rateRevisions[0].rateID
+
+            const linkedDraft =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+            await addLinkedRateToTestContract(
+                stateServer,
+                linkedDraft,
+                childRateID
+            )
+            const linkedSubmit = await submitTestContract(
+                stateServer,
+                linkedDraft.id
+            )
+            const linkedSubmitDate =
+                linkedSubmit.packageSubmissions[0].submitInfo.updatedAt
+
+            const linkedUnlock = await unlockTestContract(
+                cmsServer,
+                linkedSubmit.id,
+                'Unlock linked contract'
+            )
+            const linkedUnlockDate =
+                linkedUnlock.draftRevision?.unlockInfo?.updatedAt
+
+            expect(linkedUnlockDate).toBeDefined()
+
+            let linkedContractRow =
+                await client.contractTable.findUniqueOrThrow({
+                    where: { id: linkedSubmit.id },
+                    select: { lastActionDate: true },
+                })
+            let childRateRow = await client.rateTable.findUniqueOrThrow({
+                where: { id: childRateID },
+                select: { lastActionDate: true },
+            })
+
+            // Unlocking the linked contract moves that contract's action date,
+            // but the linked rate was not unlocked by this contract.
+            expect(linkedContractRow.lastActionDate).toEqual(linkedUnlockDate)
+            expect(childRateRow.lastActionDate).toEqual(linkedSubmitDate)
+
+            const parentUnlock = await unlockTestContract(
+                cmsServer,
+                parentSubmit.id,
+                'Unlock parent contract'
+            )
+            const parentUnlockDate =
+                parentUnlock.draftRevision?.unlockInfo?.updatedAt
+
+            expect(parentUnlockDate).toBeDefined()
+
+            const parentContractRow =
+                await client.contractTable.findUniqueOrThrow({
+                    where: { id: parentSubmit.id },
+                    select: { lastActionDate: true },
+                })
+            childRateRow = await client.rateTable.findUniqueOrThrow({
+                where: { id: childRateID },
+                select: { lastActionDate: true },
+            })
+            linkedContractRow = await client.contractTable.findUniqueOrThrow({
+                where: { id: linkedSubmit.id },
+                select: { lastActionDate: true },
+            })
+
+            // Unlocking the parent contract also unlocks its child rate, so
+            // both stored action dates move to the parent unlock event.
+            expect(parentContractRow.lastActionDate).toEqual(parentUnlockDate)
+            expect(childRateRow.lastActionDate).toEqual(parentUnlockDate)
+            expect(linkedContractRow.lastActionDate).toEqual(linkedUnlockDate)
+        })
+
         it('handles unlock and editing rates', async () => {
             const ldService = testLDService({
                 'rate-edit-unlock': true,

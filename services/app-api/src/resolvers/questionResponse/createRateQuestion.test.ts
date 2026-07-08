@@ -20,6 +20,7 @@ import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { CreateRateQuestionDocument } from '../../gen/gqlClient'
 import { withdrawTestRate } from '../../testHelpers/gqlRateHelpers'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createRateQuestion', () => {
     const cmsUser = testCMSUser()
@@ -43,6 +44,19 @@ describe('createRateQuestion', () => {
         const rateQuestion = must(
             await createTestRateQuestion(cmsServer, rateID)
         )
+
+        const prismaClient = await sharedTestPrismaClient()
+        const rateTableRow = await prismaClient.rateTable.findUnique({
+            where: { id: rateID },
+            select: { lastActionDate: true },
+        })
+        expect(rateTableRow?.lastActionDate).toEqual(rateQuestion.createdAt)
+
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: submittedContractAndRate.id },
+            select: { lastActionDate: true },
+        })
+        expect(contractTableRow?.lastActionDate).toEqual(rateQuestion.createdAt)
 
         expect(rateQuestion).toEqual(
             expect.objectContaining({

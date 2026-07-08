@@ -128,7 +128,10 @@ async function undoUnlockContractInsideTransaction(
         },
     })
 
-    const unlockedRateRevisionIDs = unlockedRates.flatMap((rate) => {
+    const unlockedRateRevisionIDs: string[] = []
+    const childRateIDs: string[] = []
+
+    for (const rate of unlockedRates) {
         const latestRevision = getLatestActiveRevision(rate.revisions)
         // We need the latest submitted revision across the full history, not just
         // the latest couple of rows. After unlock -> undo unlock -> unlock
@@ -144,11 +147,10 @@ async function undoUnlockContractInsideTransaction(
             latestRevision.unlockInfoID === sharedUnlockInfoID &&
             latestSubmittedParentContractID === contractID
         ) {
-            return [latestRevision.id]
+            unlockedRateRevisionIDs.push(latestRevision.id)
+            childRateIDs.push(rate.id)
         }
-
-        return []
-    })
+    }
 
     if (unlockedRateRevisionIDs.length > 0) {
         await tx.rateRevisionTable.updateMany({
@@ -171,6 +173,32 @@ async function undoUnlockContractInsideTransaction(
             undoUnlockInfoID: undoUnlockInfo.id,
         },
     })
+
+    // Undo unlock is a visible status/action change for users. Keep stored
+    // freshness on the contract and reversed child rates aligned with the
+    // undoUnlockInfo event timestamp. Linked rates are intentionally excluded:
+    // their own revisions were not reversed by this contract action.
+    await tx.contractTable.update({
+        where: {
+            id: contractID,
+        },
+        data: {
+            lastActionDate: undoUnlockInfo.updatedAt,
+        },
+    })
+
+    if (childRateIDs.length > 0) {
+        await tx.rateTable.updateMany({
+            where: {
+                id: {
+                    in: childRateIDs,
+                },
+            },
+            data: {
+                lastActionDate: undoUnlockInfo.updatedAt,
+            },
+        })
+    }
 
     await tx.draftRateJoinTable.deleteMany({
         where: {

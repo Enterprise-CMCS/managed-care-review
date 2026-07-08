@@ -96,6 +96,7 @@ describe('updateDivisionAssignment', () => {
 
                 const auditLogs = await prismaClient.userAudit.findMany({
                     where: { modifiedUserId: cmsUserID },
+                    orderBy: { createdAt: 'asc' },
                 })
 
                 expect(auditLogs).toHaveLength(2)

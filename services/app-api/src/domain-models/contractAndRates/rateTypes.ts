@@ -25,6 +25,8 @@ const strippedRateSchema = z.object({
     id: z.string().uuid(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    // Last persisted rate action that should affect display freshness.
+    lastActionDate: z.date().nullish(),
     initiallySubmittedAt: z.date().optional(),
     status: statusSchema,
     reviewStatus: rateReviewStatusSchema,

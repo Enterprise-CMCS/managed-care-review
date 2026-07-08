@@ -20,7 +20,13 @@ const errorMessages = {
  * @returns Extended PrismaClient instance with custom query behaviors
  */
 function extendedPrismaClient(optionArgs: { adapter: PrismaPg }) {
-    return new PrismaClient(optionArgs).$extends({
+    return new PrismaClient({
+        ...optionArgs,
+        // Set default timeout for all transactions.
+        transactionOptions: {
+            timeout: 10000,
+        },
+    }).$extends({
         query: {
             applicationSettings: {
                 delete: () => {

@@ -15,6 +15,11 @@ const contractPackageSubmissionSchema = z.object({
     rateRevisions: z.array(rateRevisionSchema),
 })
 
+const contractUndoUnlockPackageSchema = z.object({
+    undoUnlockInfo: updateInfoSchema,
+    draftContractRevisionSnapshot: contractRevisionSchema,
+})
+
 const eqroContractPackageSubmissionSchema = z.object({
     submitInfo: updateInfoSchema,
     submittedRevisions: z.array(
@@ -22,6 +27,11 @@ const eqroContractPackageSubmissionSchema = z.object({
     ),
     contractRevision: eqroContractRevisionSchema,
     rateRevisions: z.array(rateRevisionSchema),
+})
+
+const eqroContractUndoUnlockPackageSchema = z.object({
+    undoUnlockInfo: updateInfoSchema,
+    draftContractRevisionSnapshot: eqroContractRevisionSchema,
 })
 
 const packgeSubmissionCause = z.union([
@@ -44,6 +54,10 @@ type ContractPackageSubmissionWithCauseType = z.infer<
     typeof contractPackageSubmissionWithCauseSchema
 >
 
+type ContractUndoUnlockPackageType = z.infer<
+    typeof contractUndoUnlockPackageSchema
+>
+
 const ratePackageSubmissionSchema = z.object({
     submitInfo: updateInfoSchema,
     submittedRevisions: z.array(
@@ -54,6 +68,13 @@ const ratePackageSubmissionSchema = z.object({
 })
 
 type RatePackageSubmissionType = z.infer<typeof ratePackageSubmissionSchema>
+
+const rateUndoUnlockPackageSchema = z.object({
+    undoUnlockInfo: updateInfoSchema,
+    draftRateRevisionSnapshot: rateRevisionSchema,
+})
+
+type RateUndoUnlockPackageType = z.infer<typeof rateUndoUnlockPackageSchema>
 
 const ratePackageSubmissionWithCauseSchema = ratePackageSubmissionSchema.extend(
     {
@@ -68,14 +89,19 @@ type RatePackageSubmissionWithCauseType = z.infer<
 export {
     contractPackageSubmissionSchema,
     contractPackageSubmissionWithCauseSchema,
+    contractUndoUnlockPackageSchema,
+    eqroContractUndoUnlockPackageSchema,
     ratePackageSubmissionWithCauseSchema,
     ratePackageSubmissionSchema,
+    rateUndoUnlockPackageSchema,
     eqroContractPackageSubmissionSchema,
 }
 
 export type {
     ContractPackageSubmissionType,
     ContractPackageSubmissionWithCauseType,
+    ContractUndoUnlockPackageType,
     RatePackageSubmissionType,
     RatePackageSubmissionWithCauseType,
+    RateUndoUnlockPackageType,
 }

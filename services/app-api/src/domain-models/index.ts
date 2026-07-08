@@ -44,7 +44,9 @@ export type {
     RateFormDataType,
     PackageStatusType,
     ContractPackageSubmissionType,
+    ContractUndoUnlockPackageType,
     RatePackageSubmissionType,
+    RateUndoUnlockPackageType,
     ContractPackageSubmissionWithCauseType,
     RatePackageSubmissionWithCauseType,
     UnlockedContractType,
@@ -56,6 +58,17 @@ export type {
     ContractReviewStatusType,
     UpdateInfoType,
     ContractSubmissionType,
+    BaseSubmissionHistoryEntry,
+    CompleteHistory,
+    ContractSubmissionHistoryActionType,
+    ContractSubmissionHistoryEntry,
+    QuestionResponseHistoryActionType,
+    QuestionResponseHistory,
+    RateSubmissionHistoryActionType,
+    RateSubmissionHistoryEntry,
+    SubmissionHistoryActionType,
+    SubmissionHistory,
+    SubmissionHistoryUserTypes,
 } from './contractAndRates'
 
 export type {

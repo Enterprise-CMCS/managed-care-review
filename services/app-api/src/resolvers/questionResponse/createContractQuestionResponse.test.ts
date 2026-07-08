@@ -24,6 +24,7 @@ import {
 } from '../../testHelpers/gqlContractHelpers'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 import { testS3Client } from '../../testHelpers/s3Helpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 describe('createContractQuestionResponse', () => {
     const cmsUser = testCMSUser()
@@ -59,6 +60,14 @@ describe('createContractQuestionResponse', () => {
             stateServer,
             createdQuestion.id
         )
+        const responseCreatedAt = createResponseResult.responses[0].createdAt
+
+        const prismaClient = await sharedTestPrismaClient()
+        const contractTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: contract.id },
+            select: { lastActionDate: true },
+        })
+        expect(contractTableRow?.lastActionDate).toEqual(responseCreatedAt)
 
         expect(createResponseResult).toEqual(
             expect.objectContaining({

@@ -7,6 +7,7 @@ import {
     adminCreateContractQuestionResolver,
     adminCreateContractQuestionResponseResolver,
     deleteContractQuestionResolver,
+    deleteContractQuestionResponseResolver,
     createContractQuestionResponseResolver,
     questionResponseDocumentResolver,
     createRateQuestionResolver,
@@ -55,6 +56,7 @@ import {
     contractRevisionStrippedResolver,
 } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
+import { fetchSubmissionHistoryResolver } from './contract/fetchSubmissionHistory'
 import { submitContract } from './contract/submitContract'
 import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
@@ -92,7 +94,7 @@ export function configureResolvers(
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),
-            indexContracts: indexContractsResolver(store),
+            indexContracts: indexContractsResolver(store, launchDarkly),
             indexContractsStripped: indexContractsStripped(store),
             indexUsers: indexUsersResolver(store),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
@@ -102,6 +104,7 @@ export function configureResolvers(
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
+            fetchSubmissionHistory: fetchSubmissionHistoryResolver(store),
             fetchOauthClients: fetchOauthClientsResolver(store),
         },
         Mutation: {
@@ -154,6 +157,8 @@ export function configureResolvers(
                 store,
                 launchDarkly
             ),
+            deleteContractQuestionResponse:
+                deleteContractQuestionResponseResolver(store),
             adminCreateContractQuestion:
                 adminCreateContractQuestionResolver(store),
             adminCreateContractQuestionResponse:
@@ -221,10 +226,6 @@ export function configureResolvers(
                 }
             },
         },
-        // TODO: Restore QuestionAuthor resolver when union is re-enabled
-        // in schema for ContractQuestion/RateQuestion.addedBy.
-        // TODO: Restore ResponseAuthor resolver when union is re-enabled
-        // in schema for QuestionResponse.addedBy.
         SubmittableRevision: {
             __resolveType(obj) {
                 if ('contract' in obj) {
@@ -243,9 +244,13 @@ export function configureResolvers(
         RateFormData: rateFormDataResolver(),
         ContractQuestion: questionResolver(store),
         RateQuestion: questionResolver(store),
-        ContractStripped: contractStrippedResolver(),
-        Contract: contractResolver(store, applicationEndpoint),
-        UnlockedContract: unlockedContractResolver(store, applicationEndpoint),
+        ContractStripped: contractStrippedResolver(launchDarkly),
+        Contract: contractResolver(store, applicationEndpoint, launchDarkly),
+        UnlockedContract: unlockedContractResolver(
+            store,
+            applicationEndpoint,
+            launchDarkly
+        ),
         ContractRevision: contractRevisionResolver(store),
         ContractRevisionStripped: contractRevisionStrippedResolver(store),
         GenericDocument: genericDocumentResolver(s3Client),

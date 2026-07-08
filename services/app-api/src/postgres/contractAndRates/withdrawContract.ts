@@ -241,19 +241,24 @@ const withdrawContractInsideTransaction = async (
         )
     }
 
-    // add withdraw action to contract
+    // The unlock and resubmit above already moved lastActionDate for their
+    // actions. The withdrawal review action is the final visible action for
+    // this contract, so it should be the stored freshness date.
+    const contractWithdrawAction = await tx.contractActionTable.create({
+        data: {
+            contractID: contract.id,
+            updatedByID,
+            updatedReason,
+            actionType: 'WITHDRAW',
+        },
+    })
+
     await tx.contractTable.update({
         where: {
             id: contract.id,
         },
         data: {
-            reviewStatusActions: {
-                create: {
-                    updatedByID,
-                    updatedReason,
-                    actionType: 'WITHDRAW',
-                },
-            },
+            lastActionDate: contractWithdrawAction.updatedAt,
         },
     })
 
@@ -267,8 +272,10 @@ const withdrawContractInsideTransaction = async (
                     ?.rateCertificationName ?? 'Unknown Rate',
         })
 
-        // Add withdraw action to all rates that are withdrawn with this submission
-        await tx.rateActionTable.create({
+        // The submit above moved lastActionDate for submitted child rate data.
+        // The withdrawal review action is the final visible action for each
+        // withdrawn rate, so it should become the stored freshness date.
+        const rateWithdrawAction = await tx.rateActionTable.create({
             data: {
                 updatedReason,
                 updatedBy: {
@@ -282,6 +289,15 @@ const withdrawContractInsideTransaction = async (
                         id: rate.id,
                     },
                 },
+            },
+        })
+
+        await tx.rateTable.update({
+            where: {
+                id: rate.id,
+            },
+            data: {
+                lastActionDate: rateWithdrawAction.updatedAt,
             },
         })
     }

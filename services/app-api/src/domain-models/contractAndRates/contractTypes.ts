@@ -82,6 +82,8 @@ const strippedContractSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    // Last persisted contract action that should affect display freshness.
+    lastActionDate: z.date().nullish(),
     initiallySubmittedAt: z.date().optional(),
     status: statusSchema,
     reviewStatus: contractReviewStatusSchema,

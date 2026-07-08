@@ -1,4 +1,5 @@
 export { useCurrentRoute } from './useCurrentRoute'
+export { usePageLoadSpan } from './usePageLoadSpan'
 export { useFocus } from './useFocus'
 export { useLocalStorage } from './useLocalStorage'
 export { usePrevious } from './usePrevious'
