@@ -77,7 +77,7 @@ export function AppBody({
                 {siteUnderMaintenance ? (
                     <Landing />
                 ) : loginStatus === 'LOADING' ? (
-                    <Loading />
+                    <Loading fullPage />
                 ) : (
                     <AppRoutes authMode={authMode} setAlert={setGlobalAlert} />
                 )}

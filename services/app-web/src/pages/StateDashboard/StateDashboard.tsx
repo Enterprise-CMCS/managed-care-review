@@ -13,11 +13,10 @@ import {
     ErrorAlertSignIn,
     ContractTable,
     ContractInDashboardType,
-    Loading,
     GenericApiErrorBanner,
     NavLinkWithLogging,
 } from '../../components'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { ErrorOrLoadingPage } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'
 import { SubmissionSuccessBanner } from '../../components/Banner'
@@ -45,7 +44,7 @@ export const StateDashboard = (): React.ReactElement => {
     }, [activeMainContentId, updateActiveMainContent])
 
     if (!data && loading) {
-        return <Loading />
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (!data && error) {
         handleApolloError(error, true)
         return (
@@ -60,7 +59,7 @@ export const StateDashboard = (): React.ReactElement => {
             </div>
         )
     } else if (!data || !loggedInUser) {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     if (loggedInUser.__typename !== 'StateUser') {

@@ -23,6 +23,19 @@
     background-color: uswds.color('base-lightest');
 }
 
+// Centers the spinner within its own content container without covering
+// sibling content (e.g. the Settings tab nav). In-flow and transparent, with a
+// min-height so it stays vertically centered even when the container is short.
+.centeredLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 20rem;
+    text-align: center;
+}
+
 .loadingLabel {
     margin-bottom: uswds.units(2);
 }

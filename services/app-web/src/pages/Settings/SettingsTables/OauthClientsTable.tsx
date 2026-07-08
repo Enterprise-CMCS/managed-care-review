@@ -135,7 +135,7 @@ export const OauthClients = () => {
     }, [activeMainContentId, updateActiveMainContent])
 
     if (fetchOauthClientsResult.status === 'LOADING') {
-        return <Loading />
+        return <Loading centered />
     } else if (fetchOauthClientsResult.status === 'ERROR') {
         return <SettingsErrorAlert error={fetchOauthClientsResult.error} />
     } else if (!fetchOauthClientsResult) {

@@ -3,7 +3,6 @@ import {
     ButtonGroup,
     Fieldset,
     FormGroup,
-    GridContainer,
     Label,
     Grid,
 } from '@trussworks/react-uswds'
@@ -144,12 +143,7 @@ export const CreateOauthClient = (): React.ReactElement => {
         }
     }
 
-    if (indexUsersResult.status === 'LOADING')
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+    if (indexUsersResult.status === 'LOADING') return <Loading centered />
 
     if (indexUsersResult.status === 'ERROR') {
         return <SettingsErrorAlert error={indexUsersResult.error} />
