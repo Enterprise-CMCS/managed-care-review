@@ -7,7 +7,7 @@ import { AccessibleAlertBanner } from '../AccessibleAlertBanner/AccessibleAlertB
 export type AccountWarningBannerProps = {
     header?: string
     message?: React.ReactNode
-}
+} & React.HTMLAttributes<HTMLDivElement>
 
 const MissingDivisionMessage = () => {
     return (
@@ -24,6 +24,7 @@ const MissingDivisionMessage = () => {
 const UserAccountWarningBanner = ({
     header = 'Missing division',
     message = <MissingDivisionMessage />,
+    className,
 }: AccountWarningBannerProps) => {
     const { logAlertImpressionEvent } = useTealium()
 
@@ -35,12 +36,14 @@ const UserAccountWarningBanner = ({
             extension: 'react-uswds',
         })
     }, [logAlertImpressionEvent, message])
+
     return (
         <AccessibleAlertBanner
             role="alert"
             type="warning"
             headingLevel="h4"
             heading={header}
+            className={className}
         >
             {message}
         </AccessibleAlertBanner>
