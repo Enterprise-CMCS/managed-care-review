@@ -3,6 +3,8 @@
  * Ensures some type safety around flag names when we're enabling/disabling features in our code.
  *
  * This file also used to generate types for our Jest unit tests, Cypress tests, and for Yup validation logic.
+ *
+ * Default values are set to match PROD.
  */
 
 const featureFlags = {
@@ -16,7 +18,7 @@ const featureFlags = {
      */
     HIDE_SUPPORTING_DOCS_PAGE: {
         flag: 'hide-supporting-docs-page',
-        defaultValue: false,
+        defaultValue: true,
     },
     /**
      * Enables state and CMS rate edit, unlock, resubmit functionality
@@ -37,42 +39,34 @@ const featureFlags = {
      */
     DSNP: {
         flag: 'dsnp',
-        defaultValue: false,
+        defaultValue: true,
     },
     /**
      * Enables undo withdraw rate feature
      */
     UNDO_WITHDRAW_RATE: {
         flag: 'undo-withdraw-rate',
-        defaultValue: false,
+        defaultValue: true,
     },
     /**
      * Remove parameter store. False: use parameter store for email config. True: use database.
      */
     REMOVE_PARAMETER_STORE: {
         flag: 'remove-parameter-store',
-        defaultValue: false,
+        defaultValue: true,
     },
     /**
      * Enables withdraw submission features
      */
     WITHDRAW_SUBMISSION: {
         flag: 'withdraw-submission',
-        defaultValue: false,
+        defaultValue: true,
     },
     /**
      * Enables undo withdraw submission features
      */
     UNDO_WITHDRAW_SUBMISSION: {
         flag: 'undo-withdraw-submission',
-        defaultValue: false,
-    },
-    // PERMANENT FLAGS
-    /**
-     Enables the modal that alerts the user to an expiring session
-    */
-    SESSION_EXPIRING_MODAL: {
-        flag: 'session-expiring-modal',
         defaultValue: true,
     },
     /**
@@ -87,7 +81,7 @@ const featureFlags = {
      */
     CHIP_SUBMISSION_AUTOMATION: {
         flag: 'chip-submission-automation',
-        defaultValue: false,
+        defaultValue: true,
     },
     /**
      * Uses stored contract action dates for contract lastUpdatedForDisplay and updatedWithin filtering.
@@ -101,13 +95,21 @@ const featureFlags = {
      */
     RESOURCES_NAV_PAGES: {
         flag: 'resources-nav-pages',
-        defaultValue: false,
+        defaultValue: true,
     },
+    // PERMANENT FLAGS for utilities not flagging features
     /**
      * This flag toggles the ability for external API users to send write requests.
      */
     EXTERNAL_API_WRITE_REQUEST: {
         flag: 'external-api-write-request',
+        defaultValue: false,
+    },
+    /**
+     Enables the modal that alerts the user to an expiring session
+    */
+    SESSION_EXPIRING_MODAL: {
+        flag: 'session-expiring-modal',
         defaultValue: true,
     },
     MINUTES_UNTIL_SESSION_EXPIRES: {
