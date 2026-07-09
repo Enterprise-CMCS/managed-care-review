@@ -18,7 +18,8 @@
         "@mc-review/submissions": "workspace:*",
         "@mc-review/mocks": "workspace:*",
         "@mc-review/otel": "workspace:*",
-        "typescript": "5.9.3",
+        "typescript": "npm:@typescript/typescript6@6.0.2",
+        "typescript7": "npm:typescript@7.0.2",
         "url-parse": "^1.5.10"
     },
     "devDependencies": {

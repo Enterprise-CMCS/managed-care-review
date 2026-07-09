@@ -7,7 +7,6 @@
         "types": ["node"],
         "moduleResolution": "bundler",
 
-        "baseUrl": "/",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
@@ -17,6 +16,7 @@
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
 
+        "rootDir": "./",
         "outDir": "build"
     },
     "include": ["src", "eslint.config.ts"]

@@ -12,7 +12,8 @@
     },
     "dependencies": {
         "dayjs": "^1.11.19",
-        "typescript": "5.9.3"
+        "typescript": "npm:@typescript/typescript6@6.0.2",
+        "typescript7": "npm:typescript@7.0.2"
     },
     "devDependencies": {
         "@types/node": "^25.5.0",

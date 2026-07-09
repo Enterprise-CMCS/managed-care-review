@@ -6,7 +6,6 @@
         "lib": ["ES2022", "DOM"],
         "types": ["node", "jest"],
         "moduleResolution": "bundler",
-        "baseUrl": "./",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
@@ -15,13 +14,10 @@
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
         "paths": {
-            "@config/*": ["lib/config/*"],
-            "@constructs/*": ["lib/constructs/*"],
-            "@stacks/*": ["lib/stacks/*"]
+            "@config/*": ["./lib/config/*"],
+            "@constructs/*": ["./lib/constructs/*"],
+            "@stacks/*": ["./lib/stacks/*"]
         }
-    },
-    "ts-node": {
-        "esm": true
     },
     "include": ["src", "bin", "lib", "eslint.config.ts", "jest.config.js"]
 }

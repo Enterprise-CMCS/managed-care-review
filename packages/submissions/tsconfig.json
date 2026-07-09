@@ -4,8 +4,7 @@
         "module": "ESNext",
         "lib": ["ES2021", "DOM"],
         "target": "ES2021",
-        "moduleResolution": "node",
-        "baseUrl": "./",
+        "moduleResolution": "bundler",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "preserveConstEnums": true,
@@ -16,6 +15,7 @@
         "jsx": "react",
         "allowJs": true,
         "declaration": true,
+        "rootDir": "./src",
         "outDir": "./build"
     },
     "include": ["src/**/*", "src/data/statePrograms.json"],

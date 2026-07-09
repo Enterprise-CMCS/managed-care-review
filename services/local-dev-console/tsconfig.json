@@ -5,6 +5,7 @@
         "lib": ["ES2021", "DOM"],
         "target": "ES2021",
         "moduleResolution": "bundler",
+        "types": ["vite/client"],
         "sourceMap": true,
         "skipLibCheck": true,
         "esModuleInterop": true,

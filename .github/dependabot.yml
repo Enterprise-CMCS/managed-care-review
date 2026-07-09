@@ -15,6 +15,11 @@ updates:
         update-types: ['version-update:semver-major']
       - dependency-name: '@prisma/client'
         update-types: ['version-update:semver-major']
+      # CLI v7 emits schema types twice into single-file typescript +
+      # typescript-operations outputs, breaking `pnpm -r generate`.
+      # See https://github.com/dotansimha/graphql-code-generator/issues/10782
+      - dependency-name: '@graphql-codegen/cli'
+        update-types: ['version-update:semver-major']
     groups:
       aws-cdk:
         applies-to: version-updates

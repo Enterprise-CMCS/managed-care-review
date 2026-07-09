@@ -7,18 +7,20 @@
     },
     "dependencies": {
         "@apollo/client": "^4.1.7",
-        "rxjs": "^7.8.1",
         "@graphql-typed-document-node/core": "^3.2.0",
         "@mc-review/dates": "workspace:*",
         "@mc-review/submissions": "workspace:*",
         "dayjs": "^1.11.19",
         "graphql": "^16.14.0",
-        "typescript": "5.9.3",
+        "rxjs": "^7.8.1",
+        "typescript": "npm:@typescript/typescript6@6.0.2",
+        "typescript7": "npm:typescript@7.0.2",
         "uuid": "^14.0.1"
     },
     "devDependencies": {
         "@types/jest": "^30.0.0",
         "@types/node": "^25.5.0",
-        "@types/uuid": "^11.0.0"
+        "@types/uuid": "^11.0.0",
+        "vitest": "^4.1.7"
     }
 }
