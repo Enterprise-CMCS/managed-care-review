@@ -4,6 +4,7 @@ import OAuth2Server, {
     InvalidRequestError,
     InvalidClientError,
     UnauthorizedClientError,
+    ServerError,
     type Token,
     type Client,
     type User,
@@ -56,6 +57,16 @@ export class CustomOAuth2Server {
             clientId,
             clientSecret
         )
+        // A store error is not an auth result: report it as a server error
+        // rather than letting a DB failure read as valid (truthy) credentials
+        if (isValid instanceof Error) {
+            recordException(
+                isValid,
+                OTEL_SERVICE_NAME,
+                'oauth2Server.getClient.verifyClientCredentials'
+            )
+            throw new ServerError('Error verifying client credentials')
+        }
         if (!isValid) {
             throw new InvalidClientError('Invalid client credentials')
         }
@@ -143,7 +154,15 @@ export class CustomOAuth2Server {
             this.prisma,
             clientId
         )
-        if (clientResult instanceof Error || !clientResult) {
+        if (clientResult instanceof Error) {
+            recordException(
+                clientResult,
+                OTEL_SERVICE_NAME,
+                'oauth2Server.generateJWT.getOAuthClientByClientId'
+            )
+            throw new ServerError('Error fetching client')
+        }
+        if (!clientResult) {
             throw new InvalidClientError('Client not found')
         }
 
@@ -158,33 +177,13 @@ export class CustomOAuth2Server {
 
     // Main method to handle token requests
     async token(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
-        let body: Record<string, unknown> = {}
         const contentType =
             event.headers['Content-Type'] || event.headers['content-type']
 
         try {
-            if (contentType?.includes('application/json')) {
-                try {
-                    body = event.body ? JSON.parse(event.body) : {}
-                } catch {
-                    return {
-                        statusCode: 400,
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            error: 'invalid_request',
-                            error_description: 'Invalid JSON payload',
-                        }),
-                    }
-                }
-            } else if (
-                contentType?.includes('application/x-www-form-urlencoded')
-            ) {
-                // Parse form-urlencoded data
-                const params = new URLSearchParams(event.body || '')
-                body = Object.fromEntries(params.entries())
-            } else {
+            // RFC 6749 requires token requests be application/x-www-form-urlencoded,
+            // and the underlying oauth2-server library rejects anything else
+            if (!contentType?.includes('application/x-www-form-urlencoded')) {
                 return {
                     statusCode: 400,
                     headers: {
@@ -193,10 +192,15 @@ export class CustomOAuth2Server {
                     body: JSON.stringify({
                         error: 'invalid_request',
                         error_description:
-                            'Content-Type must be application/json or application/x-www-form-urlencoded',
+                            'Content-Type must be application/x-www-form-urlencoded',
                     }),
                 }
             }
+
+            const params = new URLSearchParams(event.body || '')
+            const body: Record<string, unknown> = Object.fromEntries(
+                params.entries()
+            )
 
             // Transform the body to match OAuth2 expected format
             const transformedBody = {
@@ -325,6 +329,11 @@ export class CustomOAuth2Server {
                 }
             }
         } catch (error) {
+            recordException(
+                parseErrorToError(error),
+                OTEL_SERVICE_NAME,
+                'oauth2Server.token.requestParsing'
+            )
             return {
                 statusCode: 400,
                 headers: {

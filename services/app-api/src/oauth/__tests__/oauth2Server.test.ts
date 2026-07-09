@@ -2,123 +2,120 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { CustomOAuth2Server } from '../oauth2Server'
 import type { ExtendedPrismaClient } from '../../postgres/prismaClient'
 import type { APIGatewayProxyEvent } from 'aws-lambda'
-import type { Client, Token, User } from '@node-oauth/oauth2-server'
 
-// Mock OAuth2 server
-vi.mock('@node-oauth/oauth2-server', () => {
-    class UnauthorizedClientError extends Error {
-        constructor(message: string) {
-            super(message)
-            this.name = 'UnauthorizedClientError'
+// These tests run against the real @node-oauth/oauth2-server library with only
+// Prisma mocked, so they exercise the library's own request validation
+// (method, content-type, required params) alongside our model methods.
+
+const mockJwtSecret = 'abcd1234abcd1234abcd1234abcd1234' // pragma: allowlist secret
+const mockOauthIssuer = 'mcreview-oauth'
+
+const validClientId = 'oauth-client-abc'
+const validClientSecret = 'super-secret-value' // pragma: allowlist secret
+
+const adminUser = {
+    id: 'user-123',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    role: 'ADMIN_USER',
+    givenName: 'Ada',
+    familyName: 'Admin',
+    email: 'ada@example.com',
+    divisionAssignment: null,
+    stateCode: null,
+    stateAssignments: [],
+}
+
+const oauthClientRow = {
+    id: 'oauth-row-1',
+    clientId: validClientId,
+    clientSecret: validClientSecret,
+    grants: ['client_credentials'],
+    description: null,
+    userID: adminUser.id,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    lastUsedAt: null,
+    user: adminUser,
+}
+
+function tokenEvent(overrides?: {
+    body?: string | null
+    contentType?: string
+    method?: string
+}): APIGatewayProxyEvent {
+    const headers: Record<string, string> = {}
+    if (overrides?.contentType !== undefined) {
+        if (overrides.contentType !== '') {
+            headers['Content-Type'] = overrides.contentType
         }
+    } else {
+        headers['Content-Type'] = 'application/x-www-form-urlencoded'
     }
 
-    class InvalidRequestError extends Error {
-        constructor(message: string) {
-            super(message)
-            this.name = 'InvalidRequestError'
-        }
-    }
-
-    class InvalidClientError extends Error {
-        constructor(message: string) {
-            super(message)
-            this.name = 'InvalidClientError'
-        }
-    }
-
-    class Request {
-        body: Record<string, unknown>
-        headers: Record<string, string>
-        method: string
-        query: Record<string, string>
-        constructor(options: {
-            body: Record<string, unknown>
-            headers: Record<string, string>
-            method: string
-            query: Record<string, string>
-        }) {
-            this.body = options.body
-            this.headers = options.headers
-            this.method = options.method
-            this.query = options.query
-        }
-    }
-
-    class Response {
-        body: Record<string, unknown>
-        headers: Record<string, string>
-        constructor() {
-            this.body = {}
-            this.headers = {}
-        }
-    }
-
-    interface OAuth2ServerModel {
-        getClient: (clientId: string, clientSecret: string) => Promise<Client>
-        validateScope: (
-            user: User,
-            client: Client,
-            scope: string
-        ) => Promise<boolean>
-        saveToken: (token: Token, client: Client, user: User) => Promise<Token>
-        getAccessToken: (accessToken: string) => Promise<Token | null>
-    }
-
-    class OAuth2Server {
-        private model: OAuth2ServerModel
-
-        constructor(options: { model: OAuth2ServerModel }) {
-            this.model = options.model
-        }
-
-        async token(request: Request, response: Response) {
-            if (!request.body) {
-                throw new InvalidRequestError('Missing request body')
-            }
-
-            if (!request.body.client_id || !request.body.client_secret) {
-                throw new InvalidRequestError('Missing client credentials')
-            }
-
-            // pragma: allowlist nextline secret
-            if (request.body.client_secret === 'invalid') {
-                throw new InvalidClientError('Invalid client credentials')
-            }
-
-            return {
-                grantType: 'client_credentials',
-                client: {
-                    id: request.body.client_id,
-                    grants: ['client_credentials'],
-                } as Client,
-                accessToken: 'mock.access.token', // pragma: allowlist secret
-                user: { id: 'system' } as User,
-            } as Token
-        }
-    }
+    const defaultBody = new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: validClientId,
+        client_secret: validClientSecret,
+    }).toString()
 
     return {
-        default: OAuth2Server,
-        OAuth2Server,
-        UnauthorizedClientError,
-        InvalidRequestError,
-        InvalidClientError,
-        Request,
-        Response,
-    }
-})
+        body: overrides?.body !== undefined ? overrides.body : defaultBody,
+        headers,
+        httpMethod: overrides?.method ?? 'POST',
+        queryStringParameters: null,
+        multiValueHeaders: {},
+        multiValueQueryStringParameters: null,
+        isBase64Encoded: false,
+        path: '/oauth/token',
+        pathParameters: null,
+        stageVariables: null,
+        requestContext: {
+            accountId: '',
+            apiId: '',
+            authorizer: null,
+            protocol: '',
+            httpMethod: overrides?.method ?? 'POST',
+            identity: {
+                accessKey: null,
+                accountId: null,
+                apiKey: null,
+                apiKeyId: null,
+                caller: null,
+                clientCert: null,
+                cognitoAuthenticationProvider: null,
+                cognitoAuthenticationType: null,
+                cognitoIdentityId: null,
+                cognitoIdentityPoolId: null,
+                principalOrgId: null,
+                sourceIp: '',
+                user: null,
+                userAgent: null,
+                userArn: null,
+            },
+            path: '/oauth/token',
+            stage: '',
+            requestId: '',
+            requestTimeEpoch: 0,
+            resourceId: '',
+            resourcePath: '',
+        },
+        resource: '',
+    } as APIGatewayProxyEvent
+}
 
 describe('CustomOAuth2Server', () => {
     let oauth2Server: CustomOAuth2Server
-    let mockPrisma: ExtendedPrismaClient
-    const mockJwtSecret = 'test-secret' // pragma: allowlist secret
-    const mockOauthIssuer = 'mcreview-oauth'
+    let findUnique: ReturnType<typeof vi.fn>
+    let update: ReturnType<typeof vi.fn>
 
     beforeEach(() => {
-        mockPrisma = {
+        findUnique = vi.fn().mockResolvedValue(oauthClientRow)
+        update = vi.fn().mockResolvedValue(oauthClientRow)
+        const mockPrisma = {
             oAuthClient: {
-                findUnique: vi.fn(),
+                findUnique,
+                update,
             },
         } as unknown as ExtendedPrismaClient
 
@@ -130,170 +127,121 @@ describe('CustomOAuth2Server', () => {
     })
 
     describe('token', () => {
-        it('should return 400 for invalid JSON payload', async () => {
-            const event = {
-                body: '{invalid json',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                httpMethod: 'POST',
-                queryStringParameters: null,
-                multiValueHeaders: {},
-                multiValueQueryStringParameters: null,
-                isBase64Encoded: false,
-                path: '/token',
-                pathParameters: null,
-                stageVariables: null,
-                requestContext: {
-                    accountId: '',
-                    apiId: '',
-                    authorizer: null,
-                    protocol: '',
-                    httpMethod: 'POST',
-                    identity: {
-                        accessKey: null,
-                        accountId: null,
-                        apiKey: null,
-                        apiKeyId: null,
-                        caller: null,
-                        clientCert: null,
-                        cognitoAuthenticationProvider: null,
-                        cognitoAuthenticationType: null,
-                        cognitoIdentityId: null,
-                        cognitoIdentityPoolId: null,
-                        principalOrgId: null,
-                        sourceIp: '',
-                        user: null,
-                        userAgent: null,
-                        userArn: null,
-                    },
-                    path: '/token',
-                    stage: '',
-                    requestId: '',
-                    requestTimeEpoch: 0,
-                    resourceId: '',
-                    resourcePath: '',
-                },
-                resource: '',
-            } as APIGatewayProxyEvent
+        it('returns a JWT for valid form-urlencoded credentials', async () => {
+            const result = await oauth2Server.token(tokenEvent())
 
-            const result = await oauth2Server.token(event)
+            expect(result.statusCode).toBe(200)
+            const response = JSON.parse(result.body)
+            expect(response).toHaveProperty('token_type', 'Bearer')
+            expect(response).toHaveProperty('expires_in', 1800)
+            // access_token should be a signed JWT carrying our client
+            const [, payloadB64] = response.access_token.split('.')
+            const payload = JSON.parse(
+                Buffer.from(payloadB64, 'base64url').toString()
+            )
+            expect(payload.client_id).toBe(validClientId)
+            expect(payload.user_id).toBe(adminUser.id)
+            expect(payload.grants).toEqual(['client_credentials'])
+        })
+
+        it('accepts a content-type with a charset parameter', async () => {
+            const result = await oauth2Server.token(
+                tokenEvent({
+                    contentType:
+                        'application/x-www-form-urlencoded; charset=UTF-8',
+                })
+            )
+
+            expect(result.statusCode).toBe(200)
+        })
+
+        it('accepts camelCase parameter names in the form body', async () => {
+            const result = await oauth2Server.token(
+                tokenEvent({
+                    body: new URLSearchParams({
+                        grantType: 'client_credentials',
+                        clientId: validClientId,
+                        clientSecret: validClientSecret,
+                    }).toString(),
+                })
+            )
+
+            expect(result.statusCode).toBe(200)
+        })
+
+        it('returns 400 for application/json content, per RFC 6749', async () => {
+            const result = await oauth2Server.token(
+                tokenEvent({
+                    body: JSON.stringify({
+                        grant_type: 'client_credentials',
+                        client_id: validClientId,
+                        client_secret: validClientSecret,
+                    }),
+                    contentType: 'application/json',
+                })
+            )
 
             expect(result.statusCode).toBe(400)
             expect(JSON.parse(result.body)).toEqual({
                 error: 'invalid_request',
-                error_description: 'Invalid JSON payload',
+                error_description:
+                    'Content-Type must be application/x-www-form-urlencoded',
             })
         })
 
-        it('should return 400 for invalid request', async () => {
-            const event = {
-                body: JSON.stringify({}),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                httpMethod: 'POST',
-                queryStringParameters: null,
-                multiValueHeaders: {},
-                multiValueQueryStringParameters: null,
-                isBase64Encoded: false,
-                path: '/token',
-                pathParameters: null,
-                stageVariables: null,
-                requestContext: {
-                    accountId: '',
-                    apiId: '',
-                    authorizer: null,
-                    protocol: '',
-                    httpMethod: 'POST',
-                    identity: {
-                        accessKey: null,
-                        accountId: null,
-                        apiKey: null,
-                        apiKeyId: null,
-                        caller: null,
-                        clientCert: null,
-                        cognitoAuthenticationProvider: null,
-                        cognitoAuthenticationType: null,
-                        cognitoIdentityId: null,
-                        cognitoIdentityPoolId: null,
-                        principalOrgId: null,
-                        sourceIp: '',
-                        user: null,
-                        userAgent: null,
-                        userArn: null,
-                    },
-                    path: '/token',
-                    stage: '',
-                    requestId: '',
-                    requestTimeEpoch: 0,
-                    resourceId: '',
-                    resourcePath: '',
-                },
-                resource: '',
-            } as APIGatewayProxyEvent
-
-            const result = await oauth2Server.token(event)
+        it('returns 400 when content-type is missing', async () => {
+            const result = await oauth2Server.token(
+                tokenEvent({ contentType: '' })
+            )
 
             expect(result.statusCode).toBe(400)
             expect(JSON.parse(result.body)).toEqual({
                 error: 'invalid_request',
+                error_description:
+                    'Content-Type must be application/x-www-form-urlencoded',
+            })
+        })
+
+        it('returns 400 when grant_type is missing', async () => {
+            const result = await oauth2Server.token(
+                tokenEvent({
+                    body: new URLSearchParams({
+                        client_id: validClientId,
+                        client_secret: validClientSecret,
+                    }).toString(),
+                })
+            )
+
+            expect(result.statusCode).toBe(400)
+            expect(JSON.parse(result.body)).toEqual({
+                error: 'invalid_request',
+                error_description: expect.stringContaining('grant_type'),
+            })
+        })
+
+        it('returns 401 for a wrong client secret and does not mark the client used', async () => {
+            const result = await oauth2Server.token(
+                tokenEvent({
+                    body: new URLSearchParams({
+                        grant_type: 'client_credentials',
+                        client_id: validClientId,
+                        client_secret: 'wrong-secret', // pragma: allowlist secret
+                    }).toString(),
+                })
+            )
+
+            expect(result.statusCode).toBe(401)
+            expect(JSON.parse(result.body)).toEqual({
+                error: 'invalid_client',
                 error_description: expect.any(String),
             })
+            expect(update).not.toHaveBeenCalled()
         })
 
-        it('should return 401 for invalid client credentials', async () => {
-            const event = {
-                body: JSON.stringify({
-                    grant_type: 'client_credentials',
-                    client_id: 'invalid',
-                    client_secret: 'invalid', // pragma: allowlist secret
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                httpMethod: 'POST',
-                queryStringParameters: null,
-                multiValueHeaders: {},
-                multiValueQueryStringParameters: null,
-                isBase64Encoded: false,
-                path: '/token',
-                pathParameters: null,
-                stageVariables: null,
-                requestContext: {
-                    accountId: '',
-                    apiId: '',
-                    authorizer: null,
-                    protocol: '',
-                    httpMethod: 'POST',
-                    identity: {
-                        accessKey: null,
-                        accountId: null,
-                        apiKey: null,
-                        apiKeyId: null,
-                        caller: null,
-                        clientCert: null,
-                        cognitoAuthenticationProvider: null,
-                        cognitoAuthenticationType: null,
-                        cognitoIdentityId: null,
-                        cognitoIdentityPoolId: null,
-                        principalOrgId: null,
-                        sourceIp: '',
-                        user: null,
-                        userAgent: null,
-                        userArn: null,
-                    },
-                    path: '/token',
-                    stage: '',
-                    requestId: '',
-                    requestTimeEpoch: 0,
-                    resourceId: '',
-                    resourcePath: '',
-                },
-                resource: '',
-            } as APIGatewayProxyEvent
+        it('returns 401 for an unknown client', async () => {
+            findUnique.mockResolvedValue(null)
 
-            const result = await oauth2Server.token(event)
+            const result = await oauth2Server.token(tokenEvent())
 
             expect(result.statusCode).toBe(401)
             expect(JSON.parse(result.body)).toEqual({
@@ -302,64 +250,14 @@ describe('CustomOAuth2Server', () => {
             })
         })
 
-        it('should return JWT token for valid client credentials', async () => {
-            const event = {
-                body: JSON.stringify({
-                    grant_type: 'client_credentials',
-                    client_id: 'valid', // pragma: allowlist secret
-                    client_secret: 'valid', // pragma: allowlist secret
-                }),
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                httpMethod: 'POST',
-                queryStringParameters: null,
-                multiValueHeaders: {},
-                multiValueQueryStringParameters: null,
-                isBase64Encoded: false,
-                path: '/token',
-                pathParameters: null,
-                stageVariables: null,
-                requestContext: {
-                    accountId: '',
-                    apiId: '',
-                    authorizer: null,
-                    protocol: '',
-                    httpMethod: 'POST',
-                    identity: {
-                        accessKey: null,
-                        accountId: null,
-                        apiKey: null,
-                        apiKeyId: null,
-                        caller: null,
-                        clientCert: null,
-                        cognitoAuthenticationProvider: null,
-                        cognitoAuthenticationType: null,
-                        cognitoIdentityId: null,
-                        cognitoIdentityPoolId: null,
-                        principalOrgId: null,
-                        sourceIp: '',
-                        user: null,
-                        userAgent: null,
-                        userArn: null,
-                    },
-                    path: '/token',
-                    stage: '',
-                    requestId: '',
-                    requestTimeEpoch: 0,
-                    resourceId: '',
-                    resourcePath: '',
-                },
-                resource: '',
-            } as APIGatewayProxyEvent
+        it('returns 500, not 401, when the database fails during verification', async () => {
+            findUnique.mockRejectedValue(new Error('connection refused'))
 
-            const result = await oauth2Server.token(event)
+            const result = await oauth2Server.token(tokenEvent())
 
-            expect(result.statusCode).toBe(200)
+            expect(result.statusCode).toBe(500)
             const response = JSON.parse(result.body)
-            expect(response).toHaveProperty('access_token')
-            expect(response).toHaveProperty('token_type', 'Bearer')
-            expect(response).toHaveProperty('expires_in', 1800)
+            expect(response.error).toBe('server_error')
         })
     })
 })
