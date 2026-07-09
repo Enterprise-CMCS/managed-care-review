@@ -1,11 +1,5 @@
 import React, { useEffect } from 'react'
-import {
-    ButtonGroup,
-    FormGroup,
-    GridContainer,
-    Label,
-    Grid,
-} from '@trussworks/react-uswds'
+import { ButtonGroup, FormGroup, Label, Grid } from '@trussworks/react-uswds'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Form as UswdsForm } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
@@ -136,11 +130,7 @@ export const EditStateAssign = (): React.ReactElement => {
     }
 
     if (indexUsersResult.status === 'LOADING' || loadingMcReviewSettings)
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <Loading centered />
 
     if (indexUsersResult.status === 'ERROR' || mcReviewError) {
         let error

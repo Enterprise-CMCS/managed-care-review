@@ -18,7 +18,7 @@ import {
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
 import { MultiColumnGrid, Loading, RowCellElement } from '../../../components'
-import { GridContainer, Table } from '@trussworks/react-uswds'
+import { Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '@mc-review/common-code'
@@ -255,12 +255,7 @@ const StateAssignmentTable = () => {
         }
     }, [rowCount, columnFilters, setPrevFilters, prevFilters])
 
-    if (analysts.loading)
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+    if (analysts.loading) return <Loading centered />
 
     if (analysts.error || !analysts.data)
         return <SettingsErrorAlert error={analysts.error} />
