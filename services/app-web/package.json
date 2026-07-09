@@ -91,7 +91,7 @@
         "@trussworks/react-uswds": "^10.2.0",
         "@uswds/uswds": "~3.8.2",
         "@vitejs/plugin-react": "^5.0.4",
-        "amazon-cognito-identity-js": "^6.3.12",
+        "amazon-cognito-identity-js": "^6.3.20",
         "aws-amplify": "^5.3.33",
         "axios": "^1.16.1",
         "dayjs": "^1.11.19",

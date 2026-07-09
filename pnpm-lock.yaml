@@ -731,8 +731,8 @@ importers:
         specifier: ^5.0.4
         version: 5.0.4(vite@7.3.5(@types/node@25.5.0)(jiti@2.6.1)(sass@1.77.2)(terser@5.48.0)(tsx@4.21.0)(yaml@2.9.0))
       amazon-cognito-identity-js:
-        specifier: ^6.3.12
-        version: 6.3.12
+        specifier: ^6.3.20
+        version: 6.3.20
       aws-amplify:
         specifier: ^5.3.33
         version: 5.3.33(react-native@0.74.3(@babel/core@7.29.7)(@babel/preset-env@7.24.8(@babel/core@7.29.7))(@types/react@19.2.14)(react@19.2.5))
@@ -7477,11 +7477,11 @@ packages:
   ajv@8.20.0:
     resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
 
-  amazon-cognito-identity-js@6.3.12:
-    resolution: {integrity: sha512-s7NKDZgx336cp+oDeUtB2ZzT8jWJp/v2LWuYl+LQtMEODe22RF1IJ4nRiDATp+rp1pTffCZcm44Quw4jx2bqNg==}
-
   amazon-cognito-identity-js@6.3.16:
     resolution: {integrity: sha512-HPGSBGD6Q36t99puWh0LnptxO/4icnk2kqIQ9cTJ2tFQo5NMUnWQIgtrTAk8nm+caqUbjDzXzG56GBjI2tS6jQ==}
+
+  amazon-cognito-identity-js@6.3.20:
+    resolution: {integrity: sha512-akaaLpDqz4i0m2XG4+x+XcHAlboRt3rydVrSiEFCKvaGZSmZdvnYW4SXqm2OGeVdZK0R1nIXjp8yEpID3rHC5Q==}
 
   anser@1.4.10:
     resolution: {integrity: sha512-hCv9AqTQ8ycjpSd3upOJd7vFwW1JaoYQ7tpham03GJ1ca8/65rqn0RpaWpItOAd6ylW9wAw6luXYPJIyPFVOww==}
@@ -10497,6 +10497,9 @@ packages:
 
   js-cookie@2.2.1:
     resolution: {integrity: sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==}
+
+  js-cookie@3.0.8:
+    resolution: {integrity: sha512-yeJd4aNAdYZQjaon2bpD/Gb0B/omw7HQOsynXXcOiWVCacbBcPlgn8S/d1X6blFSaHao7ozqtW7NZW19xpCtIw==}
 
   js-tokens@10.0.0:
     resolution: {integrity: sha512-lM/UBzQmfJRo9ABXbPWemivdCW8V2G8FHaHdypQaIy523snUjog0W71ayWXTjiR+ixeMyVHN2XcpnTd/liPg/Q==}
@@ -18176,7 +18179,7 @@ snapshots:
       '@ardatan/relay-compiler': 12.0.0(graphql@16.14.0)
       '@graphql-tools/utils': 10.11.0(graphql@16.14.0)
       graphql: 16.14.0
-      tslib: 2.8.1
+      tslib: 2.6.3
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -18186,7 +18189,7 @@ snapshots:
       '@ardatan/relay-compiler': 12.0.3(graphql@16.14.0)
       '@graphql-tools/utils': 11.2.0(graphql@16.14.0)
       graphql: 16.14.0
-      tslib: 2.8.1
+      tslib: 2.6.3
     transitivePeerDependencies:
       - encoding
 
@@ -18246,7 +18249,7 @@ snapshots:
       '@whatwg-node/promise-helpers': 1.3.2
       cross-inspect: 1.0.1
       graphql: 16.14.0
-      tslib: 2.8.1
+      tslib: 2.6.3
 
   '@graphql-tools/utils@11.1.0(graphql@16.14.0)':
     dependencies:
@@ -21628,7 +21631,7 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  amazon-cognito-identity-js@6.3.12:
+  amazon-cognito-identity-js@6.3.16:
     dependencies:
       '@aws-crypto/sha256-js': 1.2.2
       buffer: 4.9.2
@@ -21638,13 +21641,13 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  amazon-cognito-identity-js@6.3.16:
+  amazon-cognito-identity-js@6.3.20:
     dependencies:
       '@aws-crypto/sha256-js': 1.2.2
       buffer: 4.9.2
       fast-base64-decode: 1.0.0
       isomorphic-unfetch: 3.1.0
-      js-cookie: 2.2.1
+      js-cookie: 3.0.8
     transitivePeerDependencies:
       - encoding
 
@@ -21820,7 +21823,7 @@ snapshots:
     dependencies:
       pvtsutils: 1.3.5
       pvutils: 1.1.3
-      tslib: 2.8.1
+      tslib: 2.6.3
 
   assert-plus@1.0.0: {}
 
@@ -25551,6 +25554,8 @@ snapshots:
       react: 19.2.5
 
   js-cookie@2.2.1: {}
+
+  js-cookie@3.0.8: {}
 
   js-tokens@10.0.0: {}
 
