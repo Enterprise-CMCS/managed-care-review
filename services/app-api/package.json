@@ -32,7 +32,7 @@
         "@aws-sdk/client-ssm": "^3.1079.0",
         "@aws-sdk/lib-storage": "^3.1079.0",
         "@aws-sdk/s3-request-presigner": "^3.1079.0",
-        "@launchdarkly/node-server-sdk": "9.10.13",
+        "@launchdarkly/node-server-sdk": "9.12.1",
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@mc-review/common-code": "workspace:*",
         "@mc-review/constants": "workspace:*",
