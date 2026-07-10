@@ -43,6 +43,7 @@ function tokenEvent(overrides?: {
     body?: string | null
     contentType?: string
     method?: string
+    isBase64Encoded?: boolean
 }): APIGatewayProxyEvent {
     const headers: Record<string, string> = {}
     if (overrides?.contentType !== undefined) {
@@ -66,7 +67,7 @@ function tokenEvent(overrides?: {
         queryStringParameters: null,
         multiValueHeaders: {},
         multiValueQueryStringParameters: null,
-        isBase64Encoded: false,
+        isBase64Encoded: overrides?.isBase64Encoded ?? false,
         path: '/oauth/token',
         pathParameters: null,
         stageVariables: null,
@@ -149,6 +150,33 @@ describe('CustomOAuth2Server', () => {
                 tokenEvent({
                     contentType:
                         'application/x-www-form-urlencoded; charset=UTF-8',
+                })
+            )
+
+            expect(result.statusCode).toBe(200)
+        })
+
+        it('accepts a mixed-case content-type header value', async () => {
+            const result = await oauth2Server.token(
+                tokenEvent({
+                    contentType: 'Application/X-WWW-Form-Urlencoded',
+                })
+            )
+
+            expect(result.statusCode).toBe(200)
+        })
+
+        it('decodes a base64-encoded form body', async () => {
+            const formBody = new URLSearchParams({
+                grant_type: 'client_credentials',
+                client_id: validClientId,
+                client_secret: validClientSecret,
+            }).toString()
+
+            const result = await oauth2Server.token(
+                tokenEvent({
+                    body: Buffer.from(formBody).toString('base64'),
+                    isBase64Encoded: true,
                 })
             )
 

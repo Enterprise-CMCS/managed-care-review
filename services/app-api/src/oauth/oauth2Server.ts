@@ -183,7 +183,11 @@ export class CustomOAuth2Server {
         try {
             // RFC 6749 requires token requests be application/x-www-form-urlencoded,
             // and the underlying oauth2-server library rejects anything else
-            if (!contentType?.includes('application/x-www-form-urlencoded')) {
+            if (
+                !contentType
+                    ?.toLowerCase()
+                    .includes('application/x-www-form-urlencoded')
+            ) {
                 return {
                     statusCode: 400,
                     headers: {
@@ -197,7 +201,11 @@ export class CustomOAuth2Server {
                 }
             }
 
-            const params = new URLSearchParams(event.body || '')
+            const raw =
+                event.isBase64Encoded && event.body
+                    ? Buffer.from(event.body, 'base64').toString('utf-8')
+                    : event.body || ''
+            const params = new URLSearchParams(raw)
             const body: Record<string, unknown> = Object.fromEntries(
                 params.entries()
             )
