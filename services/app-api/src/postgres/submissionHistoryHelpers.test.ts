@@ -1632,6 +1632,7 @@ describe('buildCompleteHistory', () => {
         expect(completeHistory.map((entry) => entry.actionType)).toEqual([
             'CONTRACT_QUESTION_RESPONSE',
             'CONTRACT_QUESTION',
+            'UNDER_REVIEW',
             'CONTRACT_SUBMISSION',
         ])
         expect(
