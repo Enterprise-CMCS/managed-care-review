@@ -287,5 +287,15 @@ describe('CustomOAuth2Server', () => {
             const response = JSON.parse(result.body)
             expect(response.error).toBe('server_error')
         })
+
+        it('returns 500 when the store throws a non-Error value', async () => {
+            findUnique.mockRejectedValue('connection refused')
+
+            const result = await oauth2Server.token(tokenEvent())
+
+            expect(result.statusCode).toBe(500)
+            const response = JSON.parse(result.body)
+            expect(response.error).toBe('server_error')
+        })
     })
 })
