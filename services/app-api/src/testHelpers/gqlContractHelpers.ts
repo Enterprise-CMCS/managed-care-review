@@ -501,6 +501,9 @@ const createAndUpdateTestContractWithoutRates = async (
     formData.modifiedLengthOfContract = false
     formData.statutoryRegulatoryAttestation = false
     formData.statutoryRegulatoryAttestationDescription = 'No compliance'
+    // dsnp flag is on by default, and STATE_PLAN is a dsnp-triggering federal
+    // authority, so dsnpContract must be answered for the submit to validate
+    formData.dsnpContract = false
 
     Object.assign(formData, contractFormDataOverrides)
 
