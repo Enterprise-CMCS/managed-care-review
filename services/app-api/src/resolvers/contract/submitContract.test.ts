@@ -186,6 +186,21 @@ describe('submitContract', () => {
                 s3Client: mockS3,
             })
 
+            // chip-submission-automation is on by default, so every HEALTH_PLAN
+            // submit appends a review determination action after the submit that
+            // becomes the contract's stored lastActionDate. The child rate is not
+            // touched by that action, so it keeps the submit date.
+            const latestReviewActionDate = (contract: {
+                reviewStatusActions?: { updatedAt: Date }[] | null
+            }): Date =>
+                new Date(
+                    Math.max(
+                        ...(contract.reviewStatusActions ?? []).map((action) =>
+                            action.updatedAt.getTime()
+                        )
+                    )
+                )
+
             const parentDraft =
                 await createAndUpdateTestContractWithoutRates(stateServer)
             const parentDraftWithRate = await addNewRateToTestContract(
@@ -213,8 +228,11 @@ describe('submitContract', () => {
             })
 
             // Initial submit writes the action date for the submitted contract
-            // and for the child rate submitted with that contract.
-            expect(parentContractRow.lastActionDate).toEqual(initialSubmitDate)
+            // and for the child rate submitted with that contract. The contract's
+            // date advances to the post-submit review determination action.
+            expect(parentContractRow.lastActionDate).toEqual(
+                latestReviewActionDate(initialSubmit)
+            )
             expect(childRateRow.lastActionDate).toEqual(initialSubmitDate)
 
             await unlockTestContract(
@@ -240,8 +258,11 @@ describe('submitContract', () => {
             })
 
             // Resubmit writes a new action date for the contract and for the
-            // child rate whose own revision was resubmitted with it.
-            expect(parentContractRow.lastActionDate).toEqual(parentResubmitDate)
+            // child rate whose own revision was resubmitted with it. The contract's
+            // date advances to the post-resubmit review determination action.
+            expect(parentContractRow.lastActionDate).toEqual(
+                latestReviewActionDate(parentResubmit)
+            )
             expect(childRateRow.lastActionDate).toEqual(parentResubmitDate)
 
             const linkedContractDraft =
@@ -280,8 +301,9 @@ describe('submitContract', () => {
 
             // Submitting the linked contract makes the link part of submission
             // history, so both the linked contract and linked rate action dates move.
+            // The contract's date advances to its post-submit review determination.
             expect(linkedContractRow.lastActionDate).toEqual(
-                linkedContractSubmitDate
+                latestReviewActionDate(linkedContractSubmit)
             )
             expect(childRateRow.lastActionDate).toEqual(
                 linkedContractSubmitDate
@@ -336,8 +358,9 @@ describe('submitContract', () => {
 
             // Submitting the unlink removes the rate from the contract's
             // submission package, which is a material rate relationship action.
+            // The contract's date advances to its post-submit review determination.
             expect(linkedContractRow.lastActionDate).toEqual(
-                linkedContractUnlinkSubmitDate
+                latestReviewActionDate(linkedContractUnlinkSubmit)
             )
             expect(childRateRow.lastActionDate).toEqual(
                 linkedContractUnlinkSubmitDate
@@ -2817,28 +2840,6 @@ describe('submitContract', () => {
             resubmitted.reviewStatusActions?.forEach((a) => {
                 expect(a.actionType).toBe('NOT_SUBJECT_TO_REVIEW')
             })
-        })
-
-        it('does not add a review action when chip-submission-automation flag is off', async () => {
-            const stateServer = await constructTestPostgresServer({
-                s3Client: mockS3,
-            })
-
-            const draft = await createAndUpdateTestContractWithoutRates(
-                stateServer,
-                undefined,
-                {
-                    submissionType: 'CONTRACT_ONLY',
-                    populationCovered: 'CHIP',
-                    federalAuthorities: ['TITLE_XXI'],
-                }
-            )
-
-            const contract = await submitTestContract(stateServer, draft.id)
-
-            expect(contract.contractSubmissionType).toBe('HEALTH_PLAN')
-            expect(contract.consolidatedStatus).toBe('SUBMITTED')
-            expect(contract.reviewStatusActions ?? []).toHaveLength(0)
         })
     })
 })

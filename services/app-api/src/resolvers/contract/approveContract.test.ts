@@ -35,17 +35,23 @@ describe('approveContract', () => {
             cmsServer,
             contract.id
         )
-        expect(approvedContract.reviewStatusActions).toHaveLength(1)
+        // chip-submission-automation is on by default, so submitting the
+        // HEALTH_PLAN contract records an UNDER_REVIEW determination action, and
+        // approving appends a MARK_AS_APPROVED action, so both are present.
+        expect(approvedContract.reviewStatusActions).toHaveLength(2)
         expect(approvedContract.contractSubmissionType).toBe('HEALTH_PLAN')
-        expect(approvedContract.reviewStatusActions![0]?.contractID).toBe(
-            approvedContract.id
+
+        const submitReviewAction = approvedContract.reviewStatusActions?.find(
+            (action) => action.actionType === 'UNDER_REVIEW'
         )
-        expect(
-            approvedContract.reviewStatusActions![0]?.updatedReason
-        ).toBeNull()
-        expect(approvedContract.reviewStatusActions![0]?.actionType).toBe(
-            'MARK_AS_APPROVED'
+        const approvalAction = approvedContract.reviewStatusActions?.find(
+            (action) => action.actionType === 'MARK_AS_APPROVED'
         )
+
+        expect(submitReviewAction).toBeDefined()
+        expect(approvalAction).toBeDefined()
+        expect(approvalAction?.contractID).toBe(approvedContract.id)
+        expect(approvalAction?.updatedReason).toBeNull()
         expect(approvedContract.reviewStatus).toBe('APPROVED')
 
         const contractTableRow = await client.contractTable.findUniqueOrThrow({
@@ -53,10 +59,10 @@ describe('approveContract', () => {
             select: { lastActionDate: true },
         })
 
-        // Approval is a review action, so the stored action date should match
-        // the approval action timestamp.
+        // Approval is the latest review action, so the stored action date should
+        // match the approval action timestamp.
         expect(contractTableRow.lastActionDate).toEqual(
-            approvedContract.reviewStatusActions![0]?.updatedAt
+            approvalAction?.updatedAt
         )
     })
 

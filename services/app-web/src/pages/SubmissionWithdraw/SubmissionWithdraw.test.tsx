@@ -253,9 +253,7 @@ describe('SubmissionWithdraw', () => {
             ).toBeInTheDocument()
         })
         expect(
-            screen.getByText(
-                'No action can be taken on this submission in its current status.'
-            )
+            screen.getByRole('button', { name: 'Undo submission withdraw' })
         ).toBeInTheDocument()
     })
 
