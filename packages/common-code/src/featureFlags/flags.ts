@@ -97,13 +97,27 @@ const featureFlags = {
         flag: 'resources-nav-pages',
         defaultValue: true,
     },
-    // PERMANENT FLAGS for utilities not flagging features
+    /**
+     * Feature flag to toggle undo unlock feature for submissions. This flag should only gate CMS users ability to undo unlock and leave the feature available for admin users.
+     */
+    CMS_USER_UNDO_UNLOCK: {
+        flag: 'cms-user-undo-unlock',
+        defaultValue: false,
+    },
+    /**
+     * This flag toggles on or off enhanced revision history features for emails and state portal web app.
+     */
+    REVISION_HISTORY_ENHANCEMENTS: {
+        flag: 'revision-history-enhancements',
+        defaultValue: false,
+    },
+    // PERMANENT FLAGS for utilities features
     /**
      * This flag toggles the ability for external API users to send write requests.
      */
     EXTERNAL_API_WRITE_REQUEST: {
         flag: 'external-api-write-request',
-        defaultValue: false,
+        defaultValue: true,
     },
     /**
      Enables the modal that alerts the user to an expiring session
