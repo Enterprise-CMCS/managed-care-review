@@ -3,7 +3,8 @@ import type { Prisma } from '../../generated/client'
 import type { OAuthScope } from '../../generated/enums'
 import type { UserType } from '../../domain-models'
 import { v4 as uuidv4 } from 'uuid'
-import { randomBytes } from 'crypto'
+import { randomBytes, timingSafeEqual } from 'crypto'
+import { parseErrorToError } from '@mc-review/helpers'
 import { domainUserFromPrismaUser } from '../user/prismaDomainUser'
 
 type OAuthClientWithUser = Omit<
@@ -56,7 +57,7 @@ export async function createOAuthClient(
             user: domainUser,
         }
     } catch (error) {
-        return error as Error
+        return parseErrorToError(error)
     }
 }
 
@@ -84,7 +85,7 @@ export async function getOAuthClientById(
             user: domainUser,
         }
     } catch (error) {
-        return error as Error
+        return parseErrorToError(error)
     }
 }
 
@@ -111,7 +112,7 @@ export async function getOAuthClientByClientId(
             user: domainUser,
         }
     } catch (error) {
-        return error as Error
+        return parseErrorToError(error)
     }
 }
 
@@ -130,15 +131,25 @@ export async function verifyClientCredentials(
             return false
         }
 
-        // Update last used timestamp
+        const provided = Buffer.from(clientSecret)
+        const stored = Buffer.from(oauthClient.clientSecret)
+        const secretMatches =
+            provided.length === stored.length &&
+            timingSafeEqual(provided, stored)
+
+        if (!secretMatches) {
+            return false
+        }
+
+        // Update last used timestamp, only after successful verification
         await client.oAuthClient.update({
             where: { id: oauthClient.id },
             data: { lastUsedAt: new Date() },
         })
 
-        return clientSecret === oauthClient.clientSecret
+        return true
     } catch (error) {
-        return error as Error
+        return parseErrorToError(error)
     }
 }
 
@@ -171,7 +182,7 @@ export async function updateOAuthClient(
             user: domainUser,
         }
     } catch (error) {
-        return error as Error
+        return parseErrorToError(error)
     }
 }
 
@@ -205,7 +216,7 @@ export async function deleteOAuthClient(
             user: domainUser,
         }
     } catch (error) {
-        return error as Error
+        return parseErrorToError(error)
     }
 }
 
@@ -232,7 +243,7 @@ export async function listOAuthClients(
 
         return domainResults
     } catch (error) {
-        return error as Error
+        return parseErrorToError(error)
     }
 }
 
@@ -261,7 +272,7 @@ export async function getOAuthClientsByUserId(
 
         return domainResults
     } catch (error) {
-        return error as Error
+        return parseErrorToError(error)
     }
 }
 
