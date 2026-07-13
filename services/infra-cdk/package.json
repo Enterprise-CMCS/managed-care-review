@@ -44,7 +44,7 @@
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.102.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.92.1",
         "@aws-solutions-constructs/aws-eventbridge-lambda": "2.92.1",
-        "@aws-solutions-constructs/aws-lambda-secretsmanager": "2.98.0",
+        "@aws-solutions-constructs/aws-lambda-secretsmanager": "2.103.0",
         "@aws-solutions-constructs/aws-s3-lambda": "2.100.1",
         "@aws-solutions-constructs/aws-wafwebacl-apigateway": "2.99.0",
         "aws-cdk-lib": "2.261.0",

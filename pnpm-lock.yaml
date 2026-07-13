@@ -1074,8 +1074,8 @@ importers:
         specifier: 2.92.1
         version: 2.92.1(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-lambda-secretsmanager':
-        specifier: 2.98.0
-        version: 2.98.0(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1)
+        specifier: 2.103.0
+        version: 2.103.0(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1)
       '@aws-solutions-constructs/aws-s3-lambda':
         specifier: 2.100.1
         version: 2.100.1(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1)
@@ -2002,11 +2002,11 @@ packages:
       aws-cdk-lib: ^2.212.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.98.0':
-    resolution: {integrity: sha512-PsrEZ1VjGIZaugQAudiTEYoZWksJT0vecG3A59VcOCCbVYH3Vv+A8j/k6+eFeZEwKULDNMRDz1OiS1U2DaTY4w==}
+  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.103.0':
+    resolution: {integrity: sha512-RU4hQ3xcbIY0gCQQQDGsI0KjT1GHSP3ZCXHIYJgeRG3Equ3w5sWBbnIRlQ0wBAXyZ3rx1AcC0V2LT1D9gTGzRw==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.98.0
-      aws-cdk-lib: ^2.234.0
+      '@aws-solutions-constructs/core': 2.103.0
+      aws-cdk-lib: ^2.260.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/aws-s3-lambda@2.100.1':
@@ -15426,7 +15426,7 @@ snapshots:
       aws-cdk-lib: 2.261.0(constructs@10.5.1)
       constructs: 10.5.1
 
-  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.98.0(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1)':
+  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.103.0(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1))(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1)':
     dependencies:
       '@aws-solutions-constructs/core': 2.102.0(aws-cdk-lib@2.261.0(constructs@10.5.1))(constructs@10.5.1)
       aws-cdk-lib: 2.261.0(constructs@10.5.1)
