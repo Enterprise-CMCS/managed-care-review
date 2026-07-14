@@ -3,11 +3,7 @@ import { NotFoundError } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { GraphQLError } from 'graphql'
-import {
-    isStateUser,
-    hasCMSPermissions,
-    hasAdminPermissions,
-} from '../../domain-models'
+import { isStateUser, hasReadPermissions } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError } from '../errorUtils'
 import { canRead } from '../../oauth/oauthAuthorization'
@@ -62,10 +58,7 @@ export function fetchRateResolver(store: Store): QueryResolvers['fetchRate'] {
                         logResolverError('fetchRate', errMessage, context)
                         throw createForbiddenError(errMessage)
                     }
-                } else if (
-                    !hasCMSPermissions(user) &&
-                    !hasAdminPermissions(user)
-                ) {
+                } else if (!hasReadPermissions(user)) {
                     const errMessage = 'User not authorized to fetch rate data'
                     logResolverError('fetchRate', errMessage, context)
                     throw createForbiddenError(errMessage)

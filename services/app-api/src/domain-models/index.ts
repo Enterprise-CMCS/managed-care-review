@@ -8,6 +8,7 @@ export type {
     BaseUserType,
     BusinessOwnerUserType,
     HelpdeskUserType,
+    ReadOnlyUserType,
 } from './UserType'
 export type { StateType } from './StateType'
 
@@ -23,8 +24,10 @@ export {
     toDomainUser,
     isBusinessOwnerUser,
     isHelpdeskUser,
+    isReadOnlyUser,
     hasAdminPermissions,
     hasCMSPermissions,
+    hasReadPermissions,
 } from './user'
 
 export {

@@ -6,8 +6,8 @@
     "license": "MIT",
     "scripts": {
         "generate": "pnpm gqlgen",
-        "gqlgen": "graphql-codegen",
-        "gqlgen:watch": "graphql-codegen --watch",
+        "gqlgen": "graphql-codegen-cjs",
+        "gqlgen:watch": "graphql-codegen-cjs --watch",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "devDependencies": {

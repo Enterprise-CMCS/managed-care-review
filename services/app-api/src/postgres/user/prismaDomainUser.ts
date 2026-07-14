@@ -92,6 +92,16 @@ function domainUserFromPrismaUser(
                 familyName: prismaUser.familyName,
                 email: prismaUser.email,
             }
+        case 'READONLY_USER':
+            return {
+                id: prismaUser.id,
+                createdAt: prismaUser.createdAt,
+                updatedAt: prismaUser.updatedAt,
+                role: 'READONLY_USER',
+                givenName: prismaUser.givenName,
+                familyName: prismaUser.familyName,
+                email: prismaUser.email,
+            }
     }
 }
 

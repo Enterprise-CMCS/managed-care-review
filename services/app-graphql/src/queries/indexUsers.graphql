@@ -21,6 +21,9 @@ query indexUsers {
                 ...on HelpdeskUser {
                     ...helpdeskUserFragment
                 }
+                ...on ReadOnlyUser {
+                    ...readOnlyUserFragment
+                }
             }
         }
     }

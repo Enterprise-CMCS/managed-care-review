@@ -6,6 +6,7 @@ import type {
     HelpdeskUserType,
     BusinessOwnerUserType,
     CMSApproverUserType,
+    ReadOnlyUserType,
     UserRoles,
 } from './UserType'
 import type { User as PrismaUser } from '../generated/client'
@@ -52,6 +53,10 @@ function isBusinessOwnerUser(user: UserType): user is BusinessOwnerUserType {
     return user.role === 'BUSINESSOWNER_USER'
 }
 
+function isReadOnlyUser(user: UserType): user is ReadOnlyUserType {
+    return user.role === 'READONLY_USER'
+}
+
 function toDomainUser(user: PrismaUser): UserType {
     switch (user.role) {
         case 'ADMIN_USER':
@@ -60,6 +65,8 @@ function toDomainUser(user: PrismaUser): UserType {
             return user as HelpdeskUserType
         case 'BUSINESSOWNER_USER':
             return user as BusinessOwnerUserType
+        case 'READONLY_USER':
+            return user as ReadOnlyUserType
         case 'CMS_USER':
             return {
                 id: user.id,
@@ -107,6 +114,19 @@ function hasAdminPermissions(
     return authorizedAdmins.includes(user.role)
 }
 
+// Users allowed to view (read) submissions and other non-admin data.
+// This is the CMS-level read surface plus the dedicated read-only role.
+// It intentionally does NOT grant any mutation ability — mutations gate on
+// hasCMSPermissions / hasAdminPermissions / isStateUser, none of which
+// include READONLY_USER.
+function hasReadPermissions(user: UserType): boolean {
+    return (
+        hasCMSPermissions(user) ||
+        hasAdminPermissions(user) ||
+        isReadOnlyUser(user)
+    )
+}
+
 export {
     isUser,
     isCMSUser,
@@ -116,6 +136,8 @@ export {
     toDomainUser,
     isHelpdeskUser,
     isBusinessOwnerUser,
+    isReadOnlyUser,
     hasAdminPermissions,
     hasCMSPermissions,
+    hasReadPermissions,
 }

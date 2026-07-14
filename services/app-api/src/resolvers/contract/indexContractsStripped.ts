@@ -8,6 +8,7 @@ import {
 import {
     hasAdminPermissions,
     hasCMSPermissions,
+    isReadOnlyUser,
     isStateUser,
 } from '../../domain-models'
 import { NotFoundError } from '../../postgres'
@@ -65,8 +66,9 @@ export function indexContractsStripped(
                 const adminPermissions = hasAdminPermissions(user)
                 const cmsUser = hasCMSPermissions(user)
                 const stateUser = isStateUser(user)
+                const readOnlyUser = isReadOnlyUser(user)
 
-                if (adminPermissions || cmsUser || stateUser) {
+                if (adminPermissions || cmsUser || stateUser || readOnlyUser) {
                     let contractsWithHistory
                     if (stateUser) {
                         contractsWithHistory =

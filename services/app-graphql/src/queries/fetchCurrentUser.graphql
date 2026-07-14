@@ -18,5 +18,8 @@ query fetchCurrentUser {
         ... on BusinessOwnerUser {
             ...businessUserFragment
         }
+        ... on ReadOnlyUser {
+            ...readOnlyUserFragment
+        }
     }
 }
