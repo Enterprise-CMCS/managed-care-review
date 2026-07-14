@@ -56,6 +56,7 @@ import {
     contractRevisionStrippedResolver,
 } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
+import { fetchRevisionDiffResolver } from './contract/fetchRevisionDiff'
 import { fetchSubmissionHistoryResolver } from './contract/fetchSubmissionHistory'
 import { submitContract } from './contract/submitContract'
 import type { S3ClientT } from '../s3'
@@ -104,6 +105,7 @@ export function configureResolvers(
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
+            fetchRevisionDiff: fetchRevisionDiffResolver(store),
             fetchSubmissionHistory: fetchSubmissionHistoryResolver(store),
             fetchOauthClients: fetchOauthClientsResolver(store),
         },

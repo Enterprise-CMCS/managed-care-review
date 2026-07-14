@@ -23,6 +23,11 @@ export { reverseApproveContract } from './reverseApproveContract'
 export { undoUnlockContract } from './undoUnlockContract'
 export { findContractWithHistory } from './findContractWithHistory'
 export { findSubmissionHistoryByContractID } from './findSubmissionHistoryByContractID'
+export {
+    findRevisionDiffByContractID,
+    InvalidRevisionDiffInputError,
+    resolveRevisionPair,
+} from './findRevisionDiffByContractID'
 export { updateDraftContractFormData as updateDraftContractWithRates } from './updateDraftContractWithRates'
 export { updateMCCRSID } from './updateMCCRSID'
 export { findAllContractsWithHistoryByState } from './findAllContractsWithHistoryByState'
@@ -32,3 +37,4 @@ export { updateDraftContract } from './updateDraftContract'
 export type { FindAllRatesWithHistoryBySubmitType } from './findAllRatesWithHistoryBySubmitInfo'
 export { findContractRevision } from './findContractRevision'
 export { findRateRevision } from './findRateRevision'
+export type { FindRevisionDiffArgs } from './findRevisionDiffByContractID'

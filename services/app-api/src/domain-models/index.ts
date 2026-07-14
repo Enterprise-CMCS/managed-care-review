@@ -69,6 +69,9 @@ export type {
     SubmissionHistoryActionType,
     SubmissionHistory,
     SubmissionHistoryUserTypes,
+    RevisionDiff,
+    RevisionDiffFieldChange,
+    RevisionDiffCollectionItemChange,
 } from './contractAndRates'
 
 export type {
