@@ -84,7 +84,7 @@
         "eslint-plugin-jest": "^29.15.2",
         "eslint-plugin-prettier": "^5.5.6",
         "fs-extra": "^11.3.4",
-        "jest": "^30.3.0",
+        "jest": "^30.4.2",
         "jiti": "^2.6.1",
         "lint-staged": "^16.4.0",
         "nodemon": "^3.1.14",
