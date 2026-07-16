@@ -1,6 +1,7 @@
 import { findStatePrograms } from '../../postgres'
 import { must } from '../../testHelpers/assertionHelpers'
 import { mockSubmittableHealthPlanContract } from '../../testHelpers/contractDataMocks'
+import { packageName } from '@mc-review/submissions'
 import {
     InvalidRevisionDiffInputError,
     resolveRevisionPair,
@@ -48,8 +49,17 @@ describe('revisionDiffHelpers', () => {
                     formData: {
                         ...baseFormData,
                         populationCovered: 'MEDICAID',
+                        dsnpContract: undefined,
                         riskBasedContract: false,
                         contractType: 'BASE',
+                        contractExecutionStatus: 'UNEXECUTED',
+                        contractDateStart: new Date('2027-01-01T00:00:00.000Z'),
+                        contractDateEnd: new Date('2028-01-01T00:00:00.000Z'),
+                        managedCareEntities: ['MCO'],
+                        federalAuthorities: ['TITLE_XXI'],
+                        inLieuServicesAndSettings: false,
+                        modifiedBenefitsProvided: false,
+                        modifiedGeoAreaServed: false,
                         submissionDescription: 'Original description',
                         programIDs: [statePrograms[0].id],
                     },
@@ -74,8 +84,21 @@ describe('revisionDiffHelpers', () => {
                     formData: {
                         ...baseFormData,
                         populationCovered: 'MEDICAID_AND_CHIP',
+                        dsnpContract: true,
                         riskBasedContract: true,
                         contractType: 'AMENDMENT',
+                        contractExecutionStatus: 'EXECUTED',
+                        contractDateStart: new Date('2027-05-15T00:00:00.000Z'),
+                        contractDateEnd: new Date('2028-05-15T00:00:00.000Z'),
+                        managedCareEntities: ['MCO', 'PIHP', 'PAHP', 'PCCM'],
+                        federalAuthorities: [
+                            'STATE_PLAN',
+                            'WAIVER_1115',
+                            'TITLE_XXI',
+                        ],
+                        inLieuServicesAndSettings: true,
+                        modifiedBenefitsProvided: true,
+                        modifiedGeoAreaServed: true,
                         submissionDescription: 'Resubmitted description',
                         programIDs: [statePrograms[0].id, statePrograms[1].id],
                     },
@@ -93,19 +116,19 @@ describe('revisionDiffHelpers', () => {
             newerSubmittedAt: new Date('2024-05-11T00:00:00.000Z'),
             fieldChanges: [
                 {
-                    fieldPath: 'populationCovered',
-                    oldValue: 'Medicaid',
-                    newValue: 'Medicaid and CHIP',
-                },
-                {
-                    fieldPath: 'contractType',
-                    oldValue: 'Base contract',
-                    newValue: 'Contract amendment',
-                },
-                {
-                    fieldPath: 'riskBasedContract',
-                    oldValue: 'No',
-                    newValue: 'Yes',
+                    fieldPath: 'submissionID',
+                    oldValue: packageName(
+                        'KY',
+                        baseContract.stateNumber,
+                        [statePrograms[0].id],
+                        statePrograms
+                    ),
+                    newValue: packageName(
+                        'KY',
+                        baseContract.stateNumber,
+                        [statePrograms[0].id, statePrograms[1].id],
+                        statePrograms
+                    ),
                 },
                 {
                     fieldPath: 'programIDs',
@@ -117,6 +140,68 @@ describe('revisionDiffHelpers', () => {
                     fieldPath: 'submissionDescription',
                     oldValue: 'Original description',
                     newValue: 'Resubmitted description',
+                },
+                {
+                    fieldPath: 'contractType',
+                    oldValue: 'Base contract',
+                    newValue: 'Contract amendment',
+                },
+                {
+                    fieldPath: 'populationCovered',
+                    oldValue: 'Medicaid',
+                    newValue: 'Medicaid and CHIP',
+                },
+                {
+                    fieldPath: 'riskBasedContract',
+                    oldValue: 'No',
+                    newValue: 'Yes',
+                },
+                {
+                    fieldPath: 'dsnpContract',
+                    oldValue: null,
+                    newValue: 'Yes',
+                },
+                {
+                    fieldPath: 'contractExecutionStatus',
+                    oldValue: 'Unexecuted by some or all parties',
+                    newValue: 'Fully executed',
+                },
+                {
+                    fieldPath: 'contractDateStart',
+                    oldValue: '01/01/2027',
+                    newValue: '05/15/2027',
+                },
+                {
+                    fieldPath: 'contractDateEnd',
+                    oldValue: '01/01/2028',
+                    newValue: '05/15/2028',
+                },
+                {
+                    fieldPath: 'managedCareEntities',
+                    oldValue: 'Managed Care Organization (MCO)',
+                    newValue:
+                        'Managed Care Organization (MCO), Prepaid Inpatient Health Plan (PIHP), Prepaid Ambulatory Health Plans (PAHP), Primary Care Case Management Entity (PCCM Entity)',
+                },
+                {
+                    fieldPath: 'federalAuthorities',
+                    oldValue: 'Title XXI Separate CHIP State Plan Authority',
+                    newValue:
+                        '1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority',
+                },
+                {
+                    fieldPath: 'inLieuServicesAndSettings',
+                    oldValue: 'No',
+                    newValue: 'Yes',
+                },
+                {
+                    fieldPath: 'modifiedBenefitsProvided',
+                    oldValue: 'No',
+                    newValue: 'Yes',
+                },
+                {
+                    fieldPath: 'modifiedGeoAreaServed',
+                    oldValue: 'No',
+                    newValue: 'Yes',
                 },
             ],
         })
