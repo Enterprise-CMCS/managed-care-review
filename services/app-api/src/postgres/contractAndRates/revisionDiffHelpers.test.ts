@@ -1,5 +1,5 @@
 import { findStatePrograms } from '../../postgres'
-import { must } from '../../testHelpers/assertionHelpers'
+import { expectToBeDefined, must } from '../../testHelpers/assertionHelpers'
 import { mockSubmittableHealthPlanContract } from '../../testHelpers/contractDataMocks'
 import { packageName } from '@mc-review/submissions'
 import {
@@ -132,9 +132,11 @@ describe('revisionDiffHelpers', () => {
                 },
                 {
                     fieldPath: 'programIDs',
-                    oldValue:
-                        statePrograms[0].fullName ?? statePrograms[0].name,
-                    newValue: `${statePrograms[0].fullName ?? statePrograms[0].name}, ${statePrograms[1].fullName ?? statePrograms[1].name}`,
+                    oldValue: statePrograms[0].name,
+                    newValue: [statePrograms[0], statePrograms[1]]
+                        .sort((left, right) => left.id.localeCompare(right.id))
+                        .map((program) => program.name)
+                        .join(', '),
                 },
                 {
                     fieldPath: 'submissionDescription',
@@ -317,5 +319,80 @@ describe('revisionDiffHelpers', () => {
         )
 
         expect(selected).toBeInstanceOf(InvalidRevisionDiffInputError)
+    })
+
+    it('does not report a programIDs change when the same program abbreviations are reordered', () => {
+        const statePrograms = must(findStatePrograms('MN'))
+        const snbcProgram = statePrograms.find(
+            (program) => program.name === 'SNBC'
+        )
+        const pmapProgram = statePrograms.find(
+            (program) => program.name === 'PMAP'
+        )
+        expectToBeDefined(snbcProgram)
+        expectToBeDefined(pmapProgram)
+
+        const baseContract = mockSubmittableHealthPlanContract({
+            programIDs: [snbcProgram.id, pmapProgram.id],
+        })
+        const baseFormData = baseContract.draftRevision!.formData
+
+        const comparison = buildRevisionDiff(
+            'contract-1',
+            {
+                submitInfo: {
+                    updatedAt: new Date('2024-05-01T00:00:00.000Z'),
+                    updatedBy: mockStateUser(),
+                    updatedReason: 'Initial submission',
+                },
+                submittedRevisions: [],
+                contractRevision: {
+                    ...baseContract.draftRevision!,
+                    id: 'older-revision',
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-01T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Initial submission',
+                    },
+                    formData: {
+                        ...baseFormData,
+                        programIDs: [snbcProgram.id, pmapProgram.id],
+                    },
+                },
+                rateRevisions: [],
+            },
+            {
+                submitInfo: {
+                    updatedAt: new Date('2024-05-11T00:00:00.000Z'),
+                    updatedBy: mockStateUser(),
+                    updatedReason: 'Resubmission',
+                },
+                submittedRevisions: [],
+                contractRevision: {
+                    ...baseContract.draftRevision!,
+                    id: 'newer-revision',
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-11T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Resubmission',
+                    },
+                    formData: {
+                        ...baseFormData,
+                        programIDs: [pmapProgram.id, snbcProgram.id],
+                    },
+                },
+                rateRevisions: [],
+            },
+            statePrograms
+        )
+
+        expect(comparison).not.toBeInstanceOf(Error)
+        expect(
+            comparison instanceof Error
+                ? []
+                : comparison.fieldChanges.filter(
+                      (change) => change.fieldPath === 'programIDs'
+                  )
+        ).toEqual([])
     })
 })

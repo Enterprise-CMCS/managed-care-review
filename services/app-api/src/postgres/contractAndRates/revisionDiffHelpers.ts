@@ -45,7 +45,7 @@ const displayBooleanAsYesNo = (
     return value ? 'Yes' : 'No'
 }
 
-const displayPrograms = (
+const displayProgramNames = (
     programIDs: string[],
     statePrograms: ProgramType[]
 ): string | Error | null => {
@@ -53,7 +53,7 @@ const displayPrograms = (
         return null
     }
 
-    const names = programIDs.map((programID) => {
+    const names = [...programIDs].sort().map((programID) => {
         const program = statePrograms.find((stateProgram) => {
             return stateProgram.id === programID
         })
@@ -62,7 +62,7 @@ const displayPrograms = (
             return new Error(`Could not find state program ${programID}`)
         }
 
-        return program.fullName ?? program.name
+        return program.name
     })
 
     const missingProgramError = names.find((nameOrError) => {
@@ -174,7 +174,7 @@ const fieldConfigOverrides: Partial<
     programIDs: {
         fieldPath: 'programIDs',
         displayValue: (formData, context) =>
-            displayPrograms(formData.programIDs, context.statePrograms),
+            displayProgramNames(formData.programIDs, context.statePrograms),
     },
     contractExecutionStatus: {
         fieldPath: 'contractExecutionStatus',
