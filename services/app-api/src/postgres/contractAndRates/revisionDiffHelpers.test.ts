@@ -270,6 +270,88 @@ describe('revisionDiffHelpers', () => {
         })
     })
 
+    it('selects the latest two unique submitted revisions by default when package submissions contain duplicates', () => {
+        const contract = mockSubmittableHealthPlanContract()
+
+        const selected = resolveRevisionPair(
+            [
+                {
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-15T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Newest duplicate package event',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        ...contract.draftRevision!,
+                        id: 'newest-revision',
+                        submitInfo: {
+                            updatedAt: new Date('2024-05-11T00:00:00.000Z'),
+                            updatedBy: mockStateUser(),
+                            updatedReason: 'Newest revision',
+                        },
+                    },
+                    rateRevisions: [],
+                },
+                {
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-11T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Newest package event',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        ...contract.draftRevision!,
+                        id: 'newest-revision',
+                        submitInfo: {
+                            updatedAt: new Date('2024-05-11T00:00:00.000Z'),
+                            updatedBy: mockStateUser(),
+                            updatedReason: 'Newest revision',
+                        },
+                    },
+                    rateRevisions: [],
+                },
+                {
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-01T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Older package event',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        ...contract.draftRevision!,
+                        id: 'older-revision',
+                        submitInfo: {
+                            updatedAt: new Date('2024-05-01T00:00:00.000Z'),
+                            updatedBy: mockStateUser(),
+                            updatedReason: 'Older revision',
+                        },
+                    },
+                    rateRevisions: [],
+                },
+            ],
+            {
+                contractID: 'contract-1',
+            }
+        )
+
+        expect(selected).toEqual({
+            olderSubmission: expect.objectContaining({
+                contractRevision: expect.objectContaining({
+                    id: 'older-revision',
+                }),
+            }),
+            newerSubmission: expect.objectContaining({
+                contractRevision: expect.objectContaining({
+                    id: 'newest-revision',
+                }),
+                submitInfo: expect.objectContaining({
+                    updatedAt: new Date('2024-05-15T00:00:00.000Z'),
+                }),
+            }),
+        })
+    })
+
     it('returns an input error when only one revision id is provided', () => {
         const contract = mockSubmittableHealthPlanContract()
 
@@ -319,6 +401,111 @@ describe('revisionDiffHelpers', () => {
         )
 
         expect(selected).toBeInstanceOf(InvalidRevisionDiffInputError)
+    })
+
+    it('selects requested unique revisions when matching package submissions contain duplicates', () => {
+        const contract = mockSubmittableHealthPlanContract()
+
+        const selected = resolveRevisionPair(
+            [
+                {
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-15T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Newest duplicate package event',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        ...contract.draftRevision!,
+                        id: 'newest-revision',
+                        submitInfo: {
+                            updatedAt: new Date('2024-05-11T00:00:00.000Z'),
+                            updatedBy: mockStateUser(),
+                            updatedReason: 'Newest revision',
+                        },
+                    },
+                    rateRevisions: [],
+                },
+                {
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-11T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Newest package event',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        ...contract.draftRevision!,
+                        id: 'newest-revision',
+                        submitInfo: {
+                            updatedAt: new Date('2024-05-11T00:00:00.000Z'),
+                            updatedBy: mockStateUser(),
+                            updatedReason: 'Newest revision',
+                        },
+                    },
+                    rateRevisions: [],
+                },
+                {
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-05T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Older duplicate package event',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        ...contract.draftRevision!,
+                        id: 'older-revision',
+                        submitInfo: {
+                            updatedAt: new Date('2024-05-01T00:00:00.000Z'),
+                            updatedBy: mockStateUser(),
+                            updatedReason: 'Older revision',
+                        },
+                    },
+                    rateRevisions: [],
+                },
+                {
+                    submitInfo: {
+                        updatedAt: new Date('2024-05-01T00:00:00.000Z'),
+                        updatedBy: mockStateUser(),
+                        updatedReason: 'Older package event',
+                    },
+                    submittedRevisions: [],
+                    contractRevision: {
+                        ...contract.draftRevision!,
+                        id: 'older-revision',
+                        submitInfo: {
+                            updatedAt: new Date('2024-05-01T00:00:00.000Z'),
+                            updatedBy: mockStateUser(),
+                            updatedReason: 'Older revision',
+                        },
+                    },
+                    rateRevisions: [],
+                },
+            ],
+            {
+                contractID: 'contract-1',
+                olderContractRevisionID: 'older-revision',
+                newerContractRevisionID: 'newest-revision',
+            }
+        )
+
+        expect(selected).toEqual({
+            olderSubmission: expect.objectContaining({
+                contractRevision: expect.objectContaining({
+                    id: 'older-revision',
+                }),
+                submitInfo: expect.objectContaining({
+                    updatedAt: new Date('2024-05-05T00:00:00.000Z'),
+                }),
+            }),
+            newerSubmission: expect.objectContaining({
+                contractRevision: expect.objectContaining({
+                    id: 'newest-revision',
+                }),
+                submitInfo: expect.objectContaining({
+                    updatedAt: new Date('2024-05-15T00:00:00.000Z'),
+                }),
+            }),
+        })
     })
 
     it('does not report a programIDs change when the same program abbreviations are reordered', () => {

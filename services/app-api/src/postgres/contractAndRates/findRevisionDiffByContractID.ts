@@ -15,6 +15,42 @@ type FindRevisionDiffArgs = {
 
 class InvalidRevisionDiffInputError extends Error {}
 
+function selectLatestUniqueContractSubmissions(
+    packageSubmissions: ContractPackageSubmissionType[]
+): ContractPackageSubmissionType[] {
+    const uniqueSubmissionsByRevisionID = new Map<
+        string,
+        ContractPackageSubmissionType
+    >()
+
+    for (const submission of packageSubmissions) {
+        if (submission.contractRevision.submitInfo === undefined) {
+            continue
+        }
+
+        const existingSubmission = uniqueSubmissionsByRevisionID.get(
+            submission.contractRevision.id
+        )
+
+        if (
+            !existingSubmission ||
+            existingSubmission.submitInfo.updatedAt.getTime() <
+                submission.submitInfo.updatedAt.getTime()
+        ) {
+            uniqueSubmissionsByRevisionID.set(
+                submission.contractRevision.id,
+                submission
+            )
+        }
+    }
+
+    return [...uniqueSubmissionsByRevisionID.values()].sort(
+        (leftSubmission, rightSubmission) =>
+            rightSubmission.submitInfo.updatedAt.getTime() -
+            leftSubmission.submitInfo.updatedAt.getTime()
+    )
+}
+
 function resolveRevisionPair(
     packageSubmissions: ContractPackageSubmissionType[],
     args: FindRevisionDiffArgs
@@ -24,9 +60,8 @@ function resolveRevisionPair(
           newerSubmission: ContractPackageSubmissionType
       }
     | InvalidRevisionDiffInputError {
-    const contractSubmissions = packageSubmissions.filter((submission) => {
-        return submission.contractRevision.submitInfo !== undefined
-    })
+    const contractSubmissions =
+        selectLatestUniqueContractSubmissions(packageSubmissions)
 
     if (contractSubmissions.length < 2) {
         return new InvalidRevisionDiffInputError(
