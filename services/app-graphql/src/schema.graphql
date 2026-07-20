@@ -1232,6 +1232,7 @@ union User =
     | HelpdeskUser
     | BusinessOwnerUser
     | CMSApproverUser
+    | ReadOnlyUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
@@ -1306,6 +1307,16 @@ type HelpdeskUser {
 type BusinessOwnerUser {
     id: ID!
     "will always be 'BUSINESSOWNER_USER'"
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+}
+
+"ReadOnlyUser can view all submissions and non-admin data but cannot trigger any mutation"
+type ReadOnlyUser {
+    id: ID!
+    "will always be 'READONLY_USER'"
     role: String!
     email: String!
     givenName: String!

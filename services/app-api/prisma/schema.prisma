@@ -791,6 +791,7 @@ enum Role {
   HELPDESK_USER
   BUSINESSOWNER_USER
   CMS_APPROVER_USER
+  READONLY_USER
 }
 
 enum ContractActionType {
