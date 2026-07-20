@@ -164,7 +164,7 @@
         "lint-staged": "^16.4.0",
         "prettier": "^3.8.3",
         "react-select-event": "^5.5.0",
-        "storybook": "^10.4.4",
+        "storybook": "^10.5.2",
         "stylelint": "^17.8.0",
         "stylelint-config-recommended-scss": "^17.0.1",
         "typescript": "5.9.3",
