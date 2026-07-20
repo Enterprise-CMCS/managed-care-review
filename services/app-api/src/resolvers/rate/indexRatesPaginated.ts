@@ -8,6 +8,7 @@ import {
 import {
     hasAdminPermissions,
     hasCMSPermissions,
+    isReadOnlyUser,
     isStateUser,
 } from '../../domain-models'
 import type { QueryResolvers } from '../../gen/gqlServer'
@@ -151,8 +152,9 @@ export function indexRatesPaginatedResolver(
                 const adminPermissions = hasAdminPermissions(user)
                 const cmsUser = hasCMSPermissions(user)
                 const stateUser = isStateUser(user)
+                const readOnlyUser = isReadOnlyUser(user)
 
-                if (adminPermissions || cmsUser || stateUser) {
+                if (adminPermissions || cmsUser || stateUser || readOnlyUser) {
                     const pageSize = normalizeIndexRatesPageSize(
                         pageSizeInput ?? undefined
                     )

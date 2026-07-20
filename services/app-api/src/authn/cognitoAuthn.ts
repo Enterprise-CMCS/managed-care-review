@@ -106,6 +106,7 @@ const ADMIN_ROLE_ATTRIBUTE = 'macmcrrs-approver'
 const HELPDESK_ROLE_ATTRIBUTE = 'macmcrrs-helpdesk'
 const BUSINESSOWNER_ROLE_ATTRIBUTE = 'macmcrrs-bo'
 const CMS_APPROVER_ROLE_ATTRIBUTE = 'macmcrrs-cms-approver'
+const READONLY_ROLE_ATTRIBUTE = 'macmcrrs-ro-user'
 
 export function userTypeFromAttributes(
     id: string,
@@ -203,6 +204,16 @@ export function userTypeFromAttributes(
         return {
             id,
             role: 'BUSINESSOWNER_USER',
+            email: attributes.email,
+            givenName: attributes.given_name,
+            familyName: attributes.family_name,
+        }
+    }
+
+    if (roles.includes(READONLY_ROLE_ATTRIBUTE)) {
+        return {
+            id,
+            role: 'READONLY_USER',
             email: attributes.email,
             givenName: attributes.given_name,
             familyName: attributes.family_name,

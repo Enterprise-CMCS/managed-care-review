@@ -197,6 +197,8 @@ export function configureResolvers(
                     return 'HelpdeskUser'
                 } else if (obj.role === 'BUSINESSOWNER_USER') {
                     return 'BusinessOwnerUser'
+                } else if (obj.role === 'READONLY_USER') {
+                    return 'ReadOnlyUser'
                 } else {
                     return 'StateUser'
                 }

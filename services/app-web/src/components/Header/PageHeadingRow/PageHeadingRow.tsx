@@ -7,9 +7,17 @@ import { User, StateUser } from '../../../gen/gqlClient'
 import {
     hasAdminUserPermissions,
     hasCMSUserPermissions,
+    hasReadOnlyUserPermissions,
 } from '@mc-review/helpers'
 
-const CMSUserRow = ({ heading }: { heading?: string | React.ReactElement }) => {
+const CMSUserRow = ({
+    heading,
+    hideOrgLabel = false,
+}: {
+    heading?: string | React.ReactElement
+    // Read-only users don't get the "CMS" organization label.
+    hideOrgLabel?: boolean
+}) => {
     return (
         <div className={styles.dashboardHeading}>
             <GridContainer>
@@ -18,7 +26,7 @@ const CMSUserRow = ({ heading }: { heading?: string | React.ReactElement }) => {
                 ) : (
                     <Grid row className="flex-align-center">
                         <PageHeading>
-                            <span>CMS</span>
+                            {!hideOrgLabel && <span>CMS</span>}
                             {heading && (
                                 <span
                                     className="font-heading-lg text-light"
@@ -119,7 +127,15 @@ export const PageHeadingRow = ({
         }
     }
 
-    if (
+    if (hasReadOnlyUserPermissions(loggedInUser)) {
+        // Read-only users see the CMS-side pages but without the "CMS" org
+        // label. On pages with no heading of their own (e.g. the dashboard),
+        // render nothing rather than an empty header.
+        if (!heading) {
+            return null
+        }
+        return <CMSUserRow heading={heading} hideOrgLabel />
+    } else if (
         hasCMSUserPermissions(loggedInUser) ||
         hasAdminUserPermissions(loggedInUser)
     ) {

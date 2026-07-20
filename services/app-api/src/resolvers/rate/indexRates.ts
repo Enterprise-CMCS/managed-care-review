@@ -8,6 +8,7 @@ import {
 import {
     hasAdminPermissions,
     hasCMSPermissions,
+    isReadOnlyUser,
     isStateUser,
 } from '../../domain-models'
 import { NotFoundError } from '../../postgres'
@@ -68,8 +69,9 @@ export function indexRatesResolver(store: Store): QueryResolvers['indexRates'] {
                 const adminPermissions = hasAdminPermissions(user)
                 const cmsUser = hasCMSPermissions(user)
                 const stateUser = isStateUser(user)
+                const readOnlyUser = isReadOnlyUser(user)
 
-                if (adminPermissions || cmsUser || stateUser) {
+                if (adminPermissions || cmsUser || stateUser || readOnlyUser) {
                     let ratesWithHistory
                     if (stateUser) {
                         ratesWithHistory =
