@@ -30,7 +30,7 @@
         "jest": "^30.4.2",
         "jiti": "^2.0.0",
         "lint-staged": "^16.4.0",
-        "prettier": "^3.8.3",
+        "prettier": "^3.9.5",
         "ts-jest": "^29.4.11",
         "ts-node": "^10.9.2",
         "tsconfig-paths": "^4.2.0",
