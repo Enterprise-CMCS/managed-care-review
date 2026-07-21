@@ -4,6 +4,7 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
+    type RevisionDiff,
 } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { canRead } from '../../oauth/oauthAuthorization'
@@ -11,6 +12,66 @@ import { NotFoundError, type Store } from '../../postgres'
 import { InvalidRevisionDiffInputError } from '../../postgres/revisionDiff/findRevisionDiffByContractID'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { createUserInputError } from '../errorUtils'
+
+function serializeRevisionDiffFieldValue(value: unknown):
+    | {
+          kind: 'STRING'
+          value: string
+      }
+    | {
+          kind: 'BOOLEAN'
+          value: boolean
+      }
+    | {
+          kind: 'DATE'
+          value: Date
+      }
+    | {
+          kind: 'STRING_ARRAY'
+          value: string[]
+      }
+    | undefined {
+    if (value === undefined || value === null) {
+        return undefined
+    }
+
+    if (value instanceof Date) {
+        return {
+            kind: 'DATE',
+            value,
+        }
+    }
+
+    if (Array.isArray(value)) {
+        return {
+            kind: 'STRING_ARRAY',
+            value: value.map((item) => String(item)),
+        }
+    }
+
+    if (typeof value === 'boolean') {
+        return {
+            kind: 'BOOLEAN',
+            value,
+        }
+    }
+
+    return {
+        kind: 'STRING',
+        value: String(value),
+    }
+}
+
+function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
+    return {
+        ...comparison,
+        fieldChanges: comparison.fieldChanges.map((fieldChange) => ({
+            ...fieldChange,
+            oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
+            newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
+        })),
+    }
+}
 
 export function fetchRevisionDiffResolver(
     store: Store
@@ -133,7 +194,7 @@ export function fetchRevisionDiffResolver(
 
                 return {
                     contractID: comparison.contractID,
-                    comparison,
+                    comparison: serializeRevisionDiffForGraphQL(comparison),
                 }
             }
         )

@@ -1,7 +1,7 @@
-type RevisionDiffFieldChange = {
+type RevisionDiffFieldChange<TValue = unknown> = {
     fieldPath: string
-    oldValue: string | null
-    newValue: string | null
+    oldValue: TValue
+    newValue: TValue
 }
 
 type RevisionDiffCollectionItemAdded<TItem> = {
@@ -29,13 +29,13 @@ type RevisionDiffCollectionItemChange<TItem, TChange> =
     | RevisionDiffCollectionItemRemoved<TItem>
     | RevisionDiffCollectionItemUpdated<TItem, TChange>
 
-type RevisionDiff = {
+type RevisionDiff<TValue = unknown> = {
     contractID: string
     olderRevisionID: string
     newerRevisionID: string
     olderSubmittedAt: Date
     newerSubmittedAt: Date
-    fieldChanges: RevisionDiffFieldChange[]
+    fieldChanges: RevisionDiffFieldChange<TValue>[]
 }
 
 export type {

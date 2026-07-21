@@ -3,6 +3,8 @@ schema {
     mutation: Mutation
 }
 
+scalar JSON
+
 type Query {
     """
     fetchCurrentUser returns user information for the currently logged in User
@@ -2831,10 +2833,22 @@ type RevisionDiff {
     fieldChanges: [RevisionDiffFieldChange!]!
 }
 
+enum RevisionDiffFieldValueKind {
+    STRING
+    BOOLEAN
+    DATE
+    STRING_ARRAY
+}
+
+type RevisionDiffFieldValue {
+    kind: RevisionDiffFieldValueKind!
+    value: JSON
+}
+
 type RevisionDiffFieldChange {
     fieldPath: String!
-    oldValue: String
-    newValue: String
+    oldValue: RevisionDiffFieldValue
+    newValue: RevisionDiffFieldValue
 }
 
 type FetchSubmissionHistoryPayload {

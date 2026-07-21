@@ -36,6 +36,32 @@ describe('revisionDiffPrimitives', () => {
         ])
     })
 
+    it('buildScalarFieldDiffChanges treats equal arrays and dates as unchanged values', () => {
+        const result = buildScalarFieldDiffChanges(
+            {
+                programIDs: ['b', 'a'],
+                contractDateStart: new Date('2027-01-01T00:00:00.000Z'),
+            },
+            {
+                programIDs: ['b', 'a'],
+                contractDateStart: new Date('2027-01-01T00:00:00.000Z'),
+            },
+            [
+                {
+                    fieldPath: 'programIDs',
+                    getValue: (item) => [...item.programIDs],
+                },
+                {
+                    fieldPath: 'contractDateStart',
+                    getValue: (item) => item.contractDateStart,
+                },
+            ],
+            undefined
+        )
+
+        expect(result).toEqual([])
+    })
+
     it('diffCollectionByKey classifies added, removed, and updated items', () => {
         const result = diffCollectionByKey({
             previous: [

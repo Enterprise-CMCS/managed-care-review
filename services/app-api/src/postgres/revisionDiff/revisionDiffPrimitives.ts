@@ -5,10 +5,22 @@ import type {
 
 type ScalarDiffFieldConfig<TItem, TContext> = {
     fieldPath: string
-    getValue: (
-        item: TItem,
-        context: TContext
-    ) => RevisionDiffFieldChange['oldValue'] | Error
+    getValue: (item: TItem, context: TContext) => unknown | Error
+}
+
+function areRevisionDiffValuesEqual(left: unknown, right: unknown): boolean {
+    if (left instanceof Date && right instanceof Date) {
+        return left.getTime() === right.getTime()
+    }
+
+    if (Array.isArray(left) && Array.isArray(right)) {
+        return (
+            left.length === right.length &&
+            left.every((leftItem, index) => leftItem === right[index])
+        )
+    }
+
+    return Object.is(left, right)
 }
 
 function buildScalarFieldDiffChanges<TItem, TContext>(
@@ -30,7 +42,7 @@ function buildScalarFieldDiffChanges<TItem, TContext>(
             return newValue
         }
 
-        if (oldValue === newValue) {
+        if (areRevisionDiffValuesEqual(oldValue, newValue)) {
             continue
         }
 

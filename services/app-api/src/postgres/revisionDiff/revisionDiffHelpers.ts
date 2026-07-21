@@ -23,36 +23,14 @@ type DiffFieldConfig = {
     dataValue: (
         formData: ContractFormData,
         context: FieldContext
-    ) => string | null | Error
+    ) => unknown | Error
 }
 
 /**
- * Resolves program ids into a comma-joined list of program abbreviations.
+ * Returns program ids in a stable order so reordering does not create a diff.
  */
-const formatProgramNames = (
-    programIDs: string[],
-    statePrograms: ProgramType[]
-): string | Error | null => {
-    if (!programIDs.length) {
-        return null
-    }
-
-    const programNames: string[] = []
-
-    for (const programID of [...programIDs].sort()) {
-        const program = statePrograms.find((stateProgram) => {
-            return stateProgram.id === programID
-        })
-
-        if (!program) {
-            return new Error(`Could not find state program ${programID}`)
-        }
-
-        programNames.push(program.name)
-    }
-
-    return programNames.join(', ')
-}
+const normalizeProgramIDs = (programIDs: string[]): string[] =>
+    [...programIDs].sort()
 
 /**
  * Builds the derived contract name used for a submitted revision.
@@ -70,17 +48,9 @@ const buildContractName = (
 }
 
 /**
- * Serializes an array of domain values into a comma-joined diff value.
+ * Returns a shallow copy of an array field so diff output preserves array values.
  */
-const formatStringArray = <TKey extends string>(
-    values: TKey[]
-): string | null => {
-    if (!values.length) {
-        return null
-    }
-
-    return values.join(', ')
-}
+const cloneArrayValue = <TItem>(values: TItem[]): TItem[] => [...values]
 
 /**
  * Peels off wrapper schemas so field inference can inspect the underlying scalar type.
@@ -109,14 +79,7 @@ function buildBooleanFieldConfig(
 ): DiffFieldConfig {
     return {
         fieldPath,
-        dataValue: (formData) => {
-            const value = formData[fieldPath] as boolean | null
-            if (value === undefined || value === null) {
-                return null
-            }
-
-            return value ? 'true' : 'false'
-        },
+        dataValue: (formData) => formData[fieldPath] as boolean | undefined,
     }
 }
 
@@ -128,22 +91,32 @@ function buildStringFieldConfig(
 ): DiffFieldConfig {
     return {
         fieldPath,
-        dataValue: (formData) => (formData[fieldPath] as string) || null,
+        dataValue: (formData) => formData[fieldPath] as string | undefined,
     }
 }
 
 /**
- * Creates a diff config for date contract form fields using ISO serialization.
+ * Creates a diff config for date contract form fields.
  */
 function buildDateFieldConfig(
     fieldPath: keyof ContractFormData & string
 ): DiffFieldConfig {
     return {
         fieldPath,
-        dataValue: (formData) => {
-            const value = formData[fieldPath] as Date | null
-            return value ? value.toISOString() : null
-        },
+        dataValue: (formData) => formData[fieldPath] as Date | undefined,
+    }
+}
+
+/**
+ * Creates a diff config for string-array contract form fields.
+ */
+function buildStringArrayFieldConfig(
+    fieldPath: keyof ContractFormData & string
+): DiffFieldConfig {
+    return {
+        fieldPath,
+        dataValue: (formData) =>
+            cloneArrayValue(formData[fieldPath] as string[]),
     }
 }
 
@@ -152,7 +125,7 @@ const fieldConfigOverrides: Partial<
 > = {
     populationCovered: {
         fieldPath: 'populationCovered',
-        dataValue: (formData) => formData.populationCovered ?? null,
+        dataValue: (formData) => formData.populationCovered,
     },
     submissionType: {
         fieldPath: 'submissionType',
@@ -164,21 +137,11 @@ const fieldConfigOverrides: Partial<
     },
     programIDs: {
         fieldPath: 'programIDs',
-        dataValue: (formData, context) =>
-            formatProgramNames(formData.programIDs, context.statePrograms),
+        dataValue: (formData) => normalizeProgramIDs(formData.programIDs),
     },
     contractExecutionStatus: {
         fieldPath: 'contractExecutionStatus',
-        dataValue: (formData) => formData.contractExecutionStatus ?? null,
-    },
-    managedCareEntities: {
-        fieldPath: 'managedCareEntities',
-        dataValue: (formData) =>
-            formatStringArray(formData.managedCareEntities),
-    },
-    federalAuthorities: {
-        fieldPath: 'federalAuthorities',
-        dataValue: (formData) => formatStringArray(formData.federalAuthorities),
+        dataValue: (formData) => formData.contractExecutionStatus,
     },
 }
 
@@ -214,6 +177,10 @@ const diffContractFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
 
     if (unwrappedSchema instanceof z.ZodDate) {
         return [buildDateFieldConfig(typedFieldPath)]
+    }
+
+    if (unwrappedSchema instanceof z.ZodArray) {
+        return [buildStringArrayFieldConfig(typedFieldPath)]
     }
 
     return []

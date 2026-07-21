@@ -1,4 +1,4 @@
-import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
+import { GraphQLDate, GraphQLDateTime, GraphQLJSON } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
 import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
@@ -92,6 +92,7 @@ export function configureResolvers(
     const resolvers: Resolvers = {
         Date: GraphQLDate,
         DateTime: GraphQLDateTime,
+        JSON: GraphQLJSON,
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),

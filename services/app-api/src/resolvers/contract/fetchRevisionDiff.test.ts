@@ -107,7 +107,62 @@ describe('fetchRevisionDiff', () => {
 
         expect(result).toEqual({
             contractID: 'contract-1',
-            comparison,
+            comparison: {
+                ...comparison,
+                fieldChanges: comparison.fieldChanges.map((fieldChange) => ({
+                    ...fieldChange,
+                    oldValue:
+                        fieldChange.oldValue === undefined ||
+                        fieldChange.oldValue === null
+                            ? undefined
+                            : fieldChange.oldValue instanceof Date
+                              ? {
+                                    kind: 'DATE',
+                                    value: fieldChange.oldValue,
+                                }
+                              : Array.isArray(fieldChange.oldValue)
+                                ? {
+                                      kind: 'STRING_ARRAY',
+                                      value: fieldChange.oldValue.map((item) =>
+                                          String(item)
+                                      ),
+                                  }
+                                : typeof fieldChange.oldValue === 'boolean'
+                                  ? {
+                                        kind: 'BOOLEAN',
+                                        value: fieldChange.oldValue,
+                                    }
+                                  : {
+                                        kind: 'STRING',
+                                        value: String(fieldChange.oldValue),
+                                    },
+                    newValue:
+                        fieldChange.newValue === undefined ||
+                        fieldChange.newValue === null
+                            ? undefined
+                            : fieldChange.newValue instanceof Date
+                              ? {
+                                    kind: 'DATE',
+                                    value: fieldChange.newValue,
+                                }
+                              : Array.isArray(fieldChange.newValue)
+                                ? {
+                                      kind: 'STRING_ARRAY',
+                                      value: fieldChange.newValue.map((item) =>
+                                          String(item)
+                                      ),
+                                  }
+                                : typeof fieldChange.newValue === 'boolean'
+                                  ? {
+                                        kind: 'BOOLEAN',
+                                        value: fieldChange.newValue,
+                                    }
+                                  : {
+                                        kind: 'STRING',
+                                        value: String(fieldChange.newValue),
+                                    },
+                })),
+            },
         })
     })
 })

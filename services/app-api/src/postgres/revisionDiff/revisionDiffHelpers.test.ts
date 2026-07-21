@@ -132,11 +132,8 @@ describe('revisionDiffHelpers', () => {
                 },
                 {
                     fieldPath: 'programIDs',
-                    oldValue: statePrograms[0].name,
-                    newValue: [statePrograms[0], statePrograms[1]]
-                        .sort((left, right) => left.id.localeCompare(right.id))
-                        .map((program) => program.name)
-                        .join(', '),
+                    oldValue: [statePrograms[0].id],
+                    newValue: [statePrograms[0].id, statePrograms[1].id].sort(),
                 },
                 {
                     fieldPath: 'submissionDescription',
@@ -155,13 +152,13 @@ describe('revisionDiffHelpers', () => {
                 },
                 {
                     fieldPath: 'riskBasedContract',
-                    oldValue: 'false',
-                    newValue: 'true',
+                    oldValue: false,
+                    newValue: true,
                 },
                 {
                     fieldPath: 'dsnpContract',
-                    oldValue: null,
-                    newValue: 'true',
+                    oldValue: undefined,
+                    newValue: true,
                 },
                 {
                     fieldPath: 'contractExecutionStatus',
@@ -170,38 +167,38 @@ describe('revisionDiffHelpers', () => {
                 },
                 {
                     fieldPath: 'contractDateStart',
-                    oldValue: '2027-01-01T00:00:00.000Z',
-                    newValue: '2027-05-15T00:00:00.000Z',
+                    oldValue: new Date('2027-01-01T00:00:00.000Z'),
+                    newValue: new Date('2027-05-15T00:00:00.000Z'),
                 },
                 {
                     fieldPath: 'contractDateEnd',
-                    oldValue: '2028-01-01T00:00:00.000Z',
-                    newValue: '2028-05-15T00:00:00.000Z',
+                    oldValue: new Date('2028-01-01T00:00:00.000Z'),
+                    newValue: new Date('2028-05-15T00:00:00.000Z'),
                 },
                 {
                     fieldPath: 'managedCareEntities',
-                    oldValue: 'MCO',
-                    newValue: 'MCO, PIHP, PAHP, PCCM',
+                    oldValue: ['MCO'],
+                    newValue: ['MCO', 'PIHP', 'PAHP', 'PCCM'],
                 },
                 {
                     fieldPath: 'federalAuthorities',
-                    oldValue: 'TITLE_XXI',
-                    newValue: 'STATE_PLAN, WAIVER_1115, TITLE_XXI',
+                    oldValue: ['TITLE_XXI'],
+                    newValue: ['STATE_PLAN', 'WAIVER_1115', 'TITLE_XXI'],
                 },
                 {
                     fieldPath: 'inLieuServicesAndSettings',
-                    oldValue: 'false',
-                    newValue: 'true',
+                    oldValue: false,
+                    newValue: true,
                 },
                 {
                     fieldPath: 'modifiedBenefitsProvided',
-                    oldValue: 'false',
-                    newValue: 'true',
+                    oldValue: false,
+                    newValue: true,
                 },
                 {
                     fieldPath: 'modifiedGeoAreaServed',
-                    oldValue: 'false',
-                    newValue: 'true',
+                    oldValue: false,
+                    newValue: true,
                 },
             ],
         })

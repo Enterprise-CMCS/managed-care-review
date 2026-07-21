@@ -8,8 +8,14 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
       newerSubmittedAt
       fieldChanges {
         fieldPath
-        oldValue
-        newValue
+        oldValue {
+          kind
+          value
+        }
+        newValue {
+          kind
+          value
+        }
       }
     }
   }
