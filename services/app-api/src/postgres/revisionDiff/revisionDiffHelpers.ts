@@ -26,6 +26,9 @@ type DiffFieldConfig = {
     ) => string | null | Error
 }
 
+/**
+ * Resolves program ids into a comma-joined list of program abbreviations.
+ */
 const formatProgramNames = (
     programIDs: string[],
     statePrograms: ProgramType[]
@@ -34,7 +37,9 @@ const formatProgramNames = (
         return null
     }
 
-    const names = [...programIDs].sort().map((programID) => {
+    const programNames: string[] = []
+
+    for (const programID of [...programIDs].sort()) {
         const program = statePrograms.find((stateProgram) => {
             return stateProgram.id === programID
         })
@@ -43,21 +48,16 @@ const formatProgramNames = (
             return new Error(`Could not find state program ${programID}`)
         }
 
-        return program.name
-    })
-
-    const missingProgramError = names.find((nameOrError) => {
-        return nameOrError instanceof Error
-    })
-
-    if (missingProgramError instanceof Error) {
-        return missingProgramError
+        programNames.push(program.name)
     }
 
-    return (names as string[]).join(', ')
+    return programNames.join(', ')
 }
 
-const formatSubmissionID = (
+/**
+ * Builds the derived contract name used for a submitted revision.
+ */
+const buildContractName = (
     submission: ContractPackageSubmissionType,
     statePrograms: ProgramType[]
 ): string | Error => {
@@ -69,6 +69,9 @@ const formatSubmissionID = (
     )
 }
 
+/**
+ * Serializes an array of domain values into a comma-joined diff value.
+ */
 const formatStringArray = <TKey extends string>(
     values: TKey[]
 ): string | null => {
@@ -79,6 +82,9 @@ const formatStringArray = <TKey extends string>(
     return values.join(', ')
 }
 
+/**
+ * Peels off wrapper schemas so field inference can inspect the underlying scalar type.
+ */
 function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
     if (
         schema instanceof z.ZodOptional ||
@@ -89,12 +95,15 @@ function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
     }
 
     if (schema instanceof z.ZodPipe) {
-        return unwrapSchema(schema._def.out)
+        return unwrapSchema(schema.def.out)
     }
 
     return schema
 }
 
+/**
+ * Creates a diff config for boolean contract form fields.
+ */
 function buildBooleanFieldConfig(
     fieldPath: keyof ContractFormData & string
 ): DiffFieldConfig {
@@ -111,6 +120,9 @@ function buildBooleanFieldConfig(
     }
 }
 
+/**
+ * Creates a diff config for string contract form fields.
+ */
 function buildStringFieldConfig(
     fieldPath: keyof ContractFormData & string
 ): DiffFieldConfig {
@@ -120,6 +132,9 @@ function buildStringFieldConfig(
     }
 }
 
+/**
+ * Creates a diff config for date contract form fields using ISO serialization.
+ */
 function buildDateFieldConfig(
     fieldPath: keyof ContractFormData & string
 ): DiffFieldConfig {
@@ -173,7 +188,7 @@ const excludedFieldPaths = new Set<keyof ContractFormData>([
     'contractDocuments',
 ])
 
-const diffFieldConfigs: DiffFieldConfig[] = Object.entries(
+const diffContractFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
     contractFormDataSchema.shape as Record<string, z.core.$ZodType>
 ).flatMap(([fieldPath, schema]) => {
     const typedFieldPath = fieldPath as keyof ContractFormData & string
@@ -204,34 +219,37 @@ const diffFieldConfigs: DiffFieldConfig[] = Object.entries(
     return []
 })
 
+const scalarContractFormDataFieldConfigs: ScalarDiffFieldConfig<
+    ContractFormData,
+    FieldContext
+>[] = diffContractFormDataFieldConfigs.map((fieldConfig) => ({
+    fieldPath: fieldConfig.fieldPath,
+    getValue: fieldConfig.dataValue,
+}))
+
+/**
+ * Compares two submitted contract revisions and returns a data-only diff payload.
+ */
 function buildRevisionDiff(
     contractID: string,
     olderSubmission: ContractPackageSubmissionType,
     newerSubmission: ContractPackageSubmissionType,
     statePrograms: ProgramType[]
 ): RevisionDiff | Error {
-    const olderSubmissionID = formatSubmissionID(olderSubmission, statePrograms)
-    if (olderSubmissionID instanceof Error) {
-        return olderSubmissionID
+    const olderContractName = buildContractName(olderSubmission, statePrograms)
+    if (olderContractName instanceof Error) {
+        return olderContractName
     }
 
-    const newerSubmissionID = formatSubmissionID(newerSubmission, statePrograms)
-    if (newerSubmissionID instanceof Error) {
-        return newerSubmissionID
+    const newerContractName = buildContractName(newerSubmission, statePrograms)
+    if (newerContractName instanceof Error) {
+        return newerContractName
     }
-
-    const fieldConfigs: ScalarDiffFieldConfig<
-        ContractFormData,
-        FieldContext
-    >[] = diffFieldConfigs.map((fieldConfig) => ({
-        fieldPath: fieldConfig.fieldPath,
-        getValue: fieldConfig.dataValue,
-    }))
 
     const fieldChanges = buildScalarFieldDiffChanges(
         olderSubmission.contractRevision.formData,
         newerSubmission.contractRevision.formData,
-        fieldConfigs,
+        scalarContractFormDataFieldConfigs,
         {
             statePrograms,
         }
@@ -240,14 +258,14 @@ function buildRevisionDiff(
         return fieldChanges
     }
 
-    const submissionIDChange =
-        olderSubmissionID === newerSubmissionID
+    const contractNameChange =
+        olderContractName === newerContractName
             ? []
             : [
                   {
-                      fieldPath: 'submissionID',
-                      oldValue: olderSubmissionID,
-                      newValue: newerSubmissionID,
+                      fieldPath: 'contractName',
+                      oldValue: olderContractName,
+                      newValue: newerContractName,
                   },
               ]
 
@@ -257,7 +275,7 @@ function buildRevisionDiff(
         newerRevisionID: newerSubmission.contractRevision.id,
         olderSubmittedAt: olderSubmission.submitInfo.updatedAt,
         newerSubmittedAt: newerSubmission.submitInfo.updatedAt,
-        fieldChanges: [...submissionIDChange, ...fieldChanges],
+        fieldChanges: [...contractNameChange, ...fieldChanges],
     }
 }
 
