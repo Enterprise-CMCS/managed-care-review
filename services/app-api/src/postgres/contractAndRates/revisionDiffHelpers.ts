@@ -20,23 +20,13 @@ type FieldContext = {
 
 type DiffFieldConfig = {
     fieldPath: string
-    displayValue: (
+    dataValue: (
         formData: ContractFormData,
         context: FieldContext
     ) => string | null | Error
 }
 
-const displayBooleanAsYesNo = (
-    value: boolean | null | undefined
-): string | null => {
-    if (value === undefined || value === null) {
-        return null
-    }
-
-    return value ? 'true' : 'false'
-}
-
-const displayProgramNames = (
+const formatProgramNames = (
     programIDs: string[],
     statePrograms: ProgramType[]
 ): string | Error | null => {
@@ -67,7 +57,7 @@ const displayProgramNames = (
     return (names as string[]).join(', ')
 }
 
-const displaySubmissionID = (
+const formatSubmissionID = (
     submission: ContractPackageSubmissionType,
     statePrograms: ProgramType[]
 ): string | Error => {
@@ -79,15 +69,7 @@ const displaySubmissionID = (
     )
 }
 
-const displayDate = (value: Date | null | undefined): string | null => {
-    if (!value) {
-        return null
-    }
-
-    return value.toISOString()
-}
-
-const displayStringArray = <TKey extends string>(
+const formatStringArray = <TKey extends string>(
     values: TKey[]
 ): string | null => {
     if (!values.length) {
@@ -97,7 +79,7 @@ const displayStringArray = <TKey extends string>(
     return values.join(', ')
 }
 
-function unwrapSchema(schema: any): z.ZodTypeAny {
+function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
     if (
         schema instanceof z.ZodOptional ||
         schema instanceof z.ZodNullable ||
@@ -118,8 +100,14 @@ function buildBooleanFieldConfig(
 ): DiffFieldConfig {
     return {
         fieldPath,
-        displayValue: (formData) =>
-            displayBooleanAsYesNo(formData[fieldPath] as boolean | null),
+        dataValue: (formData) => {
+            const value = formData[fieldPath] as boolean | null
+            if (value === undefined || value === null) {
+                return null
+            }
+
+            return value ? 'true' : 'false'
+        },
     }
 }
 
@@ -128,7 +116,7 @@ function buildStringFieldConfig(
 ): DiffFieldConfig {
     return {
         fieldPath,
-        displayValue: (formData) => (formData[fieldPath] as string) || null,
+        dataValue: (formData) => (formData[fieldPath] as string) || null,
     }
 }
 
@@ -137,8 +125,10 @@ function buildDateFieldConfig(
 ): DiffFieldConfig {
     return {
         fieldPath,
-        displayValue: (formData) =>
-            displayDate(formData[fieldPath] as Date | null),
+        dataValue: (formData) => {
+            const value = formData[fieldPath] as Date | null
+            return value ? value.toISOString() : null
+        },
     }
 }
 
@@ -147,34 +137,33 @@ const fieldConfigOverrides: Partial<
 > = {
     populationCovered: {
         fieldPath: 'populationCovered',
-        displayValue: (formData) => formData.populationCovered ?? null,
+        dataValue: (formData) => formData.populationCovered ?? null,
     },
     submissionType: {
         fieldPath: 'submissionType',
-        displayValue: (formData) => formData.submissionType,
+        dataValue: (formData) => formData.submissionType,
     },
     contractType: {
         fieldPath: 'contractType',
-        displayValue: (formData) => formData.contractType,
+        dataValue: (formData) => formData.contractType,
     },
     programIDs: {
         fieldPath: 'programIDs',
-        displayValue: (formData, context) =>
-            displayProgramNames(formData.programIDs, context.statePrograms),
+        dataValue: (formData, context) =>
+            formatProgramNames(formData.programIDs, context.statePrograms),
     },
     contractExecutionStatus: {
         fieldPath: 'contractExecutionStatus',
-        displayValue: (formData) => formData.contractExecutionStatus ?? null,
+        dataValue: (formData) => formData.contractExecutionStatus ?? null,
     },
     managedCareEntities: {
         fieldPath: 'managedCareEntities',
-        displayValue: (formData) =>
-            displayStringArray(formData.managedCareEntities),
+        dataValue: (formData) =>
+            formatStringArray(formData.managedCareEntities),
     },
     federalAuthorities: {
         fieldPath: 'federalAuthorities',
-        displayValue: (formData) =>
-            displayStringArray(formData.federalAuthorities),
+        dataValue: (formData) => formatStringArray(formData.federalAuthorities),
     },
 }
 
@@ -185,7 +174,7 @@ const excludedFieldPaths = new Set<keyof ContractFormData>([
 ])
 
 const diffFieldConfigs: DiffFieldConfig[] = Object.entries(
-    contractFormDataSchema.shape as Record<string, any>
+    contractFormDataSchema.shape as Record<string, z.core.$ZodType>
 ).flatMap(([fieldPath, schema]) => {
     const typedFieldPath = fieldPath as keyof ContractFormData & string
 
@@ -221,18 +210,12 @@ function buildRevisionDiff(
     newerSubmission: ContractPackageSubmissionType,
     statePrograms: ProgramType[]
 ): RevisionDiff | Error {
-    const olderSubmissionID = displaySubmissionID(
-        olderSubmission,
-        statePrograms
-    )
+    const olderSubmissionID = formatSubmissionID(olderSubmission, statePrograms)
     if (olderSubmissionID instanceof Error) {
         return olderSubmissionID
     }
 
-    const newerSubmissionID = displaySubmissionID(
-        newerSubmission,
-        statePrograms
-    )
+    const newerSubmissionID = formatSubmissionID(newerSubmission, statePrograms)
     if (newerSubmissionID instanceof Error) {
         return newerSubmissionID
     }
@@ -242,7 +225,7 @@ function buildRevisionDiff(
         FieldContext
     >[] = diffFieldConfigs.map((fieldConfig) => ({
         fieldPath: fieldConfig.fieldPath,
-        getValue: fieldConfig.displayValue,
+        getValue: fieldConfig.dataValue,
     }))
 
     const fieldChanges = buildScalarFieldDiffChanges(
