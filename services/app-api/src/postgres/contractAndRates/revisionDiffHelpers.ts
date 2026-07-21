@@ -1,13 +1,4 @@
-import {
-    ContractTypeRecord,
-    ContractExecutionStatusRecord,
-    FederalAuthorityRecord,
-    ManagedCareEntityRecord,
-    PopulationCoveredRecord,
-    SubmissionTypeRecord,
-    packageName,
-} from '@mc-review/submissions'
-import { formatCalendarDate } from '@mc-review/dates'
+import { packageName } from '@mc-review/submissions'
 import { z } from 'zod'
 import type {
     ContractPackageSubmissionType,
@@ -42,7 +33,7 @@ const displayBooleanAsYesNo = (
         return null
     }
 
-    return value ? 'Yes' : 'No'
+    return value ? 'true' : 'false'
 }
 
 const displayProgramNames = (
@@ -93,18 +84,17 @@ const displayDate = (value: Date | null | undefined): string | null => {
         return null
     }
 
-    return formatCalendarDate(value, 'UTC')
+    return value.toISOString()
 }
 
 const displayStringArray = <TKey extends string>(
-    values: TKey[],
-    record: Record<TKey, string>
+    values: TKey[]
 ): string | null => {
     if (!values.length) {
         return null
     }
 
-    return values.map((value) => record[value]).join(', ')
+    return values.join(', ')
 }
 
 function unwrapSchema(schema: any): z.ZodTypeAny {
@@ -157,19 +147,15 @@ const fieldConfigOverrides: Partial<
 > = {
     populationCovered: {
         fieldPath: 'populationCovered',
-        displayValue: (formData) =>
-            formData.populationCovered
-                ? PopulationCoveredRecord[formData.populationCovered]
-                : null,
+        displayValue: (formData) => formData.populationCovered ?? null,
     },
     submissionType: {
         fieldPath: 'submissionType',
-        displayValue: (formData) =>
-            SubmissionTypeRecord[formData.submissionType],
+        displayValue: (formData) => formData.submissionType,
     },
     contractType: {
         fieldPath: 'contractType',
-        displayValue: (formData) => ContractTypeRecord[formData.contractType],
+        displayValue: (formData) => formData.contractType,
     },
     programIDs: {
         fieldPath: 'programIDs',
@@ -178,28 +164,17 @@ const fieldConfigOverrides: Partial<
     },
     contractExecutionStatus: {
         fieldPath: 'contractExecutionStatus',
-        displayValue: (formData) =>
-            formData.contractExecutionStatus
-                ? ContractExecutionStatusRecord[
-                      formData.contractExecutionStatus
-                  ]
-                : null,
+        displayValue: (formData) => formData.contractExecutionStatus ?? null,
     },
     managedCareEntities: {
         fieldPath: 'managedCareEntities',
         displayValue: (formData) =>
-            displayStringArray(
-                formData.managedCareEntities,
-                ManagedCareEntityRecord
-            ),
+            displayStringArray(formData.managedCareEntities),
     },
     federalAuthorities: {
         fieldPath: 'federalAuthorities',
         displayValue: (formData) =>
-            displayStringArray(
-                formData.federalAuthorities,
-                FederalAuthorityRecord
-            ),
+            displayStringArray(formData.federalAuthorities),
     },
 }
 
