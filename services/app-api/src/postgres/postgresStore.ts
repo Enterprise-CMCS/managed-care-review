@@ -70,7 +70,6 @@ import {
     findContractRevision,
     findRateRevision,
     findSubmissionHistoryByContractID,
-    findRevisionDiffByContractID,
     approveContract,
     reverseApproveContract,
     overrideContractData,
@@ -89,8 +88,11 @@ import type {
     ReverseApproveContractArgsType,
     OverrideContractDataArgsType,
     UndoUnlockContractArgsType,
-    FindRevisionDiffArgs,
 } from './contractAndRates'
+import {
+    findRevisionDiffByContractID,
+    type FindRevisionDiffArgs,
+} from './revisionDiff'
 import type { UnlockContractArgsType } from './contractAndRates/unlockContract'
 import { unlockRate } from './contractAndRates/unlockRate'
 import type { UnlockRateArgsType } from './contractAndRates/unlockRate'

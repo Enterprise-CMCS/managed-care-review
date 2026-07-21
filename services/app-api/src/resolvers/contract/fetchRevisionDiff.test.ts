@@ -1,6 +1,6 @@
 import type { CMSUserType, StateUserType } from '../../domain-models'
 import { findStatePrograms, type Store } from '../../postgres'
-import { buildRevisionDiff } from '../../postgres/contractAndRates/revisionDiffHelpers'
+import { buildRevisionDiff } from '../../postgres/revisionDiff/revisionDiffHelpers'
 import { must } from '../../testHelpers/assertionHelpers'
 import { mockSubmittableHealthPlanContract } from '../../testHelpers/contractDataMocks'
 import { fetchRevisionDiffResolver } from './fetchRevisionDiff'

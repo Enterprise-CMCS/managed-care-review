@@ -8,7 +8,7 @@ import {
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { canRead } from '../../oauth/oauthAuthorization'
 import { NotFoundError, type Store } from '../../postgres'
-import { InvalidRevisionDiffInputError } from '../../postgres/contractAndRates/findRevisionDiffByContractID'
+import { InvalidRevisionDiffInputError } from '../../postgres/revisionDiff/findRevisionDiffByContractID'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { createUserInputError } from '../errorUtils'
 

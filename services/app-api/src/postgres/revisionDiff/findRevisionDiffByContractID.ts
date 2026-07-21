@@ -4,8 +4,8 @@ import type {
 } from '../../domain-models'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { findStatePrograms } from '../state/findStatePrograms'
+import { findContractWithHistory } from '../contractAndRates/findContractWithHistory'
 import { buildRevisionDiff } from './revisionDiffHelpers'
-import { findContractWithHistory } from './findContractWithHistory'
 
 type FindRevisionDiffArgs = {
     contractID: string
