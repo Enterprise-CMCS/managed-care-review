@@ -52,6 +52,7 @@ export class Postgres extends BaseStack {
     public readonly jwtSecret: ISecret
     public readonly cluster?: IDatabaseCluster
     public readonly logicalDbManagerFunction: NodejsFunction
+    public readonly backupRestoreValidatorFunction: NodejsFunction
     public readonly vpcEndpoint: InterfaceVpcEndpoint
     public readonly bastionHost?: Instance
 
@@ -129,6 +130,8 @@ export class Postgres extends BaseStack {
 
         // Create the logical database manager Lambda
         this.logicalDbManagerFunction = this.createLogicalDbManagerLambda()
+        this.backupRestoreValidatorFunction =
+            this.createBackupRestoreValidatorLambda()
 
         // Create outputs
         this.createOutputs()
@@ -266,6 +269,47 @@ export class Postgres extends BaseStack {
         )
 
         return dbManagerFunction
+    }
+
+    /**
+     * Create backup restore validator Lambda function
+     */
+    private createBackupRestoreValidatorLambda(): NodejsFunction {
+        const backupRestoreValidatorFunction = new NodejsFunction(
+            this,
+            'BackupRestoreValidator',
+            {
+                functionName: `postgres-${this.stage}-backupRestoreValidator-cdk`,
+                description:
+                    'Validates restored Aurora automated backups from inside the application VPC',
+                runtime: Runtime.NODEJS_24_X,
+                architecture: Architecture.X86_64,
+                handler: 'handler',
+                entry: join(
+                    __dirname,
+                    '..',
+                    '..',
+                    '..',
+                    'postgres',
+                    'src',
+                    'backupRestoreValidator.ts'
+                ),
+                timeout: Duration.minutes(5),
+                memorySize: this.stageConfig.lambda.memorySize,
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups: this.getLambdaSecurityGroups(),
+                environment: {
+                    SECRETS_MANAGER_ENDPOINT: `https://secretsmanager.${this.region}.amazonaws.com`, // pragma: allowlist secret
+                },
+            }
+        )
+
+        this.databaseSecret.grantRead(backupRestoreValidatorFunction)
+
+        return backupRestoreValidatorFunction
     }
 
     /**
@@ -440,6 +484,18 @@ export class Postgres extends BaseStack {
             value: this.logicalDbManagerFunction.functionName,
             description: 'Logical database manager Lambda function name',
             exportName: this.exportName('LogicalDbManagerFunctionName'),
+        })
+
+        new CfnOutput(this, 'BackupRestoreValidatorFunctionArn', {
+            value: this.backupRestoreValidatorFunction.functionArn,
+            description: 'Backup restore validator Lambda function ARN',
+            exportName: this.exportName('BackupRestoreValidatorFunctionArn'),
+        })
+
+        new CfnOutput(this, 'BackupRestoreValidatorFunctionName', {
+            value: this.backupRestoreValidatorFunction.functionName,
+            description: 'Backup restore validator Lambda function name',
+            exportName: this.exportName('BackupRestoreValidatorFunctionName'),
         })
 
         new CfnOutput(this, 'VpcEndpointId', {
