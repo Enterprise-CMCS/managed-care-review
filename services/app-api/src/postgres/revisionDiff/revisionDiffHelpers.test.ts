@@ -1,12 +1,21 @@
-import { findStatePrograms } from '../../postgres'
+import { findStatePrograms, NewPostgresStore } from '../../postgres'
 import { expectToBeDefined, must } from '../../testHelpers/assertionHelpers'
-import { mockSubmittableHealthPlanContract } from '../../testHelpers/contractDataMocks'
+import { mockSubmittableHealthPlanContract } from '../../testHelpers'
 import { packageName } from '@mc-review/submissions'
 import {
     InvalidRevisionDiffInputError,
     resolveRevisionPair,
 } from './findRevisionDiffByContractID'
 import { buildRevisionDiff } from './revisionDiffHelpers'
+import { testCMSUser } from '../../testHelpers/userHelpers'
+import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
+import {
+    createAndSubmitTestContract,
+    submitTestContract,
+    unlockTestContract,
+    updateTestContractDraftRevision,
+} from '../../testHelpers/gqlContractHelpers'
+import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 const mockStateUser = () => ({
     id: 'state-user-id',
@@ -20,112 +29,135 @@ const mockStateUser = () => ({
 })
 
 describe('revisionDiffHelpers', () => {
-    it('builds data-only field changes for a submitted revision comparison', () => {
-        const statePrograms = must(findStatePrograms('KY'))
-        expect(statePrograms.length).toBeGreaterThan(1)
+    it('builds data-only field changes for a submitted revision comparison', async () => {
+        // Setup test API and prisma client.
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
 
+        // Setup test form data
+        const statePrograms = must(findStatePrograms('FL'))
+        expect(statePrograms.length).toBeGreaterThan(1)
         const baseContract = mockSubmittableHealthPlanContract({
             programIDs: [statePrograms[0].id],
         })
         const baseFormData = baseContract.draftRevision!.formData
 
+        // Create test contract data using API to mimic real data.
+        const contract = await createAndSubmitTestContract(stateServer, 'FL', {
+            ...baseFormData,
+            populationCovered: 'MEDICAID',
+            dsnpContract: undefined,
+            riskBasedContract: false,
+            contractType: 'BASE',
+            contractExecutionStatus: 'UNEXECUTED',
+            contractDateStart: '2027-01-01',
+            contractDateEnd: '2028-01-01',
+            managedCareEntities: ['MCO'],
+            federalAuthorities: ['TITLE_XXI'],
+            inLieuServicesAndSettings: false,
+            modifiedBenefitsProvided: false,
+            modifiedGeoAreaServed: false,
+            submissionDescription: 'Original description',
+            programIDs: [statePrograms[0].id],
+        })
+
+        const unlockedContract = await unlockTestContract(
+            cmsServer,
+            contract.id,
+            'Unlock to update'
+        )
+        const draftRevision = unlockedContract.draftRevision
+
+        await updateTestContractDraftRevision(
+            stateServer,
+            contract.id,
+            draftRevision.updatedAt,
+            {
+                ...draftRevision.formData,
+                populationCovered: 'MEDICAID_AND_CHIP',
+                dsnpContract: true,
+                riskBasedContract: true,
+                contractType: 'AMENDMENT',
+                contractExecutionStatus: 'EXECUTED',
+                contractDateStart: '2027-05-15',
+                contractDateEnd: '2028-05-15',
+                managedCareEntities: ['MCO', 'PIHP', 'PAHP', 'PCCM'],
+                federalAuthorities: ['STATE_PLAN', 'WAIVER_1115', 'TITLE_XXI'],
+                inLieuServicesAndSettings: true,
+                modifiedBenefitsProvided: true,
+                modifiedGeoAreaServed: true,
+                submissionDescription: 'Resubmitted description',
+                programIDs: [statePrograms[0].id, statePrograms[1].id],
+            }
+        )
+
+        await submitTestContract(
+            stateServer,
+            contract.id,
+            'Resubmission with changes'
+        )
+
+        const resubmittedContractDomainData =
+            await postgresStore.findContractWithHistory(contract.id)
+
+        if (resubmittedContractDomainData instanceof Error) {
+            throw new Error(
+                'Unexpected error: Prisma query findContractWithHistory resulted in error'
+            )
+        }
+
+        // There should only be 2 submissions, latest one at index 1
+        const latestSubmissionPackage =
+            resubmittedContractDomainData.packageSubmissions[0]
+        const previousSubmission =
+            resubmittedContractDomainData.packageSubmissions[1]
+
+        if (!latestSubmissionPackage) {
+            throw new Error(
+                'Unexpected error: latest package submission not found'
+            )
+        }
+        if (!previousSubmission) {
+            throw new Error(
+                'Unexpected error: previous package submission not found'
+            )
+        }
+
+        // Use test data to perform revision diff
         const comparison = buildRevisionDiff(
-            'contract-1',
-            {
-                submitInfo: {
-                    updatedAt: new Date('2024-05-01T00:00:00.000Z'),
-                    updatedBy: mockStateUser(),
-                    updatedReason: 'Initial submission',
-                },
-                submittedRevisions: [],
-                contractRevision: {
-                    ...baseContract.draftRevision!,
-                    id: 'older-revision',
-                    submitInfo: {
-                        updatedAt: new Date('2024-05-01T00:00:00.000Z'),
-                        updatedBy: mockStateUser(),
-                        updatedReason: 'Initial submission',
-                    },
-                    formData: {
-                        ...baseFormData,
-                        populationCovered: 'MEDICAID',
-                        dsnpContract: undefined,
-                        riskBasedContract: false,
-                        contractType: 'BASE',
-                        contractExecutionStatus: 'UNEXECUTED',
-                        contractDateStart: new Date('2027-01-01T00:00:00.000Z'),
-                        contractDateEnd: new Date('2028-01-01T00:00:00.000Z'),
-                        managedCareEntities: ['MCO'],
-                        federalAuthorities: ['TITLE_XXI'],
-                        inLieuServicesAndSettings: false,
-                        modifiedBenefitsProvided: false,
-                        modifiedGeoAreaServed: false,
-                        submissionDescription: 'Original description',
-                        programIDs: [statePrograms[0].id],
-                    },
-                },
-                rateRevisions: [],
-            },
-            {
-                submitInfo: {
-                    updatedAt: new Date('2024-05-11T00:00:00.000Z'),
-                    updatedBy: mockStateUser(),
-                    updatedReason: 'Resubmission with changes',
-                },
-                submittedRevisions: [],
-                contractRevision: {
-                    ...baseContract.draftRevision!,
-                    id: 'newer-revision',
-                    submitInfo: {
-                        updatedAt: new Date('2024-05-11T00:00:00.000Z'),
-                        updatedBy: mockStateUser(),
-                        updatedReason: 'Resubmission with changes',
-                    },
-                    formData: {
-                        ...baseFormData,
-                        populationCovered: 'MEDICAID_AND_CHIP',
-                        dsnpContract: true,
-                        riskBasedContract: true,
-                        contractType: 'AMENDMENT',
-                        contractExecutionStatus: 'EXECUTED',
-                        contractDateStart: new Date('2027-05-15T00:00:00.000Z'),
-                        contractDateEnd: new Date('2028-05-15T00:00:00.000Z'),
-                        managedCareEntities: ['MCO', 'PIHP', 'PAHP', 'PCCM'],
-                        federalAuthorities: [
-                            'STATE_PLAN',
-                            'WAIVER_1115',
-                            'TITLE_XXI',
-                        ],
-                        inLieuServicesAndSettings: true,
-                        modifiedBenefitsProvided: true,
-                        modifiedGeoAreaServed: true,
-                        submissionDescription: 'Resubmitted description',
-                        programIDs: [statePrograms[0].id, statePrograms[1].id],
-                    },
-                },
-                rateRevisions: [],
-            },
+            contract.id,
+            previousSubmission,
+            latestSubmissionPackage,
             statePrograms
         )
 
         expect(comparison).toEqual({
-            contractID: 'contract-1',
-            olderRevisionID: 'older-revision',
-            newerRevisionID: 'newer-revision',
-            olderSubmittedAt: new Date('2024-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2024-05-11T00:00:00.000Z'),
+            contractID: resubmittedContractDomainData.id,
+            olderRevisionID: previousSubmission.contractRevision.id,
+            newerRevisionID: latestSubmissionPackage.contractRevision.id,
+            olderSubmittedAt:
+                previousSubmission.contractRevision.submitInfo?.updatedAt,
+            newerSubmittedAt:
+                latestSubmissionPackage.contractRevision.submitInfo?.updatedAt,
             fieldChanges: [
                 {
                     fieldPath: 'contractName',
                     oldValue: packageName(
-                        'KY',
-                        baseContract.stateNumber,
+                        'FL',
+                        resubmittedContractDomainData.stateNumber,
                         [statePrograms[0].id],
                         statePrograms
                     ),
                     newValue: packageName(
-                        'KY',
-                        baseContract.stateNumber,
+                        'FL',
+                        resubmittedContractDomainData.stateNumber,
                         [statePrograms[0].id, statePrograms[1].id],
                         statePrograms
                     ),
