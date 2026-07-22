@@ -3,6 +3,8 @@ schema {
     mutation: Mutation
 }
 
+scalar JSON
+
 type Query {
     """
     fetchCurrentUser returns user information for the currently logged in User
@@ -94,6 +96,13 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
+
+    """
+    fetchRevisionDiff returns the field-level differences between two submitted
+    contract revisions. When revision IDs are omitted, it compares the latest
+    submitted contract revision to the previous submitted contract revision.
+    """
+    fetchRevisionDiff(input: FetchRevisionDiffInput!): FetchRevisionDiffPayload!
 
     """
     fetchSubmissionHistory returns the combined action history for a submission,
@@ -2824,6 +2833,35 @@ input FetchContractInput {
     contractID: ID!
 }
 
+"""
+RevisionDiff is a data-only comparison between two submitted contract revisions.
+"""
+type RevisionDiff {
+    olderRevisionID: ID!
+    newerRevisionID: ID!
+    olderSubmittedAt: DateTime!
+    newerSubmittedAt: DateTime!
+    fieldChanges: [RevisionDiffFieldChange!]!
+}
+
+enum RevisionDiffFieldValueKind {
+    STRING
+    BOOLEAN
+    DATE
+    STRING_ARRAY
+}
+
+type RevisionDiffFieldValue {
+    kind: RevisionDiffFieldValueKind!
+    value: JSON
+}
+
+type RevisionDiffFieldChange {
+    fieldPath: String!
+    oldValue: RevisionDiffFieldValue
+    newValue: RevisionDiffFieldValue
+}
+
 type FetchSubmissionHistoryPayload {
     "The contract submission the history was built for."
     contractID: ID!
@@ -2833,6 +2871,17 @@ type FetchSubmissionHistoryPayload {
 
 input FetchSubmissionHistoryInput {
     contractID: ID!
+}
+
+input FetchRevisionDiffInput {
+    contractID: ID!
+    olderContractRevisionID: ID
+    newerContractRevisionID: ID
+}
+
+type FetchRevisionDiffPayload {
+    contractID: ID!
+    comparison: RevisionDiff!
 }
 
 type FetchDocumentPayload {

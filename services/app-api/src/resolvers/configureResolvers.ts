@@ -1,4 +1,4 @@
-import { GraphQLDate, GraphQLDateTime } from 'graphql-scalars'
+import { GraphQLDate, GraphQLDateTime, GraphQLJSON } from 'graphql-scalars'
 import type { Emailer } from '../emailer'
 import type { Resolvers } from '../gen/gqlServer'
 import type { Store } from '../postgres'
@@ -56,6 +56,7 @@ import {
     contractRevisionStrippedResolver,
 } from './contract/contractRevisionResolver'
 import { fetchContractResolver } from './contract/fetchContract'
+import { fetchRevisionDiffResolver } from './contract/fetchRevisionDiff'
 import { fetchSubmissionHistoryResolver } from './contract/fetchSubmissionHistory'
 import { submitContract } from './contract/submitContract'
 import type { S3ClientT } from '../s3'
@@ -91,6 +92,7 @@ export function configureResolvers(
     const resolvers: Resolvers = {
         Date: GraphQLDate,
         DateTime: GraphQLDateTime,
+        JSON: GraphQLJSON,
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),
@@ -104,6 +106,7 @@ export function configureResolvers(
             indexRatesStripped: indexRatesStripped(store),
             fetchRate: fetchRateResolver(store),
             fetchContract: fetchContractResolver(store),
+            fetchRevisionDiff: fetchRevisionDiffResolver(store),
             fetchSubmissionHistory: fetchSubmissionHistoryResolver(store),
             fetchOauthClients: fetchOauthClientsResolver(store),
         },

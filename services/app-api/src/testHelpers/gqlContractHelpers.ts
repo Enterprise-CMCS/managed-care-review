@@ -6,6 +6,7 @@ import {
     UpdateContractDraftRevisionDocument,
     CreateContractDocument,
     FetchContractWithQuestionsDocument,
+    FetchRevisionDiffDocument,
     ApproveContractDocument,
     ReverseApproveContractDocument,
     UndoUnlockContractDocument,
@@ -24,6 +25,8 @@ import type {
     UnlockedContract,
     CreateContractInput,
     OverrideContractDataInput,
+    FetchRevisionDiffInput,
+    FetchRevisionDiffPayload,
 } from '../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { addNewRateToTestContract } from './gqlRateHelpers'
@@ -204,6 +207,28 @@ async function fetchTestContract(
     }
 
     return result.data.fetchContract.contract
+}
+
+async function fetchTestRevisionDiff(
+    server: ApolloServer,
+    input: FetchRevisionDiffInput
+): Promise<FetchRevisionDiffPayload> {
+    const result = await executeGraphQLOperation(server, {
+        query: FetchRevisionDiffDocument,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `fetchTestRevisionDiff query failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+
+    if (!result.data.fetchRevisionDiff) {
+        throw new Error('fetchTestRevisionDiff returned nothing')
+    }
+
+    return result.data.fetchRevisionDiff
 }
 
 async function approveTestContract(
@@ -758,6 +783,7 @@ export {
     reverseApproveTestContract,
     undoUnlockTestContract,
     fetchTestContract,
+    fetchTestRevisionDiff,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,

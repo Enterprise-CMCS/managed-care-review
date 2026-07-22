@@ -33,6 +33,7 @@ export {
 export {
     createAndSubmitTestContract,
     fetchTestContract,
+    fetchTestRevisionDiff,
     approveTestContract,
     reverseApproveTestContract,
     updateTestContractDraftRevision,
