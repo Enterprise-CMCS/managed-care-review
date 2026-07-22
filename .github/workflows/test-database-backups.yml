@@ -1,0 +1,110 @@
+name: Test database backups
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to validate'
+        required: true
+        default: 'val'
+        type: choice
+        options:
+          - dev
+          - val
+          - prod
+  schedule:
+    - cron: '0 9 * * 1'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  select-environments:
+    name: Select environments
+    runs-on: ubuntu-24.04
+    outputs:
+      environments: ${{ steps.environments.outputs.environments }}
+    steps:
+      - name: Select environments
+        id: environments
+        shell: bash
+        run: |
+          selected="${{ inputs.environment || 'both' }}"
+
+          if [[ "$selected" == "both" ]]; then
+            echo 'environments=["val","prod"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "environments=[\"$selected\"]" >> "$GITHUB_OUTPUT"
+          fi
+
+  test-backup-restore:
+    name: Test ${{ matrix.environment }} backup restore
+    needs: select-environments
+    runs-on: ubuntu-24.04
+    environment: ${{ matrix.environment }}
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.select-environments.outputs.environments) }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ matrix.environment == 'prod' && secrets.PROD_AWS_ACCOUNT_ID || matrix.environment == 'val' && secrets.VAL_AWS_ACCOUNT_ID || secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ matrix.environment }}
+          use-cdk-role: 'true'
+
+      - name: Deploy Postgres stack
+        working-directory: services/infra-cdk
+        shell: bash
+        env:
+          STAGE_NAME: ${{ matrix.environment }}
+          VPC_ID: ${{ matrix.environment == 'prod' && secrets.PROD_VPC_ID || matrix.environment == 'val' && secrets.VAL_VPC_ID || secrets.DEV_VPC_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ matrix.environment == 'prod' && secrets.PROD_SUBNET_PRIVATE_A_ID || matrix.environment == 'val' && secrets.VAL_SUBNET_PRIVATE_A_ID || secrets.DEV_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ matrix.environment == 'prod' && secrets.PROD_SUBNET_PRIVATE_B_ID || matrix.environment == 'val' && secrets.VAL_SUBNET_PRIVATE_B_ID || secrets.DEV_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ matrix.environment == 'prod' && secrets.PROD_SUBNET_PRIVATE_C_ID || matrix.environment == 'val' && secrets.VAL_SUBNET_PRIVATE_C_ID || secrets.DEV_SUBNET_PRIVATE_C_ID }}
+        run: |
+          pnpm cdk deploy postgres-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/postgres.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Test Aurora automated backup restore
+        env:
+          VITE_APP_AUTH_MODE: LOCAL
+        shell: bash
+        run: |
+          pnpm --filter scripts build
+
+          if [[ "${{ matrix.environment }}" == "prod" ]]; then
+            node scripts/test-aurora-automated-backup-restore.js --env prod --skip-source-compare
+          else
+            node scripts/test-aurora-automated-backup-restore.js --env "${{ matrix.environment }}"
+          fi
+
+  slack:
+    name: Slack notification on failure
+    runs-on: ubuntu-24.04
+    needs: [test-backup-restore]
+    if: always()
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v3
+
+      - name: Alert Slack On Failure
+        uses: rtCamp/action-slack-notify@v2
+        if: env.WORKFLOW_CONCLUSION == 'failure'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Database Backup Restore Alerts
+          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_COLOR: ${{ job.status }}
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: actions url,commit,ref
