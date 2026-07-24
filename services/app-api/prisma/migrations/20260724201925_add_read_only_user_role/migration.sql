@@ -1,0 +1,6 @@
+BEGIN;
+
+-- AlterEnum
+ALTER TYPE "Role" ADD VALUE 'READONLY_USER';
+
+COMMIT;
