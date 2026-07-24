@@ -15,6 +15,8 @@ import {
     packageName,
     findStatePrograms,
     typedStatePrograms,
+    FederalAuthorityRecord,
+    RateMedicaidPopulationsRecord,
 } from '@mc-review/submissions'
 import type { ContractType } from '../domain-models'
 import { resolveInitiallySubmittedAtOverride } from '../resolvers/shared/overrideHelpers'
@@ -41,7 +43,7 @@ const HEADERS = [
 ]
 
 // Enum display order, matching the prior report.
-const POP_ORDER = [
+const POP_ORDER: Array<keyof typeof RateMedicaidPopulationsRecord> = [
     'MEDICARE_MEDICAID_WITH_DSNP',
     'MEDICAID_ONLY',
     'MEDICARE_MEDICAID_WITHOUT_DSNP',
@@ -88,8 +90,12 @@ function toRow(contract: ContractType): Row {
         ),
         state: STATE_NAMES.get(contract.stateCode) ?? contract.stateCode,
         contractID: contract.id,
-        federalAuthorities: (formData.federalAuthorities ?? []).join(','),
-        rateMedicaidPopulations: POP_ORDER.filter((p) => pops.has(p)).join(','),
+        federalAuthorities: (formData.federalAuthorities ?? [])
+            .map((a) => FederalAuthorityRecord[a] ?? a)
+            .join(', '),
+        rateMedicaidPopulations: POP_ORDER.filter((p) => pops.has(p))
+            .map((p) => RateMedicaidPopulationsRecord[p] ?? p)
+            .join(', '),
         dsnp: formData.dsnpContract === true,
         initialDate: ymd(
             resolveInitiallySubmittedAtOverride(
