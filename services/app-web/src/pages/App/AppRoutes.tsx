@@ -11,6 +11,7 @@ import { idmRedirectURL } from '../Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '@mc-review/common-code'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '@mc-review/constants'
 import { getRouteName } from '../../routeHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks'
@@ -304,6 +305,7 @@ const CMSUserRoutes = ({
     )
 
     const isAdminUser = loggedInUser.__typename === 'AdminUser'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
 
     return (
         <AuthenticatedRouteWrapper>
@@ -437,7 +439,7 @@ const CMSUserRoutes = ({
                     />
                 )}
 
-                {isAdminUser && (
+                {(isAdminUser || isCMSUser) && (
                     <Route
                         path={RoutesRecord.UNDO_SUBMISSION_UNLOCK}
                         element={<UndoSubmissionUnlock />}
