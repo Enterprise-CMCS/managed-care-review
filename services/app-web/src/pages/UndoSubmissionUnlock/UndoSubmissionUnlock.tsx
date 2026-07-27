@@ -37,7 +37,7 @@ type FormError =
 
 const UndoSubmissionUnlockSchema = Yup.object().shape({
     undoSubmissionUnlockReason: Yup.string().required(
-        'You must provide a reason for this change.'
+        'You must enter a reason'
     ),
 })
 
@@ -75,6 +75,7 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
     const contract = data?.fetchContract.contract
     const contractName =
         contract?.packageSubmissions[0].contractRevision.contractName
+    const contractStatus = contract?.consolidatedStatus
     const stateHeader = useMemoizedStateHeader({
         subHeaderText: contractName,
         stateCode: contract?.state.code,
@@ -100,7 +101,8 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
 
     if (
         ContractSubmissionTypeRecord[contract.contractSubmissionType] !==
-        contractSubmissionType
+            contractSubmissionType ||
+        contractStatus !== 'UNLOCKED'
     ) {
         return <Error404 />
     }
@@ -109,8 +111,8 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
         values: UndoSubmissionUnlockValues
     ) => {
         logFormSubmitEvent({
-            heading: 'Undo submission unlock',
-            form_name: 'Undo submission unlock',
+            heading: 'Undo unlock',
+            form_name: 'Undo unlock',
             event_name: 'form_field_submit',
             link_type: 'link_other',
         })
@@ -152,11 +154,15 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
                                 contractSubmissionType,
                             }
                         ),
-                        text: 'Undo submission unlock',
+                        text: 'Undo unlock',
                     },
                 ]}
             />
-            <h1>Undo submission unlock</h1>
+            <h1 className={styles.pageHeading}>Undo unlock</h1>
+            <p className={styles.pageSubheading}>
+                Undoing the unlock returns the submission to its previous status
+                and discards any draft changes made by the state.
+            </p>
             <Formik
                 initialValues={formInitialValues}
                 onSubmit={(values) => undoUnlockSubmissionAction(values)}
@@ -174,12 +180,12 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
                         {undoUnlockError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <FieldTextarea
-                                label="Reason for undoing the submission unlock."
+                                label="Reason for undoing the unlock"
                                 id="undoSubmissionUnlockReason"
                                 data-testid="undoSubmissionUnlockReason"
                                 name="undoSubmissionUnlockReason"
                                 aria-required
-                                hint="This will discard the unlocked draft and move the submission back to its previously submitted status."
+                                hint="Tell the state why you are undoing the unlock. This reason appears on the submission record."
                                 showError={showFieldErrors(
                                     errors.undoSubmissionUnlockReason
                                 )}
@@ -214,7 +220,7 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
                                     )}
                                     loading={undoUnlockLoading}
                                 >
-                                    Undo submission unlock
+                                    Undo unlock
                                 </ActionButton>
                             </ButtonGroup>
                         </PageActionsContainer>

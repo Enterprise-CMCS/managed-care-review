@@ -3,6 +3,14 @@
 
 .undoSubmissionUnlockContainer {
     @include custom.mini-form-page-container;
+
+    .pageHeading {
+        margin-bottom: 1rem;
+    }
+
+    .pageSubheading {
+        margin-bottom: 2rem;
+    }
 }
 
 .formContainer {
