@@ -1,3 +1,5 @@
+import type { StateContactType } from './formDataTypes'
+
 type RevisionDiffFieldChange<TValue = unknown> = {
     fieldPath: string
     oldValue: TValue
@@ -29,6 +31,11 @@ type RevisionDiffCollectionItemChange<TItem, TChange> =
     | RevisionDiffCollectionItemRemoved<TItem>
     | RevisionDiffCollectionItemUpdated<TItem, TChange>
 
+type RevisionDiffCollectionItemNewOrModified<TItem> = {
+    kind: 'new_or_modified'
+    current: TItem
+}
+
 type RevisionDiff<TValue = unknown> = {
     contractID: string
     olderRevisionID: string
@@ -36,10 +43,12 @@ type RevisionDiff<TValue = unknown> = {
     olderSubmittedAt: Date
     newerSubmittedAt: Date
     fieldChanges: RevisionDiffFieldChange<TValue>[]
+    stateContactChanges: RevisionDiffCollectionItemNewOrModified<StateContactType>[]
 }
 
 export type {
     RevisionDiff,
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
+    RevisionDiffCollectionItemNewOrModified,
 }

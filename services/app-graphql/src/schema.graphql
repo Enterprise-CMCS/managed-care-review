@@ -2842,6 +2842,16 @@ type RevisionDiff {
     olderSubmittedAt: DateTime!
     newerSubmittedAt: DateTime!
     fieldChanges: [RevisionDiffFieldChange!]!
+    stateContactChanges: [RevisionDiffStateContactChange!]!
+}
+
+enum RevisionDiffStateContactChangeKind {
+    NEW_OR_MODIFIED
+}
+
+type RevisionDiffStateContactChange {
+    kind: RevisionDiffStateContactChangeKind!
+    current: StateContact!
 }
 
 enum RevisionDiffFieldValueKind {

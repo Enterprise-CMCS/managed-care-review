@@ -1,5 +1,6 @@
 import type {
     RevisionDiffCollectionItemChange,
+    RevisionDiffCollectionItemNewOrModified,
     RevisionDiffFieldChange,
 } from '../../domain-models'
 
@@ -90,8 +91,7 @@ function diffCollectionByKey<TItem, TChange>({
     getKey,
     buildChanges,
 }: DiffByKeyArgs<TItem, TChange>):
-    | RevisionDiffCollectionItemChange<TItem, TChange>[]
-    | Error {
+    RevisionDiffCollectionItemChange<TItem, TChange>[] | Error {
     const previousItemsByKey = mapItemsByKey(previous, getKey)
     if (previousItemsByKey instanceof Error) {
         return previousItemsByKey
@@ -147,5 +147,44 @@ function diffCollectionByKey<TItem, TChange>({
     return changes
 }
 
+function buildNewAndModifiedCollectionChanges<TItem>(
+    previous: TItem[],
+    current: TItem[],
+    getComparisonKey: (item: TItem) => string
+): RevisionDiffCollectionItemNewOrModified<TItem>[] {
+    const previousRemainingCounts = new Map<string, number>()
+
+    for (const item of previous) {
+        const key = getComparisonKey(item)
+        previousRemainingCounts.set(
+            key,
+            (previousRemainingCounts.get(key) ?? 0) + 1
+        )
+    }
+
+    const changes: RevisionDiffCollectionItemNewOrModified<TItem>[] = []
+
+    for (const item of current) {
+        const key = getComparisonKey(item)
+        const remainingCount = previousRemainingCounts.get(key) ?? 0
+
+        if (remainingCount > 0) {
+            previousRemainingCounts.set(key, remainingCount - 1)
+            continue
+        }
+
+        changes.push({
+            kind: 'new_or_modified',
+            current: item,
+        })
+    }
+
+    return changes
+}
+
 export type { ScalarDiffFieldConfig }
-export { buildScalarFieldDiffChanges, diffCollectionByKey }
+export {
+    buildNewAndModifiedCollectionChanges,
+    buildScalarFieldDiffChanges,
+    diffCollectionByKey,
+}

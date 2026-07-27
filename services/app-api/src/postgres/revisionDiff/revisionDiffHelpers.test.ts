@@ -233,6 +233,7 @@ describe('revisionDiffHelpers', () => {
                     newValue: true,
                 },
             ],
+            stateContactChanges: [],
         })
     })
 
@@ -608,5 +609,136 @@ describe('revisionDiffHelpers', () => {
                       (change) => change.fieldPath === 'programIDs'
                   )
         ).toEqual([])
+        expect(
+            comparison instanceof Error ? [] : comparison.stateContactChanges
+        ).toEqual([])
+    })
+
+    it('reports only new and modified state contacts from the newer submission', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const statePrograms = must(findStatePrograms('FL'))
+        const baseContract = mockSubmittableHealthPlanContract({
+            programIDs: [statePrograms[0].id],
+        })
+        const baseFormData = baseContract.draftRevision!.formData
+
+        const contract = await createAndSubmitTestContract(stateServer, 'FL', {
+            ...baseFormData,
+            programIDs: [statePrograms[0].id],
+            contractDateStart: '2027-01-01',
+            contractDateEnd: '2028-01-01',
+            stateContacts: [
+                {
+                    name: 'Unchanged Person',
+                    titleRole: 'Director',
+                    email: 'unchanged@example.com',
+                },
+                {
+                    name: 'Modified Person',
+                    titleRole: 'Manager',
+                    email: 'before@example.com',
+                },
+            ],
+        })
+
+        const unlockedContract = await unlockTestContract(
+            cmsServer,
+            contract.id,
+            'Unlock to update state contacts'
+        )
+        const draftRevision = unlockedContract.draftRevision
+
+        await updateTestContractDraftRevision(
+            stateServer,
+            contract.id,
+            draftRevision.updatedAt,
+            {
+                ...draftRevision.formData,
+                programIDs: [statePrograms[0].id],
+                contractDateStart: '2027-01-01',
+                contractDateEnd: '2028-01-01',
+                stateContacts: [
+                    {
+                        name: 'Unchanged Person',
+                        titleRole: 'Director',
+                        email: 'unchanged@example.com',
+                    },
+                    {
+                        name: 'Modified Person',
+                        titleRole: 'Senior Manager',
+                        email: 'after@example.com',
+                    },
+                    {
+                        name: 'New Person',
+                        titleRole: 'Analyst',
+                        email: 'new@example.com',
+                    },
+                ],
+            }
+        )
+
+        await submitTestContract(
+            stateServer,
+            contract.id,
+            'Resubmission with updated state contacts'
+        )
+
+        const resubmittedContractDomainData =
+            await postgresStore.findContractWithHistory(contract.id)
+
+        if (resubmittedContractDomainData instanceof Error) {
+            throw new Error(
+                'Unexpected error: Prisma query findContractWithHistory resulted in error'
+            )
+        }
+
+        const latestSubmissionPackage =
+            resubmittedContractDomainData.packageSubmissions[0]
+        const previousSubmission =
+            resubmittedContractDomainData.packageSubmissions[1]
+
+        if (!latestSubmissionPackage || !previousSubmission) {
+            throw new Error(
+                'Unexpected error: missing submitted package revisions for diff test'
+            )
+        }
+
+        const comparison = buildRevisionDiff(
+            contract.id,
+            previousSubmission,
+            latestSubmissionPackage,
+            statePrograms
+        )
+
+        expect(comparison).not.toBeInstanceOf(Error)
+        expect(
+            comparison instanceof Error ? [] : comparison.stateContactChanges
+        ).toEqual([
+            {
+                kind: 'new_or_modified',
+                current: {
+                    name: 'Modified Person',
+                    titleRole: 'Senior Manager',
+                    email: 'after@example.com',
+                },
+            },
+            {
+                kind: 'new_or_modified',
+                current: {
+                    name: 'New Person',
+                    titleRole: 'Analyst',
+                    email: 'new@example.com',
+                },
+            },
+        ])
     })
 })

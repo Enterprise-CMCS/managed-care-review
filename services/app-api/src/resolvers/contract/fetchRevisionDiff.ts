@@ -70,6 +70,10 @@ function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
             oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
             newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
         })),
+        stateContactChanges: comparison.stateContactChanges.map((change) => ({
+            kind: 'NEW_OR_MODIFIED' as const,
+            current: change.current,
+        })),
     }
 }
 

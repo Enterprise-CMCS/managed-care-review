@@ -17,6 +17,14 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
           value
         }
       }
+      stateContactChanges {
+        kind
+        current {
+          name
+          titleRole
+          email
+        }
+      }
     }
   }
 }

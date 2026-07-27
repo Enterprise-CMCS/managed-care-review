@@ -15,6 +15,94 @@ import {
 import { packageName } from '@mc-review/submissions'
 
 describe('fetchRevisionDiff', () => {
+    async function createResubmittedContractWithStateContactChanges() {
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const statePrograms = must(findStatePrograms('FL'))
+        const baseContract = mockSubmittableHealthPlanContract({
+            programIDs: [statePrograms[0].id],
+        })
+        const baseFormData = baseContract.draftRevision!.formData
+
+        const contract = await createAndSubmitTestContract(stateServer, 'FL', {
+            ...baseFormData,
+            programIDs: [statePrograms[0].id],
+            contractDateStart: '2027-01-01',
+            contractDateEnd: '2028-01-01',
+            stateContacts: [
+                {
+                    name: 'Unchanged Person',
+                    titleRole: 'Director',
+                    email: 'unchanged@example.com',
+                },
+                {
+                    name: 'Modified Person',
+                    titleRole: 'Manager',
+                    email: 'before@example.com',
+                },
+            ],
+        })
+
+        const unlockedContract = await unlockTestContract(
+            cmsServer,
+            contract.id,
+            'Unlock to update state contacts'
+        )
+
+        await updateTestContractDraftRevision(
+            stateServer,
+            contract.id,
+            unlockedContract.draftRevision.updatedAt,
+            {
+                ...unlockedContract.draftRevision.formData,
+                programIDs: [statePrograms[0].id],
+                contractDateStart: '2027-01-01',
+                contractDateEnd: '2028-01-01',
+                stateContacts: [
+                    {
+                        name: 'Unchanged Person',
+                        titleRole: 'Director',
+                        email: 'unchanged@example.com',
+                    },
+                    {
+                        name: 'Modified Person',
+                        titleRole: 'Senior Manager',
+                        email: 'after@example.com',
+                    },
+                    {
+                        name: 'New Person',
+                        titleRole: 'Analyst',
+                        email: 'new@example.com',
+                    },
+                ],
+            }
+        )
+
+        const resubmittedContract = await submitTestContract(
+            stateServer,
+            contract.id,
+            'Resubmission with updated state contacts'
+        )
+
+        const latestPackageSubmission =
+            resubmittedContract.packageSubmissions[0]
+        const previousPackageSubmission =
+            resubmittedContract.packageSubmissions[1]
+
+        return {
+            cmsServer,
+            contract,
+            latestPackageSubmission,
+            previousPackageSubmission,
+        }
+    }
+
     it('returns the store-backed diff through the GraphQL resolver', async () => {
         // Setup test API.
         const cmsUser = testCMSUser()
@@ -229,5 +317,42 @@ describe('fetchRevisionDiff', () => {
                 newValue: { kind: 'BOOLEAN', value: true },
             },
         })
+        expect(revisionDiff.comparison.stateContactChanges).toEqual([])
+    })
+
+    it('returns only new and modified state contacts through the GraphQL resolver', async () => {
+        const {
+            cmsServer,
+            contract,
+            latestPackageSubmission,
+            previousPackageSubmission,
+        } = await createResubmittedContractWithStateContactChanges()
+
+        const revisionDiff = await fetchTestRevisionDiff(cmsServer, {
+            contractID: contract.id,
+            newerContractRevisionID:
+                latestPackageSubmission.contractRevision.id,
+            olderContractRevisionID:
+                previousPackageSubmission.contractRevision.id,
+        })
+
+        expect(revisionDiff.comparison.stateContactChanges).toEqual([
+            {
+                kind: 'NEW_OR_MODIFIED',
+                current: {
+                    name: 'Modified Person',
+                    titleRole: 'Senior Manager',
+                    email: 'after@example.com',
+                },
+            },
+            {
+                kind: 'NEW_OR_MODIFIED',
+                current: {
+                    name: 'New Person',
+                    titleRole: 'Analyst',
+                    email: 'new@example.com',
+                },
+            },
+        ])
     })
 })

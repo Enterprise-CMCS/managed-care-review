@@ -88,6 +88,7 @@ export type {
     RevisionDiff,
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
+    RevisionDiffCollectionItemNewOrModified,
 } from './revisionDiffTypes'
 
 export type {
