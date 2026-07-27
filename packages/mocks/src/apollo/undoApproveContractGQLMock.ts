@@ -1,19 +1,19 @@
 import { MockLink } from '@apollo/client/testing'
 import {
     Contract,
-    ReverseApproveContractDocument,
-    ReverseApproveContractMutation,
+    UndoApproveContractDocument,
+    UndoApproveContractMutation,
 } from '../gen/gqlClient'
 import { mockContractPackageSubmittedWithQuestions } from './contractPackageDataMock'
 import { GraphQLError } from 'graphql/error'
 
-const reverseApproveContractMockSuccess = (
+const undoApproveContractMockSuccess = (
     params: {
         contractID?: string
         contractData?: Partial<Contract>
         updatedReason?: string
     } = {}
-): MockLink.MockedResponse<ReverseApproveContractMutation> => {
+): MockLink.MockedResponse<UndoApproveContractMutation> => {
     const {
         contractID = 'test-abc-123',
         contractData,
@@ -34,7 +34,7 @@ const reverseApproveContractMockSuccess = (
 
     return {
         request: {
-            query: ReverseApproveContractDocument,
+            query: UndoApproveContractDocument,
             variables: {
                 input: {
                     contractID,
@@ -44,7 +44,7 @@ const reverseApproveContractMockSuccess = (
         },
         result: {
             data: {
-                reverseApproveContract: {
+                undoApproveContract: {
                     contract,
                 },
             },
@@ -52,8 +52,8 @@ const reverseApproveContractMockSuccess = (
     }
 }
 
-const reverseApproveContractMockFailure =
-    (): MockLink.MockedResponse<ReverseApproveContractMutation> => {
+const undoApproveContractMockFailure =
+    (): MockLink.MockedResponse<UndoApproveContractMutation> => {
         const graphQLError = new GraphQLError(
             'Issue undoing submission approval',
             {
@@ -66,7 +66,7 @@ const reverseApproveContractMockFailure =
 
         return {
             request: {
-                query: ReverseApproveContractDocument,
+                query: UndoApproveContractDocument,
                 variables: {
                     input: {
                         contractID: 'test-abc-123',
@@ -81,4 +81,4 @@ const reverseApproveContractMockFailure =
         }
     }
 
-export { reverseApproveContractMockSuccess, reverseApproveContractMockFailure }
+export { undoApproveContractMockSuccess, undoApproveContractMockFailure }

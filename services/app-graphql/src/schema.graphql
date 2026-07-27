@@ -589,7 +589,7 @@ type Mutation {
     approveContract(input: ApproveContractInput!): ApproveContractPayload
 
     """
-    reverseApproveContract is a CMS and Admin user only action to reverse a contract approval
+    undoApproveContract is a CMS and Admin user only action to undo a contract approval
 
     Errors:
     - ForbiddenError:
@@ -601,9 +601,9 @@ type Mutation {
         - DB_ERROR
             - A contract cannot be found by id
     """
-    reverseApproveContract(
-        input: ReverseApproveContractInput!
-    ): ReverseApproveContractPayload
+    undoApproveContract(
+        input: UndoApproveContractInput!
+    ): UndoApproveContractPayload
 
     """
     undoUnlockContract is a CMS user only action to discard an unlocked draft and restore the last submitted contract state
@@ -781,14 +781,14 @@ input ApproveContractInput {
     updatedReason: String
 }
 
-type ReverseApproveContractPayload {
+type UndoApproveContractPayload {
     contract: Contract!
 }
 
-input ReverseApproveContractInput {
-    "The ID of the contract to reverse approval for"
+input UndoApproveContractInput {
+    "The ID of the contract to undo approval for"
     contractID: ID!
-    "The reason for reversing the approval"
+    "The reason for undoing the approval"
     updatedReason: String!
 }
 

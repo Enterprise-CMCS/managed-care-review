@@ -8,16 +8,16 @@ import { hasCMSPermissions, isAdminUser } from '../../domain-models'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 
-export function reverseApproveContract(
+export function undoApproveContract(
     store: Store,
     launchDarkly: LDService
-): MutationResolvers['reverseApproveContract'] {
+): MutationResolvers['undoApproveContract'] {
     return async (_parent, { input }, context) => {
         const { user } = context
 
         return withResolverSpan(
             context,
-            'reverseApproveContract',
+            'undoApproveContract',
             { 'mcreview.package_id': input.contractID },
             async (span) => {
                 setResolverDetails(span, user)
@@ -32,7 +32,7 @@ export function reverseApproveContract(
                 if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError(
-                        'reverseApproveContract',
+                        'undoApproveContract',
                         errMessage,
                         context
                     )
@@ -46,8 +46,8 @@ export function reverseApproveContract(
 
                 if (!hasCMSPermissions(user) && !isAdminUser(user)) {
                     const message =
-                        'user not authorized to reverse approve a contract'
-                    logResolverError('reverseApproveContract', message, context)
+                        'user not authorized to undo approve a contract'
+                    logResolverError('undoApproveContract', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -57,7 +57,7 @@ export function reverseApproveContract(
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
                     logResolverError(
-                        'reverseApproveContract',
+                        'undoApproveContract',
                         errMessage,
                         context
                     )
@@ -80,9 +80,9 @@ export function reverseApproveContract(
                 }
 
                 if (contractWithHistory.consolidatedStatus !== 'APPROVED') {
-                    const errMessage = `Attempted to reverse approval for contract with wrong status: ${contractWithHistory.consolidatedStatus}`
+                    const errMessage = `Attempted to undo approval for contract with wrong status: ${contractWithHistory.consolidatedStatus}`
                     logResolverError(
-                        'reverseApproveContract',
+                        'undoApproveContract',
                         errMessage,
                         context
                     )
@@ -95,16 +95,16 @@ export function reverseApproveContract(
                     !latestAction ||
                     latestAction.actionType !== 'MARK_AS_APPROVED'
                 ) {
-                    const errMessage = `Cannot reverse approval: latest review action is not MARK_AS_APPROVED`
+                    const errMessage = `Cannot undo approval: latest review action is not MARK_AS_APPROVED`
                     logResolverError(
-                        'reverseApproveContract',
+                        'undoApproveContract',
                         errMessage,
                         context
                     )
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
-                const reverseResult = await store.reverseApproveContract({
+                const reverseResult = await store.undoApproveContract({
                     contractID: contractID,
                     updatedByID: user.id,
                     updatedReason: updatedReason,
@@ -113,7 +113,7 @@ export function reverseApproveContract(
                 if (reverseResult instanceof Error) {
                     if (reverseResult instanceof NotFoundError) {
                         logResolverError(
-                            'reverseApproveContract',
+                            'undoApproveContract',
                             reverseResult.message,
                             context
                         )
@@ -125,9 +125,9 @@ export function reverseApproveContract(
                         })
                     }
 
-                    const errMessage = `Failed to reverse approval for contract ID:${contractID}`
+                    const errMessage = `Failed to undo approval for contract ID:${contractID}`
                     logResolverError(
-                        'reverseApproveContract',
+                        'undoApproveContract',
                         errMessage,
                         context
                     )
@@ -139,7 +139,7 @@ export function reverseApproveContract(
                     })
                 }
 
-                logResolverSuccess('reverseApproveContract', context)
+                logResolverSuccess('undoApproveContract', context)
 
                 return { contract: reverseResult }
             }

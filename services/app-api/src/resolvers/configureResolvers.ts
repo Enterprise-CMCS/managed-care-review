@@ -63,7 +63,7 @@ import type { S3ClientT } from '../s3'
 import { createContract } from './contract/createContract'
 import { updateContractDraftRevision } from './contract/updateContractDraftRevision'
 import { approveContract } from './contract/approveContract'
-import { reverseApproveContract } from './contract/reverseApproveContract'
+import { undoApproveContract } from './contract/undoApproveContract'
 import { undoUnlockContract } from './contract/undoUnlockContract'
 import { fetchMcReviewSettings } from './settings'
 import { updateStateAssignmentsByState } from './user/updateStateAssignmentsByState'
@@ -130,7 +130,7 @@ export function configureResolvers(
             ),
             updateDraftContractRates: updateDraftContractRates(store),
             approveContract: approveContract(store, launchDarkly),
-            reverseApproveContract: reverseApproveContract(store, launchDarkly),
+            undoApproveContract: undoApproveContract(store, launchDarkly),
             undoUnlockContract: undoUnlockContract(store, launchDarkly),
             withdrawContract: withdrawContract(
                 store,

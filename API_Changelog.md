@@ -105,12 +105,12 @@
 
 ### March 16, 2026
 #### Added
-- New mutation `reverseApproveContract` added to the API
-    - Reverses a previously approved contract. CMS users only.
-    - Parameters (via `ReverseApproveContractInput`)
-        - `contractID`: required ID, the ID of the contract to reverse approval for
-        - `updatedReason`: required String, the reason for reversing the approval
-    - Returns `ReverseApproveContractPayload`
+- New mutation `undoApproveContract` added to the API
+    - Undoes the approval of a previously approved contract. CMS users only.
+    - Parameters (via `UndoApproveContractInput`)
+        - `contractID`: required ID, the ID of the contract to undo approval for
+        - `updatedReason`: required String, the reason for undoing the approval
+    - Returns `UndoApproveContractPayload`
         - `contract`: Contract
     - Errors
         - `ForbiddenError`: A non-CMS or non-Admin user called this

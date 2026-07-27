@@ -6,7 +6,7 @@ import { usePage } from '../../contexts/PageContext'
 import { useMemoizedStateHeader, useRouteParams, useTealium } from '../../hooks'
 import {
     FetchContractDocument,
-    ReverseApproveContractDocument,
+    UndoApproveContractDocument,
 } from '../../gen/gqlClient'
 import { useMutation, useQuery } from '@apollo/client/react'
 import {
@@ -55,9 +55,9 @@ export const UndoSubmissionApproval = (): React.ReactElement => {
     const showFieldErrors = (error?: FormError): boolean =>
         shouldValidate && Boolean(error)
     const [
-        reverseApproveContract,
-        { error: reverseApproveError, loading: reverseApproveLoading },
-    ] = useMutation(ReverseApproveContractDocument)
+        undoApproveContract,
+        { error: undoApproveError, loading: undoApproveLoading },
+    ] = useMutation(UndoApproveContractDocument)
 
     const formInitialValues: UndoSubmissionApprovalValues = {
         undoSubmissionApprovalReason: '',
@@ -115,7 +115,7 @@ export const UndoSubmissionApproval = (): React.ReactElement => {
             link_type: 'link_other',
         })
         try {
-            await reverseApproveContract({
+            await undoApproveContract({
                 variables: {
                     input: {
                         contractID: id,
@@ -171,7 +171,7 @@ export const UndoSubmissionApproval = (): React.ReactElement => {
                             return handleSubmit(e)
                         }}
                     >
-                        {reverseApproveError && <GenericApiErrorBanner />}
+                        {undoApproveError && <GenericApiErrorBanner />}
                         <fieldset className="usa-fieldset">
                             <FieldTextarea
                                 label="Reason for undoing the submission approval."
@@ -179,7 +179,7 @@ export const UndoSubmissionApproval = (): React.ReactElement => {
                                 data-testid="undoSubmissionApprovalReason"
                                 name="undoSubmissionApprovalReason"
                                 aria-required
-                                hint="This will reverse the approval and move the submission back to its previously submitted status."
+                                hint="This will undo the approval and move the submission back to its previously submitted status."
                                 showError={showFieldErrors(
                                     errors.undoSubmissionApprovalReason
                                 )}
@@ -212,7 +212,7 @@ export const UndoSubmissionApproval = (): React.ReactElement => {
                                     disabled={showFieldErrors(
                                         errors.undoSubmissionApprovalReason
                                     )}
-                                    loading={reverseApproveLoading}
+                                    loading={undoApproveLoading}
                                 >
                                     Undo submission approval
                                 </ActionButton>

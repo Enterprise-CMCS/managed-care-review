@@ -5,8 +5,8 @@ import {
     mockContractPackageApprovedWithQuestions,
     mockContractPackageSubmitted,
     mockValidAdminUser,
-    reverseApproveContractMockFailure,
-    reverseApproveContractMockSuccess,
+    undoApproveContractMockFailure,
+    undoApproveContractMockSuccess,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSideNav } from '../SubmissionSideNav'
@@ -173,7 +173,7 @@ describe('UndoSubmissionApproval', () => {
                             contract,
                         }),
                         fetchContractMockSuccess({ contract }),
-                        reverseApproveContractMockFailure(),
+                        undoApproveContractMockFailure(),
                     ],
                 },
                 routerProvider: {
@@ -300,7 +300,7 @@ describe('UndoSubmissionApproval', () => {
                         fetchContractMockSuccess({
                             contract: approvedContract,
                         }),
-                        reverseApproveContractMockSuccess({
+                        undoApproveContractMockSuccess({
                             contractData: contract,
                         }),
                         fetchContractWithQuestionsMockSuccess({
