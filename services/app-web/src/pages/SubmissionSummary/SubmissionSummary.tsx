@@ -395,7 +395,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 Undo submission unlock
                             </ButtonWithLogging>
                         )}
-                        {isAdminUser && showUndoApprovalBtn && (
+                        {showUndoApprovalBtn && (
                             <ButtonWithLogging
                                 className="usa-button usa-button--outline"
                                 type="button"
