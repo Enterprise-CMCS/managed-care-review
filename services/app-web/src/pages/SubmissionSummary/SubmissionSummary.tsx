@@ -260,13 +260,15 @@ export const SubmissionSummary = (): React.ReactElement => {
         hasCMSPermissions &&
         undoWithdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN'
-    const showUndoUnlockBtn = isAdminUser && consolidatedStatus === 'UNLOCKED'
+    const showUndoUnlockBtn =
+        (isAdminUser || hasCMSPermissions) && consolidatedStatus === 'UNLOCKED'
     const showNoAdminActionsMsg = !showUndoUnlockBtn && !showApprovalBtn
     const showNoCMSActionsMsg =
         !showApprovalBtn &&
         !showUnlockBtn &&
         !showWithdrawBtn &&
-        !showUndoWithdrawBtn
+        !showUndoWithdrawBtn &&
+        !showUndoUnlockBtn
     const showApprovalBanner =
         consolidatedStatus === 'APPROVED' && latestContractAction
     const showWithdrawnBanner =
@@ -370,28 +372,29 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Grid>
                 ) : (
                     <MultiColumnGrid columns={3}>
-                        {isAdminUser && showUndoUnlockBtn && (
-                            <ButtonWithLogging
-                                className="usa-button usa-button--outline"
-                                type="button"
-                                onClick={() =>
-                                    navigate(
-                                        getSubmissionPath(
-                                            'UNDO_SUBMISSION_UNLOCK',
-                                            contractSubmissionType,
-                                            contract.id
+                        {(isAdminUser || hasCMSPermissions) &&
+                            showUndoUnlockBtn && (
+                                <ButtonWithLogging
+                                    className="usa-button usa-button--outline"
+                                    type="button"
+                                    onClick={() =>
+                                        navigate(
+                                            getSubmissionPath(
+                                                'UNDO_SUBMISSION_UNLOCK',
+                                                contractSubmissionType,
+                                                contract.id
+                                            )
                                         )
-                                    )
-                                }
-                                link_url={getSubmissionPath(
-                                    'UNDO_SUBMISSION_UNLOCK',
-                                    contractSubmissionType,
-                                    contract.id
-                                )}
-                            >
-                                Undo submission unlock
-                            </ButtonWithLogging>
-                        )}
+                                    }
+                                    link_url={getSubmissionPath(
+                                        'UNDO_SUBMISSION_UNLOCK',
+                                        contractSubmissionType,
+                                        contract.id
+                                    )}
+                                >
+                                    Undo unlock
+                                </ButtonWithLogging>
+                            )}
                         {hasCMSPermissions && showUnlockBtn && (
                             <ModalOpenButton
                                 modalRef={modalRef}
