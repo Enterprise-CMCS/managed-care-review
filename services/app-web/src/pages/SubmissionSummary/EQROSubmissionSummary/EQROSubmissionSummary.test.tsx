@@ -1147,6 +1147,108 @@ describe('EQROSubmissionSummary - Unlock submission button tests', () => {
                 ).not.toBeInTheDocument()
             })
         })
+
+        it('renders undo submission approval button for admin users on approved EQRO submissions', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'RESUBMITTED',
+                reviewStatus: 'APPROVED',
+                consolidatedStatus: 'APPROVED',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidAdminUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByRole('button', {
+                        name: 'Undo submission approval',
+                    })
+                ).toBeInTheDocument()
+            })
+        })
+
+        it('does not render undo submission approval button for CMS users on approved EQRO submissions', async () => {
+            const contract = mockContractPackageSubmitted({
+                id: 'test-abc-123',
+                contractSubmissionType: 'EQRO',
+                status: 'RESUBMITTED',
+                reviewStatus: 'APPROVED',
+                consolidatedStatus: 'APPROVED',
+            })
+
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<EQROSubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user: mockValidCMSUser(),
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/test-abc-123',
+                    },
+                    featureFlags: {
+                        [featureFlags.EQRO_SUBMISSIONS.flag]: true,
+                    },
+                }
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.queryByRole('button', {
+                        name: 'Undo submission approval',
+                    })
+                ).not.toBeInTheDocument()
+            })
+        })
     })
 
     describe('NEW tag on review determination change', () => {
