@@ -11,10 +11,16 @@ import { testCMSUser } from '../../testHelpers/userHelpers'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import {
     createAndSubmitTestContract,
+    createAndSubmitTestContractWithRate,
     submitTestContract,
     unlockTestContract,
     updateTestContractDraftRevision,
 } from '../../testHelpers/gqlContractHelpers'
+import {
+    formatRateDataForSending,
+    updateRatesInputFromDraftContract,
+    updateTestDraftRatesOnContract,
+} from '../../testHelpers/gqlRateHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
 const mockStateUser = () => ({
@@ -234,6 +240,19 @@ describe('revisionDiffHelpers', () => {
                 },
             ],
             stateContactChanges: [],
+            documentChanges: {
+                contractDocuments: {
+                    added: [],
+                    removed: [],
+                },
+                contractSupportingDocuments: {
+                    added: [],
+                    removed: [],
+                },
+                rates: [],
+                totalAdded: 0,
+                totalRemoved: 0,
+            },
         })
     })
 
@@ -740,5 +759,212 @@ describe('revisionDiffHelpers', () => {
                 },
             },
         ])
+    })
+
+    it('reports contract and rate document add/remove changes with totals', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const postgresStore = NewPostgresStore(prismaClient)
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contract = await createAndSubmitTestContractWithRate(
+            stateServer,
+            'FL',
+            {
+                contractDocuments: [
+                    {
+                        name: 'contract-keep.pdf',
+                        s3URL: 's3://bucketname/key/contract-keep.pdf',
+                        sha256: 'contract-keep',
+                    },
+                    {
+                        name: 'contract-removed.pdf',
+                        s3URL: 's3://bucketname/key/contract-removed.pdf',
+                        sha256: 'contract-removed',
+                    },
+                ],
+                supportingDocuments: [
+                    {
+                        name: 'support-keep.pdf',
+                        s3URL: 's3://bucketname/key/support-keep.pdf',
+                        sha256: 'support-keep',
+                    },
+                    {
+                        name: 'support-removed.pdf',
+                        s3URL: 's3://bucketname/key/support-removed.pdf',
+                        sha256: 'support-removed',
+                    },
+                ],
+            }
+        )
+
+        const unlockedContract = await unlockTestContract(
+            cmsServer,
+            contract.id,
+            'Unlock to update documents'
+        )
+
+        const draftRevision = unlockedContract.draftRevision
+        const draftRate = unlockedContract.draftRates?.[0]
+
+        if (!draftRate?.draftRevision) {
+            throw new Error('Unexpected error: draft rate not found')
+        }
+
+        const updatedContract = await updateTestContractDraftRevision(
+            stateServer,
+            contract.id,
+            draftRevision.updatedAt,
+            {
+                ...draftRevision.formData,
+                contractDateStart: '2025-06-01',
+                contractDateEnd: '2026-05-30',
+                contractDocuments: [
+                    {
+                        name: 'contract-keep.pdf',
+                        s3URL: 's3://bucketname/key/contract-keep.pdf',
+                        sha256: 'contract-keep',
+                    },
+                    {
+                        name: 'contract-added.pdf',
+                        s3URL: 's3://bucketname/key/contract-added.pdf',
+                        sha256: 'contract-added',
+                    },
+                ],
+                supportingDocuments: [
+                    {
+                        name: 'support-keep.pdf',
+                        s3URL: 's3://bucketname/key/support-keep.pdf',
+                        sha256: 'support-keep',
+                    },
+                ],
+            }
+        )
+
+        const updatedDraftRate = updatedContract.draftRates?.find(
+            (rate) => rate.id === draftRate.id
+        )
+
+        if (!updatedDraftRate?.draftRevision) {
+            throw new Error(
+                'Unexpected error: updated draft rate not found after contract update'
+            )
+        }
+
+        const updatedRateFormData = formatRateDataForSending(
+            updatedDraftRate.draftRevision.formData
+        )
+
+        const rateUpdateInput =
+            updateRatesInputFromDraftContract(updatedContract)
+        const updatedRates = rateUpdateInput.updatedRates.map((rateUpdate) =>
+            rateUpdate.type === 'UPDATE' && rateUpdate.rateID === draftRate.id
+                ? {
+                      ...rateUpdate,
+                      formData: {
+                          ...updatedRateFormData,
+                          rateDateStart: '2024-01-01',
+                          rateDateEnd: '2025-01-01',
+                          rateDateCertified: '2024-01-02',
+                          amendmentEffectiveDateStart: '2024-02-01',
+                          amendmentEffectiveDateEnd: '2025-02-01',
+                          rateDocuments: [
+                              {
+                                  name: 'rate-doc-added.xlsx',
+                                  s3URL: 's3://bucketname/key/rate-doc-added.xlsx',
+                                  sha256: 'rate-doc-added',
+                              },
+                          ],
+                          supportingDocuments: [
+                              {
+                                  name: 'ratesupdoc2.doc',
+                                  s3URL: 's3://bucketname/key/test1',
+                                  sha256: 'foobar2',
+                              },
+                              {
+                                  name: 'rate-support-added.pdf',
+                                  s3URL: 's3://bucketname/key/rate-support-added.pdf',
+                                  sha256: 'rate-support-added',
+                              },
+                          ],
+                      },
+                  }
+                : rateUpdate
+        )
+
+        await updateTestDraftRatesOnContract(stateServer, {
+            ...rateUpdateInput,
+            updatedRates,
+        })
+
+        await submitTestContract(
+            stateServer,
+            contract.id,
+            'Resubmission with updated documents'
+        )
+
+        const resubmittedContractDomainData =
+            await postgresStore.findContractWithHistory(contract.id)
+
+        if (resubmittedContractDomainData instanceof Error) {
+            throw new Error(
+                'Unexpected error: Prisma query findContractWithHistory resulted in error'
+            )
+        }
+
+        const latestSubmissionPackage =
+            resubmittedContractDomainData.packageSubmissions[0]
+        const previousSubmission =
+            resubmittedContractDomainData.packageSubmissions[1]
+
+        if (!latestSubmissionPackage || !previousSubmission) {
+            throw new Error(
+                'Unexpected error: missing submitted package revisions for document diff test'
+            )
+        }
+
+        const comparison = buildRevisionDiff(
+            contract.id,
+            previousSubmission,
+            latestSubmissionPackage,
+            must(findStatePrograms('FL'))
+        )
+
+        expect(comparison).not.toBeInstanceOf(Error)
+        expect(
+            comparison instanceof Error ? undefined : comparison.documentChanges
+        ).toEqual({
+            contractDocuments: {
+                added: ['contract-added.pdf'],
+                removed: ['contract-removed.pdf'],
+            },
+            contractSupportingDocuments: {
+                added: [],
+                removed: ['support-removed.pdf'],
+            },
+            rates: [
+                {
+                    rateID: draftRate.id,
+                    rateCertificationName:
+                        updatedDraftRate.draftRevision.formData
+                            .rateCertificationName,
+                    rateDocuments: {
+                        added: ['rate-doc-added.xlsx'],
+                        removed: ['ratedoc1.doc'],
+                    },
+                    supportingDocuments: {
+                        added: ['rate-support-added.pdf'],
+                        removed: ['ratesupdoc1.doc'],
+                    },
+                },
+            ],
+            totalAdded: 3,
+            totalRemoved: 4,
+        })
     })
 })

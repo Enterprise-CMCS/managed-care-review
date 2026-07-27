@@ -25,6 +25,30 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
           email
         }
       }
+      documentChanges {
+        contractDocuments {
+          added
+          removed
+        }
+        contractSupportingDocuments {
+          added
+          removed
+        }
+        rates {
+          rateID
+          rateCertificationName
+          rateDocuments {
+            added
+            removed
+          }
+          supportingDocuments {
+            added
+            removed
+          }
+        }
+        totalAdded
+        totalRemoved
+      }
     }
   }
 }

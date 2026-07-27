@@ -76,6 +76,9 @@ export type {
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
     RevisionDiffCollectionItemNewOrModified,
+    RevisionDiffDocumentNameChanges,
+    RevisionDiffRateDocumentChanges,
+    RevisionDiffDocumentChanges,
 } from './contractAndRates'
 
 export type {

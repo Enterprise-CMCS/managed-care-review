@@ -36,6 +36,26 @@ type RevisionDiffCollectionItemNewOrModified<TItem> = {
     current: TItem
 }
 
+type RevisionDiffDocumentNameChanges = {
+    added: string[]
+    removed: string[]
+}
+
+type RevisionDiffRateDocumentChanges = {
+    rateID: string
+    rateCertificationName: string
+    rateDocuments: RevisionDiffDocumentNameChanges
+    supportingDocuments: RevisionDiffDocumentNameChanges
+}
+
+type RevisionDiffDocumentChanges = {
+    contractDocuments: RevisionDiffDocumentNameChanges
+    contractSupportingDocuments: RevisionDiffDocumentNameChanges
+    rates: RevisionDiffRateDocumentChanges[]
+    totalAdded: number
+    totalRemoved: number
+}
+
 type RevisionDiff<TValue = unknown> = {
     contractID: string
     olderRevisionID: string
@@ -44,6 +64,7 @@ type RevisionDiff<TValue = unknown> = {
     newerSubmittedAt: Date
     fieldChanges: RevisionDiffFieldChange<TValue>[]
     stateContactChanges: RevisionDiffCollectionItemNewOrModified<StateContactType>[]
+    documentChanges: RevisionDiffDocumentChanges
 }
 
 export type {
@@ -51,4 +72,7 @@ export type {
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
     RevisionDiffCollectionItemNewOrModified,
+    RevisionDiffDocumentNameChanges,
+    RevisionDiffRateDocumentChanges,
+    RevisionDiffDocumentChanges,
 }

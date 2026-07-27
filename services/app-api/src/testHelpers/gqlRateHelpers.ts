@@ -195,7 +195,7 @@ async function updateTestDraftRatesOnContract(
         !updateResult.data.updateDraftContractRates.contract
     ) {
         throw new Error(
-            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 

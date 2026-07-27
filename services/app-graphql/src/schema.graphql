@@ -2843,6 +2843,27 @@ type RevisionDiff {
     newerSubmittedAt: DateTime!
     fieldChanges: [RevisionDiffFieldChange!]!
     stateContactChanges: [RevisionDiffStateContactChange!]!
+    documentChanges: RevisionDiffDocumentChanges!
+}
+
+type RevisionDiffDocumentNameChanges {
+    added: [String!]!
+    removed: [String!]!
+}
+
+type RevisionDiffRateDocumentChanges {
+    rateID: ID!
+    rateCertificationName: String!
+    rateDocuments: RevisionDiffDocumentNameChanges!
+    supportingDocuments: RevisionDiffDocumentNameChanges!
+}
+
+type RevisionDiffDocumentChanges {
+    contractDocuments: RevisionDiffDocumentNameChanges!
+    contractSupportingDocuments: RevisionDiffDocumentNameChanges!
+    rates: [RevisionDiffRateDocumentChanges!]!
+    totalAdded: Int!
+    totalRemoved: Int!
 }
 
 enum RevisionDiffStateContactChangeKind {
