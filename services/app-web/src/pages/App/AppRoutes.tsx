@@ -77,6 +77,7 @@ import { UndoRateWithdraw } from '../UndoRateWithdraw/UndoRateWithdraw'
 import { SubmissionWithdraw } from '../SubmissionWithdraw/SubmissionWithdraw'
 import { UndoSubmissionWithdraw } from '../UndoSubmissionWithdraw/UndoSubmissionWithdraw'
 import { UndoSubmissionUnlock } from '../UndoSubmissionUnlock/UndoSubmissionUnlock'
+import { UndoSubmissionApproval } from '../UndoSubmissionApproval/UndoSubmissionApproval'
 import { CreateOauthClient } from '../Settings/Oauth/CreateOauthClient'
 import { User } from '../../gen/gqlClient'
 import { AddLocalUser } from '../../localAuth/AddLocalUser'
@@ -447,6 +448,13 @@ const CMSUserRoutes = ({
                     <Route
                         path={RoutesRecord.UNDO_SUBMISSION_UNLOCK}
                         element={<UndoSubmissionUnlock />}
+                    />
+                )}
+
+                {isAdminUser && (
+                    <Route
+                        path={RoutesRecord.UNDO_SUBMISSION_APPROVAL}
+                        element={<UndoSubmissionApproval />}
                     />
                 )}
 

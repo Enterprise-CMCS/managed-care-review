@@ -5,9 +5,9 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { runTransactionWithRowLock } from '../prismaHelpers'
 
-async function reverseApproveContractInsideTransaction(
+async function undoApproveContractInsideTransaction(
     tx: PrismaTransactionType,
-    args: ReverseApproveContractArgsType
+    args: UndoApproveContractArgsType
 ): Promise<ContractType | Error> {
     const { contractID, updatedByID, updatedReason } = args
 
@@ -32,7 +32,7 @@ async function reverseApproveContractInsideTransaction(
     const latestAction = contract.reviewStatusActions[0]
     if (!latestAction || latestAction.actionType !== 'MARK_AS_APPROVED') {
         return new Error(
-            `Cannot reverse approval: latest review action is not MARK_AS_APPROVED`
+            `Cannot undo approval: latest review action is not MARK_AS_APPROVED`
         )
     }
 
@@ -45,7 +45,7 @@ async function reverseApproveContractInsideTransaction(
         },
     })
 
-    // Reverse approval is a review action visible to CMS/Admin users, so it
+    // Undo approval is a review action visible to CMS/Admin users, so it
     // becomes the contract's latest action date.
     await tx.contractTable.update({
         where: {
@@ -59,25 +59,25 @@ async function reverseApproveContractInsideTransaction(
     return findContractWithHistory(tx, contractID)
 }
 
-type ReverseApproveContractArgsType = {
+type UndoApproveContractArgsType = {
     contractID: string
     updatedByID: string
     updatedReason: string
 }
 
-async function reverseApproveContract(
+async function undoApproveContract(
     client: ExtendedPrismaClient,
-    args: ReverseApproveContractArgsType
+    args: UndoApproveContractArgsType
 ): Promise<ContractType | NotFoundError | Error> {
     return runTransactionWithRowLock({
         client,
-        operationName: 'reverseApproveContract',
+        operationName: 'undoApproveContract',
         table: 'ContractTable',
         id: args.contractID,
         transaction: async (tx) =>
-            await reverseApproveContractInsideTransaction(tx, args),
+            await undoApproveContractInsideTransaction(tx, args),
     })
 }
 
-export { reverseApproveContract }
-export type { ReverseApproveContractArgsType }
+export { undoApproveContract }
+export type { UndoApproveContractArgsType }

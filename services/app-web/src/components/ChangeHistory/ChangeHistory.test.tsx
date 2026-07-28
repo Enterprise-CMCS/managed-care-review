@@ -225,6 +225,59 @@ describe('Change History', () => {
         expect(screen.getAllByText(/withdraw rate/)).toHaveLength(2)
     })
 
+    it('renders a submission entry for an undo submission approval', () => {
+        const approvedContract = mockContractPackageApproved()
+        const undoApproveContract = {
+            ...approvedContract,
+            status: 'SUBMITTED' as const,
+            reviewStatus: 'UNDER_REVIEW' as const,
+            consolidatedStatus: 'SUBMITTED' as const,
+            // reviewStatusActions is ordered latest-first: the undo (UNDER_REVIEW)
+            // action followed by the MARK_AS_APPROVED action it reversed.
+            reviewStatusActions: [
+                {
+                    __typename: 'ContractReviewStatusActions' as const,
+                    updatedAt: new Date('2100-02-01'),
+                    updatedBy: {
+                        __typename: 'UpdatedBy' as const,
+                        email: 'admin@example.com',
+                        role: 'ADMIN_USER',
+                        givenName: 'Admin',
+                        familyName: 'Admin',
+                    },
+                    updatedReason: 'released in error',
+                    contractID: 'test-abc-123',
+                    actionType: 'UNDER_REVIEW' as const,
+                },
+                ...(approvedContract.reviewStatusActions ?? []),
+            ],
+        }
+
+        renderWithProviders(<ChangeHistory contract={undoApproveContract} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        })
+
+        // A "Submission" accordion entry is created at the undo action time
+        expect(
+            screen.getByRole('button', {
+                name: `${formatToPacificTime(new Date('2100-02-01'))} - Submission`,
+            })
+        ).toBeInTheDocument()
+        // Base text plus the admin's custom reason
+        expect(
+            screen.getByText(
+                'CMS undid submission release to state. released in error'
+            )
+        ).toBeInTheDocument()
+    })
+
     it('has expected text in the accordion titles and content for ADMIN events', () => {
         const submittedContract = mockContractPackageSubmittedWithRevisions({
             packageSubmissions: [

@@ -1646,6 +1646,101 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
             })
+
+            it('renders undo submission approval button for admin users on approved submissions', async () => {
+                const contract = mockContractPackageApproved({
+                    id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
+                })
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockValidUser({
+                                        role: 'ADMIN_USER',
+                                    }),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/test-abc-123',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('button', {
+                            name: 'Undo submission approval',
+                        })
+                    ).toBeInTheDocument()
+                })
+            })
+
+            it('does not render undo submission approval button for non-admin CMS users on approved submissions', async () => {
+                const contract = mockContractPackageApproved({
+                    id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
+                })
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockValidCMSUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/test-abc-123',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.queryByRole('button', {
+                            name: 'Undo submission approval',
+                        })
+                    ).not.toBeInTheDocument()
+                })
+            })
+
             it('renders status update banner on undo submission', async () => {
                 const contract = mockContractPackageSubmittedWithQuestions(
                     'test-abc-123',

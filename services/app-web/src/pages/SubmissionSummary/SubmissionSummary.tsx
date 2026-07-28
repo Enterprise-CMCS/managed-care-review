@@ -268,7 +268,9 @@ export const SubmissionSummary = (): React.ReactElement => {
     const showUndoUnlockBtn =
         (isAdminUser || (hasCMSPermissions && cmsUserUndoUnlockFlag)) &&
         consolidatedStatus === 'UNLOCKED'
-    const showNoAdminActionsMsg = !showUndoUnlockBtn && !showApprovalBtn
+    const showUndoApprovalBtn = isAdminUser && consolidatedStatus === 'APPROVED'
+    const showNoAdminActionsMsg =
+        !showUndoUnlockBtn && !showApprovalBtn && !showUndoApprovalBtn
     const showNoCMSActionsMsg =
         !showApprovalBtn &&
         !showUnlockBtn &&
@@ -398,6 +400,28 @@ export const SubmissionSummary = (): React.ReactElement => {
                                 )}
                             >
                                 Undo unlock
+                            </ButtonWithLogging>
+                        )}
+                        {showUndoApprovalBtn && (
+                            <ButtonWithLogging
+                                className="usa-button usa-button--outline"
+                                type="button"
+                                onClick={() =>
+                                    navigate(
+                                        getSubmissionPath(
+                                            'UNDO_SUBMISSION_APPROVAL',
+                                            contractSubmissionType,
+                                            contract.id
+                                        )
+                                    )
+                                }
+                                link_url={getSubmissionPath(
+                                    'UNDO_SUBMISSION_APPROVAL',
+                                    contractSubmissionType,
+                                    contract.id
+                                )}
+                            >
+                                Undo submission approval
                             </ButtonWithLogging>
                         )}
                         {hasCMSPermissions && showUnlockBtn && (

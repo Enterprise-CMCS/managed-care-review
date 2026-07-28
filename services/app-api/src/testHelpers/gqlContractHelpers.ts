@@ -8,7 +8,7 @@ import {
     FetchContractWithQuestionsDocument,
     FetchRevisionDiffDocument,
     ApproveContractDocument,
-    ReverseApproveContractDocument,
+    UndoApproveContractDocument,
     UndoUnlockContractDocument,
     WithdrawContractDocument,
     UndoWithdrawContractDocument,
@@ -261,7 +261,7 @@ async function approveTestContract(
     return result.data.approveContract.contract
 }
 
-async function reverseApproveTestContract(
+async function undoApproveTestContract(
     server: ApolloServer,
     contractID: string,
     updatedReason?: string
@@ -271,21 +271,21 @@ async function reverseApproveTestContract(
         updatedReason: updatedReason || 'Reversing approval',
     }
     const result = await executeGraphQLOperation(server, {
-        query: ReverseApproveContractDocument,
+        query: UndoApproveContractDocument,
         variables: { input },
     })
 
     if (result.errors) {
         throw new Error(
-            `reverseApproveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
+            `undoApproveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
-    if (!result.data.reverseApproveContract.contract) {
-        throw new Error('reverseApproveTestContract returned nothing')
+    if (!result.data.undoApproveContract.contract) {
+        throw new Error('undoApproveTestContract returned nothing')
     }
 
-    return result.data.reverseApproveContract.contract
+    return result.data.undoApproveContract.contract
 }
 
 async function undoUnlockTestContract(
@@ -780,7 +780,7 @@ export {
     unlockTestContract,
     createAndSubmitTestContract,
     approveTestContract,
-    reverseApproveTestContract,
+    undoApproveTestContract,
     undoUnlockTestContract,
     fetchTestContract,
     fetchTestRevisionDiff,

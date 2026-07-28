@@ -38,6 +38,7 @@ type flatRevisions = Omit<UpdateInformation, 'updatedBy'> & {
         | 'review_update_approve'
         | 'review_update_withdraw'
         | 'review_update_submitted'
+        | 'review_update_undo_approve'
         | 'submit_with_review'
     revisionVersion: string | undefined
     updatedBy?: UpdateInformation['updatedBy']
@@ -73,6 +74,7 @@ const buildChangeHistoryInfo = (
         r.kind === 'review_update_submitted' ||
         r.kind === 'review_update_withdraw' ||
         r.kind === 'review_update_approve'
+    const isUndoApprove = r.kind === 'review_update_undo_approve'
     // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
     // more than the initial contract revision.
     const hasSubsequentSubmissions = revisionHistory.length > 1
@@ -191,6 +193,25 @@ const buildChangeHistoryInfo = (
                             </LinkWithLogging>
                         </div>
                     )}
+            </div>
+        )
+    } else if (isUndoApprove) {
+        title = 'Submission'
+        const baseUndoApproveText = 'CMS undid submission release to state'
+        content = (
+            <div data-testid={`change-history-record`}>
+                <div>
+                    <span className={styles.tag}>Submitted by: </span>
+                    <span>{`${getUpdatedByDisplayName(r.updatedBy)} `}</span>
+                </div>
+                <div>
+                    <span className={styles.tag}>Changes made: </span>
+                    <span>
+                        {r.updatedReason
+                            ? `${baseUndoApproveText}. ${r.updatedReason}`
+                            : baseUndoApproveText}
+                    </span>
+                </div>
             </div>
         )
     } else if (isReviewUpdate) {
@@ -334,9 +355,24 @@ export const ChangeHistory = ({
                     }
                 }
                 if (r?.__typename === 'ContractReviewStatusActions') {
+                    // An "undo approval" is recorded as an UNDER_REVIEW action
+                    // that immediately follows a MARK_AS_APPROVED action.
+                    // reviewStatusActions is ordered latest-first, so the action
+                    // it reversed is the next (older) one in the list.
+                    const actionIndex =
+                        reviewActions?.findIndex((a) => a === r) ?? -1
+                    const priorAction =
+                        actionIndex >= 0
+                            ? reviewActions?.[actionIndex + 1]
+                            : undefined
+                    const isUndoApprove =
+                        r.actionType === 'UNDER_REVIEW' &&
+                        priorAction?.actionType === 'MARK_AS_APPROVED'
+
                     if (
-                        r.actionType === 'NOT_SUBJECT_TO_REVIEW' ||
-                        r.actionType === 'UNDER_REVIEW'
+                        !isUndoApprove &&
+                        (r.actionType === 'NOT_SUBJECT_TO_REVIEW' ||
+                            r.actionType === 'UNDER_REVIEW')
                     ) {
                         return
                     }
@@ -351,9 +387,16 @@ export const ChangeHistory = ({
                         actionKind = 'review_update_approve'
                     }
 
+                    if (isUndoApprove) {
+                        actionKind = 'review_update_undo_approve'
+                    }
+
                     const newAction: flatRevisions = {} as flatRevisions
                     newAction.updatedAt = r.updatedAt
                     newAction.updatedBy = r.updatedBy ?? undefined
+                    if (isUndoApprove) {
+                        newAction.updatedReason = r.updatedReason ?? ''
+                    }
                     newAction.kind = actionKind
                     result.push(newAction)
                 }
