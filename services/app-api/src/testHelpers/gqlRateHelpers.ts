@@ -22,6 +22,7 @@ import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
 
 import type {
     Contract,
+    UnlockedContract,
     RateFormData,
     ActuaryContact,
     ActuaryContactInput,
@@ -360,7 +361,7 @@ function formatRateDataForSending(
 }
 
 function updateRatesInputFromDraftContract(
-    contract: Contract
+    contract: Contract | UnlockedContract
 ): UpdateDraftContractRatesInput {
     const draftRates = contract.draftRates
     if (!draftRates) {

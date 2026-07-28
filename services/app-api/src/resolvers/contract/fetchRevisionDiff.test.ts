@@ -9,11 +9,14 @@ import { mockSubmittableHealthPlanContract } from '../../testHelpers'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import {
+    createAndUpdateTestContractWithRate,
     createAndSubmitTestContractWithRate,
     submitTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import {
+    addNewRateToTestContract,
+    addLinkedRateToRateInput,
     formatRateDataForSending,
     updateRatesInputFromDraftContract,
     updateTestDraftRatesOnContract,
@@ -263,6 +266,122 @@ describe('fetchRevisionDiff', () => {
         }
     }
 
+    async function createResubmittedContractWithRateChanges() {
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer()
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const draftContract = await createAndUpdateTestContractWithRate(
+            stateServer,
+            'FL'
+        )
+        const draftWithTwoRates = await addNewRateToTestContract(
+            stateServer,
+            draftContract
+        )
+        const contract = await submitTestContract(
+            stateServer,
+            draftWithTwoRates.id,
+            'Initial submission with two rates'
+        )
+
+        const sharedRateSource = await createAndSubmitTestContractWithRate(
+            stateServer,
+            'FL'
+        )
+        const sharedRateID =
+            sharedRateSource.packageSubmissions[0]?.rateRevisions[0]?.rateID
+
+        if (!sharedRateID) {
+            throw new Error('Unexpected error: shared rate source not found')
+        }
+
+        const unlockedContract = await unlockTestContract(
+            cmsServer,
+            contract.id,
+            'Unlock to update rates'
+        )
+
+        const existingDraftRates = unlockedContract.draftRates ?? []
+        const revisedDraftRate = existingDraftRates[0]
+        const removedDraftRate = existingDraftRates[1]
+
+        if (!revisedDraftRate?.draftRevision || !removedDraftRate) {
+            throw new Error(
+                'Unexpected error: expected two draft rates for rate diff test'
+            )
+        }
+
+        const linkedContract = await updateTestDraftRatesOnContract(
+            stateServer,
+            addLinkedRateToRateInput(
+                updateRatesInputFromDraftContract(unlockedContract),
+                sharedRateID
+            )
+        )
+        const linkedDraftRate = linkedContract.draftRates?.find(
+            (rate) => rate.id === revisedDraftRate.id
+        )
+
+        if (!linkedDraftRate?.draftRevision) {
+            throw new Error(
+                'Unexpected error: revised draft rate not found after linking shared rate'
+            )
+        }
+
+        const updatedRateFormData = formatRateDataForSending(
+            linkedDraftRate.draftRevision.formData
+        )
+        const rateUpdateInput =
+            updateRatesInputFromDraftContract(linkedContract)
+        const updatedRates = rateUpdateInput.updatedRates
+            .filter(
+                (rateUpdate) =>
+                    !(
+                        rateUpdate.type === 'UPDATE' &&
+                        rateUpdate.rateID === removedDraftRate.id
+                    )
+            )
+            .map((rateUpdate) =>
+                rateUpdate.type === 'UPDATE' &&
+                rateUpdate.rateID === revisedDraftRate.id
+                    ? {
+                          ...rateUpdate,
+                          formData: {
+                              ...updatedRateFormData,
+                              rateDateCertified: '2024-04-15',
+                          },
+                      }
+                    : rateUpdate
+            )
+
+        await updateTestDraftRatesOnContract(stateServer, {
+            ...rateUpdateInput,
+            updatedRates,
+        })
+
+        const resubmittedContract = await submitTestContract(
+            stateServer,
+            contract.id,
+            'Resubmission with rate changes'
+        )
+
+        return {
+            cmsServer,
+            contract,
+            sharedRateID,
+            revisedRateID: revisedDraftRate.id,
+            removedRateID: removedDraftRate.id,
+            latestPackageSubmission: resubmittedContract.packageSubmissions[0],
+            previousPackageSubmission:
+                resubmittedContract.packageSubmissions[1],
+        }
+    }
+
     it('returns the store-backed diff through the GraphQL resolver', async () => {
         // Setup test API.
         const cmsUser = testCMSUser()
@@ -491,6 +610,11 @@ describe('fetchRevisionDiff', () => {
             totalAdded: 0,
             totalRemoved: 0,
         })
+        expect(revisionDiff.comparison.rateChanges).toEqual({
+            added: [],
+            removed: [],
+            revised: [],
+        })
     })
 
     it('returns only new and modified state contacts through the GraphQL resolver', async () => {
@@ -546,6 +670,15 @@ describe('fetchRevisionDiff', () => {
                 previousPackageSubmission.contractRevision.id,
         })
 
+        const updatedRateCertificationName =
+            updatedDraftRate.draftRevision?.formData.rateCertificationName
+
+        if (!updatedRateCertificationName) {
+            throw new Error(
+                'Unexpected error: updated draft rate certification name not found'
+            )
+        }
+
         expect(revisionDiff.comparison.documentChanges).toEqual({
             contractDocuments: {
                 added: ['contract-added.pdf'],
@@ -558,9 +691,7 @@ describe('fetchRevisionDiff', () => {
             rates: [
                 {
                     rateID: updatedDraftRate.id,
-                    rateCertificationName:
-                        updatedDraftRate.draftRevision!.formData
-                            .rateCertificationName,
+                    rateCertificationName: updatedRateCertificationName,
                     rateDocuments: {
                         added: ['rate-doc-added.xlsx'],
                         removed: ['ratedoc1.doc'],
@@ -573,6 +704,71 @@ describe('fetchRevisionDiff', () => {
             ],
             totalAdded: 3,
             totalRemoved: 4,
+        })
+    })
+
+    it('returns added, removed, and revised rates through the GraphQL resolver', async () => {
+        const {
+            cmsServer,
+            contract,
+            sharedRateID,
+            revisedRateID,
+            removedRateID,
+            latestPackageSubmission,
+            previousPackageSubmission,
+        } = await createResubmittedContractWithRateChanges()
+
+        const revisionDiff = await fetchTestRevisionDiff(cmsServer, {
+            contractID: contract.id,
+            newerContractRevisionID:
+                latestPackageSubmission.contractRevision.id,
+            olderContractRevisionID:
+                previousPackageSubmission.contractRevision.id,
+        })
+
+        const addedRateCertificationName =
+            latestPackageSubmission.rateRevisions.find(
+                (rateRevision) => rateRevision.rateID === sharedRateID
+            )?.formData.rateCertificationName
+        const removedRateCertificationName =
+            previousPackageSubmission.rateRevisions.find(
+                (rateRevision) => rateRevision.rateID === removedRateID
+            )?.formData.rateCertificationName
+        const revisedRateCertificationName =
+            latestPackageSubmission.rateRevisions.find(
+                (rateRevision) => rateRevision.rateID === revisedRateID
+            )?.formData.rateCertificationName
+
+        if (
+            !addedRateCertificationName ||
+            !removedRateCertificationName ||
+            !revisedRateCertificationName
+        ) {
+            throw new Error(
+                'Unexpected error: one or more expected rate certification names not found'
+            )
+        }
+
+        expect(revisionDiff.comparison.rateChanges).toEqual({
+            added: [
+                {
+                    rateID: sharedRateID,
+                    rateCertificationName: addedRateCertificationName,
+                    includedInAnotherSubmission: true,
+                },
+            ],
+            removed: [
+                {
+                    rateID: removedRateID,
+                    rateCertificationName: removedRateCertificationName,
+                },
+            ],
+            revised: [
+                {
+                    rateID: revisedRateID,
+                    rateCertificationName: revisedRateCertificationName,
+                },
+            ],
         })
     })
 })

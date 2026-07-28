@@ -79,6 +79,10 @@ export type {
     RevisionDiffDocumentNameChanges,
     RevisionDiffRateDocumentChanges,
     RevisionDiffDocumentChanges,
+    RevisionDiffAddedRate,
+    RevisionDiffRemovedRate,
+    RevisionDiffRevisedRate,
+    RevisionDiffRateChanges,
 } from './contractAndRates'
 
 export type {

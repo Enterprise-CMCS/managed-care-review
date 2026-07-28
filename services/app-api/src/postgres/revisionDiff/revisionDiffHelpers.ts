@@ -11,6 +11,7 @@ import {
     type ScalarDiffFieldConfig,
 } from './revisionDiffPrimitives'
 import { buildDocumentChanges } from './revisionDiffDocuments'
+import { buildRateChanges } from './revisionDiffRates'
 import { buildStateContactDiffChanges } from './revisionDiffStateContacts'
 
 type ContractFormData =
@@ -251,6 +252,11 @@ function buildRevisionDiff(
         return documentChanges
     }
 
+    const rateChanges = buildRateChanges(olderSubmission, newerSubmission)
+    if (rateChanges instanceof Error) {
+        return rateChanges
+    }
+
     return {
         contractID,
         olderRevisionID: olderSubmission.contractRevision.id,
@@ -260,6 +266,7 @@ function buildRevisionDiff(
         fieldChanges: [...contractNameChange, ...fieldChanges],
         stateContactChanges,
         documentChanges,
+        rateChanges,
     }
 }
 

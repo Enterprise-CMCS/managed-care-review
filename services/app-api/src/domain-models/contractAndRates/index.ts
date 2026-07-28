@@ -92,6 +92,10 @@ export type {
     RevisionDiffDocumentNameChanges,
     RevisionDiffRateDocumentChanges,
     RevisionDiffDocumentChanges,
+    RevisionDiffAddedRate,
+    RevisionDiffRemovedRate,
+    RevisionDiffRevisedRate,
+    RevisionDiffRateChanges,
 } from './revisionDiffTypes'
 
 export type {

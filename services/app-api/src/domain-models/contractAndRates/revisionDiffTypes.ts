@@ -56,6 +56,28 @@ type RevisionDiffDocumentChanges = {
     totalRemoved: number
 }
 
+type RevisionDiffAddedRate = {
+    rateID: string
+    rateCertificationName: string
+    includedInAnotherSubmission: boolean
+}
+
+type RevisionDiffRemovedRate = {
+    rateID: string
+    rateCertificationName: string
+}
+
+type RevisionDiffRevisedRate = {
+    rateID: string
+    rateCertificationName: string
+}
+
+type RevisionDiffRateChanges = {
+    added: RevisionDiffAddedRate[]
+    removed: RevisionDiffRemovedRate[]
+    revised: RevisionDiffRevisedRate[]
+}
+
 type RevisionDiff<TValue = unknown> = {
     contractID: string
     olderRevisionID: string
@@ -65,6 +87,7 @@ type RevisionDiff<TValue = unknown> = {
     fieldChanges: RevisionDiffFieldChange<TValue>[]
     stateContactChanges: RevisionDiffCollectionItemNewOrModified<StateContactType>[]
     documentChanges: RevisionDiffDocumentChanges
+    rateChanges: RevisionDiffRateChanges
 }
 
 export type {
@@ -75,4 +98,8 @@ export type {
     RevisionDiffDocumentNameChanges,
     RevisionDiffRateDocumentChanges,
     RevisionDiffDocumentChanges,
+    RevisionDiffAddedRate,
+    RevisionDiffRemovedRate,
+    RevisionDiffRevisedRate,
+    RevisionDiffRateChanges,
 }

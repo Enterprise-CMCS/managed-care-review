@@ -2844,6 +2844,7 @@ type RevisionDiff {
     fieldChanges: [RevisionDiffFieldChange!]!
     stateContactChanges: [RevisionDiffStateContactChange!]!
     documentChanges: RevisionDiffDocumentChanges!
+    rateChanges: RevisionDiffRateChanges!
 }
 
 type RevisionDiffDocumentNameChanges {
@@ -2864,6 +2865,28 @@ type RevisionDiffDocumentChanges {
     rates: [RevisionDiffRateDocumentChanges!]!
     totalAdded: Int!
     totalRemoved: Int!
+}
+
+type RevisionDiffAddedRate {
+    rateID: ID!
+    rateCertificationName: String!
+    includedInAnotherSubmission: Boolean!
+}
+
+type RevisionDiffRemovedRate {
+    rateID: ID!
+    rateCertificationName: String!
+}
+
+type RevisionDiffRevisedRate {
+    rateID: ID!
+    rateCertificationName: String!
+}
+
+type RevisionDiffRateChanges {
+    added: [RevisionDiffAddedRate!]!
+    removed: [RevisionDiffRemovedRate!]!
+    revised: [RevisionDiffRevisedRate!]!
 }
 
 enum RevisionDiffStateContactChangeKind {

@@ -49,6 +49,21 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
         totalAdded
         totalRemoved
       }
+      rateChanges {
+        added {
+          rateID
+          rateCertificationName
+          includedInAnotherSubmission
+        }
+        removed {
+          rateID
+          rateCertificationName
+        }
+        revised {
+          rateID
+          rateCertificationName
+        }
+      }
     }
   }
 }
