@@ -53,6 +53,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
         SUBMISSION_WITHDRAW: 'form',
         UNDO_SUBMISSION_WITHDRAW: 'form',
         UNDO_SUBMISSION_UNLOCK: 'form',
+        UNDO_SUBMISSION_APPROVAL: 'form',
         UNKNOWN_ROUTE: '404',
     }
 

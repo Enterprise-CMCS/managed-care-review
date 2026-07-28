@@ -80,7 +80,7 @@ When one workflow writes multiple actions in one transaction, ordering matters: 
 Contract `lastActionDate` should update for:
 - Direct contract submit/resubmit.
 - Contract unlock.
-- Contract review actions such as `UNDER_REVIEW`, `NOT_SUBJECT_TO_REVIEW`, `MARK_AS_APPROVED`, `WITHDRAW`, reverse approve, and undo-withdraw restored review actions.
+- Contract review actions such as `UNDER_REVIEW`, `NOT_SUBJECT_TO_REVIEW`, `MARK_AS_APPROVED`, `WITHDRAW`, undo approve, and undo-withdraw restored review actions.
 - Contract data overrides.
 - Contract Q&A create/response/delete/restore actions.
 - Already-linked rate data updates when the rate's parent contract resubmits the rate.
@@ -258,7 +258,7 @@ OAuth `canWrite` (or `canOauthWrite`) is required on every write. State-vs-CMS c
 | Parent reassignment | `reassignParentContract.ts` (same dir) |
 | Parent picker / new-parent selection | `getNewParentContract` in `prismaSharedContractRateHelpers.ts` |
 | Cause derivation (`*WithCause`) | `services/app-api/src/resolvers/contract/contractResolver.ts`, `services/app-api/src/resolvers/rate/rateResolver.ts` |
-| Other status mutations | sibling files in same dir (`approveContract.ts`, `reverseApproveContract.ts`, `undoWithdrawContract.ts`, etc.) |
+| Other status mutations | sibling files in same dir (`approveContract.ts`, `undoApproveContract.ts`, `undoWithdrawContract.ts`, etc.) |
 
 ## Related codebase docs
 

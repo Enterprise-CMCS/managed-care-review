@@ -1,5 +1,5 @@
-mutation reverseApproveContract($input: ReverseApproveContractInput!) {
-    reverseApproveContract(input: $input) {
+mutation undoApproveContract($input: UndoApproveContractInput!) {
+    undoApproveContract(input: $input) {
         contract {
             ...contractFieldsFragment
 
