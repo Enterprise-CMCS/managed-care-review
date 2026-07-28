@@ -577,6 +577,24 @@ const documentToDomainModel = (doc: DocumentWithCommonFields): DocumentType => {
     }
 }
 
+// Builds the backward-compatible full `name` for a state/actuary contact.
+// External systems still read `name`, so we construct it from givenName +
+// familyName and fall back to the deprecated stored full name when those are
+// not yet populated — e.g. contacts created before the contact model update,
+// or incomplete DRAFT/UNLOCKED draft revisions where partial data is allowed
+// (external users do not consume draft data). Once existing data is migrated,
+// this fallback is removed (tracked in a separate epic ticket).
+function constructContactName(contact: {
+    givenName?: string | null
+    familyName?: string | null
+    name?: string | null
+}): string | undefined {
+    const constructed = [contact.givenName, contact.familyName]
+        .filter((part) => part != null && part.trim() !== '')
+        .join(' ')
+    return constructed !== '' ? constructed : (contact.name ?? undefined)
+}
+
 function rateFormDataToDomainModel(
     rateRevision: RateRevisionTableWithFormData
 ): RateFormDataType {
@@ -648,7 +666,9 @@ function rateFormDataToDomainModel(
         rateMedicaidPopulations: rateRevision.rateMedicaidPopulations ?? [],
         certifyingActuaryContacts: rateRevision.certifyingActuaryContacts
             ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
-                  name: actuary.name ?? undefined,
+                  name: constructContactName(actuary),
+                  givenName: actuary.givenName ?? undefined,
+                  familyName: actuary.givenName ?? undefined,
                   titleRole: actuary.titleRole ?? undefined,
                   email: actuary.email ?? undefined,
                   actuarialFirm: actuary.actuarialFirm ?? undefined,
@@ -657,7 +677,9 @@ function rateFormDataToDomainModel(
             : [],
         addtlActuaryContacts: rateRevision.addtlActuaryContacts
             ? rateRevision.addtlActuaryContacts.map((actuary) => ({
-                  name: actuary.name ?? undefined,
+                  name: constructContactName(actuary),
+                  givenName: actuary.givenName ?? undefined,
+                  familyName: actuary.givenName ?? undefined,
                   titleRole: actuary.titleRole ?? undefined,
                   email: actuary.email ?? undefined,
                   actuarialFirm: actuary.actuarialFirm ?? undefined,
@@ -758,7 +780,9 @@ function contractFormDataToDomainModel(
                 : undefined,
         stateContacts: contractRevision.stateContacts
             ? contractRevision.stateContacts.map((contact) => ({
-                  name: contact.name ?? undefined,
+                  name: constructContactName(contact),
+                  givenName: contact.givenName ?? undefined,
+                  familyName: contact.familyName ?? undefined,
                   titleRole: contact.titleRole ?? undefined,
                   email: contact.email ?? undefined,
               }))
