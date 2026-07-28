@@ -31,6 +31,8 @@ fragment rateRevisionFragment on RateRevision {
         certifyingActuaryContacts {
             id
             name
+            givenName
+            familyName
             titleRole
             email
             actuarialFirm
@@ -39,6 +41,8 @@ fragment rateRevisionFragment on RateRevision {
         addtlActuaryContacts {
             id
             name
+            givenName
+            familyName
             titleRole
             email
             actuarialFirm

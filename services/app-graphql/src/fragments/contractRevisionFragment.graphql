@@ -38,6 +38,8 @@ fragment contractRevisionFragment on ContractRevision {
 
         stateContacts {
             name
+            givenName
+            familyName
             titleRole
             email
         }
