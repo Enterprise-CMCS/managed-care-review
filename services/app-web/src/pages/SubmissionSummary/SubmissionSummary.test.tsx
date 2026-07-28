@@ -756,6 +756,7 @@ describe('SubmissionSummary', () => {
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
+                                'cms-user-undo-unlock': true,
                             },
                         }
                     )
@@ -1631,7 +1632,9 @@ describe('SubmissionSummary', () => {
                         routerProvider: {
                             route: '/submissions/health-plan/test-abc-123',
                         },
-                        featureFlags: {},
+                        featureFlags: {
+                            'cms-user-undo-unlock': true,
+                        },
                     }
                 )
 

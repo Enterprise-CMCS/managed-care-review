@@ -736,7 +736,10 @@ describe('AppRoutes and routing configuration', () => {
                             fetchContractMockSuccess({ contract }),
                         ],
                     },
-                    featureFlags: { 'session-expiring-modal': false },
+                    featureFlags: {
+                        'session-expiring-modal': false,
+                        'cms-user-undo-unlock': true,
+                    },
                 })
 
                 await waitFor(() => {

@@ -303,6 +303,10 @@ const CMSUserRoutes = ({
         featureFlags.EQRO_SUBMISSIONS.flag,
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
+    const showCMSUserUndoUnlock: boolean = ldClient?.variation(
+        featureFlags.CMS_USER_UNDO_UNLOCK.flag,
+        featureFlags.CMS_USER_UNDO_UNLOCK.defaultValue
+    )
 
     const isAdminUser = loggedInUser.__typename === 'AdminUser'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
@@ -439,7 +443,7 @@ const CMSUserRoutes = ({
                     />
                 )}
 
-                {(isAdminUser || isCMSUser) && (
+                {(isAdminUser || (isCMSUser && showCMSUserUndoUnlock)) && (
                     <Route
                         path={RoutesRecord.UNDO_SUBMISSION_UNLOCK}
                         element={<UndoSubmissionUnlock />}
