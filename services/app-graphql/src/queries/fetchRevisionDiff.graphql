@@ -34,7 +34,7 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
           added
           removed
         }
-        rates {
+        ratesDocuments {
           rateID
           rateCertificationName
           rateDocuments {

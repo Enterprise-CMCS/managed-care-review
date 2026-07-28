@@ -51,7 +51,7 @@ type RevisionDiffRateDocumentChanges = {
 type RevisionDiffDocumentChanges = {
     contractDocuments: RevisionDiffDocumentNameChanges
     contractSupportingDocuments: RevisionDiffDocumentNameChanges
-    rates: RevisionDiffRateDocumentChanges[]
+    ratesDocuments: RevisionDiffRateDocumentChanges[]
     totalAdded: number
     totalRemoved: number
 }

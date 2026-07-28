@@ -2862,7 +2862,7 @@ type RevisionDiffRateDocumentChanges {
 type RevisionDiffDocumentChanges {
     contractDocuments: RevisionDiffDocumentNameChanges!
     contractSupportingDocuments: RevisionDiffDocumentNameChanges!
-    rates: [RevisionDiffRateDocumentChanges!]!
+    ratesDocuments: [RevisionDiffRateDocumentChanges!]!
     totalAdded: Int!
     totalRemoved: Int!
 }

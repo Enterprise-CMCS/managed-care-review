@@ -164,18 +164,18 @@ function buildDocumentChanges(
         return contractSupportingDocuments
     }
 
-    const rates = buildRateDocumentGroups(
+    const ratesDocuments = buildRateDocumentGroups(
         olderSubmission.rateRevisions,
         newerSubmission.rateRevisions
     )
-    if (rates instanceof Error) {
-        return rates
+    if (ratesDocuments instanceof Error) {
+        return ratesDocuments
     }
 
     const totalAdded =
         contractDocuments.added.length +
         contractSupportingDocuments.added.length +
-        rates.reduce(
+        ratesDocuments.reduce(
             (sum, group) =>
                 sum +
                 group.rateDocuments.added.length +
@@ -186,7 +186,7 @@ function buildDocumentChanges(
     const totalRemoved =
         contractDocuments.removed.length +
         contractSupportingDocuments.removed.length +
-        rates.reduce(
+        ratesDocuments.reduce(
             (sum, group) =>
                 sum +
                 group.rateDocuments.removed.length +
@@ -197,7 +197,7 @@ function buildDocumentChanges(
     return {
         contractDocuments,
         contractSupportingDocuments,
-        rates,
+        ratesDocuments,
         totalAdded,
         totalRemoved,
     }

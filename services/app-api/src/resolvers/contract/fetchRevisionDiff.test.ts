@@ -606,7 +606,7 @@ describe('fetchRevisionDiff', () => {
                 added: [],
                 removed: [],
             },
-            rates: [],
+            ratesDocuments: [],
             totalAdded: 0,
             totalRemoved: 0,
         })
@@ -688,7 +688,7 @@ describe('fetchRevisionDiff', () => {
                 added: [],
                 removed: ['support-removed.pdf'],
             },
-            rates: [
+            ratesDocuments: [
                 {
                     rateID: updatedDraftRate.id,
                     rateCertificationName: updatedRateCertificationName,

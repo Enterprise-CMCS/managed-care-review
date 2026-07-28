@@ -252,7 +252,7 @@ describe('revisionDiffHelpers', () => {
                     added: [],
                     removed: [],
                 },
-                rates: [],
+                ratesDocuments: [],
                 totalAdded: 0,
                 totalRemoved: 0,
             },
@@ -964,7 +964,7 @@ describe('revisionDiffHelpers', () => {
                 added: [],
                 removed: ['support-removed.pdf'],
             },
-            rates: [
+            ratesDocuments: [
                 {
                     rateID: draftRate.id,
                     rateCertificationName: updatedRateCertificationName,
