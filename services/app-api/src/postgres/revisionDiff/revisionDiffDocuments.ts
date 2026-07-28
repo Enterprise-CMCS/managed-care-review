@@ -15,7 +15,7 @@ function buildDocumentNameChanges(
     const changes = diffCollectionByKey({
         previous,
         current,
-        getKey: (document) => document.sha256,
+        getKey: (document) => `${document.sha256}::${document.name}`,
         buildChanges: () => [],
     })
 
