@@ -4,7 +4,6 @@ import { MetricType } from 'web-vitals'
 type MetricCallback = (metric: MetricType) => void
 
 const reportWebVitals = (onPerfEntry?: MetricCallback): void => {
-    console.info('test')
     if (onPerfEntry) {
         import('web-vitals').then(({ onCLS, onINP, onFCP, onLCP, onTTFB }) => {
             onCLS(onPerfEntry)
