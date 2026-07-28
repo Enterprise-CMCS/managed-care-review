@@ -187,7 +187,10 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         undoWithdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN'
     const showUndoUnlockBtn = isAdminUser && consolidatedStatus === 'UNLOCKED'
-    const showNoAdminActionsMsg = !showUndoUnlockBtn && !showApprovalBtn
+    const showUndoApprovalBtn =
+        isAdminUser && consolidatedStatus === 'APPROVED'
+    const showNoAdminActionsMsg =
+        !showUndoUnlockBtn && !showApprovalBtn && !showUndoApprovalBtn
     const showNoCMSActionsMsg =
         !showApprovalBtn &&
         !showUnlockBtn &&
@@ -333,6 +336,28 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                                 )}
                             >
                                 Undo submission unlock
+                            </ButtonWithLogging>
+                        )}
+                        {showUndoApprovalBtn && (
+                            <ButtonWithLogging
+                                className="usa-button usa-button--outline"
+                                type="button"
+                                onClick={() =>
+                                    navigate(
+                                        getSubmissionPath(
+                                            'UNDO_SUBMISSION_APPROVAL',
+                                            contractSubmissionType,
+                                            contract.id
+                                        )
+                                    )
+                                }
+                                link_url={getSubmissionPath(
+                                    'UNDO_SUBMISSION_APPROVAL',
+                                    contractSubmissionType,
+                                    contract.id
+                                )}
+                            >
+                                Undo submission approval
                             </ButtonWithLogging>
                         )}
                         {showApprovalBtn && (

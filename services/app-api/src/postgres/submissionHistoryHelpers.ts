@@ -262,7 +262,7 @@ function buildContractSubmissionHistory(
         })
     }
 
-    // Review status actions (approve / reverse approve / under review / not
+    // Review status actions (approve / undo approve / under review / not
     // subject to review) are tracked separately from revisions but are still
     // contract-level events that count toward freshness.
     for (const reviewAction of contract.reviewStatusActions ?? []) {

@@ -2,11 +2,11 @@ import {
     constructTestPostgresServer,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
-import { ReverseApproveContractDocument } from '../../gen/gqlClient'
+import { UndoApproveContractDocument } from '../../gen/gqlClient'
 import { testCMSUser, testAdminUser } from '../../testHelpers/userHelpers'
 import {
     approveTestContract,
-    reverseApproveTestContract,
+    undoApproveTestContract,
     createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
     unlockTestContract,
@@ -16,7 +16,7 @@ import {
 import { testS3Client } from '../../testHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 
-describe('reverseApproveContract', () => {
+describe('undoApproveContract', () => {
     const mockS3 = testS3Client()
 
     it('admin user can reverse an approved contract', async () => {
@@ -43,7 +43,7 @@ describe('reverseApproveContract', () => {
 
         await approveTestContract(cmsServer, contract.id)
 
-        const reversedContract = await reverseApproveTestContract(
+        const reversedContract = await undoApproveTestContract(
             adminServer,
             contract.id,
             'Approval was made in error'
@@ -62,7 +62,7 @@ describe('reverseApproveContract', () => {
             select: { lastActionDate: true },
         })
 
-        // Reverse approval creates an UNDER_REVIEW review action, so the
+        // Undo approval creates an UNDER_REVIEW review action, so the
         // stored action date should match that action timestamp.
         expect(contractTableRow.lastActionDate).toEqual(
             reversedContract.reviewStatusActions![0].updatedAt
@@ -85,7 +85,7 @@ describe('reverseApproveContract', () => {
 
         await approveTestContract(cmsServer, contract.id)
 
-        const reversedContract = await reverseApproveTestContract(
+        const reversedContract = await undoApproveTestContract(
             cmsServer,
             contract.id,
             'Reversing approval'
@@ -110,7 +110,7 @@ describe('reverseApproveContract', () => {
 
         await approveTestContract(cmsServer, contract.id)
 
-        const reversedContract = await reverseApproveTestContract(
+        const reversedContract = await undoApproveTestContract(
             cmsServer,
             contract.id,
             'Approval was made in error'
@@ -161,7 +161,7 @@ describe('reverseApproveContract', () => {
 
         await approveTestContract(cmsServer, contract.id)
 
-        const reversedContract = await reverseApproveTestContract(
+        const reversedContract = await undoApproveTestContract(
             cmsServer,
             contract.id,
             'Approval was made in error'
@@ -194,7 +194,7 @@ describe('reverseApproveContract', () => {
         const contract = await createAndSubmitTestContractWithRate(stateServer)
 
         const result = await executeGraphQLOperation(cmsServer, {
-            query: ReverseApproveContractDocument,
+            query: UndoApproveContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
@@ -210,7 +210,7 @@ describe('reverseApproveContract', () => {
 
         expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(result.errors[0].message).toBe(
-            'Attempted to reverse approval for contract with wrong status: SUBMITTED'
+            'Attempted to undo approval for contract with wrong status: SUBMITTED'
         )
     })
 
@@ -231,7 +231,7 @@ describe('reverseApproveContract', () => {
         await withdrawTestContract(cmsServer, contract.id, 'test unlock')
 
         const result = await executeGraphQLOperation(cmsServer, {
-            query: ReverseApproveContractDocument,
+            query: UndoApproveContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
@@ -247,7 +247,7 @@ describe('reverseApproveContract', () => {
 
         expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(result.errors[0].message).toBe(
-            'Attempted to reverse approval for contract with wrong status: WITHDRAWN'
+            'Attempted to undo approval for contract with wrong status: WITHDRAWN'
         )
     })
 
@@ -268,7 +268,7 @@ describe('reverseApproveContract', () => {
         await approveTestContract(cmsServer, contract.id)
 
         const result = await executeGraphQLOperation(stateServer, {
-            query: ReverseApproveContractDocument,
+            query: UndoApproveContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
@@ -284,7 +284,7 @@ describe('reverseApproveContract', () => {
 
         expect(result.errors[0].extensions?.code).toBe('FORBIDDEN')
         expect(result.errors[0].message).toBe(
-            'user not authorized to reverse approve a contract'
+            'user not authorized to undo approve a contract'
         )
     })
 
@@ -304,14 +304,14 @@ describe('reverseApproveContract', () => {
 
         await approveTestContract(cmsServer, contract.id)
 
-        await reverseApproveTestContract(
+        await undoApproveTestContract(
             cmsServer,
             contract.id,
             'First reversal'
         )
 
         const result = await executeGraphQLOperation(cmsServer, {
-            query: ReverseApproveContractDocument,
+            query: UndoApproveContractDocument,
             variables: {
                 input: {
                     contractID: contract.id,
@@ -327,7 +327,7 @@ describe('reverseApproveContract', () => {
 
         expect(result.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
         expect(result.errors[0].message).toBe(
-            'Attempted to reverse approval for contract with wrong status: SUBMITTED'
+            'Attempted to undo approval for contract with wrong status: SUBMITTED'
         )
     })
 })
