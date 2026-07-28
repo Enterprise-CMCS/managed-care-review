@@ -15,4 +15,8 @@
 
 .formContainer {
     @include custom.mini-form-fields;
+
+    > [class^='usa-fieldset'] {
+        padding-top: 2rem;
+    }
 }
