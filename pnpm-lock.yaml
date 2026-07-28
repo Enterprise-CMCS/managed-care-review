@@ -495,8 +495,8 @@ importers:
         specifier: ^7.8.0
         version: 7.8.0
       '@prisma/client':
-        specifier: ^7.9.0
-        version: 7.9.0(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3)
+        specifier: ^7.9.1
+        version: 7.9.1(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3)
       '@prisma/instrumentation':
         specifier: ^7.8.0
         version: 7.8.0(@opentelemetry/api@1.9.1)
@@ -1214,8 +1214,8 @@ importers:
         specifier: ^3.1093.0
         version: 3.1093.0
       '@prisma/client':
-        specifier: ^7.9.0
-        version: 7.9.0(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3)
+        specifier: ^7.9.1
+        version: 7.9.1(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3)
       pg:
         specifier: ^8.19.0
         version: 8.19.0
@@ -5756,11 +5756,11 @@ packages:
   '@prisma/adapter-pg@7.8.0':
     resolution: {integrity: sha512-ygb3UkerK3v8MDpXVgCISdRNDozpxh6+JVJgiIGbSr5KBgz10LLf5ejUskPGoXlsIjxsOu6nuy1JVQr2EKGSlg==}
 
-  '@prisma/client-runtime-utils@7.9.0':
-    resolution: {integrity: sha512-kMVmS4ZEy3xlkca+TfxOEm/ToVVlOS2x1Tc6/wIRf/HfczBqENtSPcKszy4ZpFNzjJ8SRKvlU5V0rrpoFw2KOg==}
+  '@prisma/client-runtime-utils@7.9.1':
+    resolution: {integrity: sha512-mVIBGYdO5CFmK0HvjxrtfIyQQcPdb88pSCeVQriVQPVZyDovIWblpHfOgcS8QO187j3QF0ePArH8qPhp0AU2vg==}
 
-  '@prisma/client@7.9.0':
-    resolution: {integrity: sha512-BTG/mB+WL/1sD2gWwdNc2uuVJjNNBgCDlPFdjco6jJArgbg4IAChtzVeW4debFa/NKBbsGedCjET316sjllWTQ==}
+  '@prisma/client@7.9.1':
+    resolution: {integrity: sha512-+xgrh2EhJVF79wC0yX5G4PI1Rdcm7Qn/nekNQ+t/O153wtNggruHal+fXHSa0QE+Tp/Cw5wvxeCEhZZ59xGm8Q==}
     engines: {node: ^20.19 || ^22.12 || >=24.0}
     peerDependencies:
       prisma: '*'
@@ -19300,11 +19300,11 @@ snapshots:
     transitivePeerDependencies:
       - pg-native
 
-  '@prisma/client-runtime-utils@7.9.0': {}
+  '@prisma/client-runtime-utils@7.9.1': {}
 
-  '@prisma/client@7.9.0(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3)':
+  '@prisma/client@7.9.1(prisma@7.4.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3))(typescript@5.9.3)':
     dependencies:
-      '@prisma/client-runtime-utils': 7.9.0
+      '@prisma/client-runtime-utils': 7.9.1
     optionalDependencies:
       prisma: 7.4.2(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(typescript@5.9.3)
       typescript: 5.9.3
