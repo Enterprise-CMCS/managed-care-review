@@ -323,8 +323,11 @@ function formatGQLRateContractForSending(
     contact: ActuaryContact
 ): ActuaryContactInput {
     return {
-        ...contact,
         id: contact.id || undefined,
+        name: contact.name,
+        titleRole: contact.titleRole,
+        email: contact.email,
+        actuarialFirm: contact.actuarialFirm,
         actuarialFirmOther: contact.actuarialFirmOther || undefined,
     }
 }
