@@ -57,7 +57,7 @@ describe('SubmissionType', () => {
         ).toBeDefined()
         expect(
             screen.getByRole('button', {
-                name: 'Save & Continue',
+                name: 'Continue',
             })
         ).toBeDefined()
     })
@@ -425,17 +425,13 @@ describe('SubmissionType', () => {
         ).toBeInTheDocument()
 
         // check that validations work
-        await userEvent.click(
-            screen.getByRole('button', { name: 'Save & Continue' })
-        )
+        await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
         await screen.findByTestId('error-summary')
         await screen.findAllByText('You must select yes or no')
         await userEvent.click(
             within(riskBasedContractParent!).getByLabelText('No')
         )
-        await userEvent.click(
-            screen.getByRole('button', { name: 'Save & Continue' })
-        )
+        await userEvent.click(screen.getByRole('button', { name: 'Continue' }))
     })
 
     it('displays submission description textarea', async () => {
@@ -774,7 +770,7 @@ describe('SubmissionType', () => {
 
             // Test validations work.
             await userEvent.click(
-                screen.getByRole('button', { name: 'Save & Continue' })
+                screen.getByRole('button', { name: 'Continue' })
             )
             await screen.findByTestId('error-summary')
             await screen.findAllByText(
@@ -791,7 +787,7 @@ describe('SubmissionType', () => {
 
             await userEvent.click(
                 screen.getByRole('button', {
-                    name: 'Save & Continue',
+                    name: 'Continue',
                 })
             )
             await waitFor(() => {
@@ -830,7 +826,7 @@ describe('SubmissionType', () => {
             // Click Continue to trigger validation
             await userEvent.click(
                 screen.getByRole('button', {
-                    name: 'Save & Continue',
+                    name: 'Continue',
                 })
             )
 

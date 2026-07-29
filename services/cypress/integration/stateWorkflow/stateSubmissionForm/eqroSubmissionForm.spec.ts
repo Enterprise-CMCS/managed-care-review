@@ -21,7 +21,7 @@ describe('state user in eqro submission form', () => {
         cy.findByText('Draft was saved successfully.')
 
         // fill out contract details and fill in form
-        cy.navigateContractForm('SAVE_AND_CONTINUE')
+        cy.navigateContractForm('CONTINUE')
         cy.findByRole('heading', { level: 2, name: /Contract details/ })
         cy.fillOutEQROContractDetails()
 

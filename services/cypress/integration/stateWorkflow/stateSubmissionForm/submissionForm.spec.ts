@@ -82,7 +82,7 @@ describe('state user in health plan submission form', () => {
                 .findAllByRole('listitem')
                 .should('have.length', 5)
             cy.findByText('Rate details').should('exist')
-            cy.navigateContractForm('SAVE_AND_CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // CHECK CONTRACT DETAILS PAGE NAVIGATION
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
@@ -90,7 +90,7 @@ describe('state user in health plan submission form', () => {
             // Navigate back to previous page
             cy.navigateContractForm('BACK')
             cy.findByRole('heading', { level: 2, name: /Submission type/ })
-            cy.navigateContractForm('SAVE_AND_CONTINUE')
+            cy.navigateContractForm('CONTINUE')
 
             // Change to contract amendment, save as draft
             cy.findByRole('heading', { level: 2, name: /Contract details/ })
