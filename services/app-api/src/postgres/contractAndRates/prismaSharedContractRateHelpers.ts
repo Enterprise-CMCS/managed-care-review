@@ -669,6 +669,7 @@ function rateFormDataToDomainModel(
                   name: constructContactName(actuary),
                   givenName: actuary.givenName ?? undefined,
                   familyName: actuary.familyName ?? undefined,
+                  suffix: actuary.suffix ?? undefined,
                   titleRole: actuary.titleRole ?? undefined,
                   email: actuary.email ?? undefined,
                   actuarialFirm: actuary.actuarialFirm ?? undefined,
@@ -680,6 +681,7 @@ function rateFormDataToDomainModel(
                   name: constructContactName(actuary),
                   givenName: actuary.givenName ?? undefined,
                   familyName: actuary.familyName ?? undefined,
+                  suffix: actuary.suffix ?? undefined,
                   titleRole: actuary.titleRole ?? undefined,
                   email: actuary.email ?? undefined,
                   actuarialFirm: actuary.actuarialFirm ?? undefined,
@@ -783,6 +785,7 @@ function contractFormDataToDomainModel(
                   name: constructContactName(contact),
                   givenName: contact.givenName ?? undefined,
                   familyName: contact.familyName ?? undefined,
+                  suffix: contact.suffix ?? undefined,
                   titleRole: contact.titleRole ?? undefined,
                   email: contact.email ?? undefined,
               }))

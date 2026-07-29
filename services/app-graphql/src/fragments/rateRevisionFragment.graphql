@@ -33,6 +33,7 @@ fragment rateRevisionFragment on RateRevision {
             name
             givenName
             familyName
+            suffix
             titleRole
             email
             actuarialFirm
@@ -43,6 +44,7 @@ fragment rateRevisionFragment on RateRevision {
             name
             givenName
             familyName
+            suffix
             titleRole
             email
             actuarialFirm

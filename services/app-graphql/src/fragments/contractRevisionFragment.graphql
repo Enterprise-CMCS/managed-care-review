@@ -40,6 +40,7 @@ fragment contractRevisionFragment on ContractRevision {
             name
             givenName
             familyName
+            suffix
             titleRole
             email
         }

@@ -87,6 +87,7 @@ const stateContactSchema = z.object({
     name: z.string().optional(),
     givenName: z.string().optional(),
     familyName: z.string().optional(),
+    suffix: z.string().optional(),
     titleRole: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
 })
@@ -97,6 +98,7 @@ const actuaryContactSchema = z.object({
     name: z.string().optional(),
     givenName: z.string().optional(),
     familyName: z.string().optional(),
+    suffix: z.string().optional(),
     titleRole: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
     actuarialFirm: actuarialFirmTypeSchema.optional(),
