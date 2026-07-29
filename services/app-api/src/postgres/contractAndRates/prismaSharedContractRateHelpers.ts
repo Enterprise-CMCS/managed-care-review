@@ -668,7 +668,7 @@ function rateFormDataToDomainModel(
             ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
                   name: constructContactName(actuary),
                   givenName: actuary.givenName ?? undefined,
-                  familyName: actuary.givenName ?? undefined,
+                  familyName: actuary.familyName ?? undefined,
                   titleRole: actuary.titleRole ?? undefined,
                   email: actuary.email ?? undefined,
                   actuarialFirm: actuary.actuarialFirm ?? undefined,
@@ -679,7 +679,7 @@ function rateFormDataToDomainModel(
             ? rateRevision.addtlActuaryContacts.map((actuary) => ({
                   name: constructContactName(actuary),
                   givenName: actuary.givenName ?? undefined,
-                  familyName: actuary.givenName ?? undefined,
+                  familyName: actuary.familyName ?? undefined,
                   titleRole: actuary.titleRole ?? undefined,
                   email: actuary.email ?? undefined,
                   actuarialFirm: actuary.actuarialFirm ?? undefined,
