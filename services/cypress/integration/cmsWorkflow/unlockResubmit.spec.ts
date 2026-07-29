@@ -10,6 +10,7 @@ describe('CMS user', () => {
         cy.interceptFeatureFlags({
             '438-attestation': true,
             dsnp: true,
+            'cms-user-undo-unlock': true,
         })
         cy.logInAsStateUser()
 
@@ -264,6 +265,7 @@ describe('CMS user', () => {
             '438-attestation': true,
             'hide-supporting-docs-page': true,
             dsnp: true,
+            'cms-user-undo-unlock': true,
         })
 
         // Set up a submission with linked rates
