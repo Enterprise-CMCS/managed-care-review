@@ -84,7 +84,11 @@ export const PageActions = (props: PageActionProps): React.ReactElement => {
                     loading={actionInProgress && !disableContinue}
                     link_url={continueOnClickUrl}
                 >
-                    {!isLastPage && !isStandalonePage ? 'Continue' : 'Submit'}
+                    {isLastPage || isStandalonePage
+                        ? 'Submit'
+                        : isFirstPage
+                          ? 'Save & Continue'
+                          : 'Continue'}
                 </ActionButton>
             </ButtonGroup>
         </PageActionsContainer>

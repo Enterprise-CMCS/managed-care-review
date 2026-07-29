@@ -1,12 +1,16 @@
 export type FormButtonKey =
     | 'CONTINUE_FROM_START_NEW'
     | 'CONTINUE'
+    | 'SAVE_AND_CONTINUE'
     | 'SAVE_DRAFT'
     | 'BACK'
 type FormButtons = { [key in FormButtonKey]: string }
 const buttonsWithLabels: FormButtons = {
     CONTINUE: 'Continue',
-    CONTINUE_FROM_START_NEW: 'Continue',
+    // The Submission details page is the only page that labels its primary action
+    // 'Save & Continue' - both when starting a new submission and when editing a draft.
+    CONTINUE_FROM_START_NEW: 'Save & Continue',
+    SAVE_AND_CONTINUE: 'Save & Continue',
     SAVE_DRAFT: 'Save as draft',
     BACK: 'Back',
 }
@@ -34,7 +38,10 @@ Cypress.Commands.add(
                 cy.wait('@fetchContractQuery', { timeout: 20_000 })
             }
             cy.findByTestId('state-submission-form-page').should('exist')
-        } else if (buttonKey === 'CONTINUE') {
+        } else if (
+            buttonKey === 'CONTINUE' ||
+            buttonKey === 'SAVE_AND_CONTINUE'
+        ) {
             if (waitForLoad) {
                 cy.findAllByTestId('errorMessage').should('have.length', 0)
                 cy.wait('@updateDraftContractRatesMutation', {
@@ -72,7 +79,10 @@ Cypress.Commands.add(
                 cy.wait('@fetchContractQuery', { timeout: 20_000 })
             }
             cy.findByTestId(/-submission-form-page/).should('exist')
-        } else if (buttonKey === 'CONTINUE') {
+        } else if (
+            buttonKey === 'CONTINUE' ||
+            buttonKey === 'SAVE_AND_CONTINUE'
+        ) {
             if (waitForLoad) {
                 cy.findAllByTestId('errorMessage').should('have.length', 0)
                 cy.wait('@updateContractDraftRevisionMutation', { timeout: 50_000})

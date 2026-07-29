@@ -401,7 +401,7 @@ describe('StateSubmissionForm', () => {
             await userEvent.type(textarea, ' but updated something')
 
             const continueButton = await screen.findByRole('button', {
-                name: 'Continue',
+                name: 'Save & Continue',
             })
             continueButton.click()
         })
@@ -471,7 +471,7 @@ describe('StateSubmissionForm', () => {
             await userEvent.type(textarea, ' but updated something')
 
             const continueButton = await screen.findByRole('button', {
-                name: 'Continue',
+                name: 'Save & Continue',
             })
             continueButton.click()
         })
@@ -601,7 +601,7 @@ describe('StateSubmissionForm', () => {
             await userEvent.type(textarea, ' but updated something')
 
             const continueButton = await screen.findByRole('button', {
-                name: 'Continue',
+                name: 'Save & Continue',
             })
             expect(continueButton).toBeInTheDocument()
             await continueButton.click()

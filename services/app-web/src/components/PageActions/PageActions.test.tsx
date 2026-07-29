@@ -116,7 +116,7 @@ describe('PageActions', () => {
     })
 
     describe('page variant specific behavior', () => {
-        it('displays Cancel and Continue buttons for the first page', () => {
+        it('displays Cancel and Save & Continue buttons for the first page', () => {
             renderWithProviders(
                 <PageActions
                     pageVariant="FIRST"
@@ -140,7 +140,7 @@ describe('PageActions', () => {
                 screen.getByRole('button', { name: 'Cancel' })
             ).toBeInTheDocument()
             expect(
-                screen.getByRole('button', { name: 'Continue' })
+                screen.getByRole('button', { name: 'Save & Continue' })
             ).toBeInTheDocument()
         })
         it('displays Save as Draft, Back, and Submit buttons for the last page', () => {
@@ -240,7 +240,7 @@ describe('PageActions', () => {
             expect(continueAction).not.toHaveBeenCalled()
         })
 
-        it('displays Save as draft, Cancel and Continue buttons for the first page when editing', () => {
+        it('displays Save as draft, Cancel and Save & Continue buttons for the first page when editing', () => {
             renderWithProviders(
                 <PageActions
                     pageVariant="EDIT_FIRST"
@@ -267,10 +267,10 @@ describe('PageActions', () => {
                 screen.getByRole('button', { name: 'Cancel' })
             ).toBeInTheDocument()
             expect(
-                screen.getByRole('button', { name: 'Continue' })
+                screen.getByRole('button', { name: 'Save & Continue' })
             ).toBeInTheDocument()
         })
-        it('calls continueOnClick when Continue button is clicked on the first page when editing', async () => {
+        it('calls continueOnClick when Save & Continue button is clicked on the first page when editing', async () => {
             const continueAction = vi.fn()
             renderWithProviders(
                 <PageActions
@@ -287,7 +287,7 @@ describe('PageActions', () => {
             )
 
             await userEvent.click(
-                screen.getByRole('button', { name: 'Continue' })
+                screen.getByRole('button', { name: 'Save & Continue' })
             )
             expect(continueAction).toHaveBeenCalled()
         })

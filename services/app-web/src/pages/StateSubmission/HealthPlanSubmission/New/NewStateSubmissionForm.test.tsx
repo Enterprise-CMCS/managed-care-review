@@ -69,7 +69,7 @@ describe('NewStateSubmissionForm', () => {
         await userEvent.type(textarea, 'A submitted submission')
 
         const continueButton = await screen.findByRole('button', {
-            name: 'Continue',
+            name: 'Save & Continue',
         })
         await userEvent.click(continueButton)
 

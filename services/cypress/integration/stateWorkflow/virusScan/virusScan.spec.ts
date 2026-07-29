@@ -17,7 +17,7 @@ describe.only('documents', () => {
                 cy.navigateFormByDirectLink(
                     `/submissions/${draftContractSubType}/${draftSubmissionID}/edit/type`
                 )
-                cy.navigateContractForm('CONTINUE')
+                cy.navigateContractForm('SAVE_AND_CONTINUE')
 
                 // Upload a good file and a bad file
                 const fileInput = cy.findAllByTestId('file-input-input')
