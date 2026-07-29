@@ -980,7 +980,7 @@ describe('ContractDetails', () => {
             })
         })
 
-        it('shows alert but stays enabled after attempt to continue with zero files', async () => {
+        it('disabled with alert after first attempt to continue with zero files', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
 
@@ -1024,68 +1024,11 @@ describe('ContractDetails', () => {
                     screen.getAllByText('You must upload at least one document')
                 ).toHaveLength(2)
 
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
         })
 
-        it('re-focuses the error summary on every continue attempt', async () => {
-            const draftContract = mockContractPackageUnlockedWithUnlockedType()
-            draftContract.draftRevision.formData.contractDocuments = []
-
-            renderWithProviders(
-                <Routes>
-                    <Route
-                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
-                        element={<ContractDetails />}
-                    />
-                </Routes>,
-                {
-                    apolloProvider: {
-                        mocks: [
-                            fetchCurrentUserMock({ statusCode: 200 }),
-                            fetchContractMockSuccess({
-                                contract: {
-                                    ...draftContract,
-                                    id: '15',
-                                    contractSubmissionType: 'HEALTH_PLAN',
-                                },
-                            }),
-                        ],
-                    },
-                    routerProvider: {
-                        route: '/submissions/health-plan/15/edit/contract-details',
-                    },
-                }
-            )
-
-            await screen.findByText('Contract Details')
-
-            const continueButton = screen.getByRole('button', {
-                name: 'Continue',
-            })
-
-            await userEvent.click(continueButton)
-
-            const errorSummaryHeading = await screen.findByRole('heading', {
-                name: /error(s)? on this page/,
-            })
-            await waitFor(() => {
-                expect(errorSummaryHeading).toHaveFocus()
-            })
-
-            // move focus away, then attempt to continue a second time
-            errorSummaryHeading.blur()
-            expect(errorSummaryHeading).not.toHaveFocus()
-
-            await userEvent.click(continueButton)
-
-            await waitFor(() => {
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
-                expect(errorSummaryHeading).toHaveFocus()
-            })
-        })
-
-        it('shows alert but stays enabled after attempt to continue with invalid duplicate files', async () => {
+        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
             renderWithProviders(
                 <Routes>
                     <Route
@@ -1133,7 +1076,7 @@ describe('ContractDetails', () => {
                     )
                 ).toHaveLength(2)
 
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
         })
 
@@ -1195,7 +1138,7 @@ describe('ContractDetails', () => {
             await userEvent.click(continueButton)
 
             await waitFor(() => {
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
                 // Shown both in the error summary and as the file input's
                 // inline visual error
                 expect(
@@ -1206,7 +1149,7 @@ describe('ContractDetails', () => {
             })
         })
 
-        it('shows alert but stays enabled after attempt to continue with invalid files', async () => {
+        it('disabled with alert after first attempt to continue with invalid files', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
 
@@ -1258,9 +1201,9 @@ describe('ContractDetails', () => {
                 )
             ).toHaveLength(2)
 
-            expect(continueButton).not.toHaveAttribute('aria-disabled')
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
-        it('shows alert but stays enabled when trying to continue while a file is still uploading', async () => {
+        it('disabled with alert when trying to continue while a file is still uploading', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
 
@@ -1313,7 +1256,7 @@ describe('ContractDetails', () => {
             expect(imageElFile2).toHaveClass('is-loading')
             await waitFor(() => {
                 fireEvent.click(continueButton)
-                expect(continueButton).not.toHaveAttribute('aria-disabled')
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
 
                 expect(
                     screen.getAllByText(

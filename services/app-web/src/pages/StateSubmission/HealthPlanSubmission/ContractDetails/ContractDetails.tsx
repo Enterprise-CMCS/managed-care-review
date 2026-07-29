@@ -1354,6 +1354,10 @@ export const ContractDetails = ({
                                             )
                                         }
                                     }}
+                                    disableContinue={
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
+                                    }
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={generatePath(
                                         RoutesRecord.SUBMISSIONS_TYPE,
