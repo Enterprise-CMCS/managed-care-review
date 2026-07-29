@@ -915,10 +915,6 @@ export const EQROContractDetails = ({
                                                 }
                                             )
                                         }}
-                                        disableContinue={
-                                            shouldValidate &&
-                                            !!Object.keys(errors).length
-                                        }
                                         actionInProgress={isSubmitting}
                                         backOnClickUrl={submissionDetailsPath}
                                         continueOnClickUrl={contactsPagePath}

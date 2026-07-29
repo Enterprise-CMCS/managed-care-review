@@ -774,10 +774,6 @@ const RateDetails = ({
                                                   )
                                               }
                                     }
-                                    disableContinue={
-                                        shouldValidate &&
-                                        !!Object.keys(errors).length
-                                    }
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
                                         displayAsStandaloneRate
