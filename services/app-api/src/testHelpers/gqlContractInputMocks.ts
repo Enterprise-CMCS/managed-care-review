@@ -47,12 +47,20 @@ const mockGqlContractDraftRevisionFormDataInput = (
     const stateContacts = formDataInput?.stateContacts?.length
         ? formDataInput.stateContacts.map((contact) => ({
               name: contact.name,
+              // Coalesce null (from read data round-tripped back through this
+              // mock) to undefined; stateContactSchema treats these as optional
+              // strings and rejects null.
+              givenName: contact.givenName ?? undefined,
+              familyName: contact.familyName ?? undefined,
+              suffix: contact.suffix ?? undefined,
               titleRole: contact.titleRole,
               email: contact.email,
           }))
         : [
               {
-                  name: 'statecontact',
+                  givenName: 'state',
+                  familyName: 'contact',
+                  suffix: 'JR.',
                   titleRole: 'thestatestofcontacts',
                   email: 'statemcstate@examepl.com',
               },
