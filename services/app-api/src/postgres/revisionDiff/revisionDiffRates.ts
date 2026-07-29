@@ -1,4 +1,5 @@
 import type {
+    ActuaryContactType,
     ContractPackageSubmissionType,
     RateFormDataType,
     RateRevisionType,
@@ -13,6 +14,7 @@ import {
     buildScalarFieldDiffChanges,
     type ScalarDiffFieldConfig,
 } from './revisionDiffPrimitives'
+import { buildCertifyingActuaryContactDiffChanges } from './revisionDiffRateActuaries'
 
 type RateFormData = RateFormDataType
 
@@ -211,10 +213,23 @@ function buildRevisedRate(
         return fieldChanges
     }
 
+    const certifyingActuaryContactChanges =
+        buildCertifyingActuaryContactDiffChanges(
+            (olderRateRevision.formData.certifyingActuaryContacts ??
+                []) as ActuaryContactType[],
+            (rateRevision.formData.certifyingActuaryContacts ??
+                []) as ActuaryContactType[]
+        )
+
+    if (certifyingActuaryContactChanges instanceof Error) {
+        return certifyingActuaryContactChanges
+    }
+
     return {
         rateID: rateRevision.rateID,
         rateCertificationName: buildRateDisplayName(rateRevision),
         fieldChanges,
+        certifyingActuaryContactChanges,
     }
 }
 

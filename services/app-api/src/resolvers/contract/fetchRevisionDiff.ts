@@ -89,6 +89,15 @@ function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
                 fieldChanges: serializeRevisionDiffFieldChanges(
                     rate.fieldChanges
                 ),
+                certifyingActuaryContactChanges:
+                    rate.certifyingActuaryContactChanges.map((change) => ({
+                        ...change,
+                        kind: 'NEW_OR_MODIFIED' as const,
+                        certifyingActuaryContactFieldChanges:
+                            serializeRevisionDiffFieldChanges(
+                                change.certifyingActuaryContactFieldChanges
+                            ),
+                    })),
             })),
         },
     }

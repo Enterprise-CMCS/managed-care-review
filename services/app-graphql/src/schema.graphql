@@ -2882,12 +2882,23 @@ type RevisionDiffRevisedRate {
     rateID: ID!
     rateCertificationName: String!
     fieldChanges: [RevisionDiffFieldChange!]!
+    certifyingActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
 }
 
 type RevisionDiffRateChanges {
     added: [RevisionDiffAddedRate!]!
     removed: [RevisionDiffRemovedRate!]!
     revised: [RevisionDiffRevisedRate!]!
+}
+
+enum RevisionDiffRateActuaryContactChangeKind {
+    NEW_OR_MODIFIED
+}
+
+type RevisionDiffRateActuaryContactChange {
+    kind: RevisionDiffRateActuaryContactChangeKind!
+    current: ActuaryContact!
+    certifyingActuaryContactFieldChanges: [RevisionDiffFieldChange!]!
 }
 
 enum RevisionDiffStateContactChangeKind {

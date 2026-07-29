@@ -354,6 +354,19 @@ describe('fetchRevisionDiff', () => {
                           formData: {
                               ...updatedRateFormData,
                               rateDateCertified: '2024-04-15',
+                              certifyingActuaryContacts: [
+                                  {
+                                      ...updatedRateFormData
+                                          .certifyingActuaryContacts[0],
+                                      actuarialFirm: 'MILLIMAN' as const,
+                                  },
+                                  {
+                                      name: 'New Actuary',
+                                      titleRole: 'Senior Actuary',
+                                      email: 'new-actuary@example.com',
+                                      actuarialFirm: 'MERCER' as const,
+                                  },
+                              ],
                           },
                       }
                     : rateUpdate
@@ -789,6 +802,42 @@ describe('fetchRevisionDiff', () => {
                                 kind: 'STRING',
                                 value: 'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240415',
                             },
+                        },
+                    ],
+                    certifyingActuaryContactChanges: [
+                        {
+                            kind: 'NEW_OR_MODIFIED',
+                            current: {
+                                name: 'Foo Person',
+                                titleRole: 'Bar Job',
+                                email: 'foo@example.com',
+                                actuarialFirm: 'MILLIMAN',
+                                actuarialFirmOther: null,
+                            },
+                            certifyingActuaryContactFieldChanges: [
+                                {
+                                    fieldPath: 'actuarialFirm',
+                                    oldValue: {
+                                        kind: 'STRING',
+                                        value: 'GUIDEHOUSE',
+                                    },
+                                    newValue: {
+                                        kind: 'STRING',
+                                        value: 'MILLIMAN',
+                                    },
+                                },
+                            ],
+                        },
+                        {
+                            kind: 'NEW_OR_MODIFIED',
+                            current: {
+                                name: 'New Actuary',
+                                titleRole: 'Senior Actuary',
+                                email: 'new-actuary@example.com',
+                                actuarialFirm: 'MERCER',
+                                actuarialFirmOther: null,
+                            },
+                            certifyingActuaryContactFieldChanges: [],
                         },
                     ],
                 },

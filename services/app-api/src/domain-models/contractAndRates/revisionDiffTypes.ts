@@ -1,4 +1,4 @@
-import type { StateContactType } from './formDataTypes'
+import type { ActuaryContactType, StateContactType } from './formDataTypes'
 
 type RevisionDiffFieldChange<TValue = unknown> = {
     fieldPath: string
@@ -36,6 +36,12 @@ type RevisionDiffCollectionItemNewOrModified<TItem> = {
     current: TItem
 }
 
+type RevisionDiffRateActuaryContactChange = {
+    kind: 'new_or_modified'
+    current: ActuaryContactType
+    certifyingActuaryContactFieldChanges: RevisionDiffFieldChange[]
+}
+
 type RevisionDiffDocumentNameChanges = {
     added: string[]
     removed: string[]
@@ -71,6 +77,7 @@ type RevisionDiffRevisedRate = {
     rateID: string
     rateCertificationName: string
     fieldChanges: RevisionDiffFieldChange[]
+    certifyingActuaryContactChanges: RevisionDiffRateActuaryContactChange[]
 }
 
 type RevisionDiffRateChanges = {
@@ -96,6 +103,7 @@ export type {
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
     RevisionDiffCollectionItemNewOrModified,
+    RevisionDiffRateActuaryContactChange,
     RevisionDiffDocumentNameChanges,
     RevisionDiffRateDocumentChanges,
     RevisionDiffDocumentChanges,

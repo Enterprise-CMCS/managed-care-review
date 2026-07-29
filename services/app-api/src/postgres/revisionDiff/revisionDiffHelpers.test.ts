@@ -1073,6 +1073,19 @@ describe('revisionDiffHelpers', () => {
                           formData: {
                               ...updatedRateFormData,
                               rateDateCertified: '2024-04-15',
+                              certifyingActuaryContacts: [
+                                  {
+                                      ...updatedRateFormData
+                                          .certifyingActuaryContacts[0],
+                                      actuarialFirm: 'MILLIMAN' as const,
+                                  },
+                                  {
+                                      name: 'New Actuary',
+                                      titleRole: 'Senior Actuary',
+                                      email: 'new-actuary@example.com',
+                                      actuarialFirm: 'MERCER' as const,
+                                  },
+                              ],
                           },
                       }
                     : rateUpdate
@@ -1172,6 +1185,34 @@ describe('revisionDiffHelpers', () => {
                                 'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240102',
                             newValue:
                                 'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240415',
+                        },
+                    ],
+                    certifyingActuaryContactChanges: [
+                        {
+                            kind: 'new_or_modified',
+                            current: {
+                                name: 'Foo Person',
+                                titleRole: 'Bar Job',
+                                email: 'foo@example.com',
+                                actuarialFirm: 'MILLIMAN',
+                            },
+                            certifyingActuaryContactFieldChanges: [
+                                {
+                                    fieldPath: 'actuarialFirm',
+                                    oldValue: 'GUIDEHOUSE',
+                                    newValue: 'MILLIMAN',
+                                },
+                            ],
+                        },
+                        {
+                            kind: 'new_or_modified',
+                            current: {
+                                name: 'New Actuary',
+                                titleRole: 'Senior Actuary',
+                                email: 'new-actuary@example.com',
+                                actuarialFirm: 'MERCER',
+                            },
+                            certifyingActuaryContactFieldChanges: [],
                         },
                     ],
                 },
