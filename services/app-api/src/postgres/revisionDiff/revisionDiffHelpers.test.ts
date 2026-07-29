@@ -1160,6 +1160,20 @@ describe('revisionDiffHelpers', () => {
                 {
                     rateID: revisedDraftRate.id,
                     rateCertificationName: revisedRateCertificationName,
+                    fieldChanges: [
+                        {
+                            fieldPath: 'rateDateCertified',
+                            oldValue: new Date('2024-01-02'),
+                            newValue: new Date('2024-04-15'),
+                        },
+                        {
+                            fieldPath: 'rateCertificationName',
+                            oldValue:
+                                'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240102',
+                            newValue:
+                                'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240415',
+                        },
+                    ],
                 },
             ],
         })

@@ -70,6 +70,7 @@ type RevisionDiffRemovedRate = {
 type RevisionDiffRevisedRate = {
     rateID: string
     rateCertificationName: string
+    fieldChanges: RevisionDiffFieldChange[]
 }
 
 type RevisionDiffRateChanges = {

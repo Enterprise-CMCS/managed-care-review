@@ -62,6 +62,17 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
         revised {
           rateID
           rateCertificationName
+          fieldChanges {
+            fieldPath
+            oldValue {
+              kind
+              value
+            }
+            newValue {
+              kind
+              value
+            }
+          }
         }
       }
     }

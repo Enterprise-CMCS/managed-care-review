@@ -767,6 +767,30 @@ describe('fetchRevisionDiff', () => {
                 {
                     rateID: revisedRateID,
                     rateCertificationName: revisedRateCertificationName,
+                    fieldChanges: [
+                        {
+                            fieldPath: 'rateDateCertified',
+                            oldValue: {
+                                kind: 'DATE',
+                                value: new Date('2024-01-02'),
+                            },
+                            newValue: {
+                                kind: 'DATE',
+                                value: new Date('2024-04-15'),
+                            },
+                        },
+                        {
+                            fieldPath: 'rateCertificationName',
+                            oldValue: {
+                                kind: 'STRING',
+                                value: 'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240102',
+                            },
+                            newValue: {
+                                kind: 'STRING',
+                                value: 'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240415',
+                            },
+                        },
+                    ],
                 },
             ],
         })

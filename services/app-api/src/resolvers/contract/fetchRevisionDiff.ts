@@ -62,18 +62,35 @@ function serializeRevisionDiffFieldValue(value: unknown):
     }
 }
 
+function serializeRevisionDiffFieldChanges(
+    fieldChanges: RevisionDiff['fieldChanges']
+) {
+    return fieldChanges.map((fieldChange) => ({
+        ...fieldChange,
+        oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
+        newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
+    }))
+}
+
 function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
     return {
         ...comparison,
-        fieldChanges: comparison.fieldChanges.map((fieldChange) => ({
-            ...fieldChange,
-            oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
-            newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
-        })),
+        fieldChanges: serializeRevisionDiffFieldChanges(
+            comparison.fieldChanges
+        ),
         stateContactChanges: comparison.stateContactChanges.map((change) => ({
             kind: 'NEW_OR_MODIFIED' as const,
             current: change.current,
         })),
+        rateChanges: {
+            ...comparison.rateChanges,
+            revised: comparison.rateChanges.revised.map((rate) => ({
+                ...rate,
+                fieldChanges: serializeRevisionDiffFieldChanges(
+                    rate.fieldChanges
+                ),
+            })),
+        },
     }
 }
 

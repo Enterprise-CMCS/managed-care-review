@@ -2881,6 +2881,7 @@ type RevisionDiffRemovedRate {
 type RevisionDiffRevisedRate {
     rateID: ID!
     rateCertificationName: String!
+    fieldChanges: [RevisionDiffFieldChange!]!
 }
 
 type RevisionDiffRateChanges {

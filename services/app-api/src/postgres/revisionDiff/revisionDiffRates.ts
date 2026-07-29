@@ -1,11 +1,155 @@
 import type {
     ContractPackageSubmissionType,
+    RateFormDataType,
     RateRevisionType,
     RevisionDiffAddedRate,
     RevisionDiffRateChanges,
     RevisionDiffRemovedRate,
     RevisionDiffRevisedRate,
 } from '../../domain-models'
+import { rateFormDataSchema } from '../../domain-models/contractAndRates/formDataTypes'
+import { z } from 'zod'
+import {
+    buildScalarFieldDiffChanges,
+    type ScalarDiffFieldConfig,
+} from './revisionDiffPrimitives'
+
+type RateFormData = RateFormDataType
+
+type DiffFieldConfig = {
+    fieldPath: string
+    getValue: (formData: RateFormData) => unknown | Error
+}
+
+const normalizeStringArray = (values: string[]): string[] => [...values].sort()
+
+function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
+    if (
+        schema instanceof z.ZodOptional ||
+        schema instanceof z.ZodNullable ||
+        schema instanceof z.ZodDefault
+    ) {
+        return unwrapSchema(schema.unwrap())
+    }
+
+    if (schema instanceof z.ZodPipe) {
+        return unwrapSchema(schema.def.out)
+    }
+
+    return schema
+}
+
+function buildBooleanFieldConfig(
+    fieldPath: keyof RateFormData & string
+): DiffFieldConfig {
+    return {
+        fieldPath,
+        getValue: (formData) => formData[fieldPath] as boolean | undefined,
+    }
+}
+
+function buildStringFieldConfig(
+    fieldPath: keyof RateFormData & string
+): DiffFieldConfig {
+    return {
+        fieldPath,
+        getValue: (formData) => formData[fieldPath] as string | undefined,
+    }
+}
+
+function buildDateFieldConfig(
+    fieldPath: keyof RateFormData & string
+): DiffFieldConfig {
+    return {
+        fieldPath,
+        getValue: (formData) => formData[fieldPath] as Date | undefined,
+    }
+}
+
+function buildStringArrayFieldConfig(
+    fieldPath: keyof RateFormData & string
+): DiffFieldConfig {
+    return {
+        fieldPath,
+        getValue: (formData) =>
+            normalizeStringArray(
+                (formData[fieldPath] as string[] | undefined) ?? []
+            ),
+    }
+}
+
+const rateFieldConfigOverrides: Partial<
+    Record<keyof RateFormData, DiffFieldConfig>
+> = {
+    rateProgramIDs: {
+        fieldPath: 'rateProgramIDs',
+        getValue: (formData) =>
+            normalizeStringArray(formData.rateProgramIDs ?? []),
+    },
+    deprecatedRateProgramIDs: {
+        fieldPath: 'deprecatedRateProgramIDs',
+        getValue: (formData) =>
+            normalizeStringArray(formData.deprecatedRateProgramIDs ?? []),
+    },
+    rateMedicaidPopulations: {
+        fieldPath: 'rateMedicaidPopulations',
+        getValue: (formData) =>
+            normalizeStringArray(formData.rateMedicaidPopulations ?? []),
+    },
+}
+
+const excludedRateFieldPaths = new Set<keyof RateFormData>([
+    'id',
+    'rateID',
+    'rateDocuments',
+    'supportingDocuments',
+    'certifyingActuaryContacts',
+    'addtlActuaryContacts',
+    'packagesWithSharedRateCerts',
+])
+
+const diffRateFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
+    rateFormDataSchema.shape as Record<string, z.core.$ZodType>
+).flatMap(([fieldPath, schema]) => {
+    const typedFieldPath = fieldPath as keyof RateFormData & string
+
+    if (excludedRateFieldPaths.has(typedFieldPath)) {
+        return []
+    }
+
+    const overriddenConfig = rateFieldConfigOverrides[typedFieldPath]
+    if (overriddenConfig) {
+        return [overriddenConfig]
+    }
+
+    const unwrappedSchema = unwrapSchema(schema)
+
+    if (unwrappedSchema instanceof z.ZodBoolean) {
+        return [buildBooleanFieldConfig(typedFieldPath)]
+    }
+
+    if (unwrappedSchema instanceof z.ZodString) {
+        return [buildStringFieldConfig(typedFieldPath)]
+    }
+
+    if (unwrappedSchema instanceof z.ZodDate) {
+        return [buildDateFieldConfig(typedFieldPath)]
+    }
+
+    if (unwrappedSchema instanceof z.ZodArray) {
+        return [buildStringArrayFieldConfig(typedFieldPath)]
+    }
+
+    return []
+})
+
+const scalarRateFormDataFieldConfigs: ScalarDiffFieldConfig<
+    RateFormData,
+    void
+>[] = diffRateFormDataFieldConfigs.map((fieldConfig) => ({
+    fieldPath: fieldConfig.fieldPath,
+    getValue: (formData) => fieldConfig.getValue(formData),
+}))
 
 function buildRateDisplayName(rateRevision: RateRevisionType): string {
     return rateRevision.formData.rateCertificationName ?? rateRevision.rateID
@@ -53,11 +197,24 @@ function buildRemovedRate(
 }
 
 function buildRevisedRate(
+    olderRateRevision: RateRevisionType,
     rateRevision: RateRevisionType
-): RevisionDiffRevisedRate {
+): RevisionDiffRevisedRate | Error {
+    const fieldChanges = buildScalarFieldDiffChanges(
+        olderRateRevision.formData,
+        rateRevision.formData,
+        scalarRateFormDataFieldConfigs,
+        undefined
+    )
+
+    if (fieldChanges instanceof Error) {
+        return fieldChanges
+    }
+
     return {
         rateID: rateRevision.rateID,
         rateCertificationName: buildRateDisplayName(rateRevision),
+        fieldChanges,
     }
 }
 
@@ -103,7 +260,16 @@ function buildRateChanges(
         }
 
         if (olderRateRevision.id !== newerRateRevision.id) {
-            revised.push(buildRevisedRate(newerRateRevision))
+            const revisedRate = buildRevisedRate(
+                olderRateRevision,
+                newerRateRevision
+            )
+
+            if (revisedRate instanceof Error) {
+                return revisedRate
+            }
+
+            revised.push(revisedRate)
         }
     }
 
