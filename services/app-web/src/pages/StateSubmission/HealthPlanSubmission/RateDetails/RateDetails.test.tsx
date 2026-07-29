@@ -171,7 +171,7 @@ describe('RateDetails', () => {
         })
 
         describe('submit', () => {
-            it('enabled on initial load but disabled with alert if valid rate cert file replaced with invalid file', async () => {
+            it('stays enabled with alert if valid rate cert file replaced with invalid file', async () => {
                 const rateID = 'abc-123'
                 renderWithProviders(
                     <Routes>
@@ -215,7 +215,7 @@ describe('RateDetails', () => {
                 })
             })
 
-            it('disabled with alert if previously submitted with more than one rate cert file', async () => {
+            it('shows alert but stays enabled if previously submitted with more than one rate cert file', async () => {
                 const rateID = 'abc-123'
                 renderWithProviders(
                     <Routes>
@@ -280,18 +280,15 @@ describe('RateDetails', () => {
                         )
                     ).toHaveLength(2)
 
-                    expect(submitButton).toHaveAttribute(
-                        'aria-disabled',
-                        'true'
-                    )
+                    expect(submitButton).not.toHaveAttribute('aria-disabled')
                 })
             })
 
             it.todo(
-                'disabled with alert after first attempt to continue with invalid rate doc file'
+                'shows alert but stays enabled after attempt to continue with invalid rate doc file'
             )
             it.todo(
-                'disabled with alert when trying to continue while a file is still uploading'
+                'shows alert but stays enabled when trying to continue while a file is still uploading'
             )
         })
 
@@ -453,10 +450,75 @@ describe('RateDetails', () => {
                 expect(
                     screen.getByText('Rate certification 1')
                 ).toBeInTheDocument()
-                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                expect(submitButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.getByText('There are 10 errors on this page')
                 ).toBeInTheDocument()
+            })
+        })
+
+        it('re-focuses the error summary on every continue attempt', async () => {
+            const { user } = renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_RATE_DETAILS}
+                        element={<RateDetails type="MULTI" />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...mockContractWithLinkedRateDraft(),
+                                    id: 'test-abc-123',
+                                    contractSubmissionType: 'HEALTH_PLAN',
+                                    // clean draft rates for this test.
+                                    draftRates: [],
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/health-plan/test-abc-123/edit/rate-details`,
+                    },
+                    featureFlags: {
+                        'rate-edit-unlock': false,
+                        dsnp: true,
+                    },
+                }
+            )
+            await screen.findByText('Rate Details')
+
+            await userEvent.click(
+                screen.getByLabelText(
+                    'No, this rate certification was not included with any other submissions'
+                )
+            )
+
+            const submitButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            await user.click(submitButton)
+
+            const errorSummaryHeading = await screen.findByRole('heading', {
+                name: /error(s)? on this page/,
+            })
+            await waitFor(() => {
+                expect(errorSummaryHeading).toHaveFocus()
+            })
+
+            // move focus away, then attempt to continue a second time
+            errorSummaryHeading.blur()
+            expect(errorSummaryHeading).not.toHaveFocus()
+
+            await user.click(submitButton)
+
+            await waitFor(() => {
+                expect(submitButton).not.toHaveAttribute('aria-disabled')
+                expect(errorSummaryHeading).toHaveFocus()
             })
         })
 
@@ -529,7 +591,7 @@ describe('RateDetails', () => {
             await user.click(submitButton)
 
             await waitFor(() => {
-                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                expect(submitButton).not.toHaveAttribute('aria-disabled')
                 // Shown both in the error summary and as the file input's
                 // inline visual error
                 expect(
@@ -589,7 +651,7 @@ describe('RateDetails', () => {
                 expect(
                     screen.getByText('Rate certification 1')
                 ).toBeInTheDocument()
-                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                expect(submitButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.getByText('There is 1 error on this page')
                 ).toBeInTheDocument()
@@ -876,7 +938,7 @@ describe('RateDetails', () => {
                 expect(
                     screen.getByText('Rate certification 1')
                 ).toBeInTheDocument()
-                expect(submitButton).toHaveAttribute('aria-disabled', 'true')
+                expect(submitButton).not.toHaveAttribute('aria-disabled')
                 expect(
                     screen.getByText('There is 1 error on this page')
                 ).toBeInTheDocument()

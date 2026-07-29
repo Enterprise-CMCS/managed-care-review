@@ -16,7 +16,7 @@ import {
     TEST_PDF_FILE,
     TEST_PNG_FILE,
     dragAndDrop,
-} from '../../../../testHelpers/jestHelpers'
+} from '../../../../testHelpers'
 
 import { EQROContractDetails } from './EQROContractDetails'
 
@@ -1297,7 +1297,7 @@ describe('EQROContractDetails', () => {
             })
         })
 
-        it('disabled with alert after first attempt to continue with zero files', async () => {
+        it('shows alert but stays enabled after attempt to continue with zero files', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
             draftContract.draftRevision.formData.contractType = 'BASE'
@@ -1343,11 +1343,70 @@ describe('EQROContractDetails', () => {
                     screen.getAllByText('You must upload at least one document')
                 ).toHaveLength(2)
 
-                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
-        it('disabled with alert after first attempt to continue with invalid duplicate files', async () => {
+        it('re-focuses the error summary on every continue attempt', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractDocuments = []
+            draftContract.draftRevision.formData.contractType = 'BASE'
+            draftContract.draftRevision.formData.managedCareEntities = ['MCO']
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<EQROContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('EQRO Contract details')
+
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+
+            await userEvent.click(continueButton)
+
+            const errorSummaryHeading = await screen.findByRole('heading', {
+                name: /error(s)? on this page/,
+            })
+            await waitFor(() => {
+                expect(errorSummaryHeading).toHaveFocus()
+            })
+
+            // move focus away, then attempt to continue a second time
+            errorSummaryHeading.blur()
+            expect(errorSummaryHeading).not.toHaveFocus()
+
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
+                expect(errorSummaryHeading).toHaveFocus()
+            })
+        })
+
+        it('shows alert but stays enabled after attempt to continue with invalid duplicate files', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractType = 'BASE'
             draftContract.draftRevision.formData.managedCareEntities = ['MCO']
@@ -1399,11 +1458,11 @@ describe('EQROContractDetails', () => {
                     )
                 ).toHaveLength(2)
 
-                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
             })
         })
 
-        it('disabled with alert after first attempt to continue with invalid files', async () => {
+        it('shows alert but stays enabled after attempt to continue with invalid files', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
             draftContract.draftRevision.formData.contractType = 'BASE'
@@ -1457,10 +1516,10 @@ describe('EQROContractDetails', () => {
                 )
             ).toHaveLength(2)
 
-            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
         })
 
-        it('disabled with alert when trying to continue while a file is still uploading', async () => {
+        it('shows alert but stays enabled when trying to continue while a file is still uploading', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.contractDocuments = []
             draftContract.draftRevision.formData.contractType = 'BASE'
@@ -1515,7 +1574,7 @@ describe('EQROContractDetails', () => {
             expect(imageElFile2).toHaveClass('is-loading')
             await waitFor(() => {
                 fireEvent.click(continueButton)
-                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+                expect(continueButton).not.toHaveAttribute('aria-disabled')
 
                 expect(
                     screen.getAllByText(
