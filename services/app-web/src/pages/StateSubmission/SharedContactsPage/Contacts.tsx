@@ -484,6 +484,10 @@ const Contacts = ({
                                         setShouldValidate(true)
                                         setFocusErrorSummaryHeading(true)
                                     }}
+                                    disableContinue={
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
+                                    }
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
                                         draftSubmission.draftRevision.formData

@@ -770,6 +770,10 @@ export const SubmissionType = ({
                                             }
                                         )
                                     }}
+                                    disableContinue={
+                                        shouldValidate &&
+                                        !!Object.keys(errors).length
+                                    }
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={
                                         RoutesRecord.DASHBOARD_SUBMISSIONS

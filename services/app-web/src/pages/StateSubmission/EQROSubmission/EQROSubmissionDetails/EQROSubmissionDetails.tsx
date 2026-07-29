@@ -577,6 +577,10 @@ export const EQROSubmissionDetails = (): React.ReactElement => {
                                         }
                                     )
                                 }}
+                                disableContinue={
+                                    shouldValidate &&
+                                    !!Object.keys(errors).length
+                                }
                                 actionInProgress={isSubmitting}
                                 backOnClickUrl={
                                     RoutesRecord.DASHBOARD_SUBMISSIONS

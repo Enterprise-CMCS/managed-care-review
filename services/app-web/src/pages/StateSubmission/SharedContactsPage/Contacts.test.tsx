@@ -225,8 +225,9 @@ describe('Contacts', () => {
         await screen.findAllByText('Contacts')
 
         const continueButton = screen.getByRole('button', { name: 'Continue' })
+        expect(continueButton).not.toHaveAttribute('aria-disabled')
 
-        continueButton.click()
+        await userEvent.click(continueButton)
 
         await waitFor(() => {
             expect(screen.getAllByText('You must provide a name')).toHaveLength(
@@ -238,6 +239,15 @@ describe('Contacts', () => {
             expect(
                 screen.getAllByText('You must provide an email address')
             ).toHaveLength(2)
+            expect(continueButton).toHaveAttribute('aria-disabled', 'true')
+        })
+
+        await userEvent.type(screen.getByLabelText('Name'), 'Test Name')
+        await userEvent.type(screen.getByLabelText('Title/Role'), 'Test Role')
+        await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
+
+        await waitFor(() => {
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
         })
     })
 
