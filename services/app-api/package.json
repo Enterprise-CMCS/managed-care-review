@@ -12,6 +12,7 @@
         "test:coverage": "vitest --coverage",
         "lint": "eslint . --max-warnings=0",
         "generate": "pnpm prisma generate --config ../../prisma.config.ts",
+        "generate-dsnp-report": "DSNP_REPORT=1 vitest run src/scripts/dsnpReport.test.ts",
         "prisma:reset": "pnpm prisma migrate reset --force --config ../../prisma.config.ts",
         "build": "tsc --noEmit",
         "build:local": "tsx esbuild-local.config.ts",
