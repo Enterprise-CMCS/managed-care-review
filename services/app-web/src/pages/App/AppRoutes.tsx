@@ -11,6 +11,7 @@ import { idmRedirectURL } from '../Auth/cognitoAuth'
 import { assertNever, AuthModeType } from '@mc-review/common-code'
 import { PageTitlesRecord, RoutesRecord, RouteT } from '@mc-review/constants'
 import { getRouteName } from '../../routeHelpers'
+import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useAuth } from '../../contexts/AuthContext'
 import { usePage } from '../../contexts/PageContext'
 import { useTitle } from '../../hooks'
@@ -76,6 +77,7 @@ import { UndoRateWithdraw } from '../UndoRateWithdraw/UndoRateWithdraw'
 import { SubmissionWithdraw } from '../SubmissionWithdraw/SubmissionWithdraw'
 import { UndoSubmissionWithdraw } from '../UndoSubmissionWithdraw/UndoSubmissionWithdraw'
 import { UndoSubmissionUnlock } from '../UndoSubmissionUnlock/UndoSubmissionUnlock'
+import { UndoSubmissionApproval } from '../UndoSubmissionApproval/UndoSubmissionApproval'
 import { CreateOauthClient } from '../Settings/Oauth/CreateOauthClient'
 import { User } from '../../gen/gqlClient'
 import { AddLocalUser } from '../../localAuth/AddLocalUser'
@@ -302,8 +304,13 @@ const CMSUserRoutes = ({
         featureFlags.EQRO_SUBMISSIONS.flag,
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
+    const showCMSUserUndoUnlock: boolean = ldClient?.variation(
+        featureFlags.CMS_USER_UNDO_UNLOCK.flag,
+        featureFlags.CMS_USER_UNDO_UNLOCK.defaultValue
+    )
 
     const isAdminUser = loggedInUser.__typename === 'AdminUser'
+    const isCMSUser = hasCMSUserPermissions(loggedInUser)
 
     return (
         <AuthenticatedRouteWrapper>
@@ -437,10 +444,17 @@ const CMSUserRoutes = ({
                     />
                 )}
 
-                {isAdminUser && (
+                {(isAdminUser || (isCMSUser && showCMSUserUndoUnlock)) && (
                     <Route
                         path={RoutesRecord.UNDO_SUBMISSION_UNLOCK}
                         element={<UndoSubmissionUnlock />}
+                    />
+                )}
+
+                {isAdminUser && (
+                    <Route
+                        path={RoutesRecord.UNDO_SUBMISSION_APPROVAL}
+                        element={<UndoSubmissionApproval />}
                     />
                 )}
 

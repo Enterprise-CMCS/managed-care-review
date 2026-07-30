@@ -260,7 +260,6 @@ export const SingleRateCert = ({
                         className={styles.radioGroup}
                         legend="Rate certification type"
                         role="radiogroup"
-                        aria-required
                     >
                         <span className={styles.requiredOptionalText}>
                             Required
@@ -367,7 +366,6 @@ export const SingleRateCert = ({
                             )}
                         >
                             <Fieldset
-                                aria-required
                                 legend={
                                     isRateTypeAmendment(rateInfo)
                                         ? 'Rating period of original rate certification'
@@ -436,16 +434,8 @@ export const SingleRateCert = ({
 
                         {isRateTypeAmendment(rateInfo) && (
                             <>
-                                <FormGroup
-                                    error={Boolean(
-                                        showFieldErrors('effectiveDateStart') ??
-                                        showFieldErrors('effectiveDateEnd')
-                                    )}
-                                >
-                                    <Fieldset
-                                        aria-required
-                                        legend="Effective dates of rate amendment"
-                                    >
+                                <FormGroup>
+                                    <Fieldset legend="Effective dates of rate amendment">
                                         <span
                                             className={
                                                 styles.requiredOptionalText
@@ -618,7 +608,6 @@ export const SingleRateCert = ({
                         className={styles.radioGroup}
                         legend="Actuaries' communication preference"
                         role="radiogroup"
-                        aria-required
                     >
                         <span
                             className={styles.requiredOptionalText}

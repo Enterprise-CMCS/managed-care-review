@@ -7,6 +7,7 @@ import type {
     UserType,
     BusinessOwnerUserType,
     HelpdeskUserType,
+    ReadOnlyUserType,
 } from '../domain-models'
 import { sharedTestPrismaClient } from './storeHelpers'
 import { v4 as uuidv4 } from 'uuid'
@@ -73,6 +74,17 @@ const testHelpdeskUser = (
     email: 'iroh@example.com',
     familyName: 'Iroh',
     givenName: 'Uncle',
+    ...userData,
+})
+
+const testReadOnlyUser = (
+    userData?: Partial<ReadOnlyUserType>
+): ReadOnlyUserType => ({
+    id: uuidv4(),
+    role: 'READONLY_USER',
+    email: 'gyatso@example.com',
+    familyName: 'Monk',
+    givenName: 'Gyatso',
     ...userData,
 })
 
@@ -158,4 +170,5 @@ export {
     testCMSApproverUser,
     testBusinessOwnerUser,
     testHelpdeskUser,
+    testReadOnlyUser,
 }

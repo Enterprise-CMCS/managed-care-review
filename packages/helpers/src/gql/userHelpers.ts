@@ -5,6 +5,7 @@ import {
     AdminUser,
     BusinessOwnerUser,
     HelpdeskUser,
+    ReadOnlyUser,
     UpdatedBy,
 } from '../gen/gqlClient'
 const hasCMSUserPermissions = (
@@ -31,6 +32,24 @@ const hasAdminUserPermissions = (
     return validRoles.includes(user.role)
 }
 
+const hasReadOnlyUserPermissions = (user?: User): user is ReadOnlyUser => {
+    if (!user) {
+        return false
+    }
+
+    return user.role === 'READONLY_USER'
+}
+
+// Users who view CMS-side data (all submissions, questions, etc.). This
+// includes read-only users, who can see everything a CMS reviewer sees but
+// cannot trigger any mutation. Use hasCMSUserPermissions (not this helper) to
+// gate write/action affordances.
+const canViewCMSData = (
+    user?: User
+): user is CmsUser | CmsApproverUser | ReadOnlyUser => {
+    return hasCMSUserPermissions(user) || hasReadOnlyUserPermissions(user)
+}
+
 // process user that made the change history event.
 const getUpdatedByDisplayName = (updatedBy?: UpdatedBy): string | undefined => {
     if (!updatedBy) {
@@ -45,5 +64,7 @@ const getUpdatedByDisplayName = (updatedBy?: UpdatedBy): string | undefined => {
 export {
     hasCMSUserPermissions,
     hasAdminUserPermissions,
+    hasReadOnlyUserPermissions,
+    canViewCMSData,
     getUpdatedByDisplayName,
 }

@@ -146,6 +146,21 @@ describe('cognitoAuthn', () => {
                 },
                 {
                     attributes: {
+                        'custom:role': 'macmcrrs-ro-user',
+                        given_name: 'Generic',
+                        family_name: 'Person',
+                        email: 'gp@example.com',
+                    },
+                    expectedResult: {
+                        id: testID,
+                        role: 'READONLY_USER',
+                        email: 'gp@example.com',
+                        familyName: 'Person',
+                        givenName: 'Generic',
+                    },
+                },
+                {
+                    attributes: {
                         'custom:role':
                             'SOME_OPE User,neid-lame-user,smacfi-enduser,twoell-mmc-user,wefoi-mmc-ab-auth-user,POSS_ENDUSER,strongweak-user,macmcrrs-state-user',
                         'custom:state_code': 'FL',

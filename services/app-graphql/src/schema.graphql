@@ -3,6 +3,8 @@ schema {
     mutation: Mutation
 }
 
+scalar JSON
+
 type Query {
     """
     fetchCurrentUser returns user information for the currently logged in User
@@ -94,6 +96,13 @@ type Query {
     - NotFoundError: contract for contractID not found in database
     """
     fetchContract(input: FetchContractInput!): FetchContractPayload!
+
+    """
+    fetchRevisionDiff returns the field-level differences between two submitted
+    contract revisions. When revision IDs are omitted, it compares the latest
+    submitted contract revision to the previous submitted contract revision.
+    """
+    fetchRevisionDiff(input: FetchRevisionDiffInput!): FetchRevisionDiffPayload!
 
     """
     fetchSubmissionHistory returns the combined action history for a submission,
@@ -580,7 +589,7 @@ type Mutation {
     approveContract(input: ApproveContractInput!): ApproveContractPayload
 
     """
-    reverseApproveContract is a CMS and Admin user only action to reverse a contract approval
+    undoApproveContract is a CMS and Admin user only action to undo a contract approval
 
     Errors:
     - ForbiddenError:
@@ -592,9 +601,9 @@ type Mutation {
         - DB_ERROR
             - A contract cannot be found by id
     """
-    reverseApproveContract(
-        input: ReverseApproveContractInput!
-    ): ReverseApproveContractPayload
+    undoApproveContract(
+        input: UndoApproveContractInput!
+    ): UndoApproveContractPayload
 
     """
     undoUnlockContract is a CMS user only action to discard an unlocked draft and restore the last submitted contract state
@@ -772,14 +781,14 @@ input ApproveContractInput {
     updatedReason: String
 }
 
-type ReverseApproveContractPayload {
+type UndoApproveContractPayload {
     contract: Contract!
 }
 
-input ReverseApproveContractInput {
-    "The ID of the contract to reverse approval for"
+input UndoApproveContractInput {
+    "The ID of the contract to undo approval for"
     contractID: ID!
-    "The reason for reversing the approval"
+    "The reason for undoing the approval"
     updatedReason: String!
 }
 
@@ -1232,6 +1241,7 @@ union User =
     | HelpdeskUser
     | BusinessOwnerUser
     | CMSApproverUser
+    | ReadOnlyUser
 
 "StateUser is a user that works for a state, submitting packages to be reviewed by CMSUsers"
 type StateUser {
@@ -1306,6 +1316,16 @@ type HelpdeskUser {
 type BusinessOwnerUser {
     id: ID!
     "will always be 'BUSINESSOWNER_USER'"
+    role: String!
+    email: String!
+    givenName: String!
+    familyName: String!
+}
+
+"ReadOnlyUser can view all submissions and non-admin data but cannot trigger any mutation"
+type ReadOnlyUser {
+    id: ID!
+    "will always be 'READONLY_USER'"
     role: String!
     email: String!
     givenName: String!
@@ -2813,6 +2833,35 @@ input FetchContractInput {
     contractID: ID!
 }
 
+"""
+RevisionDiff is a data-only comparison between two submitted contract revisions.
+"""
+type RevisionDiff {
+    olderRevisionID: ID!
+    newerRevisionID: ID!
+    olderSubmittedAt: DateTime!
+    newerSubmittedAt: DateTime!
+    fieldChanges: [RevisionDiffFieldChange!]!
+}
+
+enum RevisionDiffFieldValueKind {
+    STRING
+    BOOLEAN
+    DATE
+    STRING_ARRAY
+}
+
+type RevisionDiffFieldValue {
+    kind: RevisionDiffFieldValueKind!
+    value: JSON
+}
+
+type RevisionDiffFieldChange {
+    fieldPath: String!
+    oldValue: RevisionDiffFieldValue
+    newValue: RevisionDiffFieldValue
+}
+
 type FetchSubmissionHistoryPayload {
     "The contract submission the history was built for."
     contractID: ID!
@@ -2822,6 +2871,17 @@ type FetchSubmissionHistoryPayload {
 
 input FetchSubmissionHistoryInput {
     contractID: ID!
+}
+
+input FetchRevisionDiffInput {
+    contractID: ID!
+    olderContractRevisionID: ID
+    newerContractRevisionID: ID
+}
+
+type FetchRevisionDiffPayload {
+    contractID: ID!
+    comparison: RevisionDiff!
 }
 
 type FetchDocumentPayload {

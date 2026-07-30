@@ -8,16 +8,16 @@ import { hasCMSPermissions, isAdminUser } from '../../domain-models'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 
-export function reverseApproveContract(
+export function undoApproveContract(
     store: Store,
     launchDarkly: LDService
-): MutationResolvers['reverseApproveContract'] {
+): MutationResolvers['undoApproveContract'] {
     return async (_parent, { input }, context) => {
         const { user } = context
 
         return withResolverSpan(
             context,
-            'reverseApproveContract',
+            'undoApproveContract',
             { 'mcreview.package_id': input.contractID },
             async (span) => {
                 setResolverDetails(span, user)
@@ -31,11 +31,7 @@ export function reverseApproveContract(
                 // Check OAuth client write permissions
                 if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logResolverError(
-                        'reverseApproveContract',
-                        errMessage,
-                        context
-                    )
+                    logResolverError('undoApproveContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -46,8 +42,8 @@ export function reverseApproveContract(
 
                 if (!hasCMSPermissions(user) && !isAdminUser(user)) {
                     const message =
-                        'user not authorized to reverse approve a contract'
-                    logResolverError('reverseApproveContract', message, context)
+                        'user not authorized to undo approve a contract'
+                    logResolverError('undoApproveContract', message, context)
                     throw createForbiddenError(message)
                 }
 
@@ -56,11 +52,7 @@ export function reverseApproveContract(
 
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
-                    logResolverError(
-                        'reverseApproveContract',
-                        errMessage,
-                        context
-                    )
+                    logResolverError('undoApproveContract', errMessage, context)
 
                     if (contractWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -80,12 +72,8 @@ export function reverseApproveContract(
                 }
 
                 if (contractWithHistory.consolidatedStatus !== 'APPROVED') {
-                    const errMessage = `Attempted to reverse approval for contract with wrong status: ${contractWithHistory.consolidatedStatus}`
-                    logResolverError(
-                        'reverseApproveContract',
-                        errMessage,
-                        context
-                    )
+                    const errMessage = `Attempted to undo approval for contract with wrong status: ${contractWithHistory.consolidatedStatus}`
+                    logResolverError('undoApproveContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -95,16 +83,12 @@ export function reverseApproveContract(
                     !latestAction ||
                     latestAction.actionType !== 'MARK_AS_APPROVED'
                 ) {
-                    const errMessage = `Cannot reverse approval: latest review action is not MARK_AS_APPROVED`
-                    logResolverError(
-                        'reverseApproveContract',
-                        errMessage,
-                        context
-                    )
+                    const errMessage = `Cannot undo approval: latest review action is not MARK_AS_APPROVED`
+                    logResolverError('undoApproveContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
-                const reverseResult = await store.reverseApproveContract({
+                const reverseResult = await store.undoApproveContract({
                     contractID: contractID,
                     updatedByID: user.id,
                     updatedReason: updatedReason,
@@ -113,7 +97,7 @@ export function reverseApproveContract(
                 if (reverseResult instanceof Error) {
                     if (reverseResult instanceof NotFoundError) {
                         logResolverError(
-                            'reverseApproveContract',
+                            'undoApproveContract',
                             reverseResult.message,
                             context
                         )
@@ -125,12 +109,8 @@ export function reverseApproveContract(
                         })
                     }
 
-                    const errMessage = `Failed to reverse approval for contract ID:${contractID}`
-                    logResolverError(
-                        'reverseApproveContract',
-                        errMessage,
-                        context
-                    )
+                    const errMessage = `Failed to undo approval for contract ID:${contractID}`
+                    logResolverError('undoApproveContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
@@ -139,7 +119,7 @@ export function reverseApproveContract(
                     })
                 }
 
-                logResolverSuccess('reverseApproveContract', context)
+                logResolverSuccess('undoApproveContract', context)
 
                 return { contract: reverseResult }
             }

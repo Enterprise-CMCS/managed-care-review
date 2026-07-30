@@ -107,11 +107,7 @@ describe('RateWithdraw', () => {
             expect(screen.getByTestId('rateWithdrawBanner')).toBeInTheDocument()
         })
 
-        expect(
-            screen.getByText(
-                'No action can be taken on this submission in its current status.'
-            )
-        ).toBeInTheDocument()
+        expect(screen.getByText('Undo withdraw')).toBeInTheDocument()
     })
 
     it('renders generic API error on failed withdraw', async () => {

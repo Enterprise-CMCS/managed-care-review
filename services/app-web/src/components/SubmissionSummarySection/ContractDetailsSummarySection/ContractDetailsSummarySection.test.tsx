@@ -22,18 +22,29 @@ describe('ContractDetailsSummarySection', () => {
     }
 
     it('can render draft submission without errors (review and submit behavior)', async () => {
-        const testContract = {
-            ...mockContractPackageDraft(),
-            documents: [
+        const testContract = mockContractPackageDraft()
+        if (!testContract.draftRevision)
+            throw new Error('Unexpected error: no draftRevision')
+        testContract.draftRevision.formData = {
+            ...testContract.draftRevision.formData,
+            supportingDocuments: [
                 {
+                    __typename: 'GenericDocument',
+                    id: 'supporting1',
                     s3URL: 's3://bucketname/key/test1',
                     name: 'supporting docs test 1',
                     sha256: 'fakesha',
+                    dateAdded: new Date(),
+                    downloadURL: s3DlUrl,
                 },
                 {
+                    __typename: 'GenericDocument',
+                    id: 'supporting3',
                     s3URL: 's3://bucketname/key/test3',
                     name: 'supporting docs test 3',
                     sha256: 'fakesha',
+                    dateAdded: new Date(),
+                    downloadURL: s3DlUrl,
                 },
             ],
         }
@@ -49,6 +60,7 @@ describe('ContractDetailsSummarySection', () => {
             }
         )
 
+        // Section heading and edit link render (review and submit behavior)
         expect(
             await screen.findByRole('heading', {
                 level: 2,
@@ -58,13 +70,74 @@ describe('ContractDetailsSummarySection', () => {
         expect(
             screen.getByRole('link', { name: 'Edit Contract details' })
         ).toHaveAttribute('href', '/contract-details')
+
+        // While editing there is no zip download link (that's submission
+        // summary behavior, covered by the next test)
+        expect(screen.queryByTestId('zipDownloadLink')).toBeNull()
+
+        // Contract detail fields render from the draft form data
         expect(
-            screen.getByRole('link', {
-                name: /Edit Contract supporting documents/,
+            within(screen.getByTestId('contractExecutionStatus')).getByText(
+                'Fully executed'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'Contract amendment effective dates',
             })
-        ).toHaveAttribute('href', '/documents')
-        const link = await screen.queryByTestId('zipDownloadLink')
-        expect(link).toBeNull()
+        ).toBeInTheDocument()
+        expect(
+            within(screen.getByTestId('managedCareEntities')).getByText(
+                'Managed Care Organization (MCO)'
+            )
+        ).toBeInTheDocument()
+        expect(
+            within(screen.getByTestId('federalAuthorities')).getByText(
+                '1932(a) State Plan Authority'
+            )
+        ).toBeInTheDocument()
+
+        // Provisions render for this contract-with-provisions submission
+        expect(
+            screen.getByRole('definition', {
+                name: 'This contract action includes new or modified provisions related to the following',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('definition', {
+                name: 'This contract action does NOT include new or modified provisions related to the following',
+            })
+        ).toBeInTheDocument()
+
+        // Contract documents section header
+        expect(
+            screen.getByRole('heading', {
+                level: 3,
+                name: 'Contract documents',
+            })
+        ).toBeInTheDocument()
+
+        // Contract documents table shows the contract doc from the mock form data
+        const contractDocsTable = await screen.findByRole('table', {
+            name: 'Contract',
+        })
+        expect(
+            within(contractDocsTable).getByText('contract document')
+        ).toBeInTheDocument()
+
+        // Supporting documents table shows both supporting docs and their category
+        const supportingDocsTable = await screen.findByRole('table', {
+            name: /Contract supporting documents/,
+        })
+        expect(
+            within(supportingDocsTable).getByText('supporting docs test 1')
+        ).toBeInTheDocument()
+        expect(
+            within(supportingDocsTable).getByText('supporting docs test 3')
+        ).toBeInTheDocument()
+        expect(
+            within(supportingDocsTable).getAllByText('Contract-supporting')
+        ).toHaveLength(2)
     })
 
     it('can render state submission on summary page without errors (submission summary behavior)', async () => {

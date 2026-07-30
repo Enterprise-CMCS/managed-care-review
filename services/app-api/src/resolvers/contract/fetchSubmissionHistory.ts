@@ -2,11 +2,7 @@ import { GraphQLError } from 'graphql'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { NotFoundError, type Store } from '../../postgres'
 import { canRead } from '../../oauth/oauthAuthorization'
-import {
-    hasAdminPermissions,
-    hasCMSPermissions,
-    isStateUser,
-} from '../../domain-models'
+import { hasReadPermissions, isStateUser } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 
@@ -88,10 +84,7 @@ export function fetchSubmissionHistoryResolver(
                             },
                         })
                     }
-                } else if (
-                    !hasCMSPermissions(user) &&
-                    !hasAdminPermissions(user)
-                ) {
+                } else if (!hasReadPermissions(user)) {
                     const errMessage = 'User not allowed to access contract'
                     logResolverError(
                         'fetchSubmissionHistory',

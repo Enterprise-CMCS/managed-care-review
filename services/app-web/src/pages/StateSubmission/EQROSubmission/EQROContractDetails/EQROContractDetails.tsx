@@ -589,7 +589,6 @@ export const EQROContractDetails = ({
 
                                         <FormGroup>
                                             <Fieldset
-                                                aria-required
                                                 legend={
                                                     isContractAmendment(
                                                         draftSubmission
@@ -684,7 +683,6 @@ export const EQROContractDetails = ({
                                                 )}
                                             >
                                                 <Fieldset
-                                                    aria-required
                                                     id="eqroNewContractor"
                                                     legend="Is this contract with a new EQRO contractor?"
                                                 >
@@ -747,7 +745,6 @@ export const EQROContractDetails = ({
                                                         )}
                                                     >
                                                         <Fieldset
-                                                            aria-required
                                                             id="eqroProvisionMcoEqrOrRelatedActivities"
                                                             legend="EQR or EQR-related activities performed on MCOs"
                                                         >
@@ -789,7 +786,6 @@ export const EQROContractDetails = ({
                                                         )}
                                                     >
                                                         <Fieldset
-                                                            aria-required
                                                             id="eqroProvisionMcoNewOptionalActivity"
                                                             legend="New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)"
                                                         >
@@ -831,7 +827,6 @@ export const EQROContractDetails = ({
                                                         )}
                                                     >
                                                         <Fieldset
-                                                            aria-required
                                                             id="eqroProvisionNewMcoEqrRelatedActivities"
                                                             legend="EQR-related activities for a new MCO managed care program"
                                                         >
@@ -868,7 +863,6 @@ export const EQROContractDetails = ({
                                                         )}
                                                     >
                                                         <Fieldset
-                                                            aria-required
                                                             id="eqroProvisionChipEqrRelatedActivities"
                                                             legend="EQR-related activities performed on the CHIP population"
                                                         >

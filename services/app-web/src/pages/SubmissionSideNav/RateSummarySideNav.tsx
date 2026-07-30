@@ -15,8 +15,8 @@ import { useQuery } from '@apollo/client/react'
 import { handleApolloError, toGQLError } from '@mc-review/helpers'
 import { Error404 } from '../Errors/Error404Page'
 import { recordJSException } from '@mc-review/otel'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
-import { Loading, NavLinkWithLogging } from '../../components'
+import { ErrorOrLoadingPage } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { NavLinkWithLogging } from '../../components'
 import { RoutesRecord } from '@mc-review/constants'
 import { isUnlockedOrDraft, shouldUseFormPageStyles } from './helpers'
 
@@ -71,11 +71,7 @@ export const RateSummarySideNav = () => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (!data && error) {
         const err = error
         console.error('Error from API fetch', error)
@@ -86,9 +82,9 @@ export const RateSummarySideNav = () => {
         }
 
         recordJSException(err)
-        return <GenericErrorPage /> // api failure
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" /> // api failure
     } else if (!loggedInUser || !rate || rate.status === 'DRAFT') {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     // All of this logic is to enable conditional styles with sidenabv

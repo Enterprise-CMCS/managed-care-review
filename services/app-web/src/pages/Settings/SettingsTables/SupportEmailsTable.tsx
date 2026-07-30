@@ -18,7 +18,7 @@ const SupportEmailsTable = () => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
-    if (config.loading) return <Loading />
+    if (config.loading) return <Loading centered />
 
     if (config.error || !config.data)
         return <SettingsErrorAlert error={config.error} />

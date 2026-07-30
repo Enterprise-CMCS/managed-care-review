@@ -100,6 +100,13 @@ const localUsers: LocalUserType[] = [
         role: 'CMS_APPROVER_USER',
         stateAssignments: [],
     },
+    {
+        id: 'user10',
+        email: 'gyatso@example.com',
+        givenName: 'Gyatso',
+        familyName: 'Monk',
+        role: 'READONLY_USER',
+    },
 ]
 
 const userAvatars: { [key: string]: string } = {
@@ -156,6 +163,7 @@ export function LocalLogin(): React.ReactElement {
                             BUSINESSOWNER_USER: 'CMS (Business Owner)',
                             HELPDESK_USER: 'CMS (Helpdesk)',
                             CMS_USER: 'CMS',
+                            READONLY_USER: 'Read Only',
                             STATE_USER:
                                 user.role === 'STATE_USER'
                                     ? user.stateCode

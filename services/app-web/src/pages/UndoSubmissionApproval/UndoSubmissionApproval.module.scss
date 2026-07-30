@@ -1,0 +1,10 @@
+@use '../../styles/custom.scss' as custom;
+@use '../../styles/uswdsImports.scss' as uswds;
+
+.undoSubmissionApprovalContainer {
+    @include custom.mini-form-page-container;
+}
+
+.formContainer {
+    @include custom.mini-form-fields;
+}

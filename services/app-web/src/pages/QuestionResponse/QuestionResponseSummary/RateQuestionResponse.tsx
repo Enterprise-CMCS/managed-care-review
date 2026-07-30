@@ -10,7 +10,7 @@ import { useParams, matchPath, useLocation } from 'react-router-dom'
 import { GridContainer } from '@trussworks/react-uswds'
 import { QuestionResponseSubmitBanner } from '../../../components'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { hasCMSUserPermissions, canViewCMSData } from '@mc-review/helpers'
 import {
     allQuestionsAnswered,
     getUserDivision,
@@ -35,6 +35,9 @@ export const RateQuestionResponse = () => {
     const { pathname } = useLocation()
     const { updateHeading, updateActiveMainContent } = usePage()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
+    // Read-only users see the CMS (review) view of Q&A, but without any write
+    // affordances, which remain gated by hasCMSPermissions.
+    const showCMSView = canViewCMSData(loggedInUser)
     let division: Division | undefined = undefined
 
     // Check current path, use rateID if we are viewing as state user since path is nested in summary path.
@@ -100,7 +103,7 @@ export const RateQuestionResponse = () => {
                     <QuestionResponseSubmitBanner submitType={submitType} />
                 )}
 
-                {hasCMSPermissions ? (
+                {showCMSView ? (
                     <CMSQuestionResponseTable
                         indexQuestions={rate.questions}
                         questionType="rate"

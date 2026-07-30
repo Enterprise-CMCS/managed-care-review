@@ -5,8 +5,11 @@ import { AppRoutes } from './AppRoutes'
 import {
     fetchCurrentUserMock,
     fetchContractWithQuestionsMockSuccess,
+    fetchContractMockSuccess,
     fetchRateWithQuestionsMockSuccess,
     mockValidCMSUser,
+    mockValidCMSApproverUser,
+    mockContractPackageUnlockedWithUnlockedType,
     indexContractsStrippedMockSuccess,
 } from '@mc-review/mocks'
 
@@ -706,5 +709,48 @@ describe('AppRoutes and routing configuration', () => {
                 ).toBeInTheDocument()
             )
         })
+    })
+
+    describe('undo submission unlock route access', () => {
+        it.each([
+            { role: 'CMS user', mockUser: mockValidCMSUser },
+            { role: 'CMS approver user', mockUser: mockValidCMSApproverUser },
+        ])(
+            'renders the undo unlock page (not 404) for a $role',
+            async ({ mockUser }) => {
+                const contract = mockContractPackageUnlockedWithUnlockedType({
+                    id: 'test-abc-123',
+                    contractSubmissionType: 'HEALTH_PLAN',
+                })
+
+                renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                    routerProvider: {
+                        route: '/submission-reviews/health-plan/test-abc-123/undo-submission-unlock',
+                    },
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockUser(),
+                            }),
+                            fetchContractMockSuccess({ contract }),
+                        ],
+                    },
+                    featureFlags: {
+                        'session-expiring-modal': false,
+                        'cms-user-undo-unlock': true,
+                    },
+                })
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('heading', {
+                            name: 'Undo unlock',
+                            level: 1,
+                        })
+                    ).toBeInTheDocument()
+                })
+            }
+        )
     })
 })

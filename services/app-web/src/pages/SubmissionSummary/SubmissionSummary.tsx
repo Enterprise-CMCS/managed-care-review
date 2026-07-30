@@ -22,7 +22,6 @@ import {
     SectionCard,
     ButtonWithLogging,
     MultiColumnGrid,
-    Loading,
 } from '../../components'
 import { usePage } from '../../contexts/PageContext'
 import {
@@ -32,7 +31,7 @@ import {
 import { useQuery } from '@apollo/client/react'
 import { ErrorForbiddenPage } from '../Errors/ErrorForbiddenPage'
 import { Error404 } from '../Errors/Error404Page'
-import { GenericErrorPage } from '../Errors/GenericErrorPage'
+import { ErrorOrLoadingPage } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import styles from './SubmissionSummary.module.scss'
 import { ChangeHistory } from '../../components/ChangeHistory'
 import { ModalOpenButton, UnlockSubmitModal } from '../../components/Modal'
@@ -80,6 +79,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const undoWithdrawSubmissionFlag = ldClient?.variation(
         featureFlags.UNDO_WITHDRAW_SUBMISSION.flag,
         featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
+    )
+
+    const cmsUserUndoUnlockFlag = ldClient?.variation(
+        featureFlags.CMS_USER_UNDO_UNLOCK.flag,
+        featureFlags.CMS_USER_UNDO_UNLOCK.defaultValue
     )
 
     const incompleteMessage = useMemo(() => {
@@ -143,11 +147,7 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     // Handle loading and error states for fetching data while using cached data
     if (!data && loading) {
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+        return <ErrorOrLoadingPage state="LOADING" />
     } else if (!data && error) {
         const gqlError = toGQLError(error)
         if (gqlError?.extensions.code === 'FORBIDDEN') {
@@ -155,10 +155,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         } else if (gqlError?.extensions.code === 'NOT_FOUND') {
             return <Error404 />
         } else {
-            return <GenericErrorPage />
+            return <ErrorOrLoadingPage state="GENERIC_ERROR" />
         }
     } else if (!contract) {
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     const submissionStatus = contract.status
@@ -206,7 +206,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         console.error(
             'missing fundamental contract data inside submission summary'
         )
-        return <GenericErrorPage />
+        return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
     // Get the correct update info depending on the submission status
@@ -265,13 +265,18 @@ export const SubmissionSummary = (): React.ReactElement => {
         hasCMSPermissions &&
         undoWithdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN'
-    const showUndoUnlockBtn = isAdminUser && consolidatedStatus === 'UNLOCKED'
-    const showNoAdminActionsMsg = !showUndoUnlockBtn && !showApprovalBtn
+    const showUndoUnlockBtn =
+        (isAdminUser || (hasCMSPermissions && cmsUserUndoUnlockFlag)) &&
+        consolidatedStatus === 'UNLOCKED'
+    const showUndoApprovalBtn = isAdminUser && consolidatedStatus === 'APPROVED'
+    const showNoAdminActionsMsg =
+        !showUndoUnlockBtn && !showApprovalBtn && !showUndoApprovalBtn
     const showNoCMSActionsMsg =
         !showApprovalBtn &&
         !showUnlockBtn &&
         !showWithdrawBtn &&
-        !showUndoWithdrawBtn
+        !showUndoWithdrawBtn &&
+        !showUndoUnlockBtn
     const showApprovalBanner =
         consolidatedStatus === 'APPROVED' && latestContractAction
     const showWithdrawnBanner =
@@ -375,7 +380,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Grid>
                 ) : (
                     <MultiColumnGrid columns={3}>
-                        {isAdminUser && showUndoUnlockBtn && (
+                        {showUndoUnlockBtn && (
                             <ButtonWithLogging
                                 className="usa-button usa-button--outline"
                                 type="button"
@@ -394,7 +399,29 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     contract.id
                                 )}
                             >
-                                Undo submission unlock
+                                Undo unlock
+                            </ButtonWithLogging>
+                        )}
+                        {showUndoApprovalBtn && (
+                            <ButtonWithLogging
+                                className="usa-button usa-button--outline"
+                                type="button"
+                                onClick={() =>
+                                    navigate(
+                                        getSubmissionPath(
+                                            'UNDO_SUBMISSION_APPROVAL',
+                                            contractSubmissionType,
+                                            contract.id
+                                        )
+                                    )
+                                }
+                                link_url={getSubmissionPath(
+                                    'UNDO_SUBMISSION_APPROVAL',
+                                    contractSubmissionType,
+                                    contract.id
+                                )}
+                            >
+                                Undo submission approval
                             </ButtonWithLogging>
                         )}
                         {hasCMSPermissions && showUnlockBtn && (

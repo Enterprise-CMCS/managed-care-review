@@ -16,34 +16,61 @@ const main: APIGatewayProxyHandler = async (event) => {
         `otel_proxy: received trace payload, body=${bodyBytes} bytes, content-type=${contentType}`
     )
 
-    if (!process.env.DD_API_KEY) {
-        console.error('otel_proxy: DD_API_KEY is not set')
-        return {
-            statusCode: 500,
-            body: JSON.stringify('DD_API_KEY is required'),
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': true,
-            },
+    // Local dev (stage === 'local') forwards traces to the local Jaeger
+    // container's OTLP port, set via OTEL_EXPORTER_OTLP_TRACES_ENDPOINT in
+    // .envrc. All other environments forward directly to Datadog; the
+    // endpoint override is ignored there so a stray env var can't redirect
+    // traces.
+    let tracesUrl: string
+    const headers: Record<string, string> = {
+        'content-type': contentType,
+    }
+    if (process.env.stage === 'local') {
+        const localEndpoint = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+        if (!localEndpoint) {
+            console.error(
+                'otel_proxy: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT is not set'
+            )
+            return {
+                statusCode: 500,
+                body: JSON.stringify(
+                    'OTEL_EXPORTER_OTLP_TRACES_ENDPOINT is required for local tracing'
+                ),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
         }
+        tracesUrl = localEndpoint
+    } else {
+        if (!process.env.DD_API_KEY) {
+            console.error('otel_proxy: DD_API_KEY is not set')
+            return {
+                statusCode: 500,
+                body: JSON.stringify('DD_API_KEY is required'),
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Credentials': true,
+                },
+            }
+        }
+        tracesUrl = DD_TRACES_URL
+        headers['dd-api-key'] = process.env.DD_API_KEY
+        headers['dd-otlp-source'] = 'datadog'
+        headers['dd-otel-span-mapping'] = '{span_name_as_resource_name: false}'
     }
 
-    const options = {
-        headers: {
-            'content-type': contentType,
-            'dd-api-key': process.env.DD_API_KEY,
-            'dd-otlp-source': 'datadog',
-            'dd-otel-span-mapping': '{span_name_as_resource_name: false}',
-        },
-    }
+    const options = { headers }
 
     const body = event.isBase64Encoded
         ? Buffer.from(event.body ?? '', 'base64')
         : event.body
 
     try {
-        const response = await axios.post(DD_TRACES_URL, body, options)
-        console.info(`otel_proxy: forwarded to datadog`, {
+        const response = await axios.post(tracesUrl, body, options)
+        console.info(`otel_proxy: forwarded traces`, {
+            url: tracesUrl,
             status: response.status,
             responseData: response.data,
         })
@@ -53,9 +80,9 @@ const main: APIGatewayProxyHandler = async (event) => {
             response?: { status: number; data: unknown }
             code?: string
         }
-        console.error('otel_proxy: failed to forward to datadog', {
+        console.error('otel_proxy: failed to forward traces', {
             message: parsed.message,
-            url: DD_TRACES_URL,
+            url: tracesUrl,
             httpStatus: axiosErr.response?.status,
             responseData: axiosErr.response?.data,
             code: axiosErr.code,

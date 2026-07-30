@@ -6,6 +6,36 @@
     text-align: center;
 }
 
+// Centers the spinner within the main content area (below the header,
+// above the footer) regardless of any sidebar in the surrounding layout.
+// Relies on the parent `.mainContent` region being position: relative.
+// The opaque background covers the sidebar (and any other page content) so
+// only the centered spinner shows while the page is loading.
+.fullPageLoading {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background-color: uswds.color('base-lightest');
+}
+
+// Centers the spinner within its own content container without covering
+// sibling content (e.g. the Settings tab nav). In-flow and transparent, with a
+// min-height so it stays vertically centered even when the container is short.
+.centeredLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 20rem;
+    text-align: center;
+}
+
 .loadingLabel {
     margin-bottom: uswds.units(2);
 }

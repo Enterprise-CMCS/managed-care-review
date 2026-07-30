@@ -6,6 +6,10 @@
     width: 100%;
 }
 
+.banner {
+    margin: uswds.units(3) auto uswds.units(4) auto;
+}
+
 // Matches the Required/Optional indicator used by FieldTextarea in the state
 // submission forms, for required fields on the plain-state admin Q&A form.
 .requiredOptionalText {
@@ -15,7 +19,7 @@
 
 .container {
     max-width: custom.$mcr-container-standard-width-fixed;
-    padding-bottom: 2rem;
+    padding: 0 0 2rem 0;
 
     h1 {
         margin-top: 34px;
@@ -59,7 +63,6 @@
 
 .questionSection {
     @extend %questionSection;
-    margin-top: 0px;
     [class*='summarySectionHeader'] {
         padding-bottom: 0;
         margin-bottom: 0;

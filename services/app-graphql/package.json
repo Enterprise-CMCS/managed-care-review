@@ -6,17 +6,17 @@
     "license": "MIT",
     "scripts": {
         "generate": "pnpm gqlgen",
-        "gqlgen": "graphql-codegen",
-        "gqlgen:watch": "graphql-codegen --watch",
+        "gqlgen": "graphql-codegen-cjs",
+        "gqlgen:watch": "graphql-codegen-cjs --watch",
         "prettier": "npx prettier -u --write \"**/*.+(ts|tsx|json)\""
     },
     "devDependencies": {
-        "@graphql-codegen/cli": "^6.2.1",
-        "@graphql-codegen/introspection": "^5.0.2",
+        "@graphql-codegen/cli": "^7.2.0",
+        "@graphql-codegen/introspection": "^6.1.0",
         "@graphql-codegen/typescript": "^5.0.8",
         "@graphql-codegen/typescript-operations": "^4.2.1",
         "@graphql-codegen/typed-document-node": "^7.0.0",
-        "@graphql-codegen/typescript-resolvers": "^6.0.2",
+        "@graphql-codegen/typescript-resolvers": "^6.1.0",
         "graphql": "^16.14.0"
     },
     "dependencies": {

@@ -1,10 +1,6 @@
 import type { Span } from '@opentelemetry/api'
 import { createForbiddenError } from '../errorUtils'
-import {
-    isStateUser,
-    hasAdminPermissions,
-    hasCMSPermissions,
-} from '../../domain-models'
+import { isStateUser, hasReadPermissions } from '../../domain-models'
 import type { ContractType } from '../../domain-models'
 import type {
     QueryResolvers,
@@ -272,7 +268,7 @@ export function indexContractsResolver(
 
                 // CMS/Admin users do not need draft freshness, so the flagged path can
                 // push updatedWithin into the DB using the stored lastActionDate.
-                if (hasAdminPermissions(user) || hasCMSPermissions(user)) {
+                if (hasReadPermissions(user)) {
                     const cleanedStatuses =
                         input?.statusesToExclude?.filter(
                             (s): s is ConsolidatedContractStatus => s != null

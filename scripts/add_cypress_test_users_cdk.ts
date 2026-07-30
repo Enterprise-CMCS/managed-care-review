@@ -50,6 +50,7 @@ type UserRole =
     | 'HELPDESK_USER'
     | 'BUSINESSOWNER_USER'
     | 'CMS_APPROVER_USER'
+    | 'READONLY_USER'
 
 // these are the exact roles as they are set by IDM
 function IDMRole(role: UserRole): string {
@@ -66,6 +67,8 @@ function IDMRole(role: UserRole): string {
             return 'macmcrrs-bo'
         case 'CMS_APPROVER_USER':
             return 'macmcrrs-cms-approver'
+        case 'READONLY_USER':
+            return 'macmcrrs-ro-user'
         case 'UNKNOWN_USER':
             return 'foo-bar-user'
     }
@@ -263,6 +266,13 @@ async function main() {
             familyName: 'Hotman',
             email: 'azula@example.com',
             role: 'CMS_APPROVER_USER' as const,
+            state: undefined,
+        },
+        {
+            name: 'Gyatso',
+            familyName: 'Monk',
+            email: 'gyatso@example.com',
+            role: 'READONLY_USER' as const,
             state: undefined,
         },
     ]

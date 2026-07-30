@@ -15,7 +15,7 @@ import {
     FetchContractWithQuestionsDocument,
 } from '../../../gen/gqlClient'
 import { GenericErrorPage } from '../../Errors/GenericErrorPage'
-import { hasCMSUserPermissions } from '@mc-review/helpers'
+import { hasCMSUserPermissions, canViewCMSData } from '@mc-review/helpers'
 import {
     allQuestionsAnswered,
     getUserDivision,
@@ -35,6 +35,9 @@ export const ContractQuestionResponse = () => {
     const { updateHeading, updateActiveMainContent } = usePage()
     const { loggedInUser } = useAuth()
     const hasCMSPermissions = hasCMSUserPermissions(loggedInUser)
+    // Read-only users see the CMS (review) view of Q&A, but without any write
+    // affordances, which remain gated by hasCMSPermissions.
+    const showCMSView = canViewCMSData(loggedInUser)
 
     const { data, loading, error } = useQuery(
         FetchContractWithQuestionsDocument,
@@ -92,13 +95,18 @@ export const ContractQuestionResponse = () => {
             <GridContainer className={styles.container}>
                 <h1>Contract questions</h1>
 
-                {hasCMSPermissions && !division && <UserAccountWarningBanner />}
-
-                {submitType && (
-                    <QuestionResponseSubmitBanner submitType={submitType} />
+                {hasCMSPermissions && !division && (
+                    <UserAccountWarningBanner className={styles.banner} />
                 )}
 
-                {hasCMSPermissions ? (
+                {submitType && (
+                    <QuestionResponseSubmitBanner
+                        submitType={submitType}
+                        className={styles.banner}
+                    />
+                )}
+
+                {showCMSView ? (
                     <CMSQuestionResponseTable
                         indexQuestions={contract.questions}
                         questionType="contract"

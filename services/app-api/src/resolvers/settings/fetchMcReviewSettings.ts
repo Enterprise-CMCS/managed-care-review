@@ -2,7 +2,7 @@ import type { Store } from '../../postgres'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { logResolverError, logResolverSuccess } from '../../logger'
-import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
+import { hasReadPermissions } from '../../domain-models'
 import { createForbiddenError } from '../errorUtils'
 import { GraphQLError } from 'graphql'
 import type { Emailer } from '../../emailer'
@@ -29,7 +29,7 @@ export function fetchMcReviewSettings(
                     throw createForbiddenError(oauthErr)
                 }
 
-                if (!hasCMSPermissions(user) && !hasAdminPermissions(user)) {
+                if (!hasReadPermissions(user)) {
                     const msg =
                         'user not authorized to fetch mc review settings'
                     logResolverError('fetchMcReviewSettings', msg, context)

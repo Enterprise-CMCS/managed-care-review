@@ -1,4 +1,4 @@
-import { GridContainer, Table } from '@trussworks/react-uswds'
+import { Table } from '@trussworks/react-uswds'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
     createColumnHelper,
@@ -254,12 +254,7 @@ export const DivisionAssignmentTable = (): React.ReactElement => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
-    if (indexUsersResult.status === 'LOADING')
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+    if (indexUsersResult.status === 'LOADING') return <Loading centered />
 
     if (indexUsersResult.status === 'ERROR')
         return <SettingsErrorAlert error={indexUsersResult.error} />

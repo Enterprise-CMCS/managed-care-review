@@ -2,11 +2,7 @@ import { GraphQLError } from 'graphql'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { NotFoundError, type Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
-import {
-    isStateUser,
-    hasCMSPermissions,
-    hasAdminPermissions,
-} from '../../domain-models'
+import { isStateUser, hasReadPermissions } from '../../domain-models'
 import { canRead } from '../../oauth/oauthAuthorization'
 import { logResolverError, logResolverSuccess } from '../../logger'
 
@@ -76,10 +72,7 @@ export function fetchContractResolver(
                             },
                         })
                     }
-                } else if (
-                    !hasCMSPermissions(user) &&
-                    !hasAdminPermissions(user)
-                ) {
+                } else if (!hasReadPermissions(user)) {
                     const errMessage = 'User not allowed to access contract'
                     logResolverError('fetchContract', errMessage, context)
                     throw new GraphQLError(errMessage, {

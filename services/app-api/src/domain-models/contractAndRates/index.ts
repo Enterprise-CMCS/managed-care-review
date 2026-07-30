@@ -85,6 +85,12 @@ export type {
 } from './submissionHistoryTypes'
 
 export type {
+    RevisionDiff,
+    RevisionDiffFieldChange,
+    RevisionDiffCollectionItemChange,
+} from './revisionDiffTypes'
+
+export type {
     ContractReviewStatusType,
     ContractSubmissionType,
 } from './baseContractRateTypes'

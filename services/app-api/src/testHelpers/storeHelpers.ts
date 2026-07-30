@@ -119,6 +119,9 @@ function mockStoreThatErrors(): Store {
         findSubmissionHistoryByContractID: async (_ID) => {
             return genericError
         },
+        findRevisionDiffByContractID: async (_args) => {
+            return genericError
+        },
 
         findRateWithHistory: async (_ID) => {
             return genericError
@@ -180,7 +183,7 @@ function mockStoreThatErrors(): Store {
         approveContract: async (_ID) => {
             return genericError
         },
-        reverseApproveContract: async (_ID) => {
+        undoApproveContract: async (_ID) => {
             return genericError
         },
         undoUnlockContract: async (_ID) => {

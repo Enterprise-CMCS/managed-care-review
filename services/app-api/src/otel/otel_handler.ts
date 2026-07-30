@@ -31,6 +31,23 @@ function getDDHeaders() {
     }
 }
 
+// Local dev (stage === 'local') exports traces to the local Jaeger
+// container's OTLP port, set via OTEL_EXPORTER_OTLP_TRACES_ENDPOINT in
+// .envrc. All other environments export directly to Datadog; the endpoint
+// override is ignored there so a stray env var can't redirect traces.
+function getExporterConfig() {
+    if (process.env.stage === 'local') {
+        const localEndpoint = process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+        if (!localEndpoint) {
+            throw new Error(
+                'Configuration error: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT environment variable is required for local OpenTelemetry'
+            )
+        }
+        return { url: localEndpoint, headers: {} }
+    }
+    return { url: DD_TRACES_URL, headers: getDDHeaders() }
+}
+
 export function initTracer(serviceName: string) {
     // Skip OTEL setup under unit tests (setupTests.ts sets stage='test'). This
     // keeps tests hermetic: without a registered provider, recordException/
@@ -57,10 +74,7 @@ export function initTracer(serviceName: string) {
         })
     )
 
-    const exporter = new OTLPTraceExporter({
-        url: DD_TRACES_URL,
-        headers: getDDHeaders(),
-    })
+    const exporter = new OTLPTraceExporter(getExporterConfig())
     const provider = new NodeTracerProvider({
         resource,
         spanProcessors: [new BatchSpanProcessor(exporter)],

@@ -83,3 +83,11 @@ fragment businessUserFragment on BusinessOwnerUser {
     familyName
     givenName
 }
+
+fragment readOnlyUserFragment on ReadOnlyUser {
+    id
+    email
+    role
+    familyName
+    givenName
+}

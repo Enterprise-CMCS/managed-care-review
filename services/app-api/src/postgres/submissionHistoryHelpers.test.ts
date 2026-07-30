@@ -18,7 +18,7 @@ import {
     createAndUpdateTestContractWithRate,
     fetchTestContract,
     overrideTestContractData,
-    reverseApproveTestContract,
+    undoApproveTestContract,
     submitTestContract,
     unlockTestContract,
     undoUnlockTestContract,
@@ -377,7 +377,7 @@ describe('buildContractSubmissionHistory', () => {
         // Reversing approval appends an UNDER_REVIEW review-status action. The
         // builder should copy it through so lastActionDate can move when review
         // status returns to under review.
-        await reverseApproveTestContract(
+        await undoApproveTestContract(
             cmsServer,
             submittedContract.id,
             'Approval was made in error'
@@ -1632,6 +1632,7 @@ describe('buildCompleteHistory', () => {
         expect(completeHistory.map((entry) => entry.actionType)).toEqual([
             'CONTRACT_QUESTION_RESPONSE',
             'CONTRACT_QUESTION',
+            'UNDER_REVIEW',
             'CONTRACT_SUBMISSION',
         ])
         expect(

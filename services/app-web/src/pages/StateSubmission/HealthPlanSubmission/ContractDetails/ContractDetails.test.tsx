@@ -734,7 +734,6 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/15/edit/contract-details',
                     },
-                    featureFlags: { dsnp: true },
                 }
             )
 
@@ -744,15 +743,14 @@ describe('ContractDetails', () => {
                     'Does this contract action include provisions related to any of the following'
                 )
             ).toBeNull()
-            expect(
-                screen.queryAllByTestId('yes-no-radio-fieldset')
-            ).toHaveLength(1) //Should only find the d-snp question
         })
 
         it('can set provisions for CHIP only amendment', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()
             draftContract.draftRevision.formData.populationCovered = 'CHIP'
             draftContract.draftRevision.formData.contractType = 'AMENDMENT'
+            draftContract.draftRevision.formData.submissionType =
+                'CONTRACT_ONLY'
 
             renderWithProviders(
                 <Routes>
@@ -777,7 +775,6 @@ describe('ContractDetails', () => {
                     routerProvider: {
                         route: '/submissions/health-plan/15/edit/contract-details',
                     },
-                    featureFlags: { dsnp: true },
                 }
             )
 
@@ -808,7 +805,7 @@ describe('ContractDetails', () => {
 
             // overall number of provisions should be correct
             expect(screen.getAllByTestId('yes-no-radio-fieldset')).toHaveLength(
-                provisionCHIPKeys.length + 1 //+1 to account for the unrelated dsnp question
+                provisionCHIPKeys.length
             )
         })
 

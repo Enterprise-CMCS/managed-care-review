@@ -36,6 +36,7 @@ const roleOptions = [
     { value: 'HELPDESK_USER', label: 'Helpdesk User' },
     { value: 'BUSINESSOWNER_USER', label: 'Business Owner' },
     { value: 'ADMIN_USER', label: 'Admin User' },
+    { value: 'READONLY_USER', label: 'Read Only User' },
 ]
 
 interface AddLocalUserFromValueType {

@@ -18,7 +18,7 @@ import {
     FilterSelectedOptionsType,
 } from '../../../components/FilterAccordion'
 import { MultiColumnGrid, Loading, RowCellElement } from '../../../components'
-import { GridContainer, Table } from '@trussworks/react-uswds'
+import { Table } from '@trussworks/react-uswds'
 
 import styles from '../Settings.module.scss'
 import { pluralize } from '@mc-review/common-code'
@@ -30,6 +30,8 @@ import { EditLink, formatUserNamesFromUsers } from '../'
 import { SettingsErrorAlert } from '../SettingsErrorAlert'
 import { getTealiumFiltersChanged } from '../../../tealium/tealiumHelpers'
 import { usePage } from '../../../contexts/PageContext'
+import { useAuth } from '../../../contexts/AuthContext'
+import { hasReadOnlyUserPermissions } from '@mc-review/helpers'
 
 type AnalystDisplayType = {
     email: string
@@ -104,6 +106,8 @@ const StateAssignmentTable = () => {
     const { updateActiveMainContent } = usePage()
     const { stateAnalysts: analysts } =
         useOutletContext<MCReviewSettingsContextType>()
+    const { loggedInUser } = useAuth()
+    const isReadOnlyUser = hasReadOnlyUserPermissions(loggedInUser)
 
     const activeMainContentId = 'stateAssignmentPageMainContent'
     // Set the active main content to focus when click the Skip to main content button.
@@ -129,19 +133,23 @@ const StateAssignmentTable = () => {
                 cell: (info) => formatUserNamesFromUsers(info.getValue()),
                 filterFn: 'analystFilter',
             }),
-            columnHelper.accessor('editLink', {
-                id: 'editLink',
-                header: 'Edit state assignment',
-                cell: (info) => (
-                    <EditLink
-                        rowID={info.row.original.stateCode}
-                        url={info.getValue()}
-                        fieldName={info.row.original.stateName}
-                    />
-                ),
-            }),
+            ...(isReadOnlyUser
+                ? []
+                : [
+                      columnHelper.accessor('editLink', {
+                          id: 'editLink',
+                          header: 'Edit state assignment',
+                          cell: (info) => (
+                              <EditLink
+                                  rowID={info.row.original.stateCode}
+                                  url={info.getValue()}
+                                  fieldName={info.row.original.stateName}
+                              />
+                          ),
+                      }),
+                  ]),
         ],
-        []
+        [isReadOnlyUser]
     )
 
     const reactTable = useReactTable({
@@ -255,12 +263,7 @@ const StateAssignmentTable = () => {
         }
     }, [rowCount, columnFilters, setPrevFilters, prevFilters])
 
-    if (analysts.loading)
-        return (
-            <GridContainer>
-                <Loading />
-            </GridContainer>
-        )
+    if (analysts.loading) return <Loading centered />
 
     if (analysts.error || !analysts.data)
         return <SettingsErrorAlert error={analysts.error} />
@@ -269,8 +272,9 @@ const StateAssignmentTable = () => {
         <div id={activeMainContentId}>
             <h1>State assignments</h1>
             <p>
-                Below is a list of the DMCO staff assigned to states. To edit
-                the assigned staff click on the edit link below.
+                {isReadOnlyUser
+                    ? 'Below is a list of the DMCO staff assigned to states.'
+                    : 'Below is a list of the DMCO staff assigned to states. To edit the assigned staff click on the edit link below.'}
             </p>
             <FilterAccordion
                 onClearFilters={clearFilters}

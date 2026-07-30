@@ -6,8 +6,9 @@ import {
     UpdateContractDraftRevisionDocument,
     CreateContractDocument,
     FetchContractWithQuestionsDocument,
+    FetchRevisionDiffDocument,
     ApproveContractDocument,
-    ReverseApproveContractDocument,
+    UndoApproveContractDocument,
     UndoUnlockContractDocument,
     WithdrawContractDocument,
     UndoWithdrawContractDocument,
@@ -24,6 +25,8 @@ import type {
     UnlockedContract,
     CreateContractInput,
     OverrideContractDataInput,
+    FetchRevisionDiffInput,
+    FetchRevisionDiffPayload,
 } from '../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { addNewRateToTestContract } from './gqlRateHelpers'
@@ -206,6 +209,28 @@ async function fetchTestContract(
     return result.data.fetchContract.contract
 }
 
+async function fetchTestRevisionDiff(
+    server: ApolloServer,
+    input: FetchRevisionDiffInput
+): Promise<FetchRevisionDiffPayload> {
+    const result = await executeGraphQLOperation(server, {
+        query: FetchRevisionDiffDocument,
+        variables: { input },
+    })
+
+    if (result.errors) {
+        throw new Error(
+            `fetchTestRevisionDiff query failed with errors ${JSON.stringify(result.errors)}`
+        )
+    }
+
+    if (!result.data.fetchRevisionDiff) {
+        throw new Error('fetchTestRevisionDiff returned nothing')
+    }
+
+    return result.data.fetchRevisionDiff
+}
+
 async function approveTestContract(
     server: ApolloServer,
     contractID: string,
@@ -236,7 +261,7 @@ async function approveTestContract(
     return result.data.approveContract.contract
 }
 
-async function reverseApproveTestContract(
+async function undoApproveTestContract(
     server: ApolloServer,
     contractID: string,
     updatedReason?: string
@@ -246,21 +271,21 @@ async function reverseApproveTestContract(
         updatedReason: updatedReason || 'Reversing approval',
     }
     const result = await executeGraphQLOperation(server, {
-        query: ReverseApproveContractDocument,
+        query: UndoApproveContractDocument,
         variables: { input },
     })
 
     if (result.errors) {
         throw new Error(
-            `reverseApproveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
+            `undoApproveTestContract mutation failed with errors ${JSON.stringify(result.errors)}`
         )
     }
 
-    if (!result.data.reverseApproveContract.contract) {
-        throw new Error('reverseApproveTestContract returned nothing')
+    if (!result.data.undoApproveContract.contract) {
+        throw new Error('undoApproveTestContract returned nothing')
     }
 
-    return result.data.reverseApproveContract.contract
+    return result.data.undoApproveContract.contract
 }
 
 async function undoUnlockTestContract(
@@ -501,6 +526,9 @@ const createAndUpdateTestContractWithoutRates = async (
     formData.modifiedLengthOfContract = false
     formData.statutoryRegulatoryAttestation = false
     formData.statutoryRegulatoryAttestationDescription = 'No compliance'
+    // dsnp flag is on by default, and STATE_PLAN is a dsnp-triggering federal
+    // authority, so dsnpContract must be answered for the submit to validate
+    formData.dsnpContract = false
 
     Object.assign(formData, contractFormDataOverrides)
 
@@ -752,9 +780,10 @@ export {
     unlockTestContract,
     createAndSubmitTestContract,
     approveTestContract,
-    reverseApproveTestContract,
+    undoApproveTestContract,
     undoUnlockTestContract,
     fetchTestContract,
+    fetchTestRevisionDiff,
     fetchTestContractWithQuestions,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,

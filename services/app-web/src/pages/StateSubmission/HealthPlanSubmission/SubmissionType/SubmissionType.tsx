@@ -410,7 +410,6 @@ export const SubmissionType = ({
                                         <Fieldset
                                             className={styles.radioGroup}
                                             role="radiogroup"
-                                            aria-required
                                             legend="Which populations does this contract action cover?"
                                         >
                                             <span
@@ -560,9 +559,6 @@ export const SubmissionType = ({
                                         <Fieldset
                                             className={styles.radioGroup}
                                             role="radiogroup"
-                                            aria-required={
-                                                !hasPreviouslySubmittedRates
-                                            }
                                             defaultValue={values.submissionType}
                                             legend="Choose a submission type"
                                             id="submissionType"
@@ -656,7 +652,6 @@ export const SubmissionType = ({
                                     >
                                         <Fieldset
                                             role="radiogroup"
-                                            aria-required
                                             className={styles.radioGroup}
                                             legend="Contract action type"
                                             id="contractType"

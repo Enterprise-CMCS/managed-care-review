@@ -1,5 +1,5 @@
 import { createForbiddenError } from '../errorUtils'
-import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
+import { hasReadPermissions } from '../../domain-models'
 import type { QueryResolvers } from '../../gen/gqlServer'
 import { logResolverError } from '../../logger'
 import type { Store } from '../../postgres'
@@ -17,10 +17,7 @@ export function indexUsersResolver(store: Store): QueryResolvers['indexUsers'] {
             async (span) => {
                 setResolverDetails(span, currentUser)
 
-                if (
-                    !hasAdminPermissions(currentUser) &&
-                    !hasCMSPermissions(currentUser)
-                ) {
+                if (!hasReadPermissions(currentUser)) {
                     const errMsg = 'user not authorized to fetch users'
                     logResolverError('indexUsers', errMsg, context)
                     throw createForbiddenError(errMsg)

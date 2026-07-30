@@ -413,7 +413,6 @@ describe('Health plan parsing and validation', () => {
                         populationCovered: 'CHIP',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
-                        dsnpContract: true,
                         submissionDescription: 'A real submission',
                         supportingDocuments: [
                             {
@@ -535,6 +534,7 @@ describe('Health plan parsing and validation', () => {
                 {
                     '438-attestation': true,
                     dsnp: true,
+                    'chip-submission-automation': true,
                 }
             )
             if (!(parsedContract instanceof Error)) {
@@ -542,7 +542,7 @@ describe('Health plan parsing and validation', () => {
                     'Unexpected error: Was expecting validateContractDraftRevisionInput to return and error'
                 )
             }
-            expect(parsedContract.issues).toHaveLength(6)
+            expect(parsedContract.issues).toHaveLength(5)
             const errMessages = parsedContract.issues.map((err) => err.message)
             expect(errMessages[0]).toContain(
                 'Too small: expected array to have >=1 items'
@@ -556,16 +556,49 @@ describe('Health plan parsing and validation', () => {
             expect(errMessages[3]).toContain(
                 'statutoryRegulatoryAttestationDescription is required when 438-attestation feature flag is on'
             )
-            expect(errMessages[4]).toContain(
-                'rateMedicaidPopulations is required when dsnpContract is true'
-            )
             // The rate is linked (parentContractID !== contract.id), so its rateProgramIDs
             // are excluded from this contract's program validation. Only the contract's own
             // 'fake-id' should surface in the error.
-            expect(errMessages[5]).toContain(
+            expect(errMessages[4]).toContain(
                 'Program(s) in [fake-id] are not valid FL programs'
             )
-            expect(errMessages[5]).not.toContain('fakerateprogramid')
+            expect(errMessages[4]).not.toContain('fakerateprogramid')
+        })
+        it('return error if rateMedicaidPopulations is missing when dsnpContract is true', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            // dsnpContract is only valid on non-CHIP populations, so this rule
+            // is exercised on the default MEDICAID mock (dsnpContract: true)
+            const contract = mockSubmittableHealthPlanContract()
+            if (!contract.draftRates?.[0]?.draftRevision) {
+                throw new Error('Unexpected error: missing draft rate revision')
+            }
+            contract.draftRates[0].draftRevision.formData.rateMedicaidPopulations =
+                []
+
+            const parsedContract = parseContract(
+                contract,
+                'KY',
+                postgresStore,
+                {
+                    '438-attestation': true,
+                    dsnp: true,
+                    'chip-submission-automation': true,
+                }
+            )
+            if (!(parsedContract instanceof Error)) {
+                throw new Error(
+                    'Expected parseContract to return an error for missing rateMedicaidPopulations'
+                )
+            }
+            const errMessages = parsedContract.issues.map((err) => err.message)
+            expect(
+                errMessages.some((m) =>
+                    m.includes(
+                        'rateMedicaidPopulations is required when dsnpContract is true'
+                    )
+                )
+            ).toBe(true)
         })
         it('return error if dnspContract is required but not populated', async () => {
             const prismaClient = await sharedTestPrismaClient()

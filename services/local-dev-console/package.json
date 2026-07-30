@@ -9,7 +9,7 @@
         "build": "tsc --noEmit"
     },
     "dependencies": {
-        "@launchdarkly/node-server-sdk": "9.10.13",
+        "@launchdarkly/node-server-sdk": "9.12.1",
         "@mc-review/common-code": "workspace:*",
         "express": "^5.2.1",
         "react": "^19.0.0",

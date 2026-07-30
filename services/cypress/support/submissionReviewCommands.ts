@@ -12,6 +12,9 @@ Cypress.Commands.add('unlockSubmission', (unlockReason) => {
 
     cy.findByText(
         'No action can be taken on this submission in its current status.'
+    ).should('not.exist')
+    cy.findByText(
+        'Undo unlock'
     ).should('exist')
     cy.findAllByTestId('modalWindow').eq(1).should('be.hidden')
 

@@ -9,6 +9,7 @@ type UserType =
     | HelpdeskUserType
     | BusinessOwnerUserType
     | CMSApproverUserType
+    | ReadOnlyUserType
 
 const userRolesSchema = z.enum([
     'STATE_USER',
@@ -17,6 +18,7 @@ const userRolesSchema = z.enum([
     'ADMIN_USER',
     'HELPDESK_USER',
     'BUSINESSOWNER_USER',
+    'READONLY_USER',
 ])
 
 const baseUserSchema = z.object({
@@ -64,6 +66,12 @@ const businessOwnerUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.BUSINESSOWNER_USER),
 })
 
+// Read-only users can view all submissions and non-admin data but cannot
+// trigger any mutation. They are not scoped to a state or division.
+const readOnlyUserSchema = baseUserSchema.extend({
+    role: z.literal(userRolesSchema.enum.READONLY_USER),
+})
+
 type StateUserType = z.infer<typeof stateUserSchema>
 
 type AdminUserType = z.infer<typeof adminUserSchema>
@@ -71,6 +79,8 @@ type AdminUserType = z.infer<typeof adminUserSchema>
 type HelpdeskUserType = z.infer<typeof helpdeskUserSchema>
 
 type BusinessOwnerUserType = z.infer<typeof businessOwnerUserSchema>
+
+type ReadOnlyUserType = z.infer<typeof readOnlyUserSchema>
 
 type CMSUserType = z.infer<typeof cmsUserSchema>
 
@@ -89,6 +99,7 @@ export type {
     HelpdeskUserType,
     BusinessOwnerUserType,
     CMSApproverUserType,
+    ReadOnlyUserType,
     UserType,
     UserRoles,
     CMSUsersUnionType,
@@ -102,4 +113,5 @@ export {
     baseUserSchema,
     cmsUsersUnionSchema,
     adminUserSchema,
+    readOnlyUserSchema,
 }

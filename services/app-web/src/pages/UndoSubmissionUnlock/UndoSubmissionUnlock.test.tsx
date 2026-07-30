@@ -57,15 +57,15 @@ describe('UndoSubmissionUnlock', () => {
         await waitFor(() => {
             expect(
                 screen.getByRole('heading', {
-                    name: 'Undo submission unlock',
+                    name: 'Undo unlock',
                     level: 1,
                 })
             ).toBeInTheDocument()
             expect(
-                screen.getByText('Reason for undoing the submission unlock.')
+                screen.getByText('Reason for undoing the unlock')
             ).toBeInTheDocument()
             expect(
-                screen.getByRole('button', { name: 'Undo submission unlock' })
+                screen.getByRole('button', { name: 'Undo unlock' })
             ).toBeInTheDocument()
         })
     })
@@ -122,7 +122,7 @@ describe('UndoSubmissionUnlock', () => {
         await waitFor(() => {
             expect(
                 screen.getByRole('heading', {
-                    name: /Undo submission unlock/,
+                    name: /Undo unlock/,
                     level: 1,
                 })
             ).toBeInTheDocument()
@@ -182,7 +182,7 @@ describe('UndoSubmissionUnlock', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByRole('button', { name: 'Undo submission unlock' })
+                screen.getByRole('button', { name: 'Undo unlock' })
             ).toBeInTheDocument()
         })
 
@@ -190,7 +190,7 @@ describe('UndoSubmissionUnlock', () => {
             'undoSubmissionUnlockReason'
         )
         const undoUnlockBtn = screen.getByRole('button', {
-            name: 'Undo submission unlock',
+            name: 'Undo unlock',
         })
 
         await user.type(undoUnlockReasonInput, 'undo reason')
@@ -240,19 +240,19 @@ describe('UndoSubmissionUnlock', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByRole('button', { name: 'Undo submission unlock' })
+                screen.getByRole('button', { name: 'Undo unlock' })
             ).toBeInTheDocument()
         })
 
         const undoUnlockBtn = screen.getByRole('button', {
-            name: 'Undo submission unlock',
+            name: 'Undo unlock',
         })
 
         await user.click(undoUnlockBtn)
 
         await waitFor(() => {
             expect(
-                screen.getByText('You must provide a reason for this change.')
+                screen.getByText('You must enter a reason')
             ).toBeInTheDocument()
         })
     })
@@ -314,7 +314,7 @@ describe('UndoSubmissionUnlock', () => {
 
         await waitFor(() => {
             expect(
-                screen.getByRole('button', { name: 'Undo submission unlock' })
+                screen.getByRole('button', { name: 'Undo unlock' })
             ).toBeInTheDocument()
         })
 
@@ -322,7 +322,7 @@ describe('UndoSubmissionUnlock', () => {
             'undoSubmissionUnlockReason'
         )
         const undoUnlockBtn = screen.getByRole('button', {
-            name: 'Undo submission unlock',
+            name: 'Undo unlock',
         })
 
         await user.type(undoUnlockReasonInput, 'Undo submission unlock')
