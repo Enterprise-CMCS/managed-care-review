@@ -81,6 +81,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
     )
 
+    const cmsUserUndoUnlockFlag = ldClient?.variation(
+        featureFlags.CMS_USER_UNDO_UNLOCK.flag,
+        featureFlags.CMS_USER_UNDO_UNLOCK.defaultValue
+    )
+
     const incompleteMessage = useMemo(() => {
         if (isStateUser) {
             return 'You must contact your CMS point of contact and request an unlock to complete the submission.'
@@ -260,16 +265,18 @@ export const SubmissionSummary = (): React.ReactElement => {
         hasCMSPermissions &&
         undoWithdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN'
-    const showUndoUnlockBtn = isAdminUser && consolidatedStatus === 'UNLOCKED'
-    const showUndoApprovalBtn =
-        isAdminUser && consolidatedStatus === 'APPROVED'
+    const showUndoUnlockBtn =
+        (isAdminUser || (hasCMSPermissions && cmsUserUndoUnlockFlag)) &&
+        consolidatedStatus === 'UNLOCKED'
+    const showUndoApprovalBtn = isAdminUser && consolidatedStatus === 'APPROVED'
     const showNoAdminActionsMsg =
         !showUndoUnlockBtn && !showApprovalBtn && !showUndoApprovalBtn
     const showNoCMSActionsMsg =
         !showApprovalBtn &&
         !showUnlockBtn &&
         !showWithdrawBtn &&
-        !showUndoWithdrawBtn
+        !showUndoWithdrawBtn &&
+        !showUndoUnlockBtn
     const showApprovalBanner =
         consolidatedStatus === 'APPROVED' && latestContractAction
     const showWithdrawnBanner =
@@ -373,7 +380,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     </Grid>
                 ) : (
                     <MultiColumnGrid columns={3}>
-                        {isAdminUser && showUndoUnlockBtn && (
+                        {showUndoUnlockBtn && (
                             <ButtonWithLogging
                                 className="usa-button usa-button--outline"
                                 type="button"
@@ -392,7 +399,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                                     contract.id
                                 )}
                             >
-                                Undo submission unlock
+                                Undo unlock
                             </ButtonWithLogging>
                         )}
                         {showUndoApprovalBtn && (

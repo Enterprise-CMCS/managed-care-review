@@ -31,11 +31,7 @@ export function undoApproveContract(
                 // Check OAuth client write permissions
                 if (!canOauthWrite(context, featureFlags)) {
                     const errMessage = `OAuth client does not have write permissions`
-                    logResolverError(
-                        'undoApproveContract',
-                        errMessage,
-                        context
-                    )
+                    logResolverError('undoApproveContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'FORBIDDEN',
@@ -56,11 +52,7 @@ export function undoApproveContract(
 
                 if (contractWithHistory instanceof Error) {
                     const errMessage = `Issue finding contract message: ${contractWithHistory.message}`
-                    logResolverError(
-                        'undoApproveContract',
-                        errMessage,
-                        context
-                    )
+                    logResolverError('undoApproveContract', errMessage, context)
 
                     if (contractWithHistory instanceof NotFoundError) {
                         throw new GraphQLError(errMessage, {
@@ -81,11 +73,7 @@ export function undoApproveContract(
 
                 if (contractWithHistory.consolidatedStatus !== 'APPROVED') {
                     const errMessage = `Attempted to undo approval for contract with wrong status: ${contractWithHistory.consolidatedStatus}`
-                    logResolverError(
-                        'undoApproveContract',
-                        errMessage,
-                        context
-                    )
+                    logResolverError('undoApproveContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -96,11 +84,7 @@ export function undoApproveContract(
                     latestAction.actionType !== 'MARK_AS_APPROVED'
                 ) {
                     const errMessage = `Cannot undo approval: latest review action is not MARK_AS_APPROVED`
-                    logResolverError(
-                        'undoApproveContract',
-                        errMessage,
-                        context
-                    )
+                    logResolverError('undoApproveContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
 
@@ -126,11 +110,7 @@ export function undoApproveContract(
                     }
 
                     const errMessage = `Failed to undo approval for contract ID:${contractID}`
-                    logResolverError(
-                        'undoApproveContract',
-                        errMessage,
-                        context
-                    )
+                    logResolverError('undoApproveContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

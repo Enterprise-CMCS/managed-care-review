@@ -304,11 +304,7 @@ describe('undoApproveContract', () => {
 
         await approveTestContract(cmsServer, contract.id)
 
-        await undoApproveTestContract(
-            cmsServer,
-            contract.id,
-            'First reversal'
-        )
+        await undoApproveTestContract(cmsServer, contract.id, 'First reversal')
 
         const result = await executeGraphQLOperation(cmsServer, {
             query: UndoApproveContractDocument,

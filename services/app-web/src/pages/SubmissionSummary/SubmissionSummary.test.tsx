@@ -720,7 +720,7 @@ describe('SubmissionSummary', () => {
                     })
                 })
 
-                it('displays no actions text for an unlocked submission', async () => {
+                it('displays the undo unlock button for an unlocked submission', async () => {
                     const contract =
                         mockContractPackageUnlockedWithUnlockedType({
                             id: 'test-abc-123',
@@ -756,6 +756,7 @@ describe('SubmissionSummary', () => {
                             },
                             featureFlags: {
                                 'undo-withdraw-submission': true,
+                                'cms-user-undo-unlock': true,
                             },
                         }
                     )
@@ -768,10 +769,16 @@ describe('SubmissionSummary', () => {
                         ).not.toBeInTheDocument()
 
                         expect(
-                            screen.getByText(
+                            screen.getByRole('button', {
+                                name: 'Undo unlock',
+                            })
+                        ).toBeInTheDocument()
+
+                        expect(
+                            screen.queryByText(
                                 'No action can be taken on this submission in its current status.'
                             )
-                        ).toBeInTheDocument()
+                        ).not.toBeInTheDocument()
                     })
                 })
 
@@ -1040,12 +1047,6 @@ describe('SubmissionSummary', () => {
                             name: 'Unlock submission',
                         })
                     ).not.toBeInTheDocument()
-
-                    expect(
-                        screen.getByText(
-                            'No action can be taken on this submission in its current status.'
-                        )
-                    ).toBeInTheDocument()
                 })
 
                 it('does not render released to state button for an approved submission', async () => {
@@ -1592,13 +1593,13 @@ describe('SubmissionSummary', () => {
                 await waitFor(() => {
                     expect(
                         screen.getByRole('button', {
-                            name: 'Undo submission unlock',
+                            name: 'Undo unlock',
                         })
                     ).toBeInTheDocument()
                 })
             })
 
-            it('does not render undo unlock button for non-admin CMS users on unlocked submissions', async () => {
+            it('renders undo unlock button for CMS users on an unlocked submissions', async () => {
                 const contract = mockContractPackageUnlockedWithUnlockedType({
                     id: 'test-abc-123',
                     contractSubmissionType: 'HEALTH_PLAN',
@@ -1631,16 +1632,18 @@ describe('SubmissionSummary', () => {
                         routerProvider: {
                             route: '/submissions/health-plan/test-abc-123',
                         },
-                        featureFlags: {},
+                        featureFlags: {
+                            'cms-user-undo-unlock': true,
+                        },
                     }
                 )
 
                 await waitFor(() => {
                     expect(
-                        screen.queryByRole('button', {
-                            name: 'Undo submission unlock',
+                        screen.getByRole('button', {
+                            name: 'Undo unlock',
                         })
-                    ).not.toBeInTheDocument()
+                    ).toBeInTheDocument()
                 })
             })
 

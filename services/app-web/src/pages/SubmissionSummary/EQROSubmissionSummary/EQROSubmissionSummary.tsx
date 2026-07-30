@@ -187,8 +187,7 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         undoWithdrawSubmissionFlag &&
         consolidatedStatus === 'WITHDRAWN'
     const showUndoUnlockBtn = isAdminUser && consolidatedStatus === 'UNLOCKED'
-    const showUndoApprovalBtn =
-        isAdminUser && consolidatedStatus === 'APPROVED'
+    const showUndoApprovalBtn = isAdminUser && consolidatedStatus === 'APPROVED'
     const showNoAdminActionsMsg =
         !showUndoUnlockBtn && !showApprovalBtn && !showUndoApprovalBtn
     const showNoCMSActionsMsg =

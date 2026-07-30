@@ -253,19 +253,16 @@ describe('Change History', () => {
             ],
         }
 
-        renderWithProviders(
-            <ChangeHistory contract={undoApproveContract} />,
-            {
-                apolloProvider: {
-                    mocks: [
-                        fetchCurrentUserMock({
-                            user: mockValidCMSUser(),
-                            statusCode: 200,
-                        }),
-                    ],
-                },
-            }
-        )
+        renderWithProviders(<ChangeHistory contract={undoApproveContract} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        })
 
         // A "Submission" accordion entry is created at the undo action time
         expect(

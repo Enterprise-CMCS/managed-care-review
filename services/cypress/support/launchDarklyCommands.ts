@@ -99,6 +99,7 @@ Cypress.Commands.add('stubFeatureFlags', () => {
         '438-attestation': true,
         'hide-supporting-docs-page': true,
         dsnp: true,
+        'cms-user-undo-unlock': true,
     })
 })
 
