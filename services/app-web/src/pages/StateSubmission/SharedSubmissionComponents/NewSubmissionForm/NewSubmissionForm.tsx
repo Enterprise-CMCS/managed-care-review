@@ -205,6 +205,10 @@ export const NewSubmission = () => {
                             </ActionButton>
                             <ActionButton
                                 type="submit"
+                                disabled={
+                                    shouldValidate &&
+                                    !!Object.keys(errors).length
+                                }
                                 link_url={
                                     values.contractSubmissionType
                                         ? generatePath(

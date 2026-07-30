@@ -240,6 +240,7 @@ it('renders inline errors', async () => {
     const startButton = screen.getByRole('button', { name: /Start/ })
 
     expect(startButton).toBeInTheDocument()
+    expect(startButton).not.toHaveAttribute('aria-disabled')
     expect(eqroRadio).toBeInTheDocument()
 
     await userEvent.click(startButton)
@@ -247,6 +248,7 @@ it('renders inline errors', async () => {
     expect(
         screen.getByText('You must select a submission type')
     ).toBeInTheDocument()
+    expect(startButton).toHaveAttribute('aria-disabled')
 
     await userEvent.click(eqroRadio)
 
