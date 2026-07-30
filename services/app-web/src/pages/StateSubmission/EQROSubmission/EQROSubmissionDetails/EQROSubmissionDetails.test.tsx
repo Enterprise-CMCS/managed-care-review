@@ -153,7 +153,7 @@ it('displays validation messages', async () => {
     })
 
     const continueButton = await screen.findByRole('button', {
-        name: 'Continue',
+        name: 'Save & Continue',
     })
     expect(continueButton).not.toHaveAttribute('aria-disabled')
 
@@ -274,7 +274,7 @@ it('shows validation error when submission description exceeds 1500 characters a
     // Click Continue to trigger validation
     await userEvent.click(
         screen.getByRole('button', {
-            name: 'Continue',
+            name: 'Save & Continue',
         })
     )
 
@@ -356,7 +356,7 @@ it('displays generic error banner when creating EQRO submission fails', async ()
     await userEvent.click(managedCareEntity)
 
     const continueButton = await screen.findByRole('button', {
-        name: 'Continue',
+        name: 'Save & Continue',
     })
     await userEvent.click(continueButton)
 

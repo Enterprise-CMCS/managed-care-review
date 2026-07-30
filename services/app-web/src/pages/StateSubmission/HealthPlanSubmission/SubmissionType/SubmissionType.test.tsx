@@ -86,7 +86,7 @@ describe('SubmissionType', () => {
         ).toBeDefined()
         expect(
             screen.getByRole('button', {
-                name: 'Continue',
+                name: 'Save & Continue',
             })
         ).toBeDefined()
     })

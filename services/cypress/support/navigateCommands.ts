@@ -6,7 +6,9 @@ export type FormButtonKey =
 type FormButtons = { [key in FormButtonKey]: string }
 const buttonsWithLabels: FormButtons = {
     CONTINUE: 'Continue',
-    CONTINUE_FROM_START_NEW: 'Continue',
+    // The Submission details page labels its primary action 'Save & Continue',
+    // but only when starting a new submission - editing a draft still reads 'Continue'.
+    CONTINUE_FROM_START_NEW: 'Save & Continue',
     SAVE_DRAFT: 'Save as draft',
     BACK: 'Back',
 }

@@ -20,10 +20,10 @@ describe('state user in state submission form', () => {
         // Check accessibility on Submission type page
         cy.findByRole('heading', { level: 1, name: /New submission/ })
         cy.findByRole('button', {
-            name: 'Continue',
+            name: 'Save & Continue',
         }).should('not.have.attr', 'aria-disabled')
         cy.findByRole('button', {
-            name: 'Continue',
+            name: 'Save & Continue',
         }).safeClick()
         cy.checkA11yWithWcag22aa()
 

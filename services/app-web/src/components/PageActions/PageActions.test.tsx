@@ -116,7 +116,7 @@ describe('PageActions', () => {
     })
 
     describe('page variant specific behavior', () => {
-        it('displays Cancel and Continue buttons for the first page', () => {
+        it('displays Cancel and Save & Continue buttons for the first page', () => {
             renderWithProviders(
                 <PageActions
                     pageVariant="FIRST"
@@ -140,7 +140,7 @@ describe('PageActions', () => {
                 screen.getByRole('button', { name: 'Cancel' })
             ).toBeInTheDocument()
             expect(
-                screen.getByRole('button', { name: 'Continue' })
+                screen.getByRole('button', { name: 'Save & Continue' })
             ).toBeInTheDocument()
         })
         it('displays Save as Draft, Back, and Submit buttons for the last page', () => {
