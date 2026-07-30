@@ -20,7 +20,7 @@
         "axios": "^1.18.1",
         "node-ssh": "^13.2.1",
         "prompts": "^2.4.2",
-        "yargs": "^18.0.0"
+        "yargs": "^18.1.0"
     },
     "devDependencies": {
         "@types/eslint": "^9.6.1",
