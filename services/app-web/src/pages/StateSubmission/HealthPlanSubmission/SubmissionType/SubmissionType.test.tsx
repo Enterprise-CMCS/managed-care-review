@@ -785,11 +785,12 @@ describe('SubmissionType', () => {
                 },
             })
 
-            await userEvent.click(
-                screen.getByRole('button', {
-                    name: 'Continue',
-                })
-            )
+            const continueButton = screen.getByRole('button', {
+                name: 'Continue',
+            })
+            expect(continueButton).not.toHaveAttribute('aria-disabled')
+
+            await userEvent.click(continueButton)
             await waitFor(() => {
                 expect(
                     screen.queryAllByText('You must choose a submission type')
@@ -804,6 +805,7 @@ describe('SubmissionType', () => {
                         'You must select at least one program'
                     )
                 ).toHaveLength(2)
+                expect(continueButton).toHaveAttribute('aria-disabled', 'true')
             })
         })
 

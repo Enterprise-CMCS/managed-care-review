@@ -155,6 +155,8 @@ it('displays validation messages', async () => {
     const continueButton = await screen.findByRole('button', {
         name: 'Continue',
     })
+    expect(continueButton).not.toHaveAttribute('aria-disabled')
+
     await userEvent.click(continueButton)
 
     // expect inline and summary errors to be on screen
@@ -178,6 +180,7 @@ it('displays validation messages', async () => {
                 'You must provide a description of any major changes or updates'
             )
         ).toHaveLength(2)
+        expect(continueButton).toHaveAttribute('aria-disabled', 'true')
     })
 
     // fill out all fields
@@ -226,6 +229,7 @@ it('displays validation messages', async () => {
                 'You must provide a description of any major changes or updates'
             )
         ).toHaveLength(0)
+        expect(continueButton).not.toHaveAttribute('aria-disabled')
     })
 })
 
