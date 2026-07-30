@@ -1,5 +1,8 @@
 import type { Emailer } from '../../emailer'
-import type { LDService } from '../../launchDarkly/launchDarkly'
+import {
+    defaultFeatureFlags,
+    type LDService,
+} from '../../launchDarkly/launchDarkly'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { logError, logResolverError, logResolverSuccess } from '../../logger'
@@ -34,6 +37,7 @@ import {
 import type { GeneralizedProvisionType } from '@mc-review/submissions'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
+import { buildResubmitRevisionChanges } from '../../emailer/emails/resubmitRevisionChanges'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -74,9 +78,10 @@ export function submitContract(
             async (span) => {
                 setResolverDetails(span, user)
 
-                const featureFlags = await launchDarkly.allFlags({
-                    key: context.user.email,
-                })
+                const featureFlags =
+                    (await launchDarkly.allFlags({
+                        key: context.user.email,
+                    })) ?? defaultFeatureFlags()
 
                 // Check OAuth client read permissions
                 if (!canWrite(context)) {
@@ -571,6 +576,30 @@ export function submitContract(
                 let stateContractEmailResult
 
                 if (status === 'RESUBMITTED') {
+                    let revisionChanges
+
+                    if (
+                        featureFlags['revision-history-enhancements'] &&
+                        !isEQRO
+                    ) {
+                        const revisionDiff =
+                            await store.findRevisionDiffByContractID({
+                                contractID: submitContractResult.id,
+                            })
+
+                        if (revisionDiff instanceof Error) {
+                            logResolverError(
+                                'submitContract - revision diff lookup failed',
+                                revisionDiff,
+                                context
+                            )
+                            recordResolverError(span, revisionDiff)
+                        } else {
+                            revisionChanges =
+                                buildResubmitRevisionChanges(revisionDiff)
+                        }
+                    }
+
                     cmsContractEmailResult = isEQRO
                         ? await emailer.sendResubmittedEQROCMSEmail(
                               submitContractResult,
@@ -581,7 +610,8 @@ export function submitContract(
                               submitContractResult,
                               updateInfo,
                               stateAnalystsEmails,
-                              statePrograms
+                              statePrograms,
+                              revisionChanges
                           )
                     stateContractEmailResult = isEQRO
                         ? await emailer.sendResubmittedEQROStateEmail(

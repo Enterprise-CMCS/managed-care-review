@@ -1,0 +1,7 @@
+<hr />
+<br />
+<strong>Submission changes: <%= it.revisionChanges.previousSubmissionDate %> -> <%= it.revisionChanges.currentSubmissionDate %></strong><br />
+<br />
+<% if (!it.revisionChanges.hasChanges) { %>
+No changes made in the submission on <%= it.revisionChanges.currentSubmissionDate %>.<br />
+<% } %>

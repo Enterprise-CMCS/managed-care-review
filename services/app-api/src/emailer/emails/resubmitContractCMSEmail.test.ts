@@ -11,6 +11,11 @@ import { packageName } from '@mc-review/submissions'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 
 describe('with rates', () => {
+    const noDiffRevisionChanges = {
+        previousSubmissionDate: '05/01/2027',
+        currentSubmissionDate: '05/11/2027',
+        hasChanges: false,
+    }
     const resubmitData = {
         updatedBy: {
             email: 'bob@example.com',
@@ -169,6 +174,28 @@ describe('with rates', () => {
                 ),
             })
         )
+    })
+    it('includes no-diff submission changes copy when revision changes are provided', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            noDiffRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain(
+            'Submission changes: 05/01/2027 -> 05/11/2027'
+        )
+        expect(template.bodyText).toContain(
+            'No changes made in the submission on 05/11/2027.'
+        )
+        expect(template.bodyHTML).toContain('<hr')
     })
     it('includes expected data summary for a multi-rate contract and rates resubmission CMS email', async () => {
         const contract = mockContract()

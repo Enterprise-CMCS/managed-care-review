@@ -42,6 +42,7 @@ import { withEmailSpan } from './emailTracing'
 import { parseErrorToError } from '@mc-review/helpers'
 import type { RateForDisplayType } from './templateHelpers'
 import { newEQROContractCMSEmail } from './emails/newEQROContractCMSEmail'
+import type { ResubmitRevisionChanges } from './emails/resubmitRevisionChanges'
 
 // See more discussion of configuration in docs/Configuration.md
 type EmailConfiguration = {
@@ -130,7 +131,8 @@ type Emailer = {
         contract: ContractType,
         updateInfo: UpdateInfoType,
         stateAnalystsEmails: StateAnalystsEmails,
-        statePrograms: ProgramType[]
+        statePrograms: ProgramType[],
+        revisionChanges?: ResubmitRevisionChanges
     ) => Promise<void | Error>
     sendResubmittedEQROStateEmail: (
         contract: ContractType,
@@ -391,14 +393,16 @@ function emailer(
             contract,
             updateInfo,
             stateAnalystsEmails,
-            statePrograms
+            statePrograms,
+            revisionChanges
         ) {
             const emailData = await resubmitContractCMSEmail(
                 contract,
                 updateInfo,
                 config,
                 stateAnalystsEmails,
-                statePrograms
+                statePrograms,
+                revisionChanges
             )
             if (emailData instanceof Error) {
                 return emailData

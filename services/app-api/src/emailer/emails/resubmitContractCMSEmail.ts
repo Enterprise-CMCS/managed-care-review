@@ -14,13 +14,15 @@ import type {
     ContractType,
 } from '../../domain-models'
 import { submissionSummaryURL } from '../generateURLs'
+import type { ResubmitRevisionChanges } from './resubmitRevisionChanges'
 
 export const resubmitContractCMSEmail = async (
     contract: ContractType,
     updateInfo: UpdateInfoType,
     config: EmailConfiguration,
     stateAnalystsEmails: StateAnalystsEmails,
-    statePrograms: ProgramType[]
+    statePrograms: ProgramType[],
+    revisionChanges?: ResubmitRevisionChanges
 ): Promise<EmailData | Error> => {
     const reviewerEmails = generateCMSReviewerEmailsForSubmittedContract(
         config,
@@ -74,6 +76,7 @@ export const resubmitContractCMSEmail = async (
                 rateName: rate.formData.rateCertificationName,
             })),
         submissionURL: packageURL,
+        revisionChanges,
     }
 
     const emailTemplate = isChipOnly
