@@ -104,12 +104,14 @@ function toRow(contract: ContractType): Row {
             )
         ),
         latestDate: ymd(
-            latestDate([
-                latest.submitInfo.updatedAt,
-                ...(contract.reviewStatusActions ?? []).map(
-                    (a) => a.updatedAt
-                ),
-            ]) ?? latest.submitInfo.updatedAt
+            contract.lastActionDate ??
+                latestDate([
+                    latest.submitInfo.updatedAt,
+                    ...(contract.reviewStatusActions ?? []).map(
+                        (a) => a.updatedAt
+                    ),
+                ]) ??
+                latest.submitInfo.updatedAt
         ),
     }
 }
