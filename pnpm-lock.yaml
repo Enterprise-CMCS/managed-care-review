@@ -806,8 +806,8 @@ importers:
         specifier: ^6.1.1
         version: 6.1.1(typescript@5.9.3)(vite@8.1.5(@types/node@25.5.0)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.77.2)(terser@5.49.0)(tsx@4.21.0)(yaml@2.9.0))
       web-vitals:
-        specifier: ^5.2.0
-        version: 5.2.0
+        specifier: ^6.0.1
+        version: 6.0.1
       yup:
         specifier: ^0.32.9
         version: 0.32.11
@@ -9040,8 +9040,16 @@ packages:
     resolution: {integrity: sha512-As9kMmy7BhCHr3LZ48Y2eJXL8aceNCFN8kJFZxnr862e/P0q9zBO6b5rFJEfKdry3ZjPtaXcgG7ug8yeWQX6qw==}
     engines: {node: '>=18'}
 
+  flow-estree@0.325.0:
+    resolution: {integrity: sha512-HnYTpF6Al3YZpiPwket4x33V7iXSUgyqmtOz9FvgGBRKfBzZre/A3sRpXN1Jsq1VeRson1ToHJn+EosHemaPpQ==}
+    engines: {node: '>=18'}
+
   flow-parser@0.324.0:
     resolution: {integrity: sha512-0+8EOQ3qagZGO+0Hw6L4PN23vzL6OSrRODp7BZJwirkJxOZCAgJYUdRIQO/VSklUpOPaR7Zf+SAnlnYD9FI+Mg==}
+    engines: {node: '>=0.4.0'}
+
+  flow-parser@0.325.0:
+    resolution: {integrity: sha512-3uJxDHNXuiNM5twT+tk0iIn8zdSkF67cmE/6SoWFbmxcX7BnI82qYeJSEhrfNnDx7TwhAVPnLqV7MCt+biVwZw==}
     engines: {node: '>=0.4.0'}
 
   focus-trap-react@10.3.1:
@@ -13154,8 +13162,8 @@ packages:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
 
-  web-vitals@5.2.0:
-    resolution: {integrity: sha512-i2z98bEmaCqSDiHEDu+gHl/dmR4Q+TxFmG3/13KkMO+o8UxQzCqWaDRCiLgEa41nlO4VpXSI0ASa1xWmO9sBlA==}
+  web-vitals@6.0.1:
+    resolution: {integrity: sha512-iF3+kno3Anlqi5fPVTQk9gYLfsCiL8P69Hof+AmZyVVx00E3e/BiGVvu+EsOy6jvTLqTKuiaRloPyw0JtdKbSw==}
 
   webcrypto-core@1.8.0:
     resolution: {integrity: sha512-kR1UQNH8MD42CYuLzvibfakG5Ew5seG85dMMoAM/1LqvckxaF6pUiidLuraIu4V+YCIFabYecUZAW0TuxAoaqw==}
@@ -23573,9 +23581,15 @@ snapshots:
 
   flow-estree@0.324.0: {}
 
+  flow-estree@0.325.0: {}
+
   flow-parser@0.324.0:
     dependencies:
       flow-estree: 0.324.0
+
+  flow-parser@0.325.0:
+    dependencies:
+      flow-estree: 0.325.0
 
   focus-trap-react@10.3.1(prop-types@15.8.1)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
@@ -24997,7 +25011,7 @@ snapshots:
       '@babel/register': 7.29.7(@babel/core@7.29.7)
       babel-core: 7.0.0-bridge.0(@babel/core@7.29.7)
       chalk: 4.1.2
-      flow-parser: 0.324.0
+      flow-parser: 0.325.0
       graceful-fs: 4.2.11
       micromatch: 4.0.8
       neo-async: 2.6.2
@@ -28303,7 +28317,7 @@ snapshots:
 
   web-streams-polyfill@3.3.3: {}
 
-  web-vitals@5.2.0: {}
+  web-vitals@6.0.1: {}
 
   webcrypto-core@1.8.0:
     dependencies:
