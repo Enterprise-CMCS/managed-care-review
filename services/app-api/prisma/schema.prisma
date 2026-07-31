@@ -61,12 +61,12 @@ model HealthPlanRevisionTable {
 }
 
 model ContractTable {
-  id                     String    @id @default(uuid())
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @default(now()) @updatedAt
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
   // Last persisted contract action that should affect display freshness.
   // The first value is set on initial submission.
-  lastActionDate          DateTime?
+  lastActionDate DateTime?
 
   mccrsID                String?
   stateCode              String
@@ -130,12 +130,12 @@ model ContractRevisionOverrides {
 }
 
 model RateTable {
-  id                 String    @id @default(uuid())
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @default(now()) @updatedAt
+  id             String    @id @default(uuid())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt
   // Last persisted rate action that should affect display freshness.
   // The first value is set on initial submission.
-  lastActionDate     DateTime?
+  lastActionDate DateTime?
 
   stateCode   String
   state       State  @relation(fields: [stateCode], references: [stateCode])
@@ -387,7 +387,12 @@ model ActuaryContact {
   createdAt                   DateTime           @default(now())
   updatedAt                   DateTime           @default(now()) @updatedAt
   position                    Int                @default(-1)
-  name                        String?
+  name                        String? // full name field from a deprecated model, retaining for historical data retention
+  prefix                      String?
+  givenName                   String?
+  middleName                  String?
+  familyName                  String?
+  suffix                      String?
   titleRole                   String?
   email                       String?
   actuarialFirm               ActuarialFirm?
@@ -467,7 +472,12 @@ model StateContact {
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
   position           Int                   @default(-1)
-  name               String?
+  name               String? // full name field from a deprecated model, retaining for historical data retention
+  prefix             String?
+  givenName          String?
+  middleName         String?
+  familyName         String?
+  suffix             String?
   titleRole          String?
   email              String?
   contractRevisionID String

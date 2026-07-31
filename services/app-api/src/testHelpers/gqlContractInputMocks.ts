@@ -44,19 +44,26 @@ const mockGqlContractDraftRevisionFormDataInput = (
               },
           ]
 
+    const stateContacts = formDataInput?.stateContacts?.length
+        ? formDataInput.stateContacts.map((contact) => ({
+              name: contact.name,
+              titleRole: contact.titleRole,
+              email: contact.email,
+          }))
+        : [
+              {
+                  name: 'statecontact',
+                  titleRole: 'thestatestofcontacts',
+                  email: 'statemcstate@examepl.com',
+              },
+          ]
+
     return {
         programIDs: [programIDs[0]],
         populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_ONLY',
         riskBasedContract: true,
         submissionDescription: 'Updated submission',
-        stateContacts: [
-            {
-                name: 'statecontact',
-                titleRole: 'thestatestofcontacts',
-                email: 'statemcstate@examepl.com',
-            },
-        ],
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
         contractDateStart: '2025-06-01',
@@ -86,6 +93,7 @@ const mockGqlContractDraftRevisionFormDataInput = (
         ...formDataInput,
         contractDocuments: contractDocs,
         supportingDocuments: supportingDocs,
+        stateContacts: stateContacts,
     }
 }
 

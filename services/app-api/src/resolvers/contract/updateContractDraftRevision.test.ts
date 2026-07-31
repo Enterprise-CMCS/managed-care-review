@@ -75,6 +75,16 @@ describe(`Tests UpdateContractDraftRevision`, () => {
 
             const updatedFormData = updateResult.draftRevision?.formData
 
+            const expectedStateContacts = (
+                updateFormData.stateContacts ?? []
+            ).map((contact) => ({
+                name: contact.name,
+                givenName: null,
+                familyName: null,
+                titleRole: contact.titleRole,
+                email: contact.email,
+            }))
+
             expect(updatedFormData).toEqual({
                 ...updateFormData,
                 dsnpContract: null,
@@ -87,6 +97,7 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
+                stateContacts: expectedStateContacts,
             })
         })
 

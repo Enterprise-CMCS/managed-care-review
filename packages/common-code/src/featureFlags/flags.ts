@@ -13,6 +13,14 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     * This flag toggles UI and data writes into the new contact data models
+     * for state and actuary contacts.
+     */
+    CONTACT_MODEL_UPDATE: {
+        flag: 'contact-data-model-update',
+        defaultValue: false,
+    },
+    /**
      * When enabled state users will not see a standalone supporting
      * docs page
      */

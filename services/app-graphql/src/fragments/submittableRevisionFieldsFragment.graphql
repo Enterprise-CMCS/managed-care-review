@@ -39,6 +39,8 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
 
             stateContacts {
                 name
+                givenName
+                familyName
                 titleRole
                 email
             }
@@ -122,6 +124,8 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             certifyingActuaryContacts {
                 id
                 name
+                givenName
+                familyName
                 titleRole
                 email
                 actuarialFirm
@@ -130,6 +134,8 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             addtlActuaryContacts {
                 id
                 name
+                givenName
+                familyName
                 titleRole
                 email
                 actuarialFirm

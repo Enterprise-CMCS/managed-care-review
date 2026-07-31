@@ -81,14 +81,22 @@ const packagesWithSharedRateCerts = z.object({
 })
 
 const stateContactSchema = z.object({
+    // Deprecated full name field. Retained for backward compatibility and
+    // historical data; constructed from givenName/familyName with fallback
+    // to the stored value. See constructContactName.
     name: z.string().optional(),
+    givenName: z.string().optional(),
+    familyName: z.string().optional(),
     titleRole: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
 })
 
 const actuaryContactSchema = z.object({
     id: z.string().optional(),
+    // Deprecated full name field. See stateContactSchema.name above.
     name: z.string().optional(),
+    givenName: z.string().optional(),
+    familyName: z.string().optional(),
     titleRole: z.string().optional(),
     email: z.string().email().optional().or(z.literal('')),
     actuarialFirm: actuarialFirmTypeSchema.optional(),

@@ -30,6 +30,8 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                         rateCertificationName,
                         certifyingActuaryContacts {
                             name
+                            givenName
+                            familyName
                             titleRole
                             email
                             actuarialFirm
@@ -37,6 +39,8 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                         },
                         addtlActuaryContacts {
                             name
+                            givenName
+                            familyName
                             titleRole
                             email
                             actuarialFirm
@@ -76,6 +80,8 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                         rateCertificationName,
                         certifyingActuaryContacts {
                             name
+                            givenName
+                            familyName
                             titleRole
                             email
                             actuarialFirm
@@ -83,6 +89,8 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                         },
                         addtlActuaryContacts {
                             name
+                            givenName
+                            familyName
                             titleRole
                             email
                             actuarialFirm

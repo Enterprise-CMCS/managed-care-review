@@ -326,6 +326,11 @@ async function unlockContractInsideTransaction(
                 create: currentRev.stateContacts.map((c) => ({
                     position: c.position,
                     name: c.name,
+                    prefix: c.prefix,
+                    givenName: c.givenName,
+                    middleName: c.middleName,
+                    familyName: c.familyName,
+                    suffix: c.suffix,
                     email: c.email,
                     titleRole: c.titleRole,
                 })),
