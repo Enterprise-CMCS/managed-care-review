@@ -567,7 +567,8 @@ describe('updateDraftContractRates', () => {
 
         const rateFormData = draftRates[0].draftRevision.formData
 
-        // expect responses to include givenName, familyName and name (full name) constructed from both.
+        // expect the constructed name to include givenName and familyName only
+        // (no suffix), while suffix is still stored.
         expect(rateFormData.certifyingActuaryContacts).toEqual([
             expect.objectContaining({
                 name: 'Foo Person',
@@ -580,7 +581,8 @@ describe('updateDraftContractRates', () => {
             }),
         ])
 
-        // expect responses to include givenName, familyName and name (full name) constructed from both.
+        // expect the constructed name to include givenName and familyName only
+        // (no suffix), while suffix is still stored.
         expect(rateFormData.addtlActuaryContacts).toEqual([
             expect.objectContaining({
                 name: 'Bar Person',

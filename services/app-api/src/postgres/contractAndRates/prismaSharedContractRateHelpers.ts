@@ -579,11 +579,12 @@ const documentToDomainModel = (doc: DocumentWithCommonFields): DocumentType => {
 
 // Builds the backward-compatible full `name` for a state/actuary contact.
 // External systems still read `name`, so we construct it from givenName +
-// familyName and fall back to the deprecated stored full name when those are
-// not yet populated — e.g. contacts created before the contact model update,
-// or incomplete DRAFT/UNLOCKED draft revisions where partial data is allowed
-// (external users do not consume draft data). Once existing data is migrated,
-// this fallback is removed (tracked in a separate epic ticket).
+// familyName (first and last name only, no suffix) and fall back to the
+// deprecated stored full name when
+// those are not yet populated — e.g. contacts created before the contact model
+// update, or incomplete DRAFT/UNLOCKED draft revisions where partial data is
+// allowed (external users do not consume draft data). Once existing data is
+// migrated, this fallback is removed (tracked in a separate epic ticket).
 function constructContactName(contact: {
     givenName?: string | null
     familyName?: string | null

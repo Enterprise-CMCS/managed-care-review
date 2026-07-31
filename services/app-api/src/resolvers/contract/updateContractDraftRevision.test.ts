@@ -79,7 +79,7 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 updateFormData.stateContacts ?? []
             ).map((contact) => {
                 // Mirror constructContactName: build name from givenName +
-                // familyName, falling back to the stored name.
+                // familyName (no suffix), falling back to the stored name.
                 const constructedName = [contact.givenName, contact.familyName]
                     .filter((part) => part != null && part.trim() !== '')
                     .join(' ')
@@ -227,9 +227,8 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 updateResult.data?.updateContractDraftRevision.contract
                     .draftRevision?.formData.stateContacts
 
-            // response includes givenName, familyName, suffix and the full
-            // name constructed from givenName + familyName (suffix is stored
-            // and surfaced but not part of the constructed name).
+            // response includes givenName, familyName, suffix and the full name
+            // constructed from givenName + familyName only (no suffix).
             expect(updatedStateContacts).toEqual([
                 {
                     name: 'Jane Doe',
