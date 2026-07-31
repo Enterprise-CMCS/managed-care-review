@@ -1767,7 +1767,7 @@ enum FederalAuthority {
 }
 "Contact information for contacting states regarding their submission"
 type StateContact {
-    "Constructed from givenName + familyName, falling back to the stored full name. Retained for backward compatibility with external consumers."
+    "Constructed from givenName + familyName + suffix, falling back to the stored full name. Retained for backward compatibility with external consumers."
     name: String
     givenName: String
     familyName: String
@@ -1963,7 +1963,7 @@ enum ActuarialFirm {
 "Contact information for the certifying or additional state actuary"
 type ActuaryContact {
     id: ID
-    "Deprecated full name. Constructed from givenName + familyName, falling back to the stored full name. Retained for backward compatibility with external consumers."
+    "Deprecated full name. Constructed from givenName + familyName + suffix, falling back to the stored full name. Retained for backward compatibility with external consumers."
     name: String
     givenName: String
     familyName: String
