@@ -61,6 +61,8 @@ export const SubmissionSummary = (): React.ReactElement => {
     const [documentError, setDocumentError] = useState(false)
     const [showTempUndoWithdrawBanner, setShowTempUndoWithdrawBanner] =
         useState<boolean>(false)
+    const [showTempUndoUnlockBanner, setShowTempUndoUnlockBanner] =
+        useState<boolean>(false)
     const [searchParams, setSearchParams] = useSearchParams()
     const { loggedInUser } = useAuth()
     const { id } = useRouteParams()
@@ -126,11 +128,20 @@ export const SubmissionSummary = (): React.ReactElement => {
     })
 
     useEffect(() => {
+        //Undo Withdraw
         if (searchParams.get('showTempUndoWithdrawBanner') === 'true') {
             setShowTempUndoWithdrawBanner(true)
 
             //This ensures the banner goes away upon refresh or navigation
             searchParams.delete('showTempUndoWithdrawBanner')
+            setSearchParams(searchParams, { replace: true })
+        }
+        //Undo Unlock
+        if (searchParams.get('showTempUndoUnlockBanner') === 'true') {
+            setShowTempUndoUnlockBanner(true)
+
+            //This ensures the banner goes away upon refresh or navigation
+            searchParams.delete('showTempUndoUnlockBanner')
             setSearchParams(searchParams, { replace: true })
         }
     }, [searchParams, setSearchParams])
@@ -307,6 +318,10 @@ export const SubmissionSummary = (): React.ReactElement => {
 
         if (showTempUndoWithdrawBanner) {
             return <StatusUpdatedBanner className={styles.banner} />
+        }
+
+        if (showTempUndoUnlockBanner) {
+            return <StatusUpdatedBanner className={styles.banner} message="" />
         }
 
         if (showWithdrawnBanner && latestContractAction.updatedBy) {
