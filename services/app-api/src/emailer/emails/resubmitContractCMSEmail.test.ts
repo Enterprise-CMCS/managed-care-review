@@ -15,6 +15,29 @@ describe('with rates', () => {
         previousSubmissionDate: '05/01/2027',
         currentSubmissionDate: '05/11/2027',
         hasChanges: false,
+        sections: [],
+    }
+    const submissionTypeRevisionChanges = {
+        previousSubmissionDate: '05/01/2027',
+        currentSubmissionDate: '05/11/2027',
+        hasChanges: true,
+        sections: [
+            {
+                title: 'SUBMISSION TYPE',
+                rows: [
+                    {
+                        label: 'Submission ID',
+                        oldValue: 'MCR-IL-0005-CHIP-PCCME',
+                        newValue: 'MCR-IL-0005-CHIP-CCCPLUS-FIDESNP-PCCME',
+                    },
+                    {
+                        label: 'Risk-based contract',
+                        oldValue: 'No',
+                        newValue: 'Yes',
+                    },
+                ],
+            },
+        ],
     }
     const resubmitData = {
         updatedBy: {
@@ -190,12 +213,33 @@ describe('with rates', () => {
         }
 
         expect(template.bodyText).toContain(
-            'Submission changes: 05/01/2027 -> 05/11/2027'
+            'Submission changes: 05/01/2027 → 05/11/2027'
         )
         expect(template.bodyText).toContain(
             'No changes made in the submission on 05/11/2027.'
         )
         expect(template.bodyHTML).toContain('<hr')
+    })
+    it('renders submission type diff rows when revision changes are provided', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            submissionTypeRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain('SUBMISSION TYPE')
+        expect(template.bodyText).toContain(
+            'Submission ID: MCR-IL-0005-CHIP-PCCME → MCR-IL-0005-CHIP-CCCPLUS-FIDESNP-PCCME'
+        )
+        expect(template.bodyText).toContain('Risk-based contract: No → Yes')
+        expect(template.bodyHTML).toContain('→')
     })
     it('includes expected data summary for a multi-rate contract and rates resubmission CMS email', async () => {
         const contract = mockContract()
