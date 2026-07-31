@@ -77,8 +77,10 @@ describe('Contacts', () => {
             }
         )
 
+        // Each state contact field (Name, Title/Role, Email) renders its own
+        // required marker, and none are optional when the new name fields are off
         const requiredLabels = await screen.findAllByText('Required')
-        expect(requiredLabels).toHaveLength(1)
+        expect(requiredLabels).toHaveLength(3)
         const optionalLabels = await screen.queryAllByText('Optional')
         expect(optionalLabels).toHaveLength(0)
     })
