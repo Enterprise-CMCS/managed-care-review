@@ -279,6 +279,9 @@ const updateDraftContractRatesMockSuccess = ({
                     certifyingActuaryContacts: [
                         {
                             name: '',
+                            givenName: '',
+                            familyName: '',
+                            suffix: '',
                             titleRole: '',
                             email: '',
                             actuarialFirm: undefined,
