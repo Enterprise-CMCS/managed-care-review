@@ -747,9 +747,12 @@ describe('revisionDiffHelpers', () => {
         )
 
         expect(comparison).not.toBeInstanceOf(Error)
-        expect(
-            comparison instanceof Error ? [] : comparison.stateContactChanges
-        ).toEqual([
+
+        if (comparison instanceof Error) {
+            throw comparison
+        }
+
+        expect(comparison.stateContactChanges).toEqual([
             {
                 kind: 'new_or_modified',
                 current: {
@@ -953,9 +956,12 @@ describe('revisionDiffHelpers', () => {
         )
 
         expect(comparison).not.toBeInstanceOf(Error)
-        expect(
-            comparison instanceof Error ? undefined : comparison.documentChanges
-        ).toEqual({
+
+        if (comparison instanceof Error) {
+            throw comparison
+        }
+
+        expect(comparison.documentChanges).toEqual({
             contractDocuments: {
                 added: ['contract-added.pdf'],
                 removed: ['contract-removed.pdf'],
@@ -1055,6 +1061,15 @@ describe('revisionDiffHelpers', () => {
         const updatedRateFormData = formatRateDataForSending(
             linkedDraftRate.draftRevision.formData
         )
+        const existingAddtlActuaryContact =
+            updatedRateFormData.addtlActuaryContacts?.[0]
+
+        if (!existingAddtlActuaryContact) {
+            throw new Error(
+                'Unexpected error: expected additional actuary contact missing from revised rate test data'
+            )
+        }
+
         const rateUpdateInput =
             updateRatesInputFromDraftContract(linkedContract)
         const updatedRates = rateUpdateInput.updatedRates
@@ -1078,6 +1093,12 @@ describe('revisionDiffHelpers', () => {
                                       ...updatedRateFormData
                                           .certifyingActuaryContacts[0],
                                       actuarialFirm: 'MILLIMAN' as const,
+                                  },
+                              ],
+                              addtlActuaryContacts: [
+                                  {
+                                      ...existingAddtlActuaryContact,
+                                      actuarialFirm: 'OPTUMAS' as const,
                                   },
                                   {
                                       name: 'New Actuary',
@@ -1153,9 +1174,12 @@ describe('revisionDiffHelpers', () => {
         )
 
         expect(comparison).not.toBeInstanceOf(Error)
-        expect(
-            comparison instanceof Error ? undefined : comparison.rateChanges
-        ).toEqual({
+
+        if (comparison instanceof Error) {
+            throw comparison
+        }
+
+        expect(comparison.rateChanges).toEqual({
             added: [
                 {
                     rateID: sharedRateID,
@@ -1196,13 +1220,18 @@ describe('revisionDiffHelpers', () => {
                                 email: 'foo@example.com',
                                 actuarialFirm: 'MILLIMAN',
                             },
-                            certifyingActuaryContactFieldChanges: [
-                                {
-                                    fieldPath: 'actuarialFirm',
-                                    oldValue: 'GUIDEHOUSE',
-                                    newValue: 'MILLIMAN',
-                                },
-                            ],
+                        },
+                    ],
+                    addtlActuaryContactChanges: [
+                        {
+                            kind: 'new_or_modified',
+                            current: {
+                                name: 'Bar Person',
+                                titleRole: 'Baz Job',
+                                email: 'bar@example.com',
+                                actuarialFirm: 'OPTUMAS',
+                                actuarialFirmOther: 'Some Firm',
+                            },
                         },
                         {
                             kind: 'new_or_modified',
@@ -1211,8 +1240,8 @@ describe('revisionDiffHelpers', () => {
                                 titleRole: 'Senior Actuary',
                                 email: 'new-actuary@example.com',
                                 actuarialFirm: 'MERCER',
+                                actuarialFirmOther: undefined,
                             },
-                            certifyingActuaryContactFieldChanges: [],
                         },
                     ],
                 },

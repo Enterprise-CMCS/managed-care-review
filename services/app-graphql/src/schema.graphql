@@ -2883,6 +2883,7 @@ type RevisionDiffRevisedRate {
     rateCertificationName: String!
     fieldChanges: [RevisionDiffFieldChange!]!
     certifyingActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
+    addtlActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
 }
 
 type RevisionDiffRateChanges {
@@ -2898,7 +2899,6 @@ enum RevisionDiffRateActuaryContactChangeKind {
 type RevisionDiffRateActuaryContactChange {
     kind: RevisionDiffRateActuaryContactChangeKind!
     current: ActuaryContact!
-    certifyingActuaryContactFieldChanges: [RevisionDiffFieldChange!]!
 }
 
 enum RevisionDiffStateContactChangeKind {

@@ -36,11 +36,8 @@ type RevisionDiffCollectionItemNewOrModified<TItem> = {
     current: TItem
 }
 
-type RevisionDiffRateActuaryContactChange = {
-    kind: 'new_or_modified'
-    current: ActuaryContactType
-    certifyingActuaryContactFieldChanges: RevisionDiffFieldChange[]
-}
+type RevisionDiffRateActuaryContactChange =
+    RevisionDiffCollectionItemNewOrModified<ActuaryContactType>
 
 type RevisionDiffDocumentNameChanges = {
     added: string[]
@@ -78,6 +75,7 @@ type RevisionDiffRevisedRate = {
     rateCertificationName: string
     fieldChanges: RevisionDiffFieldChange[]
     certifyingActuaryContactChanges: RevisionDiffRateActuaryContactChange[]
+    addtlActuaryContactChanges: RevisionDiffRateActuaryContactChange[]
 }
 
 type RevisionDiffRateChanges = {

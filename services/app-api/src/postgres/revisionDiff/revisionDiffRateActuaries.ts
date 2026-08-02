@@ -1,89 +1,28 @@
 import type {
     ActuaryContactType,
-    RevisionDiffFieldChange,
     RevisionDiffRateActuaryContactChange,
 } from '../../domain-models'
-import {
-    buildScalarFieldDiffChanges,
-    type ScalarDiffFieldConfig,
-} from './revisionDiffPrimitives'
+import { buildNewAndModifiedCollectionChanges } from './revisionDiffPrimitives'
 
-type ActuaryContactFieldConfig = ScalarDiffFieldConfig<ActuaryContactType, void>
+function buildActuaryContactComparisonKey(contact: ActuaryContactType): string {
+    return JSON.stringify([
+        contact.name ?? '',
+        contact.titleRole ?? '',
+        contact.email ?? '',
+        contact.actuarialFirm ?? '',
+        contact.actuarialFirmOther ?? '',
+    ])
+}
 
-const actuaryContactFieldConfigs: ActuaryContactFieldConfig[] = [
-    {
-        fieldPath: 'name',
-        getValue: (contact) => contact.name,
-    },
-    {
-        fieldPath: 'titleRole',
-        getValue: (contact) => contact.titleRole,
-    },
-    {
-        fieldPath: 'email',
-        getValue: (contact) => contact.email,
-    },
-    {
-        fieldPath: 'actuarialFirm',
-        getValue: (contact) => contact.actuarialFirm,
-    },
-    {
-        fieldPath: 'actuarialFirmOther',
-        getValue: (contact) => contact.actuarialFirmOther,
-    },
-]
-
-function buildActuaryContactFieldChanges(
-    previous: ActuaryContactType,
-    current: ActuaryContactType
-): RevisionDiffFieldChange[] | Error {
-    return buildScalarFieldDiffChanges(
+function buildRateActuaryContactDiffChanges(
+    previous: ActuaryContactType[],
+    current: ActuaryContactType[]
+): RevisionDiffRateActuaryContactChange[] {
+    return buildNewAndModifiedCollectionChanges(
         previous,
         current,
-        actuaryContactFieldConfigs,
-        undefined
+        buildActuaryContactComparisonKey
     )
 }
 
-function buildCertifyingActuaryContactDiffChanges(
-    previous: ActuaryContactType[],
-    current: ActuaryContactType[]
-): RevisionDiffRateActuaryContactChange[] | Error {
-    const changes: RevisionDiffRateActuaryContactChange[] = []
-
-    for (const [index, currentContact] of current.entries()) {
-        const previousContact = previous[index]
-
-        if (!previousContact) {
-            changes.push({
-                kind: 'new_or_modified',
-                current: currentContact,
-                certifyingActuaryContactFieldChanges: [],
-            })
-            continue
-        }
-
-        const fieldChanges = buildActuaryContactFieldChanges(
-            previousContact,
-            currentContact
-        )
-
-        if (fieldChanges instanceof Error) {
-            return fieldChanges
-        }
-
-        if (fieldChanges.length === 0) {
-            continue
-        }
-
-        changes.push({
-            kind: 'new_or_modified',
-            current: currentContact,
-            certifyingActuaryContactFieldChanges: fieldChanges,
-        })
-    }
-
-    return changes
-}
-
-export { buildCertifyingActuaryContactDiffChanges }
+export { buildRateActuaryContactDiffChanges }

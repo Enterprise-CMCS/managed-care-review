@@ -93,11 +93,13 @@ function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
                     rate.certifyingActuaryContactChanges.map((change) => ({
                         ...change,
                         kind: 'NEW_OR_MODIFIED' as const,
-                        certifyingActuaryContactFieldChanges:
-                            serializeRevisionDiffFieldChanges(
-                                change.certifyingActuaryContactFieldChanges
-                            ),
                     })),
+                addtlActuaryContactChanges: rate.addtlActuaryContactChanges.map(
+                    (change) => ({
+                        ...change,
+                        kind: 'NEW_OR_MODIFIED' as const,
+                    })
+                ),
             })),
         },
     }

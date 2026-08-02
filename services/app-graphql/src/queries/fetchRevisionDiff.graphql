@@ -75,23 +75,22 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
           }
           certifyingActuaryContactChanges {
             kind
-          current {
-            name
-            titleRole
-            email
-            actuarialFirm
-            actuarialFirmOther
+            current {
+              name
+              titleRole
+              email
+              actuarialFirm
+              actuarialFirmOther
+            }
           }
-          certifyingActuaryContactFieldChanges {
-            fieldPath
-            oldValue {
-              kind
-              value
-              }
-              newValue {
-                kind
-                value
-              }
+          addtlActuaryContactChanges {
+            kind
+            current {
+              name
+              titleRole
+              email
+              actuarialFirm
+              actuarialFirmOther
             }
           }
         }

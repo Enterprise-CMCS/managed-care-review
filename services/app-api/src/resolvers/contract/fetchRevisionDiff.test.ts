@@ -336,6 +336,15 @@ describe('fetchRevisionDiff', () => {
         const updatedRateFormData = formatRateDataForSending(
             linkedDraftRate.draftRevision.formData
         )
+        const existingAddtlActuaryContact =
+            updatedRateFormData.addtlActuaryContacts?.[0]
+
+        if (!existingAddtlActuaryContact) {
+            throw new Error(
+                'Unexpected error: expected additional actuary contact missing from revised rate test data'
+            )
+        }
+
         const rateUpdateInput =
             updateRatesInputFromDraftContract(linkedContract)
         const updatedRates = rateUpdateInput.updatedRates
@@ -359,6 +368,12 @@ describe('fetchRevisionDiff', () => {
                                       ...updatedRateFormData
                                           .certifyingActuaryContacts[0],
                                       actuarialFirm: 'MILLIMAN' as const,
+                                  },
+                              ],
+                              addtlActuaryContacts: [
+                                  {
+                                      ...existingAddtlActuaryContact,
+                                      actuarialFirm: 'OPTUMAS' as const,
                                   },
                                   {
                                       name: 'New Actuary',
@@ -814,19 +829,18 @@ describe('fetchRevisionDiff', () => {
                                 actuarialFirm: 'MILLIMAN',
                                 actuarialFirmOther: null,
                             },
-                            certifyingActuaryContactFieldChanges: [
-                                {
-                                    fieldPath: 'actuarialFirm',
-                                    oldValue: {
-                                        kind: 'STRING',
-                                        value: 'GUIDEHOUSE',
-                                    },
-                                    newValue: {
-                                        kind: 'STRING',
-                                        value: 'MILLIMAN',
-                                    },
-                                },
-                            ],
+                        },
+                    ],
+                    addtlActuaryContactChanges: [
+                        {
+                            kind: 'NEW_OR_MODIFIED',
+                            current: {
+                                name: 'Bar Person',
+                                titleRole: 'Baz Job',
+                                email: 'bar@example.com',
+                                actuarialFirm: 'OPTUMAS',
+                                actuarialFirmOther: 'Some Firm',
+                            },
                         },
                         {
                             kind: 'NEW_OR_MODIFIED',
@@ -837,7 +851,6 @@ describe('fetchRevisionDiff', () => {
                                 actuarialFirm: 'MERCER',
                                 actuarialFirmOther: null,
                             },
-                            certifyingActuaryContactFieldChanges: [],
                         },
                     ],
                 },
