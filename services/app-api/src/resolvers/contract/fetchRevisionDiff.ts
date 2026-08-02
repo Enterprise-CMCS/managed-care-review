@@ -73,6 +73,18 @@ function serializeRevisionDiffFieldChanges(
 }
 
 function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
+    const serializeRevisionDiffActuaryContact = (
+        contact: NonNullable<
+            RevisionDiff['rateChanges']['revised'][number]['certifyingActuaryContactChanges'][number]
+        >['current']
+    ) => ({
+        name: contact.name,
+        titleRole: contact.titleRole,
+        email: contact.email,
+        actuarialFirm: contact.actuarialFirm,
+        actuarialFirmOther: contact.actuarialFirmOther ?? null,
+    })
+
     return {
         ...comparison,
         fieldChanges: serializeRevisionDiffFieldChanges(
@@ -91,13 +103,17 @@ function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
                 ),
                 certifyingActuaryContactChanges:
                     rate.certifyingActuaryContactChanges.map((change) => ({
-                        ...change,
                         kind: 'NEW_OR_MODIFIED' as const,
+                        current: serializeRevisionDiffActuaryContact(
+                            change.current
+                        ),
                     })),
                 addtlActuaryContactChanges: rate.addtlActuaryContactChanges.map(
                     (change) => ({
-                        ...change,
                         kind: 'NEW_OR_MODIFIED' as const,
+                        current: serializeRevisionDiffActuaryContact(
+                            change.current
+                        ),
                     })
                 ),
             })),

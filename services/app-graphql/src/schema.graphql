@@ -2898,7 +2898,15 @@ enum RevisionDiffRateActuaryContactChangeKind {
 
 type RevisionDiffRateActuaryContactChange {
     kind: RevisionDiffRateActuaryContactChangeKind!
-    current: ActuaryContact!
+    current: RevisionDiffActuaryContact!
+}
+
+type RevisionDiffActuaryContact {
+    name: String
+    titleRole: String
+    email: String
+    actuarialFirm: ActuarialFirm
+    actuarialFirmOther: String
 }
 
 enum RevisionDiffStateContactChangeKind {
