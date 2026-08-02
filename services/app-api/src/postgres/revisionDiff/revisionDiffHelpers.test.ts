@@ -147,6 +147,9 @@ describe('revisionDiffHelpers', () => {
             statePrograms
         )
 
+        const previousFormData = previousSubmission.contractRevision.formData
+        const latestFormData = latestSubmissionPackage.contractRevision.formData
+
         expect(comparison).toEqual({
             contractID: resubmittedContractDomainData.id,
             olderRevisionID: previousSubmission.contractRevision.id,
@@ -161,85 +164,85 @@ describe('revisionDiffHelpers', () => {
                     oldValue: packageName(
                         'FL',
                         resubmittedContractDomainData.stateNumber,
-                        [statePrograms[0].id],
+                        previousFormData.programIDs,
                         statePrograms
                     ),
                     newValue: packageName(
                         'FL',
                         resubmittedContractDomainData.stateNumber,
-                        [statePrograms[0].id, statePrograms[1].id],
+                        latestFormData.programIDs,
                         statePrograms
                     ),
                 },
                 {
                     fieldPath: 'programIDs',
-                    oldValue: [statePrograms[0].id],
-                    newValue: [statePrograms[0].id, statePrograms[1].id].sort(),
+                    oldValue: [...previousFormData.programIDs].sort(),
+                    newValue: [...latestFormData.programIDs].sort(),
                 },
                 {
                     fieldPath: 'submissionDescription',
-                    oldValue: 'Original description',
-                    newValue: 'Resubmitted description',
+                    oldValue: previousFormData.submissionDescription,
+                    newValue: latestFormData.submissionDescription,
                 },
                 {
                     fieldPath: 'contractType',
-                    oldValue: 'BASE',
-                    newValue: 'AMENDMENT',
+                    oldValue: previousFormData.contractType,
+                    newValue: latestFormData.contractType,
                 },
                 {
                     fieldPath: 'populationCovered',
-                    oldValue: 'MEDICAID',
-                    newValue: 'MEDICAID_AND_CHIP',
+                    oldValue: previousFormData.populationCovered,
+                    newValue: latestFormData.populationCovered,
                 },
                 {
                     fieldPath: 'riskBasedContract',
-                    oldValue: false,
-                    newValue: true,
+                    oldValue: previousFormData.riskBasedContract,
+                    newValue: latestFormData.riskBasedContract,
                 },
                 {
                     fieldPath: 'dsnpContract',
-                    oldValue: undefined,
-                    newValue: true,
+                    oldValue: previousFormData.dsnpContract,
+                    newValue: latestFormData.dsnpContract,
                 },
                 {
                     fieldPath: 'contractExecutionStatus',
-                    oldValue: 'UNEXECUTED',
-                    newValue: 'EXECUTED',
+                    oldValue: previousFormData.contractExecutionStatus,
+                    newValue: latestFormData.contractExecutionStatus,
                 },
                 {
                     fieldPath: 'contractDateStart',
-                    oldValue: new Date('2027-01-01T00:00:00.000Z'),
-                    newValue: new Date('2027-05-15T00:00:00.000Z'),
+                    oldValue: previousFormData.contractDateStart,
+                    newValue: latestFormData.contractDateStart,
                 },
                 {
                     fieldPath: 'contractDateEnd',
-                    oldValue: new Date('2028-01-01T00:00:00.000Z'),
-                    newValue: new Date('2028-05-15T00:00:00.000Z'),
+                    oldValue: previousFormData.contractDateEnd,
+                    newValue: latestFormData.contractDateEnd,
                 },
                 {
                     fieldPath: 'managedCareEntities',
-                    oldValue: ['MCO'],
-                    newValue: ['MCO', 'PIHP', 'PAHP', 'PCCM'],
+                    oldValue: previousFormData.managedCareEntities,
+                    newValue: latestFormData.managedCareEntities,
                 },
                 {
                     fieldPath: 'federalAuthorities',
-                    oldValue: ['TITLE_XXI'],
-                    newValue: ['STATE_PLAN', 'WAIVER_1115', 'TITLE_XXI'],
+                    oldValue: previousFormData.federalAuthorities,
+                    newValue: latestFormData.federalAuthorities,
                 },
                 {
                     fieldPath: 'inLieuServicesAndSettings',
-                    oldValue: false,
-                    newValue: true,
+                    oldValue: previousFormData.inLieuServicesAndSettings,
+                    newValue: latestFormData.inLieuServicesAndSettings,
                 },
                 {
                     fieldPath: 'modifiedBenefitsProvided',
-                    oldValue: false,
-                    newValue: true,
+                    oldValue: previousFormData.modifiedBenefitsProvided,
+                    newValue: latestFormData.modifiedBenefitsProvided,
                 },
                 {
                     fieldPath: 'modifiedGeoAreaServed',
-                    oldValue: false,
-                    newValue: true,
+                    oldValue: previousFormData.modifiedGeoAreaServed,
+                    newValue: latestFormData.modifiedGeoAreaServed,
                 },
             ],
             stateContactChanges: [],
@@ -752,22 +755,25 @@ describe('revisionDiffHelpers', () => {
             throw comparison
         }
 
+        const modifiedContact =
+            latestSubmissionPackage.contractRevision.formData.stateContacts[1]
+        const newContact =
+            latestSubmissionPackage.contractRevision.formData.stateContacts[2]
+
+        if (!modifiedContact || !newContact) {
+            throw new Error(
+                'Unexpected error: expected state contacts missing from latest submission'
+            )
+        }
+
         expect(comparison.stateContactChanges).toEqual([
             {
                 kind: 'new_or_modified',
-                current: {
-                    name: 'Modified Person',
-                    titleRole: 'Senior Manager',
-                    email: 'after@example.com',
-                },
+                current: modifiedContact,
             },
             {
                 kind: 'new_or_modified',
-                current: {
-                    name: 'New Person',
-                    titleRole: 'Analyst',
-                    email: 'new@example.com',
-                },
+                current: newContact,
             },
         ])
     })
@@ -961,26 +967,117 @@ describe('revisionDiffHelpers', () => {
             throw comparison
         }
 
+        const previousContractDocuments =
+            previousSubmission.contractRevision.formData.contractDocuments
+        const latestContractDocuments =
+            latestSubmissionPackage.contractRevision.formData.contractDocuments
+        const previousSupportingDocuments =
+            previousSubmission.contractRevision.formData.supportingDocuments
+        const latestSupportingDocuments =
+            latestSubmissionPackage.contractRevision.formData
+                .supportingDocuments
+        const previousRateRevision = previousSubmission.rateRevisions.find(
+            (rateRevision) => rateRevision.rateID === draftRate.id
+        )
+        const latestRateRevision = latestSubmissionPackage.rateRevisions.find(
+            (rateRevision) => rateRevision.rateID === draftRate.id
+        )
+
+        if (!previousRateRevision || !latestRateRevision) {
+            throw new Error(
+                'Unexpected error: expected rate revisions missing from document diff test'
+            )
+        }
+
+        const previousRateDocuments =
+            previousRateRevision.formData.rateDocuments ?? []
+        const latestRateDocuments =
+            latestRateRevision.formData.rateDocuments ?? []
+        const previousRateSupportingDocuments =
+            previousRateRevision.formData.supportingDocuments ?? []
+        const latestRateSupportingDocuments =
+            latestRateRevision.formData.supportingDocuments ?? []
+
         expect(comparison.documentChanges).toEqual({
             contractDocuments: {
-                added: ['contract-added.pdf'],
-                removed: ['contract-removed.pdf'],
+                added: latestContractDocuments
+                    .filter(
+                        (document) =>
+                            !previousContractDocuments.some(
+                                (previousDocument) =>
+                                    previousDocument.sha256 === document.sha256
+                            )
+                    )
+                    .map((document) => document.name),
+                removed: previousContractDocuments
+                    .filter(
+                        (document) =>
+                            !latestContractDocuments.some(
+                                (latestDocument) =>
+                                    latestDocument.sha256 === document.sha256
+                            )
+                    )
+                    .map((document) => document.name),
             },
             contractSupportingDocuments: {
                 added: [],
-                removed: ['support-removed.pdf'],
+                removed: previousSupportingDocuments
+                    .filter(
+                        (document) =>
+                            !latestSupportingDocuments.some(
+                                (latestDocument) =>
+                                    latestDocument.sha256 === document.sha256
+                            )
+                    )
+                    .map((document) => document.name),
             },
             ratesDocuments: [
                 {
                     rateID: draftRate.id,
                     rateCertificationName: updatedRateCertificationName,
                     rateDocuments: {
-                        added: ['rate-doc-added.xlsx'],
-                        removed: ['ratedoc1.doc'],
+                        added: latestRateDocuments
+                            .filter(
+                                (document) =>
+                                    !previousRateDocuments.some(
+                                        (previousDocument) =>
+                                            previousDocument.sha256 ===
+                                            document.sha256
+                                    )
+                            )
+                            .map((document) => document.name),
+                        removed: previousRateDocuments
+                            .filter(
+                                (document) =>
+                                    !latestRateDocuments.some(
+                                        (latestDocument) =>
+                                            latestDocument.sha256 ===
+                                            document.sha256
+                                    )
+                            )
+                            .map((document) => document.name),
                     },
                     supportingDocuments: {
-                        added: ['rate-support-added.pdf'],
-                        removed: ['ratesupdoc1.doc'],
+                        added: latestRateSupportingDocuments
+                            .filter(
+                                (document) =>
+                                    !previousRateSupportingDocuments.some(
+                                        (previousDocument) =>
+                                            previousDocument.sha256 ===
+                                            document.sha256
+                                    )
+                            )
+                            .map((document) => document.name),
+                        removed: previousRateSupportingDocuments
+                            .filter(
+                                (document) =>
+                                    !latestRateSupportingDocuments.some(
+                                        (latestDocument) =>
+                                            latestDocument.sha256 ===
+                                            document.sha256
+                                    )
+                            )
+                            .map((document) => document.name),
                     },
                 },
             ],
@@ -1179,69 +1276,105 @@ describe('revisionDiffHelpers', () => {
             throw comparison
         }
 
+        const addedRateRevision = latestSubmissionPackage.rateRevisions.find(
+            (rateRevision) => rateRevision.rateID === sharedRateID
+        )
+        const removedRateRevision = previousSubmission.rateRevisions.find(
+            (rateRevision) => rateRevision.rateID === removedDraftRate.id
+        )
+        const previousRevisedRateRevision =
+            previousSubmission.rateRevisions.find(
+                (rateRevision) => rateRevision.rateID === revisedDraftRate.id
+            )
+        const latestRevisedRateRevision =
+            latestSubmissionPackage.rateRevisions.find(
+                (rateRevision) => rateRevision.rateID === revisedDraftRate.id
+            )
+
+        if (
+            !addedRateRevision ||
+            !removedRateRevision ||
+            !previousRevisedRateRevision ||
+            !latestRevisedRateRevision
+        ) {
+            throw new Error(
+                'Unexpected error: expected rate revisions missing from rate diff test'
+            )
+        }
+
+        const latestCertifyingActuaryContact =
+            latestRevisedRateRevision.formData.certifyingActuaryContacts?.[0]
+        const latestAddtlActuaryContact =
+            latestRevisedRateRevision.formData.addtlActuaryContacts?.[0]
+        const latestNewAddtlActuaryContact =
+            latestRevisedRateRevision.formData.addtlActuaryContacts?.[1]
+
+        if (
+            !latestCertifyingActuaryContact ||
+            !latestAddtlActuaryContact ||
+            !latestNewAddtlActuaryContact
+        ) {
+            throw new Error(
+                'Unexpected error: expected actuary contacts missing from revised rate test'
+            )
+        }
+
         expect(comparison.rateChanges).toEqual({
             added: [
                 {
                     rateID: sharedRateID,
-                    rateCertificationName: addedRateCertificationName,
+                    rateCertificationName:
+                        addedRateRevision.formData.rateCertificationName,
                     includedInAnotherSubmission: true,
                 },
             ],
             removed: [
                 {
                     rateID: removedDraftRate.id,
-                    rateCertificationName: removedRateCertificationName,
+                    rateCertificationName:
+                        removedRateRevision.formData.rateCertificationName,
                 },
             ],
             revised: [
                 {
                     rateID: revisedDraftRate.id,
-                    rateCertificationName: revisedRateCertificationName,
+                    rateCertificationName:
+                        latestRevisedRateRevision.formData
+                            .rateCertificationName,
                     fieldChanges: [
                         {
                             fieldPath: 'rateDateCertified',
-                            oldValue: new Date('2024-01-02'),
-                            newValue: new Date('2024-04-15'),
+                            oldValue:
+                                previousRevisedRateRevision.formData
+                                    .rateDateCertified,
+                            newValue:
+                                latestRevisedRateRevision.formData
+                                    .rateDateCertified,
                         },
                         {
                             fieldPath: 'rateCertificationName',
                             oldValue:
-                                'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240102',
+                                previousRevisedRateRevision.formData
+                                    .rateCertificationName,
                             newValue:
-                                'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240415',
+                                latestRevisedRateRevision.formData
+                                    .rateCertificationName,
                         },
                     ],
                     certifyingActuaryContactChanges: [
                         {
                             kind: 'new_or_modified',
-                            current: {
-                                name: 'Foo Person',
-                                titleRole: 'Bar Job',
-                                email: 'foo@example.com',
-                                actuarialFirm: 'MILLIMAN',
-                            },
+                            current: latestCertifyingActuaryContact,
                         },
                     ],
                     addtlActuaryContactChanges: [
                         {
                             kind: 'new_or_modified',
-                            current: {
-                                name: 'Bar Person',
-                                titleRole: 'Baz Job',
-                                email: 'bar@example.com',
-                                actuarialFirm: 'OPTUMAS',
-                                actuarialFirmOther: 'Some Firm',
-                            },
+                            current: latestAddtlActuaryContact,
                         },
                         {
                             kind: 'new_or_modified',
-                            current: {
-                                name: 'New Actuary',
-                                titleRole: 'Senior Actuary',
-                                email: 'new-actuary@example.com',
-                                actuarialFirm: 'MERCER',
-                                actuarialFirmOther: undefined,
-                            },
+                            current: latestNewAddtlActuaryContact,
                         },
                     ],
                 },
