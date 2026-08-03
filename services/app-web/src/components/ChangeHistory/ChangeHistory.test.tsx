@@ -23,6 +23,34 @@ import {
     RoutesRecord,
 } from '@mc-review/constants'
 import { Route, Routes } from 'react-router-dom'
+import { ContractUndoUnlockSubmission } from '../../gen/gqlClient'
+
+const undoUnlockSubmission = ({
+    unlockedAt,
+    undoneAt,
+}: {
+    unlockedAt: Date
+    undoneAt: Date
+}): ContractUndoUnlockSubmission => {
+    const cmsUser = {
+        email: 'zuko@example.com',
+        role: 'CMS_USER',
+        givenName: 'Zuko',
+        familyName: 'Hotman',
+    }
+    return {
+        undoUnlockInfo: {
+            updatedAt: undoneAt,
+            updatedBy: cmsUser,
+            updatedReason: 'Unlock was accidental',
+        },
+        reversedUnlockInfo: {
+            updatedAt: unlockedAt,
+            updatedBy: cmsUser,
+            updatedReason: 'Unlocking for edits',
+        },
+    }
+}
 
 describe('Change History', () => {
     it('can render history for initial submission', () => {
@@ -275,6 +303,127 @@ describe('Change History', () => {
             screen.getByText(
                 'CMS undid submission release to state. released in error'
             )
+        ).toBeInTheDocument()
+    })
+
+    it('renders an undo unlock entry alongside the unlock it reversed', () => {
+        const unlockedAt = new Date('2025-01-05T18:00:00.000Z')
+        const undoneAt = new Date('2025-01-06T18:00:00.000Z')
+        const contract = mockContractPackageSubmitted({
+            undoUnlockSubmissions: [
+                undoUnlockSubmission({ unlockedAt, undoneAt }),
+            ],
+        })
+
+        renderWithProviders(<ChangeHistory contract={contract} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidStateUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        })
+
+        expect(
+            screen.getByRole('button', {
+                name: `${formatToPacificTime(undoneAt)} - Undo unlock`,
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', {
+                name: `${formatToPacificTime(unlockedAt)} - Unlock`,
+            })
+        ).toBeInTheDocument()
+
+        const undoUnlockRecord = within(
+            screen.getByTestId(`accordionItem_${undoneAt.toISOString()}`)
+        )
+        expect(
+            undoUnlockRecord.getByText('Unlock was accidental')
+        ).toBeInTheDocument()
+        expect(
+            undoUnlockRecord.getByText('zuko@example.com')
+        ).toBeInTheDocument()
+        expect(undoUnlockRecord.getByText('Submitted')).toBeInTheDocument()
+        expect(screen.getByText('Unlocking for edits')).toBeInTheDocument()
+    })
+
+    it('shows the status each undo unlock returned the submission to', () => {
+        // Status counts only the submissions that predate the undo unlock, so
+        // it can differ between two undo unlocks on the same contract. This
+        // contract submits on 2024-01-01, 2024-02-02 and 2024-03-03: the first
+        // undo unlock follows one of those submissions, the second follows all
+        // three.
+        const afterFirstSubmission = new Date('2024-01-15T18:00:00.000Z')
+        const afterEverySubmission = new Date('2025-01-06T18:00:00.000Z')
+        const contract = mockContractPackageSubmittedWithRevisions({
+            undoUnlockSubmissions: [
+                undoUnlockSubmission({
+                    unlockedAt: new Date('2024-01-14T18:00:00.000Z'),
+                    undoneAt: afterFirstSubmission,
+                }),
+                undoUnlockSubmission({
+                    unlockedAt: new Date('2025-01-05T18:00:00.000Z'),
+                    undoneAt: afterEverySubmission,
+                }),
+            ],
+        })
+
+        renderWithProviders(<ChangeHistory contract={contract} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        })
+
+        expect(
+            within(
+                screen.getByTestId(
+                    `accordionItem_${afterFirstSubmission.toISOString()}`
+                )
+            ).getByText('Submitted')
+        ).toBeInTheDocument()
+        expect(
+            within(
+                screen.getByTestId(
+                    `accordionItem_${afterEverySubmission.toISOString()}`
+                )
+            ).getByText('Resubmitted')
+        ).toBeInTheDocument()
+    })
+
+    it('shows the review status an undo unlock returned a submission to', () => {
+        const undoneAt = new Date('2026-04-01T18:00:00.000Z')
+        const contract = mockEqroContractSubmittedNotSubjectToReview({
+            undoUnlockSubmissions: [
+                undoUnlockSubmission({
+                    unlockedAt: new Date('2026-03-31T18:00:00.000Z'),
+                    undoneAt,
+                }),
+            ],
+        })
+
+        renderWithProviders(<ChangeHistory contract={contract} />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({
+                        user: mockValidCMSUser(),
+                        statusCode: 200,
+                    }),
+                ],
+            },
+        })
+
+        expect(
+            within(
+                screen.getByTestId(`accordionItem_${undoneAt.toISOString()}`)
+            ).getByText('Not subject to review')
         ).toBeInTheDocument()
     })
 
