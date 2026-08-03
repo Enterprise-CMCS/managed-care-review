@@ -80,7 +80,6 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
               titleRole
               email
               actuarialFirm
-              actuarialFirmOther
             }
           }
           addtlActuaryContactChanges {
@@ -90,7 +89,6 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
               titleRole
               email
               actuarialFirm
-              actuarialFirmOther
             }
           }
         }

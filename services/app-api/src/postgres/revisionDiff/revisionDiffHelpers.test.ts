@@ -6,7 +6,11 @@ import {
     InvalidRevisionDiffInputError,
     resolveRevisionPair,
 } from './findRevisionDiffByContractID'
-import { buildRevisionDiff } from './revisionDiffHelpers'
+import {
+    buildRevisionDiff,
+    getUnhandledContractDiffFieldPaths,
+} from './revisionDiffHelpers'
+import { getUnhandledRateDiffFieldPaths } from './revisionDiffRates'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import { constructTestPostgresServer } from '../../testHelpers/gqlHelpers'
 import {
@@ -37,7 +41,50 @@ const mockStateUser = () => ({
     stateCode: 'KY',
 })
 
+type DocumentDiffItem = {
+    name: string
+    sha256: string
+}
+
+//documents are considered to be changed if the name and sha256 do not match between the two revisions. This function returns the added and removed document names.
+function diffDocumentsByShaAndName(
+    previousDocs: DocumentDiffItem[],
+    latestDocs: DocumentDiffItem[]
+) {
+    const previousDocKeys = new Set(
+        previousDocs.map((document) => `${document.sha256}::${document.name}`)
+    )
+    const latestDocKeys = new Set(
+        latestDocs.map((document) => `${document.sha256}::${document.name}`)
+    )
+
+    return {
+        // return the names of documents that are in the latest submission but not in the previous submission, and vice versa.
+        added: latestDocs
+            .filter(
+                (document) =>
+                    !previousDocKeys.has(`${document.sha256}::${document.name}`)
+            )
+            .map((document) => document.name),
+        // return the names of documents that are in the previous submission but not in the latest submission.
+        removed: previousDocs
+            .filter(
+                (document) =>
+                    !latestDocKeys.has(`${document.sha256}::${document.name}`)
+            )
+            .map((document) => document.name),
+    }
+}
+
 describe('revisionDiffHelpers', () => {
+    it('accounts for every contract form field in revision diff handling', () => {
+        expect(getUnhandledContractDiffFieldPaths()).toEqual([])
+    })
+
+    it('accounts for every rate form field in revision diff handling', () => {
+        expect(getUnhandledRateDiffFieldPaths()).toEqual([])
+    })
+
     it('builds data-only field changes for a submitted revision comparison', async () => {
         // Setup test API and prisma client.
         const prismaClient = await sharedTestPrismaClient()
@@ -999,86 +1046,29 @@ describe('revisionDiffHelpers', () => {
             latestRateRevision.formData.supportingDocuments ?? []
 
         expect(comparison.documentChanges).toEqual({
-            contractDocuments: {
-                added: latestContractDocuments
-                    .filter(
-                        (document) =>
-                            !previousContractDocuments.some(
-                                (previousDocument) =>
-                                    previousDocument.sha256 === document.sha256
-                            )
-                    )
-                    .map((document) => document.name),
-                removed: previousContractDocuments
-                    .filter(
-                        (document) =>
-                            !latestContractDocuments.some(
-                                (latestDocument) =>
-                                    latestDocument.sha256 === document.sha256
-                            )
-                    )
-                    .map((document) => document.name),
-            },
+            contractDocuments: diffDocumentsByShaAndName(
+                previousContractDocuments,
+                latestContractDocuments
+            ),
             contractSupportingDocuments: {
                 added: [],
-                removed: previousSupportingDocuments
-                    .filter(
-                        (document) =>
-                            !latestSupportingDocuments.some(
-                                (latestDocument) =>
-                                    latestDocument.sha256 === document.sha256
-                            )
-                    )
-                    .map((document) => document.name),
+                removed: diffDocumentsByShaAndName(
+                    previousSupportingDocuments,
+                    latestSupportingDocuments
+                ).removed,
             },
             ratesDocuments: [
                 {
                     rateID: draftRate.id,
                     rateCertificationName: updatedRateCertificationName,
-                    rateDocuments: {
-                        added: latestRateDocuments
-                            .filter(
-                                (document) =>
-                                    !previousRateDocuments.some(
-                                        (previousDocument) =>
-                                            previousDocument.sha256 ===
-                                            document.sha256
-                                    )
-                            )
-                            .map((document) => document.name),
-                        removed: previousRateDocuments
-                            .filter(
-                                (document) =>
-                                    !latestRateDocuments.some(
-                                        (latestDocument) =>
-                                            latestDocument.sha256 ===
-                                            document.sha256
-                                    )
-                            )
-                            .map((document) => document.name),
-                    },
-                    supportingDocuments: {
-                        added: latestRateSupportingDocuments
-                            .filter(
-                                (document) =>
-                                    !previousRateSupportingDocuments.some(
-                                        (previousDocument) =>
-                                            previousDocument.sha256 ===
-                                            document.sha256
-                                    )
-                            )
-                            .map((document) => document.name),
-                        removed: previousRateSupportingDocuments
-                            .filter(
-                                (document) =>
-                                    !latestRateSupportingDocuments.some(
-                                        (latestDocument) =>
-                                            latestDocument.sha256 ===
-                                            document.sha256
-                                    )
-                            )
-                            .map((document) => document.name),
-                    },
+                    rateDocuments: diffDocumentsByShaAndName(
+                        previousRateDocuments,
+                        latestRateDocuments
+                    ),
+                    supportingDocuments: diffDocumentsByShaAndName(
+                        previousRateSupportingDocuments,
+                        latestRateSupportingDocuments
+                    ),
                 },
             ],
             totalAdded: 3,

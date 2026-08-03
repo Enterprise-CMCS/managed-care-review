@@ -2905,8 +2905,7 @@ type RevisionDiffActuaryContact {
     name: String
     titleRole: String
     email: String
-    actuarialFirm: ActuarialFirm
-    actuarialFirmOther: String
+    actuarialFirm: String
 }
 
 enum RevisionDiffStateContactChangeKind {

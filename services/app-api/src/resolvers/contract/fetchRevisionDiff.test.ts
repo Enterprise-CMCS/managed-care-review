@@ -827,7 +827,6 @@ describe('fetchRevisionDiff', () => {
                                 titleRole: 'Bar Job',
                                 email: 'foo@example.com',
                                 actuarialFirm: 'MILLIMAN',
-                                actuarialFirmOther: null,
                             },
                         },
                     ],
@@ -839,7 +838,6 @@ describe('fetchRevisionDiff', () => {
                                 titleRole: 'Baz Job',
                                 email: 'bar@example.com',
                                 actuarialFirm: 'OPTUMAS',
-                                actuarialFirmOther: null,
                             },
                         },
                         {
@@ -849,7 +847,6 @@ describe('fetchRevisionDiff', () => {
                                 titleRole: 'Senior Actuary',
                                 email: 'new-actuary@example.com',
                                 actuarialFirm: 'MERCER',
-                                actuarialFirmOther: null,
                             },
                         },
                     ],

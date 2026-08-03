@@ -83,6 +83,18 @@ function buildStringArrayFieldConfig(
 const rateFieldConfigOverrides: Partial<
     Record<keyof RateFormData, DiffFieldConfig>
 > = {
+    rateType: {
+        fieldPath: 'rateType',
+        getValue: (formData) => formData.rateType,
+    },
+    actuaryCommunicationPreference: {
+        fieldPath: 'actuaryCommunicationPreference',
+        getValue: (formData) => formData.actuaryCommunicationPreference,
+    },
+    rateCapitationType: {
+        fieldPath: 'rateCapitationType',
+        getValue: (formData) => formData.rateCapitationType,
+    },
     rateProgramIDs: {
         fieldPath: 'rateProgramIDs',
         getValue: (formData) =>
@@ -144,6 +156,39 @@ const diffRateFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
 
     return []
 })
+
+/**
+ * lists rate form fields that are not already excluded, overridden, or supported by existing auto-diffing.
+ * used to test if new rate form fields are added which need to be specifically handled in the revision diff logic.
+ */
+function getUnhandledRateDiffFieldPaths(): string[] {
+    return Object.entries(
+        rateFormDataSchema.shape as Record<string, z.core.$ZodType>
+    ).flatMap(([fieldPath, schema]) => {
+        const typedFieldPath = fieldPath as keyof RateFormData & string
+
+        if (excludedRateFieldPaths.has(typedFieldPath)) {
+            return []
+        }
+
+        if (rateFieldConfigOverrides[typedFieldPath]) {
+            return []
+        }
+
+        const unwrappedSchema = unwrapSchema(schema)
+
+        if (
+            unwrappedSchema instanceof z.ZodBoolean ||
+            unwrappedSchema instanceof z.ZodString ||
+            unwrappedSchema instanceof z.ZodDate ||
+            unwrappedSchema instanceof z.ZodArray
+        ) {
+            return []
+        }
+
+        return [fieldPath]
+    })
+}
 
 const scalarRateFormDataFieldConfigs: ScalarDiffFieldConfig<
     RateFormData,
@@ -316,4 +361,4 @@ function buildRateChanges(
     }
 }
 
-export { buildRateChanges }
+export { buildRateChanges, getUnhandledRateDiffFieldPaths }

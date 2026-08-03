@@ -189,6 +189,39 @@ const diffContractFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
     return []
 })
 
+/**
+ * lists contract form fields that are not already excluded, overridden, or supported by existing auto-diffing.
+ * used to test if new contract form fields are added which need to be specifically handled in the revision diff logic.
+ */
+function getUnhandledContractDiffFieldPaths(): string[] {
+    return Object.entries(
+        contractFormDataSchema.shape as Record<string, z.core.$ZodType>
+    ).flatMap(([fieldPath, schema]) => {
+        const typedFieldPath = fieldPath as keyof ContractFormData & string
+
+        if (excludedFieldPaths.has(typedFieldPath)) {
+            return []
+        }
+
+        if (fieldConfigOverrides[typedFieldPath]) {
+            return []
+        }
+
+        const unwrappedSchema = unwrapSchema(schema)
+
+        if (
+            unwrappedSchema instanceof z.ZodBoolean ||
+            unwrappedSchema instanceof z.ZodString ||
+            unwrappedSchema instanceof z.ZodDate ||
+            unwrappedSchema instanceof z.ZodArray
+        ) {
+            return []
+        }
+
+        return [fieldPath]
+    })
+}
+
 const scalarContractFormDataFieldConfigs: ScalarDiffFieldConfig<
     ContractFormData,
     FieldContext
@@ -270,4 +303,4 @@ function buildRevisionDiff(
     }
 }
 
-export { buildRevisionDiff }
+export { buildRevisionDiff, getUnhandledContractDiffFieldPaths }

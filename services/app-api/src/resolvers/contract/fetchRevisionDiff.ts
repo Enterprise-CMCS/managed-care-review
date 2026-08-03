@@ -81,11 +81,10 @@ function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
         name: contact.name,
         titleRole: contact.titleRole,
         email: contact.email,
-        actuarialFirm: contact.actuarialFirm,
-        actuarialFirmOther:
+        actuarialFirm:
             contact.actuarialFirm === 'OTHER'
                 ? (contact.actuarialFirmOther ?? null)
-                : null,
+                : (contact.actuarialFirm ?? null),
     })
 
     return {
