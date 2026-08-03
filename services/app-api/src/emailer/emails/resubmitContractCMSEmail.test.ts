@@ -9,6 +9,7 @@ import { resubmitContractCMSEmail } from './index'
 import type { ContractType } from '../../domain-models'
 import { packageName } from '@mc-review/submissions'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
+import { emailColors } from '../styleConstants'
 
 describe('with rates', () => {
     const noDiffRevisionChanges = {
@@ -327,7 +328,9 @@ describe('with rates', () => {
         expect(template.bodyText).toContain(
             'Managed Care authorities: Title XXI Separate CHIP State Plan Authority\n→ 1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority'
         )
-        expect(template.bodyHTML).toContain('NEW Associated with a D-SNP')
+        expect(template.bodyHTML).toContain(
+            `<span style="color: ${emailColors.revisionChangesNewIndicator}; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> Associated with a D-SNP`
+        )
         expect(template.bodyHTML).toContain(
             '<strong>Managed Care authorities:</strong> Title XXI Separate CHIP State Plan Authority<br />→ 1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority'
         )
@@ -351,7 +354,9 @@ describe('with rates', () => {
             'In Lieu-of Services and Settings: No → Yes'
         )
         expect(template.bodyText).toContain('NEW CHIP beneficiaries: Yes')
-        expect(template.bodyHTML).toContain('NEW CHIP beneficiaries')
+        expect(template.bodyHTML).toContain(
+            `<span style="color: ${emailColors.revisionChangesNewIndicator}; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> CHIP beneficiaries`
+        )
     })
     it('includes expected data summary for a multi-rate contract and rates resubmission CMS email', async () => {
         const contract = mockContract()

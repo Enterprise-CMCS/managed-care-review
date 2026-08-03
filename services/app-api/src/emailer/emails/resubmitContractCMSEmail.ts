@@ -15,6 +15,7 @@ import type {
 } from '../../domain-models'
 import { submissionSummaryURL } from '../generateURLs'
 import type { ResubmitRevisionChanges } from './resubmitRevisionChanges'
+import { emailColors } from '../styleConstants'
 
 export const resubmitContractCMSEmail = async (
     contract: ContractType,
@@ -77,6 +78,8 @@ export const resubmitContractCMSEmail = async (
             })),
         submissionURL: packageURL,
         revisionChanges,
+        revisionChangesNewIndicatorColor:
+            emailColors.revisionChangesNewIndicator,
     }
 
     const emailTemplate = isChipOnly

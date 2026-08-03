@@ -80,6 +80,25 @@ type FederalAuthorityValue =
     | 'BENCHMARK'
     | 'TITLE_XXI'
 
+const submissionTypeFieldOrder: SubmissionTypeFieldPath[] = [
+    'contractName',
+    'populationCovered',
+    'submissionType',
+    'contractType',
+    'riskBasedContract',
+    'programIDs',
+    'submissionDescription',
+]
+
+const contractDetailsFieldOrder: ContractDetailsFieldPath[] = [
+    'contractExecutionStatus',
+    'contractDateStart',
+    'contractDateEnd',
+    'managedCareEntities',
+    'federalAuthorities',
+    'dsnpContract',
+]
+
 const isChipOnlyContract = (contract: ContractType): boolean =>
     contract.packageSubmissions[0]?.contractRevision.formData
         .populationCovered === 'CHIP'
@@ -455,15 +474,45 @@ const buildResubmitRevisionChanges = (
     statePrograms: ProgramType[]
 ): ResubmitRevisionChanges => {
     const submissionTypeRows = comparison.fieldChanges
-        .map((fieldChange) =>
-            buildSubmissionTypeRow(fieldChange, statePrograms)
+        .flatMap((fieldChange) => {
+            const row = buildSubmissionTypeRow(fieldChange, statePrograms)
+
+            return row
+                ? [
+                      {
+                          row,
+                          fieldPath:
+                              fieldChange.fieldPath as SubmissionTypeFieldPath,
+                      },
+                  ]
+                : []
+        })
+        .sort(
+            (left, right) =>
+                submissionTypeFieldOrder.indexOf(left.fieldPath) -
+                submissionTypeFieldOrder.indexOf(right.fieldPath)
         )
-        .filter((row): row is ResubmitRevisionChangeRow => row !== undefined)
+        .map(({ row }) => row)
     const contractDetailsRows = comparison.fieldChanges
-        .map((fieldChange) =>
-            buildContractDetailsRow(fieldChange, statePrograms)
+        .flatMap((fieldChange) => {
+            const row = buildContractDetailsRow(fieldChange, statePrograms)
+
+            return row
+                ? [
+                      {
+                          row,
+                          fieldPath:
+                              fieldChange.fieldPath as ContractDetailsFieldPath,
+                      },
+                  ]
+                : []
+        })
+        .sort(
+            (left, right) =>
+                contractDetailsFieldOrder.indexOf(left.fieldPath) -
+                contractDetailsFieldOrder.indexOf(right.fieldPath)
         )
-        .filter((row): row is ResubmitRevisionChangeRow => row !== undefined)
+        .map(({ row }) => row)
     const contractProvisionsRows = comparison.fieldChanges
         .map((fieldChange) =>
             buildContractProvisionsRow(

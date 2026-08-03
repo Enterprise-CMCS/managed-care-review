@@ -1,5 +1,6 @@
 <hr />
-<br />
+<div style="height: 32px; line-height: 32px;">&nbsp;</div>
+<div style="height: 32px; line-height: 32px;">&nbsp;</div>
 <div style="padding: 4px 0;">
     <strong>Submission changes: <%= it.revisionChanges.previousSubmissionDate %> → <%= it.revisionChanges.currentSubmissionDate %></strong>
 </div>
@@ -9,14 +10,18 @@
 </div>
 <% } %>
 <% if (it.revisionChanges.hasChanges) { %>
-<% it.revisionChanges.sections.forEach(function(section) { %>
+<div style="height: 16px; line-height: 16px;">&nbsp;</div>
+<% it.revisionChanges.sections.forEach(function(section, index) { %>
+<% if (index > 0) { %>
+<div style="height: 32px; line-height: 32px;">&nbsp;</div>
+<% } %>
 <div style="padding: 4px 0;">
     <strong><%= section.title %></strong>
 </div>
 <% section.rows.forEach(function(row) { %>
 <% if (row.isNew) { %>
 <div style="padding: 4px 0;">
-    <strong>NEW <%= row.label %>:</strong> <%= row.newValue %>
+    <strong><span style="color: <%= it.revisionChangesNewIndicatorColor %>; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> <%= row.label %>:</strong> <%= row.newValue %>
 </div>
 <% } else { %>
 <div style="padding: 4px 0;">
