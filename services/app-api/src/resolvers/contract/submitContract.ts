@@ -596,6 +596,7 @@ export function submitContract(
                             recordResolverError(span, revisionDiff)
                         } else {
                             revisionChanges = buildResubmitRevisionChanges(
+                                submitContractResult,
                                 revisionDiff,
                                 statePrograms
                             )

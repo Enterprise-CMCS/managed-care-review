@@ -10,8 +10,13 @@ No changes made in the submission on <%= it.revisionChanges.currentSubmissionDat
 <strong><%= section.title %></strong><br />
 <br />
 <% section.rows.forEach(function(row) { %>
+<% if (row.isNew) { %>
+<strong>NEW <%= row.label %>:</strong> <%= row.newValue %><br />
+<br />
+<% } else { %>
 <strong><%= row.label %>:</strong> <%= row.oldValue %> → <%= row.newValue %><br />
 <br />
+<% } %>
 <% }) %>
 <% }) %>
 <% } %>

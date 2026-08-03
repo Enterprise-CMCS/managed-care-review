@@ -39,6 +39,50 @@ describe('with rates', () => {
             },
         ],
     }
+    const contractDetailsRevisionChanges = {
+        previousSubmissionDate: '05/01/2027',
+        currentSubmissionDate: '05/11/2027',
+        hasChanges: true,
+        sections: [
+            {
+                title: 'CONTRACT DETAILS',
+                rows: [
+                    {
+                        label: 'Status',
+                        oldValue: 'Unexecuted by some or all parties',
+                        newValue: 'Fully executed',
+                    },
+                    {
+                        label: 'Associated with a D-SNP',
+                        newValue: 'Yes',
+                        isNew: true,
+                    },
+                ],
+            },
+        ],
+    }
+    const contractProvisionsRevisionChanges = {
+        previousSubmissionDate: '05/01/2027',
+        currentSubmissionDate: '05/11/2027',
+        hasChanges: true,
+        sections: [
+            {
+                title: 'CONTRACT PROVISIONS',
+                rows: [
+                    {
+                        label: 'In Lieu-of Services and Settings',
+                        oldValue: 'No',
+                        newValue: 'Yes',
+                    },
+                    {
+                        label: 'CHIP beneficiaries',
+                        newValue: 'Yes',
+                        isNew: true,
+                    },
+                ],
+            },
+        ],
+    }
     const resubmitData = {
         updatedBy: {
             email: 'bob@example.com',
@@ -240,6 +284,48 @@ describe('with rates', () => {
         )
         expect(template.bodyText).toContain('Risk-based contract: No → Yes')
         expect(template.bodyHTML).toContain('→')
+    })
+    it('renders contract details diff rows and NEW fields when revision changes are provided', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            contractDetailsRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain('CONTRACT DETAILS')
+        expect(template.bodyText).toContain(
+            'Status: Unexecuted by some or all parties → Fully executed'
+        )
+        expect(template.bodyText).toContain('NEW Associated with a D-SNP: Yes')
+        expect(template.bodyHTML).toContain('NEW Associated with a D-SNP')
+    })
+    it('renders contract provisions diff rows and NEW fields when revision changes are provided', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            contractProvisionsRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain('CONTRACT PROVISIONS')
+        expect(template.bodyText).toContain(
+            'In Lieu-of Services and Settings: No → Yes'
+        )
+        expect(template.bodyText).toContain('NEW CHIP beneficiaries: Yes')
+        expect(template.bodyHTML).toContain('NEW CHIP beneficiaries')
     })
     it('includes expected data summary for a multi-rate contract and rates resubmission CMS email', async () => {
         const contract = mockContract()
