@@ -839,7 +839,7 @@ describe('fetchRevisionDiff', () => {
                                 titleRole: 'Baz Job',
                                 email: 'bar@example.com',
                                 actuarialFirm: 'OPTUMAS',
-                                actuarialFirmOther: 'Some Firm',
+                                actuarialFirmOther: null,
                             },
                         },
                         {
