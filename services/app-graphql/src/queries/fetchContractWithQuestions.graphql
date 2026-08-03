@@ -33,6 +33,10 @@ query fetchContractWithQuestions($input: FetchContractInput!) {
                 ...packageSubmissionsFragment
             }
 
+            undoUnlockSubmissions {
+                ...undoUnlockSubmissionsFragment
+            }
+
             questions {
                 DMCOQuestions {
                     ...contractQuestionListFragment

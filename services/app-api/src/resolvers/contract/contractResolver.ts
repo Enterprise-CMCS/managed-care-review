@@ -254,6 +254,14 @@ function genericContractResolver<
             )
         },
 
+        undoUnlockSubmissions(parent: ParentType) {
+            return (parent.undoUnlockPackages ?? []).map((undoUnlock) => ({
+                undoUnlockInfo: undoUnlock.undoUnlockInfo,
+                reversedUnlockInfo:
+                    undoUnlock.draftContractRevisionSnapshot.unlockInfo,
+            }))
+        },
+
         questions: async (
             parent: ParentType,
             _args: Record<string, never>,

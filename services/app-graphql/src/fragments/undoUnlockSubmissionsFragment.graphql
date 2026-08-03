@@ -1,0 +1,9 @@
+fragment undoUnlockSubmissionsFragment on ContractUndoUnlockSubmission {
+    undoUnlockInfo {
+        ...updateInformationFields
+    }
+
+    reversedUnlockInfo {
+        ...updateInformationFields
+    }
+}

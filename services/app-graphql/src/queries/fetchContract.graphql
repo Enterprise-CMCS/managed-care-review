@@ -32,6 +32,10 @@ query fetchContract($input: FetchContractInput!) {
             packageSubmissions {
                 ...packageSubmissionsFragment
             }
+
+            undoUnlockSubmissions {
+                ...undoUnlockSubmissionsFragment
+            }
         }
     }
 }
