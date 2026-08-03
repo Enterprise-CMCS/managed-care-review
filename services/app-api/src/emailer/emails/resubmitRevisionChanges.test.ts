@@ -137,6 +137,7 @@ describe('buildResubmitRevisionChanges', () => {
                             label: 'Submission description',
                             oldValue: 'Original submission description',
                             newValue: 'Updated submission description',
+                            breakBeforeNewValue: true,
                         },
                     ],
                 },
@@ -225,6 +226,7 @@ describe('buildResubmitRevisionChanges', () => {
                                 'Title XXI Separate CHIP State Plan Authority',
                             newValue:
                                 '1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority',
+                            breakBeforeNewValue: true,
                         },
                         {
                             label: 'Associated with a D-SNP',

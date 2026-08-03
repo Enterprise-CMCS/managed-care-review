@@ -1,21 +1,27 @@
 <hr />
 <br />
-<strong>Submission changes: <%= it.revisionChanges.previousSubmissionDate %> → <%= it.revisionChanges.currentSubmissionDate %></strong><br />
-<br />
+<div style="padding: 4px 0;">
+    <strong>Submission changes: <%= it.revisionChanges.previousSubmissionDate %> → <%= it.revisionChanges.currentSubmissionDate %></strong>
+</div>
 <% if (!it.revisionChanges.hasChanges) { %>
-No changes made in the submission on <%= it.revisionChanges.currentSubmissionDate %>.<br />
+<div style="padding: 4px 0;">
+    No changes made in the submission on <%= it.revisionChanges.currentSubmissionDate %>.
+</div>
 <% } %>
 <% if (it.revisionChanges.hasChanges) { %>
 <% it.revisionChanges.sections.forEach(function(section) { %>
-<strong><%= section.title %></strong><br />
-<br />
+<div style="padding: 4px 0;">
+    <strong><%= section.title %></strong>
+</div>
 <% section.rows.forEach(function(row) { %>
 <% if (row.isNew) { %>
-<strong>NEW <%= row.label %>:</strong> <%= row.newValue %><br />
-<br />
+<div style="padding: 4px 0;">
+    <strong>NEW <%= row.label %>:</strong> <%= row.newValue %>
+</div>
 <% } else { %>
-<strong><%= row.label %>:</strong> <%= row.oldValue %> → <%= row.newValue %><br />
-<br />
+<div style="padding: 4px 0;">
+    <strong><%= row.label %>:</strong> <%= row.oldValue %><% if (row.breakBeforeNewValue) { %><br />→ <%= row.newValue %><% } else { %> → <%= row.newValue %><% } %>
+</div>
 <% } %>
 <% }) %>
 <% }) %>

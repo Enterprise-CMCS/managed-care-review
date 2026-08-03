@@ -35,6 +35,12 @@ describe('with rates', () => {
                         oldValue: 'No',
                         newValue: 'Yes',
                     },
+                    {
+                        label: 'Submission description',
+                        oldValue: 'Old description',
+                        newValue: 'New description',
+                        breakBeforeNewValue: true,
+                    },
                 ],
             },
         ],
@@ -56,6 +62,14 @@ describe('with rates', () => {
                         label: 'Associated with a D-SNP',
                         newValue: 'Yes',
                         isNew: true,
+                    },
+                    {
+                        label: 'Managed Care authorities',
+                        oldValue:
+                            'Title XXI Separate CHIP State Plan Authority',
+                        newValue:
+                            '1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority',
+                        breakBeforeNewValue: true,
                     },
                 ],
             },
@@ -283,7 +297,13 @@ describe('with rates', () => {
             'Submission ID: MCR-IL-0005-CHIP-PCCME → MCR-IL-0005-CHIP-CCCPLUS-FIDESNP-PCCME'
         )
         expect(template.bodyText).toContain('Risk-based contract: No → Yes')
+        expect(template.bodyText).toContain(
+            'Submission description: Old description\n→ New description'
+        )
         expect(template.bodyHTML).toContain('→')
+        expect(template.bodyHTML).toContain(
+            '<strong>Submission description:</strong> Old description<br />→ New description'
+        )
     })
     it('renders contract details diff rows and NEW fields when revision changes are provided', async () => {
         const template = await resubmitContractCMSEmail(
@@ -304,7 +324,13 @@ describe('with rates', () => {
             'Status: Unexecuted by some or all parties → Fully executed'
         )
         expect(template.bodyText).toContain('NEW Associated with a D-SNP: Yes')
+        expect(template.bodyText).toContain(
+            'Managed Care authorities: Title XXI Separate CHIP State Plan Authority\n→ 1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority'
+        )
         expect(template.bodyHTML).toContain('NEW Associated with a D-SNP')
+        expect(template.bodyHTML).toContain(
+            '<strong>Managed Care authorities:</strong> Title XXI Separate CHIP State Plan Authority<br />→ 1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority'
+        )
     })
     it('renders contract provisions diff rows and NEW fields when revision changes are provided', async () => {
         const template = await resubmitContractCMSEmail(

@@ -15,6 +15,7 @@ type ResubmitRevisionChangeRow = {
     newValue: string
     oldValue?: string
     isNew?: boolean
+    breakBeforeNewValue?: boolean
 }
 
 type ResubmitRevisionChangeSection = {
@@ -298,6 +299,9 @@ const buildSubmissionTypeRow = (
         label,
         oldValue,
         newValue,
+        ...(typedFieldPath === 'submissionDescription'
+            ? { breakBeforeNewValue: true }
+            : {}),
     }
 }
 
@@ -347,6 +351,9 @@ const buildContractDetailsRow = (
         label,
         oldValue,
         newValue,
+        ...(typedFieldPath === 'federalAuthorities'
+            ? { breakBeforeNewValue: true }
+            : {}),
     }
 }
 
