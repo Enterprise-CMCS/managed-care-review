@@ -1,8 +1,5 @@
 import { formatCalendarDate } from '@mc-review/dates'
-import {
-    ContractExecutionStatusRecord,
-    FederalAuthorityRecord,
-} from '@mc-review/submissions'
+import { FederalAuthorityRecord } from '@mc-review/submissions'
 import {
     type ContractType,
     type ProgramType,
@@ -31,6 +28,7 @@ type ResubmitRevisionChanges = {
 }
 
 const EMAIL_TIMEZONE = 'America/Los_Angeles'
+const MISSING_VALUE_PLACEHOLDER = '⎯'
 
 type SubmissionTypeFieldPath =
     | 'contractName'
@@ -52,6 +50,7 @@ type ContractDetailsFieldPath =
 type ContractProvisionsFieldPath =
     | 'inLieuServicesAndSettings'
     | 'modifiedBenefitsProvided'
+    | 'modifiedEnrollmentProcess'
     | 'modifiedGeoAreaServed'
     | 'modifiedMedicaidBeneficiaries'
     | 'modifiedRiskSharingStrategy'
@@ -117,6 +116,14 @@ const populationCoveredValueRecord: Record<PopulationCoveredValue, string> = {
 const contractActionTypeValueRecord: Record<ContractActionTypeValue, string> = {
     BASE: 'Base',
     AMENDMENT: 'Amendment',
+}
+
+const contractExecutionStatusValueRecord: Record<
+    ContractExecutionStatusValue,
+    string
+> = {
+    EXECUTED: 'Executed',
+    UNEXECUTED: 'Unexecuted',
 }
 
 const formatBooleanValue = (value: unknown): string | undefined => {
@@ -223,7 +230,7 @@ const formatFieldValue = (
         }
 
         if (fieldPath === 'contractExecutionStatus') {
-            return ContractExecutionStatusRecord[
+            return contractExecutionStatusValueRecord[
                 value as ContractExecutionStatusValue
             ]
         }
@@ -234,6 +241,7 @@ const formatFieldValue = (
         fieldPath === 'dsnpContract' ||
         fieldPath === 'inLieuServicesAndSettings' ||
         fieldPath === 'modifiedBenefitsProvided' ||
+        fieldPath === 'modifiedEnrollmentProcess' ||
         fieldPath === 'modifiedGeoAreaServed' ||
         fieldPath === 'modifiedMedicaidBeneficiaries' ||
         fieldPath === 'modifiedRiskSharingStrategy' ||
@@ -310,14 +318,14 @@ const buildSubmissionTypeRow = (
         statePrograms
     )
 
-    if (!oldValue || !newValue) {
+    if (oldValue === undefined) {
         return undefined
     }
 
     return {
         label,
         oldValue,
-        newValue,
+        newValue: newValue ?? MISSING_VALUE_PLACEHOLDER,
         ...(typedFieldPath === 'submissionDescription'
             ? { breakBeforeNewValue: true }
             : {}),
@@ -354,11 +362,11 @@ const buildContractDetailsRow = (
         statePrograms
     )
 
-    if (!newValue) {
-        return undefined
-    }
-
     if (oldValue === undefined) {
+        if (newValue === undefined) {
+            return undefined
+        }
+
         return {
             label,
             newValue,
@@ -369,7 +377,7 @@ const buildContractDetailsRow = (
     return {
         label,
         oldValue,
-        newValue,
+        newValue: newValue ?? MISSING_VALUE_PLACEHOLDER,
         ...(typedFieldPath === 'federalAuthorities'
             ? { breakBeforeNewValue: true }
             : {}),
@@ -383,6 +391,7 @@ const getProvisionLabel = (
     const baseLabelConfig: Record<ContractProvisionsFieldPath, string> = {
         inLieuServicesAndSettings: 'In Lieu-of Services and Settings',
         modifiedBenefitsProvided: 'Benefits provided',
+        modifiedEnrollmentProcess: 'Enrollment/disenrolment process',
         modifiedGeoAreaServed: 'Geo area served',
         modifiedMedicaidBeneficiaries: isChipOnlyContract(currentContract)
             ? 'CHIP beneficiaries'
@@ -413,6 +422,7 @@ const buildContractProvisionsRow = (
     const rowOrder: ContractProvisionsFieldPath[] = [
         'inLieuServicesAndSettings',
         'modifiedBenefitsProvided',
+        'modifiedEnrollmentProcess',
         'modifiedGeoAreaServed',
         'modifiedMedicaidBeneficiaries',
         'modifiedRiskSharingStrategy',
@@ -447,13 +457,13 @@ const buildContractProvisionsRow = (
         statePrograms
     )
 
-    if (!newValue) {
-        return undefined
-    }
-
     const label = getProvisionLabel(typedFieldPath, currentContract)
 
     if (oldValue === undefined) {
+        if (newValue === undefined) {
+            return undefined
+        }
+
         return {
             label,
             newValue,
@@ -464,7 +474,7 @@ const buildContractProvisionsRow = (
     return {
         label,
         oldValue,
-        newValue,
+        newValue: newValue ?? MISSING_VALUE_PLACEHOLDER,
     }
 }
 

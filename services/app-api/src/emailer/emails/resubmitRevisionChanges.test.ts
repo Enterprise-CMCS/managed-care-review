@@ -202,8 +202,8 @@ describe('buildResubmitRevisionChanges', () => {
                     rows: [
                         {
                             label: 'Status',
-                            oldValue: 'Unexecuted by some or all parties',
-                            newValue: 'Fully executed',
+                            oldValue: 'Unexecuted',
+                            newValue: 'Executed',
                         },
                         {
                             label: 'Start date',
@@ -232,6 +232,47 @@ describe('buildResubmitRevisionChanges', () => {
                             label: 'Associated with a D-SNP',
                             newValue: 'Yes',
                             isNew: true,
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('formats removed contract detail values with a dash placeholder', () => {
+        const comparison: RevisionDiff = {
+            contractID: 'test-contract-id',
+            olderRevisionID: 'older-rev',
+            newerRevisionID: 'newer-rev',
+            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
+            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            fieldChanges: [
+                {
+                    fieldPath: 'dsnpContract',
+                    oldValue: false,
+                    newValue: undefined,
+                },
+            ],
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            previousSubmissionDate: '04/30/2027',
+            currentSubmissionDate: '05/10/2027',
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'CONTRACT DETAILS',
+                    rows: [
+                        {
+                            label: 'Associated with a D-SNP',
+                            oldValue: 'No',
+                            newValue: '⎯',
                         },
                     ],
                 },
@@ -441,6 +482,47 @@ describe('buildResubmitRevisionChanges', () => {
                             label: 'Payments for mental disease institutions',
                             oldValue: 'No',
                             newValue: 'Yes',
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('formats removed contract provision values with a dash placeholder', () => {
+        const comparison: RevisionDiff = {
+            contractID: 'test-contract-id',
+            olderRevisionID: 'older-rev',
+            newerRevisionID: 'newer-rev',
+            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
+            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            fieldChanges: [
+                {
+                    fieldPath: 'modifiedBenefitsProvided',
+                    oldValue: false,
+                    newValue: undefined,
+                },
+            ],
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            previousSubmissionDate: '04/30/2027',
+            currentSubmissionDate: '05/10/2027',
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'CONTRACT PROVISIONS',
+                    rows: [
+                        {
+                            label: 'Benefits provided',
+                            oldValue: 'No',
+                            newValue: '⎯',
                         },
                     ],
                 },
