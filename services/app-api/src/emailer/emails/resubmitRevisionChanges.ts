@@ -109,7 +109,7 @@ const submissionTypeValueRecord: Record<SubmissionTypeValue, string> = {
 
 const populationCoveredValueRecord: Record<PopulationCoveredValue, string> = {
     MEDICAID: 'Medicaid',
-    CHIP: 'CHIP',
+    CHIP: 'CHIP-only',
     MEDICAID_AND_CHIP: 'Medicaid and CHIP',
 }
 

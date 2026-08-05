@@ -32,6 +32,11 @@ describe('with rates', () => {
                         newValue: 'MCR-IL-0005-CHIP-CCCPLUS-FIDESNP-PCCME',
                     },
                     {
+                        label: 'Medicaid populations',
+                        oldValue: 'Medicaid and CHIP',
+                        newValue: 'CHIP-only',
+                    },
+                    {
                         label: 'Risk-based contract',
                         oldValue: 'No',
                         newValue: 'Yes',
@@ -278,6 +283,50 @@ describe('with rates', () => {
             'No changes made in the submission on 05/11/2027.'
         )
         expect(template.bodyHTML).toContain('<hr')
+    })
+    it('renders submission changes for CHIP-only CMS resubmission emails', async () => {
+        const chipOnlySubmission: ContractType = {
+            ...submission,
+            packageSubmissions: [
+                {
+                    ...submission.packageSubmissions[0],
+                    contractRevision: {
+                        ...submission.packageSubmissions[0].contractRevision,
+                        formData: {
+                            ...submission.packageSubmissions[0].contractRevision
+                                .formData,
+                            populationCovered: 'CHIP',
+                        },
+                    },
+                },
+            ],
+        }
+
+        const template = await resubmitContractCMSEmail(
+            chipOnlySubmission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            submissionTypeRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.subject).toContain(
+            'is not subject to DMCO review and validation.'
+        )
+        expect(template.bodyText).toContain('Submission changes: 05/01/2027')
+        expect(template.bodyText).toContain('SUBMISSION TYPE')
+        expect(template.bodyText).toContain(
+            'Medicaid populations: Medicaid and CHIP → CHIP-only'
+        )
+        expect(template.bodyText).toContain('Risk-based contract: No → Yes')
+        expect(template.bodyHTML).toContain(
+            '<strong>Medicaid populations:</strong> Medicaid and CHIP → CHIP-only'
+        )
     })
     it('renders submission type diff rows when revision changes are provided', async () => {
         const template = await resubmitContractCMSEmail(

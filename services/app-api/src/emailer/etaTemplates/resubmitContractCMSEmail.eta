@@ -4,6 +4,5 @@ The state completed their edits on submission <%= it.packageName %><br />
 <br />
 <a href="<%= it.submissionURL %>">View the full submission</a>
 <% if (it.revisionChanges) { %>
-<br />
 <%~ includeFile('./reusableTemplates/resubmitRevisionChanges', it) %>
 <% } %>
