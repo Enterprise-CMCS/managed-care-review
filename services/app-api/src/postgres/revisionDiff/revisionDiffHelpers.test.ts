@@ -41,41 +41,6 @@ const mockStateUser = () => ({
     stateCode: 'KY',
 })
 
-type DocumentDiffItem = {
-    name: string
-    sha256: string
-}
-
-//documents are considered to be changed if the name and sha256 do not match between the two revisions. This function returns the added and removed document names.
-function diffDocumentsByShaAndName(
-    previousDocs: DocumentDiffItem[],
-    latestDocs: DocumentDiffItem[]
-) {
-    const previousDocKeys = new Set(
-        previousDocs.map((document) => `${document.sha256}::${document.name}`)
-    )
-    const latestDocKeys = new Set(
-        latestDocs.map((document) => `${document.sha256}::${document.name}`)
-    )
-
-    return {
-        // return the names of documents that are in the latest submission but not in the previous submission, and vice versa.
-        added: latestDocs
-            .filter(
-                (document) =>
-                    !previousDocKeys.has(`${document.sha256}::${document.name}`)
-            )
-            .map((document) => document.name),
-        // return the names of documents that are in the previous submission but not in the latest submission.
-        removed: previousDocs
-            .filter(
-                (document) =>
-                    !latestDocKeys.has(`${document.sha256}::${document.name}`)
-            )
-            .map((document) => document.name),
-    }
-}
-
 describe('revisionDiffHelpers', () => {
     it('accounts for every contract form field in revision diff handling', () => {
         expect(getUnhandledContractDiffFieldPaths()).toEqual([])
@@ -826,6 +791,46 @@ describe('revisionDiffHelpers', () => {
     })
 
     it('reports contract and rate document add/remove changes with totals', async () => {
+        type DocumentDiffItem = {
+            name: string
+            sha256: string
+        }
+
+        const diffDocumentsByShaAndName = (
+            previousDocs: DocumentDiffItem[],
+            latestDocs: DocumentDiffItem[]
+        ) => {
+            const previousDocKeys = new Set(
+                previousDocs.map(
+                    (document) => `${document.sha256}::${document.name}`
+                )
+            )
+            const latestDocKeys = new Set(
+                latestDocs.map(
+                    (document) => `${document.sha256}::${document.name}`
+                )
+            )
+
+            return {
+                added: latestDocs
+                    .filter(
+                        (document) =>
+                            !previousDocKeys.has(
+                                `${document.sha256}::${document.name}`
+                            )
+                    )
+                    .map((document) => document.name),
+                removed: previousDocs
+                    .filter(
+                        (document) =>
+                            !latestDocKeys.has(
+                                `${document.sha256}::${document.name}`
+                            )
+                    )
+                    .map((document) => document.name),
+            }
+        }
+
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
         const cmsUser = testCMSUser()

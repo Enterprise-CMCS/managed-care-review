@@ -75,7 +75,7 @@ const mockSubmission = (
 }
 
 describe('revisionDiffDocuments', () => {
-    it('builds contract and rate document add/remove changes keyed by sha256', () => {
+    it('builds contract and rate document add/remove changes keyed by sha256 and name', () => {
         const contract = mockSubmittableHealthPlanContract()
 
         const previous = mockSubmission({
@@ -170,6 +170,49 @@ describe('revisionDiffDocuments', () => {
             ],
             totalAdded: 2,
             totalRemoved: 4,
+        })
+    })
+
+    it('treats documents with the same sha256 but different names as changed', () => {
+        const previous = mockSubmission({
+            contractRevision: {
+                ...mockSubmittableHealthPlanContract().draftRevision!,
+                formData: {
+                    ...mockSubmittableHealthPlanContract().draftRevision!
+                        .formData,
+                    contractDocuments: [
+                        mockDocument('contract-original.pdf', 'shared-sha'),
+                    ],
+                    supportingDocuments: [],
+                },
+            },
+        })
+
+        const current = mockSubmission({
+            contractRevision: {
+                ...previous.contractRevision,
+                formData: {
+                    ...previous.contractRevision.formData,
+                    contractDocuments: [
+                        mockDocument('contract-renamed.pdf', 'shared-sha'),
+                    ],
+                    supportingDocuments: [],
+                },
+            },
+        })
+
+        expect(buildDocumentChanges(previous, current)).toEqual({
+            contractDocuments: {
+                added: ['contract-renamed.pdf'],
+                removed: ['contract-original.pdf'],
+            },
+            contractSupportingDocuments: {
+                added: [],
+                removed: [],
+            },
+            ratesDocuments: [],
+            totalAdded: 1,
+            totalRemoved: 1,
         })
     })
 })
