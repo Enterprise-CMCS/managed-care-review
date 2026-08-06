@@ -97,6 +97,9 @@ const isRatePartiallyFilled = (rate: RateFormData): boolean => {
             (actuary) =>
                 actuary.id ||
                 actuary.name ||
+                actuary.givenName ||
+                actuary.familyName ||
+                actuary.suffix ||
                 actuary.titleRole ||
                 actuary.actuarialFirm ||
                 actuary.email
