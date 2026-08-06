@@ -1,7 +1,10 @@
+import React from 'react'
 import { getActuaryFirm } from '@mc-review/submissions'
 import { DataDetailMissingField } from '../DataDetailMissingField'
 import { ActuaryContact, StateContact } from '../../../gen/gqlClient'
 import { LinkWithLogging } from '../../TealiumLogging'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 type Contact = ActuaryContact | StateContact
 function isCertainActuaryContact(contact: Contact): contact is ActuaryContact {
@@ -15,12 +18,26 @@ export const DataDetailContactField = ({
 }: {
     contact?: Contact
 }): React.ReactElement => {
-    if (!contact || !contact.name || !contact.email)
+    const ldClient = useLDClient()
+    const useStructuredContactName = ldClient?.variation(
+        featureFlags.CONTACT_MODEL_UPDATE.flag,
+        featureFlags.CONTACT_MODEL_UPDATE.defaultValue
+    )
+
+    // Display full name constructed using name fields when feature flag is on.
+    const displayName = useStructuredContactName
+        ? [contact?.givenName, contact?.familyName, contact?.suffix]
+              .map((namePart) => namePart?.trim())
+              .filter(Boolean)
+              .join(' ')
+        : contact?.name
+
+    if (!contact || !displayName || !contact.email)
         return <DataDetailMissingField />
-    const { name, titleRole, email } = contact
+    const { titleRole, email } = contact
     return (
         <address>
-            {name}
+            {displayName}
             <br />
             {titleRole}
             <br />

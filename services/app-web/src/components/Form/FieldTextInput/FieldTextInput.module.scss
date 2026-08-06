@@ -1,5 +1,12 @@
+@use '../../../styles/custom.scss' as custom;
+
 .nestedField {
     label {
         font-weight: normal;
     }
+}
+
+.requiredOptionalText {
+    display: block;
+    color: custom.$mcr-foundation-hint;
 }

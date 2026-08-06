@@ -493,6 +493,110 @@ describe('updateDraftContractRates', () => {
         expect(draftRates).toHaveLength(1)
     })
 
+    it('writes givenName, familyName and suffix on actuary contacts', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const draft = await createTestContract(stateServer)
+        const draftFD = draft.draftRevision!
+
+        const result = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: draft.id,
+                    lastSeenUpdatedAt: draftFD.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'CREATE',
+                            formData: {
+                                rateType: 'NEW',
+                                rateCapitationType: 'RATE_CELL',
+                                rateDateStart: '2024-01-01',
+                                rateDateEnd: '2025-01-01',
+                                rateProgramIDs: ['foo'],
+                                deprecatedRateProgramIDs: [],
+                                rateDocuments: [
+                                    {
+                                        s3URL: 's3://bucketname/key/test1',
+                                        name: 'ratedoc1.doc',
+                                        sha256: 'foobar',
+                                    },
+                                ],
+                                supportingDocuments: [],
+                                certifyingActuaryContacts: [
+                                    {
+                                        givenName: 'Foo',
+                                        familyName: 'Person',
+                                        suffix: 'Sr.',
+                                        titleRole: 'Bar Job',
+                                        email: 'foo@example.com',
+                                        actuarialFirm: 'GUIDEHOUSE',
+                                    },
+                                ],
+                                addtlActuaryContacts: [
+                                    {
+                                        givenName: 'Bar',
+                                        familyName: 'Person',
+                                        suffix: 'III',
+                                        titleRole: 'Baz Job',
+                                        email: 'bar@example.com',
+                                        actuarialFirm: 'OTHER',
+                                        actuarialFirmOther: 'Some Firm',
+                                    },
+                                ],
+                                actuaryCommunicationPreference:
+                                    'OACT_TO_ACTUARY',
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result.errors).toBeUndefined()
+        if (!result.data) {
+            throw new Error('No data returned')
+        }
+
+        const draftRates =
+            result.data.updateDraftContractRates.contract.draftRates
+
+        expect(draftRates).toHaveLength(1)
+
+        const rateFormData = draftRates[0].draftRevision.formData
+
+        // expect the constructed name to include givenName and familyName only
+        // (no suffix), while suffix is still stored.
+        expect(rateFormData.certifyingActuaryContacts).toEqual([
+            expect.objectContaining({
+                name: 'Foo Person',
+                givenName: 'Foo',
+                familyName: 'Person',
+                suffix: 'Sr.',
+                titleRole: 'Bar Job',
+                email: 'foo@example.com',
+                actuarialFirm: 'GUIDEHOUSE',
+            }),
+        ])
+
+        // expect the constructed name to include givenName and familyName only
+        // (no suffix), while suffix is still stored.
+        expect(rateFormData.addtlActuaryContacts).toEqual([
+            expect.objectContaining({
+                name: 'Bar Person',
+                givenName: 'Bar',
+                familyName: 'Person',
+                suffix: 'III',
+                titleRole: 'Baz Job',
+                email: 'bar@example.com',
+                actuarialFirm: 'OTHER',
+                actuarialFirmOther: 'Some Firm',
+            }),
+        ])
+    })
+
     it('updates an existing rate', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,

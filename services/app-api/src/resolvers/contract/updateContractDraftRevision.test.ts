@@ -77,13 +77,24 @@ describe(`Tests UpdateContractDraftRevision`, () => {
 
             const expectedStateContacts = (
                 updateFormData.stateContacts ?? []
-            ).map((contact) => ({
-                name: contact.name,
-                givenName: null,
-                familyName: null,
-                titleRole: contact.titleRole,
-                email: contact.email,
-            }))
+            ).map((contact) => {
+                // Mirror constructContactName: build name from givenName +
+                // familyName (no suffix), falling back to the stored name.
+                const constructedName = [contact.givenName, contact.familyName]
+                    .filter((part) => part != null && part.trim() !== '')
+                    .join(' ')
+                return {
+                    name:
+                        constructedName !== ''
+                            ? constructedName
+                            : (contact.name ?? null),
+                    givenName: contact.givenName ?? null,
+                    familyName: contact.familyName ?? null,
+                    suffix: contact.suffix ?? null,
+                    titleRole: contact.titleRole,
+                    email: contact.email,
+                }
+            })
 
             expect(updatedFormData).toEqual({
                 ...updateFormData,
@@ -171,6 +182,63 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             expect(updatedFormData.stateContacts).toEqual(
                 expect.arrayContaining(updatedFormData.stateContacts)
             )
+        })
+
+        it('writes givenName, familyName and suffix on state contacts', async () => {
+            const server = await constructTestPostgresServer()
+            const draftContract = await createTestContract(server)
+            const draftRevision = draftContract.draftRevision
+
+            if (!draftRevision) {
+                throw new Error(
+                    'Unexpected error: Draft contract did not contain a draft revision'
+                )
+            }
+
+            const updateFormData: ContractDraftRevisionFormDataInput = {
+                ...mockGqlContractDraftRevisionFormDataInput(
+                    draftContract.stateCode
+                ),
+                stateContacts: [
+                    {
+                        givenName: 'Jane',
+                        familyName: 'Doe',
+                        suffix: 'Jr.',
+                        titleRole: 'Contract Manager',
+                        email: 'jane.doe@example.com',
+                    },
+                ],
+            }
+
+            const updateResult = await executeGraphQLOperation(server, {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: draftContract.id,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        formData: updateFormData,
+                    },
+                },
+            })
+
+            expect(updateResult.errors).toBeUndefined()
+
+            const updatedStateContacts =
+                updateResult.data?.updateContractDraftRevision.contract
+                    .draftRevision?.formData.stateContacts
+
+            // response includes givenName, familyName, suffix and the full name
+            // constructed from givenName + familyName only (no suffix).
+            expect(updatedStateContacts).toEqual([
+                {
+                    name: 'Jane Doe',
+                    givenName: 'Jane',
+                    familyName: 'Doe',
+                    suffix: 'Jr.',
+                    titleRole: 'Contract Manager',
+                    email: 'jane.doe@example.com',
+                },
+            ])
         })
 
         it('errors if a CMS user calls it', async () => {

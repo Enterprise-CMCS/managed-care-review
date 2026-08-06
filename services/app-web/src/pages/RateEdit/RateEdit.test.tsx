@@ -42,6 +42,7 @@ describe('RateEdit', () => {
                 },
                 featureFlags: {
                     'rate-edit-unlock': true,
+                    'contact-data-model-update': true,
                 },
             })
 
@@ -49,6 +50,18 @@ describe('RateEdit', () => {
                 expect(
                     screen.queryByTestId('single-rate-edit')
                 ).toBeInTheDocument()
+                expect(
+                    screen.getByTestId('actuaryContacts.givenName')
+                ).toHaveValue('Actuary')
+                expect(
+                    screen.getByTestId('actuaryContacts.familyName')
+                ).toHaveValue('Contact')
+                expect(
+                    screen.getByTestId('actuaryContacts.suffix')
+                ).toHaveValue('Person')
+                expect(
+                    screen.queryByTestId('actuaryContacts.name')
+                ).not.toBeInTheDocument()
             })
         })
 
@@ -71,20 +84,32 @@ describe('RateEdit', () => {
                 },
                 featureFlags: {
                     'rate-edit-unlock': true,
+                    'contact-data-model-update': true,
                 },
             })
 
             await screen.findByTestId('single-rate-edit')
             await screen.findByText('Rate Details')
-            const actuaryNameInput = screen.getByTestId('actuaryContacts.name')
+            const actuaryFirstNameInput = screen.getByTestId(
+                'actuaryContacts.givenName'
+            )
+            const actuaryLastNameInput = screen.getByTestId(
+                'actuaryContacts.familyName'
+            )
+            const actuarySuffixInput = screen.getByTestId(
+                'actuaryContacts.suffix'
+            )
             expect(
                 screen.queryByText(
                     'Was this rate certification included with another submission?'
                 )
             ).not.toBeInTheDocument()
-            expect(actuaryNameInput).toBeInTheDocument()
+            expect(actuaryFirstNameInput).toBeInTheDocument()
+            expect(actuaryLastNameInput).toBeInTheDocument()
+            expect(actuarySuffixInput).toBeInTheDocument()
 
-            await user.clear(actuaryNameInput)
+            await user.clear(actuaryFirstNameInput)
+            await user.clear(actuaryLastNameInput)
             await user.click(
                 screen.getByRole('button', {
                     name: 'Remove rate-document.pdf document',
@@ -97,14 +122,17 @@ describe('RateEdit', () => {
             )
 
             await screen.findByTestId('error-summary')
-            expect(screen.getAllByText('You must provide a name')).toHaveLength(
-                2
-            ) // we show only start date error messages inline if both fields have errors, see RateDatesErrorMessage
+            expect(
+                screen.getAllByText('You must provide a first name')
+            ).toHaveLength(2)
+            expect(
+                screen.getAllByText('You must provide a last name')
+            ).toHaveLength(2)
             expect(
                 screen.getAllByText('You must upload a rate certification')
             ).toHaveLength(2)
             expect(screen.getAllByTestId('error-summary-message')).toHaveLength(
-                2
+                3
             )
             // check that linked rates errors do not appear
             expect(

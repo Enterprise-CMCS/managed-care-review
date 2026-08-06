@@ -1,6 +1,6 @@
 import * as Yup from 'yup'
 import { dayjs } from '@mc-review/dates'
-import { FeatureFlagSettings } from '@mc-review/common-code'
+import { FeatureFlagSettings, featureFlags } from '@mc-review/common-code'
 import {
     validateFileItemsList,
     validateFileItemsListSingleUpload,
@@ -10,10 +10,10 @@ import {
 Yup.addMethod(Yup.date, 'validateDateFormat', validateDateFormat)
 
 const SingleRateCertSchema = (
-    _activeFeatureFlags: FeatureFlagSettings,
+    activeFeatureFlags: FeatureFlagSettings,
     isDSNP?: boolean
-) =>
-    Yup.object().shape({
+) => {
+    return Yup.object().shape({
         rateDocuments: validateFileItemsListSingleUpload({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
         hasSharedRateCert: Yup.string().optional(), // legacy field
@@ -35,7 +35,7 @@ const SingleRateCertSchema = (
             'You must choose a rate certification type'
         ),
         rateMedicaidPopulations:
-            isDSNP && _activeFeatureFlags['dsnp']
+            isDSNP && activeFeatureFlags['dsnp']
                 ? Yup.array().test(
                       'medicaidPopulationSelection',
                       'You must select at least one Medicaid population',
@@ -138,7 +138,23 @@ const SingleRateCertSchema = (
         }),
         actuaryContacts: Yup.array().of(
             Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
+                // When the contact-data-model-update flag is on, actuary
+                // contacts collect structured first/last name (required) plus
+                // an optional suffix.
+                ...(activeFeatureFlags[featureFlags.CONTACT_MODEL_UPDATE.flag]
+                    ? {
+                          givenName: Yup.string().required(
+                              'You must provide a first name'
+                          ),
+                          familyName: Yup.string().required(
+                              'You must provide a last name'
+                          ),
+                      }
+                    : {
+                          name: Yup.string().required(
+                              'You must provide a name'
+                          ),
+                      }),
                 titleRole: Yup.string().required(
                     'You must provide a title/role'
                 ),
@@ -160,7 +176,23 @@ const SingleRateCertSchema = (
         ),
         addtlActuaryContacts: Yup.array().of(
             Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
+                // When the contact-data-model-update flag is on, actuary
+                // contacts collect structured first/last name (required) plus
+                // an optional suffix.
+                ...(activeFeatureFlags[featureFlags.CONTACT_MODEL_UPDATE.flag]
+                    ? {
+                          givenName: Yup.string().required(
+                              'You must provide a first name'
+                          ),
+                          familyName: Yup.string().required(
+                              'You must provide a last name'
+                          ),
+                      }
+                    : {
+                          name: Yup.string().required(
+                              'You must provide a name'
+                          ),
+                      }),
                 titleRole: Yup.string().required(
                     'You must provide a title/role'
                 ),
@@ -184,6 +216,7 @@ const SingleRateCertSchema = (
             'You must select a communication preference'
         ),
     })
+}
 
 const RateDetailsFormSchema = (
     activeFeatureFlags?: FeatureFlagSettings,

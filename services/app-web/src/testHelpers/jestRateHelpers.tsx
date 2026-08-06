@@ -81,9 +81,20 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
     fireEvent.change(dateCertified, { target: { value: '12/01/2021' } })
 
     // fill out actuary contact
-    const nameInput = withinTargetRateCert.getAllByLabelText('Name')[0]
-    fireEvent.change(nameInput, {
-        target: { value: `Actuary Contact Person ${index}` },
+    const firstNameInput =
+        withinTargetRateCert.getAllByLabelText('First name')[0]
+    fireEvent.change(firstNameInput, {
+        target: { value: `Actuary ${index}` },
+    })
+
+    const lastNameInput = withinTargetRateCert.getAllByLabelText('Last name')[0]
+    fireEvent.change(lastNameInput, {
+        target: { value: `Contact Person ${index}` },
+    })
+
+    const suffixInput = withinTargetRateCert.getAllByLabelText('Suffix')[0]
+    fireEvent.change(suffixInput, {
+        target: { value: 'Jr.' },
     })
 
     const titleInput = withinTargetRateCert.getAllByLabelText('Title/Role')[0]
@@ -101,10 +112,6 @@ const fillOutIndexRate = async (screen: Screen, index: number) => {
 
 const rateCertifications = (screen: Screen) => {
     return screen.getAllByTestId('rate-certification-form')
-}
-
-const lastRateCertificationFromList = (screen: Screen) => {
-    return rateCertifications(screen).pop()
 }
 
 const fillOutFirstRate = async (screen: Screen) => {
@@ -180,5 +187,4 @@ export {
     fillOutFirstRate,
     fillOutIndexRate,
     rateCertifications,
-    lastRateCertificationFromList,
 }
