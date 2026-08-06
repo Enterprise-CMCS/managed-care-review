@@ -3,6 +3,7 @@ import type {
     RevisionDiffCollectionItemNewOrModified,
     RevisionDiffFieldChange,
 } from '../../domain-models'
+import { z } from 'zod'
 
 type ScalarDiffFieldConfig<TItem, TContext> = {
     fieldPath: string
@@ -182,9 +183,43 @@ function buildNewAndModifiedCollectionChanges<TItem>(
     return changes
 }
 
+function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
+    if (
+        schema instanceof z.ZodOptional ||
+        schema instanceof z.ZodNullable ||
+        schema instanceof z.ZodDefault
+    ) {
+        return unwrapSchema(schema.unwrap())
+    }
+
+    if (schema instanceof z.ZodPipe) {
+        return unwrapSchema(schema.def.out)
+    }
+
+    return schema
+}
+
+function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
+    if (
+        schema instanceof z.ZodString ||
+        schema instanceof z.ZodEnum ||
+        schema instanceof z.ZodLiteral
+    ) {
+        return true
+    }
+
+    if (schema instanceof z.ZodUnion) {
+        return schema.options.every((option) => option instanceof z.ZodLiteral)
+    }
+
+    return false
+}
+
 export type { ScalarDiffFieldConfig }
 export {
     buildNewAndModifiedCollectionChanges,
     buildScalarFieldDiffChanges,
     diffCollectionByKey,
+    isStringEnumLikeSchema,
+    unwrapSchema,
 }

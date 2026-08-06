@@ -8,7 +8,9 @@ import type {
 import { contractFormDataSchema } from '../../domain-models/contractAndRates/formDataTypes'
 import {
     buildScalarFieldDiffChanges,
+    isStringEnumLikeSchema,
     type ScalarDiffFieldConfig,
+    unwrapSchema,
 } from './revisionDiffPrimitives'
 import { buildDocumentChanges } from './revisionDiffDocuments'
 import { buildRateChanges } from './revisionDiffRates'
@@ -54,44 +56,6 @@ const buildContractName = (
  * Returns a shallow copy of an array field so diff output preserves array values.
  */
 const cloneArrayValue = <TItem>(values: TItem[]): TItem[] => [...values]
-
-/**
- * Peels off wrapper schemas so field inference can inspect the underlying scalar type.
- */
-function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
-    if (
-        schema instanceof z.ZodOptional ||
-        schema instanceof z.ZodNullable ||
-        schema instanceof z.ZodDefault
-    ) {
-        return unwrapSchema(schema.unwrap())
-    }
-
-    if (schema instanceof z.ZodPipe) {
-        return unwrapSchema(schema.def.out)
-    }
-
-    return schema
-}
-
-/**
- * Detects enum-like schemas expressed as string enums, literals, or unions of string literals.
- */
-function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
-    if (schema instanceof z.ZodString || schema instanceof z.ZodEnum) {
-        return true
-    }
-
-    if (schema instanceof z.ZodLiteral) {
-        return true
-    }
-
-    if (schema instanceof z.ZodUnion) {
-        return schema.options.every((option) => option instanceof z.ZodLiteral)
-    }
-
-    return false
-}
 
 /**
  * Creates a diff config for boolean contract form fields.

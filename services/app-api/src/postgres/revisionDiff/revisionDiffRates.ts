@@ -12,7 +12,9 @@ import { rateFormDataSchema } from '../../domain-models/contractAndRates/formDat
 import { z } from 'zod'
 import {
     buildScalarFieldDiffChanges,
+    isStringEnumLikeSchema,
     type ScalarDiffFieldConfig,
+    unwrapSchema,
 } from './revisionDiffPrimitives'
 import { buildRateActuaryContactDiffChanges } from './revisionDiffRateActuaries'
 
@@ -24,38 +26,6 @@ type DiffFieldConfig = {
 }
 
 const normalizeStringArray = (values: string[]): string[] => [...values].sort()
-
-function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
-    if (
-        schema instanceof z.ZodOptional ||
-        schema instanceof z.ZodNullable ||
-        schema instanceof z.ZodDefault
-    ) {
-        return unwrapSchema(schema.unwrap())
-    }
-
-    if (schema instanceof z.ZodPipe) {
-        return unwrapSchema(schema.def.out)
-    }
-
-    return schema
-}
-
-function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
-    if (schema instanceof z.ZodString || schema instanceof z.ZodEnum) {
-        return true
-    }
-
-    if (schema instanceof z.ZodLiteral) {
-        return true
-    }
-
-    if (schema instanceof z.ZodUnion) {
-        return schema.options.every((option) => option instanceof z.ZodLiteral)
-    }
-
-    return false
-}
 
 function buildBooleanFieldConfig(
     fieldPath: keyof RateFormData & string
