@@ -57,6 +57,9 @@ describe('RateDetails', () => {
                     routerProvider: {
                         route: `/rates/${rateID}/edit`,
                     },
+                    featureFlags: {
+                        'contact-data-model-update': true,
+                    },
                 }
             )
 
@@ -68,9 +71,9 @@ describe('RateDetails', () => {
                 screen.getByRole('button', { name: 'Submit' })
             ).not.toHaveAttribute('aria-disabled')
             const requiredLabels = await screen.findAllByText('Required')
-            expect(requiredLabels).toHaveLength(7)
+            expect(requiredLabels).toHaveLength(8)
             const optionalLabels = screen.queryAllByText('Optional')
-            expect(optionalLabels).toHaveLength(1)
+            expect(optionalLabels).toHaveLength(2)
         })
 
         it('progressively disclose new rate form fields as expected', async () => {
@@ -81,6 +84,9 @@ describe('RateDetails', () => {
                             statusCode: 200,
                         }),
                     ],
+                },
+                featureFlags: {
+                    'contact-data-model-update': true,
                 },
             })
 
@@ -132,7 +138,7 @@ describe('RateDetails', () => {
 
             // check for expected errors
             await waitFor(() => {
-                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(7)
+                expect(screen.queryAllByTestId('errorMessage')).toHaveLength(8)
                 expect(
                     screen.queryAllByText(
                         'You must select which rate(s) are included in this certification'
@@ -149,7 +155,10 @@ describe('RateDetails', () => {
                     )
                 ).toHaveLength(2)
                 expect(
-                    screen.queryAllByText('You must provide a name')
+                    screen.queryAllByText('You must provide a first name')
+                ).toHaveLength(2)
+                expect(
+                    screen.queryAllByText('You must provide a last name')
                 ).toHaveLength(2)
                 expect(
                     screen.queryAllByText('You must provide a title/role')
@@ -382,6 +391,7 @@ describe('RateDetails', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
+                        'contact-data-model-update': true,
                     },
                 }
             )
@@ -631,6 +641,7 @@ describe('RateDetails', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
+                        'contact-data-model-update': true,
                     },
                 }
             )
@@ -808,6 +819,7 @@ describe('RateDetails', () => {
                     },
                     featureFlags: {
                         'rate-edit-unlock': false,
+                        'contact-data-model-update': true,
                     },
                 }
             )

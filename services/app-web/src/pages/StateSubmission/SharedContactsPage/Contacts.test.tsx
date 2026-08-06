@@ -37,13 +37,19 @@ describe('Contacts', () => {
                 routerProvider: {
                     route: '/submissions/health-plan/15/edit/contacts',
                 },
+                featureFlags: {
+                    'contact-data-model-update': true,
+                },
             }
         )
 
         await waitFor(() => {
             expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
             expect(screen.getByText('State contacts 1')).toBeInTheDocument()
-            expect(screen.getByLabelText('Name')).toBeInTheDocument()
+            expect(screen.getByLabelText('First name')).toBeInTheDocument()
+            expect(screen.getByLabelText('Last name')).toBeInTheDocument()
+            expect(screen.getByLabelText('Suffix')).toBeInTheDocument()
+            expect(screen.queryByLabelText('Name')).not.toBeInTheDocument()
             expect(screen.getByLabelText('Title/Role')).toBeInTheDocument()
             expect(screen.getByLabelText('Email')).toBeInTheDocument()
         })
@@ -74,15 +80,18 @@ describe('Contacts', () => {
                 routerProvider: {
                     route: '/submissions/health-plan/15/edit/contacts',
                 },
+                featureFlags: {
+                    'contact-data-model-update': true,
+                },
             }
         )
 
-        // Each state contact field (Name, Title/Role, Email) renders its own
-        // required marker, and none are optional when the new name fields are off
+        // First name, last name, title/role, and email are required. Suffix is
+        // optional.
         const requiredLabels = await screen.findAllByText('Required')
-        expect(requiredLabels).toHaveLength(3)
+        expect(requiredLabels).toHaveLength(4)
         const optionalLabels = await screen.queryAllByText('Optional')
-        expect(optionalLabels).toHaveLength(0)
+        expect(optionalLabels).toHaveLength(1)
     })
 
     it('checks saved mocked state contacts correctly', async () => {
@@ -110,12 +119,17 @@ describe('Contacts', () => {
                 routerProvider: {
                     route: '/submissions/health-plan/15/edit/contacts',
                 },
+                featureFlags: {
+                    'contact-data-model-update': true,
+                },
             }
         )
         await screen.findAllByText('Contacts')
 
         // checks the submission values in apollohelper mock
-        expect(screen.getByLabelText('Name')).toHaveValue('State Contact 1')
+        expect(screen.getByLabelText('First name')).toHaveValue('State')
+        expect(screen.getByLabelText('Last name')).toHaveValue('Contact')
+        expect(screen.getByLabelText('Suffix')).toHaveValue('1')
         expect(screen.getByLabelText('Title/Role')).toHaveValue(
             'Test State Contact 1'
         )
@@ -149,12 +163,22 @@ describe('Contacts', () => {
                 routerProvider: {
                     route: '/submissions/health-plan/15/edit/contacts',
                 },
+                featureFlags: {
+                    'contact-data-model-update': true,
+                },
             }
         )
         await screen.findAllByText('Contacts')
 
-        screen.getAllByLabelText('Name')[0].focus()
-        await userEvent.paste('State Contact Person')
+        const firstName = screen.getAllByLabelText('First name')[0]
+        firstName.focus()
+        await userEvent.clear(firstName)
+        await userEvent.paste('State')
+
+        const lastName = screen.getAllByLabelText('Last name')[0]
+        lastName.focus()
+        await userEvent.clear(lastName)
+        await userEvent.paste('Contact 1')
 
         screen.getAllByLabelText('Title/Role')[0].focus()
         await userEvent.paste('State Contact Title')
@@ -195,6 +219,9 @@ describe('Contacts', () => {
         draftContract.draftRevision.formData.stateContacts = [
             {
                 name: '',
+                givenName: '',
+                familyName: '',
+                suffix: '',
                 titleRole: '',
                 email: '',
             },
@@ -222,6 +249,9 @@ describe('Contacts', () => {
                 routerProvider: {
                     route: '/submissions/health-plan/15/edit/contacts',
                 },
+                featureFlags: {
+                    'contact-data-model-update': true,
+                },
             }
         )
         await screen.findAllByText('Contacts')
@@ -232,9 +262,12 @@ describe('Contacts', () => {
         await userEvent.click(continueButton)
 
         await waitFor(() => {
-            expect(screen.getAllByText('You must provide a name')).toHaveLength(
-                2
-            )
+            expect(
+                screen.getAllByText('You must provide a first name')
+            ).toHaveLength(2)
+            expect(
+                screen.getAllByText('You must provide a last name')
+            ).toHaveLength(2)
             expect(
                 screen.getAllByText('You must provide a title/role')
             ).toHaveLength(2)
@@ -244,7 +277,9 @@ describe('Contacts', () => {
             expect(continueButton).toHaveAttribute('aria-disabled', 'true')
         })
 
-        await userEvent.type(screen.getByLabelText('Name'), 'Test Name')
+        await userEvent.type(screen.getByLabelText('First name'), 'Test')
+        await userEvent.type(screen.getByLabelText('Last name'), 'Name')
+        await userEvent.type(screen.getByLabelText('Suffix'), 'Jr.')
         await userEvent.type(screen.getByLabelText('Title/Role'), 'Test Role')
         await userEvent.type(screen.getByLabelText('Email'), 'test@example.com')
 
@@ -253,7 +288,7 @@ describe('Contacts', () => {
         })
     })
 
-    it('after "Add state contact" button click, should focus on the field name of the new contact', async () => {
+    it('after "Add state contact" button click, should focus on the first name of the new contact', async () => {
         const draftContract = mockContractPackageUnlockedWithUnlockedType()
         renderWithProviders(
             <Routes>
@@ -278,6 +313,9 @@ describe('Contacts', () => {
                 routerProvider: {
                     route: '/submissions/health-plan/15/edit/contacts',
                 },
+                featureFlags: {
+                    'contact-data-model-update': true,
+                },
             }
         )
         await screen.findAllByText('Contacts')
@@ -285,22 +323,35 @@ describe('Contacts', () => {
         const addStateContactButton = screen.getByRole('button', {
             name: 'Add another state contact',
         })
-        const firstContactName = screen.getByLabelText('Name')
-        await userEvent.clear(firstContactName)
+        const firstContactFirstName = screen.getByLabelText('First name')
+        const firstContactLastName = screen.getByLabelText('Last name')
+        await userEvent.clear(firstContactFirstName)
+        await userEvent.clear(firstContactLastName)
 
-        await userEvent.type(firstContactName, 'First person')
-        expect(firstContactName).toHaveFocus()
+        await userEvent.type(firstContactFirstName, 'First')
+        await userEvent.type(firstContactLastName, 'Person')
+        firstContactFirstName.focus()
+        expect(firstContactFirstName).toHaveFocus()
 
         addStateContactButton.click()
 
         await waitFor(() => {
-            expect(screen.getAllByLabelText('Name')).toHaveLength(2)
-            const secondContactName = screen.getAllByLabelText('Name')[1]
-            expect(firstContactName).toHaveValue('First person')
-            expect(firstContactName).not.toHaveFocus()
+            expect(screen.getAllByLabelText('First name')).toHaveLength(2)
+            expect(screen.getAllByLabelText('Last name')).toHaveLength(2)
+            expect(screen.getAllByLabelText('Suffix')).toHaveLength(2)
+            const secondContactFirstName =
+                screen.getAllByLabelText('First name')[1]
+            const secondContactLastName =
+                screen.getAllByLabelText('Last name')[1]
+            const secondContactSuffix = screen.getAllByLabelText('Suffix')[1]
+            expect(firstContactFirstName).toHaveValue('First')
+            expect(firstContactLastName).toHaveValue('Person')
+            expect(firstContactFirstName).not.toHaveFocus()
 
-            expect(secondContactName).toHaveValue('')
-            expect(secondContactName).toHaveFocus()
+            expect(secondContactFirstName).toHaveValue('')
+            expect(secondContactLastName).toHaveValue('')
+            expect(secondContactSuffix).toHaveValue('')
+            expect(secondContactFirstName).toHaveFocus()
         })
     })
 
@@ -329,6 +380,9 @@ describe('Contacts', () => {
                 routerProvider: {
                     route: '/submissions/health-plan/15/edit/contacts',
                 },
+                featureFlags: {
+                    'contact-data-model-update': true,
+                },
             }
         )
         await screen.findAllByText('Contacts')
@@ -355,6 +409,9 @@ describe('Contacts', () => {
         draftContract.draftRevision.formData.stateContacts = [
             {
                 name: '',
+                givenName: '',
+                familyName: '',
+                suffix: '',
                 titleRole: '',
                 email: '',
             },
@@ -381,6 +438,9 @@ describe('Contacts', () => {
                 },
                 routerProvider: {
                     route: '/submissions/health-plan/15/edit/contacts',
+                },
+                featureFlags: {
+                    'contact-data-model-update': true,
                 },
             }
         )
@@ -423,13 +483,19 @@ describe('Contacts', () => {
                     routerProvider: {
                         route: '/submissions/eqro/15/edit/contacts',
                     },
+                    featureFlags: {
+                        'contact-data-model-update': true,
+                    },
                 }
             )
 
             await waitFor(() => {
                 expect(screen.getByTestId('state-contacts')).toBeInTheDocument()
                 expect(screen.getByText('State contacts 1')).toBeInTheDocument()
-                expect(screen.getByLabelText('Name')).toBeInTheDocument()
+                expect(screen.getByLabelText('First name')).toBeInTheDocument()
+                expect(screen.getByLabelText('Last name')).toBeInTheDocument()
+                expect(screen.getByLabelText('Suffix')).toBeInTheDocument()
+                expect(screen.queryByLabelText('Name')).not.toBeInTheDocument()
                 expect(screen.getByLabelText('Title/Role')).toBeInTheDocument()
                 expect(screen.getByLabelText('Email')).toBeInTheDocument()
             })
@@ -465,6 +531,9 @@ describe('Contacts', () => {
         //             },
         //             routerProvider: {
         //                 route: '/submissions/eqro/15/edit/contacts',
+        //             },
+        //             featureFlags: {
+        //                 'contact-data-model-update': true,
         //             },
         //         }
         //     )
@@ -512,6 +581,9 @@ describe('Contacts', () => {
                     routerProvider: {
                         route: '/submissions/eqro/15/edit/contacts',
                     },
+                    featureFlags: {
+                        'contact-data-model-update': true,
+                    },
                 }
             )
 
@@ -520,12 +592,20 @@ describe('Contacts', () => {
             })
 
             // Fill out required fields for form validation to pass
-            const nameInput = screen.getByLabelText('Name')
+            const firstNameInput = screen.getByLabelText('First name')
+            const lastNameInput = screen.getByLabelText('Last name')
+            const suffixInput = screen.getByLabelText('Suffix')
             const titleInput = screen.getByLabelText('Title/Role')
             const emailInput = screen.getByLabelText('Email')
 
-            await userEvent.clear(nameInput)
-            await userEvent.type(nameInput, 'Test Name')
+            await userEvent.clear(firstNameInput)
+            await userEvent.type(firstNameInput, 'Test')
+
+            await userEvent.clear(lastNameInput)
+            await userEvent.type(lastNameInput, 'Name')
+
+            await userEvent.clear(suffixInput)
+            await userEvent.type(suffixInput, 'Jr.')
 
             await userEvent.clear(titleInput)
             await userEvent.type(titleInput, 'Test Title')
