@@ -75,6 +75,25 @@ function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
 }
 
 /**
+ * Detects enum-like schemas expressed as string enums, literals, or unions of string literals.
+ */
+function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
+    if (schema instanceof z.ZodString || schema instanceof z.ZodEnum) {
+        return true
+    }
+
+    if (schema instanceof z.ZodLiteral) {
+        return true
+    }
+
+    if (schema instanceof z.ZodUnion) {
+        return schema.options.every((option) => option instanceof z.ZodLiteral)
+    }
+
+    return false
+}
+
+/**
  * Creates a diff config for boolean contract form fields.
  */
 function buildBooleanFieldConfig(
@@ -126,25 +145,9 @@ function buildStringArrayFieldConfig(
 const fieldConfigOverrides: Partial<
     Record<keyof ContractFormData, DiffFieldConfig>
 > = {
-    populationCovered: {
-        fieldPath: 'populationCovered',
-        dataValue: (formData) => formData.populationCovered,
-    },
-    submissionType: {
-        fieldPath: 'submissionType',
-        dataValue: (formData) => formData.submissionType,
-    },
-    contractType: {
-        fieldPath: 'contractType',
-        dataValue: (formData) => formData.contractType,
-    },
     programIDs: {
         fieldPath: 'programIDs',
         dataValue: (formData) => normalizeProgramIDs(formData.programIDs),
-    },
-    contractExecutionStatus: {
-        fieldPath: 'contractExecutionStatus',
-        dataValue: (formData) => formData.contractExecutionStatus,
     },
 }
 
@@ -174,7 +177,7 @@ const diffContractFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
         return [buildBooleanFieldConfig(typedFieldPath)]
     }
 
-    if (unwrappedSchema instanceof z.ZodString) {
+    if (isStringEnumLikeSchema(unwrappedSchema)) {
         return [buildStringFieldConfig(typedFieldPath)]
     }
 
@@ -211,7 +214,7 @@ function getUnhandledContractDiffFieldPaths(): string[] {
 
         if (
             unwrappedSchema instanceof z.ZodBoolean ||
-            unwrappedSchema instanceof z.ZodString ||
+            isStringEnumLikeSchema(unwrappedSchema) ||
             unwrappedSchema instanceof z.ZodDate ||
             unwrappedSchema instanceof z.ZodArray
         ) {

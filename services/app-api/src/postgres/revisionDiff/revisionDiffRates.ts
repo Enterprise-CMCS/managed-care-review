@@ -41,6 +41,22 @@ function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
     return schema
 }
 
+function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
+    if (schema instanceof z.ZodString || schema instanceof z.ZodEnum) {
+        return true
+    }
+
+    if (schema instanceof z.ZodLiteral) {
+        return true
+    }
+
+    if (schema instanceof z.ZodUnion) {
+        return schema.options.every((option) => option instanceof z.ZodLiteral)
+    }
+
+    return false
+}
+
 function buildBooleanFieldConfig(
     fieldPath: keyof RateFormData & string
 ): DiffFieldConfig {
@@ -83,18 +99,6 @@ function buildStringArrayFieldConfig(
 const rateFieldConfigOverrides: Partial<
     Record<keyof RateFormData, DiffFieldConfig>
 > = {
-    rateType: {
-        fieldPath: 'rateType',
-        getValue: (formData) => formData.rateType,
-    },
-    actuaryCommunicationPreference: {
-        fieldPath: 'actuaryCommunicationPreference',
-        getValue: (formData) => formData.actuaryCommunicationPreference,
-    },
-    rateCapitationType: {
-        fieldPath: 'rateCapitationType',
-        getValue: (formData) => formData.rateCapitationType,
-    },
     rateProgramIDs: {
         fieldPath: 'rateProgramIDs',
         getValue: (formData) =>
@@ -142,7 +146,7 @@ const diffRateFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
         return [buildBooleanFieldConfig(typedFieldPath)]
     }
 
-    if (unwrappedSchema instanceof z.ZodString) {
+    if (isStringEnumLikeSchema(unwrappedSchema)) {
         return [buildStringFieldConfig(typedFieldPath)]
     }
 
@@ -179,7 +183,7 @@ function getUnhandledRateDiffFieldPaths(): string[] {
 
         if (
             unwrappedSchema instanceof z.ZodBoolean ||
-            unwrappedSchema instanceof z.ZodString ||
+            isStringEnumLikeSchema(unwrappedSchema) ||
             unwrappedSchema instanceof z.ZodDate ||
             unwrappedSchema instanceof z.ZodArray
         ) {
