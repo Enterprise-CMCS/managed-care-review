@@ -10,6 +10,7 @@ import {
     ContractPackageSubmission,
     ContractRevision,
     ContractSubmissionType,
+    ContractUndoUnlockPackage,
 } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging'
@@ -23,6 +24,7 @@ import {
 import {
     eqroValidationAndReviewDetermination,
     healthPlanReviewDetermination,
+    SubmissionStatusRecord,
 } from '@mc-review/submissions'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -35,6 +37,7 @@ type flatRevisions = Omit<UpdateInformation, 'updatedBy'> & {
     kind:
         | 'submit'
         | 'unlock'
+        | 'undo_unlock'
         | 'review_update_approve'
         | 'review_update_withdraw'
         | 'review_update_submitted'
@@ -75,6 +78,7 @@ const buildChangeHistoryInfo = (
         r.kind === 'review_update_withdraw' ||
         r.kind === 'review_update_approve'
     const isUndoApprove = r.kind === 'review_update_undo_approve'
+    const isUndoUnlock = r.kind === 'undo_unlock'
     // We want to know if this contract has multiple submissions. To have multiple submissions, there must be minimum
     // more than the initial contract revision.
     const hasSubsequentSubmissions = revisionHistory.length > 1
@@ -195,6 +199,43 @@ const buildChangeHistoryInfo = (
                     )}
             </div>
         )
+    } else if (isUndoUnlock) {
+        title = 'Undo unlock'
+        // The submission returns to whatever it was before the unlock, so the
+        // status is set by the events that predate the undo unlock.
+        const priorReviewAction = contract.reviewStatusActions?.find(
+            (action) => new Date(action.updatedAt) < new Date(r.updatedAt)
+        )
+        const priorSubmissions = contract.packageSubmissions.filter(
+            (submission) =>
+                submission.cause === 'CONTRACT_SUBMISSION' &&
+                new Date(submission.submitInfo.updatedAt) <
+                    new Date(r.updatedAt)
+        ).length
+        let returnedToStatus = SubmissionStatusRecord['SUBMITTED']
+        if (priorReviewAction?.actionType === 'NOT_SUBJECT_TO_REVIEW') {
+            returnedToStatus = ReviewDecisionRecord['NOT_SUBJECT_TO_REVIEW']
+        } else if (priorSubmissions > 1) {
+            returnedToStatus = SubmissionStatusRecord['RESUBMITTED']
+        }
+        content = (
+            <div data-testid={`change-history-record`}>
+                <div>
+                    <span className={styles.tag}>Updated by: </span>
+                    <span>{`${getUpdatedByDisplayName(r.updatedBy)} `}</span>
+                </div>
+                <div>
+                    <span className={styles.tag}>Status: </span>
+                    <span>{returnedToStatus}</span>
+                </div>
+                <div>
+                    <span className={styles.tag}>
+                        Reason for undoing the unlock:{' '}
+                    </span>
+                    <span>{r.updatedReason}</span>
+                </div>
+            </div>
+        )
     } else if (isUndoApprove) {
         title = 'Submission'
         const baseUndoApproveText = 'CMS undid submission release to state'
@@ -272,11 +313,18 @@ export const ChangeHistory = ({
             | ContractPackageSubmission
             | ContractRevision
             | ContractReviewStatusActions
+            | ContractUndoUnlockPackage
             | undefined
             | null
         )[] = [...contractSubmissions, contract.draftRevision]
         if (reviewActions) {
             reversedRevisions = reversedRevisions.concat(...reviewActions)
+        }
+
+        if (contract.undoUnlockPackages) {
+            reversedRevisions = reversedRevisions.concat(
+                ...contract.undoUnlockPackages
+            )
         }
 
         reversedRevisions.reverse()
@@ -399,6 +447,29 @@ export const ChangeHistory = ({
                     }
                     newAction.kind = actionKind
                     result.push(newAction)
+                }
+                if (r?.__typename === 'ContractUndoUnlockPackage') {
+                    // Undoing an unlock hides that unlock's revision from both
+                    // packageSubmissions and draftRevision, so the snapshot is
+                    // the only remaining record of the unlock itself.
+                    const reversedUnlockInfo =
+                        r.draftContractRevisionSnapshot.unlockInfo
+                    if (reversedUnlockInfo) {
+                        const newUnlock: flatRevisions = {} as flatRevisions
+                        newUnlock.updatedAt = reversedUnlockInfo.updatedAt
+                        newUnlock.updatedBy = reversedUnlockInfo.updatedBy
+                        newUnlock.updatedReason =
+                            reversedUnlockInfo.updatedReason
+                        newUnlock.kind = 'unlock'
+                        result.push(newUnlock)
+                    }
+
+                    const newUndoUnlock: flatRevisions = {} as flatRevisions
+                    newUndoUnlock.updatedAt = r.undoUnlockInfo.updatedAt
+                    newUndoUnlock.updatedBy = r.undoUnlockInfo.updatedBy
+                    newUndoUnlock.updatedReason = r.undoUnlockInfo.updatedReason
+                    newUndoUnlock.kind = 'undo_unlock'
+                    result.push(newUndoUnlock)
                 }
             },
             (submitsIdx = 1)
