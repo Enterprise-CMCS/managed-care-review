@@ -1828,6 +1828,111 @@ describe('SubmissionSummary', () => {
                     ).toBeInTheDocument()
                 })
             })
+
+            it('renders status update banner and clears the url flag on undo unlock', async () => {
+                let testLocation: Location
+                const contract = mockContractPackageSubmittedWithQuestions(
+                    'test-abc-123',
+                    { contractSubmissionType: 'HEALTH_PLAN' }
+                )
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/test-abc-123?showTempUndoUnlockBanner=true',
+                        },
+                        location: (location) => (testLocation = location),
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByTestId('statusUpdatedBanner')
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.getByRole('heading', {
+                            level: 4,
+                            name: /Status updated/,
+                        })
+                    ).toBeInTheDocument()
+                })
+
+                // flag is consumed once so the banner does not survive a refresh
+                await waitFor(() => {
+                    expect(testLocation.search).toBe('')
+                })
+            })
+
+            it('does not render status update banner without the undo unlock url flag', async () => {
+                const contract = mockContractPackageSubmittedWithQuestions(
+                    'test-abc-123',
+                    { contractSubmissionType: 'HEALTH_PLAN' }
+                )
+
+                renderWithProviders(
+                    <Routes>
+                        <Route element={<SubmissionSideNav />}>
+                            <Route
+                                path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                                element={<SubmissionSummary />}
+                            />
+                        </Route>
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                                fetchContractWithQuestionsMockSuccess({
+                                    contract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/test-abc-123',
+                        },
+                    }
+                )
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('heading', {
+                            level: 1,
+                            name: 'Submission summary',
+                        })
+                    ).toBeInTheDocument()
+                })
+                expect(
+                    screen.queryByTestId('statusUpdatedBanner')
+                ).not.toBeInTheDocument()
+            })
         }
     )
 

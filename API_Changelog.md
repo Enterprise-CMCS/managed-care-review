@@ -1,6 +1,15 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### August 3, 2026
+#### Added
+- New field `undoUnlockPackages` on `Contract` and `UnlockedContract`
+    - Returns the unlocks on the contract that CMS reversed with `undoUnlockContract`, in descending order by date. Most recent undo unlock is in the first position in the array.
+    - Returns the new type `ContractUndoUnlockPackage`
+        - `undoUnlockInfo`: required `UpdateInformation`, the reason/date/by for the undo unlock action
+        - `draftContractRevisionSnapshot`: required `UndoUnlockContractRevision`, the unlocked draft revision that the undo unlock reverted, carrying `id` and `unlockInfo` only
+    - An undo unlock does not create a `packageSubmission`, and the unlock it reverses is removed from `draftRevision`, so these events appear in no other field.
+
 ### June 12, 2026
 #### Updated
 - `createContractQuestion` and `createRateQuestion` now reject a new question while a previous question round is still open.
