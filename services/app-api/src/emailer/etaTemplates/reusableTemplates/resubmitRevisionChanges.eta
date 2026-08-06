@@ -1,0 +1,32 @@
+<hr />
+<div style="padding: 4px 0;">
+    <strong>Submission changes: <%= it.revisionChanges.previousSubmissionDate %> → <%= it.revisionChanges.currentSubmissionDate %></strong>
+</div>
+<% if (!it.revisionChanges.hasChanges) { %>
+<div style="padding: 4px 0;">
+    No changes made in the submission on <%= it.revisionChanges.currentSubmissionDate %>.
+</div>
+<% } %>
+<% if (it.revisionChanges.hasChanges) { %>
+<br />
+<% it.revisionChanges.sections.forEach(function(section, index) { %>
+<% if (index > 0) { %>
+<br />
+<br />
+<% } %>
+<div style="padding: 4px 0;">
+    <strong><%= section.title %></strong>
+</div>
+<% section.rows.forEach(function(row) { %>
+<% if (row.isNew) { %>
+<div style="padding: 4px 0;">
+    <strong><span style="color: <%= it.revisionChangesNewIndicatorColor %>; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> <%= row.label %>:</strong> <%= row.newValue %>
+</div>
+<% } else { %>
+<div style="padding: 4px 0;">
+    <strong><%= row.label %>:</strong> <%= row.oldValue %><% if (row.breakBeforeNewValue) { %><br />→ <%= row.newValue %><% } else { %> → <%= row.newValue %><% } %>
+</div>
+<% } %>
+<% }) %>
+<% }) %>
+<% } %>
