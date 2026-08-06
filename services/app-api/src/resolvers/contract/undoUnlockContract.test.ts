@@ -66,8 +66,10 @@ describe('undoUnlockContract', () => {
                 undoUnlockInfo: expect.objectContaining({
                     updatedReason: 'Unlock was accidental',
                 }),
-                reversedUnlockInfo: expect.objectContaining({
-                    updatedReason: 'Unlocking for edits',
+                draftContractRevisionSnapshot: expect.objectContaining({
+                    unlockInfo: expect.objectContaining({
+                        updatedReason: 'Unlocking for edits',
+                    }),
                 }),
             }),
         ])

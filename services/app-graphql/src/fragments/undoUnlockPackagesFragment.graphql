@@ -3,7 +3,10 @@ fragment undoUnlockPackagesFragment on ContractUndoUnlockPackage {
         ...updateInformationFields
     }
 
-    reversedUnlockInfo {
-        ...updateInformationFields
+    draftContractRevisionSnapshot {
+        id
+        unlockInfo {
+            ...updateInformationFields
+        }
     }
 }

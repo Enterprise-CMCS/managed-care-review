@@ -10,6 +10,7 @@ import {
     ContractPackageSubmission,
     ContractRevision,
     ContractSubmissionType,
+    ContractUndoUnlockPackage,
 } from '../../gen/gqlClient'
 import styles from './ChangeHistory.module.scss'
 import { LinkWithLogging } from '../TealiumLogging'
@@ -312,11 +313,18 @@ export const ChangeHistory = ({
             | ContractPackageSubmission
             | ContractRevision
             | ContractReviewStatusActions
+            | ContractUndoUnlockPackage
             | undefined
             | null
         )[] = [...contractSubmissions, contract.draftRevision]
         if (reviewActions) {
             reversedRevisions = reversedRevisions.concat(...reviewActions)
+        }
+
+        if (contract.undoUnlockPackages) {
+            reversedRevisions = reversedRevisions.concat(
+                ...contract.undoUnlockPackages
+            )
         }
 
         reversedRevisions.reverse()
@@ -440,33 +448,32 @@ export const ChangeHistory = ({
                     newAction.kind = actionKind
                     result.push(newAction)
                 }
+                if (r?.__typename === 'ContractUndoUnlockPackage') {
+                    // Undoing an unlock hides that unlock's revision from both
+                    // packageSubmissions and draftRevision, so the snapshot is
+                    // the only remaining record of the unlock itself.
+                    const reversedUnlockInfo =
+                        r.draftContractRevisionSnapshot.unlockInfo
+                    if (reversedUnlockInfo) {
+                        const newUnlock: flatRevisions = {} as flatRevisions
+                        newUnlock.updatedAt = reversedUnlockInfo.updatedAt
+                        newUnlock.updatedBy = reversedUnlockInfo.updatedBy
+                        newUnlock.updatedReason =
+                            reversedUnlockInfo.updatedReason
+                        newUnlock.kind = 'unlock'
+                        result.push(newUnlock)
+                    }
+
+                    const newUndoUnlock: flatRevisions = {} as flatRevisions
+                    newUndoUnlock.updatedAt = r.undoUnlockInfo.updatedAt
+                    newUndoUnlock.updatedBy = r.undoUnlockInfo.updatedBy
+                    newUndoUnlock.updatedReason = r.undoUnlockInfo.updatedReason
+                    newUndoUnlock.kind = 'undo_unlock'
+                    result.push(newUndoUnlock)
+                }
             },
             (submitsIdx = 1)
         )
-
-        // Add an entry for each undo unlock, plus the unlock it reversed.
-        // Undoing an unlock hides that unlock's revision from both
-        // packageSubmissions and draftRevision, so the loop above never sees
-        // it and reversedUnlockInfo is the only remaining record of it.
-        for (const undoUnlock of contract.undoUnlockPackages ?? []) {
-            const reversedUnlockInfo = undoUnlock.reversedUnlockInfo
-            if (reversedUnlockInfo) {
-                const newUnlock: flatRevisions = {} as flatRevisions
-                newUnlock.updatedAt = reversedUnlockInfo.updatedAt
-                newUnlock.updatedBy = reversedUnlockInfo.updatedBy
-                newUnlock.updatedReason = reversedUnlockInfo.updatedReason
-                newUnlock.kind = 'unlock'
-                result.push(newUnlock)
-            }
-
-            const newUndoUnlock: flatRevisions = {} as flatRevisions
-            newUndoUnlock.updatedAt = undoUnlock.undoUnlockInfo.updatedAt
-            newUndoUnlock.updatedBy = undoUnlock.undoUnlockInfo.updatedBy
-            newUndoUnlock.updatedReason =
-                undoUnlock.undoUnlockInfo.updatedReason
-            newUndoUnlock.kind = 'undo_unlock'
-            result.push(newUndoUnlock)
-        }
 
         return result.sort(
             (a, b) =>

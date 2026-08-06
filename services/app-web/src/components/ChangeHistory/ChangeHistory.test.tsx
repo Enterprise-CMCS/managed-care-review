@@ -39,15 +39,19 @@ const undoUnlockPackage = ({
         familyName: 'Hotman',
     }
     return {
+        __typename: 'ContractUndoUnlockPackage',
         undoUnlockInfo: {
             updatedAt: undoneAt,
             updatedBy: cmsUser,
             updatedReason: 'Unlock was accidental',
         },
-        reversedUnlockInfo: {
-            updatedAt: unlockedAt,
-            updatedBy: cmsUser,
-            updatedReason: 'Unlocking for edits',
+        draftContractRevisionSnapshot: {
+            id: `discarded-revision-${undoneAt.toISOString()}`,
+            unlockInfo: {
+                updatedAt: unlockedAt,
+                updatedBy: cmsUser,
+                updatedReason: 'Unlocking for edits',
+            },
         },
     }
 }
@@ -560,7 +564,14 @@ describe('Change History', () => {
         )
     })
     it('should list accordion items with links when appropriate', () => {
-        const submittedContract = mockContractPackageSubmittedWithRevisions()
+        const submittedContract = mockContractPackageSubmittedWithRevisions({
+            undoUnlockPackages: [
+                undoUnlockPackage({
+                    unlockedAt: new Date('2025-01-05T18:00:00.000Z'),
+                    undoneAt: new Date('2025-01-06T18:00:00.000Z'),
+                }),
+            ],
+        })
         renderWithProviders(<ChangeHistory contract={submittedContract} />)
         //Latest resubmission should not have a link.
         expect(
