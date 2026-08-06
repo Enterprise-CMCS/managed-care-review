@@ -448,7 +448,7 @@ export const ChangeHistory = ({
         // Undoing an unlock hides that unlock's revision from both
         // packageSubmissions and draftRevision, so the loop above never sees
         // it and reversedUnlockInfo is the only remaining record of it.
-        for (const undoUnlock of contract.undoUnlockSubmissions ?? []) {
+        for (const undoUnlock of contract.undoUnlockPackages ?? []) {
             const reversedUnlockInfo = undoUnlock.reversedUnlockInfo
             if (reversedUnlockInfo) {
                 const newUnlock: flatRevisions = {} as flatRevisions

@@ -3,9 +3,9 @@
 
 ### August 3, 2026
 #### Added
-- New field `undoUnlockSubmissions` on `Contract` and `UnlockedContract`
+- New field `undoUnlockPackages` on `Contract` and `UnlockedContract`
     - Returns the unlocks on the contract that CMS reversed with `undoUnlockContract`, in descending order by date. Most recent undo unlock is in the first position in the array.
-    - Returns the new type `ContractUndoUnlockSubmission`
+    - Returns the new type `ContractUndoUnlockPackage`
         - `undoUnlockInfo`: required `UpdateInformation`, the reason/date/by for the undo unlock action
         - `reversedUnlockInfo`: optional `UpdateInformation`, the reason/date/by of the unlock that the undo unlock reversed
     - An undo unlock does not create a `packageSubmission`, and the unlock it reverses is removed from `draftRevision`, so these events appear in no other field.

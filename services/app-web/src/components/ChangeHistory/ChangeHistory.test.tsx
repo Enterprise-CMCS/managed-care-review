@@ -23,15 +23,15 @@ import {
     RoutesRecord,
 } from '@mc-review/constants'
 import { Route, Routes } from 'react-router-dom'
-import { ContractUndoUnlockSubmission } from '../../gen/gqlClient'
+import { ContractUndoUnlockPackage } from '../../gen/gqlClient'
 
-const undoUnlockSubmission = ({
+const undoUnlockPackage = ({
     unlockedAt,
     undoneAt,
 }: {
     unlockedAt: Date
     undoneAt: Date
-}): ContractUndoUnlockSubmission => {
+}): ContractUndoUnlockPackage => {
     const cmsUser = {
         email: 'zuko@example.com',
         role: 'CMS_USER',
@@ -310,9 +310,7 @@ describe('Change History', () => {
         const unlockedAt = new Date('2025-01-05T18:00:00.000Z')
         const undoneAt = new Date('2025-01-06T18:00:00.000Z')
         const contract = mockContractPackageSubmitted({
-            undoUnlockSubmissions: [
-                undoUnlockSubmission({ unlockedAt, undoneAt }),
-            ],
+            undoUnlockPackages: [undoUnlockPackage({ unlockedAt, undoneAt })],
         })
 
         renderWithProviders(<ChangeHistory contract={contract} />, {
@@ -359,12 +357,12 @@ describe('Change History', () => {
         const afterFirstSubmission = new Date('2024-01-15T18:00:00.000Z')
         const afterEverySubmission = new Date('2025-01-06T18:00:00.000Z')
         const contract = mockContractPackageSubmittedWithRevisions({
-            undoUnlockSubmissions: [
-                undoUnlockSubmission({
+            undoUnlockPackages: [
+                undoUnlockPackage({
                     unlockedAt: new Date('2024-01-14T18:00:00.000Z'),
                     undoneAt: afterFirstSubmission,
                 }),
-                undoUnlockSubmission({
+                undoUnlockPackage({
                     unlockedAt: new Date('2025-01-05T18:00:00.000Z'),
                     undoneAt: afterEverySubmission,
                 }),
@@ -401,8 +399,8 @@ describe('Change History', () => {
     it('shows the review status an undo unlock returned a submission to', () => {
         const undoneAt = new Date('2026-04-01T18:00:00.000Z')
         const contract = mockEqroContractSubmittedNotSubjectToReview({
-            undoUnlockSubmissions: [
-                undoUnlockSubmission({
+            undoUnlockPackages: [
+                undoUnlockPackage({
                     unlockedAt: new Date('2026-03-31T18:00:00.000Z'),
                     undoneAt,
                 }),

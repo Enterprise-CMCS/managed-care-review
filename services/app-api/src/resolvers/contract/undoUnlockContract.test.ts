@@ -61,7 +61,7 @@ describe('undoUnlockContract', () => {
         expect(reversedContract.draftRevision).toBeNull()
         expect(reversedContract.draftRates).toBeNull()
 
-        expect(reversedContract.undoUnlockSubmissions).toEqual([
+        expect(reversedContract.undoUnlockPackages).toEqual([
             expect.objectContaining({
                 undoUnlockInfo: expect.objectContaining({
                     updatedReason: 'Unlock was accidental',

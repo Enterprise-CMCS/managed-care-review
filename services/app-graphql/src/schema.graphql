@@ -2454,10 +2454,10 @@ type ContractPackageSubmission {
 }
 
 """
-ContractUndoUnlockSubmission is a record of an unlock on this contract that CMS reversed.
+ContractUndoUnlockPackage is a record of an unlock on this contract that CMS reversed.
 The unlocked draft revision it discarded is not part of the contract's submitted history.
 """
-type ContractUndoUnlockSubmission {
+type ContractUndoUnlockPackage {
     "undoUnlockInfo provides the reason/date/by for the undo unlock action"
     undoUnlockInfo: UpdateInformation!
     "reversedUnlockInfo provides the reason/date/by of the unlock that this undo unlock reversed"
@@ -2667,10 +2667,10 @@ type Contract {
     packageSubmissions: [ContractPackageSubmission!]!
 
     """
-    undoUnlockSubmissions are the unlocks on this contract that CMS reversed with an undo unlock.
+    undoUnlockPackages are the unlocks on this contract that CMS reversed with an undo unlock.
     Returned in _descending_ order. Most recent undo unlock is in the first position in the array.
     """
-    undoUnlockSubmissions: [ContractUndoUnlockSubmission!]
+    undoUnlockPackages: [ContractUndoUnlockPackage!]
 
     """
     questions field is an array of questions asked about the contract by CMS. Each questions also contains responses
@@ -2761,10 +2761,10 @@ type UnlockedContract {
     packageSubmissions: [ContractPackageSubmission!]!
 
     """
-    undoUnlockSubmissions are the unlocks on this contract that CMS reversed with an undo unlock.
+    undoUnlockPackages are the unlocks on this contract that CMS reversed with an undo unlock.
     Returned in _descending_ order. Most recent undo unlock is in the first position in the array.
     """
-    undoUnlockSubmissions: [ContractUndoUnlockSubmission!]
+    undoUnlockPackages: [ContractUndoUnlockPackage!]
 
     """
     questions field is an array of questions asked about the contract by CMS. Each questions also contains responses

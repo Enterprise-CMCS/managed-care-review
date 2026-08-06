@@ -1,4 +1,4 @@
-fragment undoUnlockSubmissionsFragment on ContractUndoUnlockSubmission {
+fragment undoUnlockPackagesFragment on ContractUndoUnlockPackage {
     undoUnlockInfo {
         ...updateInformationFields
     }
