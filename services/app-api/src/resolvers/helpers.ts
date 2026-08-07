@@ -1,4 +1,8 @@
+import type { StateCodeType } from '@mc-review/submissions'
 import type { ContractType, RateType } from '../domain-models'
+import type { Context } from '../handlers/apollo_gql'
+import type { Store } from '../postgres'
+import { logResolverError } from '../logger'
 
 type WithLatest = {
     latestQuestionCreatedAt?: Date | string | null
@@ -92,4 +96,26 @@ export function getRateLastUpdatedForDisplay(
         lastSubmitted,
         latestReviewAction,
     ])
+}
+
+export async function getStateAnalystsEmails(
+    contractRes: ContractType | RateType,
+    store: Store,
+    context: Context
+): Promise<string[]> {
+    let stateAnalystsEmails: string[] = []
+    const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+        contractRes.stateCode as StateCodeType
+    )
+
+    if (stateAnalystsEmailsResult instanceof Error) {
+        logResolverError(
+            'getStateAnalystsEmails',
+            stateAnalystsEmailsResult.message,
+            context
+        )
+    } else {
+        stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
+    }
+    return stateAnalystsEmails
 }

@@ -14,9 +14,9 @@ import { GraphQLError } from 'graphql'
 import { isValidCmsDivison } from '../../domain-models'
 import type { Emailer } from '../../emailer'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
-import type { StateCodeType } from '@mc-review/submissions'
 import { parseAndValidateDocuments } from '../documentHelpers'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import { getStateAnalystsEmails } from '../helpers'
 
 export function createContractQuestionResolver(
     store: Store,
@@ -247,24 +247,11 @@ export function createContractQuestionResolver(
                     })
                 }
 
-                let stateAnalystsEmails: string[] = []
-                // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-                const stateAnalystsEmailsResult =
-                    await store.findStateAssignedUsers(
-                        contractResult.stateCode as StateCodeType
-                    )
-
-                if (stateAnalystsEmailsResult instanceof Error) {
-                    logResolverError(
-                        'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message,
-                        context
-                    )
-                } else {
-                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                        (u) => u.email
-                    )
-                }
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    contractResult,
+                    store,
+                    context
+                )
 
                 const sendQuestionsCMSEmailResult =
                     await emailer.sendQuestionsCMSEmail(
