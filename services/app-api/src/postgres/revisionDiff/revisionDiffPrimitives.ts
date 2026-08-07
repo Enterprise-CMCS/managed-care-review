@@ -199,6 +199,22 @@ function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
     return schema
 }
 
+// function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
+//     if (
+//         schema instanceof z.ZodString ||
+//         schema instanceof z.ZodEnum ||
+//         schema instanceof z.ZodLiteral
+//     ) {
+//         return true
+//     }
+
+//     if (schema instanceof z.ZodUnion) {
+//         return schema.options.every((option) => option instanceof z.ZodLiteral)
+//     }
+
+//     return false
+// }
+
 function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
     if (
         schema instanceof z.ZodString ||
@@ -210,6 +226,17 @@ function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
 
     if (schema instanceof z.ZodUnion) {
         return schema.options.every((option) => option instanceof z.ZodLiteral)
+    }
+
+    const zodInternal =
+        '_zod' in schema && schema._zod && typeof schema._zod === 'object'
+            ? schema._zod
+            : undefined
+    const values =
+        zodInternal && 'values' in zodInternal ? zodInternal.values : undefined
+
+    if (values instanceof Set) {
+        return [...values].every((value) => typeof value === 'string')
     }
 
     return false

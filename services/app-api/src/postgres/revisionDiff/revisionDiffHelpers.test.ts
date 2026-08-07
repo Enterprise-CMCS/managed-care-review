@@ -791,45 +791,71 @@ describe('revisionDiffHelpers', () => {
     })
 
     it('reports contract and rate document add/remove changes with totals', async () => {
-        type DocumentDiffItem = {
-            name: string
-            sha256: string
-        }
-
-        const diffDocumentsByShaAndName = (
-            previousDocs: DocumentDiffItem[],
-            latestDocs: DocumentDiffItem[]
-        ) => {
-            const previousDocKeys = new Set(
-                previousDocs.map(
-                    (document) => `${document.sha256}::${document.name}`
-                )
-            )
-            const latestDocKeys = new Set(
-                latestDocs.map(
-                    (document) => `${document.sha256}::${document.name}`
-                )
-            )
-
-            return {
-                added: latestDocs
-                    .filter(
-                        (document) =>
-                            !previousDocKeys.has(
-                                `${document.sha256}::${document.name}`
-                            )
-                    )
-                    .map((document) => document.name),
-                removed: previousDocs
-                    .filter(
-                        (document) =>
-                            !latestDocKeys.has(
-                                `${document.sha256}::${document.name}`
-                            )
-                    )
-                    .map((document) => document.name),
-            }
-        }
+        const previousContractDocuments = [
+            {
+                name: 'contract-keep.pdf',
+                s3URL: 's3://bucketname/key/contract-keep.pdf',
+                sha256: 'contract-keep',
+            },
+            {
+                name: 'contract-removed.pdf',
+                s3URL: 's3://bucketname/key/contract-removed.pdf',
+                sha256: 'contract-removed',
+            },
+        ]
+        const updatedContractDocuments = [
+            {
+                name: 'contract-keep.pdf',
+                s3URL: 's3://bucketname/key/contract-keep.pdf',
+                sha256: 'contract-keep',
+            },
+            {
+                name: 'contract-added.pdf',
+                s3URL: 's3://bucketname/key/contract-added.pdf',
+                sha256: 'contract-added',
+            },
+        ]
+        const previousContractSupportingDocuments = [
+            {
+                name: 'support-keep.pdf',
+                s3URL: 's3://bucketname/key/support-keep.pdf',
+                sha256: 'support-keep',
+            },
+            {
+                name: 'support-removed.pdf',
+                s3URL: 's3://bucketname/key/support-removed.pdf',
+                sha256: 'support-removed',
+            },
+        ]
+        const updatedContractSupportingDocuments = [
+            {
+                name: 'support-keep.pdf',
+                s3URL: 's3://bucketname/key/support-keep.pdf',
+                sha256: 'support-keep',
+            },
+        ]
+        // The initial rate fixture already contains:
+        // rateDocuments: ['ratedoc1.doc']
+        // supportingDocuments: ['ratesupdoc1.doc', 'ratesupdoc2.doc']
+        const updatedRateDocuments = [
+            {
+                name: 'rate-doc-added.xlsx',
+                s3URL: 's3://bucketname/key/rate-doc-added.xlsx',
+                sha256: 'rate-doc-added',
+            },
+        ]
+        const updatedRateSupportingDocuments = [
+            {
+                name: 'ratesupdoc2.doc',
+                s3URL: 's3://bucketname/key/test1',
+                sha256: 'foobar2',
+            },
+            {
+                name: 'rate-support-added.pdf',
+                s3URL: 's3://bucketname/key/rate-support-added.pdf',
+                sha256: 'rate-support-added',
+            },
+        ]
 
         const prismaClient = await sharedTestPrismaClient()
         const postgresStore = NewPostgresStore(prismaClient)
@@ -845,30 +871,8 @@ describe('revisionDiffHelpers', () => {
             stateServer,
             'FL',
             {
-                contractDocuments: [
-                    {
-                        name: 'contract-keep.pdf',
-                        s3URL: 's3://bucketname/key/contract-keep.pdf',
-                        sha256: 'contract-keep',
-                    },
-                    {
-                        name: 'contract-removed.pdf',
-                        s3URL: 's3://bucketname/key/contract-removed.pdf',
-                        sha256: 'contract-removed',
-                    },
-                ],
-                supportingDocuments: [
-                    {
-                        name: 'support-keep.pdf',
-                        s3URL: 's3://bucketname/key/support-keep.pdf',
-                        sha256: 'support-keep',
-                    },
-                    {
-                        name: 'support-removed.pdf',
-                        s3URL: 's3://bucketname/key/support-removed.pdf',
-                        sha256: 'support-removed',
-                    },
-                ],
+                contractDocuments: previousContractDocuments,
+                supportingDocuments: previousContractSupportingDocuments,
             }
         )
 
@@ -893,25 +897,8 @@ describe('revisionDiffHelpers', () => {
                 ...draftRevision.formData,
                 contractDateStart: '2025-06-01',
                 contractDateEnd: '2026-05-30',
-                contractDocuments: [
-                    {
-                        name: 'contract-keep.pdf',
-                        s3URL: 's3://bucketname/key/contract-keep.pdf',
-                        sha256: 'contract-keep',
-                    },
-                    {
-                        name: 'contract-added.pdf',
-                        s3URL: 's3://bucketname/key/contract-added.pdf',
-                        sha256: 'contract-added',
-                    },
-                ],
-                supportingDocuments: [
-                    {
-                        name: 'support-keep.pdf',
-                        s3URL: 's3://bucketname/key/support-keep.pdf',
-                        sha256: 'support-keep',
-                    },
-                ],
+                contractDocuments: updatedContractDocuments,
+                supportingDocuments: updatedContractSupportingDocuments,
             }
         )
 
@@ -942,25 +929,8 @@ describe('revisionDiffHelpers', () => {
                           rateDateCertified: '2024-01-02',
                           amendmentEffectiveDateStart: '2024-02-01',
                           amendmentEffectiveDateEnd: '2025-02-01',
-                          rateDocuments: [
-                              {
-                                  name: 'rate-doc-added.xlsx',
-                                  s3URL: 's3://bucketname/key/rate-doc-added.xlsx',
-                                  sha256: 'rate-doc-added',
-                              },
-                          ],
-                          supportingDocuments: [
-                              {
-                                  name: 'ratesupdoc2.doc',
-                                  s3URL: 's3://bucketname/key/test1',
-                                  sha256: 'foobar2',
-                              },
-                              {
-                                  name: 'rate-support-added.pdf',
-                                  s3URL: 's3://bucketname/key/rate-support-added.pdf',
-                                  sha256: 'rate-support-added',
-                              },
-                          ],
+                          rateDocuments: updatedRateDocuments,
+                          supportingDocuments: updatedRateSupportingDocuments,
                       },
                   }
                 : rateUpdate
@@ -1019,15 +989,6 @@ describe('revisionDiffHelpers', () => {
             throw comparison
         }
 
-        const previousContractDocuments =
-            previousSubmission.contractRevision.formData.contractDocuments
-        const latestContractDocuments =
-            latestSubmissionPackage.contractRevision.formData.contractDocuments
-        const previousSupportingDocuments =
-            previousSubmission.contractRevision.formData.supportingDocuments
-        const latestSupportingDocuments =
-            latestSubmissionPackage.contractRevision.formData
-                .supportingDocuments
         const previousRateRevision = previousSubmission.rateRevisions.find(
             (rateRevision) => rateRevision.rateID === draftRate.id
         )
@@ -1041,39 +1002,27 @@ describe('revisionDiffHelpers', () => {
             )
         }
 
-        const previousRateDocuments =
-            previousRateRevision.formData.rateDocuments ?? []
-        const latestRateDocuments =
-            latestRateRevision.formData.rateDocuments ?? []
-        const previousRateSupportingDocuments =
-            previousRateRevision.formData.supportingDocuments ?? []
-        const latestRateSupportingDocuments =
-            latestRateRevision.formData.supportingDocuments ?? []
-
         expect(comparison.documentChanges).toEqual({
-            contractDocuments: diffDocumentsByShaAndName(
-                previousContractDocuments,
-                latestContractDocuments
-            ),
+            contractDocuments: {
+                added: ['contract-added.pdf'],
+                removed: ['contract-removed.pdf'],
+            },
             contractSupportingDocuments: {
                 added: [],
-                removed: diffDocumentsByShaAndName(
-                    previousSupportingDocuments,
-                    latestSupportingDocuments
-                ).removed,
+                removed: ['support-removed.pdf'],
             },
             ratesDocuments: [
                 {
                     rateID: draftRate.id,
                     rateCertificationName: updatedRateCertificationName,
-                    rateDocuments: diffDocumentsByShaAndName(
-                        previousRateDocuments,
-                        latestRateDocuments
-                    ),
-                    supportingDocuments: diffDocumentsByShaAndName(
-                        previousRateSupportingDocuments,
-                        latestRateSupportingDocuments
-                    ),
+                    rateDocuments: {
+                        added: ['rate-doc-added.xlsx'],
+                        removed: ['ratedoc1.doc'],
+                    },
+                    supportingDocuments: {
+                        added: ['rate-support-added.pdf'],
+                        removed: ['ratesupdoc1.doc'],
+                    },
                 },
             ],
             totalAdded: 3,
