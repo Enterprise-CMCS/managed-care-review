@@ -1,3 +1,5 @@
+import type { ActuaryContactType, StateContactType } from './formDataTypes'
+
 type RevisionDiffFieldChange<TValue = unknown> = {
     fieldPath: string
     oldValue: TValue
@@ -29,6 +31,59 @@ type RevisionDiffCollectionItemChange<TItem, TChange> =
     | RevisionDiffCollectionItemRemoved<TItem>
     | RevisionDiffCollectionItemUpdated<TItem, TChange>
 
+type RevisionDiffCollectionItemNewOrModified<TItem> = {
+    kind: 'new_or_modified'
+    current: TItem
+}
+
+type RevisionDiffRateActuaryContactChange =
+    RevisionDiffCollectionItemNewOrModified<ActuaryContactType>
+
+type RevisionDiffDocumentNameChanges = {
+    added: string[]
+    removed: string[]
+}
+
+type RevisionDiffRateDocumentChanges = {
+    rateID: string
+    rateCertificationName: string
+    rateDocuments: RevisionDiffDocumentNameChanges
+    supportingDocuments: RevisionDiffDocumentNameChanges
+}
+
+type RevisionDiffDocumentChanges = {
+    contractDocuments: RevisionDiffDocumentNameChanges
+    contractSupportingDocuments: RevisionDiffDocumentNameChanges
+    ratesDocuments: RevisionDiffRateDocumentChanges[]
+    totalAdded: number
+    totalRemoved: number
+}
+
+type RevisionDiffAddedRate = {
+    rateID: string
+    rateCertificationName: string
+    includedInAnotherSubmission: boolean
+}
+
+type RevisionDiffRemovedRate = {
+    rateID: string
+    rateCertificationName: string
+}
+
+type RevisionDiffRevisedRate = {
+    rateID: string
+    rateCertificationName: string
+    fieldChanges: RevisionDiffFieldChange[]
+    certifyingActuaryContactChanges: RevisionDiffRateActuaryContactChange[]
+    addtlActuaryContactChanges: RevisionDiffRateActuaryContactChange[]
+}
+
+type RevisionDiffRateChanges = {
+    added: RevisionDiffAddedRate[]
+    removed: RevisionDiffRemovedRate[]
+    revised: RevisionDiffRevisedRate[]
+}
+
 type RevisionDiff<TValue = unknown> = {
     contractID: string
     olderRevisionID: string
@@ -36,10 +91,22 @@ type RevisionDiff<TValue = unknown> = {
     olderSubmittedAt: Date
     newerSubmittedAt: Date
     fieldChanges: RevisionDiffFieldChange<TValue>[]
+    stateContactChanges: RevisionDiffCollectionItemNewOrModified<StateContactType>[]
+    documentChanges: RevisionDiffDocumentChanges
+    rateChanges: RevisionDiffRateChanges
 }
 
 export type {
     RevisionDiff,
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
+    RevisionDiffCollectionItemNewOrModified,
+    RevisionDiffRateActuaryContactChange,
+    RevisionDiffDocumentNameChanges,
+    RevisionDiffRateDocumentChanges,
+    RevisionDiffDocumentChanges,
+    RevisionDiffAddedRate,
+    RevisionDiffRemovedRate,
+    RevisionDiffRevisedRate,
+    RevisionDiffRateChanges,
 }

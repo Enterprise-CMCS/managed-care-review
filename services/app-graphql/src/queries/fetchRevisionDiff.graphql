@@ -17,6 +17,82 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
           value
         }
       }
+      stateContactChanges {
+        kind
+        current {
+          name
+          titleRole
+          email
+        }
+      }
+      documentChanges {
+        contractDocuments {
+          added
+          removed
+        }
+        contractSupportingDocuments {
+          added
+          removed
+        }
+        ratesDocuments {
+          rateID
+          rateCertificationName
+          rateDocuments {
+            added
+            removed
+          }
+          supportingDocuments {
+            added
+            removed
+          }
+        }
+        totalAdded
+        totalRemoved
+      }
+      rateChanges {
+        added {
+          rateID
+          rateCertificationName
+          includedInAnotherSubmission
+        }
+        removed {
+          rateID
+          rateCertificationName
+        }
+        revised {
+          rateID
+          rateCertificationName
+          fieldChanges {
+            fieldPath
+            oldValue {
+              kind
+              value
+            }
+            newValue {
+              kind
+              value
+            }
+          }
+          certifyingActuaryContactChanges {
+            kind
+            current {
+              name
+              titleRole
+              email
+              actuarialFirm
+            }
+          }
+          addtlActuaryContactChanges {
+            kind
+            current {
+              name
+              titleRole
+              email
+              actuarialFirm
+            }
+          }
+        }
+      }
     }
   }
 }

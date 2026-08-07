@@ -2882,6 +2882,79 @@ type RevisionDiff {
     olderSubmittedAt: DateTime!
     newerSubmittedAt: DateTime!
     fieldChanges: [RevisionDiffFieldChange!]!
+    stateContactChanges: [RevisionDiffStateContactChange!]!
+    documentChanges: RevisionDiffDocumentChanges!
+    rateChanges: RevisionDiffRateChanges!
+}
+
+type RevisionDiffDocumentNameChanges {
+    added: [String!]!
+    removed: [String!]!
+}
+
+type RevisionDiffRateDocumentChanges {
+    rateID: ID!
+    rateCertificationName: String!
+    rateDocuments: RevisionDiffDocumentNameChanges!
+    supportingDocuments: RevisionDiffDocumentNameChanges!
+}
+
+type RevisionDiffDocumentChanges {
+    contractDocuments: RevisionDiffDocumentNameChanges!
+    contractSupportingDocuments: RevisionDiffDocumentNameChanges!
+    ratesDocuments: [RevisionDiffRateDocumentChanges!]!
+    totalAdded: Int!
+    totalRemoved: Int!
+}
+
+type RevisionDiffAddedRate {
+    rateID: ID!
+    rateCertificationName: String!
+    includedInAnotherSubmission: Boolean!
+}
+
+type RevisionDiffRemovedRate {
+    rateID: ID!
+    rateCertificationName: String!
+}
+
+type RevisionDiffRevisedRate {
+    rateID: ID!
+    rateCertificationName: String!
+    fieldChanges: [RevisionDiffFieldChange!]!
+    certifyingActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
+    addtlActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
+}
+
+type RevisionDiffRateChanges {
+    added: [RevisionDiffAddedRate!]!
+    removed: [RevisionDiffRemovedRate!]!
+    revised: [RevisionDiffRevisedRate!]!
+}
+
+enum RevisionDiffRateActuaryContactChangeKind {
+    NEW_OR_MODIFIED
+}
+
+type RevisionDiffRateActuaryContactChange {
+    kind: RevisionDiffRateActuaryContactChangeKind!
+    current: RevisionDiffActuaryContact!
+}
+
+type RevisionDiffActuaryContact {
+    name: String
+    titleRole: String
+    email: String
+    actuarialFirm: String
+}
+
+enum RevisionDiffStateContactChangeKind {
+    NEW_OR_MODIFIED
+}
+
+type RevisionDiffStateContactChange {
+    kind: RevisionDiffStateContactChangeKind!
+    current: StateContact!
 }
 
 enum RevisionDiffFieldValueKind {

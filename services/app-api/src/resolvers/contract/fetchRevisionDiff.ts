@@ -62,14 +62,64 @@ function serializeRevisionDiffFieldValue(value: unknown):
     }
 }
 
+function serializeRevisionDiffFieldChanges(
+    fieldChanges: RevisionDiff['fieldChanges']
+) {
+    return fieldChanges.map((fieldChange) => ({
+        ...fieldChange,
+        oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
+        newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
+    }))
+}
+
 function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
+    const serializeRevisionDiffActuaryContact = (
+        contact: NonNullable<
+            RevisionDiff['rateChanges']['revised'][number]['certifyingActuaryContactChanges'][number]
+        >['current']
+    ) => ({
+        name: contact.name,
+        titleRole: contact.titleRole,
+        email: contact.email,
+        actuarialFirm:
+            contact.actuarialFirm === 'OTHER'
+                ? (contact.actuarialFirmOther ?? null)
+                : (contact.actuarialFirm ?? null),
+    })
+
     return {
         ...comparison,
-        fieldChanges: comparison.fieldChanges.map((fieldChange) => ({
-            ...fieldChange,
-            oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
-            newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
+        fieldChanges: serializeRevisionDiffFieldChanges(
+            comparison.fieldChanges
+        ),
+        stateContactChanges: comparison.stateContactChanges.map((change) => ({
+            kind: 'NEW_OR_MODIFIED' as const,
+            current: change.current,
         })),
+        rateChanges: {
+            ...comparison.rateChanges,
+            revised: comparison.rateChanges.revised.map((rate) => ({
+                ...rate,
+                fieldChanges: serializeRevisionDiffFieldChanges(
+                    rate.fieldChanges
+                ),
+                certifyingActuaryContactChanges:
+                    rate.certifyingActuaryContactChanges.map((change) => ({
+                        kind: 'NEW_OR_MODIFIED' as const,
+                        current: serializeRevisionDiffActuaryContact(
+                            change.current
+                        ),
+                    })),
+                addtlActuaryContactChanges: rate.addtlActuaryContactChanges.map(
+                    (change) => ({
+                        kind: 'NEW_OR_MODIFIED' as const,
+                        current: serializeRevisionDiffActuaryContact(
+                            change.current
+                        ),
+                    })
+                ),
+            })),
+        },
     }
 }
 

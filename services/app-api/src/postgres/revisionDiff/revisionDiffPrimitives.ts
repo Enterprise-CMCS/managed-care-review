@@ -1,7 +1,9 @@
 import type {
     RevisionDiffCollectionItemChange,
+    RevisionDiffCollectionItemNewOrModified,
     RevisionDiffFieldChange,
 } from '../../domain-models'
+import { z } from 'zod'
 
 type ScalarDiffFieldConfig<TItem, TContext> = {
     fieldPath: string
@@ -90,8 +92,7 @@ function diffCollectionByKey<TItem, TChange>({
     getKey,
     buildChanges,
 }: DiffByKeyArgs<TItem, TChange>):
-    | RevisionDiffCollectionItemChange<TItem, TChange>[]
-    | Error {
+    RevisionDiffCollectionItemChange<TItem, TChange>[] | Error {
     const previousItemsByKey = mapItemsByKey(previous, getKey)
     if (previousItemsByKey instanceof Error) {
         return previousItemsByKey
@@ -147,5 +148,105 @@ function diffCollectionByKey<TItem, TChange>({
     return changes
 }
 
+function buildNewAndModifiedCollectionChanges<TItem>(
+    previous: TItem[],
+    current: TItem[],
+    getComparisonKey: (item: TItem) => string
+): RevisionDiffCollectionItemNewOrModified<TItem>[] {
+    const previousRemainingCounts = new Map<string, number>()
+
+    for (const item of previous) {
+        const key = getComparisonKey(item)
+        previousRemainingCounts.set(
+            key,
+            (previousRemainingCounts.get(key) ?? 0) + 1
+        )
+    }
+
+    const changes: RevisionDiffCollectionItemNewOrModified<TItem>[] = []
+
+    for (const item of current) {
+        const key = getComparisonKey(item)
+        const remainingCount = previousRemainingCounts.get(key) ?? 0
+
+        if (remainingCount > 0) {
+            previousRemainingCounts.set(key, remainingCount - 1)
+            continue
+        }
+
+        changes.push({
+            kind: 'new_or_modified',
+            current: item,
+        })
+    }
+
+    return changes
+}
+
+function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
+    if (
+        schema instanceof z.ZodOptional ||
+        schema instanceof z.ZodNullable ||
+        schema instanceof z.ZodDefault
+    ) {
+        return unwrapSchema(schema.unwrap())
+    }
+
+    if (schema instanceof z.ZodPipe) {
+        return unwrapSchema(schema.def.out)
+    }
+
+    return schema
+}
+
+// function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
+//     if (
+//         schema instanceof z.ZodString ||
+//         schema instanceof z.ZodEnum ||
+//         schema instanceof z.ZodLiteral
+//     ) {
+//         return true
+//     }
+
+//     if (schema instanceof z.ZodUnion) {
+//         return schema.options.every((option) => option instanceof z.ZodLiteral)
+//     }
+
+//     return false
+// }
+
+function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
+    if (
+        schema instanceof z.ZodString ||
+        schema instanceof z.ZodEnum ||
+        schema instanceof z.ZodLiteral
+    ) {
+        return true
+    }
+
+    if (schema instanceof z.ZodUnion) {
+        return schema.options.every((option) => option instanceof z.ZodLiteral)
+    }
+
+    const zodInternal =
+        '_zod' in schema && schema._zod && typeof schema._zod === 'object'
+            ? schema._zod
+            : undefined
+    const values =
+        zodInternal && 'values' in zodInternal ? zodInternal.values : undefined
+
+    if (values instanceof Set) {
+        return [...values].every((value) => typeof value === 'string')
+    }
+
+    return false
+}
+
 export type { ScalarDiffFieldConfig }
-export { buildScalarFieldDiffChanges, diffCollectionByKey }
+export {
+    buildNewAndModifiedCollectionChanges,
+    buildScalarFieldDiffChanges,
+    diffCollectionByKey,
+    isStringEnumLikeSchema,
+    unwrapSchema,
+}
