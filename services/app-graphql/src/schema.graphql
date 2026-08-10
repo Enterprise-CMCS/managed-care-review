@@ -2854,7 +2854,7 @@ type RevisionDiffDocumentNameChanges {
 
 type RevisionDiffRateDocumentChanges {
     rateID: ID!
-    rateCertificationName: String!
+    rateCertificationName: String
     rateDocuments: RevisionDiffDocumentNameChanges!
     supportingDocuments: RevisionDiffDocumentNameChanges!
 }
@@ -2869,18 +2869,18 @@ type RevisionDiffDocumentChanges {
 
 type RevisionDiffAddedRate {
     rateID: ID!
-    rateCertificationName: String!
+    rateCertificationName: String
     includedInAnotherSubmission: Boolean!
 }
 
 type RevisionDiffRemovedRate {
     rateID: ID!
-    rateCertificationName: String!
+    rateCertificationName: String
 }
 
 type RevisionDiffRevisedRate {
     rateID: ID!
-    rateCertificationName: String!
+    rateCertificationName: String
     fieldChanges: [RevisionDiffFieldChange!]!
     certifyingActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
     addtlActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!

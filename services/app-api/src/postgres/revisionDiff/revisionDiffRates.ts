@@ -172,8 +172,10 @@ const scalarRateFormDataFieldConfigs: ScalarDiffFieldConfig<
     getValue: (formData) => fieldConfig.getValue(formData),
 }))
 
-function buildRateDisplayName(rateRevision: RateRevisionType): string {
-    return rateRevision.formData.rateCertificationName ?? rateRevision.rateID
+function buildRateDisplayName(
+    rateRevision: RateRevisionType
+): string | undefined {
+    return rateRevision.formData.rateCertificationName ?? undefined
 }
 
 function isIncludedInAnotherSubmission(
@@ -323,10 +325,13 @@ function buildRateChanges(
         )
     }
 
-    const sortByName = <TItem extends { rateCertificationName: string }>(
+    const sortByName = <TItem extends { rateCertificationName?: string }>(
         left: TItem,
         right: TItem
-    ) => left.rateCertificationName.localeCompare(right.rateCertificationName)
+    ) =>
+        (left.rateCertificationName ?? '').localeCompare(
+            right.rateCertificationName ?? ''
+        )
 
     return {
         added: added.sort(sortByName),

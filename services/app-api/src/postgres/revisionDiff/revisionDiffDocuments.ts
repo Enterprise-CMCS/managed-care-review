@@ -82,8 +82,7 @@ function buildRateDocumentChanges(
 
     return {
         rateID: rate.rateID,
-        rateCertificationName:
-            rate.formData.rateCertificationName ?? rate.rateID,
+        rateCertificationName: rate.formData.rateCertificationName ?? undefined,
         rateDocuments,
         supportingDocuments,
     }
@@ -138,8 +137,8 @@ function buildRateDocumentGroups(
     }
 
     return groups.sort((leftGroup, rightGroup) =>
-        leftGroup.rateCertificationName.localeCompare(
-            rightGroup.rateCertificationName
+        (leftGroup.rateCertificationName ?? '').localeCompare(
+            rightGroup.rateCertificationName ?? ''
         )
     )
 }

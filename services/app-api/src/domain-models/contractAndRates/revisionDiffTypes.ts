@@ -46,7 +46,7 @@ type RevisionDiffDocumentNameChanges = {
 
 type RevisionDiffRateDocumentChanges = {
     rateID: string
-    rateCertificationName: string
+    rateCertificationName?: string
     rateDocuments: RevisionDiffDocumentNameChanges
     supportingDocuments: RevisionDiffDocumentNameChanges
 }
@@ -61,18 +61,18 @@ type RevisionDiffDocumentChanges = {
 
 type RevisionDiffAddedRate = {
     rateID: string
-    rateCertificationName: string
+    rateCertificationName?: string
     includedInAnotherSubmission: boolean
 }
 
 type RevisionDiffRemovedRate = {
     rateID: string
-    rateCertificationName: string
+    rateCertificationName?: string
 }
 
 type RevisionDiffRevisedRate = {
     rateID: string
-    rateCertificationName: string
+    rateCertificationName?: string
     fieldChanges: RevisionDiffFieldChange[]
     certifyingActuaryContactChanges: RevisionDiffRateActuaryContactChange[]
     addtlActuaryContactChanges: RevisionDiffRateActuaryContactChange[]

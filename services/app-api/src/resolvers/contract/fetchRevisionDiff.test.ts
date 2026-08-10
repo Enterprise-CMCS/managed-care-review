@@ -698,15 +698,6 @@ describe('fetchRevisionDiff', () => {
                 previousPackageSubmission.contractRevision.id,
         })
 
-        const updatedRateCertificationName =
-            updatedDraftRate.draftRevision?.formData.rateCertificationName
-
-        if (!updatedRateCertificationName) {
-            throw new Error(
-                'Unexpected error: updated draft rate certification name not found'
-            )
-        }
-
         expect(revisionDiff.comparison.documentChanges).toEqual({
             contractDocuments: {
                 added: ['contract-added.pdf'],
@@ -719,7 +710,9 @@ describe('fetchRevisionDiff', () => {
             ratesDocuments: [
                 {
                     rateID: updatedDraftRate.id,
-                    rateCertificationName: updatedRateCertificationName,
+                    rateCertificationName:
+                        updatedDraftRate.draftRevision?.formData
+                            .rateCertificationName,
                     rateDocuments: {
                         added: ['rate-doc-added.xlsx'],
                         removed: ['ratedoc1.doc'],
@@ -768,9 +761,9 @@ describe('fetchRevisionDiff', () => {
             )?.formData.rateCertificationName
 
         if (
-            !addedRateCertificationName ||
-            !removedRateCertificationName ||
-            !revisedRateCertificationName
+            addedRateCertificationName === undefined ||
+            removedRateCertificationName === undefined ||
+            revisedRateCertificationName === undefined
         ) {
             throw new Error(
                 'Unexpected error: one or more expected rate certification names not found'
