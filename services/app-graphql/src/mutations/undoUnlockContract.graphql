@@ -32,6 +32,10 @@ mutation undoUnlockContract($input: UndoUnlockContractInput!) {
             packageSubmissions {
                 ...packageSubmissionsFragment
             }
+
+            undoUnlockPackages {
+                ...undoUnlockPackagesFragment
+            }
         }
     }
 }

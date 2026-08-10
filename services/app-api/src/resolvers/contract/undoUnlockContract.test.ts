@@ -60,6 +60,19 @@ describe('undoUnlockContract', () => {
         expect(reversedContract.consolidatedStatus).toBe('SUBMITTED')
         expect(reversedContract.draftRevision).toBeNull()
         expect(reversedContract.draftRates).toBeNull()
+
+        expect(reversedContract.undoUnlockPackages).toEqual([
+            expect.objectContaining({
+                undoUnlockInfo: expect.objectContaining({
+                    updatedReason: 'Unlock was accidental',
+                }),
+                draftContractRevisionSnapshot: expect.objectContaining({
+                    unlockInfo: expect.objectContaining({
+                        updatedReason: 'Unlocking for edits',
+                    }),
+                }),
+            }),
+        ])
     })
 
     it('reversed unlocked contract can be unlocked again, resubmitted, and approved with expected client data', async () => {

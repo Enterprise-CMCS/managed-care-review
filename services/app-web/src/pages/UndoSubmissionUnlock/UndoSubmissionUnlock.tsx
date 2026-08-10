@@ -125,7 +125,9 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
                     },
                 },
             })
-            navigate(`/submissions/${contractSubmissionType}/${id}`)
+            navigate(
+                `/submissions/${contractSubmissionType}/${id}?showTempUndoUnlockBanner=true`
+            )
         } catch (err) {
             recordJSException(
                 `UndoSubmissionUnlock: GraphQL error reported. Error message: ${err}`
@@ -213,7 +215,7 @@ export const UndoSubmissionUnlock = (): React.ReactElement => {
                                     variant="default"
                                     data-testid="page-actions-right-primary"
                                     parent_component_type="page body"
-                                    link_url={`/submissions/${contractSubmissionType}/${id}`}
+                                    link_url={`/submissions/${contractSubmissionType}/${id}?showTempUndoUnlockBanner=true`}
                                     animationTimeout={1000}
                                     disabled={showFieldErrors(
                                         errors.undoSubmissionUnlockReason

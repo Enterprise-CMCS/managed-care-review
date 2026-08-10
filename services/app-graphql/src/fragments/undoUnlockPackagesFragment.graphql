@@ -1,0 +1,12 @@
+fragment undoUnlockPackagesFragment on ContractUndoUnlockPackage {
+    undoUnlockInfo {
+        ...updateInformationFields
+    }
+
+    draftContractRevisionSnapshot {
+        id
+        unlockInfo {
+            ...updateInformationFields
+        }
+    }
+}

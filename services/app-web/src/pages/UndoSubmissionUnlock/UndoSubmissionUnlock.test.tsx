@@ -332,6 +332,8 @@ describe('UndoSubmissionUnlock', () => {
             expect(testLocation.pathname).toBe(
                 `/submissions/health-plan/${contract.id}`
             )
+            // flag tells the summary page to show the temporary status banner
+            expect(testLocation.search).toBe('?showTempUndoUnlockBanner=true')
         })
 
         await waitFor(() => {

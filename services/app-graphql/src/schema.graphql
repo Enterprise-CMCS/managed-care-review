@@ -2454,6 +2454,28 @@ type ContractPackageSubmission {
 }
 
 """
+ContractUndoUnlockPackage is a record of an unlock on this contract that CMS reversed.
+The discarded draft revision is in neither packageSubmissions nor draftRevision, so this
+is the only record of the undo unlock and of the unlock it reversed.
+"""
+type ContractUndoUnlockPackage {
+    "undoUnlockInfo provides the reason/date/by for the undo unlock action"
+    undoUnlockInfo: UpdateInformation!
+    "draftContractRevisionSnapshot is the unlocked draft revision that the undo unlock reverted, kept as history"
+    draftContractRevisionSnapshot: UndoUnlockContractRevision!
+}
+
+"""
+UndoUnlockContractRevision carries only the fields needed to describe the reversed
+unlock
+"""
+type UndoUnlockContractRevision {
+    id: ID!
+    "unlockInfo is the who/when/why of the unlock that the undo unlock reversed"
+    unlockInfo: UpdateInformation
+}
+
+"""
 RatePackageSubmission is a snapshot of a contract and all its related rates in time
 a RatePackageSubmission can be created by the user submitting a contract or a related rate
 """
@@ -2656,6 +2678,12 @@ type Contract {
     packageSubmissions: [ContractPackageSubmission!]!
 
     """
+    undoUnlockPackages are the unlocks on this contract that CMS reversed with an undo unlock.
+    Returned in _descending_ order. Most recent undo unlock is in the first position in the array.
+    """
+    undoUnlockPackages: [ContractUndoUnlockPackage!]
+
+    """
     questions field is an array of questions asked about the contract by CMS. Each questions also contains responses
     to the question submitted by the State. DRAFT contracts will not have questions, only contracts that have been submitted
     , unlocked, or resubmitted. The array is in descending order by createdAt.
@@ -2742,6 +2770,12 @@ type UnlockedContract {
     submission is in the first position in the array.
     """
     packageSubmissions: [ContractPackageSubmission!]!
+
+    """
+    undoUnlockPackages are the unlocks on this contract that CMS reversed with an undo unlock.
+    Returned in _descending_ order. Most recent undo unlock is in the first position in the array.
+    """
+    undoUnlockPackages: [ContractUndoUnlockPackage!]
 
     """
     questions field is an array of questions asked about the contract by CMS. Each questions also contains responses
