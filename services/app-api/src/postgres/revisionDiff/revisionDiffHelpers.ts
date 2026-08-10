@@ -244,17 +244,18 @@ function buildRevisionDiff(
         newerSubmission.contractRevision.formData.stateContacts
     )
 
-    const documentChanges = buildDocumentChanges(
-        olderSubmission,
-        newerSubmission
-    )
-    if (documentChanges instanceof Error) {
-        return documentChanges
-    }
-
     const rateChanges = buildRateChanges(olderSubmission, newerSubmission)
     if (rateChanges instanceof Error) {
         return rateChanges
+    }
+
+    const documentChanges = buildDocumentChanges(
+        olderSubmission,
+        newerSubmission,
+        rateChanges.revised
+    )
+    if (documentChanges instanceof Error) {
+        return documentChanges
     }
 
     return {

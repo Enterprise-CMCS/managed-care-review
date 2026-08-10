@@ -18,8 +18,8 @@ import {
 } from './revisionDiffPrimitives'
 import {
     buildRateDocumentChanges,
-    hasRateDocumentChanges,
-} from './revisionDiffDocuments'
+    hasRateDocumentListChanges,
+} from './revisionDiffRateDocuments'
 import { buildRateActuaryContactDiffChanges } from './revisionDiffRateActuaries'
 
 type RateFormData = RateFormDataType
@@ -226,7 +226,7 @@ function buildRemovedRate(
 function buildRevisedRate(
     olderRateRevision: RateRevisionType,
     rateRevision: RateRevisionType
-): RevisionDiffRevisedRate | Error {
+): { revisedRate: RevisionDiffRevisedRate; hasChanges: boolean } | Error {
     const fieldChanges = buildScalarFieldDiffChanges(
         olderRateRevision.formData,
         rateRevision.formData,
@@ -252,35 +252,36 @@ function buildRevisedRate(
             []) as ActuaryContactType[]
     )
 
-    return {
-        rateID: rateRevision.rateID,
-        rateCertificationName: buildRateDisplayName(rateRevision),
-        fieldChanges,
-        certifyingActuaryContactChanges,
-        addtlActuaryContactChanges,
-    }
-}
-
-function hasRevisedRateChanges(
-    revisedRate: RevisionDiffRevisedRate,
-    olderRateRevision: RateRevisionType,
-    newerRateRevision: RateRevisionType
-): boolean | Error {
     const documentChanges = buildRateDocumentChanges(
         olderRateRevision,
-        newerRateRevision
+        rateRevision
     )
 
     if (documentChanges instanceof Error) {
         return documentChanges
     }
 
-    return (
-        revisedRate.fieldChanges.length > 0 ||
-        revisedRate.certifyingActuaryContactChanges.length > 0 ||
-        revisedRate.addtlActuaryContactChanges.length > 0 ||
-        hasRateDocumentChanges(documentChanges)
-    )
+    const revisedRate = {
+        rateID: rateRevision.rateID,
+        rateCertificationName: buildRateDisplayName(rateRevision),
+        fieldChanges,
+        rateDocuments: documentChanges.rateDocuments,
+        supportingRateDocuments: documentChanges.supportingDocuments,
+        certifyingActuaryContactChanges,
+        addtlActuaryContactChanges,
+    }
+
+    return {
+        revisedRate,
+        hasChanges:
+            revisedRate.fieldChanges.length > 0 ||
+            revisedRate.certifyingActuaryContactChanges.length > 0 ||
+            revisedRate.addtlActuaryContactChanges.length > 0 ||
+            hasRateDocumentListChanges(
+                revisedRate.rateDocuments,
+                revisedRate.supportingRateDocuments
+            ),
+    }
 }
 
 function buildRateChanges(
@@ -325,27 +326,17 @@ function buildRateChanges(
         }
 
         if (olderRateRevision.id !== newerRateRevision.id) {
-            const revisedRate = buildRevisedRate(
+            const revisedRateResult = buildRevisedRate(
                 olderRateRevision,
                 newerRateRevision
             )
 
-            if (revisedRate instanceof Error) {
-                return revisedRate
+            if (revisedRateResult instanceof Error) {
+                return revisedRateResult
             }
 
-            const hasChanges = hasRevisedRateChanges(
-                revisedRate,
-                olderRateRevision,
-                newerRateRevision
-            )
-
-            if (hasChanges instanceof Error) {
-                return hasChanges
-            }
-
-            if (hasChanges) {
-                revised.push(revisedRate)
+            if (revisedRateResult.hasChanges) {
+                revised.push(revisedRateResult.revisedRate)
             }
         }
     }

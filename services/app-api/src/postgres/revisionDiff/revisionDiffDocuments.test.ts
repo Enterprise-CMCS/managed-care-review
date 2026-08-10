@@ -3,6 +3,7 @@ import { mockSubmittableHealthPlanContract } from '../../testHelpers'
 import type {
     ContractPackageSubmissionType,
     RateRevisionType,
+    RevisionDiffRevisedRate,
     UpdateInfoType,
 } from '../../domain-models'
 import type { DocumentType } from '../../domain-models/contractAndRates'
@@ -73,6 +74,25 @@ const mockSubmission = (
         ...overrides,
     }
 }
+
+const mockRevisedRate = (
+    overrides?: Partial<RevisionDiffRevisedRate>
+): RevisionDiffRevisedRate => ({
+    rateID: '22222222-2222-2222-2222-222222222222',
+    rateCertificationName: 'RATE-ONE',
+    fieldChanges: [],
+    rateDocuments: {
+        added: [],
+        removed: [],
+    },
+    supportingRateDocuments: {
+        added: [],
+        removed: [],
+    },
+    certifyingActuaryContactChanges: [],
+    addtlActuaryContactChanges: [],
+    ...overrides,
+})
 
 describe('revisionDiffDocuments', () => {
     it('builds contract and rate document add/remove changes keyed by sha256 and name', () => {
@@ -145,7 +165,20 @@ describe('revisionDiffDocuments', () => {
             ],
         })
 
-        expect(buildDocumentChanges(previous, current)).toEqual({
+        expect(
+            buildDocumentChanges(previous, current, [
+                mockRevisedRate({
+                    rateDocuments: {
+                        added: ['rate-doc-added.xlsx'],
+                        removed: ['rate-doc-removed.xlsx'],
+                    },
+                    supportingRateDocuments: {
+                        added: [],
+                        removed: ['rate-support-removed.pdf'],
+                    },
+                }),
+            ])
+        ).toEqual({
             contractDocuments: {
                 added: ['contract-added.pdf'],
                 removed: ['contract-removed.pdf'],
@@ -201,7 +234,7 @@ describe('revisionDiffDocuments', () => {
             },
         })
 
-        expect(buildDocumentChanges(previous, current)).toEqual({
+        expect(buildDocumentChanges(previous, current, [])).toEqual({
             contractDocuments: {
                 added: ['contract-renamed.pdf'],
                 removed: ['contract-original.pdf'],

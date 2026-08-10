@@ -2847,7 +2847,7 @@ type RevisionDiff {
     rateChanges: RevisionDiffRateChanges!
 }
 
-type RevisionDiffDocumentNameChanges {
+type RevisionDiffDocumentListChanges {
     added: [String!]!
     removed: [String!]!
 }
@@ -2855,13 +2855,13 @@ type RevisionDiffDocumentNameChanges {
 type RevisionDiffRateDocumentChanges {
     rateID: ID!
     rateCertificationName: String
-    rateDocuments: RevisionDiffDocumentNameChanges!
-    supportingDocuments: RevisionDiffDocumentNameChanges!
+    rateDocuments: RevisionDiffDocumentListChanges!
+    supportingDocuments: RevisionDiffDocumentListChanges!
 }
 
 type RevisionDiffDocumentChanges {
-    contractDocuments: RevisionDiffDocumentNameChanges!
-    contractSupportingDocuments: RevisionDiffDocumentNameChanges!
+    contractDocuments: RevisionDiffDocumentListChanges!
+    contractSupportingDocuments: RevisionDiffDocumentListChanges!
     ratesDocuments: [RevisionDiffRateDocumentChanges!]!
     totalAdded: Int!
     totalRemoved: Int!
@@ -2882,6 +2882,8 @@ type RevisionDiffRevisedRate {
     rateID: ID!
     rateCertificationName: String
     fieldChanges: [RevisionDiffFieldChange!]!
+    rateDocuments: RevisionDiffDocumentListChanges!
+    supportingRateDocuments: RevisionDiffDocumentListChanges!
     certifyingActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
     addtlActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
 }

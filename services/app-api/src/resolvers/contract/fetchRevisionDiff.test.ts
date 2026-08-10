@@ -812,6 +812,14 @@ describe('fetchRevisionDiff', () => {
                             },
                         },
                     ],
+                    rateDocuments: {
+                        added: [],
+                        removed: [],
+                    },
+                    supportingRateDocuments: {
+                        added: [],
+                        removed: [],
+                    },
                     certifyingActuaryContactChanges: [
                         {
                             kind: 'NEW_OR_MODIFIED',

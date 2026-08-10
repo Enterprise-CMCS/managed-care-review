@@ -1,159 +1,17 @@
 import type {
     ContractPackageSubmissionType,
     RevisionDiffDocumentChanges,
-    RevisionDiffDocumentNameChanges,
-    RevisionDiffRateDocumentChanges,
-    RateRevisionType,
+    RevisionDiffRevisedRate,
 } from '../../domain-models'
-import type { DocumentType } from '../../domain-models/contractAndRates'
-import { diffCollectionByKey } from './revisionDiffPrimitives'
-
-function buildDocumentNameChanges(
-    previous: DocumentType[],
-    current: DocumentType[]
-): RevisionDiffDocumentNameChanges | Error {
-    const changes = diffCollectionByKey({
-        previous,
-        current,
-        getKey: (document) => `${document.sha256}::${document.name}`,
-        buildChanges: () => [],
-    })
-
-    if (changes instanceof Error) {
-        return changes
-    }
-
-    const added: string[] = []
-    const removed: string[] = []
-
-    for (const change of changes) {
-        if (change.kind === 'added') {
-            added.push(change.current.name)
-        } else if (change.kind === 'removed') {
-            removed.push(change.previous.name)
-        }
-    }
-
-    return {
-        added,
-        removed,
-    }
-}
-
-function hasDocumentNameChanges(
-    changes: RevisionDiffDocumentNameChanges
-): boolean {
-    return changes.added.length > 0 || changes.removed.length > 0
-}
-
-function buildRateDocumentChanges(
-    previous: RateRevisionType | undefined,
-    current: RateRevisionType | undefined
-): RevisionDiffRateDocumentChanges | Error {
-    const previousRateDocuments = previous?.formData.rateDocuments ?? []
-    const currentRateDocuments = current?.formData.rateDocuments ?? []
-    const previousSupportingDocuments =
-        previous?.formData.supportingDocuments ?? []
-    const currentSupportingDocuments =
-        current?.formData.supportingDocuments ?? []
-
-    const rateDocuments = buildDocumentNameChanges(
-        previousRateDocuments,
-        currentRateDocuments
-    )
-    if (rateDocuments instanceof Error) {
-        return rateDocuments
-    }
-
-    const supportingDocuments = buildDocumentNameChanges(
-        previousSupportingDocuments,
-        currentSupportingDocuments
-    )
-    if (supportingDocuments instanceof Error) {
-        return supportingDocuments
-    }
-
-    const rate = current ?? previous
-    if (!rate) {
-        return new Error(
-            'Cannot build document changes without a rate revision'
-        )
-    }
-
-    return {
-        rateID: rate.rateID,
-        rateCertificationName: rate.formData.rateCertificationName ?? undefined,
-        rateDocuments,
-        supportingDocuments,
-    }
-}
-
-function hasRateDocumentChanges(
-    changes: RevisionDiffRateDocumentChanges
-): boolean {
-    return (
-        hasDocumentNameChanges(changes.rateDocuments) ||
-        hasDocumentNameChanges(changes.supportingDocuments)
-    )
-}
-
-function buildRateDocumentGroups(
-    previousRates: RateRevisionType[],
-    currentRates: RateRevisionType[]
-): RevisionDiffRateDocumentChanges[] | Error {
-    const previousRatesByID = new Map(
-        previousRates.map((rateRevision) => [rateRevision.rateID, rateRevision])
-    )
-    const currentRatesByID = new Map(
-        currentRates.map((rateRevision) => [rateRevision.rateID, rateRevision])
-    )
-
-    if (previousRatesByID.size !== previousRates.length) {
-        return new Error(
-            'Duplicate rateID encountered while building rate document revision diff'
-        )
-    }
-
-    if (currentRatesByID.size !== currentRates.length) {
-        return new Error(
-            'Duplicate rateID encountered while building rate document revision diff'
-        )
-    }
-
-    const rateIDs = new Set([
-        ...previousRatesByID.keys(),
-        ...currentRatesByID.keys(),
-    ])
-
-    const groups: RevisionDiffRateDocumentChanges[] = []
-
-    for (const rateID of rateIDs) {
-        const group = buildRateDocumentChanges(
-            previousRatesByID.get(rateID),
-            currentRatesByID.get(rateID)
-        )
-
-        if (group instanceof Error) {
-            return group
-        }
-
-        if (hasRateDocumentChanges(group)) {
-            groups.push(group)
-        }
-    }
-
-    return groups.sort((leftGroup, rightGroup) =>
-        (leftGroup.rateCertificationName ?? '').localeCompare(
-            rightGroup.rateCertificationName ?? ''
-        )
-    )
-}
+import { buildRateDocumentChangesFromRevisedRates } from './revisionDiffRateDocuments'
+import { buildDocumentListChanges } from './revisionDiffPrimitives'
 
 function buildDocumentChanges(
     olderSubmission: ContractPackageSubmissionType,
-    newerSubmission: ContractPackageSubmissionType
+    newerSubmission: ContractPackageSubmissionType,
+    revisedRates: RevisionDiffRevisedRate[]
 ): RevisionDiffDocumentChanges | Error {
-    const contractDocuments = buildDocumentNameChanges(
+    const contractDocuments = buildDocumentListChanges(
         olderSubmission.contractRevision.formData.contractDocuments,
         newerSubmission.contractRevision.formData.contractDocuments
     )
@@ -161,7 +19,7 @@ function buildDocumentChanges(
         return contractDocuments
     }
 
-    const contractSupportingDocuments = buildDocumentNameChanges(
+    const contractSupportingDocuments = buildDocumentListChanges(
         olderSubmission.contractRevision.formData.supportingDocuments,
         newerSubmission.contractRevision.formData.supportingDocuments
     )
@@ -169,13 +27,8 @@ function buildDocumentChanges(
         return contractSupportingDocuments
     }
 
-    const ratesDocuments = buildRateDocumentGroups(
-        olderSubmission.rateRevisions,
-        newerSubmission.rateRevisions
-    )
-    if (ratesDocuments instanceof Error) {
-        return ratesDocuments
-    }
+    const ratesDocuments =
+        buildRateDocumentChangesFromRevisedRates(revisedRates)
 
     const totalAdded =
         contractDocuments.added.length +
@@ -208,8 +61,4 @@ function buildDocumentChanges(
     }
 }
 
-export {
-    buildDocumentChanges,
-    buildRateDocumentChanges,
-    hasRateDocumentChanges,
-}
+export { buildDocumentChanges }

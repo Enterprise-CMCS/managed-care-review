@@ -1,8 +1,10 @@
 import type {
+    RevisionDiffDocumentListChanges,
     RevisionDiffCollectionItemChange,
     RevisionDiffCollectionItemNewOrModified,
     RevisionDiffFieldChange,
 } from '../../domain-models'
+import type { DocumentType } from '../../domain-models/contractAndRates'
 import { z } from 'zod'
 
 type ScalarDiffFieldConfig<TItem, TContext> = {
@@ -183,6 +185,44 @@ function buildNewAndModifiedCollectionChanges<TItem>(
     return changes
 }
 
+function buildDocumentListChanges(
+    previous: DocumentType[],
+    current: DocumentType[]
+): RevisionDiffDocumentListChanges | Error {
+    const changes = diffCollectionByKey({
+        previous,
+        current,
+        getKey: (document) => `${document.sha256}::${document.name}`,
+        buildChanges: () => [],
+    })
+
+    if (changes instanceof Error) {
+        return changes
+    }
+
+    const added: string[] = []
+    const removed: string[] = []
+
+    for (const change of changes) {
+        if (change.kind === 'added') {
+            added.push(change.current.name)
+        } else if (change.kind === 'removed') {
+            removed.push(change.previous.name)
+        }
+    }
+
+    return {
+        added,
+        removed,
+    }
+}
+
+function hasDocumentListChanges(
+    changes: RevisionDiffDocumentListChanges
+): boolean {
+    return changes.added.length > 0 || changes.removed.length > 0
+}
+
 function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
     if (
         schema instanceof z.ZodOptional ||
@@ -198,22 +238,6 @@ function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
 
     return schema
 }
-
-// function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
-//     if (
-//         schema instanceof z.ZodString ||
-//         schema instanceof z.ZodEnum ||
-//         schema instanceof z.ZodLiteral
-//     ) {
-//         return true
-//     }
-
-//     if (schema instanceof z.ZodUnion) {
-//         return schema.options.every((option) => option instanceof z.ZodLiteral)
-//     }
-
-//     return false
-// }
 
 function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
     if (
@@ -244,9 +268,11 @@ function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
 
 export type { ScalarDiffFieldConfig }
 export {
+    buildDocumentListChanges,
     buildNewAndModifiedCollectionChanges,
     buildScalarFieldDiffChanges,
     diffCollectionByKey,
+    hasDocumentListChanges,
     isStringEnumLikeSchema,
     unwrapSchema,
 }

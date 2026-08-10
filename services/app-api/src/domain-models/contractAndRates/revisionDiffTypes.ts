@@ -39,7 +39,7 @@ type RevisionDiffCollectionItemNewOrModified<TItem> = {
 type RevisionDiffRateActuaryContactChange =
     RevisionDiffCollectionItemNewOrModified<ActuaryContactType>
 
-type RevisionDiffDocumentNameChanges = {
+type RevisionDiffDocumentListChanges = {
     added: string[]
     removed: string[]
 }
@@ -47,13 +47,13 @@ type RevisionDiffDocumentNameChanges = {
 type RevisionDiffRateDocumentChanges = {
     rateID: string
     rateCertificationName?: string
-    rateDocuments: RevisionDiffDocumentNameChanges
-    supportingDocuments: RevisionDiffDocumentNameChanges
+    rateDocuments: RevisionDiffDocumentListChanges
+    supportingDocuments: RevisionDiffDocumentListChanges
 }
 
 type RevisionDiffDocumentChanges = {
-    contractDocuments: RevisionDiffDocumentNameChanges
-    contractSupportingDocuments: RevisionDiffDocumentNameChanges
+    contractDocuments: RevisionDiffDocumentListChanges
+    contractSupportingDocuments: RevisionDiffDocumentListChanges
     ratesDocuments: RevisionDiffRateDocumentChanges[]
     totalAdded: number
     totalRemoved: number
@@ -74,6 +74,8 @@ type RevisionDiffRevisedRate = {
     rateID: string
     rateCertificationName?: string
     fieldChanges: RevisionDiffFieldChange[]
+    rateDocuments: RevisionDiffDocumentListChanges
+    supportingRateDocuments: RevisionDiffDocumentListChanges
     certifyingActuaryContactChanges: RevisionDiffRateActuaryContactChange[]
     addtlActuaryContactChanges: RevisionDiffRateActuaryContactChange[]
 }
@@ -102,7 +104,7 @@ export type {
     RevisionDiffCollectionItemChange,
     RevisionDiffCollectionItemNewOrModified,
     RevisionDiffRateActuaryContactChange,
-    RevisionDiffDocumentNameChanges,
+    RevisionDiffDocumentListChanges,
     RevisionDiffRateDocumentChanges,
     RevisionDiffDocumentChanges,
     RevisionDiffAddedRate,

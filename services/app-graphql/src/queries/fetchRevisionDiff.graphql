@@ -73,6 +73,14 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
               value
             }
           }
+          rateDocuments {
+            added
+            removed
+          }
+          supportingRateDocuments {
+            added
+            removed
+          }
           certifyingActuaryContactChanges {
             kind
             current {

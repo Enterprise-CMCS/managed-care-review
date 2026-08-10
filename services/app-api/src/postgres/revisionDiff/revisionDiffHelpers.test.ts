@@ -1305,6 +1305,14 @@ describe('revisionDiffHelpers', () => {
                                     .rateCertificationName,
                         },
                     ],
+                    rateDocuments: {
+                        added: [],
+                        removed: [],
+                    },
+                    supportingRateDocuments: {
+                        added: [],
+                        removed: [],
+                    },
                     certifyingActuaryContactChanges: [
                         {
                             kind: 'new_or_modified',
