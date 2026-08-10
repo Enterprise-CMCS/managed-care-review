@@ -9,7 +9,7 @@ import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import { getStateAnalystsEmails } from '../helpers'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function undoWithdrawRate(
     store: Store,
@@ -169,20 +169,16 @@ export function undoWithdrawRate(
                 logResolverSuccess('undoWithdrawRate', context)
 
                 //Send emails upon success
-                const statePrograms = store.findStatePrograms(
-                    undoWithdrawRateResult.stateCode
+                const statePrograms = getStatePrograms(
+                    undoWithdrawRateResult.stateCode,
+                    store,
+                    context,
+                    {
+                        operation: 'undoWithdrawRate',
+                        errorMsg: (m) => `Email failed: ${m}`,
+                        cause: 'EMAIL_ERROR',
+                    }
                 )
-
-                if (statePrograms instanceof Error) {
-                    const errMessage = `Email failed: ${statePrograms.message}`
-                    logResolverError('undoWithdrawRate', errMessage, context)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'EMAIL_ERROR',
-                        },
-                    })
-                }
 
                 const stateAnalystsEmails = await getStateAnalystsEmails(
                     undoWithdrawRateResult,

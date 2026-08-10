@@ -37,7 +37,7 @@ import type { GeneralizedProvisionType } from '@mc-review/submissions'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 import { buildResubmitRevisionChanges } from '../../emailer/emails/resubmitRevisionChanges'
-import { getStateAnalystsEmails } from '../helpers'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -540,23 +540,11 @@ export function submitContract(
                 // Get submitter email from every contract submitted revision.
                 const submitterEmails = contractSubmitters(submitContractResult)
 
-                const statePrograms = store.findStatePrograms(
-                    submitContractResult.stateCode
+                const statePrograms = getStatePrograms(
+                    submitContractResult.stateCode,
+                    store,
+                    context
                 )
-
-                if (statePrograms instanceof Error) {
-                    logResolverError(
-                        'findStatePrograms',
-                        statePrograms.message,
-                        context
-                    )
-                    throw new GraphQLError(statePrograms.message, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
 
                 let cmsContractEmailResult
                 let stateContractEmailResult

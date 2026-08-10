@@ -8,7 +8,7 @@ import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
-import { getStateAnalystsEmails } from '../helpers'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function createContractQuestionResponseResolver(
     store: Store,
@@ -157,22 +157,12 @@ export function createContractQuestionResponseResolver(
                     throw createUserInputError(errMessage)
                 }
 
-                const statePrograms = store.findStatePrograms(
-                    contract.stateCode
+                const statePrograms = getStatePrograms(
+                    contract.stateCode,
+                    store,
+                    context,
+                    { operation: 'createContractQuestionResponse' }
                 )
-                if (statePrograms instanceof Error) {
-                    logResolverError(
-                        'createContractQuestionResponse',
-                        statePrograms.message,
-                        context
-                    )
-                    throw new GraphQLError(statePrograms.message, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
 
                 const submitterEmails = contractSubmitters(contract)
 

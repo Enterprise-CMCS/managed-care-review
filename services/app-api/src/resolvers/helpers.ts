@@ -1,5 +1,6 @@
+import { GraphQLError } from 'graphql'
 import type { StateCodeType } from '@mc-review/submissions'
-import type { ContractType, RateType } from '../domain-models'
+import type { ContractType, ProgramType, RateType } from '../domain-models'
 import type { Context } from '../handlers/apollo_gql'
 import type { Store } from '../postgres'
 import { logResolverError } from '../logger'
@@ -118,4 +119,35 @@ export async function getStateAnalystsEmails(
         stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
     }
     return stateAnalystsEmails
+}
+
+export function getStatePrograms(
+    stateCode: string,
+    store: Store,
+    context: Context,
+    options?: {
+        operation?: string
+        errorMsg?: (msg: string) => string
+        cause?: string
+    }
+): ProgramType[] {
+    const statePrograms = store.findStatePrograms(stateCode)
+
+    if (statePrograms instanceof Error) {
+        const message =
+            options?.errorMsg?.(statePrograms.message) ?? statePrograms.message
+        logResolverError(
+            options?.operation ?? 'findStatePrograms',
+            message,
+            context
+        )
+        throw new GraphQLError(message, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: options?.cause ?? 'DB_ERROR',
+            },
+        })
+    }
+
+    return statePrograms
 }

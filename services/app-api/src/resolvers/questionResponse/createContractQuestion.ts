@@ -16,7 +16,7 @@ import type { Emailer } from '../../emailer'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import { getStateAnalystsEmails } from '../helpers'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function createContractQuestionResolver(
     store: Store,
@@ -132,24 +132,12 @@ export function createContractQuestionResolver(
                     throw createUserInputError(errMessage)
                 }
 
-                const statePrograms = store.findStatePrograms(
-                    contractResult.stateCode
+                const statePrograms = getStatePrograms(
+                    contractResult.stateCode,
+                    store,
+                    context
                 )
                 const submitterEmails = contractSubmitters(contractResult)
-
-                if (statePrograms instanceof Error) {
-                    logResolverError(
-                        'findStatePrograms',
-                        statePrograms.message,
-                        context
-                    )
-                    throw new GraphQLError(statePrograms.message, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
 
                 const allQuestions = await store.findAllQuestionsByContract(
                     contractResult.id
