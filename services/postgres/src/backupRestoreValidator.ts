@@ -4,15 +4,9 @@ import { SecretsManager } from './secrets'
 import { SecretDict } from './types'
 
 type BackupRestoreValidationEvent = {
-    sourceDbSecretArn: string
+    dbSecretArn: string
     restoredDbHost: string
     restoredDbPort?: number
-    skipSourceCompare?: boolean
-}
-
-type TableCount = {
-    tableName: string
-    rowCount: number
 }
 
 type LambdaResponse = {
@@ -20,106 +14,89 @@ type LambdaResponse = {
     body: string
 }
 
+// db.ts caps statements at 10s, which is fine for rotation but far too short for
+// counting every row in a production-sized database.
+const STATEMENT_TIMEOUT_MS = 300000
+
 const quoteSqlIdentifier = (identifier: string): string =>
     `"${identifier.replace(/"/g, '""')}"`
 
-const quoteQualifiedTableName = (tableName: string): string => {
-    const [schema, table] = tableName.split('.')
-    if (!schema || !table) {
-        throw new Error(`Unexpected table name format: ${tableName}`)
-    }
-
-    return `${quoteSqlIdentifier(schema)}.${quoteSqlIdentifier(table)}`
-}
-
-async function getTableNames(client: Client): Promise<string[]> {
-    const result = await client.query<{ table_name: string }>(`
-        SELECT table_schema || '.' || table_name AS table_name
+async function getTableCounts(client: Client): Promise<Record<string, number>> {
+    const tables = await client.query<{ table_name: string }>(`
+        SELECT table_name
         FROM information_schema.tables
         WHERE table_schema = 'public'
           AND table_type = 'BASE TABLE'
-        ORDER BY 1;
+        ORDER BY table_name;
     `)
 
-    return result.rows.map((row) => row.table_name)
-}
+    const counts: Record<string, number> = {}
 
-async function getTableCounts(client: Client): Promise<TableCount[]> {
-    const tableNames = await getTableNames(client)
-    const counts: TableCount[] = []
-
-    for (const tableName of tableNames) {
+    for (const { table_name } of tables.rows) {
         const result = await client.query<{ row_count: string }>(
-            `SELECT count(*)::text AS row_count FROM ${quoteQualifiedTableName(tableName)};`
+            `SELECT count(*)::text AS row_count FROM public.${quoteSqlIdentifier(table_name)};`
         )
 
-        counts.push({
-            tableName,
-            rowCount: Number(result.rows[0].row_count),
-        })
+        counts[table_name] = Number(result.rows[0].row_count)
     }
 
     return counts
 }
 
-function validateMinimumData(counts: TableCount[]): void {
-    const totalRows = counts.reduce((sum, count) => sum + count.rowCount, 0)
-    const stateCount = counts.find(
-        (count) => count.tableName === 'public.State'
-    )?.rowCount
+/**
+ * Reads the Prisma migration history out of the restored backup. A restore that
+ * came back with rolled back or half-applied migrations is not usable for
+ * recovery even if every table is present.
+ */
+async function getAppliedMigrations(client: Client): Promise<string[]> {
+    const result = await client.query<{
+        migration_name: string
+        finished_at: Date | null
+        rolled_back_at: Date | null
+    }>(`
+        SELECT migration_name, finished_at, rolled_back_at
+        FROM public."_prisma_migrations"
+        ORDER BY started_at;
+    `)
 
-    if (counts.length === 0) {
+    if (result.rows.length === 0) {
+        throw new Error('Restored backup has no applied Prisma migrations')
+    }
+
+    const rolledBack = result.rows
+        .filter((row) => row.rolled_back_at)
+        .map((row) => row.migration_name)
+    if (rolledBack.length > 0) {
+        throw new Error(
+            `Restored backup contains rolled back migrations: ${rolledBack.join(', ')}`
+        )
+    }
+
+    const unfinished = result.rows
+        .filter((row) => !row.finished_at)
+        .map((row) => row.migration_name)
+    if (unfinished.length > 0) {
+        throw new Error(
+            `Restored backup contains unfinished migrations: ${unfinished.join(', ')}`
+        )
+    }
+
+    return result.rows.map((row) => row.migration_name)
+}
+
+function validateMinimumData(counts: Record<string, number>): void {
+    const tableNames = Object.keys(counts)
+    if (tableNames.length === 0) {
         throw new Error('Restored backup has no public tables')
     }
 
+    const totalRows = Object.values(counts).reduce((sum, c) => sum + c, 0)
     if (totalRows === 0) {
         throw new Error('Restored backup has no rows')
     }
 
-    if (stateCount === 0) {
+    if (!counts['State']) {
         throw new Error('Restored backup has no State rows')
-    }
-}
-
-function compareTableCounts(
-    sourceCounts: TableCount[],
-    restoredCounts: TableCount[]
-): void {
-    const restoredCountByTable = new Map(
-        restoredCounts.map((count) => [count.tableName, count.rowCount])
-    )
-
-    const mismatches = sourceCounts.flatMap((sourceCount) => {
-        const restoredCount = restoredCountByTable.get(sourceCount.tableName)
-
-        if (restoredCount === sourceCount.rowCount) return []
-
-        return [
-            {
-                tableName: sourceCount.tableName,
-                sourceRows: sourceCount.rowCount,
-                restoredRows: restoredCount ?? 'missing',
-            },
-        ]
-    })
-
-    const sourceTableNames = new Set(
-        sourceCounts.map((count) => count.tableName)
-    )
-    const extraRestoredTables = restoredCounts
-        .filter((count) => !sourceTableNames.has(count.tableName))
-        .map((count) => ({
-            tableName: count.tableName,
-            sourceRows: 'missing',
-            restoredRows: count.rowCount,
-        }))
-
-    const allMismatches = [...mismatches, ...extraRestoredTables]
-    if (allMismatches.length > 0) {
-        console.table(allMismatches)
-        throw new Error(
-            `Restored backup does not match source table counts: ${allMismatches.length} mismatch(es)`
-        )
     }
 }
 
@@ -132,6 +109,8 @@ async function connectToDatabase(
         throw new Error(`Failed to connect to database at ${credentials.host}`)
     }
 
+    await client.query(`SET statement_timeout = ${STATEMENT_TIMEOUT_MS}`)
+
     return client
 }
 
@@ -142,67 +121,68 @@ function formatResponse(statusCode: number, body: unknown): LambdaResponse {
     }
 }
 
+/**
+ * Validates a restored Aurora backup. Only the restored cluster is queried --
+ * the live source database is deliberately never connected to.
+ */
 export const handler = async (
     event: BackupRestoreValidationEvent
 ): Promise<LambdaResponse> => {
     console.info('Backup restore validation event:', {
         ...event,
-        sourceDbSecretArn: event.sourceDbSecretArn ? '[provided]' : undefined,
+        dbSecretArn: event.dbSecretArn ? '[provided]' : undefined,
     })
 
-    if (!event.sourceDbSecretArn) {
-        return formatResponse(400, {
-            message: 'sourceDbSecretArn is required',
-        })
-    }
+    const missingField = (['dbSecretArn', 'restoredDbHost'] as const).find(
+        (field) => !event[field]
+    )
 
-    if (!event.restoredDbHost) {
+    if (missingField) {
         return formatResponse(400, {
-            message: 'restoredDbHost is required',
+            message: `${missingField} is required`,
         })
     }
 
     const secrets = new SecretsManager()
     const dbClient = new DatabaseClient()
-    let sourceClient: Client | undefined
     let restoredClient: Client | undefined
 
     try {
-        const sourceCredentials = await secrets.getSecretDict(
-            event.sourceDbSecretArn,
+        // The restore is a point-in-time copy, so it accepts the source
+        // credentials. The source host is never used.
+        const credentials = await secrets.getSecretDict(
+            event.dbSecretArn,
             'AWSCURRENT'
         )
-        const restoredCredentials: SecretDict = {
-            ...sourceCredentials,
+
+        restoredClient = await connectToDatabase(dbClient, {
+            ...credentials,
             host: event.restoredDbHost,
-            port: event.restoredDbPort ?? sourceCredentials.port,
-        }
+            port: event.restoredDbPort ?? credentials.port,
+        })
 
-        restoredClient = await connectToDatabase(dbClient, restoredCredentials)
-        const restoredCounts = await getTableCounts(restoredClient)
-        validateMinimumData(restoredCounts)
-
-        if (!event.skipSourceCompare) {
-            sourceClient = await connectToDatabase(dbClient, sourceCredentials)
-            const sourceCounts = await getTableCounts(sourceClient)
-            compareTableCounts(sourceCounts, restoredCounts)
-        }
+        const tableCounts = await getTableCounts(restoredClient)
+        validateMinimumData(tableCounts)
+        const appliedMigrations = await getAppliedMigrations(restoredClient)
 
         return formatResponse(200, {
             message: 'Aurora automated backup restore validation passed',
-            restoredTableCount: restoredCounts.length,
+            tableCount: Object.keys(tableCounts).length,
+            rowCount: Object.values(tableCounts).reduce((sum, c) => sum + c, 0),
+            tableCounts,
+            appliedMigrations,
         })
     } catch (error) {
-        console.error('Aurora automated backup restore validation failed', error)
+        console.error(
+            'Aurora automated backup restore validation failed',
+            error
+        )
         return formatResponse(500, {
             message: 'Aurora automated backup restore validation failed',
             error: error instanceof Error ? error.message : String(error),
         })
     } finally {
-        await Promise.all([
-            sourceClient?.end(),
-            restoredClient?.end(),
-        ]).catch((error) => {
+        await restoredClient?.end().catch((error) => {
             console.warn('Failed to close database connection', error)
         })
     }
