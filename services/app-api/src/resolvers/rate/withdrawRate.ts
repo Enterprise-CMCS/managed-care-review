@@ -9,7 +9,7 @@ import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
-import { getStateAnalystsEmails } from '../helpers'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function withdrawRate(
     store: Store,
@@ -149,20 +149,16 @@ export function withdrawRate(
                 logResolverSuccess('withdrawRate', context)
 
                 // Send out email to state contacts
-                const statePrograms = store.findStatePrograms(
-                    withdrawnRate.stateCode
+                const statePrograms = getStatePrograms(
+                    withdrawnRate.stateCode,
+                    store,
+                    context,
+                    {
+                        operation: 'withdrawRate',
+                        errorMsg: (m) => `Email failed: ${m}`,
+                        cause: 'EMAIL_ERROR',
+                    }
                 )
-
-                if (statePrograms instanceof Error) {
-                    const errMessage = `Email failed: ${statePrograms.message}`
-                    logResolverError('withdrawRate', errMessage, context)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'EMAIL_ERROR',
-                        },
-                    })
-                }
 
                 const stateAnalystsEmails = await getStateAnalystsEmails(
                     withdrawnRate,
