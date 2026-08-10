@@ -88,6 +88,15 @@ function buildRateDocumentChanges(
     }
 }
 
+function hasRateDocumentChanges(
+    changes: RevisionDiffRateDocumentChanges
+): boolean {
+    return (
+        hasDocumentNameChanges(changes.rateDocuments) ||
+        hasDocumentNameChanges(changes.supportingDocuments)
+    )
+}
+
 function buildRateDocumentGroups(
     previousRates: RateRevisionType[],
     currentRates: RateRevisionType[]
@@ -128,10 +137,7 @@ function buildRateDocumentGroups(
             return group
         }
 
-        if (
-            hasDocumentNameChanges(group.rateDocuments) ||
-            hasDocumentNameChanges(group.supportingDocuments)
-        ) {
+        if (hasRateDocumentChanges(group)) {
             groups.push(group)
         }
     }
@@ -202,4 +208,8 @@ function buildDocumentChanges(
     }
 }
 
-export { buildDocumentChanges }
+export {
+    buildDocumentChanges,
+    buildRateDocumentChanges,
+    hasRateDocumentChanges,
+}

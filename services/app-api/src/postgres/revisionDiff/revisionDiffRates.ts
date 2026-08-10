@@ -16,6 +16,10 @@ import {
     type ScalarDiffFieldConfig,
     unwrapSchema,
 } from './revisionDiffPrimitives'
+import {
+    buildRateDocumentChanges,
+    hasRateDocumentChanges,
+} from './revisionDiffDocuments'
 import { buildRateActuaryContactDiffChanges } from './revisionDiffRateActuaries'
 
 type RateFormData = RateFormDataType
@@ -257,6 +261,28 @@ function buildRevisedRate(
     }
 }
 
+function hasRevisedRateChanges(
+    revisedRate: RevisionDiffRevisedRate,
+    olderRateRevision: RateRevisionType,
+    newerRateRevision: RateRevisionType
+): boolean | Error {
+    const documentChanges = buildRateDocumentChanges(
+        olderRateRevision,
+        newerRateRevision
+    )
+
+    if (documentChanges instanceof Error) {
+        return documentChanges
+    }
+
+    return (
+        revisedRate.fieldChanges.length > 0 ||
+        revisedRate.certifyingActuaryContactChanges.length > 0 ||
+        revisedRate.addtlActuaryContactChanges.length > 0 ||
+        hasRateDocumentChanges(documentChanges)
+    )
+}
+
 function buildRateChanges(
     olderSubmission: ContractPackageSubmissionType,
     newerSubmission: ContractPackageSubmissionType
@@ -308,7 +334,19 @@ function buildRateChanges(
                 return revisedRate
             }
 
-            revised.push(revisedRate)
+            const hasChanges = hasRevisedRateChanges(
+                revisedRate,
+                olderRateRevision,
+                newerRateRevision
+            )
+
+            if (hasChanges instanceof Error) {
+                return hasChanges
+            }
+
+            if (hasChanges) {
+                revised.push(revisedRate)
+            }
         }
     }
 
