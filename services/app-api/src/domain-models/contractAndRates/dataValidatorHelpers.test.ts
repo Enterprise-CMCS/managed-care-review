@@ -26,6 +26,7 @@ import {
 import { findStatePrograms } from '../../postgres'
 import type { ContractFormDataType } from './formDataTypes'
 import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
+import { z } from 'zod'
 
 describe('Health plan parsing and validation', () => {
     describe('validateContractDraftRevisionInput', () => {
@@ -201,6 +202,149 @@ describe('Health plan parsing and validation', () => {
     })
 
     describe('parseContract', () => {
+        it('requires complete state contacts when the contact model flag is on', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockSubmittableHealthPlanContract()
+            // Make first contact invalid
+            contract.draftRevision!.formData.stateContacts[0].familyName =
+                undefined
+
+            const parsedWithFlag = parseContract(
+                contract,
+                'KY',
+                postgresStore,
+                { 'contact-data-model-update': true }
+            )
+
+            if (!(parsedWithFlag instanceof z.ZodError)) {
+                throw new Error('Expected parseContract to return a ZodError')
+            }
+            expect(parsedWithFlag.issues).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        path: [
+                            'draftRevision',
+                            'formData',
+                            'stateContacts',
+                            0,
+                            'familyName',
+                        ],
+                    }),
+                ])
+            )
+        })
+
+        it.each(['certifyingActuaryContacts', 'addtlActuaryContacts'] as const)(
+            'requires complete %s when the contact model flag is on',
+            async (contactField) => {
+                const prismaClient = await sharedTestPrismaClient()
+                const postgresStore = NewPostgresStore(prismaClient)
+                const contract = mockSubmittableHealthPlanContract()
+                // Make actuary contact invalid
+                const rateFormData =
+                    contract.draftRates![0].draftRevision!.formData
+                rateFormData[contactField]![0].familyName = undefined
+
+                const parsedWithFlag = parseContract(
+                    contract,
+                    'KY',
+                    postgresStore,
+                    { 'contact-data-model-update': true }
+                )
+
+                if (!(parsedWithFlag instanceof z.ZodError)) {
+                    throw new Error(
+                        'Expected parseContract to return a ZodError'
+                    )
+                }
+                expect(parsedWithFlag.issues).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            message: expect.stringContaining(
+                                contract.draftRates![0].id
+                            ),
+                            path: [
+                                'draftRates',
+                                0,
+                                'draftRevision',
+                                'formData',
+                                contactField,
+                                0,
+                                'familyName',
+                            ],
+                        }),
+                    ])
+                )
+            }
+        )
+
+        it.each(['certifyingActuaryContacts', 'addtlActuaryContacts'] as const)(
+            'only requires actuarialFirm or actuarialFirmOther on %s when the contact model flag is on',
+            async (contactField) => {
+                const prismaClient = await sharedTestPrismaClient()
+                const postgresStore = NewPostgresStore(prismaClient)
+                const contract = mockSubmittableHealthPlanContract()
+                const rateFormData =
+                    contract.draftRates![0].draftRevision!.formData
+                rateFormData[contactField]![0].actuarialFirm = undefined
+                rateFormData[contactField]![0].actuarialFirmOther = undefined
+
+                const parsedWithFlag = parseContract(
+                    contract,
+                    'KY',
+                    postgresStore,
+                    { 'contact-data-model-update': true }
+                )
+
+                if (!(parsedWithFlag instanceof z.ZodError)) {
+                    throw new Error(
+                        'Expected parseContract to return a ZodError'
+                    )
+                }
+                expect(parsedWithFlag.issues).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            message: expect.stringContaining(
+                                contract.draftRates![0].id
+                            ),
+                            path: [
+                                'draftRates',
+                                0,
+                                'draftRevision',
+                                'formData',
+                                contactField,
+                                0,
+                                'actuarialFirm',
+                            ],
+                        }),
+                    ])
+                )
+            }
+        )
+
+        it.each(['certifyingActuaryContacts', 'addtlActuaryContacts'] as const)(
+            'accepts actuarialFirmOther without actuarialFirm on %s',
+            async (contactField) => {
+                const prismaClient = await sharedTestPrismaClient()
+                const postgresStore = NewPostgresStore(prismaClient)
+                const contract = mockSubmittableHealthPlanContract()
+                const rateFormData =
+                    contract.draftRates![0].draftRevision!.formData
+                rateFormData[contactField]![0].actuarialFirm = undefined
+                rateFormData[contactField]![0].actuarialFirmOther = 'Other firm'
+
+                const parsedContract = parseContract(
+                    contract,
+                    'KY',
+                    postgresStore,
+                    { 'contact-data-model-update': true }
+                )
+
+                expect(parsedContract).toEqual(contract)
+            }
+        )
+
         it('success if valid form data', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
@@ -254,7 +398,9 @@ describe('Health plan parsing and validation', () => {
                         ],
                         stateContacts: [
                             {
-                                name: 'Someone',
+                                name: 'Some One',
+                                givenName: 'Some',
+                                familyName: 'One',
                                 email: 'someone@example.com',
                                 titleRole: 'sometitle',
                             },
@@ -653,7 +799,9 @@ describe('Health plan parsing and validation', () => {
                         ],
                         stateContacts: [
                             {
-                                name: 'Someone',
+                                name: 'Some One',
+                                givenName: 'Some',
+                                familyName: 'One',
                                 email: 'someone@example.com',
                                 titleRole: 'sometitle',
                             },
@@ -944,7 +1092,9 @@ describe('EQRO parsing and validation', () => {
         ],
         stateContacts: [
             {
-                name: 'Someone',
+                name: 'Some One',
+                givenName: 'Some',
+                familyName: 'One',
                 email: 'someone@example.com',
                 titleRole: 'sometitle',
             },
@@ -1351,6 +1501,40 @@ describe('EQRO parsing and validation', () => {
     })
 
     describe('parseEQROContract', () => {
+        it('only requires complete state contacts when the contact model flag is on', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = createValidEQROContract()
+            contract.draftRevision!.formData.stateContacts[0].familyName =
+                undefined
+
+            const parsedWithFlag = parseEQROContract(
+                contract,
+                'FL',
+                postgresStore,
+                { 'contact-data-model-update': true }
+            )
+
+            if (!(parsedWithFlag instanceof z.ZodError)) {
+                throw new Error(
+                    'Expected parseEQROContract to return a ZodError'
+                )
+            }
+            expect(parsedWithFlag.issues).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        path: [
+                            'draftRevision',
+                            'formData',
+                            'stateContacts',
+                            0,
+                            'familyName',
+                        ],
+                    }),
+                ])
+            )
+        })
+
         it('should succeed if valid EQRO contract', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)

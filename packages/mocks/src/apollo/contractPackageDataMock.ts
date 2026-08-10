@@ -545,7 +545,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                                 id: null,
                                 actuarialFirmOther: null,
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
                                 givenName: 'Actuary',
                                 familyName: 'Contact',
                                 suffix: '1',
@@ -558,7 +558,7 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                                 id: null,
                                 actuarialFirmOther: null,
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
                                 givenName: 'Actuary',
                                 familyName: 'Contact',
                                 suffix: '1',
@@ -762,7 +762,7 @@ function mockContractPackageSubmittedWithQuestions(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -773,7 +773,7 @@ function mockContractPackageSubmittedWithQuestions(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -830,7 +830,7 @@ function mockContractWithLinkedRateDraft(
                 supportingDocuments: [],
                 stateContacts: [
                     {
-                        name: 'State Contact 1',
+                        name: 'State Contact',
                         givenName: 'State',
                         familyName: 'Contact',
                         suffix: '1',
@@ -953,7 +953,7 @@ function mockContractWithLinkedRateDraft(
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
                                 givenName: 'Actuary',
                                 familyName: 'Contact',
                                 suffix: '1',
@@ -964,7 +964,7 @@ function mockContractWithLinkedRateDraft(
                         addtlActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
                                 givenName: 'Actuary',
                                 familyName: 'Contact',
                                 suffix: '1',
@@ -1014,7 +1014,7 @@ function mockContractWithLinkedRateDraft(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -1025,7 +1025,7 @@ function mockContractWithLinkedRateDraft(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -1201,7 +1201,7 @@ function mockContractWithLinkedRateSubmitted(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -1212,7 +1212,7 @@ function mockContractWithLinkedRateSubmitted(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -1456,7 +1456,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                                 {
                                     id: 'certifyingActuaryContacts1',
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -1469,7 +1469,7 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                                 {
                                     id: 'addtlActuaryContacts1',
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -1697,7 +1697,7 @@ function mockContractPackageApproved(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -1708,7 +1708,7 @@ function mockContractPackageApproved(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -2350,7 +2350,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                 supportingDocuments: [],
                 stateContacts: [
                     {
-                        name: 'State Contact 1',
+                        name: 'State Contact',
                         givenName: 'State',
                         familyName: 'Contact',
                         suffix: '1',
@@ -2466,7 +2466,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
                                 givenName: 'Actuary',
                                 familyName: 'Contact',
                                 suffix: '1',
@@ -2477,7 +2477,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                         addtlActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
                                 givenName: 'Actuary',
                                 familyName: 'Contact',
                                 suffix: '1',
@@ -2721,7 +2721,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -2732,7 +2732,7 @@ function mockContractPackageUnlockedWithUnlockedType(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
                                     givenName: 'Actuary',
                                     familyName: 'Contact',
                                     suffix: '1',
@@ -2791,7 +2791,7 @@ function mockContractFormData(
         stateContacts: [
             {
                 __typename: 'StateContact',
-                name: 'State Contact 1',
+                name: 'State Contact',
                 givenName: 'State',
                 familyName: 'Contact',
                 suffix: '1',
@@ -2903,7 +2903,7 @@ function mockUpdateContractDraftRevisionInput(
           }))
         : [
               {
-                  name: 'State Contact 1',
+                  name: 'State Contact',
                   givenName: 'State',
                   familyName: 'Contact',
                   suffix: '1',

@@ -1671,6 +1671,143 @@ describe('submitContract', () => {
             expect(response.errors).toBeDefined()
         })
 
+        it('returns an error if a state contact is incomplete', async () => {
+            const stateServer = await constructTestPostgresServer({
+                ldService: testLDService({
+                    'contact-data-model-update': true,
+                }),
+            })
+            const draft = await createAndUpdateTestContractWithoutRates(
+                stateServer,
+                undefined,
+                {
+                    submissionType: 'CONTRACT_ONLY',
+                    stateContacts: [
+                        {
+                            givenName: 'Test',
+                            titleRole: 'Test title',
+                            email: 'test@example.com',
+                        },
+                    ],
+                }
+            )
+
+            const response = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                    },
+                },
+            })
+
+            expect(response.errors).toEqual([
+                expect.objectContaining({
+                    message: expect.stringContaining('familyName'),
+                    path: ['submitContract'],
+                    extensions: expect.objectContaining({
+                        code: 'BAD_USER_INPUT',
+                    }),
+                }),
+            ])
+        })
+
+        it('returns an error if a certifying actuary contact is incomplete', async () => {
+            const stateServer = await constructTestPostgresServer({
+                ldService: testLDService({
+                    'contact-data-model-update': true,
+                }),
+            })
+            const contract =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+            const draft = await addNewRateToTestContract(
+                stateServer,
+                contract,
+                {
+                    certifyingActuaryContacts: [
+                        {
+                            givenName: 'Test',
+                            titleRole: 'Test title',
+                            email: 'test@example.com',
+                            actuarialFirm: 'GUIDEHOUSE',
+                        },
+                    ],
+                }
+            )
+            if (!draft.draftRates?.[0]) {
+                throw new Error('Expected contract to have a draft rate')
+            }
+            const rateID = draft.draftRates[0].id
+
+            const response = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                    },
+                },
+            })
+
+            expect(response.errors).toEqual([
+                expect.objectContaining({
+                    message: expect.stringContaining('familyName'),
+                    path: ['submitContract'],
+                    extensions: expect.objectContaining({
+                        code: 'BAD_USER_INPUT',
+                    }),
+                }),
+            ])
+            expect(response.errors?.[0].message).toContain(rateID)
+        })
+
+        it('returns an error if an additional actuary contact is incomplete', async () => {
+            const stateServer = await constructTestPostgresServer({
+                ldService: testLDService({
+                    'contact-data-model-update': true,
+                }),
+            })
+            const contract =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+            const draft = await addNewRateToTestContract(
+                stateServer,
+                contract,
+                {
+                    addtlActuaryContacts: [
+                        {
+                            givenName: 'Test',
+                            titleRole: 'Test title',
+                            email: 'test@example.com',
+                            actuarialFirm: 'GUIDEHOUSE',
+                        },
+                    ],
+                }
+            )
+            if (!draft.draftRates?.[0]) {
+                throw new Error('Expected contract to have a draft rate')
+            }
+            const rateID = draft.draftRates[0].id
+
+            const response = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                    },
+                },
+            })
+
+            expect(response.errors).toEqual([
+                expect.objectContaining({
+                    message: expect.stringContaining('familyName'),
+                    path: ['submitContract'],
+                    extensions: expect.objectContaining({
+                        code: 'BAD_USER_INPUT',
+                    }),
+                }),
+            ])
+            expect(response.errors?.[0].message).toContain(rateID)
+        })
+
         it('returns an error if a CONTRACT_AND_RATES submission is missing rates', async () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
