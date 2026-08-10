@@ -89,7 +89,14 @@ const stateContactSchema = z.object({
     familyName: z.string().optional(),
     suffix: z.string().optional(),
     titleRole: z.string().optional(),
-    email: z.string().email().optional().or(z.literal('')),
+    email: z.email().optional().or(z.literal('')),
+})
+
+const submittableStateContactSchema = stateContactSchema.extend({
+    givenName: z.string().min(1),
+    familyName: z.string().min(1),
+    titleRole: z.string().min(1),
+    email: z.email(),
 })
 
 const actuaryContactSchema = z.object({
@@ -100,10 +107,28 @@ const actuaryContactSchema = z.object({
     familyName: z.string().optional(),
     suffix: z.string().optional(),
     titleRole: z.string().optional(),
-    email: z.string().email().optional().or(z.literal('')),
+    email: z.email().optional().or(z.literal('')),
     actuarialFirm: actuarialFirmTypeSchema.optional(),
     actuarialFirmOther: z.string().optional(),
 })
+
+const submittableActuaryContactSchema = actuaryContactSchema
+    .extend({
+        givenName: z.string().min(1),
+        familyName: z.string().min(1),
+        titleRole: z.string().min(1),
+        email: z.email(),
+    })
+    .refine(
+        (contact) =>
+            contact.actuarialFirm !== undefined ||
+            contact.actuarialFirmOther !== undefined,
+        {
+            message:
+                'Actuary contact must have actuarialFirm or actuarialFirmOther',
+            path: ['actuarialFirm'],
+        }
+    )
 
 function preprocessNulls<T extends z.ZodType>(schema: T) {
     return z.preprocess((val) => val ?? undefined, schema)
@@ -459,6 +484,8 @@ type StateContactType = z.infer<typeof stateContactSchema>
 type ActuaryContactType = z.infer<typeof actuaryContactSchema>
 
 export {
+    submittableStateContactSchema,
+    submittableActuaryContactSchema,
     submittableContractFormDataSchema,
     submittableEQROContractFormDataSchema,
     submittableRateFormDataSchema,

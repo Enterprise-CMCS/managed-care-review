@@ -5,7 +5,11 @@ import {
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import type { ContractFormDataType } from './formDataTypes'
-import { eqroContractFormDataSchema } from './formDataTypes'
+import {
+    eqroContractFormDataSchema,
+    submittableActuaryContactSchema,
+    submittableStateContactSchema,
+} from './formDataTypes'
 import {
     preprocessNulls,
     populationCoveredSchema,
@@ -183,10 +187,84 @@ const validateEQROContractDraftRevisionInput = (
     return data
 }
 
+// Validate state contacts for completeness
+const stateContactValidation = (
+    stateContacts: ContractFormDataType['stateContacts']
+) => {
+    const result = z
+        .array(submittableStateContactSchema)
+        .safeParse(stateContacts)
+
+    if (result.success) {
+        return []
+    }
+
+    return result.error.issues.map((issue) => ({
+        ...issue,
+        path: ['draftRevision', 'formData', 'stateContacts', ...issue.path],
+    }))
+}
+
+// Validate actuary contacts for completeness
+const rateActuaryContactValidation = (
+    draftRates: NonNullable<ContractType['draftRates']>
+) =>
+    draftRates.flatMap((rate, rateIndex) => {
+        const rateFormData = rate.draftRevision?.formData
+        if (!rateFormData) {
+            return [
+                {
+                    code: 'custom' as const,
+                    message: `Rate ${rate.id} draft revision form data is required`,
+                    path: [
+                        'draftRates',
+                        rateIndex,
+                        'draftRevision',
+                        'formData',
+                    ],
+                },
+            ]
+        }
+
+        return (
+            ['certifyingActuaryContacts', 'addtlActuaryContacts'] as const
+        ).flatMap((contactField) => {
+            const result = z
+                .array(submittableActuaryContactSchema)
+                .safeParse(rateFormData[contactField])
+
+            if (result.success) {
+                return []
+            }
+
+            return result.error.issues.map((issue) => ({
+                ...issue,
+                message: `Rate ${rate.id}: ${issue.message}`,
+                path: [
+                    'draftRates',
+                    rateIndex,
+                    'draftRevision',
+                    'formData',
+                    contactField,
+                    ...issue.path,
+                ],
+            }))
+        })
+    })
+
 const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
     if (featureFlags) {
         return submittableContractSchema.superRefine((contract, ctx) => {
             const contractFormData = contract.draftRevision.formData
+            // Validate state and actuary contacts
+            if (featureFlags['contact-data-model-update']) {
+                stateContactValidation(contractFormData.stateContacts).forEach(
+                    (issue) => ctx.addIssue(issue)
+                )
+                rateActuaryContactValidation(contract.draftRates).forEach(
+                    (issue) => ctx.addIssue(issue)
+                )
+            }
             if (featureFlags['438-attestation']) {
                 // since we have different validations based on a feature flag, we add them as a refinement here.
                 // once 438 attestation ships this refinement should be moved to the submittableContractSchema
@@ -328,10 +406,17 @@ const parseContract = (
 const parseEQROContract = (
     contract: ContractType,
     stateCode: string,
-    store: Store
+    store: Store,
+    featureFlags?: FeatureFlagSettings
 ): ContractType | z.ZodError => {
     const eqroContractParser = submittableEQROContractSchema.superRefine(
         (contract, ctx) => {
+            if (featureFlags?.['contact-data-model-update']) {
+                stateContactValidation(
+                    contract.draftRevision.formData.stateContacts
+                ).forEach((issue) => ctx.addIssue(issue))
+            }
+
             //Validating programs
             const contractProgramsIDs = new Set(
                 contract.draftRevision.formData.programIDs
