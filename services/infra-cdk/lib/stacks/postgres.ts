@@ -294,7 +294,7 @@ export class Postgres extends BaseStack {
                     'src',
                     'backupRestoreValidator.ts'
                 ),
-                timeout: Duration.minutes(5),
+                timeout: Duration.minutes(15),
                 memorySize: this.stageConfig.lambda.memorySize,
                 vpc: this.vpc,
                 vpcSubnets: {
