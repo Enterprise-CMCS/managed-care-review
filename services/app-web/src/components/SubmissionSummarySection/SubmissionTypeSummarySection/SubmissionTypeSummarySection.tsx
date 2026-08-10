@@ -26,6 +26,8 @@ import {
 } from '../SummarySectionFields'
 import { formattedProgramNames } from '../../../formHelpers'
 import { getConsolidatedContractStatusText } from '../../ContractTable'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 export type SubmissionTypeSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -51,12 +53,18 @@ export const SubmissionTypeSummarySection = ({
     explainMissingData,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
     const contractOrRev = contractRev ? contractRev : contract
+    const ldClient = useLDClient()
     const contractFormData = getVisibleLatestContractFormData(
         contractOrRev,
         isStateUser
     )
 
     if (!contractFormData) return <GenericErrorPage />
+
+    const chipSubmissionAutomation = ldClient?.variation(
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.flag,
+        featureFlags.CHIP_SUBMISSION_AUTOMATION.defaultValue
+    )
 
     const programIDs = contractFormData?.programIDs ?? []
     const programNames = formattedProgramNames(
@@ -86,20 +94,22 @@ export const SubmissionTypeSummarySection = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {contract.consolidatedStatus && isSubmitted && (
-                    <ReviewDecisionSummary
-                        reviewDecision={
-                            contract.consolidatedStatus ===
-                                'NOT_SUBJECT_TO_REVIEW' &&
-                            contractFormData.populationCovered === 'CHIP'
-                                ? 'Not subject to DMCO review and validation'
-                                : getConsolidatedContractStatusText(
-                                      contract.consolidatedStatus
-                                  )
-                        }
-                        explainMissingData={explainMissingData}
-                    />
-                )}
+                {contract.consolidatedStatus &&
+                    isSubmitted &&
+                    chipSubmissionAutomation &&
+                    contractFormData.populationCovered === 'CHIP' && (
+                        <ReviewDecisionSummary
+                            reviewDecision={
+                                contract.consolidatedStatus ===
+                                'NOT_SUBJECT_TO_REVIEW'
+                                    ? 'Not subject to DMCO review and validation'
+                                    : getConsolidatedContractStatusText(
+                                          contract.consolidatedStatus
+                                      )
+                            }
+                            explainMissingData={explainMissingData}
+                        />
+                    )}
                 <MultiColumnGrid columns={2}>
                     {initiallySubmittedAt &&
                         (isSubmitted || (!isStateUser && isUnlocked)) && (
