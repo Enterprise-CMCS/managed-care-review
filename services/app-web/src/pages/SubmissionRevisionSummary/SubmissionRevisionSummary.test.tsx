@@ -215,6 +215,81 @@ describe('SubmissionRevisionSummary', () => {
                 ).toHaveTextContent('Submission 1')
             })
 
+            it('renders modified provisions from the revision being viewed, not the latest revision', async () => {
+                const mockContract = mockContractPackageSubmittedWithRevisions({
+                    id: '15',
+                    contractSubmissionType: 'HEALTH_PLAN',
+                })
+
+                // Revision versions are numbered oldest first, so /revisions/1 is the
+                // earliest submission - the last of the three newest first packageSubmissions
+                const earliestFormData =
+                    mockContract.packageSubmissions[2].contractRevision.formData
+                earliestFormData.modifiedBenefitsProvided = false
+                earliestFormData.modifiedGeoAreaServed = true
+
+                // Flip the provisions on the latest revision so reading the wrong one fails this test
+                const latestFormData =
+                    mockContract.packageSubmissions[0].contractRevision.formData
+                latestFormData.modifiedBenefitsProvided = true
+                latestFormData.modifiedGeoAreaServed = false
+
+                renderWithProviders(
+                    <Routes>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_REVISION}
+                            element={<SubmissionRevisionSummary />}
+                        />
+                    </Routes>,
+                    {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    user: mockUser(),
+                                    statusCode: 200,
+                                }),
+                                fetchContractMockSuccess({
+                                    contract: mockContract,
+                                }),
+                            ],
+                        },
+                        routerProvider: {
+                            route: '/submissions/health-plan/15/revisions/1',
+                        },
+                        featureFlags: {},
+                    }
+                )
+
+                const modifiedProvisions = await screen.findByLabelText(
+                    'This contract action includes new or modified provisions related to the following'
+                )
+                const unmodifiedProvisions = await screen.findByLabelText(
+                    'This contract action does NOT include new or modified provisions related to the following'
+                )
+
+                expect(
+                    within(modifiedProvisions).getByText(
+                        'Geographic areas served by the managed care plans'
+                    )
+                ).toBeInTheDocument()
+                expect(
+                    within(unmodifiedProvisions).getByText(
+                        'Benefits provided by the managed care plans'
+                    )
+                ).toBeInTheDocument()
+
+                expect(
+                    within(modifiedProvisions).queryByText(
+                        'Benefits provided by the managed care plans'
+                    )
+                ).toBeNull()
+                expect(
+                    within(unmodifiedProvisions).queryByText(
+                        'Geographic areas served by the managed care plans'
+                    )
+                ).toBeNull()
+            })
+
             it('renders the right indexed version 3', async () => {
                 renderWithProviders(
                     <Routes>
