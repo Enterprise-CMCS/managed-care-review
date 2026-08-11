@@ -24,7 +24,7 @@ import {
 import { packageName } from '@mc-review/submissions'
 
 describe('fetchRevisionDiff', () => {
-    async function createResubmittedContractWithStateContactChanges() {
+    async function createResubmittedContractWithAllDiffChanges() {
         const cmsUser = testCMSUser()
         const stateServer = await constructTestPostgresServer()
         const cmsServer = await constructTestPostgresServer({
@@ -33,98 +33,27 @@ describe('fetchRevisionDiff', () => {
             },
         })
 
-        const statePrograms = must(findStatePrograms('FL'))
-        const baseContract = mockSubmittableHealthPlanContract({
-            programIDs: [statePrograms[0].id],
-        })
-        const baseFormData = baseContract.draftRevision!.formData
-
-        const contract = await createAndSubmitTestContract(stateServer, 'FL', {
-            ...baseFormData,
-            programIDs: [statePrograms[0].id],
-            contractDateStart: '2027-01-01',
-            contractDateEnd: '2028-01-01',
-            stateContacts: [
-                {
-                    name: 'Unchanged Person',
-                    titleRole: 'Director',
-                    email: 'unchanged@example.com',
-                },
-                {
-                    name: 'Modified Person',
-                    titleRole: 'Manager',
-                    email: 'before@example.com',
-                },
-            ],
-        })
-
-        const unlockedContract = await unlockTestContract(
-            cmsServer,
-            contract.id,
-            'Unlock to update state contacts'
-        )
-
-        await updateTestContractDraftRevision(
+        const draftContract = await createAndUpdateTestContractWithRate(
             stateServer,
-            contract.id,
-            unlockedContract.draftRevision.updatedAt,
+            'FL'
+        )
+        const draftWithTwoRates = await addNewRateToTestContract(
+            stateServer,
+            draftContract
+        )
+        if (!draftWithTwoRates.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft revision missing after adding second rate'
+            )
+        }
+        const initialDraftContract = await updateTestContractDraftRevision(
+            stateServer,
+            draftWithTwoRates.id,
+            draftWithTwoRates.draftRevision.updatedAt,
             {
-                ...unlockedContract.draftRevision.formData,
-                programIDs: [statePrograms[0].id],
+                ...draftWithTwoRates.draftRevision.formData,
                 contractDateStart: '2027-01-01',
                 contractDateEnd: '2028-01-01',
-                stateContacts: [
-                    {
-                        name: 'Unchanged Person',
-                        titleRole: 'Director',
-                        email: 'unchanged@example.com',
-                    },
-                    {
-                        name: 'Modified Person',
-                        titleRole: 'Senior Manager',
-                        email: 'after@example.com',
-                    },
-                    {
-                        name: 'New Person',
-                        titleRole: 'Analyst',
-                        email: 'new@example.com',
-                    },
-                ],
-            }
-        )
-
-        const resubmittedContract = await submitTestContract(
-            stateServer,
-            contract.id,
-            'Resubmission with updated state contacts'
-        )
-
-        const latestPackageSubmission =
-            resubmittedContract.packageSubmissions[0]
-        const previousPackageSubmission =
-            resubmittedContract.packageSubmissions[1]
-
-        return {
-            cmsServer,
-            contract,
-            latestPackageSubmission,
-            previousPackageSubmission,
-        }
-    }
-
-    async function createResubmittedContractWithDocumentChanges() {
-        const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
-
-        const contract = await createAndSubmitTestContractWithRate(
-            stateServer,
-            'FL',
-            {
                 contractDocuments: [
                     {
                         name: 'contract-keep.pdf',
@@ -149,26 +78,82 @@ describe('fetchRevisionDiff', () => {
                         sha256: 'support-removed',
                     },
                 ],
+                stateContacts: [
+                    {
+                        name: 'Unchanged Person',
+                        titleRole: 'Director',
+                        email: 'unchanged@example.com',
+                    },
+                    {
+                        name: 'Modified Person',
+                        titleRole: 'Manager',
+                        email: 'modified@example.com',
+                    },
+                ],
             }
         )
+
+        const contract = await submitTestContract(
+            stateServer,
+            initialDraftContract.id,
+            'Initial submission with full diff setup'
+        )
+
+        const sharedRateSource = await createAndSubmitTestContractWithRate(
+            stateServer,
+            'FL'
+        )
+        const sharedRateID =
+            sharedRateSource.packageSubmissions[0]?.rateRevisions[0]?.rateID
+
+        if (!sharedRateID) {
+            throw new Error('Unexpected error: shared rate source not found')
+        }
 
         const unlockedContract = await unlockTestContract(
             cmsServer,
             contract.id,
-            'Unlock to update documents'
+            'Unlock to update full revision diff coverage'
         )
 
-        const draftRate = unlockedContract.draftRates?.[0]
-        if (!draftRate?.draftRevision) {
-            throw new Error('Unexpected error: draft rate not found')
+        const existingDraftRates = unlockedContract.draftRates ?? []
+        const revisedDraftRate = existingDraftRates[0]
+        const removedDraftRate = existingDraftRates[1]
+
+        if (!revisedDraftRate?.draftRevision || !removedDraftRate) {
+            throw new Error(
+                'Unexpected error: expected two draft rates for rate diff test'
+            )
+        }
+
+        const contractWithLinkedRate = await updateTestDraftRatesOnContract(
+            stateServer,
+            addLinkedRateToRateInput(
+                updateRatesInputFromDraftContract(unlockedContract),
+                sharedRateID
+            )
+        )
+        if (!contractWithLinkedRate.draftRevision) {
+            throw new Error(
+                'Unexpected error: draft revision missing after linking shared rate'
+            )
+        }
+        const linkedDraftRate = contractWithLinkedRate.draftRates?.find(
+            (rate) => rate.id === revisedDraftRate.id
+        )
+
+        if (!linkedDraftRate?.draftRevision) {
+            throw new Error(
+                'Unexpected error: revised draft rate not found after linking shared rate'
+            )
         }
 
         const updatedContract = await updateTestContractDraftRevision(
             stateServer,
             contract.id,
-            unlockedContract.draftRevision.updatedAt,
+            contractWithLinkedRate.draftRevision.updatedAt,
             {
-                ...unlockedContract.draftRevision.formData,
+                ...contractWithLinkedRate.draftRevision.formData,
                 contractDateStart: '2025-06-01',
                 contractDateEnd: '2026-05-30',
                 contractDocuments: [
@@ -190,11 +175,28 @@ describe('fetchRevisionDiff', () => {
                         sha256: 'support-keep',
                     },
                 ],
+                stateContacts: [
+                    {
+                        name: 'Unchanged Person',
+                        titleRole: 'Director',
+                        email: 'unchanged@example.com',
+                    },
+                    {
+                        name: 'Modified Person',
+                        titleRole: 'Senior Manager',
+                        email: 'after@example.com',
+                    },
+                    {
+                        name: 'New Person',
+                        titleRole: 'Analyst',
+                        email: 'new@example.com',
+                    },
+                ],
             }
         )
 
         const updatedDraftRate = updatedContract.draftRates?.find(
-            (rate) => rate.id === draftRate.id
+            (rate) => rate.id === revisedDraftRate.id
         )
 
         if (!updatedDraftRate?.draftRevision) {
@@ -206,136 +208,6 @@ describe('fetchRevisionDiff', () => {
         const updatedRateFormData = formatRateDataForSending(
             updatedDraftRate.draftRevision.formData
         )
-
-        const rateUpdateInput =
-            updateRatesInputFromDraftContract(updatedContract)
-        const updatedRates = rateUpdateInput.updatedRates.map((rateUpdate) =>
-            rateUpdate.type === 'UPDATE' && rateUpdate.rateID === draftRate.id
-                ? {
-                      ...rateUpdate,
-                      formData: {
-                          ...updatedRateFormData,
-                          rateDateStart: '2024-01-01',
-                          rateDateEnd: '2025-01-01',
-                          rateDateCertified: '2024-01-02',
-                          amendmentEffectiveDateStart: '2024-02-01',
-                          amendmentEffectiveDateEnd: '2025-02-01',
-                          rateDocuments: [
-                              {
-                                  name: 'rate-doc-added.xlsx',
-                                  s3URL: 's3://bucketname/key/rate-doc-added.xlsx',
-                                  sha256: 'rate-doc-added',
-                              },
-                          ],
-                          supportingDocuments: [
-                              {
-                                  name: 'ratesupdoc2.doc',
-                                  s3URL: 's3://bucketname/key/test1',
-                                  sha256: 'foobar2',
-                              },
-                              {
-                                  name: 'rate-support-added.pdf',
-                                  s3URL: 's3://bucketname/key/rate-support-added.pdf',
-                                  sha256: 'rate-support-added',
-                              },
-                          ],
-                      },
-                  }
-                : rateUpdate
-        )
-
-        await updateTestDraftRatesOnContract(stateServer, {
-            ...rateUpdateInput,
-            updatedRates,
-        })
-
-        const resubmittedContract = await submitTestContract(
-            stateServer,
-            contract.id,
-            'Resubmission with updated documents'
-        )
-
-        return {
-            cmsServer,
-            contract,
-            draftRate,
-            updatedDraftRate,
-            latestPackageSubmission: resubmittedContract.packageSubmissions[0],
-            previousPackageSubmission:
-                resubmittedContract.packageSubmissions[1],
-        }
-    }
-
-    async function createResubmittedContractWithRateChanges() {
-        const cmsUser = testCMSUser()
-        const stateServer = await constructTestPostgresServer()
-        const cmsServer = await constructTestPostgresServer({
-            context: {
-                user: cmsUser,
-            },
-        })
-
-        const draftContract = await createAndUpdateTestContractWithRate(
-            stateServer,
-            'FL'
-        )
-        const draftWithTwoRates = await addNewRateToTestContract(
-            stateServer,
-            draftContract
-        )
-        const contract = await submitTestContract(
-            stateServer,
-            draftWithTwoRates.id,
-            'Initial submission with two rates'
-        )
-
-        const sharedRateSource = await createAndSubmitTestContractWithRate(
-            stateServer,
-            'FL'
-        )
-        const sharedRateID =
-            sharedRateSource.packageSubmissions[0]?.rateRevisions[0]?.rateID
-
-        if (!sharedRateID) {
-            throw new Error('Unexpected error: shared rate source not found')
-        }
-
-        const unlockedContract = await unlockTestContract(
-            cmsServer,
-            contract.id,
-            'Unlock to update rates'
-        )
-
-        const existingDraftRates = unlockedContract.draftRates ?? []
-        const revisedDraftRate = existingDraftRates[0]
-        const removedDraftRate = existingDraftRates[1]
-
-        if (!revisedDraftRate?.draftRevision || !removedDraftRate) {
-            throw new Error(
-                'Unexpected error: expected two draft rates for rate diff test'
-            )
-        }
-
-        const linkedContract = await updateTestDraftRatesOnContract(
-            stateServer,
-            addLinkedRateToRateInput(
-                updateRatesInputFromDraftContract(unlockedContract),
-                sharedRateID
-            )
-        )
-        const linkedDraftRate = linkedContract.draftRates?.find(
-            (rate) => rate.id === revisedDraftRate.id
-        )
-
-        if (!linkedDraftRate?.draftRevision) {
-            throw new Error(
-                'Unexpected error: revised draft rate not found after linking shared rate'
-            )
-        }
-
-        const updatedRateFormData = formatRateDataForSending(
-            linkedDraftRate.draftRevision.formData
-        )
         const existingAddtlActuaryContact =
             updatedRateFormData.addtlActuaryContacts?.[0]
 
@@ -346,7 +218,7 @@ describe('fetchRevisionDiff', () => {
         }
 
         const rateUpdateInput =
-            updateRatesInputFromDraftContract(linkedContract)
+            updateRatesInputFromDraftContract(updatedContract)
         const updatedRates = rateUpdateInput.updatedRates
             .filter(
                 (rateUpdate) =>
@@ -363,6 +235,25 @@ describe('fetchRevisionDiff', () => {
                           formData: {
                               ...updatedRateFormData,
                               rateDateCertified: '2024-04-15',
+                              rateDocuments: [
+                                  {
+                                      name: 'rate-doc-added.xlsx',
+                                      s3URL: 's3://bucketname/key/rate-doc-added.xlsx',
+                                      sha256: 'rate-doc-added',
+                                  },
+                              ],
+                              supportingDocuments: [
+                                  {
+                                      name: 'ratesupdoc2.doc',
+                                      s3URL: 's3://bucketname/key/test1',
+                                      sha256: 'foobar2',
+                                  },
+                                  {
+                                      name: 'rate-support-added.pdf',
+                                      s3URL: 's3://bucketname/key/rate-support-added.pdf',
+                                      sha256: 'rate-support-added',
+                                  },
+                              ],
                               certifyingActuaryContacts: [
                                   {
                                       ...updatedRateFormData
@@ -401,6 +292,7 @@ describe('fetchRevisionDiff', () => {
         return {
             cmsServer,
             contract,
+            updatedDraftRate,
             sharedRateID,
             revisedRateID: revisedDraftRate.id,
             removedRateID: removedDraftRate.id,
@@ -663,7 +555,7 @@ describe('fetchRevisionDiff', () => {
             contract,
             latestPackageSubmission,
             previousPackageSubmission,
-        } = await createResubmittedContractWithStateContactChanges()
+        } = await createResubmittedContractWithAllDiffChanges()
 
         const revisionDiff = await fetchTestRevisionDiff(cmsServer, {
             contractID: contract.id,
@@ -675,7 +567,7 @@ describe('fetchRevisionDiff', () => {
 
         expect(revisionDiff.comparison.stateContactChanges).toEqual([
             {
-                kind: 'NEW_OR_MODIFIED',
+                changeType: 'NEW_OR_MODIFIED',
                 current: {
                     name: 'Modified Person',
                     titleRole: 'Senior Manager',
@@ -683,7 +575,7 @@ describe('fetchRevisionDiff', () => {
                 },
             },
             {
-                kind: 'NEW_OR_MODIFIED',
+                changeType: 'NEW_OR_MODIFIED',
                 current: {
                     name: 'New Person',
                     titleRole: 'Analyst',
@@ -697,10 +589,10 @@ describe('fetchRevisionDiff', () => {
         const {
             cmsServer,
             contract,
-            updatedDraftRate,
+            revisedRateID,
             latestPackageSubmission,
             previousPackageSubmission,
-        } = await createResubmittedContractWithDocumentChanges()
+        } = await createResubmittedContractWithAllDiffChanges()
 
         const revisionDiff = await fetchTestRevisionDiff(cmsServer, {
             contractID: contract.id,
@@ -721,10 +613,12 @@ describe('fetchRevisionDiff', () => {
             },
             ratesDocuments: [
                 {
-                    rateID: updatedDraftRate.id,
+                    rateID: revisedRateID,
                     rateCertificationName:
-                        updatedDraftRate.draftRevision?.formData
-                            .rateCertificationName,
+                        latestPackageSubmission.rateRevisions.find(
+                            (rateRevision) =>
+                                rateRevision.rateID === revisedRateID
+                        )?.formData.rateCertificationName,
                     rateDocuments: {
                         added: ['rate-doc-added.xlsx'],
                         removed: ['ratedoc1.doc'],
@@ -749,7 +643,7 @@ describe('fetchRevisionDiff', () => {
             removedRateID,
             latestPackageSubmission,
             previousPackageSubmission,
-        } = await createResubmittedContractWithRateChanges()
+        } = await createResubmittedContractWithAllDiffChanges()
 
         const revisionDiff = await fetchTestRevisionDiff(cmsServer, {
             contractID: contract.id,
@@ -825,16 +719,16 @@ describe('fetchRevisionDiff', () => {
                         },
                     ],
                     rateDocuments: {
-                        added: [],
-                        removed: [],
+                        added: ['rate-doc-added.xlsx'],
+                        removed: ['ratedoc1.doc'],
                     },
                     supportingRateDocuments: {
-                        added: [],
-                        removed: [],
+                        added: ['rate-support-added.pdf'],
+                        removed: ['ratesupdoc1.doc'],
                     },
                     certifyingActuaryContactChanges: [
                         {
-                            kind: 'NEW_OR_MODIFIED',
+                            changeType: 'NEW_OR_MODIFIED',
                             current: {
                                 name: 'Foo Person',
                                 titleRole: 'Bar Job',
@@ -845,7 +739,7 @@ describe('fetchRevisionDiff', () => {
                     ],
                     addtlActuaryContactChanges: [
                         {
-                            kind: 'NEW_OR_MODIFIED',
+                            changeType: 'NEW_OR_MODIFIED',
                             current: {
                                 name: 'Bar Person',
                                 titleRole: 'Baz Job',
@@ -854,7 +748,7 @@ describe('fetchRevisionDiff', () => {
                             },
                         },
                         {
-                            kind: 'NEW_OR_MODIFIED',
+                            changeType: 'NEW_OR_MODIFIED',
                             current: {
                                 name: 'New Actuary',
                                 titleRole: 'Senior Actuary',

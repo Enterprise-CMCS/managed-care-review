@@ -2899,7 +2899,7 @@ enum RevisionDiffRateActuaryContactChangeKind {
 }
 
 type RevisionDiffRateActuaryContactChange {
-    kind: RevisionDiffRateActuaryContactChangeKind!
+    changeType: RevisionDiffRateActuaryContactChangeKind!
     current: RevisionDiffActuaryContact!
 }
 
@@ -2915,7 +2915,7 @@ enum RevisionDiffStateContactChangeKind {
 }
 
 type RevisionDiffStateContactChange {
-    kind: RevisionDiffStateContactChangeKind!
+    changeType: RevisionDiffStateContactChangeKind!
     current: StateContact!
 }
 

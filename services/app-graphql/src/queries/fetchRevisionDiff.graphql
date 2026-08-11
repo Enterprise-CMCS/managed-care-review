@@ -18,7 +18,7 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
         }
       }
       stateContactChanges {
-        kind
+        changeType
         current {
           name
           titleRole
@@ -82,7 +82,7 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
             removed
           }
           certifyingActuaryContactChanges {
-            kind
+            changeType
             current {
               name
               titleRole
@@ -91,7 +91,7 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
             }
           }
           addtlActuaryContactChanges {
-            kind
+            changeType
             current {
               name
               titleRole
