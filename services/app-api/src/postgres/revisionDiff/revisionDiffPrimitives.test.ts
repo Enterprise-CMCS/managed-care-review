@@ -102,7 +102,7 @@ describe('revisionDiffPrimitives', () => {
 
         expect(result).toEqual([
             {
-                kind: 'removed',
+                changeType: 'removed',
                 key: 'removed-rate',
                 previous: {
                     id: 'removed-rate',
@@ -110,7 +110,7 @@ describe('revisionDiffPrimitives', () => {
                 },
             },
             {
-                kind: 'updated',
+                changeType: 'updated',
                 key: 'updated-rate',
                 previous: {
                     id: 'updated-rate',
@@ -129,7 +129,7 @@ describe('revisionDiffPrimitives', () => {
                 ],
             },
             {
-                kind: 'added',
+                changeType: 'added',
                 key: 'added-rate',
                 current: {
                     id: 'added-rate',
@@ -176,14 +176,14 @@ describe('revisionDiffPrimitives', () => {
 
         expect(result).toEqual([
             {
-                kind: 'new_or_modified',
+                changeType: 'new_or_modified',
                 current: {
                     name: 'Bea',
                     email: 'bea-updated@example.com',
                 },
             },
             {
-                kind: 'new_or_modified',
+                changeType: 'new_or_modified',
                 current: {
                     name: 'Cy',
                     email: 'cy@example.com',
@@ -201,7 +201,7 @@ describe('revisionDiffPrimitives', () => {
 
         expect(result).toEqual([
             {
-                kind: 'new_or_modified',
+                changeType: 'new_or_modified',
                 current: {
                     name: 'Ada',
                 },

@@ -2927,7 +2927,7 @@ enum RevisionDiffFieldValueKind {
 }
 
 type RevisionDiffFieldValue {
-    kind: RevisionDiffFieldValueKind!
+    valueType: RevisionDiffFieldValueKind!
     value: JSON
 }
 

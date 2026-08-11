@@ -112,7 +112,7 @@ function diffCollectionByKey<TItem, TChange>({
 
         if (!currentItem) {
             changes.push({
-                kind: 'removed',
+                changeType: 'removed',
                 key,
                 previous: previousItem,
             })
@@ -126,7 +126,7 @@ function diffCollectionByKey<TItem, TChange>({
 
         if (itemChanges.length > 0) {
             changes.push({
-                kind: 'updated',
+                changeType: 'updated',
                 key,
                 previous: previousItem,
                 current: currentItem,
@@ -141,7 +141,7 @@ function diffCollectionByKey<TItem, TChange>({
         }
 
         changes.push({
-            kind: 'added',
+            changeType: 'added',
             key,
             current: currentItem,
         })
@@ -177,7 +177,7 @@ function buildNewAndModifiedCollectionChanges<TItem>(
         }
 
         changes.push({
-            kind: 'new_or_modified',
+            changeType: 'new_or_modified',
             current: item,
         })
     }
@@ -204,9 +204,9 @@ function buildDocumentListChanges(
     const removed: string[] = []
 
     for (const change of changes) {
-        if (change.kind === 'added') {
+        if (change.changeType === 'added' && 'current' in change) {
             added.push(change.current.name)
-        } else if (change.kind === 'removed') {
+        } else if (change.changeType === 'removed' && 'previous' in change) {
             removed.push(change.previous.name)
         }
     }

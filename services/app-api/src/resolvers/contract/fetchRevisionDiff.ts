@@ -15,19 +15,19 @@ import { createUserInputError } from '../errorUtils'
 
 function serializeRevisionDiffFieldValue(value: unknown):
     | {
-          kind: 'STRING'
+          valueType: 'STRING'
           value: string
       }
     | {
-          kind: 'BOOLEAN'
+          valueType: 'BOOLEAN'
           value: boolean
       }
     | {
-          kind: 'DATE'
+          valueType: 'DATE'
           value: Date
       }
     | {
-          kind: 'STRING_ARRAY'
+          valueType: 'STRING_ARRAY'
           value: string[]
       }
     | undefined {
@@ -37,27 +37,27 @@ function serializeRevisionDiffFieldValue(value: unknown):
 
     if (value instanceof Date) {
         return {
-            kind: 'DATE',
+            valueType: 'DATE',
             value,
         }
     }
 
     if (Array.isArray(value)) {
         return {
-            kind: 'STRING_ARRAY',
+            valueType: 'STRING_ARRAY',
             value: value.map((item) => String(item)),
         }
     }
 
     if (typeof value === 'boolean') {
         return {
-            kind: 'BOOLEAN',
+            valueType: 'BOOLEAN',
             value,
         }
     }
 
     return {
-        kind: 'STRING',
+        valueType: 'STRING',
         value: String(value),
     }
 }

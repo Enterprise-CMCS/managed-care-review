@@ -9,11 +9,11 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
       fieldChanges {
         fieldPath
         oldValue {
-          kind
+          valueType
           value
         }
         newValue {
-          kind
+          valueType
           value
         }
       }
@@ -65,11 +65,11 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
           fieldChanges {
             fieldPath
             oldValue {
-              kind
+              valueType
               value
             }
             newValue {
-              kind
+              valueType
               value
             }
           }

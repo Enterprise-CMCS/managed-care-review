@@ -536,92 +536,104 @@ describe('fetchRevisionDiff', () => {
         ].sort()
 
         // Exactly the fields changed between the two submissions diff, each
-        // wrapped in its serialized { kind, value } shape (null when unanswered).
+        // wrapped in its serialized { valueType, value } shape (null when unanswered).
         expect(changesByPath).toEqual({
             contractName: {
                 fieldPath: 'contractName',
-                oldValue: { kind: 'STRING', value: oldContractName },
-                newValue: { kind: 'STRING', value: newContractName },
+                oldValue: { valueType: 'STRING', value: oldContractName },
+                newValue: { valueType: 'STRING', value: newContractName },
             },
             programIDs: {
                 fieldPath: 'programIDs',
                 oldValue: {
-                    kind: 'STRING_ARRAY',
+                    valueType: 'STRING_ARRAY',
                     value: [statePrograms[0].id],
                 },
-                newValue: { kind: 'STRING_ARRAY', value: sortedProgramIDs },
+                newValue: {
+                    valueType: 'STRING_ARRAY',
+                    value: sortedProgramIDs,
+                },
             },
             submissionDescription: {
                 fieldPath: 'submissionDescription',
-                oldValue: { kind: 'STRING', value: 'Original description' },
-                newValue: { kind: 'STRING', value: 'Resubmitted description' },
+                oldValue: {
+                    valueType: 'STRING',
+                    value: 'Original description',
+                },
+                newValue: {
+                    valueType: 'STRING',
+                    value: 'Resubmitted description',
+                },
             },
             contractType: {
                 fieldPath: 'contractType',
-                oldValue: { kind: 'STRING', value: 'BASE' },
-                newValue: { kind: 'STRING', value: 'AMENDMENT' },
+                oldValue: { valueType: 'STRING', value: 'BASE' },
+                newValue: { valueType: 'STRING', value: 'AMENDMENT' },
             },
             populationCovered: {
                 fieldPath: 'populationCovered',
-                oldValue: { kind: 'STRING', value: 'MEDICAID' },
-                newValue: { kind: 'STRING', value: 'MEDICAID_AND_CHIP' },
+                oldValue: { valueType: 'STRING', value: 'MEDICAID' },
+                newValue: {
+                    valueType: 'STRING',
+                    value: 'MEDICAID_AND_CHIP',
+                },
             },
             riskBasedContract: {
                 fieldPath: 'riskBasedContract',
-                oldValue: { kind: 'BOOLEAN', value: false },
-                newValue: { kind: 'BOOLEAN', value: true },
+                oldValue: { valueType: 'BOOLEAN', value: false },
+                newValue: { valueType: 'BOOLEAN', value: true },
             },
             dsnpContract: {
                 fieldPath: 'dsnpContract',
                 // Old revision left dsnpContract unanswered, so it serializes to null.
                 oldValue: null,
-                newValue: { kind: 'BOOLEAN', value: true },
+                newValue: { valueType: 'BOOLEAN', value: true },
             },
             contractExecutionStatus: {
                 fieldPath: 'contractExecutionStatus',
-                oldValue: { kind: 'STRING', value: 'UNEXECUTED' },
-                newValue: { kind: 'STRING', value: 'EXECUTED' },
+                oldValue: { valueType: 'STRING', value: 'UNEXECUTED' },
+                newValue: { valueType: 'STRING', value: 'EXECUTED' },
             },
             contractDateStart: {
                 fieldPath: 'contractDateStart',
-                oldValue: { kind: 'DATE', value: new Date('2027-01-01') },
-                newValue: { kind: 'DATE', value: new Date('2027-05-15') },
+                oldValue: { valueType: 'DATE', value: new Date('2027-01-01') },
+                newValue: { valueType: 'DATE', value: new Date('2027-05-15') },
             },
             contractDateEnd: {
                 fieldPath: 'contractDateEnd',
-                oldValue: { kind: 'DATE', value: new Date('2028-01-01') },
-                newValue: { kind: 'DATE', value: new Date('2028-05-15') },
+                oldValue: { valueType: 'DATE', value: new Date('2028-01-01') },
+                newValue: { valueType: 'DATE', value: new Date('2028-05-15') },
             },
             managedCareEntities: {
                 fieldPath: 'managedCareEntities',
-                oldValue: { kind: 'STRING_ARRAY', value: ['MCO'] },
+                oldValue: { valueType: 'STRING_ARRAY', value: ['MCO'] },
                 newValue: {
-                    kind: 'STRING_ARRAY',
+                    valueType: 'STRING_ARRAY',
                     value: ['MCO', 'PIHP', 'PAHP', 'PCCM'],
                 },
             },
             federalAuthorities: {
                 fieldPath: 'federalAuthorities',
-                oldValue: { kind: 'STRING_ARRAY', value: ['TITLE_XXI'] },
+                oldValue: { valueType: 'STRING_ARRAY', value: ['TITLE_XXI'] },
                 newValue: {
-                    kind: 'STRING_ARRAY',
+                    valueType: 'STRING_ARRAY',
                     value: ['STATE_PLAN', 'WAIVER_1115', 'TITLE_XXI'],
                 },
             },
             inLieuServicesAndSettings: {
                 fieldPath: 'inLieuServicesAndSettings',
-                oldValue: { kind: 'BOOLEAN', value: false },
-                newValue: { kind: 'BOOLEAN', value: true },
+                oldValue: { valueType: 'BOOLEAN', value: false },
+                newValue: { valueType: 'BOOLEAN', value: true },
             },
             modifiedBenefitsProvided: {
                 fieldPath: 'modifiedBenefitsProvided',
-                oldValue: { kind: 'BOOLEAN', value: false },
-                newValue: { kind: 'BOOLEAN', value: true },
+                oldValue: { valueType: 'BOOLEAN', value: false },
+                newValue: { valueType: 'BOOLEAN', value: true },
             },
             modifiedGeoAreaServed: {
                 fieldPath: 'modifiedGeoAreaServed',
-                oldValue: { kind: 'BOOLEAN', value: false },
-                newValue: { kind: 'BOOLEAN', value: true },
+                oldValue: { valueType: 'BOOLEAN', value: false },
+                newValue: { valueType: 'BOOLEAN', value: true },
             },
         })
         expect(revisionDiff.comparison.stateContactChanges).toEqual([])
@@ -792,22 +804,22 @@ describe('fetchRevisionDiff', () => {
                         {
                             fieldPath: 'rateDateCertified',
                             oldValue: {
-                                kind: 'DATE',
+                                valueType: 'DATE',
                                 value: new Date('2024-01-02'),
                             },
                             newValue: {
-                                kind: 'DATE',
+                                valueType: 'DATE',
                                 value: new Date('2024-04-15'),
                             },
                         },
                         {
                             fieldPath: 'rateCertificationName',
                             oldValue: {
-                                kind: 'STRING',
+                                valueType: 'STRING',
                                 value: 'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240102',
                             },
                             newValue: {
-                                kind: 'STRING',
+                                valueType: 'STRING',
                                 value: 'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240415',
                             },
                         },
