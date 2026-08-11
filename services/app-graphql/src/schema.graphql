@@ -2894,12 +2894,12 @@ type RevisionDiffRateChanges {
     revised: [RevisionDiffRevisedRate!]!
 }
 
-enum RevisionDiffRateActuaryContactChangeKind {
+enum RevisionDiffRateActuaryContactChangeType {
     NEW_OR_MODIFIED
 }
 
 type RevisionDiffRateActuaryContactChange {
-    changeType: RevisionDiffRateActuaryContactChangeKind!
+    changeType: RevisionDiffRateActuaryContactChangeType!
     current: RevisionDiffActuaryContact!
 }
 
@@ -2910,16 +2910,16 @@ type RevisionDiffActuaryContact {
     actuarialFirm: String
 }
 
-enum RevisionDiffStateContactChangeKind {
+enum RevisionDiffStateContactChangeType {
     NEW_OR_MODIFIED
 }
 
 type RevisionDiffStateContactChange {
-    changeType: RevisionDiffStateContactChangeKind!
+    changeType: RevisionDiffStateContactChangeType!
     current: StateContact!
 }
 
-enum RevisionDiffFieldValueKind {
+enum RevisionDiffFieldValueType {
     STRING
     BOOLEAN
     DATE
@@ -2927,7 +2927,7 @@ enum RevisionDiffFieldValueKind {
 }
 
 type RevisionDiffFieldValue {
-    valueType: RevisionDiffFieldValueKind!
+    valueType: RevisionDiffFieldValueType!
     value: JSON
 }
 

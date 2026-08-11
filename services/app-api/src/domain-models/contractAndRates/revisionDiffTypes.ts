@@ -7,19 +7,19 @@ type RevisionDiffFieldChange<TValue = unknown> = {
 }
 
 type RevisionDiffCollectionItemAdded<TItem> = {
-    changeType: 'added'
+    changeType: 'ADDED'
     key: string
     current: TItem
 }
 
 type RevisionDiffCollectionItemRemoved<TItem> = {
-    changeType: 'removed'
+    changeType: 'REMOVED'
     key: string
     previous: TItem
 }
 
 type RevisionDiffCollectionItemUpdated<TItem, TChange> = {
-    changeType: 'updated'
+    changeType: 'UPDATED'
     key: string
     previous: TItem
     current: TItem
@@ -32,7 +32,7 @@ type RevisionDiffCollectionItemChange<TItem, TChange> =
     | RevisionDiffCollectionItemUpdated<TItem, TChange>
 
 type RevisionDiffCollectionItemNewOrModified<TItem> = {
-    changeType: 'new_or_modified'
+    changeType: 'NEW_OR_MODIFIED'
     current: TItem
 }
 
