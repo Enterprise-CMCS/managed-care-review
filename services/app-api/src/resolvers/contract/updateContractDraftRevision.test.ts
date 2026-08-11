@@ -54,6 +54,14 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             // validate contract submission type
             expect(draftContract.contractSubmissionType).toBe('HEALTH_PLAN')
 
+            const testContact = {
+                givenName: 'Jane',
+                familyName: 'Doe',
+                suffix: 'Jr.',
+                titleRole: 'Contract Manager',
+                email: 'jane.doe@example.com',
+            }
+
             // update that draft.
             const updateFormData: ContractDraftRevisionFormDataInput =
                 mockGqlContractDraftRevisionFormDataInput(
@@ -64,6 +72,7 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                         modifiedNonRiskPaymentArrangements: undefined,
                         contractDocuments: [],
                         supportingDocuments: [],
+                        stateContacts: [testContact],
                     }
                 )
             const updateResult = await updateTestContractDraftRevision(
@@ -74,27 +83,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             )
 
             const updatedFormData = updateResult.draftRevision?.formData
-
-            const expectedStateContacts = (
-                updateFormData.stateContacts ?? []
-            ).map((contact) => {
-                // Mirror constructContactName: build name from givenName +
-                // familyName (no suffix), falling back to the stored name.
-                const constructedName = [contact.givenName, contact.familyName]
-                    .filter((part) => part != null && part.trim() !== '')
-                    .join(' ')
-                return {
-                    name:
-                        constructedName !== ''
-                            ? constructedName
-                            : (contact.name ?? null),
-                    givenName: contact.givenName ?? null,
-                    familyName: contact.familyName ?? null,
-                    suffix: contact.suffix ?? null,
-                    titleRole: contact.titleRole,
-                    email: contact.email,
-                }
-            })
 
             expect(updatedFormData).toEqual({
                 ...updateFormData,
@@ -108,7 +96,12 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
-                stateContacts: expectedStateContacts,
+                stateContacts: [
+                    {
+                        name: `${testContact.givenName} ${testContact.familyName}`,
+                        ...testContact,
+                    },
+                ],
             })
         })
 
@@ -195,17 +188,21 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 )
             }
 
+            const testContact = {
+                givenName: 'Jane',
+                familyName: 'Doe',
+                suffix: 'Jr.',
+                titleRole: 'Contract Manager',
+                email: 'jane.doe@example.com',
+            }
+
             const updateFormData: ContractDraftRevisionFormDataInput = {
                 ...mockGqlContractDraftRevisionFormDataInput(
                     draftContract.stateCode
                 ),
                 stateContacts: [
                     {
-                        givenName: 'Jane',
-                        familyName: 'Doe',
-                        suffix: 'Jr.',
-                        titleRole: 'Contract Manager',
-                        email: 'jane.doe@example.com',
+                        ...testContact,
                     },
                 ],
             }
@@ -231,12 +228,8 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             // constructed from givenName + familyName only (no suffix).
             expect(updatedStateContacts).toEqual([
                 {
-                    name: 'Jane Doe',
-                    givenName: 'Jane',
-                    familyName: 'Doe',
-                    suffix: 'Jr.',
-                    titleRole: 'Contract Manager',
-                    email: 'jane.doe@example.com',
+                    name: `${testContact.givenName} ${testContact.familyName}`,
+                    ...testContact,
                 },
             ])
         })

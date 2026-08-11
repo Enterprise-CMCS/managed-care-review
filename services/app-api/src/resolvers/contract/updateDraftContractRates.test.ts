@@ -501,6 +501,25 @@ describe('updateDraftContractRates', () => {
         const draft = await createTestContract(stateServer)
         const draftFD = draft.draftRevision!
 
+        const testActuaryContact = {
+            givenName: 'Foo',
+            familyName: 'Person',
+            suffix: 'Sr.',
+            titleRole: 'Bar Job',
+            email: 'foo@example.com',
+            actuarialFirm: 'GUIDEHOUSE',
+        }
+
+        const testAddtlActuaryContact = {
+            givenName: 'Bar',
+            familyName: 'Person',
+            suffix: 'III',
+            titleRole: 'Baz Job',
+            email: 'bar@example.com',
+            actuarialFirm: 'OTHER',
+            actuarialFirmOther: 'Some Firm',
+        }
+
         const result = await executeGraphQLOperation(stateServer, {
             query: UpdateDraftContractRatesDocument,
             variables: {
@@ -525,27 +544,8 @@ describe('updateDraftContractRates', () => {
                                     },
                                 ],
                                 supportingDocuments: [],
-                                certifyingActuaryContacts: [
-                                    {
-                                        givenName: 'Foo',
-                                        familyName: 'Person',
-                                        suffix: 'Sr.',
-                                        titleRole: 'Bar Job',
-                                        email: 'foo@example.com',
-                                        actuarialFirm: 'GUIDEHOUSE',
-                                    },
-                                ],
-                                addtlActuaryContacts: [
-                                    {
-                                        givenName: 'Bar',
-                                        familyName: 'Person',
-                                        suffix: 'III',
-                                        titleRole: 'Baz Job',
-                                        email: 'bar@example.com',
-                                        actuarialFirm: 'OTHER',
-                                        actuarialFirmOther: 'Some Firm',
-                                    },
-                                ],
+                                certifyingActuaryContacts: [testActuaryContact],
+                                addtlActuaryContacts: [testAddtlActuaryContact],
                                 actuaryCommunicationPreference:
                                     'OACT_TO_ACTUARY',
                             },
@@ -572,12 +572,7 @@ describe('updateDraftContractRates', () => {
         expect(rateFormData.certifyingActuaryContacts).toEqual([
             expect.objectContaining({
                 name: 'Foo Person',
-                givenName: 'Foo',
-                familyName: 'Person',
-                suffix: 'Sr.',
-                titleRole: 'Bar Job',
-                email: 'foo@example.com',
-                actuarialFirm: 'GUIDEHOUSE',
+                ...testActuaryContact,
             }),
         ])
 
@@ -586,13 +581,7 @@ describe('updateDraftContractRates', () => {
         expect(rateFormData.addtlActuaryContacts).toEqual([
             expect.objectContaining({
                 name: 'Bar Person',
-                givenName: 'Bar',
-                familyName: 'Person',
-                suffix: 'III',
-                titleRole: 'Baz Job',
-                email: 'bar@example.com',
-                actuarialFirm: 'OTHER',
-                actuarialFirmOther: 'Some Firm',
+                ...testAddtlActuaryContact,
             }),
         ])
     })
