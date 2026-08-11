@@ -27,7 +27,6 @@ export const DataDetailContactField = ({
     // Display full name constructed using name fields when feature flag is on.
     const displayName = useStructuredContactName
         ? [contact?.givenName, contact?.familyName, contact?.suffix]
-              .map((namePart) => namePart?.trim())
               .filter(Boolean)
               .join(' ')
         : contact?.name

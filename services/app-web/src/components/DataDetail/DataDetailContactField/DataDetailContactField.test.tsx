@@ -29,9 +29,9 @@ describe('DataDetailContactField', () => {
 
     it('renders the structured name when the contact model update flag is on', async () => {
         const contact: StateContact = {
-            name: 'Legacy Name',
-            givenName: 'Wednesday',
-            familyName: 'Addams',
+            name: 'Wednesday Addams',
+            givenName: 'Structured',
+            familyName: 'Contact',
             suffix: 'Jr.',
             titleRole: 'Writer/Detective',
             email: `wedsaddams@example.com`,
@@ -42,7 +42,7 @@ describe('DataDetailContactField', () => {
             },
         })
         expect(
-            await screen.findByText(/Wednesday Addams Jr./)
+            await screen.findByText(/Structured Contact Jr./)
         ).toBeInTheDocument()
         expect(screen.queryByText(/Legacy Name/)).toBeNull()
     })
