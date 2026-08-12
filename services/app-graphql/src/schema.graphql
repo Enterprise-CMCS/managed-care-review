@@ -2882,9 +2882,84 @@ type RevisionDiff {
     olderSubmittedAt: DateTime!
     newerSubmittedAt: DateTime!
     fieldChanges: [RevisionDiffFieldChange!]!
+    stateContactChanges: [RevisionDiffStateContactChange!]!
+    documentChanges: RevisionDiffDocumentChanges!
+    rateChanges: RevisionDiffRateChanges!
 }
 
-enum RevisionDiffFieldValueKind {
+type RevisionDiffDocumentListChanges {
+    added: [String!]!
+    removed: [String!]!
+}
+
+type RevisionDiffRateDocumentChanges {
+    rateID: ID!
+    rateCertificationName: String
+    rateDocuments: RevisionDiffDocumentListChanges!
+    supportingDocuments: RevisionDiffDocumentListChanges!
+}
+
+type RevisionDiffDocumentChanges {
+    contractDocuments: RevisionDiffDocumentListChanges!
+    contractSupportingDocuments: RevisionDiffDocumentListChanges!
+    ratesDocuments: [RevisionDiffRateDocumentChanges!]!
+    totalAdded: Int!
+    totalRemoved: Int!
+}
+
+type RevisionDiffAddedRate {
+    rateID: ID!
+    rateCertificationName: String
+    includedInAnotherSubmission: Boolean!
+}
+
+type RevisionDiffRemovedRate {
+    rateID: ID!
+    rateCertificationName: String
+}
+
+type RevisionDiffRevisedRate {
+    rateID: ID!
+    rateCertificationName: String
+    fieldChanges: [RevisionDiffFieldChange!]!
+    rateDocuments: RevisionDiffDocumentListChanges!
+    supportingRateDocuments: RevisionDiffDocumentListChanges!
+    certifyingActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
+    addtlActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
+}
+
+type RevisionDiffRateChanges {
+    added: [RevisionDiffAddedRate!]!
+    removed: [RevisionDiffRemovedRate!]!
+    revised: [RevisionDiffRevisedRate!]!
+}
+
+enum RevisionDiffRateActuaryContactChangeType {
+    NEW_OR_MODIFIED
+}
+
+type RevisionDiffRateActuaryContactChange {
+    changeType: RevisionDiffRateActuaryContactChangeType!
+    current: RevisionDiffActuaryContact!
+}
+
+type RevisionDiffActuaryContact {
+    name: String
+    titleRole: String
+    email: String
+    actuarialFirm: String
+}
+
+enum RevisionDiffStateContactChangeType {
+    NEW_OR_MODIFIED
+}
+
+type RevisionDiffStateContactChange {
+    changeType: RevisionDiffStateContactChangeType!
+    current: StateContact!
+}
+
+enum RevisionDiffFieldValueType {
     STRING
     BOOLEAN
     DATE
@@ -2892,7 +2967,7 @@ enum RevisionDiffFieldValueKind {
 }
 
 type RevisionDiffFieldValue {
-    kind: RevisionDiffFieldValueKind!
+    valueType: RevisionDiffFieldValueType!
     value: JSON
 }
 
