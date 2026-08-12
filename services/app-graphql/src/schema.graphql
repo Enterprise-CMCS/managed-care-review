@@ -2870,7 +2870,6 @@ type RevisionDiffDocumentChanges {
 type RevisionDiffAddedRate {
     rateID: ID!
     rateCertificationName: String
-    includedInAnotherSubmission: Boolean!
 }
 
 type RevisionDiffRemovedRate {

@@ -1269,7 +1269,6 @@ describe('revisionDiffHelpers', () => {
                     rateID: sharedRateID,
                     rateCertificationName:
                         addedRateRevision.formData.rateCertificationName,
-                    includedInAnotherSubmission: true,
                 },
             ],
             removed: [
