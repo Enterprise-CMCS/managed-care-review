@@ -128,6 +128,9 @@ describe('isRatePartiallyFilled', () => {
                 certifyingActuaryContacts: [
                     {
                         name: '',
+                        givenName: '',
+                        familyName: '',
+                        suffix: '',
                         titleRole: '',
                         email: '',
                         actuarialFirm: undefined,
@@ -146,7 +149,9 @@ describe('isRatePartiallyFilled', () => {
                 rateProgramIDs: [],
                 certifyingActuaryContacts: [
                     {
-                        name: 'Bob',
+                        givenName: 'Bob',
+                        familyName: 'Builder',
+                        suffix: 'Jr.',
                     },
                 ],
                 addtlActuaryContacts: [],

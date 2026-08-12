@@ -579,11 +579,12 @@ const documentToDomainModel = (doc: DocumentWithCommonFields): DocumentType => {
 
 // Builds the backward-compatible full `name` for a state/actuary contact.
 // External systems still read `name`, so we construct it from givenName +
-// familyName and fall back to the deprecated stored full name when those are
-// not yet populated — e.g. contacts created before the contact model update,
-// or incomplete DRAFT/UNLOCKED draft revisions where partial data is allowed
-// (external users do not consume draft data). Once existing data is migrated,
-// this fallback is removed (tracked in a separate epic ticket).
+// familyName (first and last name only, no suffix) and fall back to the
+// deprecated stored full name when
+// those are not yet populated — e.g. contacts created before the contact model
+// update, or incomplete DRAFT/UNLOCKED draft revisions where partial data is
+// allowed (external users do not consume draft data). Once existing data is
+// migrated, this fallback is removed (tracked in a separate epic ticket).
 function constructContactName(contact: {
     givenName?: string | null
     familyName?: string | null
@@ -669,6 +670,7 @@ function rateFormDataToDomainModel(
                   name: constructContactName(actuary),
                   givenName: actuary.givenName ?? undefined,
                   familyName: actuary.familyName ?? undefined,
+                  suffix: actuary.suffix ?? undefined,
                   titleRole: actuary.titleRole ?? undefined,
                   email: actuary.email ?? undefined,
                   actuarialFirm: actuary.actuarialFirm ?? undefined,
@@ -680,6 +682,7 @@ function rateFormDataToDomainModel(
                   name: constructContactName(actuary),
                   givenName: actuary.givenName ?? undefined,
                   familyName: actuary.familyName ?? undefined,
+                  suffix: actuary.suffix ?? undefined,
                   titleRole: actuary.titleRole ?? undefined,
                   email: actuary.email ?? undefined,
                   actuarialFirm: actuary.actuarialFirm ?? undefined,
@@ -783,6 +786,7 @@ function contractFormDataToDomainModel(
                   name: constructContactName(contact),
                   givenName: contact.givenName ?? undefined,
                   familyName: contact.familyName ?? undefined,
+                  suffix: contact.suffix ?? undefined,
                   titleRole: contact.titleRole ?? undefined,
                   email: contact.email ?? undefined,
               }))

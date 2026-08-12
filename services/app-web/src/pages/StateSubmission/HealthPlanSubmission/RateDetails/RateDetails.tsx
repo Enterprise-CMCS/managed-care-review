@@ -118,6 +118,11 @@ const RateDetails = ({
         featureFlags.DSNP.defaultValue
     )
 
+    const showNewContactNameFields = ldClient?.variation(
+        featureFlags.CONTACT_MODEL_UPDATE.flag,
+        featureFlags.CONTACT_MODEL_UPDATE.defaultValue
+    )
+
     const [showAPIErrorBanner, setShowAPIErrorBanner] = useState<
         boolean | string
     >(false) // string is a custom error message, defaults to generic message when true
@@ -208,6 +213,7 @@ const RateDetails = ({
         {
             'rate-edit-unlock': useEditUnlockRate,
             dsnp: dsnpEnabled,
+            [featureFlags.CONTACT_MODEL_UPDATE.flag]: showNewContactNameFields,
         },
         !displayAsStandaloneRate,
         isDSNP

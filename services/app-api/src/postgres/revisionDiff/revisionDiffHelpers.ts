@@ -8,8 +8,13 @@ import type {
 import { contractFormDataSchema } from '../../domain-models/contractAndRates/formDataTypes'
 import {
     buildScalarFieldDiffChanges,
+    isStringEnumLikeSchema,
     type ScalarDiffFieldConfig,
+    unwrapSchema,
 } from './revisionDiffPrimitives'
+import { buildDocumentChanges } from './revisionDiffDocuments'
+import { buildRateChanges } from './revisionDiffRates'
+import { buildStateContactDiffChanges } from './revisionDiffStateContacts'
 
 type ContractFormData =
     ContractPackageSubmissionType['contractRevision']['formData']
@@ -51,25 +56,6 @@ const buildContractName = (
  * Returns a shallow copy of an array field so diff output preserves array values.
  */
 const cloneArrayValue = <TItem>(values: TItem[]): TItem[] => [...values]
-
-/**
- * Peels off wrapper schemas so field inference can inspect the underlying scalar type.
- */
-function unwrapSchema(schema: z.core.$ZodType): z.core.$ZodType {
-    if (
-        schema instanceof z.ZodOptional ||
-        schema instanceof z.ZodNullable ||
-        schema instanceof z.ZodDefault
-    ) {
-        return unwrapSchema(schema.unwrap())
-    }
-
-    if (schema instanceof z.ZodPipe) {
-        return unwrapSchema(schema.def.out)
-    }
-
-    return schema
-}
 
 /**
  * Creates a diff config for boolean contract form fields.
@@ -123,25 +109,9 @@ function buildStringArrayFieldConfig(
 const fieldConfigOverrides: Partial<
     Record<keyof ContractFormData, DiffFieldConfig>
 > = {
-    populationCovered: {
-        fieldPath: 'populationCovered',
-        dataValue: (formData) => formData.populationCovered,
-    },
-    submissionType: {
-        fieldPath: 'submissionType',
-        dataValue: (formData) => formData.submissionType,
-    },
-    contractType: {
-        fieldPath: 'contractType',
-        dataValue: (formData) => formData.contractType,
-    },
     programIDs: {
         fieldPath: 'programIDs',
         dataValue: (formData) => normalizeProgramIDs(formData.programIDs),
-    },
-    contractExecutionStatus: {
-        fieldPath: 'contractExecutionStatus',
-        dataValue: (formData) => formData.contractExecutionStatus,
     },
 }
 
@@ -171,7 +141,7 @@ const diffContractFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
         return [buildBooleanFieldConfig(typedFieldPath)]
     }
 
-    if (unwrappedSchema instanceof z.ZodString) {
+    if (isStringEnumLikeSchema(unwrappedSchema)) {
         return [buildStringFieldConfig(typedFieldPath)]
     }
 
@@ -185,6 +155,39 @@ const diffContractFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
 
     return []
 })
+
+/**
+ * lists contract form fields that are not already excluded, overridden, or supported by existing auto-diffing.
+ * used to test if new contract form fields are added which need to be specifically handled in the revision diff logic.
+ */
+function getUnhandledContractDiffFieldPaths(): string[] {
+    return Object.entries(
+        contractFormDataSchema.shape as Record<string, z.core.$ZodType>
+    ).flatMap(([fieldPath, schema]) => {
+        const typedFieldPath = fieldPath as keyof ContractFormData & string
+
+        if (excludedFieldPaths.has(typedFieldPath)) {
+            return []
+        }
+
+        if (fieldConfigOverrides[typedFieldPath]) {
+            return []
+        }
+
+        const unwrappedSchema = unwrapSchema(schema)
+
+        if (
+            unwrappedSchema instanceof z.ZodBoolean ||
+            isStringEnumLikeSchema(unwrappedSchema) ||
+            unwrappedSchema instanceof z.ZodDate ||
+            unwrappedSchema instanceof z.ZodArray
+        ) {
+            return []
+        }
+
+        return [fieldPath]
+    })
+}
 
 const scalarContractFormDataFieldConfigs: ScalarDiffFieldConfig<
     ContractFormData,
@@ -236,6 +239,25 @@ function buildRevisionDiff(
                   },
               ]
 
+    const stateContactChanges = buildStateContactDiffChanges(
+        olderSubmission.contractRevision.formData.stateContacts,
+        newerSubmission.contractRevision.formData.stateContacts
+    )
+
+    const rateChanges = buildRateChanges(olderSubmission, newerSubmission)
+    if (rateChanges instanceof Error) {
+        return rateChanges
+    }
+
+    const documentChanges = buildDocumentChanges(
+        olderSubmission,
+        newerSubmission,
+        rateChanges.revised
+    )
+    if (documentChanges instanceof Error) {
+        return documentChanges
+    }
+
     return {
         contractID,
         olderRevisionID: olderSubmission.contractRevision.id,
@@ -243,7 +265,10 @@ function buildRevisionDiff(
         olderSubmittedAt: olderSubmission.submitInfo.updatedAt,
         newerSubmittedAt: newerSubmission.submitInfo.updatedAt,
         fieldChanges: [...contractNameChange, ...fieldChanges],
+        stateContactChanges,
+        documentChanges,
+        rateChanges,
     }
 }
 
-export { buildRevisionDiff }
+export { buildRevisionDiff, getUnhandledContractDiffFieldPaths }

@@ -9,12 +9,96 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
       fieldChanges {
         fieldPath
         oldValue {
-          kind
+          valueType
           value
         }
         newValue {
-          kind
+          valueType
           value
+        }
+      }
+      stateContactChanges {
+        changeType
+        current {
+          name
+          titleRole
+          email
+        }
+      }
+      documentChanges {
+        contractDocuments {
+          added
+          removed
+        }
+        contractSupportingDocuments {
+          added
+          removed
+        }
+        ratesDocuments {
+          rateID
+          rateCertificationName
+          rateDocuments {
+            added
+            removed
+          }
+          supportingDocuments {
+            added
+            removed
+          }
+        }
+        totalAdded
+        totalRemoved
+      }
+      rateChanges {
+        added {
+          rateID
+          rateCertificationName
+          includedInAnotherSubmission
+        }
+        removed {
+          rateID
+          rateCertificationName
+        }
+        revised {
+          rateID
+          rateCertificationName
+          fieldChanges {
+            fieldPath
+            oldValue {
+              valueType
+              value
+            }
+            newValue {
+              valueType
+              value
+            }
+          }
+          rateDocuments {
+            added
+            removed
+          }
+          supportingRateDocuments {
+            added
+            removed
+          }
+          certifyingActuaryContactChanges {
+            changeType
+            current {
+              name
+              titleRole
+              email
+              actuarialFirm
+            }
+          }
+          addtlActuaryContactChanges {
+            changeType
+            current {
+              name
+              titleRole
+              email
+              actuarialFirm
+            }
+          }
         }
       }
     }

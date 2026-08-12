@@ -1,7 +1,9 @@
 import React from 'react'
 import { Field, FormikErrors, getIn, useFormikContext } from 'formik'
 import { Fieldset, FormGroup } from '@trussworks/react-uswds'
-import { FieldRadio, FieldTextInput } from '../../../components/Form'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
+import { FieldRadio, FieldTextInput } from '../../../components'
 import { PoliteErrorMessage } from '../../../components/PoliteErrorMessage'
 import { RateCertFormType } from '../HealthPlanSubmission/RateDetails/SingleRateCert'
 import styles from '../StateSubmissionForm.module.scss'
@@ -29,6 +31,11 @@ export const ActuaryContactFields = ({
     inputRef,
 }: ActuaryFormPropType) => {
     const { values, errors } = useFormikContext()
+    const ldClient = useLDClient()
+    const showNewContactNameFields = ldClient?.variation(
+        featureFlags.CONTACT_MODEL_UPDATE.flag,
+        featureFlags.CONTACT_MODEL_UPDATE.defaultValue
+    )
     const showFieldErrors = (error?: FormError) =>
         shouldValidate && Boolean(error)
     const testIdPrefix = fieldNamePrefix.includes('actuaryContacts')
@@ -36,20 +43,66 @@ export const ActuaryContactFields = ({
         : 'addtlActuaryContacts'
     return (
         <Fieldset legend={fieldSetLegend}>
-            <span className={styles.requiredOptionalText}>Required</span>
-            <FieldTextInput
-                name={`${fieldNamePrefix}.name`}
-                id={`${fieldNamePrefix}.name`}
-                label="Name"
-                showError={Boolean(
-                    showFieldErrors(getIn(errors, `${fieldNamePrefix}.name`))
-                )}
-                type="text"
-                inputRef={inputRef}
-                variant="SUBHEAD"
-                aria-required
-                data-testid={`${testIdPrefix}.name`}
-            />
+            {showNewContactNameFields ? (
+                <>
+                    <FieldTextInput
+                        name={`${fieldNamePrefix}.givenName`}
+                        id={`${fieldNamePrefix}.givenName`}
+                        label="First name"
+                        showError={Boolean(
+                            showFieldErrors(
+                                getIn(errors, `${fieldNamePrefix}.givenName`)
+                            )
+                        )}
+                        type="text"
+                        inputRef={inputRef}
+                        variant="SUBHEAD"
+                        aria-required
+                        data-testid={`${testIdPrefix}.givenName`}
+                    />
+
+                    <FieldTextInput
+                        name={`${fieldNamePrefix}.familyName`}
+                        id={`${fieldNamePrefix}.familyName`}
+                        label="Last name"
+                        showError={Boolean(
+                            showFieldErrors(
+                                getIn(errors, `${fieldNamePrefix}.familyName`)
+                            )
+                        )}
+                        type="text"
+                        variant="SUBHEAD"
+                        aria-required
+                        data-testid={`${testIdPrefix}.familyName`}
+                    />
+
+                    <FieldTextInput
+                        name={`${fieldNamePrefix}.suffix`}
+                        id={`${fieldNamePrefix}.suffix`}
+                        label="Suffix"
+                        showError={false}
+                        type="text"
+                        variant="SUBHEAD"
+                        data-testid={`${testIdPrefix}.suffix`}
+                    />
+                </>
+            ) : (
+                <FieldTextInput
+                    name={`${fieldNamePrefix}.name`}
+                    id={`${fieldNamePrefix}.name`}
+                    label="Name"
+                    showError={Boolean(
+                        showFieldErrors(
+                            getIn(errors, `${fieldNamePrefix}.name`)
+                        )
+                    )}
+                    type="text"
+                    inputRef={inputRef}
+                    variant="SUBHEAD"
+                    aria-required
+                    data-testid={`${testIdPrefix}.name`}
+                />
+            )}
 
             <FieldTextInput
                 name={`${fieldNamePrefix}.titleRole`}

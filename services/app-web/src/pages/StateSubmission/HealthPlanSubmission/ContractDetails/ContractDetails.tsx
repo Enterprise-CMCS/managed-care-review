@@ -579,10 +579,12 @@ export const ContractDetails = ({
                         })
                     }}
                     validationSchema={() =>
-                        ContractDetailsFormSchema(
-                            draftSubmission,
-                            ldClient?.allFlags()
-                        )
+                        ContractDetailsFormSchema(draftSubmission, {
+                            'chip-submission-automation':
+                                chipSubmissionAutomation,
+                            '438-attestation': contract438Attestation,
+                            dsnp: enableDSNPs,
+                        })
                     }
                 >
                     {({

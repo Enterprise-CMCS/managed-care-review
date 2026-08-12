@@ -39,6 +39,7 @@ export type {
     ContractType,
     ContractRevisionType,
     ContractFormDataType,
+    ActuaryContactType,
     StrippedContractType,
     StrippedContractRevisionType,
     StrippedContractFormDataType,
@@ -75,6 +76,15 @@ export type {
     RevisionDiff,
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
+    RevisionDiffCollectionItemNewOrModified,
+    RevisionDiffRateActuaryContactChange,
+    RevisionDiffDocumentListChanges,
+    RevisionDiffRateDocumentChanges,
+    RevisionDiffDocumentChanges,
+    RevisionDiffAddedRate,
+    RevisionDiffRemovedRate,
+    RevisionDiffRevisedRate,
+    RevisionDiffRateChanges,
 } from './contractAndRates'
 
 export type {
