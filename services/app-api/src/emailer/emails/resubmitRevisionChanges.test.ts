@@ -6,13 +6,28 @@ describe('buildResubmitRevisionChanges', () => {
     const statePrograms = mockMNState().programs
     const currentContract = mockContract()
 
+    // The resubmit email renders fieldChanges only, so the remaining diff
+    // collections are required by the type but left empty in these fixtures.
+    const baseComparison: Omit<RevisionDiff, 'fieldChanges'> = {
+        contractID: 'test-contract-id',
+        olderRevisionID: 'older-rev',
+        newerRevisionID: 'newer-rev',
+        olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
+        newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+        stateContactChanges: [],
+        documentChanges: {
+            contractDocuments: { added: [], removed: [] },
+            contractSupportingDocuments: { added: [], removed: [] },
+            ratesDocuments: [],
+            totalAdded: 0,
+            totalRemoved: 0,
+        },
+        rateChanges: { added: [], removed: [], revised: [] },
+    }
+
     it('returns no-diff content when contract field changes are empty', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [],
         }
 
@@ -32,11 +47,7 @@ describe('buildResubmitRevisionChanges', () => {
 
     it('formats submission type field changes for CMS resubmit email', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'contractName',
@@ -147,11 +158,7 @@ describe('buildResubmitRevisionChanges', () => {
 
     it('formats contract details field changes for CMS resubmit email, including NEW fields', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'contractExecutionStatus',
@@ -241,11 +248,7 @@ describe('buildResubmitRevisionChanges', () => {
 
     it('formats removed contract detail values with a dash placeholder', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'dsnpContract',
@@ -300,11 +303,7 @@ describe('buildResubmitRevisionChanges', () => {
             ],
         }
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'inLieuServicesAndSettings',
@@ -491,11 +490,7 @@ describe('buildResubmitRevisionChanges', () => {
 
     it('formats removed contract provision values with a dash placeholder', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'modifiedBenefitsProvided',
