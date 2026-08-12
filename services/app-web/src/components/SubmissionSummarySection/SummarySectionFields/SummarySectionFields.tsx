@@ -1,8 +1,4 @@
-import {
-    Contract,
-    ContractFormData,
-    UnlockedContract,
-} from '../../../gen/gqlClient'
+import { ContractFormData } from '../../../gen/gqlClient'
 import {
     DataDetail,
     DataDetailCheckboxList,
@@ -16,7 +12,6 @@ import {
     federalAuthorityKeysForCHIP,
     FederalAuthorityRecord,
     getProvisionDictionary,
-    isBaseContract,
     isMissingProvisions,
     ManagedCareEntityRecord,
     PopulationCoveredRecord,
@@ -429,23 +424,23 @@ export const DsnpSummary = ({
 }
 
 export const ModifiedProvisionSummary = ({
-    contract,
+    formData,
     isEditing,
     explainMissingData,
     label,
 }: {
-    contract: Contract | UnlockedContract
+    formData: ContractFormData
     isEditing?: boolean
     explainMissingData?: boolean
     label?: string
 }) => {
-    const provisionsAreInvalid = isMissingProvisions(contract) && isEditing
+    const provisionsAreInvalid = isMissingProvisions(formData) && isEditing
     const dynamicLabel = label
         ? label
-        : isBaseContract(contract)
+        : formData.contractType === 'BASE'
           ? 'This contract action includes provisions related to the following'
           : 'This contract action includes new or modified provisions related to the following'
-    const [modifiedProvisions] = sortModifiedProvisions(contract)
+    const [modifiedProvisions] = sortModifiedProvisions(formData)
 
     return (
         <DataDetail
@@ -456,7 +451,7 @@ export const ModifiedProvisionSummary = ({
             {provisionsAreInvalid ? null : (
                 <DataDetailCheckboxList
                     list={modifiedProvisions}
-                    dict={getProvisionDictionary(contract)}
+                    dict={getProvisionDictionary(formData)}
                     displayEmptyList
                 />
             )}
@@ -465,23 +460,23 @@ export const ModifiedProvisionSummary = ({
 }
 
 export const UnmodifiedProvisionSummary = ({
-    contract,
+    formData,
     isEditing,
     explainMissingData,
     label,
 }: {
-    contract: Contract | UnlockedContract
+    formData: ContractFormData
     isEditing?: boolean
     explainMissingData?: boolean
     label?: string
 }) => {
-    const provisionsAreInvalid = isMissingProvisions(contract) && isEditing
+    const provisionsAreInvalid = isMissingProvisions(formData) && isEditing
     const dynamicLabel = label
         ? label
-        : isBaseContract(contract)
+        : formData.contractType === 'BASE'
           ? 'This contract action does NOT include provisions related to the following'
           : 'This contract action does NOT include new or modified provisions related to the following'
-    const unmodifiedProvisions = sortModifiedProvisions(contract)[1]
+    const unmodifiedProvisions = sortModifiedProvisions(formData)[1]
 
     return (
         <DataDetail
@@ -492,7 +487,7 @@ export const UnmodifiedProvisionSummary = ({
             {provisionsAreInvalid ? null : (
                 <DataDetailCheckboxList
                     list={unmodifiedProvisions}
-                    dict={getProvisionDictionary(contract)}
+                    dict={getProvisionDictionary(formData)}
                     displayEmptyList
                 />
             )}
