@@ -182,10 +182,35 @@ function buildRateDisplayName(
     return rateRevision.formData.rateCertificationName ?? undefined
 }
 
-function buildAddedRate(rateRevision: RateRevisionType): RevisionDiffAddedRate {
+function isIncludedInAnotherSubmission(
+    rateRevision: RateRevisionType,
+    newerSubmissionSubmittedAt: Date
+): boolean {
+    const sharedPackages =
+        rateRevision.formData.packagesWithSharedRateCerts ?? []
+
+    if (sharedPackages.length > 0) {
+        return true
+    }
+
+    return (
+        rateRevision.submitInfo?.updatedAt.getTime() !== undefined &&
+        rateRevision.submitInfo.updatedAt.getTime() <
+            newerSubmissionSubmittedAt.getTime()
+    )
+}
+
+function buildAddedRate(
+    rateRevision: RateRevisionType,
+    newerSubmissionSubmittedAt: Date
+): RevisionDiffAddedRate {
     return {
         rateID: rateRevision.rateID,
         rateCertificationName: buildRateDisplayName(rateRevision),
+        includedInAnotherSubmission: isIncludedInAnotherSubmission(
+            rateRevision,
+            newerSubmissionSubmittedAt
+        ),
     }
 }
 
@@ -321,7 +346,12 @@ function buildRateChanges(
             continue
         }
 
-        added.push(buildAddedRate(newerRateRevision))
+        added.push(
+            buildAddedRate(
+                newerRateRevision,
+                newerSubmission.submitInfo.updatedAt
+            )
+        )
     }
 
     const sortByName = <TItem extends { rateCertificationName?: string }>(
