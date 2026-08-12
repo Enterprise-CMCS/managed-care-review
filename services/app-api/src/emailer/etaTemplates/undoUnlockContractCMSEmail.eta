@@ -1,0 +1,22 @@
+CMS undid the unlock on <%= it.packageName %>. The submission returned to its previous status, and any changes made while it was unlocked were discarded.<br />
+<br />
+<b>Updated by:</b> <%= it.updatedBy %><br />
+<b>Updated on:</b> <%= it.updatedAt %><br />
+<b>Reason for undoing the unlock:</b> <%= it.reason %><br />
+<b>Status:</b> <%= it.status %><br />
+<% if (it.shouldIncludeRates) { %>
+    <% if (it.rateInfos.length > 1) { %>
+        <b>Rate names</b>:
+        <ul style=<%~'"margin-top: 0px;"'%>>
+        <% it.rateInfos.forEach(function(rate) { %>
+            <li><%= rate.rateName %></li>
+        <% }) %>
+        </ul>
+    <% } else { %>
+        <% it.rateInfos.forEach(function(rate) { %>
+            <b>Rate name</b>: <%= rate.rateName %><br />
+        <% }) %>
+    <% } %>
+<% } %>
+<br />
+<a href="<%= it.submissionURL%>">View submission</a>
