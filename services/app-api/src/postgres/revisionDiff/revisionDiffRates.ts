@@ -302,19 +302,17 @@ function buildRateChanges(
             continue
         }
 
-        if (olderRateRevision.id !== newerRateRevision.id) {
-            const revisedRateResult = buildRevisedRate(
-                olderRateRevision,
-                newerRateRevision
-            )
+        const revisedRateResult = buildRevisedRate(
+            olderRateRevision,
+            newerRateRevision
+        )
 
-            if (revisedRateResult instanceof Error) {
-                return revisedRateResult
-            }
+        if (revisedRateResult instanceof Error) {
+            return revisedRateResult
+        }
 
-            if (revisedRateResult.hasChanges) {
-                revised.push(revisedRateResult.revisedRate)
-            }
+        if (revisedRateResult.hasChanges) {
+            revised.push(revisedRateResult.revisedRate)
         }
     }
 
