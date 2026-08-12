@@ -171,6 +171,7 @@ const AddLocalUser = () => {
                                     name="givenName"
                                     label="First name"
                                     type="text"
+                                    aria-required
                                     showError={
                                         shouldValidate &&
                                         Boolean(errors.givenName)
@@ -181,6 +182,7 @@ const AddLocalUser = () => {
                                     name="familyName"
                                     label="Last name"
                                     type="text"
+                                    aria-required
                                     showError={
                                         shouldValidate &&
                                         Boolean(errors.familyName)
@@ -191,6 +193,7 @@ const AddLocalUser = () => {
                                     name="email"
                                     label="Email"
                                     type="email"
+                                    aria-required
                                     showError={
                                         shouldValidate && Boolean(errors.email)
                                     }

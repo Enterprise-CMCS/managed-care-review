@@ -7,6 +7,7 @@ describe('state user in health plan submission form', () => {
         // goal of this test is to check every single form page and navigation (going backwards, forwards or save as draft with new info)
         cy.interceptFeatureFlags({
             '438-attestation': true,
+            'contact-data-model-update': true,
             'hide-supporting-docs-page': true,
             dsnp: true,
         })
@@ -241,7 +242,9 @@ describe('state user in health plan submission form', () => {
             // Add one more file, a duplicate
             multiSuppportingDocsField.attachFile('documents/trussel-guide.pdf')
             // Files show correct loading states then complete
-            cy.findByText('You already added a file with this name and extension. Remove one.').should('exist')
+            cy.findByText(
+                'You already added a file with this name and extension. Remove one.'
+            ).should('exist')
 
             cy.findAllByTestId('file-input-preview-list')
                 .last()

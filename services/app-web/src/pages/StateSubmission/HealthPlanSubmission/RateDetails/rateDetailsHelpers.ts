@@ -66,8 +66,26 @@ const convertRateFormToGQLRateFormData = (
             ? rateForm.rateMedicaidPopulations
             : [],
         deprecatedRateProgramIDs: [],
-        certifyingActuaryContacts: rateForm.actuaryContacts,
-        addtlActuaryContacts: rateForm.addtlActuaryContacts,
+        certifyingActuaryContacts: rateForm.actuaryContacts.map((contact) => ({
+            ...contact,
+            name: contact.name?.trim(),
+            givenName: contact.givenName?.trim(),
+            familyName: contact.familyName?.trim(),
+            suffix: contact.suffix?.trim(),
+            titleRole: contact.titleRole?.trim(),
+            email: contact.email?.trim(),
+            actuarialFirmOther: contact.actuarialFirmOther?.trim(),
+        })),
+        addtlActuaryContacts: rateForm.addtlActuaryContacts.map((contact) => ({
+            ...contact,
+            name: contact.name?.trim(),
+            givenName: contact.givenName?.trim(),
+            familyName: contact.familyName?.trim(),
+            suffix: contact.suffix?.trim(),
+            titleRole: contact.titleRole?.trim(),
+            email: contact.email?.trim(),
+            actuarialFirmOther: contact.actuarialFirmOther?.trim(),
+        })),
         actuaryCommunicationPreference:
             rateForm.actuaryCommunicationPreference ?? undefined,
     }
@@ -79,6 +97,9 @@ const isRatePartiallyFilled = (rate: RateFormData): boolean => {
             (actuary) =>
                 actuary.id ||
                 actuary.name ||
+                actuary.givenName ||
+                actuary.familyName ||
+                actuary.suffix ||
                 actuary.titleRole ||
                 actuary.actuarialFirm ||
                 actuary.email

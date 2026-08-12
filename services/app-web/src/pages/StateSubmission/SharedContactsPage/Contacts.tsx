@@ -99,6 +99,13 @@ const Contacts = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
 
+    // Collect first/last name (required) plus an optional suffix, rather than
+    // a single required full name.
+    const showNewContactNameFields = ldClient?.variation(
+        featureFlags.CONTACT_MODEL_UPDATE.flag,
+        featureFlags.CONTACT_MODEL_UPDATE.defaultValue
+    )
+
     /*
      Set focus to contact name field when adding new contacts.
      Clears ref and focusNewContact component state immediately after. The reset allows additional contacts to be added and preserves expected focus behavior.
@@ -138,13 +145,26 @@ const Contacts = ({
 
     const emptyStateContact = {
         name: '',
+        givenName: '',
+        familyName: '',
+        suffix: '',
         titleRole: '',
         email: '',
     }
 
     const contactsInitialValues: ContactsFormValues = {
         stateContacts:
-            stateContacts.length === 0 ? [emptyStateContact] : stateContacts,
+            stateContacts.length === 0
+                ? [emptyStateContact]
+                : stateContacts.map((contact) => ({
+                      ...contact,
+                      name: contact.name ?? '',
+                      givenName: contact.givenName ?? '',
+                      familyName: contact.familyName ?? '',
+                      suffix: contact.suffix ?? '',
+                      titleRole: contact.titleRole ?? '',
+                      email: contact.email ?? '',
+                  })),
     }
 
     const handleFormSubmit = async (
@@ -212,7 +232,20 @@ const Contacts = ({
     const contactSchema = Yup.object().shape({
         stateContacts: Yup.array().of(
             Yup.object().shape({
-                name: Yup.string().required('You must provide a name'),
+                ...(showNewContactNameFields
+                    ? {
+                          givenName: Yup.string().required(
+                              'You must provide a first name'
+                          ),
+                          familyName: Yup.string().required(
+                              'You must provide a last name'
+                          ),
+                      }
+                    : {
+                          name: Yup.string().required(
+                              'You must provide a name'
+                          ),
+                      }),
                 titleRole: Yup.string().required(
                     'You must provide a title/role'
                 ),
@@ -326,44 +359,83 @@ const Contacts = ({
                                                                     <Fieldset
                                                                         legend={`State contacts ${index + 1}`}
                                                                     >
-                                                                        <span
-                                                                            className={
-                                                                                styles.requiredOptionalText
-                                                                            }
-                                                                        >
-                                                                            Required
-                                                                        </span>
-                                                                        <FieldTextInput
-                                                                            id={`stateContacts.${index}.name`}
-                                                                            label="Name"
-                                                                            name={`stateContacts.${index}.name`}
-                                                                            aria-required={
-                                                                                index ===
-                                                                                0
-                                                                            }
-                                                                            showError={Boolean(
-                                                                                showFieldErrors(
-                                                                                    getIn(
-                                                                                        errors,
-                                                                                        `stateContacts.${index}.name`
+                                                                        {showNewContactNameFields ? (
+                                                                            <>
+                                                                                <FieldTextInput
+                                                                                    id={`stateContacts.${index}.givenName`}
+                                                                                    label="First name"
+                                                                                    name={`stateContacts.${index}.givenName`}
+                                                                                    aria-required
+                                                                                    showError={Boolean(
+                                                                                        showFieldErrors(
+                                                                                            getIn(
+                                                                                                errors,
+                                                                                                `stateContacts.${index}.givenName`
+                                                                                            )
+                                                                                        )
+                                                                                    )}
+                                                                                    type="text"
+                                                                                    inputRef={
+                                                                                        newStateContactNameRef
+                                                                                    }
+                                                                                    variant="SUBHEAD"
+                                                                                />
+
+                                                                                <FieldTextInput
+                                                                                    id={`stateContacts.${index}.familyName`}
+                                                                                    label="Last name"
+                                                                                    name={`stateContacts.${index}.familyName`}
+                                                                                    aria-required
+                                                                                    showError={Boolean(
+                                                                                        showFieldErrors(
+                                                                                            getIn(
+                                                                                                errors,
+                                                                                                `stateContacts.${index}.familyName`
+                                                                                            )
+                                                                                        )
+                                                                                    )}
+                                                                                    type="text"
+                                                                                    variant="SUBHEAD"
+                                                                                />
+
+                                                                                <FieldTextInput
+                                                                                    id={`stateContacts.${index}.suffix`}
+                                                                                    label="Suffix"
+                                                                                    name={`stateContacts.${index}.suffix`}
+                                                                                    showError={
+                                                                                        false
+                                                                                    }
+                                                                                    type="text"
+                                                                                    variant="SUBHEAD"
+                                                                                />
+                                                                            </>
+                                                                        ) : (
+                                                                            <FieldTextInput
+                                                                                id={`stateContacts.${index}.name`}
+                                                                                label="Name"
+                                                                                name={`stateContacts.${index}.name`}
+                                                                                aria-required
+                                                                                showError={Boolean(
+                                                                                    showFieldErrors(
+                                                                                        getIn(
+                                                                                            errors,
+                                                                                            `stateContacts.${index}.name`
+                                                                                        )
                                                                                     )
-                                                                                )
-                                                                            )}
-                                                                            type="text"
-                                                                            inputRef={
-                                                                                newStateContactNameRef
-                                                                            }
-                                                                            variant="SUBHEAD"
-                                                                        />
+                                                                                )}
+                                                                                type="text"
+                                                                                inputRef={
+                                                                                    newStateContactNameRef
+                                                                                }
+                                                                                variant="SUBHEAD"
+                                                                            />
+                                                                        )}
 
                                                                         <FieldTextInput
                                                                             id={`stateContacts.${index}.titleRole`}
                                                                             label="Title/Role"
                                                                             name={`stateContacts.${index}.titleRole`}
-                                                                            aria-required={
-                                                                                index ===
-                                                                                0
-                                                                            }
+                                                                            aria-required
                                                                             showError={Boolean(
                                                                                 showFieldErrors(
                                                                                     getIn(
@@ -380,10 +452,7 @@ const Contacts = ({
                                                                             id={`stateContacts.${index}.email`}
                                                                             label="Email"
                                                                             name={`stateContacts.${index}.email`}
-                                                                            aria-required={
-                                                                                index ===
-                                                                                0
-                                                                            }
+                                                                            aria-required
                                                                             showError={Boolean(
                                                                                 showFieldErrors(
                                                                                     getIn(

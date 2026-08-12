@@ -1,4 +1,4 @@
-import { screen, render } from '@testing-library/react'
+import { fireEvent, screen, render } from '@testing-library/react'
 import { FieldTextInput } from './FieldTextInput'
 
 const mockOnChange = vi.fn()
@@ -13,6 +13,7 @@ vi.mock('formik', () => {
         ...vi.importActual('formik'),
         useField: () => [
             {
+                value: '   Mary Kate ',
                 onChange: mockOnChange,
                 onBlur: mockOnBlur,
             },
@@ -26,6 +27,10 @@ vi.mock('formik', () => {
 })
 
 describe('FieldTextInput component', () => {
+    beforeEach(() => {
+        vi.clearAllMocks()
+    })
+
     it('renders without errors', () => {
         render(
             <FieldTextInput
@@ -54,6 +59,23 @@ describe('FieldTextInput component', () => {
             'aria-required',
             'true'
         )
+    })
+
+    it('trims leading and trailing whitespace on blur', () => {
+        render(
+            <FieldTextInput
+                id="input1"
+                label="default label"
+                name="input1"
+                showError={false}
+                type="text"
+            />
+        )
+
+        fireEvent.blur(screen.getByLabelText('default label'))
+
+        expect(mockSetValue).toHaveBeenCalledWith('Mary Kate')
+        expect(mockOnBlur).toHaveBeenCalled()
     })
 
     it('displays hint', () => {

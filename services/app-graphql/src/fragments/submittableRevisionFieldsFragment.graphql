@@ -41,6 +41,7 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
                 name
                 givenName
                 familyName
+                suffix
                 titleRole
                 email
             }
@@ -126,6 +127,7 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
                 name
                 givenName
                 familyName
+                suffix
                 titleRole
                 email
                 actuarialFirm
@@ -136,6 +138,7 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
                 name
                 givenName
                 familyName
+                suffix
                 titleRole
                 email
                 actuarialFirm

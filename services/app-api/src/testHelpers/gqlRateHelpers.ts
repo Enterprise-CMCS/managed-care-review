@@ -326,6 +326,12 @@ function formatGQLRateContractForSending(
     return {
         id: contact.id || undefined,
         name: contact.name,
+        // Coalesce null (from GraphQL response data round-tripped back into a
+        // mutation input) to undefined; actuaryContactSchema treats these as
+        // optional strings and rejects null.
+        givenName: contact.givenName ?? undefined,
+        familyName: contact.familyName ?? undefined,
+        suffix: contact.suffix ?? undefined,
         titleRole: contact.titleRole,
         email: contact.email,
         actuarialFirm: contact.actuarialFirm,

@@ -51,9 +51,12 @@ const documentsInput = (
 const stateContactsInput = (contacts: StateContact[]): StateContactInput[] => {
     return contacts.map((contact) => {
         return {
-            email: contact.email,
-            name: contact.name,
-            titleRole: contact.titleRole,
+            email: contact.email?.trim(),
+            givenName: contact.givenName?.trim(),
+            familyName: contact.familyName?.trim(),
+            suffix: contact.suffix?.trim(),
+            name: contact.name?.trim(),
+            titleRole: contact.titleRole?.trim(),
         }
     })
 }

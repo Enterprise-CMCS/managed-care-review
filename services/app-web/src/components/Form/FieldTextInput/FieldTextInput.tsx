@@ -40,7 +40,8 @@ export const FieldTextInput = ({
     onBlur,
     ...inputProps
 }: TextInputProps): React.ReactElement => {
-    const [field, meta] = useField({ name })
+    const [field, meta, helpers] = useField({ name })
+    const isRequired = inputProps['aria-required']
 
     const classes = classNames(
         {
@@ -53,7 +54,12 @@ export const FieldTextInput = ({
     // Initial use case is to trim away trailing whitespace in email addresses
     const customOnBlur = (e: React.FocusEvent<HTMLInputElement, Element>) => {
         if (!e) return
-        e.currentTarget.value = field.value.trim()
+        if (typeof field.value === 'string') {
+            const trimmedValue = field.value.trim()
+            e.currentTarget.value = trimmedValue
+            void helpers.setValue(trimmedValue)
+        }
+        field.onBlur(e)
         if (onBlur) onBlur(e)
     }
 
@@ -62,6 +68,9 @@ export const FieldTextInput = ({
             <Label htmlFor={id} error={showError}>
                 {label}
             </Label>
+            <span className={styles.requiredOptionalText}>
+                {isRequired ? 'Required' : 'Optional'}
+            </span>
             {showError && meta.error && (
                 <PoliteErrorMessage formFieldLabel={label}>
                     {meta.error}
