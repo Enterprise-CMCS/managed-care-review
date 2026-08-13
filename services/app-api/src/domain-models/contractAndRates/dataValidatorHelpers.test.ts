@@ -280,7 +280,7 @@ describe('Health plan parsing and validation', () => {
         )
 
         it.each(['certifyingActuaryContacts', 'addtlActuaryContacts'] as const)(
-            'only requires actuarialFirm or actuarialFirmOther on %s when the contact model flag is on',
+            'requires actuarialFirm on %s when the contact model flag is on',
             async (contactField) => {
                 const prismaClient = await sharedTestPrismaClient()
                 const postgresStore = NewPostgresStore(prismaClient)
@@ -324,24 +324,46 @@ describe('Health plan parsing and validation', () => {
         )
 
         it.each(['certifyingActuaryContacts', 'addtlActuaryContacts'] as const)(
-            'accepts actuarialFirmOther without actuarialFirm on %s',
+            'requires actuarialFirmOther on %s when actuarialFirm is OTHER',
             async (contactField) => {
                 const prismaClient = await sharedTestPrismaClient()
                 const postgresStore = NewPostgresStore(prismaClient)
                 const contract = mockSubmittableHealthPlanContract()
                 const rateFormData =
                     contract.draftRates![0].draftRevision!.formData
-                rateFormData[contactField]![0].actuarialFirm = undefined
-                rateFormData[contactField]![0].actuarialFirmOther = 'Other firm'
+                rateFormData[contactField]![0].actuarialFirm = 'OTHER'
+                rateFormData[contactField]![0].actuarialFirmOther = undefined
 
-                const parsedContract = parseContract(
+                const parsedWithFlag = parseContract(
                     contract,
                     'KY',
                     postgresStore,
                     { 'contact-data-model-update': true }
                 )
 
-                expect(parsedContract).toEqual(contract)
+                if (!(parsedWithFlag instanceof z.ZodError)) {
+                    throw new Error(
+                        'Expected parseContract to return a ZodError'
+                    )
+                }
+                expect(parsedWithFlag.issues).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            message: expect.stringContaining(
+                                contract.draftRates![0].id
+                            ),
+                            path: [
+                                'draftRates',
+                                0,
+                                'draftRevision',
+                                'formData',
+                                contactField,
+                                0,
+                                'actuarialFirmOther',
+                            ],
+                        }),
+                    ])
+                )
             }
         )
 
