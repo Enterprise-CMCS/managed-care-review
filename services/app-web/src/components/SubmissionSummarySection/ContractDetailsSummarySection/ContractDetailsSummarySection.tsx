@@ -20,7 +20,6 @@ import {
     getLastContractSubmission,
     getPackageSubmissionAtIndex,
     getVisibleLatestContractFormData,
-    isContractWithProvisions,
 } from '@mc-review/submissions'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
@@ -103,13 +102,19 @@ export const ContractDetailsSummarySection = ({
         featureFlags.CHIP_SUBMISSION_AUTOMATION.defaultValue
     )
 
-    const contractSupportingDocuments = contractFormData?.supportingDocuments
-    const contractDocs = contractFormData?.contractDocuments
+    const contractSupportingDocuments = contractFormData.supportingDocuments
+    const contractDocs = contractFormData.contractDocuments
     const contractDocumentCount =
         contractSupportingDocuments &&
         contractDocs &&
         contractFormData.supportingDocuments.length +
             contractFormData.contractDocuments.length
+
+    const isChipOnly = contractFormData.populationCovered === 'CHIP'
+    const isContractAmendment = contractFormData.contractType === 'AMENDMENT'
+    const isBaseContract = contractFormData.contractType === 'BASE'
+    const isContractWithProvisions =
+        isContractAmendment || (isBaseContract && !isChipOnly)
 
     const currentRevision = getCurrentRevForZipLink(
         contract,
@@ -177,16 +182,16 @@ export const ContractDetailsSummarySection = ({
                             />
                         </MultiColumnGrid>
                     )}
-                {isContractWithProvisions(contract) && (
+                {isContractWithProvisions && (
                     <MultiColumnGrid columns={2}>
                         <ModifiedProvisionSummary
-                            contract={contract}
+                            formData={contractFormData}
                             isEditing={isEditing}
                             explainMissingData={explainMissingData}
                         />
 
                         <UnmodifiedProvisionSummary
-                            contract={contract}
+                            formData={contractFormData}
                             isEditing={isEditing}
                             explainMissingData={explainMissingData}
                         />
