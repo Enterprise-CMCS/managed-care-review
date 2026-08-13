@@ -436,29 +436,37 @@ describe('SubmissionTypeSummarySection', () => {
         expect(screen.queryByText(/\(retired\)/)).not.toBeInTheDocument()
     })
 
-    it('renders CHIP-only Review decision with DMCO override text when NOT_SUBJECT_TO_REVIEW', async () => {
-        const contract = mockContractPackageSubmitted({
-            consolidatedStatus: 'NOT_SUBJECT_TO_REVIEW',
-            reviewStatus: 'NOT_SUBJECT_TO_REVIEW',
-        })
-        contract.packageSubmissions[0].contractRevision.formData.populationCovered =
-            'CHIP'
-        renderWithProviders(
-            <SubmissionTypeSummarySection
-                contract={contract}
-                editNavigateTo="submission-type"
-                submissionName="MN-MSHO-0003"
-                isStateUser={true}
-                initiallySubmittedAt={contract.initiallySubmittedAt}
-            />
-        )
-        const reviewDecision = await screen.findByRole('definition', {
-            name: 'Review decision',
-        })
-        expect(reviewDecision).toHaveTextContent(
-            'Not subject to DMCO review and validation'
-        )
-    })
+    it.each([
+        'NOT_SUBJECT_TO_REVIEW',
+        'SUBMITTED',
+        'RESUBMITTED',
+        'APPROVED',
+        'WITHDRAWN',
+    ] as const)(
+        'renders CHIP-only Review decision as not subject to review when consolidated status is %s',
+        async (consolidatedStatus) => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus,
+            })
+            contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+                'CHIP'
+            renderWithProviders(
+                <SubmissionTypeSummarySection
+                    contract={contract}
+                    editNavigateTo="submission-type"
+                    submissionName="MN-MSHO-0003"
+                    isStateUser={true}
+                    initiallySubmittedAt={contract.initiallySubmittedAt}
+                />
+            )
+            const reviewDecision = await screen.findByRole('definition', {
+                name: 'Review decision',
+            })
+            expect(reviewDecision).toHaveTextContent(
+                'Not subject to DMCO review and validation'
+            )
+        }
+    )
 
     it('does not render Review decision when not CHIP-only', async () => {
         const contract = mockContractPackageSubmitted({

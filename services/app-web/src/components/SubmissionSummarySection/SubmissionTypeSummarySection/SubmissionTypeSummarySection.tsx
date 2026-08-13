@@ -25,7 +25,6 @@ import {
     UpdatedAtSummary,
 } from '../SummarySectionFields'
 import { formattedProgramNames } from '../../../formHelpers'
-import { getConsolidatedContractStatusText } from '../../ContractTable'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 
@@ -94,19 +93,11 @@ export const SubmissionTypeSummarySection = ({
                 {headerChildComponent && headerChildComponent}
             </SectionHeader>
             <dl>
-                {contract.consolidatedStatus &&
-                    isSubmitted &&
+                {isSubmitted &&
                     chipSubmissionAutomation &&
                     contractFormData.populationCovered === 'CHIP' && (
                         <ReviewDecisionSummary
-                            reviewDecision={
-                                contract.consolidatedStatus ===
-                                'NOT_SUBJECT_TO_REVIEW'
-                                    ? 'Not subject to DMCO review and validation'
-                                    : getConsolidatedContractStatusText(
-                                          contract.consolidatedStatus
-                                      )
-                            }
+                            reviewDecision="Not subject to DMCO review and validation"
                             explainMissingData={explainMissingData}
                         />
                     )}
