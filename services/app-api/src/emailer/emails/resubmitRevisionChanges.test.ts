@@ -6,8 +6,8 @@ describe('buildResubmitRevisionChanges', () => {
     const statePrograms = mockMNState().programs
     const currentContract = mockContract()
 
-    // The resubmit email renders fieldChanges only, so the remaining diff
-    // collections are required by the type but left empty in these fixtures.
+    // The resubmit email renders multiple diff collections, so the remaining
+    // ones are required by the type even when a test only exercises one area.
     const baseComparison: Omit<RevisionDiff, 'fieldChanges'> = {
         contractID: 'test-contract-id',
         olderRevisionID: 'older-rev',
@@ -518,6 +518,161 @@ describe('buildResubmitRevisionChanges', () => {
                             label: 'Benefits provided',
                             oldValue: 'No',
                             newValue: '⎯',
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('formats new and modified state contacts for CMS resubmit email', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            stateContactChanges: [
+                {
+                    changeType: 'NEW_OR_MODIFIED',
+                    current: {
+                        name: 'Kasimir Kraft',
+                        titleRole: 'Assistant Division Chief',
+                        email: 'kkraft@il.gov',
+                    },
+                },
+                {
+                    changeType: 'NEW_OR_MODIFIED',
+                    current: {
+                        name: 'Rhonda Cumberbatch',
+                        titleRole: 'ASA PRINCIPLE',
+                        email: 'Rhonda@il.gov',
+                    },
+                },
+            ],
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            previousSubmissionDate: '04/30/2027',
+            currentSubmissionDate: '05/10/2027',
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'STATE CONTACTS',
+                    contactsLabel: 'New and modified:',
+                    contacts: [
+                        {
+                            value: 'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov',
+                        },
+                        {
+                            value: 'Rhonda Cumberbatch, ASA PRINCIPLE, Rhonda@il.gov',
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('formats contract and rate document changes for CMS resubmit email', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            documentChanges: {
+                contractDocuments: {
+                    added: ['Contract Amendment 08.pdf'],
+                    removed: ['Prior Contract Amendment 08.pdf'],
+                },
+                contractSupportingDocuments: {
+                    added: [],
+                    removed: ['Supporting Rate Cert.pdf'],
+                },
+                ratesDocuments: [
+                    {
+                        rateID: 'rate-1',
+                        rateCertificationName:
+                            'MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                        rateDocuments: {
+                            added: [
+                                'IL FIDE SNP CY 28 RATE CERTIFICATION.xlsx',
+                            ],
+                            removed: ['Old Rate Cert Summary.pdf'],
+                        },
+                        supportingDocuments: {
+                            added: [],
+                            removed: ['Old Supporting Rate Doc.pdf'],
+                        },
+                    },
+                ],
+                totalAdded: 2,
+                totalRemoved: 4,
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            previousSubmissionDate: '04/30/2027',
+            currentSubmissionDate: '05/10/2027',
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'DOCUMENTS',
+                    documentSummary: {
+                        totalChanged: 6,
+                        totalAdded: 2,
+                        totalRemoved: 4,
+                    },
+                    documentGroups: [
+                        {
+                            title: 'CONTRACT',
+                            rows: [
+                                {
+                                    label: 'Added',
+                                    value: 'Contract Amendment 08.pdf',
+                                },
+                                {
+                                    label: 'Removed',
+                                    value: 'Prior Contract Amendment 08.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'CONTRACT SUPPORTING',
+                            rows: [
+                                {
+                                    label: 'Removed',
+                                    value: 'Supporting Rate Cert.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'RATE CERTIFICATION | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                            rows: [
+                                {
+                                    label: 'Added',
+                                    value: 'IL FIDE SNP CY 28 RATE CERTIFICATION.xlsx',
+                                },
+                                {
+                                    label: 'Removed',
+                                    value: 'Old Rate Cert Summary.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'RATE SUPPORTING | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                            rows: [
+                                {
+                                    label: 'Removed',
+                                    value: 'Old Supporting Rate Doc.pdf',
+                                },
+                            ],
                         },
                     ],
                 },

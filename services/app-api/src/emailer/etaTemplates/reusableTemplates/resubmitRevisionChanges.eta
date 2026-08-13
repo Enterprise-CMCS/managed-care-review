@@ -17,6 +17,7 @@
 <div style="padding: 4px 0;">
     <strong><%= section.title %></strong>
 </div>
+<% if (section.rows) { %>
 <% section.rows.forEach(function(row) { %>
 <% if (row.isNew) { %>
 <div style="padding: 4px 0;">
@@ -24,9 +25,39 @@
 </div>
 <% } else { %>
 <div style="padding: 4px 0;">
-    <strong><%= row.label %>:</strong> <%= row.oldValue %><% if (row.breakBeforeNewValue) { %><br />→ <%= row.newValue %><% } else { %> → <%= row.newValue %><% } %>
+<strong><%= row.label %>:</strong> <%= row.oldValue %><% if (row.breakBeforeNewValue) { %><br />→ <%= row.newValue %><% } else { %> → <%= row.newValue %><% } %>
 </div>
 <% } %>
 <% }) %>
+<% } %>
+<% if (section.contacts && section.contactsLabel) { %>
+<div style="padding: 4px 0;">
+    <strong><%= section.contactsLabel %></strong>
+</div>
+<ul style="margin: 0; padding-left: 24px;">
+<% section.contacts.forEach(function(contact) { %>
+    <li style="padding: 4px 0;"><%= contact.value %></li>
+<% }) %>
+</ul>
+<% } %>
+<% if (section.documentSummary && section.documentGroups) { %>
+<div style="padding: 4px 0;">
+    <strong><%= section.documentSummary.totalChanged %> documents changed:</strong> <%= section.documentSummary.totalAdded %> added, <%= section.documentSummary.totalRemoved %> removed
+</div>
+<br />
+<% section.documentGroups.forEach(function(group, groupIndex) { %>
+<% if (groupIndex > 0) { %>
+<br />
+<% } %>
+<div style="padding: 4px 0;">
+    <%= group.title %>
+</div>
+<% group.rows.forEach(function(row) { %>
+<div style="padding: 4px 0 4px 40px;">
+    <strong><%= row.label %>:</strong> <%= row.value %>
+</div>
+<% }) %>
+<% }) %>
+<% } %>
 <% }) %>
 <% } %>

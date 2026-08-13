@@ -103,6 +103,79 @@ describe('with rates', () => {
             },
         ],
     }
+    const contactsAndDocumentsRevisionChanges = {
+        previousSubmissionDate: '05/01/2027',
+        currentSubmissionDate: '05/11/2027',
+        hasChanges: true,
+        sections: [
+            {
+                title: 'STATE CONTACTS',
+                contactsLabel: 'New and modified:',
+                contacts: [
+                    {
+                        value: 'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov',
+                    },
+                    {
+                        value: 'Rhonda Cumberbatch, ASA PRINCIPLE, Rhonda@il.gov',
+                    },
+                ],
+            },
+            {
+                title: 'DOCUMENTS',
+                documentSummary: {
+                    totalChanged: 6,
+                    totalAdded: 2,
+                    totalRemoved: 4,
+                },
+                documentGroups: [
+                    {
+                        title: 'CONTRACT',
+                        rows: [
+                            {
+                                label: 'Added' as const,
+                                value: 'VA-CCCPLUS-MEDALLION-Contract-Amendment-08.pdf',
+                            },
+                            {
+                                label: 'Removed' as const,
+                                value: 'Old Contract Amendment 08.pdf',
+                            },
+                        ],
+                    },
+                    {
+                        title: 'CONTRACT SUPPORTING',
+                        rows: [
+                            {
+                                label: 'Removed' as const,
+                                value: '2023-CCCPLUS-RATE-CERT.pdf',
+                            },
+                        ],
+                    },
+                    {
+                        title: 'RATE CERTIFICATION | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                        rows: [
+                            {
+                                label: 'Added' as const,
+                                value: 'IL FIDE SNP CY 28 RATE CERTIFICATION.xlsx',
+                            },
+                            {
+                                label: 'Removed' as const,
+                                value: 'Contract-Provisions-Summary.pdf',
+                            },
+                        ],
+                    },
+                    {
+                        title: 'RATE SUPPORTING | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                        rows: [
+                            {
+                                label: 'Removed' as const,
+                                value: 'Supporting Contract Amendment 08.pdf',
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    }
     const resubmitData = {
         updatedBy: {
             email: 'bob@example.com',
@@ -405,6 +478,71 @@ describe('with rates', () => {
         expect(template.bodyText).toContain('NEW CHIP beneficiaries: Yes')
         expect(template.bodyHTML).toContain(
             `<span style="color: ${emailColors.revisionChangesNewIndicator}; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> CHIP beneficiaries`
+        )
+    })
+    it('renders state contacts and document sections after the existing diff sections', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            {
+                previousSubmissionDate: '05/01/2027',
+                currentSubmissionDate: '05/11/2027',
+                hasChanges: true,
+                sections: [
+                    ...submissionTypeRevisionChanges.sections,
+                    ...contractDetailsRevisionChanges.sections,
+                    ...contractProvisionsRevisionChanges.sections,
+                    ...contactsAndDocumentsRevisionChanges.sections,
+                ],
+            }
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain('STATE CONTACTS')
+        expect(template.bodyText).toContain('New and modified:')
+        expect(template.bodyText).toContain(
+            'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov'
+        )
+        expect(template.bodyText).toContain(
+            'Rhonda Cumberbatch, ASA PRINCIPLE, Rhonda@il.gov'
+        )
+        expect(template.bodyText).toContain('DOCUMENTS')
+        expect(template.bodyText).toContain(
+            '6 documents changed: 2 added, 4 removed'
+        )
+        expect(template.bodyText).toContain('CONTRACT')
+        expect(template.bodyText).toContain(
+            'Added: VA-CCCPLUS-MEDALLION-Contract-Amendment-08.pdf'
+        )
+        expect(template.bodyText).toContain(
+            'Removed: 2023-CCCPLUS-RATE-CERT.pdf'
+        )
+        expect(template.bodyText).toContain(
+            'RATE CERTIFICATION | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230'
+        )
+        expect(template.bodyText).toContain(
+            'Removed: Supporting Contract Amendment 08.pdf'
+        )
+
+        const stateContactsIndex = template.bodyText?.indexOf('STATE CONTACTS')
+        const documentsIndex = template.bodyText?.indexOf('DOCUMENTS')
+        expect(stateContactsIndex).toBeGreaterThan(
+            template.bodyText?.indexOf('CONTRACT PROVISIONS') ?? -1
+        )
+        expect(documentsIndex).toBeGreaterThan(stateContactsIndex ?? -1)
+
+        expect(template.bodyHTML).toContain('<ul')
+        expect(template.bodyHTML).toContain(
+            '<strong>6 documents changed:</strong> 2 added, 4 removed'
+        )
+        expect(template.bodyHTML).toContain(
+            'RATE SUPPORTING | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230'
         )
     })
     it('includes expected data summary for a multi-rate contract and rates resubmission CMS email', async () => {

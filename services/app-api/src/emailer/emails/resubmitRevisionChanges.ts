@@ -15,9 +15,31 @@ type ResubmitRevisionChangeRow = {
     breakBeforeNewValue?: boolean
 }
 
+type ResubmitRevisionChangeContact = {
+    value: string
+}
+
+type ResubmitRevisionDocumentGroupRow = {
+    label: 'Added' | 'Removed'
+    value: string
+}
+
+type ResubmitRevisionDocumentGroup = {
+    title: string
+    rows: ResubmitRevisionDocumentGroupRow[]
+}
+
 type ResubmitRevisionChangeSection = {
     title: string
-    rows: ResubmitRevisionChangeRow[]
+    rows?: ResubmitRevisionChangeRow[]
+    contactsLabel?: string
+    contacts?: ResubmitRevisionChangeContact[]
+    documentSummary?: {
+        totalChanged: number
+        totalAdded: number
+        totalRemoved: number
+    }
+    documentGroups?: ResubmitRevisionDocumentGroup[]
 }
 
 type ResubmitRevisionChanges = {
@@ -478,6 +500,128 @@ const buildContractProvisionsRow = (
     }
 }
 
+const buildStateContactValue = (
+    contact: RevisionDiff['stateContactChanges'][number]['current']
+): string => {
+    return [contact.name, contact.titleRole, contact.email]
+        .filter((value): value is string => Boolean(value))
+        .join(', ')
+}
+
+const buildStateContactsSection = (
+    comparison: RevisionDiff
+): ResubmitRevisionChangeSection | undefined => {
+    const contacts = comparison.stateContactChanges
+        .map((change) => buildStateContactValue(change.current))
+        .filter(Boolean)
+        .map((value) => ({ value }))
+
+    if (contacts.length === 0) {
+        return undefined
+    }
+
+    return {
+        title: 'STATE CONTACTS',
+        contactsLabel: 'New and modified:',
+        contacts,
+    }
+}
+
+const buildDocumentGroupRows = (
+    added: string[],
+    removed: string[]
+): ResubmitRevisionDocumentGroupRow[] => [
+    ...added.map((value) => ({
+        label: 'Added' as const,
+        value,
+    })),
+    ...removed.map((value) => ({
+        label: 'Removed' as const,
+        value,
+    })),
+]
+
+const buildDocumentsSection = (
+    comparison: RevisionDiff
+): ResubmitRevisionChangeSection | undefined => {
+    const documentGroups: ResubmitRevisionDocumentGroup[] = []
+    const {
+        contractDocuments,
+        contractSupportingDocuments,
+        ratesDocuments,
+        totalAdded,
+        totalRemoved,
+    } = comparison.documentChanges
+
+    const contractRows = buildDocumentGroupRows(
+        contractDocuments.added,
+        contractDocuments.removed
+    )
+
+    if (contractRows.length > 0) {
+        documentGroups.push({
+            title: 'CONTRACT',
+            rows: contractRows,
+        })
+    }
+
+    const contractSupportingRows = buildDocumentGroupRows(
+        contractSupportingDocuments.added,
+        contractSupportingDocuments.removed
+    )
+
+    if (contractSupportingRows.length > 0) {
+        documentGroups.push({
+            title: 'CONTRACT SUPPORTING',
+            rows: contractSupportingRows,
+        })
+    }
+
+    for (const rateDocuments of ratesDocuments) {
+        const certificationRows = buildDocumentGroupRows(
+            rateDocuments.rateDocuments.added,
+            rateDocuments.rateDocuments.removed
+        )
+
+        if (certificationRows.length > 0) {
+            documentGroups.push({
+                title: `RATE CERTIFICATION | ${
+                    rateDocuments.rateCertificationName ?? rateDocuments.rateID
+                }`,
+                rows: certificationRows,
+            })
+        }
+
+        const supportingRows = buildDocumentGroupRows(
+            rateDocuments.supportingDocuments.added,
+            rateDocuments.supportingDocuments.removed
+        )
+
+        if (supportingRows.length > 0) {
+            documentGroups.push({
+                title: `RATE SUPPORTING | ${
+                    rateDocuments.rateCertificationName ?? rateDocuments.rateID
+                }`,
+                rows: supportingRows,
+            })
+        }
+    }
+
+    if (documentGroups.length === 0) {
+        return undefined
+    }
+
+    return {
+        title: 'DOCUMENTS',
+        documentSummary: {
+            totalChanged: totalAdded + totalRemoved,
+            totalAdded,
+            totalRemoved,
+        },
+        documentGroups,
+    }
+}
+
 const buildResubmitRevisionChanges = (
     currentContract: ContractType,
     comparison: RevisionDiff,
@@ -556,6 +700,16 @@ const buildResubmitRevisionChanges = (
         })
     }
 
+    const stateContactsSection = buildStateContactsSection(comparison)
+    if (stateContactsSection) {
+        sections.push(stateContactsSection)
+    }
+
+    const documentsSection = buildDocumentsSection(comparison)
+    if (documentsSection) {
+        sections.push(documentsSection)
+    }
+
     return {
         previousSubmissionDate: formatCalendarDate(
             comparison.olderSubmittedAt,
@@ -565,7 +719,7 @@ const buildResubmitRevisionChanges = (
             comparison.newerSubmittedAt,
             EMAIL_TIMEZONE
         ),
-        hasChanges: comparison.fieldChanges.length > 0,
+        hasChanges: sections.length > 0,
         sections,
     }
 }
