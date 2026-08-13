@@ -488,6 +488,8 @@ const createAndUpdateTestContractWithoutRates = async (
     formData.stateContacts = [
         {
             name: 'test name',
+            givenName: 'test',
+            familyName: 'name',
             titleRole: 'test title',
             email: 'email@example.com',
         },
