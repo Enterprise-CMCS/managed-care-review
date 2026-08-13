@@ -184,6 +184,8 @@ const mockContractRev = (
             stateContacts: [
                 {
                     name: 'Test Person',
+                    givenName: 'Test',
+                    familyName: 'Person',
                     titleRole: 'A Role',
                     email: 'test+state+contact@example.com',
                 },
@@ -269,6 +271,8 @@ const mockRateRevision = (
                 {
                     actuarialFirm: 'DELOITTE',
                     name: 'Actuary Contact 1',
+                    givenName: 'Actuary',
+                    familyName: 'Contact 1',
                     titleRole: 'Test Actuary Contact 1',
                     email: 'actuarycontact1@example.com',
                 },
@@ -460,7 +464,9 @@ const mockContract = (
                         ],
                         stateContacts: [
                             {
-                                name: 'contract-state-contact',
+                                name: 'contract-state contact',
+                                givenName: 'contract-state',
+                                familyName: 'contact',
                                 titleRole: 'state contact',
                                 email: 'contract-state-contact@example.com',
                             },
@@ -550,6 +556,8 @@ const mockContract = (
                                 {
                                     actuarialFirm: 'DELOITTE',
                                     name: 'Actuary Contact 1',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -558,6 +566,8 @@ const mockContract = (
                                 {
                                     actuarialFirm: 'DELOITTE',
                                     name: 'Actuary Contact 1',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact 1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -644,7 +654,9 @@ const mockEQROContract = (
                         ],
                         stateContacts: [
                             {
-                                name: 'contract-state-contact',
+                                name: 'contract-state contact',
+                                givenName: 'contract-state',
+                                familyName: 'contact',
                                 titleRole: 'state contact',
                                 email: 'contract-state-contact@example.com',
                             },

@@ -259,6 +259,8 @@ function addNewRateToRateInput(
         certifyingActuaryContacts: [
             {
                 name: 'Foo Person',
+                givenName: 'Foo',
+                familyName: 'Person',
                 titleRole: 'Bar Job',
                 email: 'foo@example.com',
                 actuarialFirm: 'GUIDEHOUSE',
@@ -267,6 +269,8 @@ function addNewRateToRateInput(
         addtlActuaryContacts: [
             {
                 name: 'Bar Person',
+                givenName: 'Bar',
+                familyName: 'Person',
                 titleRole: 'Baz Job',
                 email: 'bar@example.com',
                 actuarialFirm: 'OTHER',
@@ -628,6 +632,8 @@ const testRateFormInputData = (): RateFormDataInput => ({
     certifyingActuaryContacts: [
         {
             name: 'Foo Person',
+            givenName: 'Foo',
+            familyName: 'Person',
             titleRole: 'Bar Job',
             email: 'foo@example.com',
             actuarialFirm: 'GUIDEHOUSE',

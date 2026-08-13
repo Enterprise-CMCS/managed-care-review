@@ -236,7 +236,8 @@ export function submitContract(
                     ? parseEQROContract(
                           contractToParse,
                           contractWithHistory.stateCode,
-                          store
+                          store,
+                          featureFlags
                       )
                     : parseContract(
                           contractToParse,
