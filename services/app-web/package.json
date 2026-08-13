@@ -94,7 +94,7 @@
         "amazon-cognito-identity-js": "^6.3.20",
         "aws-amplify": "^5.3.33",
         "axios": "^1.18.1",
-        "dayjs": "^1.11.19",
+        "dayjs": "^1.11.21",
         "focus-trap-react": "^10.2.3",
         "formik": "^2.4.9",
         "graphql": "^16.14.0",
