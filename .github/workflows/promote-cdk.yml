@@ -1106,6 +1106,11 @@ jobs:
           VPC_ID: ${{ secrets.QA_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.QA_INTERNAL_ALLOWED_ORIGINS }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          # Custom API Gateway domain - qa only, gives the Mulesoft/Salesforce
+          # integration a stable hostname instead of the raw execute-api URL.
+          # Reuses the same cert as the CloudFront distributions.
+          CLOUDFRONT_CERT_ARN: ${{ secrets.QA_CERTIFICATE_ARN }}
+          API_DOMAIN_NAME: ${{ secrets.QA_API_DOMAIN_NAME }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-qa-cdk \
