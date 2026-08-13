@@ -39,10 +39,8 @@ describe('state user in state submission form', () => {
         }).safeClick()
         cy.checkA11yWithWcag22aa()
 
-        cy.location().then((fullUrl) => {
-            const submissionURL = fullUrl
-                .toString()
-                .replace('edit/contract-details', '')
+        cy.location('href').then((fullUrl) => {
+            const submissionURL = fullUrl.replace('edit/contract-details', '')
 
             // Check accessibility on rate details page
             cy.navigateFormByDirectLink(`${submissionURL}edit/rate-details`)
