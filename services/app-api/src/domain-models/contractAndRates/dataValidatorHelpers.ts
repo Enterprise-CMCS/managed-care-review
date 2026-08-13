@@ -261,9 +261,11 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                 stateContactValidation(contractFormData.stateContacts).forEach(
                     (issue) => ctx.addIssue(issue)
                 )
-                rateActuaryContactValidation(contract.draftRates).forEach(
-                    (issue) => ctx.addIssue(issue)
-                )
+                if (contractFormData.submissionType === 'CONTRACT_AND_RATES') {
+                    rateActuaryContactValidation(contract.draftRates).forEach(
+                        (issue) => ctx.addIssue(issue)
+                    )
+                }
             }
             if (featureFlags['438-attestation']) {
                 // since we have different validations based on a feature flag, we add them as a refinement here.
