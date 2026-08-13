@@ -119,16 +119,27 @@ const submittableActuaryContactSchema = actuaryContactSchema
         titleRole: z.string().min(1),
         email: z.email(),
     })
-    .refine(
-        (contact) =>
-            contact.actuarialFirm !== undefined ||
-            contact.actuarialFirmOther !== undefined,
-        {
-            message:
-                'Actuary contact must have actuarialFirm or actuarialFirmOther',
-            path: ['actuarialFirm'],
+    .superRefine((contact, ctx) => {
+        if (contact.actuarialFirm === undefined) {
+            ctx.addIssue({
+                code: 'custom',
+                message: 'Actuary contact must have an actuarialFirm',
+                path: ['actuarialFirm'],
+            })
         }
-    )
+
+        if (
+            contact.actuarialFirm === 'OTHER' &&
+            !contact.actuarialFirmOther?.trim()
+        ) {
+            ctx.addIssue({
+                code: 'custom',
+                message:
+                    'Actuary contact must have actuarialFirmOther when actuarialFirm is OTHER',
+                path: ['actuarialFirmOther'],
+            })
+        }
+    })
 
 function preprocessNulls<T extends z.ZodType>(schema: T) {
     return z.preprocess((val) => val ?? undefined, schema)
