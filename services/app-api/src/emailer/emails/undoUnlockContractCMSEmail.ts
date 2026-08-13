@@ -14,7 +14,7 @@ import {
     renderTemplate,
     stripHTMLFromTemplate,
 } from '../templateHelpers'
-import { formatCalendarDate } from 'Users/truss-ronak/Projects/forked/managed-care-review/packages/dates/build'
+import { formatCalendarDate } from '@mc-review/dates'
 import { pruneDuplicateEmails } from '../formatters'
 import { submissionSummaryURL } from '../generateURLs'
 
