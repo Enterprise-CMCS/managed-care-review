@@ -1446,4 +1446,6 @@ test('renders overall email as expected', async () => {
     if (!template.bodyHTML) {
         throw new Error('Expected bodyHTML to be defined')
     }
+
+    ;(expect(template.bodyHTML) as any).toMatchSnapshot()
 })
