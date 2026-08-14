@@ -724,4 +724,8 @@ const buildResubmitRevisionChanges = (
     }
 }
 
-export { buildResubmitRevisionChanges, type ResubmitRevisionChanges }
+export {
+    buildResubmitRevisionChanges,
+    type ResubmitRevisionChanges,
+    type ResubmitRevisionChangeSection,
+}
