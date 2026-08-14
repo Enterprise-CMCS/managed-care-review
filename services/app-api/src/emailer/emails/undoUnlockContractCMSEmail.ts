@@ -1,4 +1,7 @@
-import { packageName as generatePackageName } from '@mc-review/submissions'
+import {
+    eqroValidationAndReviewDetermination,
+    packageName as generatePackageName,
+} from '@mc-review/submissions'
 import type {
     ContractType,
     ProgramType,
@@ -57,6 +60,12 @@ export const undoUnlockContractCMSEmail = async (
         config.baseUrl
     )
 
+    const isEQRO = contract.contractSubmissionType === `EQRO`
+
+    const isNotSubjectToReview =
+        isEQRO &&
+        eqroValidationAndReviewDetermination(contract.id, formData) === false
+
     const etaData = {
         packageName,
         updatedAt: formatCalendarDate(
@@ -65,8 +74,11 @@ export const undoUnlockContractCMSEmail = async (
         ),
         updatedBy: updateInfo.updatedBy.email,
         reason: updateInfo.updatedReason,
-        // Do we want any overrides on this status?
-        status: contract.status,
+        status: isNotSubjectToReview ? `Not subject to review` : `Submitted`,
+        isEQRO,
+        reviewDecisionText: isNotSubjectToReview
+            ? `Not subject to formal review and approval`
+            : `Subject to formal review and approval`,
         shouldIncludeRates: isContractAndRates,
         rateInfos: contract.packageSubmissions[0].rateRevisions.map((rate) => ({
             rateName: rate.formData.rateCertificationName,
