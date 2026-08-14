@@ -99,6 +99,13 @@ export function getRateLastUpdatedForDisplay(
     ])
 }
 
+/**
+ * Helper function to handle error handling and logging when getting state analysts emails. Should only be called from the resolver.
+ * @param contractRes is a contract or rate
+ * @param store the store used to query persisted data
+ * @param context the GraphQL context
+ * @returns an empty [] if there is an error or the analysts list is empty
+ */
 export async function getStateAnalystsEmails(
     contractRes: ContractType | RateType,
     store: Store,
@@ -121,6 +128,14 @@ export async function getStateAnalystsEmails(
     return stateAnalystsEmails
 }
 
+/**
+ * Helper function to handle error handling and logging when getting state programs. Should only be called from the resolver.
+ * @param stateCode state code on the contract
+ * @param store the store used to query persisted data
+ * @param context the GraphQL context
+ * @param options is an object that has properties for having unique logging and error reporting
+ * @returns an [] of ProgramType
+ */
 export function getStatePrograms(
     stateCode: string,
     store: Store,
