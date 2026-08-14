@@ -331,7 +331,7 @@ describe('with rates', () => {
             })
         )
     })
-    it('includes no-diff submission changes copy when revision changes are provided', async () => {
+    it('renders fallback copy when revisionChanges is present but has no displayable changes', async () => {
         const template = await resubmitContractCMSEmail(
             submission,
             resubmitData,
@@ -395,6 +395,57 @@ describe('with rates', () => {
         expect(template.bodyText).toContain('Risk-based contract: No → Yes')
         expect(template.bodyHTML).toContain(
             '<strong>Medicaid populations:</strong> Medicaid and CHIP → CHIP-only'
+        )
+    })
+    it('renders state contacts and document changes for CHIP-only CMS resubmission emails', async () => {
+        const chipOnlySubmission: ContractType = {
+            ...submission,
+            packageSubmissions: [
+                {
+                    ...submission.packageSubmissions[0],
+                    contractRevision: {
+                        ...submission.packageSubmissions[0].contractRevision,
+                        formData: {
+                            ...submission.packageSubmissions[0].contractRevision
+                                .formData,
+                            populationCovered: 'CHIP',
+                        },
+                    },
+                },
+            ],
+        }
+
+        const template = await resubmitContractCMSEmail(
+            chipOnlySubmission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            contactsAndDocumentsRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.subject).toContain(
+            'is not subject to DMCO review and validation.'
+        )
+        expect(template.bodyText).toContain('STATE CONTACTS')
+        expect(template.bodyText).toContain(
+            'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov'
+        )
+        expect(template.bodyText).toContain('DOCUMENTS')
+        expect(template.bodyText).toContain(
+            '6 documents changed: 2 added, 4 removed'
+        )
+        expect(template.bodyText).toContain(
+            'RATE CERTIFICATION | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230'
+        )
+        expect(template.bodyHTML).toContain('<strong>STATE CONTACTS</strong>')
+        expect(template.bodyHTML).toContain('<strong>DOCUMENTS</strong>')
+        expect(template.bodyHTML).toContain(
+            '<strong>6 documents changed:</strong> 2 added, 4 removed'
         )
     })
     it('renders submission type diff rows when revision changes are provided', async () => {
