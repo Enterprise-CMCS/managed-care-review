@@ -9,7 +9,7 @@ CMS undid the unlock on <%= it.packageName %>. The submission returned to its pr
 <% } %>
 <% if (it.shouldIncludeRates) { %>
     <% if (it.rateInfos.length > 1) { %>
-        <b>Rate names</b>:
+        <b>Rate names:</b>
         <ul style=<%~'"margin-top: 0px;"'%>>
         <% it.rateInfos.forEach(function(rate) { %>
             <li><%= rate.rateName %></li>
@@ -17,7 +17,7 @@ CMS undid the unlock on <%= it.packageName %>. The submission returned to its pr
         </ul>
     <% } else { %>
         <% it.rateInfos.forEach(function(rate) { %>
-            <b>Rate name</b>: <%= rate.rateName %><br />
+            <b>Rate name:</b> <%= rate.rateName %><br />
         <% }) %>
     <% } %>
 <% } %>
