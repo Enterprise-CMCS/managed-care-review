@@ -114,6 +114,17 @@ async function unlockContractInsideTransaction(
             // return data only queries data we need.
             id: true,
             revisions: {
+                // Only the revision that was last submitted with a contract
+                // tells us who the current parent is. Undo unlock preserves
+                // reversed unlocked revisions for audit history. Matches how
+                // getParentContractID selects the parent-defining revision.
+                where: {
+                    submitInfo: {
+                        submittedContracts: {
+                            some: {},
+                        },
+                    },
+                },
                 orderBy: {
                     createdAt: 'desc',
                 },
@@ -129,7 +140,7 @@ async function unlockContractInsideTransaction(
                     },
                     unlockInfo: true,
                 },
-                take: 2, // Only two revision states are possible: mutually unlocked or submitted
+                take: 1,
             },
             reviewStatusActions: {
                 orderBy: {
