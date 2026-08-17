@@ -1,4 +1,4 @@
-<div>If you need assistance or to make changes to your submission:</div>
+<b>If you need assistance or to make changes to your submission:</b>
 <ul>
     <li>
         For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:<%= it.cmsReviewHelpEmailAddress %>"><%= it.cmsReviewHelpEmailAddress %></a> and/or your CMS primary contact.
