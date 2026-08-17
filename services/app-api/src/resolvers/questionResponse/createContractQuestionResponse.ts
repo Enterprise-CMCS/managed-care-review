@@ -6,9 +6,9 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError, type Store } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
-import type { StateCodeType } from '@mc-review/submissions'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function createContractQuestionResponseResolver(
     store: Store,
@@ -157,43 +157,20 @@ export function createContractQuestionResponseResolver(
                     throw createUserInputError(errMessage)
                 }
 
-                const statePrograms = store.findStatePrograms(
-                    contract.stateCode
+                const statePrograms = getStatePrograms(
+                    contract.stateCode,
+                    store,
+                    context,
+                    { operation: 'createContractQuestionResponse' }
                 )
-                if (statePrograms instanceof Error) {
-                    logResolverError(
-                        'createContractQuestionResponse',
-                        statePrograms.message,
-                        context
-                    )
-                    throw new GraphQLError(statePrograms.message, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
 
                 const submitterEmails = contractSubmitters(contract)
 
-                let stateAnalystsEmails: string[] = []
-                // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-                const stateAnalystsEmailsResult =
-                    await store.findStateAssignedUsers(
-                        contract.stateCode as StateCodeType
-                    )
-
-                if (stateAnalystsEmailsResult instanceof Error) {
-                    logResolverError(
-                        'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message,
-                        context
-                    )
-                } else {
-                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                        (u) => u.email
-                    )
-                }
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    contract,
+                    store,
+                    context
+                )
 
                 const sendQuestionResponseCMSEmailResult =
                     await emailer.sendQuestionResponseCMSEmail(

@@ -6,9 +6,9 @@ import { GraphQLError } from 'graphql/index'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import type { Emailer } from '../../emailer'
-import type { StateCodeType } from '@mc-review/submissions'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
+import { getStateAnalystsEmails } from '../helpers'
 
 export function createRateQuestionResponseResolver(
     store: Store,
@@ -124,24 +124,11 @@ export function createRateQuestionResponseResolver(
                     throw new Error(errMessage)
                 }
 
-                let stateAnalystsEmails: string[] = []
-                // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-                const stateAnalystsEmailsResult =
-                    await store.findStateAssignedUsers(
-                        rate.stateCode as StateCodeType
-                    )
-
-                if (stateAnalystsEmailsResult instanceof Error) {
-                    logResolverError(
-                        'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message,
-                        context
-                    )
-                } else {
-                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                        (u) => u.email
-                    )
-                }
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    rate,
+                    store,
+                    context
+                )
 
                 const sendRateQuestionResponseCMSEmailResult =
                     await emailer.sendRateQuestionResponseCMSEmail(

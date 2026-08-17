@@ -12,6 +12,7 @@ import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAn
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
+import { getStatePrograms } from '../helpers'
 
 // Zod schemas to parse the updatedRates param since the types are not fully defined in GQL
 // CREATE / UPDATE / LINK
@@ -158,23 +159,16 @@ function updateDraftContractRates(
                     })
                 }
 
-                const statePrograms = store.findStatePrograms(
-                    contract.stateCode
+                const statePrograms = getStatePrograms(
+                    contract.stateCode,
+                    store,
+                    context,
+                    {
+                        operation: 'updateDraftContractRates',
+                        errorMsg: (m) =>
+                            `Couldn't find programs for state ${contract.stateCode}. Message: ${m}`,
+                    }
                 )
-                if (statePrograms instanceof Error) {
-                    const errMessage = `Couldn't find programs for state ${contract.stateCode}. Message: ${statePrograms.message}`
-                    logResolverError(
-                        'updateDraftContractRates',
-                        errMessage,
-                        context
-                    )
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
 
                 // AUTHORIZATION
                 // Only callable by a state user from this state

@@ -1,4 +1,9 @@
-import type { ContractType, RateType } from '../domain-models'
+import { GraphQLError } from 'graphql'
+import type { StateCodeType } from '@mc-review/submissions'
+import type { ContractType, ProgramType, RateType } from '../domain-models'
+import type { Context } from '../handlers/apollo_gql'
+import type { Store } from '../postgres'
+import { logResolverError } from '../logger'
 
 type WithLatest = {
     latestQuestionCreatedAt?: Date | string | null
@@ -92,4 +97,72 @@ export function getRateLastUpdatedForDisplay(
         lastSubmitted,
         latestReviewAction,
     ])
+}
+
+/**
+ * Helper function to handle error handling and logging when getting state analysts emails. Should only be called from the resolver.
+ * @param contractRes is a contract or rate
+ * @param store the store used to query persisted data
+ * @param context the GraphQL context
+ * @returns an empty [] if there is an error or the analysts list is empty
+ */
+export async function getStateAnalystsEmails(
+    contractRes: ContractType | RateType,
+    store: Store,
+    context: Context
+): Promise<string[]> {
+    let stateAnalystsEmails: string[] = []
+    const stateAnalystsEmailsResult = await store.findStateAssignedUsers(
+        contractRes.stateCode as StateCodeType
+    )
+
+    if (stateAnalystsEmailsResult instanceof Error) {
+        logResolverError(
+            'getStateAnalystsEmails',
+            stateAnalystsEmailsResult.message,
+            context
+        )
+    } else {
+        stateAnalystsEmails = stateAnalystsEmailsResult.map((u) => u.email)
+    }
+    return stateAnalystsEmails
+}
+
+/**
+ * Helper function to handle error handling and logging when getting state programs. Should only be called from the resolver.
+ * @param stateCode state code on the contract
+ * @param store the store used to query persisted data
+ * @param context the GraphQL context
+ * @param options is an object that has properties for having unique logging and error reporting
+ * @returns an [] of ProgramType
+ */
+export function getStatePrograms(
+    stateCode: string,
+    store: Store,
+    context: Context,
+    options?: {
+        operation?: string
+        errorMsg?: (msg: string) => string
+        cause?: string
+    }
+): ProgramType[] {
+    const statePrograms = store.findStatePrograms(stateCode)
+
+    if (statePrograms instanceof Error) {
+        const message =
+            options?.errorMsg?.(statePrograms.message) ?? statePrograms.message
+        logResolverError(
+            options?.operation ?? 'findStatePrograms',
+            message,
+            context
+        )
+        throw new GraphQLError(message, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: options?.cause ?? 'DB_ERROR',
+            },
+        })
+    }
+
+    return statePrograms
 }

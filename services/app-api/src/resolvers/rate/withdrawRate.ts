@@ -1,7 +1,6 @@
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
-import type { StateCodeType } from '@mc-review/submissions'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
@@ -10,6 +9,7 @@ import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function withdrawRate(
     store: Store,
@@ -149,39 +149,22 @@ export function withdrawRate(
                 logResolverSuccess('withdrawRate', context)
 
                 // Send out email to state contacts
-                const statePrograms = store.findStatePrograms(
-                    withdrawnRate.stateCode
+                const statePrograms = getStatePrograms(
+                    withdrawnRate.stateCode,
+                    store,
+                    context,
+                    {
+                        operation: 'withdrawRate',
+                        errorMsg: (m) => `Email failed: ${m}`,
+                        cause: 'EMAIL_ERROR',
+                    }
                 )
 
-                if (statePrograms instanceof Error) {
-                    const errMessage = `Email failed: ${statePrograms.message}`
-                    logResolverError('withdrawRate', errMessage, context)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'EMAIL_ERROR',
-                        },
-                    })
-                }
-
-                let stateAnalystsEmails: string[] = []
-                // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-                const stateAnalystsEmailsResult =
-                    await store.findStateAssignedUsers(
-                        withdrawnRate.stateCode as StateCodeType
-                    )
-
-                if (stateAnalystsEmailsResult instanceof Error) {
-                    logResolverError(
-                        'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message,
-                        context
-                    )
-                } else {
-                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                        (u) => u.email
-                    )
-                }
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    withdrawnRate,
+                    store,
+                    context
+                )
 
                 const sendWithdrawCMSEmail =
                     await emailer.sendWithdrawnRateCMSEmail(
