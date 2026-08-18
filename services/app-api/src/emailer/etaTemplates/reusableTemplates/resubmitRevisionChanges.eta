@@ -42,7 +42,7 @@
 <% } %>
 <% if (section.documentSummary && section.documentGroups) { %>
 <div style="padding: 4px 0;">
-    <strong><%= section.documentSummary.totalChanged %> documents changed:</strong> <%= section.documentSummary.totalAdded %> added, <%= section.documentSummary.totalRemoved %> removed
+    <strong><%= section.documentSummary.totalChanged %> document<% if (section.documentSummary.totalChanged !== 1) { %>s<% } %> changed:</strong> <%= section.documentSummary.totalAdded %> added, <%= section.documentSummary.totalRemoved %> removed
 </div>
 <br />
 <% section.documentGroups.forEach(function(group, groupIndex) { %>

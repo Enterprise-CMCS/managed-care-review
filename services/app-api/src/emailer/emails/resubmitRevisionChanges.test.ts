@@ -750,6 +750,80 @@ describe('buildResubmitRevisionChanges', () => {
         })
     })
 
+    it('uses the UI fallback label when a rate document group has no rate name', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            documentChanges: {
+                contractDocuments: {
+                    added: [],
+                    removed: [],
+                },
+                contractSupportingDocuments: {
+                    added: [],
+                    removed: [],
+                },
+                ratesDocuments: [
+                    {
+                        rateID: 'rate-without-name',
+                        rateCertificationName: undefined,
+                        rateDocuments: {
+                            added: ['rate-cert-added.pdf'],
+                            removed: [],
+                        },
+                        supportingDocuments: {
+                            added: [],
+                            removed: ['rate-support-removed.pdf'],
+                        },
+                    },
+                ],
+                totalAdded: 1,
+                totalRemoved: 1,
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            ...baseDates,
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'DOCUMENTS',
+                    documentSummary: {
+                        totalChanged: 2,
+                        totalAdded: 1,
+                        totalRemoved: 1,
+                    },
+                    documentGroups: [
+                        {
+                            title: 'RATE CERTIFICATION | Unknown rate name',
+                            rows: [
+                                {
+                                    label: 'Added',
+                                    value: 'rate-cert-added.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'RATE SUPPORTING | Unknown rate name',
+                            rows: [
+                                {
+                                    label: 'Removed',
+                                    value: 'rate-support-removed.pdf',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
     it('orders formatter sections in the expected email sequence', () => {
         const comparison: RevisionDiff = {
             ...baseComparison,

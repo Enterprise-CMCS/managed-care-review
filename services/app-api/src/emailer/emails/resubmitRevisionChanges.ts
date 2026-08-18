@@ -545,6 +545,8 @@ const buildDocumentsSection = (
     comparison: RevisionDiff
 ): ResubmitRevisionChangeSection | undefined => {
     const documentGroups: ResubmitRevisionDocumentGroup[] = []
+    const getRateNameForDisplay = (rateCertificationName?: string) =>
+        rateCertificationName ?? 'Unknown rate name'
     const {
         contractDocuments,
         contractSupportingDocuments,
@@ -585,9 +587,9 @@ const buildDocumentsSection = (
 
         if (certificationRows.length > 0) {
             documentGroups.push({
-                title: `RATE CERTIFICATION | ${
-                    rateDocuments.rateCertificationName ?? rateDocuments.rateID
-                }`,
+                title: `RATE CERTIFICATION | ${getRateNameForDisplay(
+                    rateDocuments.rateCertificationName
+                )}`,
                 rows: certificationRows,
             })
         }
@@ -599,9 +601,9 @@ const buildDocumentsSection = (
 
         if (supportingRows.length > 0) {
             documentGroups.push({
-                title: `RATE SUPPORTING | ${
-                    rateDocuments.rateCertificationName ?? rateDocuments.rateID
-                }`,
+                title: `RATE SUPPORTING | ${getRateNameForDisplay(
+                    rateDocuments.rateCertificationName
+                )}`,
                 rows: supportingRows,
             })
         }
