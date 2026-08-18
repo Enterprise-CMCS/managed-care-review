@@ -11,10 +11,10 @@ import { logResolverError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { GraphQLError } from 'graphql/index'
 import type { Emailer } from '../../emailer'
-import type { StateCodeType } from '@mc-review/submissions'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import { getStateAnalystsEmails } from '../helpers'
 
 export function withdrawContract(
     store: Store,
@@ -144,24 +144,12 @@ export function withdrawContract(
                         )
                     })
                 }
-                let stateAnalystsEmails: string[] = []
-                const stateAnalystsEmailsResult =
-                    await store.findStateAssignedUsers(
-                        withdrawnContract.stateCode as StateCodeType
-                    )
 
-                if (stateAnalystsEmailsResult instanceof Error) {
-                    logResolverError(
-                        'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message,
-                        context
-                    )
-                    recordResolverError(span, stateAnalystsEmailsResult)
-                } else {
-                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                        (u) => u.email
-                    )
-                }
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    withdrawnContract,
+                    store,
+                    context
+                )
 
                 const sendWithdrawCMSEmail =
                     await emailer.sendWithdrawnSubmissionCMSEmail(

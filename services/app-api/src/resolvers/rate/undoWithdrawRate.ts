@@ -1,7 +1,6 @@
 import type { Store } from '../../postgres'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import type { Emailer } from '../../emailer'
-import type { StateCodeType } from '@mc-review/submissions'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { hasCMSPermissions } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
@@ -10,6 +9,7 @@ import { NotFoundError } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function undoWithdrawRate(
     store: Store,
@@ -169,38 +169,22 @@ export function undoWithdrawRate(
                 logResolverSuccess('undoWithdrawRate', context)
 
                 //Send emails upon success
-                const statePrograms = store.findStatePrograms(
-                    undoWithdrawRateResult.stateCode
+                const statePrograms = getStatePrograms(
+                    undoWithdrawRateResult.stateCode,
+                    store,
+                    context,
+                    {
+                        operation: 'undoWithdrawRate',
+                        errorMsg: (m) => `Email failed: ${m}`,
+                        cause: 'EMAIL_ERROR',
+                    }
                 )
 
-                if (statePrograms instanceof Error) {
-                    const errMessage = `Email failed: ${statePrograms.message}`
-                    logResolverError('undoWithdrawRate', errMessage, context)
-                    throw new GraphQLError(errMessage, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'EMAIL_ERROR',
-                        },
-                    })
-                }
-
-                let stateAnalystEmails: string[] = []
-                const stateAnalystEmailsResult =
-                    await store.findStateAssignedUsers(
-                        undoWithdrawRateResult.stateCode as StateCodeType
-                    )
-
-                if (stateAnalystEmailsResult instanceof Error) {
-                    logResolverError(
-                        'getStateAnalystEmails',
-                        stateAnalystEmailsResult.message,
-                        context
-                    )
-                } else {
-                    stateAnalystEmails = stateAnalystEmailsResult.map(
-                        (u) => u.email
-                    )
-                }
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    undoWithdrawRateResult,
+                    store,
+                    context
+                )
 
                 //State emails
                 const sendUndoWithdrawnRateStateEmail =
@@ -216,7 +200,7 @@ export function undoWithdrawRate(
                         undoWithdrawRateResult,
                         parentContract.contractSubmissionType,
                         statePrograms,
-                        stateAnalystEmails
+                        stateAnalystsEmails
                     )
 
                 //Send email error handling

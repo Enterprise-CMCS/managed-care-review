@@ -28,7 +28,6 @@ import {
 } from '../../domain-models/contractAndRates/dataValidatorHelpers'
 import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
-import type { StateCodeType } from '@mc-review/submissions'
 import {
     isCHIPOnly,
     isContractWithProvisions,
@@ -38,6 +37,7 @@ import type { GeneralizedProvisionType } from '@mc-review/submissions'
 import { canWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 import { buildResubmitRevisionChanges } from '../../emailer/emails/resubmitRevisionChanges'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -532,46 +532,20 @@ export function submitContract(
                 // Send emails!
                 const status = submitContractResult.status
 
-                let stateAnalystsEmails: string[] = []
-                // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-                const stateAnalystsEmailsResult =
-                    await store.findStateAssignedUsers(
-                        submitContractResult.stateCode as StateCodeType
-                    )
-
-                if (stateAnalystsEmailsResult instanceof Error) {
-                    logResolverError(
-                        'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message,
-                        context
-                    )
-                    recordResolverError(span, stateAnalystsEmailsResult)
-                } else {
-                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                        (u) => u.email
-                    )
-                }
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    submitContractResult,
+                    store,
+                    context
+                )
 
                 // Get submitter email from every contract submitted revision.
                 const submitterEmails = contractSubmitters(submitContractResult)
 
-                const statePrograms = store.findStatePrograms(
-                    submitContractResult.stateCode
+                const statePrograms = getStatePrograms(
+                    submitContractResult.stateCode,
+                    store,
+                    context
                 )
-
-                if (statePrograms instanceof Error) {
-                    logResolverError(
-                        'findStatePrograms',
-                        statePrograms.message,
-                        context
-                    )
-                    throw new GraphQLError(statePrograms.message, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
 
                 let cmsContractEmailResult
                 let stateContractEmailResult
