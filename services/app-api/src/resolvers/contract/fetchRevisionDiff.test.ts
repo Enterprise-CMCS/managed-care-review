@@ -589,7 +589,9 @@ describe('fetchRevisionDiff', () => {
         const {
             cmsServer,
             contract,
+            sharedRateID,
             revisedRateID,
+            removedRateID,
             latestPackageSubmission,
             previousPackageSubmission,
         } = await createResubmittedContractWithAllDiffChanges()
@@ -602,6 +604,29 @@ describe('fetchRevisionDiff', () => {
                 previousPackageSubmission.contractRevision.id,
         })
 
+        const addedRateCertificationName =
+            latestPackageSubmission.rateRevisions.find(
+                (rateRevision) => rateRevision.rateID === sharedRateID
+            )?.formData.rateCertificationName
+        const removedRateCertificationName =
+            previousPackageSubmission.rateRevisions.find(
+                (rateRevision) => rateRevision.rateID === removedRateID
+            )?.formData.rateCertificationName
+        const revisedRateCertificationName =
+            latestPackageSubmission.rateRevisions.find(
+                (rateRevision) => rateRevision.rateID === revisedRateID
+            )?.formData.rateCertificationName
+
+        if (
+            addedRateCertificationName === undefined ||
+            removedRateCertificationName === undefined ||
+            revisedRateCertificationName === undefined
+        ) {
+            throw new Error(
+                'Unexpected error: one or more expected rate certification names not found'
+            )
+        }
+
         expect(revisionDiff.comparison.documentChanges).toEqual({
             contractDocuments: {
                 added: ['contract-added.pdf'],
@@ -613,12 +638,32 @@ describe('fetchRevisionDiff', () => {
             },
             ratesDocuments: [
                 {
+                    rateID: sharedRateID,
+                    rateCertificationName: addedRateCertificationName,
+                    rateDocuments: {
+                        added: ['ratedoc1.doc'],
+                        removed: [],
+                    },
+                    supportingDocuments: {
+                        added: ['ratesupdoc1.doc', 'ratesupdoc2.doc'],
+                        removed: [],
+                    },
+                },
+                {
+                    rateID: removedRateID,
+                    rateCertificationName: removedRateCertificationName,
+                    rateDocuments: {
+                        added: [],
+                        removed: ['ratedoc1.doc'],
+                    },
+                    supportingDocuments: {
+                        added: [],
+                        removed: ['ratesupdoc1.doc', 'ratesupdoc2.doc'],
+                    },
+                },
+                {
                     rateID: revisedRateID,
-                    rateCertificationName:
-                        latestPackageSubmission.rateRevisions.find(
-                            (rateRevision) =>
-                                rateRevision.rateID === revisedRateID
-                        )?.formData.rateCertificationName,
+                    rateCertificationName: revisedRateCertificationName,
                     rateDocuments: {
                         added: ['rate-doc-added.xlsx'],
                         removed: ['ratedoc1.doc'],
@@ -629,8 +674,8 @@ describe('fetchRevisionDiff', () => {
                     },
                 },
             ],
-            totalAdded: 3,
-            totalRemoved: 4,
+            totalAdded: 6,
+            totalRemoved: 7,
         })
     })
 

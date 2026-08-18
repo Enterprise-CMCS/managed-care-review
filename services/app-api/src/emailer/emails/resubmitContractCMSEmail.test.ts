@@ -172,6 +172,54 @@ describe('with rates', () => {
             ],
         },
     ])
+    const addedAndRemovedRateDocumentsRevisionChanges = makeRevisionChanges([
+        {
+            title: 'DOCUMENTS',
+            documentSummary: {
+                totalChanged: 4,
+                totalAdded: 2,
+                totalRemoved: 2,
+            },
+            documentGroups: [
+                {
+                    title: 'RATE CERTIFICATION | MCR-IL-ADDED-RATE',
+                    rows: [
+                        {
+                            label: 'Added' as const,
+                            value: 'added-rate-certification.xlsx',
+                        },
+                    ],
+                },
+                {
+                    title: 'RATE SUPPORTING | MCR-IL-ADDED-RATE',
+                    rows: [
+                        {
+                            label: 'Added' as const,
+                            value: 'added-rate-supporting.pdf',
+                        },
+                    ],
+                },
+                {
+                    title: 'RATE CERTIFICATION | MCR-IL-REMOVED-RATE',
+                    rows: [
+                        {
+                            label: 'Removed' as const,
+                            value: 'removed-rate-certification.xlsx',
+                        },
+                    ],
+                },
+                {
+                    title: 'RATE SUPPORTING | MCR-IL-REMOVED-RATE',
+                    rows: [
+                        {
+                            label: 'Removed' as const,
+                            value: 'removed-rate-supporting.pdf',
+                        },
+                    ],
+                },
+            ],
+        },
+    ])
     const resubmitData = {
         updatedBy: {
             email: 'bob@example.com',
@@ -668,6 +716,49 @@ describe('with rates', () => {
         )
         expect(template.bodyHTML).toContain(
             'RATE SUPPORTING | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230'
+        )
+    })
+    it('renders added-rate and removed-rate document groups in the CMS email body', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            addedAndRemovedRateDocumentsRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain(
+            '4 documents changed: 2 added, 2 removed'
+        )
+        expect(template.bodyText).toContain(
+            'RATE CERTIFICATION | MCR-IL-ADDED-RATE'
+        )
+        expect(template.bodyText).toContain(
+            'Added: added-rate-certification.xlsx'
+        )
+        expect(template.bodyText).toContain(
+            'RATE SUPPORTING | MCR-IL-ADDED-RATE'
+        )
+        expect(template.bodyText).toContain('Added: added-rate-supporting.pdf')
+        expect(template.bodyText).toContain(
+            'RATE CERTIFICATION | MCR-IL-REMOVED-RATE'
+        )
+        expect(template.bodyText).toContain(
+            'Removed: removed-rate-certification.xlsx'
+        )
+        expect(template.bodyText).toContain(
+            'RATE SUPPORTING | MCR-IL-REMOVED-RATE'
+        )
+        expect(template.bodyText).toContain(
+            'Removed: removed-rate-supporting.pdf'
+        )
+        expect(template.bodyHTML).toContain(
+            '<strong>4 documents changed:</strong> 2 added, 2 removed'
         )
     })
     it('includes expected data summary for a multi-rate contract and rates resubmission CMS email', async () => {
