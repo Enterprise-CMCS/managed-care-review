@@ -16,7 +16,11 @@ import {
     CfnAccount,
     LogGroupLogDestination,
     AccessLogFormat,
+    DomainName,
+    BasePathMapping,
+    EndpointType,
 } from 'aws-cdk-lib/aws-apigateway'
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager'
 import {
     PolicyStatement,
     Effect,
@@ -602,6 +606,11 @@ export class AppApiStack extends BaseStack {
         // Setup WAF association AFTER routes are configured (ensures deployment exists)
         this.setupWafAssociation(this.apiGateway)
 
+        // Optional custom domain for the API Gateway (currently only used by
+        // qa, to give the Mulesoft/Salesforce integration a stable hostname
+        // instead of the raw execute-api URL)
+        this.setupCustomApiDomain(this.apiGateway)
+
         // Setup cleanup function cron schedule
         this.setupCleanupSchedule()
 
@@ -1130,6 +1139,42 @@ export class AppApiStack extends BaseStack {
 
         // Ensure WAF association happens after API Gateway deployment
         wafAssociation.node.addDependency(apiGateway)
+    }
+
+    /**
+     * Optional custom domain for the API Gateway. Reuses the same ACM cert as
+     * the CloudFront distributions (CLOUDFRONT_CERT_ARN) - it already carries
+     * this hostname as a SAN - so no separate cert secret is needed, just the
+     * hostname itself. A no-op unless both env vars are set.
+     */
+    private setupCustomApiDomain(apiGateway: RestApi): void {
+        const certArn = process.env.CLOUDFRONT_CERT_ARN
+        const domainName = process.env.API_DOMAIN_NAME
+        if (!certArn || !domainName) return
+
+        const certificate = Certificate.fromCertificateArn(
+            this,
+            'ApiGatewayCertificate',
+            certArn
+        )
+
+        const apiDomainName = new DomainName(this, 'ApiGatewayDomainName', {
+            domainName,
+            certificate,
+            endpointType: EndpointType.EDGE,
+        })
+
+        new BasePathMapping(this, 'ApiGatewayBasePathMapping', {
+            domainName: apiDomainName,
+            restApi: apiGateway,
+        })
+
+        new CfnOutput(this, 'ApiGatewayCustomDomainTarget', {
+            value: apiDomainName.domainNameAliasDomainName,
+            exportName: this.exportName('ApiGatewayCustomDomainTarget'),
+            description:
+                'CloudFront alias target for the custom API domain CNAME (submit this to the DNS/Cloud team)',
+        })
     }
 
     /**

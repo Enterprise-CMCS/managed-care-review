@@ -36,23 +36,31 @@ export class CognitoStack extends BaseStack {
         })
 
         const isDevValProd = ['dev', 'val', 'prod'].includes(this.stage)
+        const isQa = this.stage === 'qa'
 
-        if (isDevValProd) {
+        if (isDevValProd || isQa) {
             // Dev/Val/Prod: Import existing Cognito resources previously deployed by serverless
             // These resources aren't managed by CDK and we reference them here
+            //
+            // qa: intentionally reuses val's exact Cognito User Pool/Client/Identity Pool
+            // rather than provisioning its own. qa and val are designed to never diverge,
+            // and no separate Okta app was registered for qa - see the qa environment
+            // discovery doc for the full reasoning.
+            const cognitoSourceStage = this.cognitoSourceStage()
+
             const userPoolId = StringParameter.valueFromLookup(
                 this,
-                `/cognito/${this.stage}/user_pool_id`
+                `/cognito/${cognitoSourceStage}/user_pool_id`
             )
 
             const userPoolClientId = StringParameter.valueFromLookup(
                 this,
-                `/cognito/${this.stage}/user_pool_client_id`
+                `/cognito/${cognitoSourceStage}/user_pool_client_id`
             )
 
             const identityPoolId = StringParameter.valueFromLookup(
                 this,
-                `/cognito/${this.stage}/identity_pool_id`
+                `/cognito/${cognitoSourceStage}/identity_pool_id`
             )
 
             // Import existing resources (read-only references)
@@ -231,22 +239,32 @@ export class CognitoStack extends BaseStack {
         this.createOutputs()
     }
 
+    /**
+     * Which stage's Cognito SSM parameters to read. qa deliberately reads val's -
+     * see the constructor comment above.
+     */
+    private cognitoSourceStage(): string {
+        return this.stage === 'qa' ? 'val' : this.stage
+    }
+
     private createOutputs(): void {
         // Export Cognito resource IDs for use by other stacks
         // - dev/val/prod: References existing Serverless-deployed Cognito (imported via SSM)
+        // - qa: References val's Serverless-deployed Cognito (imported via SSM, pinned to val)
         // - review envs: References CDK-created Cognito resources
 
         const isDevValProd = ['dev', 'val', 'prod'].includes(this.stage)
-        const description = isDevValProd
-            ? 'from Serverless (imported)'
-            : 'from CDK'
+        const isQa = this.stage === 'qa'
+        const description =
+            isDevValProd || isQa ? 'from Serverless (imported)' : 'from CDK'
 
-        const userPoolDomain = isDevValProd
-            ? StringParameter.valueFromLookup(
-                  this,
-                  `/cognito/${this.stage}/user_pool_domain`
-              )
-            : `${this.userPoolDomain!.domainName}.auth.${this.region}.amazoncognito.com`
+        const userPoolDomain =
+            isDevValProd || isQa
+                ? StringParameter.valueFromLookup(
+                      this,
+                      `/cognito/${this.cognitoSourceStage()}/user_pool_domain`
+                  )
+                : `${this.userPoolDomain!.domainName}.auth.${this.region}.amazoncognito.com`
 
         new CfnOutput(this, 'UserPoolId', {
             value: this.userPool.userPoolId,
