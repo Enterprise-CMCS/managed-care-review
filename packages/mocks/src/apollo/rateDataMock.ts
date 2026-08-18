@@ -86,7 +86,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                 {
                     __typename: 'ActuaryContact',
                     id: '123-cert-actuary',
-                    name: 'Actuary Contact Person',
+                    name: 'Actuary Contact',
                     givenName: 'Actuary',
                     familyName: 'Contact',
                     suffix: 'Person',
@@ -100,7 +100,7 @@ const rateRevisionDataMock = (data?: Partial<RateRevision>): RateRevision => {
                 {
                     __typename: 'ActuaryContact',
                     id: '123-additional-actuary',
-                    name: 'Additional actuary name',
+                    name: 'Additional actuary',
                     givenName: 'Additional',
                     familyName: 'actuary',
                     suffix: 'name',
@@ -464,7 +464,7 @@ function mockRateSubmittedWithQuestions(
                     {
                         id: 'uuid1',
                         actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
+                        name: 'Actuary Contact',
                         givenName: 'Actuary',
                         familyName: 'Contact',
                         suffix: '1',
@@ -477,7 +477,7 @@ function mockRateSubmittedWithQuestions(
                     {
                         id: 'uuid2',
                         actuarialFirm: 'DELOITTE',
-                        name: 'Actuary Contact 1',
+                        name: 'Actuary Contact',
                         givenName: 'Actuary',
                         familyName: 'Contact',
                         suffix: '1',

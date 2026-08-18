@@ -131,7 +131,11 @@ export function configureResolvers(
             updateDraftContractRates: updateDraftContractRates(store),
             approveContract: approveContract(store, launchDarkly),
             undoApproveContract: undoApproveContract(store, launchDarkly),
-            undoUnlockContract: undoUnlockContract(store, launchDarkly),
+            undoUnlockContract: undoUnlockContract(
+                store,
+                emailer,
+                launchDarkly
+            ),
             withdrawContract: withdrawContract(
                 store,
                 emailer,

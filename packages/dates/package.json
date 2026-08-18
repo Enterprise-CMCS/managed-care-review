@@ -11,7 +11,7 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "dayjs": "^1.11.19",
+        "dayjs": "^1.11.21",
         "typescript": "5.9.3"
     },
     "devDependencies": {

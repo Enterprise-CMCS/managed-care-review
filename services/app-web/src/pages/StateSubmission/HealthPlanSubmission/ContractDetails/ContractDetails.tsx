@@ -50,10 +50,6 @@ import {
     ManagedCareEntityRecord,
     FederalAuthorityRecord,
     dsnpTriggers,
-    isBaseContract,
-    isCHIPOnly,
-    isContractAmendment,
-    isContractWithProvisions,
     generateProvisionLabel,
     generateApplicableProvisionsList,
 } from '@mc-review/submissions'
@@ -169,22 +165,18 @@ export const ContractDetails = ({
     if (interimState || !draftSubmission)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
-    const fileItemsFromDraftSubmission = (
-        docType: string
-    ): FileItemT[] | undefined => {
-        if (
-            (draftSubmission &&
-                docType === 'contract' &&
-                !draftSubmission.draftRevision.formData.contractDocuments) ||
-            (draftSubmission &&
-                docType === 'supporting' &&
-                !draftSubmission.draftRevision.formData.supportingDocuments)
-        )
-            return undefined
+    // Get the draft revision form data
+    const formData = draftSubmission.draftRevision?.formData
+
+    if (!formData) {
+        return <ErrorOrLoadingPage state={'GENERIC_ERROR'} />
+    }
+
+    const fileItemsFromDraftSubmission = (docType: string): FileItemT[] => {
         const docs =
             docType === 'contract'
-                ? draftSubmission.draftRevision.formData.contractDocuments
-                : draftSubmission.draftRevision.formData.supportingDocuments
+                ? formData.contractDocuments
+                : formData.supportingDocuments
         return docs.map((doc) => {
             const key = getKey(doc.s3URL)
             if (!key) {
@@ -207,136 +199,90 @@ export const ContractDetails = ({
             }
         })
     }
-    const applicableProvisions =
-        generateApplicableProvisionsList(draftSubmission)
 
-    const applicableFederalAuthorities = isCHIPOnly(draftSubmission)
+    const applicableProvisions = generateApplicableProvisionsList(formData)
+    const isChipOnly = formData.populationCovered === 'CHIP'
+    const isContractAmendment = formData.contractType === 'AMENDMENT'
+    const isBaseContract = formData.contractType === 'BASE'
+    const isContractWithProvisions =
+        isContractAmendment || (isBaseContract && !isChipOnly)
+
+    const applicableFederalAuthorities = isChipOnly
         ? federalAuthorityKeysForCHIP
         : federalAuthorityKeys
-    const hideDsnpForChipOnly =
-        chipSubmissionAutomation && isCHIPOnly(draftSubmission)
+    const hideDsnpForChipOnly = chipSubmissionAutomation && isChipOnly
 
     const contractDetailsInitialValues: ContractDetailsFormValues = {
         contractDocuments: formatDocumentsForForm({
-            documents: draftSubmission.draftRevision.formData.contractDocuments,
+            documents: formData.contractDocuments,
             getKey: getKey,
         }),
         supportingDocuments: formatDocumentsForForm({
-            documents:
-                draftSubmission.draftRevision.formData.supportingDocuments,
+            documents: formData.supportingDocuments,
             getKey: getKey,
         }),
-        contractExecutionStatus:
-            draftSubmission.draftRevision.formData.contractExecutionStatus ??
-            undefined,
+        contractExecutionStatus: formData.contractExecutionStatus ?? undefined,
         contractDateStart:
-            (draftSubmission &&
-                formatForForm(
-                    draftSubmission.draftRevision.formData.contractDateStart
-                )) ??
+            (draftSubmission && formatForForm(formData.contractDateStart)) ??
             '',
         contractDateEnd:
-            (draftSubmission &&
-                formatForForm(
-                    draftSubmission.draftRevision.formData.contractDateEnd
-                )) ??
-            '',
+            (draftSubmission && formatForForm(formData.contractDateEnd)) ?? '',
         managedCareEntities:
-            (draftSubmission.draftRevision.formData
-                .managedCareEntities as ManagedCareEntity[]) ?? [],
-        federalAuthorities:
-            draftSubmission.draftRevision.formData.federalAuthorities ?? [],
-        dsnpContract:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData.dsnpContract
-            ) ?? '',
+            (formData.managedCareEntities as ManagedCareEntity[]) ?? [],
+        federalAuthorities: formData.federalAuthorities ?? [],
+        dsnpContract: booleanAsYesNoFormValue(formData.dsnpContract) ?? '',
         inLieuServicesAndSettings:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData.inLieuServicesAndSettings
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.inLieuServicesAndSettings) ?? '',
         modifiedBenefitsProvided:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData.modifiedBenefitsProvided
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedBenefitsProvided) ?? '',
         modifiedGeoAreaServed:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData.modifiedGeoAreaServed
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedGeoAreaServed) ?? '',
         modifiedMedicaidBeneficiaries:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedMedicaidBeneficiaries
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedMedicaidBeneficiaries) ??
+            '',
         modifiedRiskSharingStrategy:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedRiskSharingStrategy
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedRiskSharingStrategy) ?? '',
         modifiedIncentiveArrangements:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedIncentiveArrangements
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedIncentiveArrangements) ??
+            '',
         modifiedWitholdAgreements:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData.modifiedWitholdAgreements
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedWitholdAgreements) ?? '',
         modifiedStateDirectedPayments:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedStateDirectedPayments
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedStateDirectedPayments) ??
+            '',
         modifiedPassThroughPayments:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedPassThroughPayments
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedPassThroughPayments) ?? '',
         modifiedPaymentsForMentalDiseaseInstitutions:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedPaymentsForMentalDiseaseInstitutions
+                formData.modifiedPaymentsForMentalDiseaseInstitutions
             ) ?? '',
         modifiedMedicalLossRatioStandards:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedMedicalLossRatioStandards
+                formData.modifiedMedicalLossRatioStandards
             ) ?? '',
         modifiedOtherFinancialPaymentIncentive:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedOtherFinancialPaymentIncentive
+                formData.modifiedOtherFinancialPaymentIncentive
             ) ?? '',
         modifiedEnrollmentProcess:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData.modifiedEnrollmentProcess
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedEnrollmentProcess) ?? '',
         modifiedGrevienceAndAppeal:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedGrevienceAndAppeal
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedGrevienceAndAppeal) ?? '',
         modifiedNetworkAdequacyStandards:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedNetworkAdequacyStandards
+                formData.modifiedNetworkAdequacyStandards
             ) ?? '',
         modifiedLengthOfContract:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData.modifiedLengthOfContract
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.modifiedLengthOfContract) ?? '',
         modifiedNonRiskPaymentArrangements:
             booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .modifiedNonRiskPaymentArrangements
+                formData.modifiedNonRiskPaymentArrangements
             ) ?? '',
         statutoryRegulatoryAttestation:
-            booleanAsYesNoFormValue(
-                draftSubmission.draftRevision.formData
-                    .statutoryRegulatoryAttestation
-            ) ?? '',
+            booleanAsYesNoFormValue(formData.statutoryRegulatoryAttestation) ??
+            '',
         statutoryRegulatoryAttestationDescription:
-            draftSubmission.draftRevision.formData
-                .statutoryRegulatoryAttestationDescription ?? '',
+            formData.statutoryRegulatoryAttestationDescription ?? '',
     }
 
     const showFieldErrors = (
@@ -406,14 +352,10 @@ export const ContractDetails = ({
                     values.contractDateStart
                 ),
                 contractDateEnd: formatFormDateForGQL(values.contractDateEnd),
-                riskBasedContract:
-                    draftSubmission.draftRevision.formData.riskBasedContract,
-                populationCovered:
-                    draftSubmission.draftRevision.formData.populationCovered,
-                programIDs:
-                    draftSubmission.draftRevision.formData.programIDs || [],
-                stateContacts:
-                    draftSubmission.draftRevision.formData.stateContacts || [],
+                riskBasedContract: formData.riskBasedContract,
+                populationCovered: formData.populationCovered,
+                programIDs: formData.programIDs || [],
+                stateContacts: formData.stateContacts || [],
                 contractDocuments:
                     formatDocumentsForGQL(values.contractDocuments) || [],
                 supportingDocuments:
@@ -425,8 +367,7 @@ export const ContractDetails = ({
                     values.dsnpContract && dsnpTrigger && !hideDsnpForChipOnly
                         ? yesNoFormValueAsBoolean(values.dsnpContract)
                         : undefined,
-                submissionType:
-                    draftSubmission.draftRevision.formData.submissionType,
+                submissionType: formData.submissionType,
                 statutoryRegulatoryAttestation: yesNoFormValueAsBoolean(
                     values.statutoryRegulatoryAttestation
                 ),
@@ -446,7 +387,7 @@ export const ContractDetails = ({
             )
             return
         }
-        if (isContractWithProvisions(draftSubmission)) {
+        if (isContractWithProvisions) {
             updatedDraftSubmissionFormData.inLieuServicesAndSettings =
                 yesNoFormValueAsBoolean(values.inLieuServicesAndSettings)
             updatedDraftSubmissionFormData.modifiedBenefitsProvided =
@@ -552,10 +493,7 @@ export const ContractDetails = ({
         <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(
-                        draftSubmission.draftRevision.formData,
-                        hideSupportingDocs
-                    )}
+                    formPages={activeFormPages(formData, hideSupportingDocs)}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts
@@ -572,8 +510,7 @@ export const ContractDetails = ({
                         return handleFormSubmit(values, setSubmitting, {
                             type: 'CONTINUE',
                             redirectPath:
-                                draftSubmission.draftRevision.formData
-                                    .submissionType === 'CONTRACT_ONLY'
+                                formData.submissionType === 'CONTRACT_ONLY'
                                     ? 'SUBMISSIONS_CONTACTS'
                                     : 'SUBMISSIONS_RATE_DETAILS',
                         })
@@ -985,9 +922,7 @@ export const ContractDetails = ({
                                     <FormGroup>
                                         <Fieldset
                                             legend={
-                                                isContractAmendment(
-                                                    draftSubmission
-                                                )
+                                                isContractAmendment
                                                     ? 'Amendment effective dates'
                                                     : 'Contract effective dates'
                                             }
@@ -1276,15 +1211,11 @@ export const ContractDetails = ({
                                                 </Fieldset>
                                             </FormGroup>
                                         )}
-                                    {isContractWithProvisions(
-                                        draftSubmission
-                                    ) && (
+                                    {isContractWithProvisions && (
                                         <FormGroup data-testid="yes-no-group">
                                             <Fieldset
                                                 legend={
-                                                    isBaseContract(
-                                                        draftSubmission
-                                                    )
+                                                    isBaseContract
                                                         ? 'Does this contract action include provisions related to any of the following'
                                                         : 'Does this contract action include new or modified provisions related to any of the following'
                                                 }
@@ -1309,7 +1240,7 @@ export const ContractDetails = ({
                                                                 modifiedProvisionName
                                                             }
                                                             label={generateProvisionLabel(
-                                                                draftSubmission,
+                                                                formData,
                                                                 modifiedProvisionName
                                                             )}
                                                             showError={Boolean(
@@ -1369,8 +1300,8 @@ export const ContractDetails = ({
                                         }
                                     )}
                                     continueOnClickUrl={
-                                        draftSubmission.draftRevision.formData
-                                            .submissionType === 'CONTRACT_ONLY'
+                                        formData.submissionType ===
+                                        'CONTRACT_ONLY'
                                             ? generatePath(
                                                   RoutesRecord.SUBMISSIONS_RATE_DETAILS,
                                                   {

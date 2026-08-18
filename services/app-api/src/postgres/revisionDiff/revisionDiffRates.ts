@@ -182,35 +182,12 @@ function buildRateDisplayName(
     return rateRevision.formData.rateCertificationName ?? undefined
 }
 
-function isIncludedInAnotherSubmission(
-    rateRevision: RateRevisionType,
-    newerSubmissionSubmittedAt: Date
-): boolean {
-    const sharedPackages =
-        rateRevision.formData.packagesWithSharedRateCerts ?? []
-
-    if (sharedPackages.length > 0) {
-        return true
-    }
-
-    return (
-        rateRevision.submitInfo?.updatedAt.getTime() !== undefined &&
-        rateRevision.submitInfo.updatedAt.getTime() <
-            newerSubmissionSubmittedAt.getTime()
-    )
-}
-
-function buildAddedRate(
-    rateRevision: RateRevisionType,
-    newerSubmissionSubmittedAt: Date
-): RevisionDiffAddedRate {
+function buildAddedRate(rateRevision: RateRevisionType): RevisionDiffAddedRate {
     return {
         rateID: rateRevision.rateID,
         rateCertificationName: buildRateDisplayName(rateRevision),
-        includedInAnotherSubmission: isIncludedInAnotherSubmission(
-            rateRevision,
-            newerSubmissionSubmittedAt
-        ),
+        // TODO(MCR-6481): identify when a rate on a submission diff is from another submission but linked to the current submission, e.g. a linked rate.
+        includedInAnotherSubmission: false,
     }
 }
 
@@ -325,19 +302,17 @@ function buildRateChanges(
             continue
         }
 
-        if (olderRateRevision.id !== newerRateRevision.id) {
-            const revisedRateResult = buildRevisedRate(
-                olderRateRevision,
-                newerRateRevision
-            )
+        const revisedRateResult = buildRevisedRate(
+            olderRateRevision,
+            newerRateRevision
+        )
 
-            if (revisedRateResult instanceof Error) {
-                return revisedRateResult
-            }
+        if (revisedRateResult instanceof Error) {
+            return revisedRateResult
+        }
 
-            if (revisedRateResult.hasChanges) {
-                revised.push(revisedRateResult.revisedRate)
-            }
+        if (revisedRateResult.hasChanges) {
+            revised.push(revisedRateResult.revisedRate)
         }
     }
 
@@ -346,12 +321,7 @@ function buildRateChanges(
             continue
         }
 
-        added.push(
-            buildAddedRate(
-                newerRateRevision,
-                newerSubmission.submitInfo.updatedAt
-            )
-        )
+        added.push(buildAddedRate(newerRateRevision))
     }
 
     const sortByName = <TItem extends { rateCertificationName?: string }>(
