@@ -2897,6 +2897,34 @@ describe('submitContract', () => {
             ])
         })
 
+        it('returns an error if EQRO contract execution status is not populated', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const draftWithoutContractStatus =
+                await createAndUpdateTestEQROContract(stateServer, undefined, {
+                    contractExecutionStatus: undefined,
+                })
+            const response = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: {
+                        contractID: draftWithoutContractStatus.id,
+                    },
+                },
+            })
+
+            expect(response.errors).toEqual([
+                expect.objectContaining({
+                    message: expect.stringContaining('contractExecutionStatus'),
+                    extensions: expect.objectContaining({
+                        code: 'BAD_USER_INPUT',
+                        argumentName: 'contractID',
+                    }),
+                }),
+            ])
+        })
+
         it('send EQRO submission CMS email on successful submit', async () => {
             const config = testEmailConfig()
             const mockEmailer = testEmailer(config)
