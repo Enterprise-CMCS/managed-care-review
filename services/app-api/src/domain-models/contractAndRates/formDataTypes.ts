@@ -286,11 +286,12 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     contractDateEnd: preprocessNulls(
         genericContractFormDataSchema.shape.contractDateEnd.optional()
     ),
-    // Fields not applicable to EQRO submissions
-    // following values should be undefined for a EQRO contract
+    contractExecutionStatus: preprocessNulls(
+        genericContractFormDataSchema.shape.contractExecutionStatus.optional()
+    ),
+    // Fields not applicable to EQRO submissions should be undefined.
     riskBasedContract: preprocessNulls(z.undefined().optional()),
     dsnpContract: preprocessNulls(z.undefined().optional()),
-    contractExecutionStatus: preprocessNulls(z.undefined().optional()),
     inLieuServicesAndSettings: preprocessNulls(z.undefined().optional()),
     modifiedBenefitsProvided: preprocessNulls(z.undefined().optional()),
     modifiedGeoAreaServed: preprocessNulls(z.undefined().optional()),
@@ -363,6 +364,8 @@ const submittableEQROContractFormDataSchema = eqroContractFormDataSchema.extend(
             genericContractFormDataSchema.shape.stateContacts.nonempty(),
         contractDocuments:
             genericContractFormDataSchema.shape.contractDocuments.nonempty(),
+        contractExecutionStatus:
+            genericContractFormDataSchema.shape.contractExecutionStatus,
         submissionType: z.literal('CONTRACT_ONLY'),
     }
 )
