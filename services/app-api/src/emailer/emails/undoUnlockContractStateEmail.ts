@@ -3,43 +3,56 @@ import type {
     ProgramType,
     UpdateInfoType,
 } from '../../domain-models'
-import type {
-    EmailConfiguration,
-    EmailData,
-    StateAnalystsEmails,
-} from '../emailer'
+import type { EmailConfiguration, EmailData } from '../emailer'
 import {
     parseEmailDataUndoUnlockContract,
     renderTemplate,
     stripHTMLFromTemplate,
 } from '../templateHelpers'
-import { pruneDuplicateEmails } from '../formatters'
+import { formatEmailAddresses, pruneDuplicateEmails } from '../formatters'
 
-export const undoUnlockContractCMSEmail = async (
+export const undoUnlockContractStateEmail = async (
     contract: ContractType,
     updateInfo: UpdateInfoType,
-    stateAnalystsEmails: StateAnalystsEmails,
+    submitterEmails: string[],
     statePrograms: ProgramType[],
     config: EmailConfiguration
 ): Promise<EmailData | Error> => {
+    const stateContactEmails: string[] = []
+    const contractRev = contract.packageSubmissions[0].contractRevision
+    contractRev.formData.stateContacts.forEach((contact) => {
+        if (contact.email) stateContactEmails.push(contact.email)
+    })
+
     const toAddresses = pruneDuplicateEmails([
-        ...stateAnalystsEmails,
-        ...config.dmcoEmails,
+        ...stateContactEmails,
+        ...submitterEmails,
         ...config.devReviewTeamEmails,
     ])
 
-    const etaData = parseEmailDataUndoUnlockContract(
+    const undoUnlockContractData = parseEmailDataUndoUnlockContract(
         contract,
         updateInfo,
         statePrograms,
         config
     )
-    if (etaData instanceof Error) {
-        return etaData
+    if (undoUnlockContractData instanceof Error) {
+        return undoUnlockContractData
+    }
+
+    const etaData = {
+        ...undoUnlockContractData,
+        cmsReviewHelpEmailAddress: formatEmailAddresses(
+            config.cmsReviewHelpEmailAddress
+        ),
+        cmsRateHelpEmailAddress: formatEmailAddresses(
+            config.cmsRateHelpEmailAddress
+        ),
+        helpDeskEmail: formatEmailAddresses(config.helpDeskEmail),
     }
 
     const template = await renderTemplate<typeof etaData>(
-        'undoUnlockContractCMSEmail',
+        'undoUnlockContractStateEmail',
         etaData
     )
 

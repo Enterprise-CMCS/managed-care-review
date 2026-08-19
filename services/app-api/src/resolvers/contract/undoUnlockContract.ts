@@ -9,7 +9,11 @@ import {
 } from '../../postgres'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
+import {
+    contractSubmitters,
+    hasAdminPermissions,
+    hasCMSPermissions,
+} from '../../domain-models'
 import type { UpdateInfoType } from '../../domain-models'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
@@ -171,12 +175,33 @@ export function undoUnlockContract(
                         statePrograms
                     )
 
-                if (undoUnlockContractCMSEmailResult instanceof Error) {
-                    logResolverError(
-                        'undoUnlockContractCMSEmail - CMS email failed',
-                        undoUnlockContractCMSEmailResult,
-                        context
+                const submitterEmails = contractSubmitters(reverseResult)
+                const undoUnlockContractStateEmailResult =
+                    await emailer.sendUndoUnlockContractStateEmail(
+                        reverseResult,
+                        updateInfo,
+                        submitterEmails,
+                        statePrograms
                     )
+
+                if (
+                    undoUnlockContractCMSEmailResult instanceof Error ||
+                    undoUnlockContractStateEmailResult instanceof Error
+                ) {
+                    if (undoUnlockContractCMSEmailResult instanceof Error) {
+                        logResolverError(
+                            'undoUnlockContractCMSEmail - CMS email failed',
+                            undoUnlockContractCMSEmailResult,
+                            context
+                        )
+                    }
+                    if (undoUnlockContractStateEmailResult instanceof Error) {
+                        logResolverError(
+                            'undoUnlockContractStateEmail - state email failed',
+                            undoUnlockContractStateEmailResult,
+                            context
+                        )
+                    }
                     throw new GraphQLError('Email failed.', {
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',

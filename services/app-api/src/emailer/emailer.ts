@@ -7,6 +7,7 @@ import {
     newEqroContractStateEmail,
     unlockContractCMSEmail,
     undoUnlockContractCMSEmail,
+    undoUnlockContractStateEmail,
     unlockContractStateEmail,
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
@@ -120,6 +121,12 @@ type Emailer = {
         contract: ContractType,
         updateInfo: UpdateInfoType,
         stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendUndoUnlockContractStateEmail: (
+        contract: ContractType,
+        updateInfo: UpdateInfoType,
+        submitterEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockContractStateEmail: (
@@ -368,6 +375,25 @@ function emailer(
                 contract,
                 updateInfo,
                 stateAnalystsEmails,
+                statePrograms,
+                config
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUndoUnlockContractStateEmail: async function (
+            contract,
+            updateInfo,
+            submitterEmails,
+            statePrograms
+        ) {
+            const emailData = await undoUnlockContractStateEmail(
+                contract,
+                updateInfo,
+                submitterEmails,
                 statePrograms,
                 config
             )

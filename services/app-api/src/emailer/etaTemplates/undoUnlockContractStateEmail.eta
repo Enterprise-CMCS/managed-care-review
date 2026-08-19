@@ -1,0 +1,22 @@
+<%~ includeFile('./undoUnlockContractCMSEmail', it) %>
+<br />
+<br />
+<% if (it.isEQRO) { %>
+   <% if (it.isNotSubjectToReview) { %>
+        <b>As a reminder, all contracts with EQROs must:</b>
+        <ul style="margin-top: 0;">
+            <li>Be submitted to CMS. This includes base contracts, amendments to base contracts, and extensions.</li>
+            <li>Meet competence and independence requirements specified at 42 CFR 438.354 to qualify for Federal Financial Participation (FFP).</li>
+            <li>Require the mandatory review activities specified at 42 CFR 438.358 for MCOs, PIHPs, and PAHPs.</li>
+        </ul>
+    <% } else { %>
+        What comes next:
+        <ol style="margin-top: 0;">
+            <li><strong>Check for completeness:</strong> CMS will review all documentation submitted to ensure all required materials were received.</li>
+            <li><strong>CMS review:</strong> Your submission will be reviewed by CMS for adherence to federal regulations.</li>
+            <li><strong>Questions:</strong> You may receive questions from CMS as they conduct their review.</li>
+            <li><strong>Decision:</strong> Once all questions have been addressed, CMS will contact you with a final determination.</li>
+        </ol>
+    <% } %>
+<% } %>
+<%~ includeFile('./partialStateNeedAssistance', it) %>

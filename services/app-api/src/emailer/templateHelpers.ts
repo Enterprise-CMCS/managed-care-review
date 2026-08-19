@@ -22,7 +22,10 @@ import {
 import { rateSummaryURL, submissionSummaryURL } from './generateURLs'
 import { formatCalendarDate } from '@mc-review/dates'
 import type { SubmissionType } from '../gen/gqlServer'
-import type { ConsolidatedContractStatusType } from '../domain-models/contractAndRates'
+import type {
+    ConsolidatedContractStatusType,
+    UpdateInfoType,
+} from '../domain-models/contractAndRates'
 import type { ReviewActionTypes } from '../domain-models/contractAndRates/contractReviewActionType'
 
 // ETA SETUP
@@ -522,6 +525,80 @@ const parseEmailDataUndoWithdrawEQROSubmission = (
     }
 }
 
+export type UndoUnlockContractEtaData = {
+    packageName: string
+    updatedAt: string
+    updatedBy: string
+    reason: string
+    status: string
+    isEQRO: boolean
+    isNotSubjectToReview: boolean
+    reviewDecisionText: string
+    shouldIncludeRates: boolean
+    rateInfos: { rateName: string | undefined }[]
+    submissionURL: string
+}
+
+const parseEmailDataUndoUnlockContract = (
+    contract: ContractType,
+    updateInfo: UpdateInfoType,
+    statePrograms: ProgramType[],
+    config: EmailConfiguration
+): UndoUnlockContractEtaData | Error => {
+    const contractRev = contract.packageSubmissions[0].contractRevision
+    const formData = contractRev.formData
+
+    //This checks to make sure all programs contained in submission exists for the state.
+    const packagePrograms = findContractPrograms(contractRev, statePrograms)
+    if (packagePrograms instanceof Error) {
+        return packagePrograms
+    }
+
+    const contractPackageName = packageName(
+        contract.stateCode,
+        contract.stateNumber,
+        formData.programIDs,
+        packagePrograms
+    )
+
+    const isContractAndRates =
+        formData.submissionType === 'CONTRACT_AND_RATES' &&
+        Boolean(contract.packageSubmissions[0].rateRevisions.length)
+
+    const submissionURL = submissionSummaryURL(
+        contract.id,
+        contract.contractSubmissionType,
+        config.baseUrl
+    )
+
+    const isEQRO = contract.contractSubmissionType === `EQRO`
+
+    const isNotSubjectToReview =
+        isEQRO &&
+        eqroValidationAndReviewDetermination(contract.id, formData) === false
+
+    return {
+        packageName: contractPackageName,
+        updatedAt: formatCalendarDate(
+            updateInfo.updatedAt,
+            'America/Los_Angeles'
+        ),
+        updatedBy: updateInfo.updatedBy.email,
+        reason: updateInfo.updatedReason,
+        status: isNotSubjectToReview ? `Not subject to review` : `Submitted`,
+        isEQRO,
+        isNotSubjectToReview,
+        reviewDecisionText: isNotSubjectToReview
+            ? `Not subject to formal review and approval`
+            : `Subject to formal review and approval`,
+        shouldIncludeRates: isContractAndRates,
+        rateInfos: contract.packageSubmissions[0].rateRevisions.map((rate) => ({
+            rateName: rate.formData.rateCertificationName,
+        })),
+        submissionURL,
+    }
+}
+
 type FieldYesNoUserValue = 'Yes' | 'No' | undefined // Use for user facing display
 const booleanAsYesNoUserValue = (bool?: boolean | null): FieldYesNoUserValue =>
     bool ? 'Yes' : bool === false ? 'No' : undefined
@@ -542,5 +619,6 @@ export {
     getRateStateContactEmails,
     parseEmailDataWithdrawSubmission,
     parseEmailDataUndoWithdrawEQROSubmission,
+    parseEmailDataUndoUnlockContract,
     booleanAsYesNoUserValue,
 }
