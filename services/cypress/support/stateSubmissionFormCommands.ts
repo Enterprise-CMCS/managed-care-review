@@ -248,6 +248,12 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 })
 
 Cypress.Commands.add('fillOutEQROContractDetails', () => {
+    cy.findByRole('radiogroup', { name: 'Contract status' }).within(() => {
+        cy.findByRole('radio', { name: 'Fully executed' }).check({
+            force: true,
+        })
+    })
+
     cy.findAllByLabelText('Start date', { timeout: 2000 })
         .parents()
         .findByTestId('date-picker-external-input')

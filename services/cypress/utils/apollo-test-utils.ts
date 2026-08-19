@@ -103,6 +103,7 @@ const eqroFromData = (
     ],
     supportingDocuments: [],
     contractType: 'BASE',
+    contractExecutionStatus: 'EXECUTED',
     contractDocuments: [
         {
             name: 'Contract Cert.pdf',
