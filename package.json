@@ -79,7 +79,7 @@
     "devDependencies": {
         "axe-core": "^4.12.1",
         "c8": "^12.0.0",
-        "cypress": "^13.13.2",
+        "cypress": "^15.20.1",
         "cypress-axe": "^1.7.0",
         "danger": "^13.0.10",
         "husky": "^9.1.7",
