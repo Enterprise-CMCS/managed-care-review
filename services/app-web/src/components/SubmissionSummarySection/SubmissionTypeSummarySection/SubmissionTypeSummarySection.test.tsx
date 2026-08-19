@@ -436,34 +436,44 @@ describe('SubmissionTypeSummarySection', () => {
         expect(screen.queryByText(/\(retired\)/)).not.toBeInTheDocument()
     })
 
-    it('renders CHIP-only Review decision with DMCO override text when NOT_SUBJECT_TO_REVIEW', () => {
-        const contract = mockContractPackageSubmitted({
-            consolidatedStatus: 'NOT_SUBJECT_TO_REVIEW',
-            reviewStatus: 'NOT_SUBJECT_TO_REVIEW',
-        })
-        contract.packageSubmissions[0].contractRevision.formData.populationCovered =
-            'CHIP'
-        renderWithProviders(
-            <SubmissionTypeSummarySection
-                contract={contract}
-                editNavigateTo="submission-type"
-                submissionName="MN-MSHO-0003"
-                isStateUser={true}
-                initiallySubmittedAt={contract.initiallySubmittedAt}
-            />
-        )
-        const reviewDecision = screen.getByRole('definition', {
-            name: 'Review decision',
-        })
-        expect(reviewDecision).toHaveTextContent(
-            'Not subject to DMCO review and validation'
-        )
-    })
+    it.each([
+        'NOT_SUBJECT_TO_REVIEW',
+        'SUBMITTED',
+        'RESUBMITTED',
+        'APPROVED',
+        'WITHDRAWN',
+    ] as const)(
+        'renders CHIP-only Review decision as not subject to review when consolidated status is %s',
+        async (consolidatedStatus) => {
+            const contract = mockContractPackageSubmitted({
+                consolidatedStatus,
+            })
+            contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+                'CHIP'
+            renderWithProviders(
+                <SubmissionTypeSummarySection
+                    contract={contract}
+                    editNavigateTo="submission-type"
+                    submissionName="MN-MSHO-0003"
+                    isStateUser={true}
+                    initiallySubmittedAt={contract.initiallySubmittedAt}
+                />
+            )
+            const reviewDecision = await screen.findByRole('definition', {
+                name: 'Review decision',
+            })
+            expect(reviewDecision).toHaveTextContent(
+                'Not subject to DMCO review and validation'
+            )
+        }
+    )
 
-    it('renders Review decision with normalized status text when not CHIP-only', () => {
+    it('does not render Review decision when not CHIP-only', async () => {
         const contract = mockContractPackageSubmitted({
             consolidatedStatus: 'SUBMITTED',
         })
+        contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+            'MEDICAID'
         renderWithProviders(
             <SubmissionTypeSummarySection
                 contract={contract}
@@ -473,10 +483,36 @@ describe('SubmissionTypeSummarySection', () => {
                 initiallySubmittedAt={contract.initiallySubmittedAt}
             />
         )
-        const reviewDecision = screen.getByRole('definition', {
-            name: 'Review decision',
+        await screen.findByRole('definition', {
+            name: 'Which populations does this contract action cover?',
         })
-        expect(reviewDecision).toHaveTextContent('Submitted')
+        expect(
+            screen.queryByRole('definition', { name: 'Review decision' })
+        ).not.toBeInTheDocument()
+    })
+
+    it('does not render Review decision on a past version that is no longer CHIP-only', async () => {
+        const contract = mockContractPackageSubmitted({
+            consolidatedStatus: 'RESUBMITTED',
+        })
+        const contractRev = contract.packageSubmissions[0].contractRevision
+        contractRev.formData.populationCovered = 'MEDICAID'
+        renderWithProviders(
+            <SubmissionTypeSummarySection
+                contract={contract}
+                contractRev={contractRev}
+                editNavigateTo="submission-type"
+                submissionName="MN-MSHO-0003"
+                isStateUser={true}
+                initiallySubmittedAt={contract.initiallySubmittedAt}
+            />
+        )
+        await screen.findByRole('definition', {
+            name: 'Which populations does this contract action cover?',
+        })
+        expect(
+            screen.queryByRole('definition', { name: 'Review decision' })
+        ).not.toBeInTheDocument()
     })
 
     it('does not render fields with missing fields for submitted package on submission summary', () => {
