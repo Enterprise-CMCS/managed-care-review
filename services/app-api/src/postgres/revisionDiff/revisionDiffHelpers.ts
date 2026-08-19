@@ -252,6 +252,8 @@ function buildRevisionDiff(
     const documentChanges = buildDocumentChanges(
         olderSubmission,
         newerSubmission,
+        rateChanges.added,
+        rateChanges.removed,
         rateChanges.revised
     )
     if (documentChanges instanceof Error) {

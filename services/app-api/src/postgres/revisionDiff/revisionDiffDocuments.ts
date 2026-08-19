@@ -1,14 +1,18 @@
 import type {
+    RevisionDiffAddedRate,
     ContractPackageSubmissionType,
     RevisionDiffDocumentChanges,
+    RevisionDiffRemovedRate,
     RevisionDiffRevisedRate,
 } from '../../domain-models'
-import { buildRateDocumentChangesFromRevisedRates } from './revisionDiffRateDocuments'
+import { buildRateDocumentChangesFromRateChanges } from './revisionDiffRateDocuments'
 import { buildDocumentListChanges } from './revisionDiffPrimitives'
 
 function buildDocumentChanges(
     olderSubmission: ContractPackageSubmissionType,
     newerSubmission: ContractPackageSubmissionType,
+    addedRates: RevisionDiffAddedRate[],
+    removedRates: RevisionDiffRemovedRate[],
     revisedRates: RevisionDiffRevisedRate[]
 ): RevisionDiffDocumentChanges | Error {
     const contractDocuments = buildDocumentListChanges(
@@ -27,8 +31,16 @@ function buildDocumentChanges(
         return contractSupportingDocuments
     }
 
-    const ratesDocuments =
-        buildRateDocumentChangesFromRevisedRates(revisedRates)
+    const ratesDocuments = buildRateDocumentChangesFromRateChanges(
+        olderSubmission,
+        newerSubmission,
+        addedRates,
+        removedRates,
+        revisedRates
+    )
+    if (ratesDocuments instanceof Error) {
+        return ratesDocuments
+    }
 
     const totalAdded =
         contractDocuments.added.length +

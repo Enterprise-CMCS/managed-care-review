@@ -166,18 +166,24 @@ describe('revisionDiffDocuments', () => {
         })
 
         expect(
-            buildDocumentChanges(previous, current, [
-                mockRevisedRate({
-                    rateDocuments: {
-                        added: ['rate-doc-added.xlsx'],
-                        removed: ['rate-doc-removed.xlsx'],
-                    },
-                    supportingRateDocuments: {
-                        added: [],
-                        removed: ['rate-support-removed.pdf'],
-                    },
-                }),
-            ])
+            buildDocumentChanges(
+                previous,
+                current,
+                [],
+                [],
+                [
+                    mockRevisedRate({
+                        rateDocuments: {
+                            added: ['rate-doc-added.xlsx'],
+                            removed: ['rate-doc-removed.xlsx'],
+                        },
+                        supportingRateDocuments: {
+                            added: [],
+                            removed: ['rate-support-removed.pdf'],
+                        },
+                    }),
+                ]
+            )
         ).toEqual({
             contractDocuments: {
                 added: ['contract-added.pdf'],
@@ -203,6 +209,121 @@ describe('revisionDiffDocuments', () => {
             ],
             totalAdded: 2,
             totalRemoved: 4,
+        })
+    })
+
+    it('counts all documents on added and removed rates as changed', () => {
+        const addedRateID = '33333333-3333-3333-3333-333333333333'
+        const removedRateID = '44444444-4444-4444-4444-444444444444'
+        const addedRateName = 'RATE-ADDED'
+        const removedRateName = 'RATE-REMOVED'
+
+        const previous = mockSubmission({
+            rateRevisions: [
+                mockRateRevision({
+                    id: 'removed-rate-revision',
+                    rateID: removedRateID,
+                    formData: {
+                        ...mockRateRevision().formData,
+                        rateCertificationName: removedRateName,
+                        rateDocuments: [
+                            mockDocument(
+                                'removed-rate-doc.pdf',
+                                'removed-rate-doc'
+                            ),
+                        ],
+                        supportingDocuments: [
+                            mockDocument(
+                                'removed-rate-support.pdf',
+                                'removed-rate-support'
+                            ),
+                        ],
+                    },
+                }),
+            ],
+        })
+
+        const current = mockSubmission({
+            rateRevisions: [
+                mockRateRevision({
+                    id: 'added-rate-revision',
+                    rateID: addedRateID,
+                    formData: {
+                        ...mockRateRevision().formData,
+                        rateCertificationName: addedRateName,
+                        rateDocuments: [
+                            mockDocument(
+                                'added-rate-doc.pdf',
+                                'added-rate-doc'
+                            ),
+                        ],
+                        supportingDocuments: [
+                            mockDocument(
+                                'added-rate-support.pdf',
+                                'added-rate-support'
+                            ),
+                        ],
+                    },
+                }),
+            ],
+        })
+
+        expect(
+            buildDocumentChanges(
+                previous,
+                current,
+                [
+                    {
+                        rateID: addedRateID,
+                        rateCertificationName: addedRateName,
+                        includedInAnotherSubmission: false,
+                    },
+                ],
+                [
+                    {
+                        rateID: removedRateID,
+                        rateCertificationName: removedRateName,
+                    },
+                ],
+                []
+            )
+        ).toEqual({
+            contractDocuments: {
+                added: [],
+                removed: [],
+            },
+            contractSupportingDocuments: {
+                added: [],
+                removed: [],
+            },
+            ratesDocuments: [
+                {
+                    rateID: addedRateID,
+                    rateCertificationName: addedRateName,
+                    rateDocuments: {
+                        added: ['added-rate-doc.pdf'],
+                        removed: [],
+                    },
+                    supportingDocuments: {
+                        added: ['added-rate-support.pdf'],
+                        removed: [],
+                    },
+                },
+                {
+                    rateID: removedRateID,
+                    rateCertificationName: removedRateName,
+                    rateDocuments: {
+                        added: [],
+                        removed: ['removed-rate-doc.pdf'],
+                    },
+                    supportingDocuments: {
+                        added: [],
+                        removed: ['removed-rate-support.pdf'],
+                    },
+                },
+            ],
+            totalAdded: 2,
+            totalRemoved: 2,
         })
     })
 
@@ -234,7 +355,7 @@ describe('revisionDiffDocuments', () => {
             },
         })
 
-        expect(buildDocumentChanges(previous, current, [])).toEqual({
+        expect(buildDocumentChanges(previous, current, [], [], [])).toEqual({
             contractDocuments: {
                 added: ['contract-renamed.pdf'],
                 removed: ['contract-original.pdf'],
