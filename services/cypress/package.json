@@ -45,7 +45,7 @@
         "axe-core": "^4.12.1",
         "buffer": "^6.0.3",
         "c8": "^12.0.0",
-        "cypress": "^15.8.2",
+        "cypress": "^15.20.1",
         "cypress-axe": "^1.7.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.4.0",
