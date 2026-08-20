@@ -3313,7 +3313,7 @@ function mockEqroContractSubmittedUnderReview(
                             ],
                             supportingDocuments: [],
                             contractType: 'BASE',
-                            contractExecutionStatus: null,
+                            contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -3410,7 +3410,7 @@ function mockEqroContractSubmittedUnderReview(
                         ],
                         supportingDocuments: [],
                         contractType: 'BASE',
-                        contractExecutionStatus: null,
+                        contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -3570,7 +3570,7 @@ function mockEqroContractSubmittedNotSubjectToReview(
                             ],
                             supportingDocuments: [],
                             contractType: 'BASE',
-                            contractExecutionStatus: null,
+                            contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -3668,7 +3668,7 @@ function mockEqroContractSubmittedNotSubjectToReview(
                         ],
                         supportingDocuments: [],
                         contractType: 'BASE',
-                        contractExecutionStatus: null,
+                        contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -3851,7 +3851,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                             ],
                             supportingDocuments: [],
                             contractType: 'BASE',
-                            contractExecutionStatus: null,
+                            contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -3962,7 +3962,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                         ],
                         supportingDocuments: [],
                         contractType: 'BASE',
-                        contractExecutionStatus: null,
+                        contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -4079,7 +4079,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                             ],
                             supportingDocuments: [],
                             contractType: 'BASE',
-                            contractExecutionStatus: null,
+                            contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -4177,7 +4177,7 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                         ],
                         supportingDocuments: [],
                         contractType: 'BASE',
-                        contractExecutionStatus: null,
+                        contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
                             {
                                 __typename: 'GenericDocument',

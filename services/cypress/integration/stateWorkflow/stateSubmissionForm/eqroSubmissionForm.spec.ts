@@ -43,6 +43,10 @@ describe('state user in eqro submission form', () => {
         // continue to review and submit page
         cy.navigateContractForm('CONTINUE')
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
+        cy.findByTestId('contractExecutionStatus').should(
+            'contain.text',
+            'Fully executed'
+        )
 
         // go back to contacts page and save as draft
         cy.navigateContractForm('BACK')

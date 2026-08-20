@@ -79,6 +79,9 @@ export const EQROContractDetailsFormSchema = (
     return Yup.object().shape({
         contractDocuments: validateFileItemsList({ required: true }),
         supportingDocuments: validateFileItemsList({ required: false }),
+        contractExecutionStatus: Yup.string().defined(
+            'You must select a contract status'
+        ),
 
         contractDateStart: Yup.date()
             // @ts-ignore-next-line

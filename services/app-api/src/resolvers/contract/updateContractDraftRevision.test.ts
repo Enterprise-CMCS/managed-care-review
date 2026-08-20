@@ -543,6 +543,7 @@ describe(`Tests UpdateContractDraftRevision`, () => {
 
             expect(updatedFormData).toEqual(
                 expect.objectContaining({
+                    contractExecutionStatus: 'EXECUTED',
                     eqroNewContractor: true,
                     eqroProvisionMcoNewOptionalActivity: true,
                     eqroProvisionNewMcoEqrRelatedActivities: true,

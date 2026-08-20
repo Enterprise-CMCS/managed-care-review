@@ -428,7 +428,7 @@ const createAndUpdateTestEQROContract = async (
             eqroProvisionMcoNewOptionalActivity: true,
             riskBasedContract: undefined,
             dsnpContract: undefined,
-            contractExecutionStatus: undefined,
+            contractExecutionStatus: 'EXECUTED',
             inLieuServicesAndSettings: undefined,
             modifiedBenefitsProvided: undefined,
             modifiedGeoAreaServed: undefined,

@@ -1122,6 +1122,7 @@ describe('EQRO parsing and validation', () => {
             },
         ],
         contractType: 'BASE',
+        contractExecutionStatus: 'EXECUTED',
         contractDocuments: [
             {
                 s3URL: 's3://bucketname/key/contractdoc1',
@@ -1811,7 +1812,38 @@ describe('EQRO parsing and validation', () => {
             )
         })
 
-        it('should succeed with optional fields omitted', async () => {
+        it('should return an error if contract execution status is omitted', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = createValidEQROContract({
+                contractExecutionStatus: undefined,
+            })
+
+            const parsedContract = parseEQROContract(
+                contract,
+                'FL',
+                postgresStore
+            )
+
+            expect(parsedContract).toBeInstanceOf(z.ZodError)
+            if (!(parsedContract instanceof z.ZodError)) {
+                throw new Error('Expected parseEQROContract to return an error')
+            }
+
+            expect(parsedContract.issues).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        path: [
+                            'draftRevision',
+                            'formData',
+                            'contractExecutionStatus',
+                        ],
+                    }),
+                ])
+            )
+        })
+
+        it('should succeed with other optional fields omitted', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
             const stateCode = 'FL'
@@ -1819,7 +1851,6 @@ describe('EQRO parsing and validation', () => {
                 // Ensure optional fields are not set
                 federalAuthorities: [],
                 riskBasedContract: undefined,
-                contractExecutionStatus: undefined,
                 modifiedBenefitsProvided: undefined,
                 modifiedGeoAreaServed: undefined,
                 modifiedRiskSharingStrategy: undefined,
