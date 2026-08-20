@@ -76,22 +76,22 @@ export const Training = (): React.ReactElement => {
                 <ul className={styles.resourceList}>
                     <li>
                         <a
-                            href="https://www.youtube.com/watch?v=1d-f0pnLLLE"
+                            href="https://www.youtube.com/watch?v=8uyyaQEAOCI"
                             target="_blank"
                             rel="noreferrer"
-                            aria-label="MC-Review training webinar recording (opens in new window)"
+                            aria-label="MC-Review overview recording (opens in new window)"
                         >
-                            MC-Review training webinar recording
+                            MC-Review overview recording
                         </a>
                     </li>
                     <li>
                         <a
-                            href="https://www.medicaid.gov/medicaid/managed-care/mc-rvw-state-wbnr-sprng-2024.pdf"
+                            href="/MC-Review-overview-Slide-deck.pdf"
                             target="_blank"
                             rel="noreferrer"
-                            aria-label="MC-Review training webinar - Slide deck (opens in new window)"
+                            aria-label="MC-Review overview - Slide deck (opens in new window)"
                         >
-                            MC-Review training webinar - Slide deck
+                            MC-Review overview - Slide deck
                         </a>
                     </li>
                 </ul>
