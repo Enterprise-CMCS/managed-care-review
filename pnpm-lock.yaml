@@ -364,10 +364,16 @@ importers:
       '@aws-sdk/client-lambda':
         specifier: ^3.1111.0
         version: 3.1111.0
+      '@aws-sdk/client-rds':
+        specifier: ^3.1111.0
+        version: 3.1111.0
       '@aws-sdk/client-s3':
         specifier: ^3.1111.0
         version: 3.1111.0
       '@aws-sdk/client-secrets-manager':
+        specifier: ^3.1111.0
+        version: 3.1111.0
+      '@aws-sdk/client-ssm':
         specifier: ^3.1111.0
         version: 3.1111.0
       '@types/papaparse':
