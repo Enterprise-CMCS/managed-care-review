@@ -1108,8 +1108,8 @@ importers:
         specifier: ^8.58.1
         version: 8.58.2(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
       aws-cdk:
-        specifier: ^2.1136.0
-        version: 2.1136.0
+        specifier: ^2.1137.0
+        version: 2.1137.0
       esbuild:
         specifier: ^0.25.5
         version: 0.25.8
@@ -7339,8 +7339,8 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1136.0:
-    resolution: {integrity: sha512-n6kCL9R9uuvb7WXEwiSs3rYGwnTy9AHHmxOT5Pj5/++E4PYz2bLDXIxzoiOMIj5maoyC52PTe/0GezFV+O0ILQ==}
+  aws-cdk@2.1137.0:
+    resolution: {integrity: sha512-SRy2df/5cqGvq8ncph1m93rWEh3RGbvP6uwElw+W0x135vZDzTpfbuq2L8oAHwK2yDt3RNS5sb7Phwb7xqQP2g==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
 
@@ -8617,6 +8617,7 @@ packages:
   eslint@9.39.4:
     resolution: {integrity: sha512-XoMjdBOwe/esVgEvLmNsD3IRHkm7fbKIUGvrleloJXUZgDHig2IPWNniv+GwjyJXzuNqVjlr5+4yVUZjycJwfQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -21720,7 +21721,7 @@ snapshots:
       '@aws-cdk/cloud-assembly-schema': 54.14.0
       constructs: 10.7.1
 
-  aws-cdk@2.1136.0: {}
+  aws-cdk@2.1137.0: {}
 
   aws-sign2@0.7.0: {}
 
