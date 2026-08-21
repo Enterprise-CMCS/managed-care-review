@@ -27,6 +27,7 @@ import type {
     UpdateInfoType,
 } from '../domain-models/contractAndRates'
 import type { ReviewActionTypes } from '../domain-models/contractAndRates/contractReviewActionType'
+import { ConsolidatedContractStatusRecord } from '@mc-review/constants'
 
 // ETA SETUP
 Eta.configure({
@@ -532,6 +533,7 @@ export type UndoUnlockContractEtaData = {
     reason: string
     status: string
     isEQRO: boolean
+    isCHIPOnly: boolean
     isNotSubjectToReview: boolean
     reviewDecisionText: string
     shouldIncludeRates: boolean
@@ -571,11 +573,14 @@ const parseEmailDataUndoUnlockContract = (
         config.baseUrl
     )
 
-    const isEQRO = contract.contractSubmissionType === `EQRO`
-
+    const isEQRO = contract.contractSubmissionType === 'EQRO'
+    const isCHIPOnly = formData.populationCovered === 'CHIP'
+    contract.reviewStatusActions
     const isNotSubjectToReview =
-        isEQRO &&
-        eqroValidationAndReviewDetermination(contract.id, formData) === false
+        (isEQRO &&
+            eqroValidationAndReviewDetermination(contract.id, formData) ===
+                false) ||
+        isCHIPOnly
 
     return {
         packageName: contractPackageName,
@@ -585,8 +590,9 @@ const parseEmailDataUndoUnlockContract = (
         ),
         updatedBy: updateInfo.updatedBy.email,
         reason: updateInfo.updatedReason,
-        status: isNotSubjectToReview ? `Not subject to review` : `Submitted`,
+        status: ConsolidatedContractStatusRecord[contract.consolidatedStatus],
         isEQRO,
+        isCHIPOnly,
         isNotSubjectToReview,
         reviewDecisionText: isNotSubjectToReview
             ? `Not subject to formal review and approval`
