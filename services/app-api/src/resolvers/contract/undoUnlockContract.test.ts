@@ -730,6 +730,98 @@ describe('undoUnlockContract', () => {
         ).toBe('Resubmit after third unlock')
     })
 
+    it('withdraws and undo withdraws with child rates intact after two reverse-unlock cycles', async () => {
+        const cmsServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            emailer: mockEmailer,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            emailer: mockEmailer,
+        })
+
+        const submittedContract =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const childRateID =
+            submittedContract.packageSubmissions[0].rateRevisions[0].rateID
+
+        await unlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'First unlock before withdraw'
+        )
+        await undoUnlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'First reverse before withdraw'
+        )
+        await unlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Second unlock before withdraw'
+        )
+        await undoUnlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Second reverse before withdraw'
+        )
+
+        // Withdraw unlocks and resubmits the contract internally, so it relies
+        // on the same child rate lookup as a plain unlock.
+        const withdrawnContract = await withdrawTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Withdrawing after two reversed unlocks'
+        )
+
+        expect(withdrawnContract.consolidatedStatus).toBe('WITHDRAWN')
+
+        const withdrawnChildRate = await fetchTestRateById(
+            cmsServer,
+            childRateID
+        )
+
+        expect(withdrawnChildRate.consolidatedStatus).toBe('WITHDRAWN')
+
+        const undoWithdrawnContract = await undoWithdrawTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Undo withdrawal after two reversed unlocks'
+        )
+
+        expect(undoWithdrawnContract.consolidatedStatus).toBe('RESUBMITTED')
+        expect(
+            undoWithdrawnContract.packageSubmissions[0].rateRevisions.map(
+                (rateRev) => rateRev.rateID
+            )
+        ).toContain(childRateID)
+
+        const restoredChildRate = await fetchTestRateById(
+            stateServer,
+            childRateID
+        )
+
+        expect(restoredChildRate.consolidatedStatus).toBe('RESUBMITTED')
+        expect(restoredChildRate.parentContractID).toBe(submittedContract.id)
+
+        // The child rate must still unlock with its contract afterwards
+        const unlockedAfterUndoWithdraw = await unlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Unlock after undo withdraw'
+        )
+
+        expect(unlockedAfterUndoWithdraw.draftRates).toHaveLength(1)
+        expect(unlockedAfterUndoWithdraw.draftRates?.[0].id).toBe(childRateID)
+        expect(
+            unlockedAfterUndoWithdraw.draftRates?.[0].draftRevision
+        ).not.toBeNull()
+    })
+
     it('errors if contract is not UNLOCKED', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
