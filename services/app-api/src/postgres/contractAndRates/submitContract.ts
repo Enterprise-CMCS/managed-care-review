@@ -49,16 +49,9 @@ async function submitContractInsideTransaction(
             if (rate.draftRevision) {
                 unsubmittedChildRevs.push(rate.draftRevision)
             } else {
-                console.info(
-                    'Strange, a child rate is not in a draft state. Shouldnt be true while we are unlocking child rates with contracts.'
-                )
-                const latestSubmittedRate = rate.revisions[0]
-                if (!latestSubmittedRate) {
-                    return new Error(
-                        `Attempted to submit a contract connected to an unsubmitted child-rate. ContractID: ${contractID}`
-                    )
-                }
-                linkedRateRevs.push(latestSubmittedRate)
+                const msg = `Cannot submit contract ${contractID}: child rate ${rate.id} has no active draft revision`
+                console.error(msg)
+                return new Error(msg)
             }
         } else {
             // non-child rate
