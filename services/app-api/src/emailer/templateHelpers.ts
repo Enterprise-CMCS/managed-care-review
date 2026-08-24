@@ -574,8 +574,7 @@ const parseEmailDataUndoUnlockContract = (
     )
 
     const isEQRO = contract.contractSubmissionType === 'EQRO'
-    const isCHIPOnly = formData.populationCovered === 'CHIP'
-    contract.reviewStatusActions
+    const isCHIPOnly = !isEQRO && formData.populationCovered === 'CHIP'
     const isNotSubjectToReview =
         (isEQRO &&
             eqroValidationAndReviewDetermination(contract.id, formData) ===
@@ -590,7 +589,9 @@ const parseEmailDataUndoUnlockContract = (
         ),
         updatedBy: updateInfo.updatedBy.email,
         reason: updateInfo.updatedReason,
-        status: ConsolidatedContractStatusRecord[contract.consolidatedStatus],
+        status: isNotSubjectToReview
+            ? ConsolidatedContractStatusRecord['NOT_SUBJECT_TO_REVIEW']
+            : ConsolidatedContractStatusRecord['SUBMITTED'],
         isEQRO,
         isCHIPOnly,
         isNotSubjectToReview,
