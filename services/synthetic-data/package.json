@@ -1,0 +1,37 @@
+{
+    "name": "@mc-review/synthetic-data",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "exports": {
+        ".": "./src/index.ts"
+    },
+    "scripts": {
+        "build": "tsc --noEmit",
+        "cli": "tsx src/cli.ts",
+        "preflight": "tsx src/cli.ts preflight",
+        "test": "vitest --watch",
+        "test:once": "vitest run",
+        "test:coverage": "vitest --coverage",
+        "lint": "eslint . --max-warnings=0"
+    },
+    "dependencies": {
+        "@graphql-typed-document-node/core": "^3.2.0",
+        "graphql": "^16.14.0",
+        "zod": "^4.3.6"
+    },
+    "devDependencies": {
+        "@types/eslint": "^9.6.1",
+        "@types/node": "^26.2.0",
+        "@typescript-eslint/eslint-plugin": "^8.58.1",
+        "@typescript-eslint/parser": "^8.58.1",
+        "@vitest/coverage-v8": "^4.1.7",
+        "eslint": "^10.4.0",
+        "eslint-config-prettier": "^10.1.8",
+        "prettier": "^3.9.6",
+        "tsx": "^4.21.0",
+        "typescript": "5.9.3",
+        "typescript-eslint": "^8.56.0",
+        "vitest": "^4.1.7"
+    }
+}
