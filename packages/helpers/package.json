@@ -22,7 +22,7 @@
         "url-parse": "^1.5.10"
     },
     "devDependencies": {
-        "@types/node": "^25.5.0",
+        "@types/node": "^26.2.0",
         "@types/url-parse": "^1.4.3",
         "@vitest/coverage-v8": "^4.1.7",
         "vitest": "^4.1.7"
