@@ -9,8 +9,8 @@ import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
-import type { StateCodeType } from '@mc-review/submissions'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function unlockContractResolver(
     store: Store,
@@ -95,45 +95,20 @@ export function unlockContractResolver(
                     })
                 }
 
-                let stateAnalystsEmails: string[] = []
-                // not great that state code type isn't being used in ContractType but I'll risk the conversion for now
-                const stateAnalystsEmailsResult =
-                    await store.findStateAssignedUsers(
-                        contractResult.stateCode as StateCodeType
-                    )
-
-                if (stateAnalystsEmailsResult instanceof Error) {
-                    logResolverError(
-                        'getStateAnalystsEmails',
-                        stateAnalystsEmailsResult.message,
-                        context
-                    )
-                } else {
-                    stateAnalystsEmails = stateAnalystsEmailsResult.map(
-                        (u) => u.email
-                    )
-                }
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    contractResult,
+                    store,
+                    context
+                )
 
                 // Get submitter email from every pkg submitted revision.
                 const submitterEmails = contractSubmitters(unlockContractResult)
 
-                const statePrograms = store.findStatePrograms(
-                    unlockContractResult.stateCode
+                const statePrograms = getStatePrograms(
+                    unlockContractResult.stateCode,
+                    store,
+                    context
                 )
-
-                if (statePrograms instanceof Error) {
-                    logResolverError(
-                        'findStatePrograms',
-                        statePrograms.message,
-                        context
-                    )
-                    throw new GraphQLError(statePrograms.message, {
-                        extensions: {
-                            code: 'INTERNAL_SERVER_ERROR',
-                            cause: 'DB_ERROR',
-                        },
-                    })
-                }
 
                 const updateInfo: UpdateInfoType = {
                     updatedAt: new Date(), // technically this is not right but it's close enough while we are supporting two systems

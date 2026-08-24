@@ -54,6 +54,14 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             // validate contract submission type
             expect(draftContract.contractSubmissionType).toBe('HEALTH_PLAN')
 
+            const testContact = {
+                givenName: 'Jane',
+                familyName: 'Doe',
+                suffix: 'Jr.',
+                titleRole: 'Contract Manager',
+                email: 'jane.doe@example.com',
+            }
+
             // update that draft.
             const updateFormData: ContractDraftRevisionFormDataInput =
                 mockGqlContractDraftRevisionFormDataInput(
@@ -64,6 +72,7 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                         modifiedNonRiskPaymentArrangements: undefined,
                         contractDocuments: [],
                         supportingDocuments: [],
+                        stateContacts: [testContact],
                     }
                 )
             const updateResult = await updateTestContractDraftRevision(
@@ -74,16 +83,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             )
 
             const updatedFormData = updateResult.draftRevision?.formData
-
-            const expectedStateContacts = (
-                updateFormData.stateContacts ?? []
-            ).map((contact) => ({
-                name: contact.name,
-                givenName: null,
-                familyName: null,
-                titleRole: contact.titleRole,
-                email: contact.email,
-            }))
 
             expect(updatedFormData).toEqual({
                 ...updateFormData,
@@ -97,7 +96,12 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
-                stateContacts: expectedStateContacts,
+                stateContacts: [
+                    {
+                        name: `${testContact.givenName} ${testContact.familyName}`,
+                        ...testContact,
+                    },
+                ],
             })
         })
 
@@ -171,6 +175,63 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             expect(updatedFormData.stateContacts).toEqual(
                 expect.arrayContaining(updatedFormData.stateContacts)
             )
+        })
+
+        it('writes givenName, familyName and suffix on state contacts', async () => {
+            const server = await constructTestPostgresServer()
+            const draftContract = await createTestContract(server)
+            const draftRevision = draftContract.draftRevision
+
+            if (!draftRevision) {
+                throw new Error(
+                    'Unexpected error: Draft contract did not contain a draft revision'
+                )
+            }
+
+            const testContact = {
+                givenName: 'Jane',
+                familyName: 'Doe',
+                suffix: 'Jr.',
+                titleRole: 'Contract Manager',
+                email: 'jane.doe@example.com',
+            }
+
+            const updateFormData: ContractDraftRevisionFormDataInput = {
+                ...mockGqlContractDraftRevisionFormDataInput(
+                    draftContract.stateCode
+                ),
+                stateContacts: [
+                    {
+                        ...testContact,
+                    },
+                ],
+            }
+
+            const updateResult = await executeGraphQLOperation(server, {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: draftContract.id,
+                        lastSeenUpdatedAt: draftRevision.updatedAt,
+                        formData: updateFormData,
+                    },
+                },
+            })
+
+            expect(updateResult.errors).toBeUndefined()
+
+            const updatedStateContacts =
+                updateResult.data?.updateContractDraftRevision.contract
+                    .draftRevision?.formData.stateContacts
+
+            // response includes givenName, familyName, suffix and the full name
+            // constructed from givenName + familyName only (no suffix).
+            expect(updatedStateContacts).toEqual([
+                {
+                    name: `${testContact.givenName} ${testContact.familyName}`,
+                    ...testContact,
+                },
+            ])
         })
 
         it('errors if a CMS user calls it', async () => {
@@ -482,6 +543,7 @@ describe(`Tests UpdateContractDraftRevision`, () => {
 
             expect(updatedFormData).toEqual(
                 expect.objectContaining({
+                    contractExecutionStatus: 'EXECUTED',
                     eqroNewContractor: true,
                     eqroProvisionMcoNewOptionalActivity: true,
                     eqroProvisionNewMcoEqrRelatedActivities: true,

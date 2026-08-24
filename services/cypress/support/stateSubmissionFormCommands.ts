@@ -1,3 +1,5 @@
+import { featureFlags } from '@mc-review/common-code'
+
 Cypress.Commands.add('startNewContractOnlySubmissionWithBaseContract', () => {
     // Must be on '/submissions/new'
     cy.findByTestId('state-dashboard-page').should('exist')
@@ -246,6 +248,12 @@ Cypress.Commands.add('fillOutBaseContractDetails', () => {
 })
 
 Cypress.Commands.add('fillOutEQROContractDetails', () => {
+    cy.findByRole('radiogroup', { name: 'Contract status' }).within(() => {
+        cy.findByRole('radio', { name: 'Fully executed' }).check({
+            force: true,
+        })
+    })
+
     cy.findAllByLabelText('Start date', { timeout: 2000 })
         .parents()
         .findByTestId('date-picker-external-input')
@@ -436,6 +444,30 @@ Cypress.Commands.add('fillOutAmendmentToBaseContractDetails', () => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
+const contactModelUpdateFlag = featureFlags.CONTACT_MODEL_UPDATE.flag
+
+const fillOutActuaryName = () =>
+    cy.getFeatureFlagStore([contactModelUpdateFlag]).then((store) => {
+        if (store[contactModelUpdateFlag]) {
+            cy.findAllByLabelText('First name')
+                .eq(0)
+                .click()
+                .clear()
+                .type('Actuary')
+            cy.findAllByLabelText('Last name')
+                .eq(0)
+                .clear()
+                .type('Contact Person')
+            cy.findAllByLabelText('Suffix').eq(0).clear().type('Jr.')
+        } else {
+            cy.findAllByLabelText('Name')
+                .eq(0)
+                .click()
+                .clear()
+                .type('Actuary Contact Person')
+        }
+    })
+
 Cypress.Commands.add('fillOutNewRateCertification', () => {
     // Must be on '/submissions/:id/edit/rate-details'
     // Must be a contract and rates submission
@@ -472,7 +504,7 @@ Cypress.Commands.add('fillOutNewRateCertification', () => {
     cy.findAllByLabelText('Medicaid-only').eq(0).check({ force: true })
 
     //Fill out certifying actuary
-    cy.findAllByLabelText('Name').eq(0).click().type('Actuary Contact Person')
+    fillOutActuaryName()
     cy.findAllByLabelText('Title/Role').eq(0).type('Actuary Contact Title')
     cy.findAllByLabelText('Email').eq(0).type('actuarycontact@example.com')
     cy.findAllByLabelText('Mercer').eq(0).check({ force: true })
@@ -562,11 +594,7 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
         .type('03/01/2024')
 
     //Fill out certifying actuary
-    cy.findAllByLabelText('Name')
-        .eq(0)
-        .click()
-        .clear()
-        .type('Actuary Contact Person')
+    fillOutActuaryName()
     cy.findAllByLabelText('Title/Role')
         .eq(0)
         .clear()
@@ -600,23 +628,41 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
 
 Cypress.Commands.add('fillOutStateContact', () => {
     // Must be on '/submissions/:id/contacts'
-    cy.findAllByLabelText('Name')
-        .eq(0)
-        .click()
-        .clear()
-        .type('State Contact Person')
-    cy.findAllByLabelText('Name')
-        .eq(0)
-        .should('have.value', 'State Contact Person') // this assertion is here to catch flakes early due to state contact person value not persisting
-    cy.findAllByLabelText('Title/Role')
-        .eq(0)
-        .clear()
-        .type('State Contact Title')
-    cy.findAllByLabelText('Email')
-        .eq(0)
-        .clear()
-        .type('mc-review-qa@truss.works')
-    cy.findAllByTestId('errorMessage').should('have.length', 0)
+    cy.getFeatureFlagStore([contactModelUpdateFlag]).then((store) => {
+        if (store[contactModelUpdateFlag]) {
+            cy.findAllByLabelText('First name')
+                .eq(0)
+                .click()
+                .clear()
+                .type('State')
+            cy.findAllByLabelText('First name')
+                .eq(0)
+                .should('have.value', 'State')
+            cy.findAllByLabelText('Last name')
+                .eq(0)
+                .clear()
+                .type('Contact Person')
+            cy.findAllByLabelText('Suffix').eq(0).clear().type('Jr.')
+        } else {
+            cy.findAllByLabelText('Name')
+                .eq(0)
+                .click()
+                .clear()
+                .type('State Contact Person')
+            cy.findAllByLabelText('Name')
+                .eq(0)
+                .should('have.value', 'State Contact Person') // this assertion is here to catch flakes early due to state contact person value not persisting
+        }
+        cy.findAllByLabelText('Title/Role')
+            .eq(0)
+            .clear()
+            .type('State Contact Title')
+        cy.findAllByLabelText('Email')
+            .eq(0)
+            .clear()
+            .type('mc-review-qa@truss.works')
+        cy.findAllByTestId('errorMessage').should('have.length', 0)
+    })
 })
 
 Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
@@ -627,16 +673,29 @@ Cypress.Commands.add('fillOutAdditionalActuaryContact', () => {
         .eq(0)
         .click()
     cy.findByTestId('addtnl-actuary-contact').should('exist')
-    cy.findByTestId('addtlActuaryContacts.name')
-        .click()
-        .clear()
-        .type('Actuary Contact Person')
-    cy.findByTestId('addtlActuaryContacts.titleRole')
-        .clear()
-        .type('Actuary Contact Title')
-    cy.findByTestId('addtlActuaryContacts.email')
-        .clear()
-        .type('actuarycontact@example.com')
+    cy.getFeatureFlagStore([contactModelUpdateFlag]).then((store) => {
+        if (store[contactModelUpdateFlag]) {
+            cy.findByTestId('addtlActuaryContacts.givenName')
+                .click()
+                .clear()
+                .type('Actuary')
+            cy.findByTestId('addtlActuaryContacts.familyName')
+                .clear()
+                .type('Contact Person')
+            cy.findByTestId('addtlActuaryContacts.suffix').clear().type('Jr.')
+        } else {
+            cy.findByTestId('addtlActuaryContacts.name')
+                .click()
+                .clear()
+                .type('Actuary Contact Person')
+        }
+        cy.findByTestId('addtlActuaryContacts.titleRole')
+            .clear()
+            .type('Actuary Contact Title')
+        cy.findByTestId('addtlActuaryContacts.email')
+            .clear()
+            .type('actuarycontact@example.com')
+    })
 
     // Actuarial firm
     cy.findByTestId('addtlActuaryContacts.mercer').check({ force: true })
@@ -678,7 +737,9 @@ Cypress.Commands.add('waitForDocumentsToLoad', () => {
 
 Cypress.Commands.add('verifyDocumentsHaveNoErrors', () => {
     cy.findByText(/Upload failed/).should('not.exist')
-    cy.findByText('You already added a file with this name and extension. Remove one.').should('not.exist')
+    cy.findByText(
+        'You already added a file with this name and extension. Remove one.'
+    ).should('not.exist')
     cy.findByText('Failed security scan, please remove').should('not.exist')
     cy.findByText('Remove files with errors').should('not.exist')
 })

@@ -75,6 +75,12 @@ it('renders EQRO fields', async () => {
         ).toBeInTheDocument()
     })
 
+    expect(
+        within(screen.getByTestId('contractExecutionStatus')).getByText(
+            'Fully executed'
+        )
+    ).toBeInTheDocument()
+
     const withinInclude = within(
         screen.getByLabelText(
             'This contract action includes new or modified provisions related to the following'

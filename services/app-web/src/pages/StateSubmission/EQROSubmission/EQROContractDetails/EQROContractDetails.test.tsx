@@ -122,6 +122,95 @@ describe('EQROContractDetails', () => {
         })
     })
 
+    describe('Contract status', () => {
+        it('displays the saved contract execution status', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractExecutionStatus =
+                'UNEXECUTED'
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<EQROContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contract-details',
+                    },
+                }
+            )
+
+            const contractStatus = await screen.findByRole('radiogroup', {
+                name: 'Contract status',
+            })
+
+            expect(
+                within(contractStatus).getByRole('radio', {
+                    name: 'Unexecuted by some or all parties',
+                })
+            ).toBeChecked()
+        })
+
+        it('requires a contract execution status before continuing', async () => {
+            const draftContract = mockContractPackageUnlockedWithUnlockedType()
+            draftContract.draftRevision.formData.contractExecutionStatus = null
+            draftContract.draftRevision.formData.contractType = 'BASE'
+            draftContract.draftRevision.formData.populationCovered = 'MEDICAID'
+            draftContract.draftRevision.formData.managedCareEntities = ['PIHP']
+
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        element={<EQROContractDetails />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...draftContract,
+                                    id: '15',
+                                    contractSubmissionType: 'EQRO',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eqro/15/edit/contract-details',
+                    },
+                }
+            )
+
+            await screen.findByText('EQRO Contract details')
+            await userEvent.click(
+                screen.getByRole('button', { name: 'Continue' })
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getAllByText('You must select a contract status')
+                ).toHaveLength(2)
+            })
+        })
+    })
+
     describe('EQRO provisions questions - conditional rendering', () => {
         it('shows eqroNewContractor question for Base contract with MCO', async () => {
             const draftContract = mockContractPackageUnlockedWithUnlockedType()

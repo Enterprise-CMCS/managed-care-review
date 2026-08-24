@@ -1,4 +1,5 @@
 import {
+    buildNewAndModifiedCollectionChanges,
     buildScalarFieldDiffChanges,
     diffCollectionByKey,
 } from './revisionDiffPrimitives'
@@ -101,7 +102,7 @@ describe('revisionDiffPrimitives', () => {
 
         expect(result).toEqual([
             {
-                kind: 'removed',
+                changeType: 'REMOVED',
                 key: 'removed-rate',
                 previous: {
                     id: 'removed-rate',
@@ -109,7 +110,7 @@ describe('revisionDiffPrimitives', () => {
                 },
             },
             {
-                kind: 'updated',
+                changeType: 'UPDATED',
                 key: 'updated-rate',
                 previous: {
                     id: 'updated-rate',
@@ -128,7 +129,7 @@ describe('revisionDiffPrimitives', () => {
                 ],
             },
             {
-                kind: 'added',
+                changeType: 'ADDED',
                 key: 'added-rate',
                 current: {
                     id: 'added-rate',
@@ -157,5 +158,54 @@ describe('revisionDiffPrimitives', () => {
 
         expect(result).toBeInstanceOf(Error)
         expect((result as Error).message).toContain('Duplicate diff key')
+    })
+
+    it('buildNewAndModifiedCollectionChanges returns only current items not present in the previous collection', () => {
+        const result = buildNewAndModifiedCollectionChanges(
+            [
+                { name: 'Ada', email: 'ada@example.com' },
+                { name: 'Bea', email: 'bea@example.com' },
+            ],
+            [
+                { name: 'Ada', email: 'ada@example.com' },
+                { name: 'Bea', email: 'bea-updated@example.com' },
+                { name: 'Cy', email: 'cy@example.com' },
+            ],
+            (item) => JSON.stringify(item)
+        )
+
+        expect(result).toEqual([
+            {
+                changeType: 'NEW_OR_MODIFIED',
+                current: {
+                    name: 'Bea',
+                    email: 'bea-updated@example.com',
+                },
+            },
+            {
+                changeType: 'NEW_OR_MODIFIED',
+                current: {
+                    name: 'Cy',
+                    email: 'cy@example.com',
+                },
+            },
+        ])
+    })
+
+    it('buildNewAndModifiedCollectionChanges treats duplicate unchanged items as matched by count', () => {
+        const result = buildNewAndModifiedCollectionChanges(
+            [{ name: 'Ada' }, { name: 'Ada' }],
+            [{ name: 'Ada' }, { name: 'Ada' }, { name: 'Ada' }],
+            (item) => JSON.stringify(item)
+        )
+
+        expect(result).toEqual([
+            {
+                changeType: 'NEW_OR_MODIFIED',
+                current: {
+                    name: 'Ada',
+                },
+            },
+        ])
     })
 })

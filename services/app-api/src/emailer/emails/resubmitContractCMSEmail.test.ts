@@ -10,99 +10,216 @@ import type { ContractType } from '../../domain-models'
 import { packageName } from '@mc-review/submissions'
 import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 import { emailColors } from '../styleConstants'
+import {
+    buildResubmitRevisionChanges,
+    type ResubmitRevisionChanges,
+    type ResubmitRevisionChangeSection,
+} from './resubmitRevisionChanges'
+import type { RevisionDiff } from '../../domain-models'
 
 describe('with rates', () => {
-    const noDiffRevisionChanges = {
+    const revisionDates = {
         previousSubmissionDate: '05/01/2027',
         currentSubmissionDate: '05/11/2027',
+    }
+    const makeRevisionChanges = (
+        sections: ResubmitRevisionChangeSection[],
+        hasChanges = true
+    ): ResubmitRevisionChanges => ({
+        ...revisionDates,
+        hasChanges,
+        sections,
+    })
+    const noDiffRevisionChanges = {
+        ...revisionDates,
         hasChanges: false,
         sections: [],
     }
-    const submissionTypeRevisionChanges = {
-        previousSubmissionDate: '05/01/2027',
-        currentSubmissionDate: '05/11/2027',
-        hasChanges: true,
-        sections: [
-            {
-                title: 'SUBMISSION TYPE',
-                rows: [
-                    {
-                        label: 'Submission ID',
-                        oldValue: 'MCR-IL-0005-CHIP-PCCME',
-                        newValue: 'MCR-IL-0005-CHIP-CCCPLUS-FIDESNP-PCCME',
-                    },
-                    {
-                        label: 'Medicaid populations',
-                        oldValue: 'Medicaid and CHIP',
-                        newValue: 'CHIP-only',
-                    },
-                    {
-                        label: 'Risk-based contract',
-                        oldValue: 'No',
-                        newValue: 'Yes',
-                    },
-                    {
-                        label: 'Submission description',
-                        oldValue: 'Old description',
-                        newValue: 'New description',
-                        breakBeforeNewValue: true,
-                    },
-                ],
+    const submissionTypeRevisionChanges = makeRevisionChanges([
+        {
+            title: 'SUBMISSION TYPE',
+            rows: [
+                {
+                    label: 'Submission ID',
+                    oldValue: 'MCR-IL-0005-CHIP-PCCME',
+                    newValue: 'MCR-IL-0005-CHIP-CCCPLUS-FIDESNP-PCCME',
+                },
+                {
+                    label: 'Medicaid populations',
+                    oldValue: 'Medicaid and CHIP',
+                    newValue: 'CHIP-only',
+                },
+                {
+                    label: 'Risk-based contract',
+                    oldValue: 'No',
+                    newValue: 'Yes',
+                },
+                {
+                    label: 'Submission description',
+                    oldValue: 'Old description',
+                    newValue: 'New description',
+                    breakBeforeNewValue: true,
+                },
+            ],
+        },
+    ])
+    const contractDetailsRevisionChanges = makeRevisionChanges([
+        {
+            title: 'CONTRACT DETAILS',
+            rows: [
+                {
+                    label: 'Status',
+                    oldValue: 'Unexecuted by some or all parties',
+                    newValue: 'Fully executed',
+                },
+                {
+                    label: 'Associated with a D-SNP',
+                    newValue: 'Yes',
+                    isNew: true,
+                },
+                {
+                    label: 'Managed Care authorities',
+                    oldValue: 'Title XXI Separate CHIP State Plan Authority',
+                    newValue:
+                        '1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority',
+                    breakBeforeNewValue: true,
+                },
+            ],
+        },
+    ])
+    const contractProvisionsRevisionChanges = makeRevisionChanges([
+        {
+            title: 'CONTRACT PROVISIONS',
+            rows: [
+                {
+                    label: 'In Lieu-of Services and Settings',
+                    oldValue: 'No',
+                    newValue: 'Yes',
+                },
+                {
+                    label: 'CHIP beneficiaries',
+                    newValue: 'Yes',
+                    isNew: true,
+                },
+            ],
+        },
+    ])
+    const contactsAndDocumentsRevisionChanges = makeRevisionChanges([
+        {
+            title: 'STATE CONTACTS',
+            contactsLabel: 'New and modified:',
+            contacts: [
+                {
+                    value: 'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov',
+                },
+                {
+                    value: 'Rhonda Cumberbatch, ASA PRINCIPLE, Rhonda@il.gov',
+                },
+            ],
+        },
+        {
+            title: 'DOCUMENTS',
+            documentSummary: {
+                totalChanged: 6,
+                totalAdded: 2,
+                totalRemoved: 4,
             },
-        ],
-    }
-    const contractDetailsRevisionChanges = {
-        previousSubmissionDate: '05/01/2027',
-        currentSubmissionDate: '05/11/2027',
-        hasChanges: true,
-        sections: [
-            {
-                title: 'CONTRACT DETAILS',
-                rows: [
-                    {
-                        label: 'Status',
-                        oldValue: 'Unexecuted by some or all parties',
-                        newValue: 'Fully executed',
-                    },
-                    {
-                        label: 'Associated with a D-SNP',
-                        newValue: 'Yes',
-                        isNew: true,
-                    },
-                    {
-                        label: 'Managed Care authorities',
-                        oldValue:
-                            'Title XXI Separate CHIP State Plan Authority',
-                        newValue:
-                            '1932(a) State Plan Authority, 1115 Waiver Authority, Title XXI Separate CHIP State Plan Authority',
-                        breakBeforeNewValue: true,
-                    },
-                ],
+            documentGroups: [
+                {
+                    title: 'CONTRACT',
+                    rows: [
+                        {
+                            label: 'Added' as const,
+                            value: 'VA-CCCPLUS-MEDALLION-Contract-Amendment-08.pdf',
+                        },
+                        {
+                            label: 'Removed' as const,
+                            value: 'Old Contract Amendment 08.pdf',
+                        },
+                    ],
+                },
+                {
+                    title: 'CONTRACT SUPPORTING',
+                    rows: [
+                        {
+                            label: 'Removed' as const,
+                            value: '2023-CCCPLUS-RATE-CERT.pdf',
+                        },
+                    ],
+                },
+                {
+                    title: 'RATE CERTIFICATION | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                    rows: [
+                        {
+                            label: 'Added' as const,
+                            value: 'IL FIDE SNP CY 28 RATE CERTIFICATION.xlsx',
+                        },
+                        {
+                            label: 'Removed' as const,
+                            value: 'Contract-Provisions-Summary.pdf',
+                        },
+                    ],
+                },
+                {
+                    title: 'RATE SUPPORTING | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                    rows: [
+                        {
+                            label: 'Removed' as const,
+                            value: 'Supporting Contract Amendment 08.pdf',
+                        },
+                    ],
+                },
+            ],
+        },
+    ])
+    const addedAndRemovedRateDocumentsRevisionChanges = makeRevisionChanges([
+        {
+            title: 'DOCUMENTS',
+            documentSummary: {
+                totalChanged: 4,
+                totalAdded: 2,
+                totalRemoved: 2,
             },
-        ],
-    }
-    const contractProvisionsRevisionChanges = {
-        previousSubmissionDate: '05/01/2027',
-        currentSubmissionDate: '05/11/2027',
-        hasChanges: true,
-        sections: [
-            {
-                title: 'CONTRACT PROVISIONS',
-                rows: [
-                    {
-                        label: 'In Lieu-of Services and Settings',
-                        oldValue: 'No',
-                        newValue: 'Yes',
-                    },
-                    {
-                        label: 'CHIP beneficiaries',
-                        newValue: 'Yes',
-                        isNew: true,
-                    },
-                ],
-            },
-        ],
-    }
+            documentGroups: [
+                {
+                    title: 'RATE CERTIFICATION | MCR-IL-ADDED-RATE',
+                    rows: [
+                        {
+                            label: 'Added' as const,
+                            value: 'added-rate-certification.xlsx',
+                        },
+                    ],
+                },
+                {
+                    title: 'RATE SUPPORTING | MCR-IL-ADDED-RATE',
+                    rows: [
+                        {
+                            label: 'Added' as const,
+                            value: 'added-rate-supporting.pdf',
+                        },
+                    ],
+                },
+                {
+                    title: 'RATE CERTIFICATION | MCR-IL-REMOVED-RATE',
+                    rows: [
+                        {
+                            label: 'Removed' as const,
+                            value: 'removed-rate-certification.xlsx',
+                        },
+                    ],
+                },
+                {
+                    title: 'RATE SUPPORTING | MCR-IL-REMOVED-RATE',
+                    rows: [
+                        {
+                            label: 'Removed' as const,
+                            value: 'removed-rate-supporting.pdf',
+                        },
+                    ],
+                },
+            ],
+        },
+    ])
     const resubmitData = {
         updatedBy: {
             email: 'bob@example.com',
@@ -262,7 +379,7 @@ describe('with rates', () => {
             })
         )
     })
-    it('includes no-diff submission changes copy when revision changes are provided', async () => {
+    it('renders fallback copy when revisionChanges is present but has no displayable changes', async () => {
         const template = await resubmitContractCMSEmail(
             submission,
             resubmitData,
@@ -326,6 +443,57 @@ describe('with rates', () => {
         expect(template.bodyText).toContain('Risk-based contract: No → Yes')
         expect(template.bodyHTML).toContain(
             '<strong>Medicaid populations:</strong> Medicaid and CHIP → CHIP-only'
+        )
+    })
+    it('renders state contacts and document changes for CHIP-only CMS resubmission emails', async () => {
+        const chipOnlySubmission: ContractType = {
+            ...submission,
+            packageSubmissions: [
+                {
+                    ...submission.packageSubmissions[0],
+                    contractRevision: {
+                        ...submission.packageSubmissions[0].contractRevision,
+                        formData: {
+                            ...submission.packageSubmissions[0].contractRevision
+                                .formData,
+                            populationCovered: 'CHIP',
+                        },
+                    },
+                },
+            ],
+        }
+
+        const template = await resubmitContractCMSEmail(
+            chipOnlySubmission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            contactsAndDocumentsRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.subject).toContain(
+            'is not subject to DMCO review and validation.'
+        )
+        expect(template.bodyText).toContain('STATE CONTACTS')
+        expect(template.bodyText).toContain(
+            'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov'
+        )
+        expect(template.bodyText).toContain('DOCUMENTS')
+        expect(template.bodyText).toContain(
+            '6 documents changed: 2 added, 4 removed'
+        )
+        expect(template.bodyText).toContain(
+            'RATE CERTIFICATION | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230'
+        )
+        expect(template.bodyHTML).toContain('<strong>STATE CONTACTS</strong>')
+        expect(template.bodyHTML).toContain('<strong>DOCUMENTS</strong>')
+        expect(template.bodyHTML).toContain(
+            '<strong>6 documents changed:</strong> 2 added, 4 removed'
         )
     })
     it('renders submission type diff rows when revision changes are provided', async () => {
@@ -405,6 +573,192 @@ describe('with rates', () => {
         expect(template.bodyText).toContain('NEW CHIP beneficiaries: Yes')
         expect(template.bodyHTML).toContain(
             `<span style="color: ${emailColors.revisionChangesNewIndicator}; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> CHIP beneficiaries`
+        )
+    })
+    it('renders formatter output from a RevisionDiff through the CMS email', async () => {
+        const comparison: RevisionDiff = {
+            contractID: 'test-contract-id',
+            olderRevisionID: 'older-rev',
+            newerRevisionID: 'newer-rev',
+            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
+            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            fieldChanges: [
+                {
+                    fieldPath: 'submissionType',
+                    oldValue: 'CONTRACT_ONLY',
+                    newValue: 'CONTRACT_AND_RATES',
+                },
+                {
+                    fieldPath: 'contractExecutionStatus',
+                    oldValue: 'UNEXECUTED',
+                    newValue: 'EXECUTED',
+                },
+            ],
+            stateContactChanges: [
+                {
+                    changeType: 'NEW_OR_MODIFIED',
+                    current: {
+                        name: 'Kasimir Kraft',
+                        titleRole: 'Assistant Division Chief',
+                        email: 'kkraft@il.gov',
+                    },
+                },
+            ],
+            documentChanges: {
+                contractDocuments: {
+                    added: ['Contract Amendment 08.pdf'],
+                    removed: [],
+                },
+                contractSupportingDocuments: {
+                    added: [],
+                    removed: ['Supporting Rate Cert.pdf'],
+                },
+                ratesDocuments: [],
+                totalAdded: 1,
+                totalRemoved: 1,
+            },
+            rateChanges: { added: [], removed: [], revised: [] },
+        }
+
+        const revisionChanges = buildResubmitRevisionChanges(
+            submission,
+            comparison,
+            defaultStatePrograms
+        )
+
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            revisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain('Submission type: Contract only')
+        expect(template.bodyText).toContain('→ Contract and rate(s)')
+        expect(template.bodyText).toContain('Status: Unexecuted → Executed')
+        expect(template.bodyText).toContain('STATE CONTACTS')
+        expect(template.bodyText).toContain(
+            'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov'
+        )
+        expect(template.bodyText).toContain('DOCUMENTS')
+        expect(template.bodyText).toContain(
+            '2 documents changed: 1 added, 1 removed'
+        )
+        expect(template.bodyText).toContain('Added: Contract Amendment 08.pdf')
+        expect(template.bodyText).toContain('Removed: Supporting Rate Cert.pdf')
+        expect(template.bodyHTML).toContain('<strong>STATE CONTACTS</strong>')
+        expect(template.bodyHTML).toContain('<strong>DOCUMENTS</strong>')
+        expect(template.bodyHTML).toContain(
+            '<strong>2 documents changed:</strong> 1 added, 1 removed'
+        )
+    })
+    it('renders state contacts and document sections after the existing diff sections', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            makeRevisionChanges([
+                ...submissionTypeRevisionChanges.sections,
+                ...contractDetailsRevisionChanges.sections,
+                ...contractProvisionsRevisionChanges.sections,
+                ...contactsAndDocumentsRevisionChanges.sections,
+            ])
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain('STATE CONTACTS')
+        expect(template.bodyText).toContain('New and modified:')
+        expect(template.bodyText).toContain(
+            'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov'
+        )
+        expect(template.bodyText).toContain(
+            'Rhonda Cumberbatch, ASA PRINCIPLE, Rhonda@il.gov'
+        )
+        expect(template.bodyText).toContain('DOCUMENTS')
+        expect(template.bodyText).toContain(
+            '6 documents changed: 2 added, 4 removed'
+        )
+        expect(template.bodyText).toContain('CONTRACT')
+        expect(template.bodyText).toContain(
+            'Added: VA-CCCPLUS-MEDALLION-Contract-Amendment-08.pdf'
+        )
+        expect(template.bodyText).toContain(
+            'Removed: 2023-CCCPLUS-RATE-CERT.pdf'
+        )
+        expect(template.bodyText).toContain(
+            'RATE CERTIFICATION | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230'
+        )
+        expect(template.bodyText).toContain(
+            'Removed: Supporting Contract Amendment 08.pdf'
+        )
+
+        const stateContactsIndex = template.bodyText?.indexOf('STATE CONTACTS')
+        const documentsIndex = template.bodyText?.indexOf('DOCUMENTS')
+        expect(stateContactsIndex).toBeGreaterThan(
+            template.bodyText?.indexOf('CONTRACT PROVISIONS') ?? -1
+        )
+        expect(documentsIndex).toBeGreaterThan(stateContactsIndex ?? -1)
+
+        expect(template.bodyHTML).toContain('<ul')
+        expect(template.bodyHTML).toContain(
+            '<strong>6 documents changed:</strong> 2 added, 4 removed'
+        )
+        expect(template.bodyHTML).toContain(
+            'RATE SUPPORTING | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230'
+        )
+    })
+    it('renders added-rate and removed-rate document groups in the CMS email body', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            addedAndRemovedRateDocumentsRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain(
+            '4 documents changed: 2 added, 2 removed'
+        )
+        expect(template.bodyText).toContain(
+            'RATE CERTIFICATION | MCR-IL-ADDED-RATE'
+        )
+        expect(template.bodyText).toContain(
+            'Added: added-rate-certification.xlsx'
+        )
+        expect(template.bodyText).toContain(
+            'RATE SUPPORTING | MCR-IL-ADDED-RATE'
+        )
+        expect(template.bodyText).toContain('Added: added-rate-supporting.pdf')
+        expect(template.bodyText).toContain(
+            'RATE CERTIFICATION | MCR-IL-REMOVED-RATE'
+        )
+        expect(template.bodyText).toContain(
+            'Removed: removed-rate-certification.xlsx'
+        )
+        expect(template.bodyText).toContain(
+            'RATE SUPPORTING | MCR-IL-REMOVED-RATE'
+        )
+        expect(template.bodyText).toContain(
+            'Removed: removed-rate-supporting.pdf'
+        )
+        expect(template.bodyHTML).toContain(
+            '<strong>4 documents changed:</strong> 2 added, 2 removed'
         )
     })
     it('includes expected data summary for a multi-rate contract and rates resubmission CMS email', async () => {
@@ -1178,6 +1532,10 @@ test('renders overall email as expected', async () => {
     if (template instanceof Error) {
         console.error(testStateAnalystEmails)
         return
+    }
+
+    if (!template.bodyHTML) {
+        throw new Error('Expected bodyHTML to be defined')
     }
 
     expect(template.bodyHTML).toMatchSnapshot()

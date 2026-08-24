@@ -6,13 +6,32 @@ describe('buildResubmitRevisionChanges', () => {
     const statePrograms = mockMNState().programs
     const currentContract = mockContract()
 
+    // The resubmit email renders multiple diff collections, so the remaining
+    // ones are required by the type even when a test only exercises one area.
+    const baseComparison: Omit<RevisionDiff, 'fieldChanges'> = {
+        contractID: 'test-contract-id',
+        olderRevisionID: 'older-rev',
+        newerRevisionID: 'newer-rev',
+        olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
+        newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+        stateContactChanges: [],
+        documentChanges: {
+            contractDocuments: { added: [], removed: [] },
+            contractSupportingDocuments: { added: [], removed: [] },
+            ratesDocuments: [],
+            totalAdded: 0,
+            totalRemoved: 0,
+        },
+        rateChanges: { added: [], removed: [], revised: [] },
+    }
+    const baseDates = {
+        previousSubmissionDate: '04/30/2027',
+        currentSubmissionDate: '05/10/2027',
+    }
+
     it('returns no-diff content when contract field changes are empty', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [],
         }
 
@@ -23,8 +42,7 @@ describe('buildResubmitRevisionChanges', () => {
                 statePrograms
             )
         ).toEqual({
-            previousSubmissionDate: '04/30/2027',
-            currentSubmissionDate: '05/10/2027',
+            ...baseDates,
             hasChanges: false,
             sections: [],
         })
@@ -32,11 +50,7 @@ describe('buildResubmitRevisionChanges', () => {
 
     it('formats submission type field changes for CMS resubmit email', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'contractName',
@@ -96,8 +110,7 @@ describe('buildResubmitRevisionChanges', () => {
                 },
             ])
         ).toEqual({
-            previousSubmissionDate: '04/30/2027',
-            currentSubmissionDate: '05/10/2027',
+            ...baseDates,
             hasChanges: true,
             sections: [
                 {
@@ -147,11 +160,7 @@ describe('buildResubmitRevisionChanges', () => {
 
     it('formats contract details field changes for CMS resubmit email, including NEW fields', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'contractExecutionStatus',
@@ -193,8 +202,7 @@ describe('buildResubmitRevisionChanges', () => {
                 statePrograms
             )
         ).toEqual({
-            previousSubmissionDate: '04/30/2027',
-            currentSubmissionDate: '05/10/2027',
+            ...baseDates,
             hasChanges: true,
             sections: [
                 {
@@ -241,11 +249,7 @@ describe('buildResubmitRevisionChanges', () => {
 
     it('formats removed contract detail values with a dash placeholder', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'dsnpContract',
@@ -262,8 +266,7 @@ describe('buildResubmitRevisionChanges', () => {
                 statePrograms
             )
         ).toEqual({
-            previousSubmissionDate: '04/30/2027',
-            currentSubmissionDate: '05/10/2027',
+            ...baseDates,
             hasChanges: true,
             sections: [
                 {
@@ -300,11 +303,7 @@ describe('buildResubmitRevisionChanges', () => {
             ],
         }
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'inLieuServicesAndSettings',
@@ -396,8 +395,7 @@ describe('buildResubmitRevisionChanges', () => {
                 statePrograms
             )
         ).toEqual({
-            previousSubmissionDate: '04/30/2027',
-            currentSubmissionDate: '05/10/2027',
+            ...baseDates,
             hasChanges: true,
             sections: [
                 {
@@ -491,11 +489,7 @@ describe('buildResubmitRevisionChanges', () => {
 
     it('formats removed contract provision values with a dash placeholder', () => {
         const comparison: RevisionDiff = {
-            contractID: 'test-contract-id',
-            olderRevisionID: 'older-rev',
-            newerRevisionID: 'newer-rev',
-            olderSubmittedAt: new Date('2027-05-01T00:00:00.000Z'),
-            newerSubmittedAt: new Date('2027-05-11T00:00:00.000Z'),
+            ...baseComparison,
             fieldChanges: [
                 {
                     fieldPath: 'modifiedBenefitsProvided',
@@ -512,8 +506,7 @@ describe('buildResubmitRevisionChanges', () => {
                 statePrograms
             )
         ).toEqual({
-            previousSubmissionDate: '04/30/2027',
-            currentSubmissionDate: '05/10/2027',
+            ...baseDates,
             hasChanges: true,
             sections: [
                 {
@@ -528,5 +521,366 @@ describe('buildResubmitRevisionChanges', () => {
                 },
             ],
         })
+    })
+
+    it('formats new and modified state contacts for CMS resubmit email', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            stateContactChanges: [
+                {
+                    changeType: 'NEW_OR_MODIFIED',
+                    current: {
+                        name: 'Kasimir Kraft',
+                        titleRole: 'Assistant Division Chief',
+                        email: 'kkraft@il.gov',
+                    },
+                },
+                {
+                    changeType: 'NEW_OR_MODIFIED',
+                    current: {
+                        name: 'Rhonda Cumberbatch',
+                        titleRole: 'ASA PRINCIPLE',
+                        email: 'Rhonda@il.gov',
+                    },
+                },
+            ],
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            ...baseDates,
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'STATE CONTACTS',
+                    contactsLabel: 'New and modified:',
+                    contacts: [
+                        {
+                            value: 'Kasimir Kraft, Assistant Division Chief, kkraft@il.gov',
+                        },
+                        {
+                            value: 'Rhonda Cumberbatch, ASA PRINCIPLE, Rhonda@il.gov',
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('formats contract and rate document changes for CMS resubmit email', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            documentChanges: {
+                contractDocuments: {
+                    added: ['Contract Amendment 08.pdf'],
+                    removed: ['Prior Contract Amendment 08.pdf'],
+                },
+                contractSupportingDocuments: {
+                    added: [],
+                    removed: ['Supporting Rate Cert.pdf'],
+                },
+                ratesDocuments: [
+                    {
+                        rateID: 'rate-1',
+                        rateCertificationName:
+                            'MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                        rateDocuments: {
+                            added: [
+                                'IL FIDE SNP CY 28 RATE CERTIFICATION.xlsx',
+                            ],
+                            removed: ['Old Rate Cert Summary.pdf'],
+                        },
+                        supportingDocuments: {
+                            added: [],
+                            removed: ['Old Supporting Rate Doc.pdf'],
+                        },
+                    },
+                ],
+                totalAdded: 2,
+                totalRemoved: 4,
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            ...baseDates,
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'DOCUMENTS',
+                    documentSummary: {
+                        totalChanged: 6,
+                        totalAdded: 2,
+                        totalRemoved: 4,
+                    },
+                    documentGroups: [
+                        {
+                            title: 'CONTRACT',
+                            rows: [
+                                {
+                                    label: 'Added',
+                                    value: 'Contract Amendment 08.pdf',
+                                },
+                                {
+                                    label: 'Removed',
+                                    value: 'Prior Contract Amendment 08.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'CONTRACT SUPPORTING',
+                            rows: [
+                                {
+                                    label: 'Removed',
+                                    value: 'Supporting Rate Cert.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'RATE CERTIFICATION | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                            rows: [
+                                {
+                                    label: 'Added',
+                                    value: 'IL FIDE SNP CY 28 RATE CERTIFICATION.xlsx',
+                                },
+                                {
+                                    label: 'Removed',
+                                    value: 'Old Rate Cert Summary.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'RATE SUPPORTING | MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20251230',
+                            rows: [
+                                {
+                                    label: 'Removed',
+                                    value: 'Old Supporting Rate Doc.pdf',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('omits empty document groups from the documents section', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            documentChanges: {
+                contractDocuments: {
+                    added: [],
+                    removed: [],
+                },
+                contractSupportingDocuments: {
+                    added: [],
+                    removed: ['supporting-only.pdf'],
+                },
+                ratesDocuments: [
+                    {
+                        rateID: 'rate-1',
+                        rateCertificationName: 'RATE-ONE',
+                        rateDocuments: {
+                            added: [],
+                            removed: [],
+                        },
+                        supportingDocuments: {
+                            added: ['rate-support-added.pdf'],
+                            removed: [],
+                        },
+                    },
+                ],
+                totalAdded: 1,
+                totalRemoved: 1,
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            ...baseDates,
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'DOCUMENTS',
+                    documentSummary: {
+                        totalChanged: 2,
+                        totalAdded: 1,
+                        totalRemoved: 1,
+                    },
+                    documentGroups: [
+                        {
+                            title: 'CONTRACT SUPPORTING',
+                            rows: [
+                                {
+                                    label: 'Removed',
+                                    value: 'supporting-only.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'RATE SUPPORTING | RATE-ONE',
+                            rows: [
+                                {
+                                    label: 'Added',
+                                    value: 'rate-support-added.pdf',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('uses the UI fallback label when a rate document group has no rate name', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            documentChanges: {
+                contractDocuments: {
+                    added: [],
+                    removed: [],
+                },
+                contractSupportingDocuments: {
+                    added: [],
+                    removed: [],
+                },
+                ratesDocuments: [
+                    {
+                        rateID: 'rate-without-name',
+                        rateCertificationName: undefined,
+                        rateDocuments: {
+                            added: ['rate-cert-added.pdf'],
+                            removed: [],
+                        },
+                        supportingDocuments: {
+                            added: [],
+                            removed: ['rate-support-removed.pdf'],
+                        },
+                    },
+                ],
+                totalAdded: 1,
+                totalRemoved: 1,
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            ...baseDates,
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'DOCUMENTS',
+                    documentSummary: {
+                        totalChanged: 2,
+                        totalAdded: 1,
+                        totalRemoved: 1,
+                    },
+                    documentGroups: [
+                        {
+                            title: 'RATE CERTIFICATION | Unknown rate name',
+                            rows: [
+                                {
+                                    label: 'Added',
+                                    value: 'rate-cert-added.pdf',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'RATE SUPPORTING | Unknown rate name',
+                            rows: [
+                                {
+                                    label: 'Removed',
+                                    value: 'rate-support-removed.pdf',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('orders formatter sections in the expected email sequence', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [
+                {
+                    fieldPath: 'submissionType',
+                    oldValue: 'CONTRACT_ONLY',
+                    newValue: 'CONTRACT_AND_RATES',
+                },
+                {
+                    fieldPath: 'contractExecutionStatus',
+                    oldValue: 'UNEXECUTED',
+                    newValue: 'EXECUTED',
+                },
+                {
+                    fieldPath: 'modifiedBenefitsProvided',
+                    oldValue: false,
+                    newValue: true,
+                },
+            ],
+            stateContactChanges: [
+                {
+                    changeType: 'NEW_OR_MODIFIED',
+                    current: {
+                        name: 'Kasimir Kraft',
+                        titleRole: 'Assistant Division Chief',
+                        email: 'kkraft@il.gov',
+                    },
+                },
+            ],
+            documentChanges: {
+                contractDocuments: {
+                    added: ['Contract Amendment 08.pdf'],
+                    removed: [],
+                },
+                contractSupportingDocuments: {
+                    added: [],
+                    removed: [],
+                },
+                ratesDocuments: [],
+                totalAdded: 1,
+                totalRemoved: 0,
+            },
+        }
+
+        const result = buildResubmitRevisionChanges(
+            currentContract,
+            comparison,
+            statePrograms
+        )
+
+        expect(result.sections.map((section) => section.title)).toEqual([
+            'SUBMISSION TYPE',
+            'CONTRACT DETAILS',
+            'CONTRACT PROVISIONS',
+            'STATE CONTACTS',
+            'DOCUMENTS',
+        ])
     })
 })

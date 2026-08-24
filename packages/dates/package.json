@@ -11,11 +11,11 @@
         "test:coverage": "vitest --coverage"
     },
     "dependencies": {
-        "dayjs": "^1.11.19",
+        "dayjs": "^1.11.21",
         "typescript": "5.9.3"
     },
     "devDependencies": {
-        "@types/node": "^25.5.0",
+        "@types/node": "^26.2.0",
         "@types/url-parse": "^1.4.3",
         "@vitest/coverage-v8": "^4.1.7",
         "vitest": "^4.1.7"

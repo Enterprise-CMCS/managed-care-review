@@ -15,19 +15,19 @@ import { createUserInputError } from '../errorUtils'
 
 function serializeRevisionDiffFieldValue(value: unknown):
     | {
-          kind: 'STRING'
+          valueType: 'STRING'
           value: string
       }
     | {
-          kind: 'BOOLEAN'
+          valueType: 'BOOLEAN'
           value: boolean
       }
     | {
-          kind: 'DATE'
+          valueType: 'DATE'
           value: Date
       }
     | {
-          kind: 'STRING_ARRAY'
+          valueType: 'STRING_ARRAY'
           value: string[]
       }
     | undefined {
@@ -37,39 +37,89 @@ function serializeRevisionDiffFieldValue(value: unknown):
 
     if (value instanceof Date) {
         return {
-            kind: 'DATE',
+            valueType: 'DATE',
             value,
         }
     }
 
     if (Array.isArray(value)) {
         return {
-            kind: 'STRING_ARRAY',
+            valueType: 'STRING_ARRAY',
             value: value.map((item) => String(item)),
         }
     }
 
     if (typeof value === 'boolean') {
         return {
-            kind: 'BOOLEAN',
+            valueType: 'BOOLEAN',
             value,
         }
     }
 
     return {
-        kind: 'STRING',
+        valueType: 'STRING',
         value: String(value),
     }
 }
 
+function serializeRevisionDiffFieldChanges(
+    fieldChanges: RevisionDiff['fieldChanges']
+) {
+    return fieldChanges.map((fieldChange) => ({
+        ...fieldChange,
+        oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
+        newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
+    }))
+}
+
 function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
+    const serializeRevisionDiffActuaryContact = (
+        contact: NonNullable<
+            RevisionDiff['rateChanges']['revised'][number]['certifyingActuaryContactChanges'][number]
+        >['current']
+    ) => ({
+        name: contact.name,
+        titleRole: contact.titleRole,
+        email: contact.email,
+        actuarialFirm:
+            contact.actuarialFirm === 'OTHER'
+                ? (contact.actuarialFirmOther ?? null)
+                : (contact.actuarialFirm ?? null),
+    })
+
     return {
         ...comparison,
-        fieldChanges: comparison.fieldChanges.map((fieldChange) => ({
-            ...fieldChange,
-            oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
-            newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
+        fieldChanges: serializeRevisionDiffFieldChanges(
+            comparison.fieldChanges
+        ),
+        stateContactChanges: comparison.stateContactChanges.map((change) => ({
+            changeType: 'NEW_OR_MODIFIED' as const,
+            current: change.current,
         })),
+        rateChanges: {
+            ...comparison.rateChanges,
+            revised: comparison.rateChanges.revised.map((rate) => ({
+                ...rate,
+                fieldChanges: serializeRevisionDiffFieldChanges(
+                    rate.fieldChanges
+                ),
+                certifyingActuaryContactChanges:
+                    rate.certifyingActuaryContactChanges.map((change) => ({
+                        changeType: 'NEW_OR_MODIFIED' as const,
+                        current: serializeRevisionDiffActuaryContact(
+                            change.current
+                        ),
+                    })),
+                addtlActuaryContactChanges: rate.addtlActuaryContactChanges.map(
+                    (change) => ({
+                        changeType: 'NEW_OR_MODIFIED' as const,
+                        current: serializeRevisionDiffActuaryContact(
+                            change.current
+                        ),
+                    })
+                ),
+            })),
+        },
     }
 }
 

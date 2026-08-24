@@ -1767,10 +1767,11 @@ enum FederalAuthority {
 }
 "Contact information for contacting states regarding their submission"
 type StateContact {
-    "Constructed from givenName + familyName, falling back to the stored full name. Retained for backward compatibility with external consumers."
+    "Constructed from givenName + familyName (no suffix), falling back to the stored full name. Retained for backward compatibility with external consumers."
     name: String
     givenName: String
     familyName: String
+    suffix: String
     titleRole: String
     email: String
 }
@@ -1962,10 +1963,11 @@ enum ActuarialFirm {
 "Contact information for the certifying or additional state actuary"
 type ActuaryContact {
     id: ID
-    "Deprecated full name. Constructed from givenName + familyName, falling back to the stored full name. Retained for backward compatibility with external consumers."
+    "Deprecated full name. Constructed from givenName + familyName (no suffix), falling back to the stored full name. Retained for backward compatibility with external consumers."
     name: String
     givenName: String
     familyName: String
+    suffix: String
     titleRole: String
     email: String
     actuarialFirm: ActuarialFirm
@@ -1976,6 +1978,9 @@ type ActuaryContact {
 input ActuaryContactInput {
     id: ID
     name: String
+    givenName: String
+    familyName: String
+    suffix: String
     titleRole: String
     email: String
     actuarialFirm: ActuarialFirm
@@ -1985,6 +1990,9 @@ input ActuaryContactInput {
 "Contact information input for contacting states regarding their submission"
 input StateContactInput {
     name: String
+    givenName: String
+    familyName: String
+    suffix: String
     titleRole: String
     email: String
 }
@@ -2882,9 +2890,84 @@ type RevisionDiff {
     olderSubmittedAt: DateTime!
     newerSubmittedAt: DateTime!
     fieldChanges: [RevisionDiffFieldChange!]!
+    stateContactChanges: [RevisionDiffStateContactChange!]!
+    documentChanges: RevisionDiffDocumentChanges!
+    rateChanges: RevisionDiffRateChanges!
 }
 
-enum RevisionDiffFieldValueKind {
+type RevisionDiffDocumentListChanges {
+    added: [String!]!
+    removed: [String!]!
+}
+
+type RevisionDiffRateDocumentChanges {
+    rateID: ID!
+    rateCertificationName: String
+    rateDocuments: RevisionDiffDocumentListChanges!
+    supportingDocuments: RevisionDiffDocumentListChanges!
+}
+
+type RevisionDiffDocumentChanges {
+    contractDocuments: RevisionDiffDocumentListChanges!
+    contractSupportingDocuments: RevisionDiffDocumentListChanges!
+    ratesDocuments: [RevisionDiffRateDocumentChanges!]!
+    totalAdded: Int!
+    totalRemoved: Int!
+}
+
+type RevisionDiffAddedRate {
+    rateID: ID!
+    rateCertificationName: String
+    includedInAnotherSubmission: Boolean!
+}
+
+type RevisionDiffRemovedRate {
+    rateID: ID!
+    rateCertificationName: String
+}
+
+type RevisionDiffRevisedRate {
+    rateID: ID!
+    rateCertificationName: String
+    fieldChanges: [RevisionDiffFieldChange!]!
+    rateDocuments: RevisionDiffDocumentListChanges!
+    supportingRateDocuments: RevisionDiffDocumentListChanges!
+    certifyingActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
+    addtlActuaryContactChanges: [RevisionDiffRateActuaryContactChange!]!
+}
+
+type RevisionDiffRateChanges {
+    added: [RevisionDiffAddedRate!]!
+    removed: [RevisionDiffRemovedRate!]!
+    revised: [RevisionDiffRevisedRate!]!
+}
+
+enum RevisionDiffRateActuaryContactChangeType {
+    NEW_OR_MODIFIED
+}
+
+type RevisionDiffRateActuaryContactChange {
+    changeType: RevisionDiffRateActuaryContactChangeType!
+    current: RevisionDiffActuaryContact!
+}
+
+type RevisionDiffActuaryContact {
+    name: String
+    titleRole: String
+    email: String
+    actuarialFirm: String
+}
+
+enum RevisionDiffStateContactChangeType {
+    NEW_OR_MODIFIED
+}
+
+type RevisionDiffStateContactChange {
+    changeType: RevisionDiffStateContactChangeType!
+    current: StateContact!
+}
+
+enum RevisionDiffFieldValueType {
     STRING
     BOOLEAN
     DATE
@@ -2892,7 +2975,7 @@ enum RevisionDiffFieldValueKind {
 }
 
 type RevisionDiffFieldValue {
-    kind: RevisionDiffFieldValueKind!
+    valueType: RevisionDiffFieldValueType!
     value: JSON
 }
 

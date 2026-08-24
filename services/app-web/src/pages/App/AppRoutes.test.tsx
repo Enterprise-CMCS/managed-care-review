@@ -108,18 +108,15 @@ describe('AppRoutes and routing configuration', () => {
 
         expect(
             screen.getByRole('link', {
-                name: /MC-Review training webinar recording \(opens in new window\)/i,
+                name: /MC-Review overview recording \(opens in new window\)/i,
             })
-        ).toHaveAttribute('href', 'https://www.youtube.com/watch?v=1d-f0pnLLLE')
+        ).toHaveAttribute('href', 'https://www.youtube.com/watch?v=8uyyaQEAOCI')
 
         expect(
             screen.getByRole('link', {
-                name: /MC-Review training webinar - Slide deck \(opens in new window\)/i,
+                name: /MC-Review overview - Slide deck \(opens in new window\)/i,
             })
-        ).toHaveAttribute(
-            'href',
-            'https://www.medicaid.gov/medicaid/managed-care/mc-rvw-state-wbnr-sprng-2024.pdf'
-        )
+        ).toHaveAttribute('href', '/MC-Review-overview-Slide-deck.pdf')
     }
 
     const expect404Page = () => {

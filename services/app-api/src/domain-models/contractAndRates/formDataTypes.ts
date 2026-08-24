@@ -82,13 +82,21 @@ const packagesWithSharedRateCerts = z.object({
 
 const stateContactSchema = z.object({
     // Deprecated full name field. Retained for backward compatibility and
-    // historical data; constructed from givenName/familyName with fallback
-    // to the stored value. See constructContactName.
+    // historical data; constructed from givenName/familyName (no suffix) with
+    // fallback to the stored value. See constructContactName.
     name: z.string().optional(),
     givenName: z.string().optional(),
     familyName: z.string().optional(),
+    suffix: z.string().optional(),
     titleRole: z.string().optional(),
-    email: z.string().email().optional().or(z.literal('')),
+    email: z.email().optional().or(z.literal('')),
+})
+
+const submittableStateContactSchema = stateContactSchema.extend({
+    givenName: z.string().min(1),
+    familyName: z.string().min(1),
+    titleRole: z.string().min(1),
+    email: z.email(),
 })
 
 const actuaryContactSchema = z.object({
@@ -97,11 +105,41 @@ const actuaryContactSchema = z.object({
     name: z.string().optional(),
     givenName: z.string().optional(),
     familyName: z.string().optional(),
+    suffix: z.string().optional(),
     titleRole: z.string().optional(),
-    email: z.string().email().optional().or(z.literal('')),
+    email: z.email().optional().or(z.literal('')),
     actuarialFirm: actuarialFirmTypeSchema.optional(),
     actuarialFirmOther: z.string().optional(),
 })
+
+const submittableActuaryContactSchema = actuaryContactSchema
+    .extend({
+        givenName: z.string().min(1),
+        familyName: z.string().min(1),
+        titleRole: z.string().min(1),
+        email: z.email(),
+    })
+    .superRefine((contact, ctx) => {
+        if (contact.actuarialFirm === undefined) {
+            ctx.addIssue({
+                code: 'custom',
+                message: 'Actuary contact must have an actuarialFirm',
+                path: ['actuarialFirm'],
+            })
+        }
+
+        if (
+            contact.actuarialFirm === 'OTHER' &&
+            !contact.actuarialFirmOther?.trim()
+        ) {
+            ctx.addIssue({
+                code: 'custom',
+                message:
+                    'Actuary contact must have actuarialFirmOther when actuarialFirm is OTHER',
+                path: ['actuarialFirmOther'],
+            })
+        }
+    })
 
 function preprocessNulls<T extends z.ZodType>(schema: T) {
     return z.preprocess((val) => val ?? undefined, schema)
@@ -248,11 +286,12 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     contractDateEnd: preprocessNulls(
         genericContractFormDataSchema.shape.contractDateEnd.optional()
     ),
-    // Fields not applicable to EQRO submissions
-    // following values should be undefined for a EQRO contract
+    contractExecutionStatus: preprocessNulls(
+        genericContractFormDataSchema.shape.contractExecutionStatus.optional()
+    ),
+    // Fields not applicable to EQRO submissions should be undefined.
     riskBasedContract: preprocessNulls(z.undefined().optional()),
     dsnpContract: preprocessNulls(z.undefined().optional()),
-    contractExecutionStatus: preprocessNulls(z.undefined().optional()),
     inLieuServicesAndSettings: preprocessNulls(z.undefined().optional()),
     modifiedBenefitsProvided: preprocessNulls(z.undefined().optional()),
     modifiedGeoAreaServed: preprocessNulls(z.undefined().optional()),
@@ -325,6 +364,8 @@ const submittableEQROContractFormDataSchema = eqroContractFormDataSchema.extend(
             genericContractFormDataSchema.shape.stateContacts.nonempty(),
         contractDocuments:
             genericContractFormDataSchema.shape.contractDocuments.nonempty(),
+        contractExecutionStatus:
+            genericContractFormDataSchema.shape.contractExecutionStatus,
         submissionType: z.literal('CONTRACT_ONLY'),
     }
 )
@@ -457,6 +498,8 @@ type StateContactType = z.infer<typeof stateContactSchema>
 type ActuaryContactType = z.infer<typeof actuaryContactSchema>
 
 export {
+    submittableStateContactSchema,
+    submittableActuaryContactSchema,
     submittableContractFormDataSchema,
     submittableEQROContractFormDataSchema,
     submittableRateFormDataSchema,

@@ -3,7 +3,9 @@ import {
     FileUpload,
     FileItemT,
     ErrorSummary,
+    FieldRadio,
     FieldYesNo,
+    PoliteErrorMessage,
     DynamicStepIndicator,
     LinkWithLogging,
     FormNotificationContainer,
@@ -48,6 +50,7 @@ import { useContractForm } from '../../../../hooks/useContractForm'
 import {
     UpdateContractDraftRevisionInput,
     ContractDraftRevisionFormDataInput,
+    ContractExecutionStatus,
 } from '../../../../gen/gqlClient'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { usePage } from '../../../../contexts/PageContext'
@@ -56,6 +59,7 @@ import { getSubmissionPath } from '../../../../routeHelpers'
 export type ContractDetailsFormValues = {
     contractDocuments: FileItemT[]
     supportingDocuments: FileItemT[]
+    contractExecutionStatus: ContractExecutionStatus | undefined
     contractDateStart: string
     contractDateEnd: string
     eqroNewContractor: string | undefined
@@ -176,6 +180,9 @@ export const EQROContractDetails = ({
                 draftSubmission.draftRevision.formData.supportingDocuments,
             getKey: getKey,
         }),
+        contractExecutionStatus:
+            draftSubmission.draftRevision.formData.contractExecutionStatus ??
+            undefined,
         contractDateStart:
             (draftSubmission &&
                 formatForForm(
@@ -277,6 +284,7 @@ export const EQROContractDetails = ({
         const updatedDraftSubmissionFormData: ContractDraftRevisionFormDataInput =
             {
                 ...formData,
+                contractExecutionStatus: values.contractExecutionStatus,
                 contractDateStart: formatFormDateForGQL(
                     values.contractDateStart
                 ),
@@ -585,6 +593,63 @@ export const EQROContractDetails = ({
                                                     )
                                                 }
                                             />
+                                        </FormGroup>
+
+                                        <FormGroup
+                                            error={Boolean(
+                                                showFieldErrors(
+                                                    'contractExecutionStatus',
+                                                    errors
+                                                )
+                                            )}
+                                        >
+                                            <Fieldset
+                                                role="radiogroup"
+                                                className={styles.radioGroup}
+                                                legend="Contract status"
+                                            >
+                                                <span
+                                                    className={
+                                                        styles.requiredOptionalText
+                                                    }
+                                                >
+                                                    Required
+                                                </span>
+                                                {Boolean(
+                                                    showFieldErrors(
+                                                        'contractExecutionStatus',
+                                                        errors
+                                                    )
+                                                ) && (
+                                                    <PoliteErrorMessage formFieldLabel="Contract status">
+                                                        {
+                                                            errors.contractExecutionStatus
+                                                        }
+                                                    </PoliteErrorMessage>
+                                                )}
+                                                <FieldRadio
+                                                    id="executedContract"
+                                                    name="contractExecutionStatus"
+                                                    label="Fully executed"
+                                                    aria-required
+                                                    value="EXECUTED"
+                                                    list_position={1}
+                                                    list_options={2}
+                                                    parent_component_heading="Contract status"
+                                                    radio_button_title="Fully executed"
+                                                />
+                                                <FieldRadio
+                                                    id="unexecutedContract"
+                                                    name="contractExecutionStatus"
+                                                    label="Unexecuted by some or all parties"
+                                                    aria-required
+                                                    value="UNEXECUTED"
+                                                    list_position={2}
+                                                    list_options={2}
+                                                    parent_component_heading="Contract status"
+                                                    radio_button_title="Unexecuted by some or all parties"
+                                                />
+                                            </Fieldset>
                                         </FormGroup>
 
                                         <FormGroup>

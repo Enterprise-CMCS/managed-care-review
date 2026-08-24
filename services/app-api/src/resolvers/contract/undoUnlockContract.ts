@@ -9,12 +9,20 @@ import {
 } from '../../postgres'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { hasAdminPermissions, hasCMSPermissions } from '../../domain-models'
+import {
+    contractSubmitters,
+    hasAdminPermissions,
+    hasCMSPermissions,
+} from '../../domain-models'
+import type { UpdateInfoType } from '../../domain-models'
 import { canOauthWrite } from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
+import type { Emailer } from '../../emailer'
+import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
 export function undoUnlockContract(
     store: Store,
+    emailer: Emailer,
     launchDarkly: LDService
 ): MutationResolvers['undoUnlockContract'] {
     return async (_parent, { input }, context) => {
@@ -130,6 +138,74 @@ export function undoUnlockContract(
                         extensions: {
                             code: 'INTERNAL_SERVER_ERROR',
                             cause: 'DB_ERROR',
+                        },
+                    })
+                }
+
+                const stateAnalystsEmails = await getStateAnalystsEmails(
+                    reverseResult,
+                    store,
+                    context
+                )
+
+                const statePrograms = getStatePrograms(
+                    reverseResult.stateCode,
+                    store,
+                    context,
+                    {
+                        operation: 'undoUnlockContract',
+                        errorMsg: (m) => `Email failed: ${m}`,
+                        cause: 'EMAIL_ERROR',
+                    }
+                )
+
+                const resultsUpdateInfo = reverseResult.undoUnlockPackages?.[0]
+                    .undoUnlockInfo as UpdateInfoType
+                const updateInfo: UpdateInfoType = {
+                    updatedAt: resultsUpdateInfo.updatedAt,
+                    updatedBy: resultsUpdateInfo.updatedBy,
+                    updatedReason: resultsUpdateInfo.updatedReason,
+                }
+
+                const undoUnlockContractCMSEmailResult =
+                    await emailer.sendUndoUnlockContractCMSEmail(
+                        reverseResult,
+                        updateInfo,
+                        stateAnalystsEmails,
+                        statePrograms
+                    )
+
+                const submitterEmails = contractSubmitters(reverseResult)
+                const undoUnlockContractStateEmailResult =
+                    await emailer.sendUndoUnlockContractStateEmail(
+                        reverseResult,
+                        updateInfo,
+                        submitterEmails,
+                        statePrograms
+                    )
+
+                if (
+                    undoUnlockContractCMSEmailResult instanceof Error ||
+                    undoUnlockContractStateEmailResult instanceof Error
+                ) {
+                    if (undoUnlockContractCMSEmailResult instanceof Error) {
+                        logResolverError(
+                            'undoUnlockContractCMSEmail - CMS email failed',
+                            undoUnlockContractCMSEmailResult,
+                            context
+                        )
+                    }
+                    if (undoUnlockContractStateEmailResult instanceof Error) {
+                        logResolverError(
+                            'undoUnlockContractStateEmail - state email failed',
+                            undoUnlockContractStateEmailResult,
+                            context
+                        )
+                    }
+                    throw new GraphQLError('Email failed.', {
+                        extensions: {
+                            code: 'INTERNAL_SERVER_ERROR',
+                            cause: 'EMAIL_ERROR',
                         },
                     })
                 }

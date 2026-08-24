@@ -32,6 +32,7 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                             name
                             givenName
                             familyName
+                            suffix
                             titleRole
                             email
                             actuarialFirm
@@ -41,6 +42,7 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                             name
                             givenName
                             familyName
+                            suffix
                             titleRole
                             email
                             actuarialFirm
@@ -82,6 +84,7 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                             name
                             givenName
                             familyName
+                            suffix
                             titleRole
                             email
                             actuarialFirm
@@ -91,6 +94,7 @@ query indexRatesForDashboard($input: IndexRatesInput) {
                             name
                             givenName
                             familyName
+                            suffix
                             titleRole
                             email
                             actuarialFirm

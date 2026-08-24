@@ -419,6 +419,9 @@ function mockRateRevision(
                     actuarialFirmOther: null,
                     actuarialFirm: 'DELOITTE',
                     name: `Actuary Contact ${name}`,
+                    givenName: 'Actuary',
+                    familyName: `Contact ${name}`,
+                    suffix: '',
                     titleRole: `Test Actuary Contact ${name}`,
                     email: 'actuarycontact1@test.com',
                 },
@@ -429,6 +432,9 @@ function mockRateRevision(
                     actuarialFirmOther: null,
                     actuarialFirm: 'DELOITTE',
                     name: `Additional Actuary Contact ${name}`,
+                    givenName: 'Additional',
+                    familyName: `Actuary Contact ${name}`,
+                    suffix: '',
                     titleRole: 'Test Actuary Contact 1',
                     email: 'actuarycontact1@test.com',
                 },
@@ -539,7 +545,10 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                                 id: null,
                                 actuarialFirmOther: null,
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
+                                givenName: 'Actuary',
+                                familyName: 'Contact',
+                                suffix: '1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'actuarycontact1@test.com',
                             },
@@ -549,7 +558,10 @@ function mockContractPackageDraft(partial?: Partial<Contract>): Contract {
                                 id: null,
                                 actuarialFirmOther: null,
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
+                                givenName: 'Actuary',
+                                familyName: 'Contact',
+                                suffix: '1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'additionalactuarycontact1@test.com',
                             },
@@ -750,7 +762,10 @@ function mockContractPackageSubmittedWithQuestions(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -758,7 +773,10 @@ function mockContractPackageSubmittedWithQuestions(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -812,7 +830,10 @@ function mockContractWithLinkedRateDraft(
                 supportingDocuments: [],
                 stateContacts: [
                     {
-                        name: 'State Contact 1',
+                        name: 'State Contact',
+                        givenName: 'State',
+                        familyName: 'Contact',
+                        suffix: '1',
                         titleRole: 'Test State Contact 1',
                         email: 'actuarycontact1@test.com',
                     },
@@ -932,7 +953,10 @@ function mockContractWithLinkedRateDraft(
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
+                                givenName: 'Actuary',
+                                familyName: 'Contact',
+                                suffix: '1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'actuarycontact1@test.com',
                             },
@@ -940,7 +964,10 @@ function mockContractWithLinkedRateDraft(
                         addtlActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
+                                givenName: 'Actuary',
+                                familyName: 'Contact',
+                                suffix: '1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'additionalactuarycontact1@test.com',
                             },
@@ -987,7 +1014,10 @@ function mockContractWithLinkedRateDraft(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -995,7 +1025,10 @@ function mockContractWithLinkedRateDraft(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'additionalactuarycontact1@test.com',
                                 },
@@ -1168,7 +1201,10 @@ function mockContractWithLinkedRateSubmitted(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -1176,7 +1212,10 @@ function mockContractWithLinkedRateSubmitted(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'additionalactuarycontact1@test.com',
                                 },
@@ -1417,7 +1456,10 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                                 {
                                     id: 'certifyingActuaryContacts1',
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                     actuarialFirmOther: null,
@@ -1427,7 +1469,10 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                                 {
                                     id: 'addtlActuaryContacts1',
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                     actuarialFirmOther: null,
@@ -1652,7 +1697,10 @@ function mockContractPackageApproved(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -1660,7 +1708,10 @@ function mockContractPackageApproved(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -1923,6 +1974,9 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                             stateContacts: [
                                 {
                                     name: 'Raymond Holt',
+                                    givenName: 'Raymond',
+                                    familyName: 'Holt',
+                                    suffix: '',
                                     titleRole: 'test',
                                     email: 'kaleigh@example.com',
                                     __typename: 'StateContact',
@@ -2015,6 +2069,9 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                         stateContacts: [
                             {
                                 name: 'Raymond Holt',
+                                givenName: 'Raymond',
+                                familyName: 'Holt',
+                                suffix: '',
                                 titleRole: 'test',
                                 email: 'kaleigh@example.com',
                                 __typename: 'StateContact',
@@ -2114,6 +2171,9 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                             stateContacts: [
                                 {
                                     name: 'Raymond Holt',
+                                    givenName: 'Raymond',
+                                    familyName: 'Holt',
+                                    suffix: '',
                                     titleRole: 'test',
                                     email: 'kaleigh@example.com',
                                     __typename: 'StateContact',
@@ -2186,6 +2246,9 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                         stateContacts: [
                             {
                                 name: 'Raymond Holt',
+                                givenName: 'Raymond',
+                                familyName: 'Holt',
+                                suffix: '',
                                 titleRole: 'test',
                                 email: 'kaleigh@example.com',
                                 __typename: 'StateContact',
@@ -2287,7 +2350,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                 supportingDocuments: [],
                 stateContacts: [
                     {
-                        name: 'State Contact 1',
+                        name: 'State Contact',
+                        givenName: 'State',
+                        familyName: 'Contact',
+                        suffix: '1',
                         titleRole: 'Test State Contact 1',
                         email: 'actuarycontact1@test.com',
                     },
@@ -2400,7 +2466,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                         certifyingActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
+                                givenName: 'Actuary',
+                                familyName: 'Contact',
+                                suffix: '1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'actuarycontact1@test.com',
                             },
@@ -2408,7 +2477,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                         addtlActuaryContacts: [
                             {
                                 actuarialFirm: 'DELOITTE',
-                                name: 'Actuary Contact 1',
+                                name: 'Actuary Contact',
+                                givenName: 'Actuary',
+                                familyName: 'Contact',
+                                suffix: '1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'additionalactuarycontact1@test.com',
                             },
@@ -2649,7 +2721,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                             certifyingActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -2657,7 +2732,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                             addtlActuaryContacts: [
                                 {
                                     actuarialFirm: 'DELOITTE',
-                                    name: 'Actuary Contact 1',
+                                    name: 'Actuary Contact',
+                                    givenName: 'Actuary',
+                                    familyName: 'Contact',
+                                    suffix: '1',
                                     titleRole: 'Test Actuary Contact 1',
                                     email: 'actuarycontact1@test.com',
                                 },
@@ -2713,7 +2791,10 @@ function mockContractFormData(
         stateContacts: [
             {
                 __typename: 'StateContact',
-                name: 'State Contact 1',
+                name: 'State Contact',
+                givenName: 'State',
+                familyName: 'Contact',
+                suffix: '1',
                 titleRole: 'Test State Contact 1',
                 email: 'actuarycontact1@test.com',
             },
@@ -2814,12 +2895,18 @@ function mockUpdateContractDraftRevisionInput(
     const stateContacts: StateContactInput[] = partial?.stateContacts
         ? partial.stateContacts.map((contact) => ({
               name: contact.name,
+              familyName: contact.familyName,
+              givenName: contact.givenName,
+              suffix: contact.suffix,
               titleRole: contact.titleRole,
               email: contact.email,
           }))
         : [
               {
-                  name: 'State Contact 1',
+                  name: 'State Contact',
+                  givenName: 'State',
+                  familyName: 'Contact',
+                  suffix: '1',
                   titleRole: 'Test State Contact 1',
                   email: 'actuarycontact1@test.com',
               },
@@ -3013,6 +3100,9 @@ const mockEmptyDraftContractAndRate = (): Contract =>
                                 actuarialFirmOther: null,
                                 actuarialFirm: null,
                                 name: '',
+                                givenName: '',
+                                familyName: '',
+                                suffix: '',
                                 titleRole: '',
                                 email: '',
                             },
@@ -3023,6 +3113,9 @@ const mockEmptyDraftContractAndRate = (): Contract =>
                                 actuarialFirmOther: null,
                                 actuarialFirm: null,
                                 name: '',
+                                givenName: '',
+                                familyName: '',
+                                suffix: '',
                                 titleRole: '',
                                 email: '',
                             },
@@ -3211,13 +3304,16 @@ function mockEqroContractSubmittedUnderReview(
                                 {
                                     __typename: 'StateContact',
                                     name: 'anne smith',
+                                    givenName: 'anne',
+                                    familyName: 'smith',
+                                    suffix: '',
                                     titleRole: 'tester',
                                     email: 'anne@example.com',
                                 },
                             ],
                             supportingDocuments: [],
                             contractType: 'BASE',
-                            contractExecutionStatus: null,
+                            contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -3305,13 +3401,16 @@ function mockEqroContractSubmittedUnderReview(
                             {
                                 __typename: 'StateContact',
                                 name: 'anne smith',
+                                givenName: 'anne',
+                                familyName: 'smith',
+                                suffix: '',
                                 titleRole: 'tester',
                                 email: 'anne@example.com',
                             },
                         ],
                         supportingDocuments: [],
                         contractType: 'BASE',
-                        contractExecutionStatus: null,
+                        contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -3462,13 +3561,16 @@ function mockEqroContractSubmittedNotSubjectToReview(
                                 {
                                     __typename: 'StateContact',
                                     name: 'anne smith',
+                                    givenName: 'anne',
+                                    familyName: 'smith',
+                                    suffix: '',
                                     titleRole: 'tester',
                                     email: 'anne@example.com',
                                 },
                             ],
                             supportingDocuments: [],
                             contractType: 'BASE',
-                            contractExecutionStatus: null,
+                            contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -3557,13 +3659,16 @@ function mockEqroContractSubmittedNotSubjectToReview(
                             {
                                 __typename: 'StateContact',
                                 name: 'anne smith',
+                                givenName: 'anne',
+                                familyName: 'smith',
+                                suffix: '',
                                 titleRole: 'tester',
                                 email: 'anne@example.com',
                             },
                         ],
                         supportingDocuments: [],
                         contractType: 'BASE',
-                        contractExecutionStatus: null,
+                        contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -3737,13 +3842,16 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                                 {
                                     __typename: 'StateContact',
                                     name: 'anne smith',
+                                    givenName: 'anne',
+                                    familyName: 'smith',
+                                    suffix: '',
                                     titleRole: 'tester',
                                     email: 'anne@example.com',
                                 },
                             ],
                             supportingDocuments: [],
                             contractType: 'BASE',
-                            contractExecutionStatus: null,
+                            contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -3845,13 +3953,16 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                             {
                                 __typename: 'StateContact',
                                 name: 'anne smith',
+                                givenName: 'anne',
+                                familyName: 'smith',
+                                suffix: '',
                                 titleRole: 'tester',
                                 email: 'anne@example.com',
                             },
                         ],
                         supportingDocuments: [],
                         contractType: 'BASE',
-                        contractExecutionStatus: null,
+                        contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
                             {
                                 __typename: 'GenericDocument',
@@ -3959,13 +4070,16 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                                 {
                                     __typename: 'StateContact',
                                     name: 'anne smith',
+                                    givenName: 'anne',
+                                    familyName: 'smith',
+                                    suffix: '',
                                     titleRole: 'tester',
                                     email: 'anne@example.com',
                                 },
                             ],
                             supportingDocuments: [],
                             contractType: 'BASE',
-                            contractExecutionStatus: null,
+                            contractExecutionStatus: 'EXECUTED',
                             contractDocuments: [
                                 {
                                     __typename: 'GenericDocument',
@@ -4054,13 +4168,16 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                             {
                                 __typename: 'StateContact',
                                 name: 'anne smith',
+                                givenName: 'anne',
+                                familyName: 'smith',
+                                suffix: '',
                                 titleRole: 'tester',
                                 email: 'anne@example.com',
                             },
                         ],
                         supportingDocuments: [],
                         contractType: 'BASE',
-                        contractExecutionStatus: null,
+                        contractExecutionStatus: 'EXECUTED',
                         contractDocuments: [
                             {
                                 __typename: 'GenericDocument',

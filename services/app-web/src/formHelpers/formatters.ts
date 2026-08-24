@@ -34,6 +34,9 @@ const formatActuaryContactsForForm = (
         ? actuaryContacts.map((contact) => {
               const {
                   name,
+                  givenName,
+                  familyName,
+                  suffix,
                   titleRole,
                   email,
                   actuarialFirm,
@@ -41,6 +44,9 @@ const formatActuaryContactsForForm = (
               } = contact
               return {
                   name: name ?? '',
+                  givenName: givenName ?? '',
+                  familyName: familyName ?? '',
+                  suffix: suffix ?? '',
                   titleRole: titleRole ?? '',
                   email: email ?? '',
                   actuarialFirmOther: actuarialFirmOther ?? undefined,
@@ -50,6 +56,9 @@ const formatActuaryContactsForForm = (
         : [
               {
                   name: '',
+                  givenName: '',
+                  familyName: '',
+                  suffix: '',
                   titleRole: '',
                   email: '',
                   actuarialFirm: undefined,
@@ -65,6 +74,9 @@ const formatAddtlActuaryContactsForForm = (
         ? actuaryContacts.map((contact) => {
               const {
                   name,
+                  givenName,
+                  familyName,
+                  suffix,
                   titleRole,
                   email,
                   actuarialFirm,
@@ -72,6 +84,9 @@ const formatAddtlActuaryContactsForForm = (
               } = contact
               return {
                   name: name ?? '',
+                  givenName: givenName ?? '',
+                  familyName: familyName ?? '',
+                  suffix: suffix ?? '',
                   titleRole: titleRole ?? '',
                   email: email ?? '',
                   actuarialFirmOther: actuarialFirmOther ?? undefined,

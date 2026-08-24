@@ -6,6 +6,8 @@ import {
     newContractStateEmail,
     newEqroContractStateEmail,
     unlockContractCMSEmail,
+    undoUnlockContractCMSEmail,
+    undoUnlockContractStateEmail,
     unlockContractStateEmail,
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
@@ -113,6 +115,18 @@ type Emailer = {
         contract: UnlockedContractType,
         updateInfo: UpdateInfoType,
         stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendUndoUnlockContractCMSEmail: (
+        contract: ContractType,
+        updateInfo: UpdateInfoType,
+        stateAnalystsEmails: StateAnalystsEmails,
+        statePrograms: ProgramType[]
+    ) => Promise<void | Error>
+    sendUndoUnlockContractStateEmail: (
+        contract: ContractType,
+        updateInfo: UpdateInfoType,
+        submitterEmails: StateAnalystsEmails,
         statePrograms: ProgramType[]
     ) => Promise<void | Error>
     sendUnlockContractStateEmail: (
@@ -344,6 +358,44 @@ function emailer(
                 config,
                 stateAnalystsEmails,
                 statePrograms
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUndoUnlockContractCMSEmail: async function (
+            contract,
+            updateInfo,
+            stateAnalystsEmails,
+            statePrograms
+        ) {
+            const emailData = await undoUnlockContractCMSEmail(
+                contract,
+                updateInfo,
+                stateAnalystsEmails,
+                statePrograms,
+                config
+            )
+            if (emailData instanceof Error) {
+                return emailData
+            } else {
+                return await this.sendEmail(emailData)
+            }
+        },
+        sendUndoUnlockContractStateEmail: async function (
+            contract,
+            updateInfo,
+            submitterEmails,
+            statePrograms
+        ) {
+            const emailData = await undoUnlockContractStateEmail(
+                contract,
+                updateInfo,
+                submitterEmails,
+                statePrograms,
+                config
             )
             if (emailData instanceof Error) {
                 return emailData

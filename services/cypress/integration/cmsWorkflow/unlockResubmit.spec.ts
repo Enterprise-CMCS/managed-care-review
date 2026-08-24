@@ -51,8 +51,7 @@ describe('CMS user', () => {
         }).should('exist')
 
         // Store submission url for reference later
-        cy.location().then((fullUrl) => {
-            const reviewURL = fullUrl.toString()
+        cy.location('href').then((reviewURL) => {
             const submissionURL = reviewURL.replace(
                 'edit/review-and-submit',
                 ''
@@ -295,10 +294,11 @@ describe('CMS user', () => {
             cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
             // Test unlock and resubmit with a linked rate submission
-            cy.location().then((fullUrl) => {
-                const submissionURL = fullUrl
-                    .toString()
-                    .replace('edit/review-and-submit', '')
+            cy.location('href').then((fullUrl) => {
+                const submissionURL = fullUrl.replace(
+                    'edit/review-and-submit',
+                    ''
+                )
 
                 // Submit, sent to dashboard
                 cy.submitStateSubmissionForm()

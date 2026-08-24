@@ -126,7 +126,7 @@ describe('CMS user can view rate reviews', () => {
                         .siblings('dd')
                         .should(
                             'have.text',
-                            'actuary1test titleemail@example.comMercer'
+                            'Actuary Onetest titleemail@example.comMercer'
                         )
                     // cy.findByText('Download all rate documents').should('exist')
                     cy.findByRole('table', {

@@ -41,7 +41,9 @@ const contractFormData = (
     submissionDescription: 'A submission description',
     stateContacts: [
         {
-            name: 'Name',
+            givenName: 'State',
+            familyName: 'Contact',
+            suffix: 'Jr.',
             titleRole: 'Title',
             email: 'example@example.com',
         },
@@ -92,13 +94,16 @@ const eqroFromData = (
     submissionDescription: 'Test EQRO submission',
     stateContacts: [
         {
-            name: 'Name',
+            givenName: 'State',
+            familyName: 'Contact',
+            suffix: 'Jr.',
             titleRole: 'Title',
             email: 'example@example.com',
         },
     ],
     supportingDocuments: [],
     contractType: 'BASE',
+    contractExecutionStatus: 'EXECUTED',
     contractDocuments: [
         {
             name: 'Contract Cert.pdf',
@@ -138,7 +143,9 @@ const rateFormData = (
     rateProgramIDs: [minnesotaStatePrograms[0].id],
     certifyingActuaryContacts: [
         {
-            name: 'actuary1',
+            givenName: 'Actuary',
+            familyName: 'One',
+            suffix: 'Jr.',
             titleRole: 'test title',
             email: 'email@example.com',
             actuarialFirm: 'MERCER' as const,
@@ -570,4 +577,3 @@ export {
     eqroFromData,
     minnesotaStatePrograms,
 }
-

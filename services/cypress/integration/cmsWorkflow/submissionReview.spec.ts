@@ -132,6 +132,11 @@ describe('CMS user can view submission', () => {
             const latestSubmission = contract.packageSubmissions[0]
             const contractName = latestSubmission.contractRevision.contractName
 
+            expect(
+                latestSubmission.contractRevision.formData
+                    .contractExecutionStatus
+            ).to.equal('EXECUTED')
+
             cy.logInAsCMSUser()
 
             cy.findByRole('link', { name: contractName })
@@ -148,6 +153,10 @@ describe('CMS user can view submission', () => {
             cy.findByTestId('submission-id').should(
                 'contain.text',
                 contractName
+            )
+            cy.findByTestId('contractExecutionStatus').should(
+                'contain.text',
+                'Fully executed'
             )
 
             //TODO: Add assertions for review determination once that is added.

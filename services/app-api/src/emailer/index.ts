@@ -6,6 +6,8 @@ export {
     newEqroContractStateEmail,
     unlockContractCMSEmail,
     unlockContractStateEmail,
+    undoUnlockContractCMSEmail,
+    undoUnlockContractStateEmail,
     resubmitContractStateEmail,
     resubmitContractCMSEmail,
     sendEQROContractResubmitStateEmail,

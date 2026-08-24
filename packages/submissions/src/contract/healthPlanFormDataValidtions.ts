@@ -102,16 +102,20 @@ const isMedicaidAmendmentProvision = (
 
 // Returns the list of provision keys that apply for given submission variant
 const generateApplicableProvisionsList = (
-    draftSubmission: Contract | UnlockedContract
+    formData: ContractFormData
 ):
     | CHIPProvisionType[]
     | MedicaidBaseProvisionType[]
     | MedicaidAmendmentProvisionType[] => {
-    if (isCHIPOnly(draftSubmission)) {
-        return isContractAmendment(draftSubmission)
+    const chipOnly = formData.populationCovered === 'CHIP'
+    const contractAmendment = formData.contractType === 'AMENDMENT'
+    const baseContract = formData.contractType === 'BASE'
+
+    if (chipOnly) {
+        return contractAmendment
             ? (provisionCHIPKeys as unknown as CHIPProvisionType[])
             : [] // there are no applicable provisions for CHIP base contract
-    } else if (isBaseContract(draftSubmission)) {
+    } else if (baseContract) {
         return modifiedProvisionMedicaidBaseKeys as unknown as MedicaidBaseProvisionType[]
     } else {
         return modifiedProvisionMedicaidAmendmentKeys as unknown as MedicaidAmendmentProvisionType[]
@@ -120,20 +124,18 @@ const generateApplicableProvisionsList = (
 
 // Returns user-friendly label text for the provision based on the given submission variant
 const generateProvisionLabel = (
-    draftSubmission: Contract | UnlockedContract,
+    formData: ContractFormData,
     provision: GeneralizedProvisionType
 ): string => {
-    if (isCHIPOnly(draftSubmission) && isCHIPProvision(provision)) {
+    const isChipOnly = formData.populationCovered === 'CHIP'
+    const isBaseContract = formData.contractType === 'BASE'
+    const isContractAmendment = formData.contractType === 'AMENDMENT'
+
+    if (isChipOnly && isCHIPProvision(provision)) {
         return ModifiedProvisionsCHIPRecord[provision]
-    } else if (
-        isBaseContract(draftSubmission) &&
-        isMedicaidBaseProvision(provision)
-    ) {
+    } else if (isBaseContract && isMedicaidBaseProvision(provision)) {
         return ModifiedProvisionsBaseContractRecord[provision]
-    } else if (
-        isContractAmendment(draftSubmission) &&
-        isMedicaidAmendmentProvision(provision)
-    ) {
+    } else if (isContractAmendment && isMedicaidAmendmentProvision(provision)) {
         return ModifiedProvisionsAmendmentRecord[provision]
     } else {
         console.warn('Coding Error: This is a fallback case and is unexpected.')
@@ -147,44 +149,41 @@ const generateProvisionLabel = (
     That functionality needed for unlocked contracts which can be edited in a non-linear fashion)
 */
 const sortModifiedProvisions = (
-    contract: Contract | UnlockedContract
+    formData: ContractFormData
 ): [GeneralizedProvisionType[], GeneralizedProvisionType[]] => {
-    const contractFormData =
-        contract.draftRevision?.formData ||
-        getLastContractSubmission(contract)?.contractRevision.formData
     const initialProvisions = {
-        inLieuServicesAndSettings: contractFormData?.inLieuServicesAndSettings,
-        modifiedBenefitsProvided: contractFormData?.modifiedBenefitsProvided,
-        modifiedGeoAreaServed: contractFormData?.modifiedGeoAreaServed,
+        inLieuServicesAndSettings: formData.inLieuServicesAndSettings,
+        modifiedBenefitsProvided: formData.modifiedBenefitsProvided,
+        modifiedGeoAreaServed: formData.modifiedGeoAreaServed,
         modifiedMedicaidBeneficiaries:
-            contractFormData?.modifiedMedicaidBeneficiaries,
+            formData.modifiedMedicaidBeneficiaries,
         modifiedRiskSharingStrategy:
-            contractFormData?.modifiedRiskSharingStrategy,
+            formData.modifiedRiskSharingStrategy,
         modifiedIncentiveArrangements:
-            contractFormData?.modifiedIncentiveArrangements,
-        modifiedWitholdAgreements: contractFormData?.modifiedWitholdAgreements,
+            formData.modifiedIncentiveArrangements,
+        modifiedWitholdAgreements: formData.modifiedWitholdAgreements,
         modifiedStateDirectedPayments:
-            contractFormData?.modifiedStateDirectedPayments,
+            formData.modifiedStateDirectedPayments,
         modifiedPassThroughPayments:
-            contractFormData?.modifiedPassThroughPayments,
+            formData.modifiedPassThroughPayments,
         modifiedPaymentsForMentalDiseaseInstitutions:
-            contractFormData?.modifiedPaymentsForMentalDiseaseInstitutions,
+            formData.modifiedPaymentsForMentalDiseaseInstitutions,
         modifiedMedicalLossRatioStandards:
-            contractFormData?.modifiedMedicalLossRatioStandards,
+            formData.modifiedMedicalLossRatioStandards,
         modifiedOtherFinancialPaymentIncentive:
-            contractFormData?.modifiedOtherFinancialPaymentIncentive,
-        modifiedEnrollmentProcess: contractFormData?.modifiedEnrollmentProcess,
+            formData.modifiedOtherFinancialPaymentIncentive,
+        modifiedEnrollmentProcess: formData.modifiedEnrollmentProcess,
         modifiedGrevienceAndAppeal:
-            contractFormData?.modifiedGrevienceAndAppeal,
+            formData.modifiedGrevienceAndAppeal,
         modifiedNetworkAdequacyStandards:
-            contractFormData?.modifiedNetworkAdequacyStandards,
-        modifiedLengthOfContract: contractFormData?.modifiedLengthOfContract,
+            formData.modifiedNetworkAdequacyStandards,
+        modifiedLengthOfContract: formData.modifiedLengthOfContract,
         modifiedNonRiskPaymentArrangements:
-            contractFormData?.modifiedNonRiskPaymentArrangements,
+            formData.modifiedNonRiskPaymentArrangements,
         statutoryRegulatoryAttestation:
-            contractFormData?.statutoryRegulatoryAttestation,
+            formData.statutoryRegulatoryAttestation,
         statutoryRegulatoryAttestationDescription:
-            contractFormData?.statutoryRegulatoryAttestationDescription,
+            formData.statutoryRegulatoryAttestationDescription,
     }
     const hasInitialProvisions = Object.values(initialProvisions).some(
         (val) => val !== undefined
@@ -192,8 +191,13 @@ const sortModifiedProvisions = (
     const modifiedProvisions: GeneralizedProvisionType[] = []
     const unmodifiedProvisions: GeneralizedProvisionType[] = []
 
-    if (hasInitialProvisions && isContractWithProvisions(contract)) {
-        const applicableProvisions = generateApplicableProvisionsList(contract)
+    const isContractWithProvisions =
+        formData.contractType === 'AMENDMENT' ||
+        (formData.contractType === 'BASE' &&
+            formData.populationCovered !== 'CHIP')
+
+    if (hasInitialProvisions && isContractWithProvisions) {
+        const applicableProvisions = generateApplicableProvisionsList(formData)
 
         for (const provisionKey of applicableProvisions) {
             const value = initialProvisions[provisionKey]
@@ -213,11 +217,11 @@ const sortModifiedProvisions = (
     This is used to determine if we display the missing data warning on review and submit
 */
 const isMissingProvisions = (
-    contract: Contract | UnlockedContract
+    formData: ContractFormData
 ): boolean => {
-    const requiredProvisions = generateApplicableProvisionsList(contract)
+    const requiredProvisions = generateApplicableProvisionsList(formData)
     const [modifiedProvisions, unmodifiedProvisions] =
-        sortModifiedProvisions(contract)
+        sortModifiedProvisions(formData)
 
     return (
         modifiedProvisions.length + unmodifiedProvisions.length <
@@ -241,14 +245,14 @@ const healthPlanReviewDetermination = (formData: ContractFormData): boolean => {
     Returns lang string dictionary for variant
 */
 const getProvisionDictionary = (
-    contract: Contract | UnlockedContract
+    formData: ContractFormData
 ):
     | typeof ModifiedProvisionsCHIPRecord
     | typeof ModifiedProvisionsBaseContractRecord
     | typeof ModifiedProvisionsAmendmentRecord => {
-    if (isCHIPOnly(contract)) {
+    if (formData.populationCovered === 'CHIP') {
         return ModifiedProvisionsCHIPRecord
-    } else if (isBaseContract(contract)) {
+    } else if (formData.contractType === 'BASE') {
         return ModifiedProvisionsBaseContractRecord
     } else {
         return ModifiedProvisionsAmendmentRecord

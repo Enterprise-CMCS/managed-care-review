@@ -428,7 +428,7 @@ const createAndUpdateTestEQROContract = async (
             eqroProvisionMcoNewOptionalActivity: true,
             riskBasedContract: undefined,
             dsnpContract: undefined,
-            contractExecutionStatus: undefined,
+            contractExecutionStatus: 'EXECUTED',
             inLieuServicesAndSettings: undefined,
             modifiedBenefitsProvided: undefined,
             modifiedGeoAreaServed: undefined,
@@ -488,6 +488,8 @@ const createAndUpdateTestContractWithoutRates = async (
     formData.stateContacts = [
         {
             name: 'test name',
+            givenName: 'test',
+            familyName: 'name',
             titleRole: 'test title',
             email: 'email@example.com',
         },

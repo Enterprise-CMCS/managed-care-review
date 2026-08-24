@@ -22,6 +22,7 @@ import { updateDraftRate } from '../postgres/contractAndRates/updateDraftRate'
 
 import type {
     Contract,
+    UnlockedContract,
     RateFormData,
     ActuaryContact,
     ActuaryContactInput,
@@ -195,7 +196,7 @@ async function updateTestDraftRatesOnContract(
         !updateResult.data.updateDraftContractRates.contract
     ) {
         throw new Error(
-            `updateDraftContractRates mutation failed with errors ${updateResult.errors}`
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(updateResult.errors)}`
         )
     }
 
@@ -258,6 +259,8 @@ function addNewRateToRateInput(
         certifyingActuaryContacts: [
             {
                 name: 'Foo Person',
+                givenName: 'Foo',
+                familyName: 'Person',
                 titleRole: 'Bar Job',
                 email: 'foo@example.com',
                 actuarialFirm: 'GUIDEHOUSE',
@@ -266,6 +269,8 @@ function addNewRateToRateInput(
         addtlActuaryContacts: [
             {
                 name: 'Bar Person',
+                givenName: 'Bar',
+                familyName: 'Person',
                 titleRole: 'Baz Job',
                 email: 'bar@example.com',
                 actuarialFirm: 'OTHER',
@@ -325,6 +330,12 @@ function formatGQLRateContractForSending(
     return {
         id: contact.id || undefined,
         name: contact.name,
+        // Coalesce null (from GraphQL response data round-tripped back into a
+        // mutation input) to undefined; actuaryContactSchema treats these as
+        // optional strings and rejects null.
+        givenName: contact.givenName ?? undefined,
+        familyName: contact.familyName ?? undefined,
+        suffix: contact.suffix ?? undefined,
         titleRole: contact.titleRole,
         email: contact.email,
         actuarialFirm: contact.actuarialFirm,
@@ -363,7 +374,7 @@ function formatRateDataForSending(
 }
 
 function updateRatesInputFromDraftContract(
-    contract: Contract
+    contract: Contract | UnlockedContract
 ): UpdateDraftContractRatesInput {
     const draftRates = contract.draftRates
     if (!draftRates) {
@@ -621,6 +632,8 @@ const testRateFormInputData = (): RateFormDataInput => ({
     certifyingActuaryContacts: [
         {
             name: 'Foo Person',
+            givenName: 'Foo',
+            familyName: 'Person',
             titleRole: 'Bar Job',
             email: 'foo@example.com',
             actuarialFirm: 'GUIDEHOUSE',

@@ -90,6 +90,9 @@ type SingleRateCertProps = {
 
 const emptyActuaryContact = {
     name: '',
+    givenName: '',
+    familyName: '',
+    suffix: '',
     titleRole: '',
     email: '',
     actuarialFirm: undefined,

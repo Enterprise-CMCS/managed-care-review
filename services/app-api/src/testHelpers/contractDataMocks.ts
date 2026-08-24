@@ -226,7 +226,9 @@ const mockSubmittableHealthPlanContract = (opts?: {
                 supportingDocuments: [],
                 stateContacts: [
                     {
-                        name: 'Someone',
+                        name: 'Some One',
+                        givenName: 'Some',
+                        familyName: 'One',
                         email: 'someone@example.com',
                         titleRole: 'sometitle',
                     },
@@ -314,6 +316,8 @@ const mockSubmittableHealthPlanContract = (opts?: {
                             {
                                 actuarialFirm: 'DELOITTE',
                                 name: 'Actuary Contact 1',
+                                givenName: 'Actuary',
+                                familyName: 'Contact 1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'actuarycontact1@test.com',
                             },
@@ -322,6 +326,8 @@ const mockSubmittableHealthPlanContract = (opts?: {
                             {
                                 actuarialFirm: 'DELOITTE',
                                 name: 'Actuary Contact 1',
+                                givenName: 'Actuary',
+                                familyName: 'Contact 1',
                                 titleRole: 'Test Actuary Contact 1',
                                 email: 'additionalactuarycontact1@test.com',
                             },

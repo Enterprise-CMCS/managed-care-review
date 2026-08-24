@@ -22,6 +22,7 @@ import {
 import styles from '../SubmissionSummarySection.module.scss'
 import {
     ContractEffectiveDateSummary,
+    ContractExecutionSummary,
     EQROModifiedProvisionSummary,
     NewEQROContractorSummary,
 } from '../SummarySectionFields'
@@ -101,6 +102,10 @@ export const EQROContractDetailsSummarySection = ({
             />
             <dl>
                 <MultiColumnGrid columns={2}>
+                    <ContractExecutionSummary
+                        contractFormData={contractFormData}
+                        explainMissingData={explainMissingData}
+                    />
                     <ContractEffectiveDateSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
