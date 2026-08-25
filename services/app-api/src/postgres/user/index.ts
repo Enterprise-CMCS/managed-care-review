@@ -1,4 +1,5 @@
 export { findUser } from './findUser'
+export { findStateUserByEmail } from './findStateUserByEmail'
 export type { InsertUserArgsType } from './insertUser'
 export { insertUser } from './insertUser'
 export { insertManyUsers } from './insertManyUsers'

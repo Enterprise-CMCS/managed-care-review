@@ -33,6 +33,7 @@ import { findPrograms, findStatePrograms } from './'
 import type { InsertUserArgsType, UpdateUserInfoArgsType } from './user'
 import {
     findUser,
+    findStateUserByEmail,
     insertUser,
     updateCmsUserProperties,
     updateUserInfo,
@@ -179,6 +180,9 @@ type Store = {
     ) => Promise<UserType[] | Error>
     findAllUsers: () => Promise<UserType[] | Error>
     findUser: (id: string) => Promise<UserType | undefined | Error>
+    findStateUserByEmail: (
+        email: string
+    ) => Promise<StateUserType | Error | undefined>
     findStateAssignedUsers: (
         stateCode: StateCodeType
     ) => Promise<UserType[] | Error>
@@ -391,6 +395,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertManyUsers: (args) => insertManyUsers(client, args),
         findAllUsers: () => findAllUsers(client),
         findUser: (id) => findUser(client, id),
+        findStateUserByEmail: (email) => findStateUserByEmail(client, email),
         updateUserInfo: (userID, args) => updateUserInfo(client, userID, args),
         findStateAssignedUsers: (stateCode) =>
             findStateAssignedUsers(client, stateCode),
