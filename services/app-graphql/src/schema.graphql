@@ -42,6 +42,17 @@ type Query {
     indexUsers: IndexUsersPayload!
 
     """
+    fetchStateUser returns a single StateUser, based on an email address, givenName, and familyName
+    Multiple pieces of data are used to reduce the frequency of multiple records being found
+    Returns the most recently created user in instances where multiple records are found
+
+    Errors:
+    - ForbiddenError: A user who doesn't have permission called this
+    - NotFoundError: No StateUser exists with the given email
+    """
+    fetchStateUser(input: FetchStateUserInput!): FetchStateUserPayload!
+
+    """
     indexRates returns full submitted rates.
     indexRates can be called by CMS, admin users, and state users; also used in link rate dropdown.
     If called by a state user, the response will contain rate data from only their state.
@@ -1086,6 +1097,16 @@ type UserEdge {
 type IndexUsersPayload {
     totalCount: Int
     edges: [UserEdge!]!
+}
+
+input FetchStateUserInput {
+    email: String!
+    givenName: String!
+    familyName: String!
+}
+
+type FetchStateUserPayload {
+    user: StateUser!
 }
 
 input SubmitContractInput {

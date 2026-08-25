@@ -20,6 +20,7 @@ import {
     stateUserResolver,
     cmsUserResolver,
     indexUsersResolver,
+    fetchStateUserResolver,
     cmsApproverUserResolver,
     updateStateAssignment,
 } from './user'
@@ -99,6 +100,7 @@ export function configureResolvers(
             indexContracts: indexContractsResolver(store, launchDarkly),
             indexContractsStripped: indexContractsStripped(store),
             indexUsers: indexUsersResolver(store),
+            fetchStateUser: fetchStateUserResolver(store),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
             indexRates: indexRatesResolver(store),
