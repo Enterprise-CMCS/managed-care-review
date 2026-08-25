@@ -59,7 +59,7 @@ function mockStoreThatErrors(): Store {
         findUser: async (_ID) => {
             return genericError
         },
-        findStateUserByEmail: async (_email) => {
+        findStateUser: async (_args) => {
             return genericError
         },
         insertUser: async (_args) => {

@@ -42,8 +42,9 @@ type Query {
     indexUsers: IndexUsersPayload!
 
     """
-    fetchStateUser returns a single StateUser, based on an email address
-    If multiple emails are found, returns the most recent one.
+    fetchStateUser returns a single StateUser, based on an email address, givenName, and familyName
+    Multiple pieces of data are used to reduce the frequency of multiple records being found
+    Returns the most recently created user in instances where multiple records are found
 
     Errors:
     - ForbiddenError: A user who doesn't have permission called this
@@ -1100,6 +1101,8 @@ type IndexUsersPayload {
 
 input FetchStateUserInput {
     email: String!
+    givenName: String!
+    familyName: String!
 }
 
 type FetchStateUserPayload {

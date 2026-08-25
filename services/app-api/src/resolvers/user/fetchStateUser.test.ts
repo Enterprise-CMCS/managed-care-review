@@ -56,7 +56,11 @@ describe('fetchStateUser', () => {
         const res = await executeGraphQLOperation(server, {
             query: FetchStateUserDocument,
             variables: {
-                input: { email: stateUserToInsert.email },
+                input: {
+                    email: stateUserToInsert.email,
+                    givenName: stateUserToInsert.givenName,
+                    familyName: stateUserToInsert.familyName,
+                },
             },
         })
 
@@ -75,7 +79,7 @@ describe('fetchStateUser', () => {
         expect(user.state.code).toBe(stateUserToInsert.stateCode)
     })
 
-    it('returns the most recent created user if email is found multiple times', async () => {
+    it('returns the most recent created user if multiple records are found', async () => {
         const { postgresStore, stateUserToInsert } = await insertTestUsers()
 
         const newerUser = await postgresStore.insertUser({
@@ -96,7 +100,11 @@ describe('fetchStateUser', () => {
         const res = await executeGraphQLOperation(server, {
             query: FetchStateUserDocument,
             variables: {
-                input: { email: stateUserToInsert.email },
+                input: {
+                    email: stateUserToInsert.email,
+                    givenName: stateUserToInsert.givenName,
+                    familyName: stateUserToInsert.familyName,
+                },
             },
         })
 

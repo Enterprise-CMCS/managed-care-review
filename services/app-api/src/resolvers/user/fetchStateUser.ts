@@ -32,7 +32,11 @@ export function fetchStateUserResolver(
                     throw createForbiddenError(errMessage)
                 }
 
-                const findResult = await store.findStateUserByEmail(input.email)
+                const findResult = await store.findStateUser({
+                    email: input.email,
+                    givenName: input.givenName,
+                    familyName: input.familyName,
+                })
 
                 if (findResult instanceof Error) {
                     const errMessage = `Error querying state user. ${findResult.message}`
@@ -46,7 +50,7 @@ export function fetchStateUserResolver(
                 }
 
                 if (findResult === undefined) {
-                    const errMessage = `No state user found with email: ${input.email}`
+                    const errMessage = `No state user found with email: ${input.email}, givenName: ${input.givenName}, familyName: ${input.familyName}`
                     logResolverError('fetchStateUser', errMessage, context)
                     throw createNotFoundError(errMessage)
                 }
