@@ -146,7 +146,7 @@
         "@types/react-dom": "^19.2.4",
         "@types/uuid": "^11.0.0",
         "@typescript-eslint/eslint-plugin": "^8.58.1",
-        "@typescript-eslint/parser": "^8.58.1",
+        "@typescript-eslint/parser": "^8.67.0",
         "@vitest/coverage-v8": "^4.1.7",
         "@vitest/ui": "^4.1.7",
         "classnames": "^2.2.6",
