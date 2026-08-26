@@ -879,7 +879,9 @@ jobs:
   # ============================================
 
   deploy-github-oidc-qa:
-    needs: [begin-deployment, end-deployment-dev]
+    needs: [begin-deployment, deploy-github-oidc-val]
+    # Bootstrap QA's role with Val's existing role because both stages share an
+    # AWS account. After the first successful deploy, switch this job to QA.
     # Do not fail the overall promote run if qa fails - qa is not yet load-bearing
     # for anyone else's work, and we don't want a qa-only issue blocking other
     # engineers' unrelated merges. See caveats where this is set on the other qa jobs.
@@ -887,7 +889,7 @@ jobs:
     name: deploy - GitHub OIDC service (qa)
     runs-on: ubuntu-24.04
     environment:
-      name: qa
+      name: val
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -902,12 +904,12 @@ jobs:
         shell: bash
         run: pnpm build:packages
 
-      - name: Get AWS credentials (qa)
+      - name: Get AWS credentials for QA OIDC bootstrap
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
-          account-id: ${{ secrets.QA_AWS_ACCOUNT_ID }}
-          stage-name: qa
+          account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
+          stage-name: val
           changed-services: 'github-oidc'
           use-cdk-role: 'true'
 
@@ -916,6 +918,7 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: qa
+          QA_ACCOUNT_ID: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
         run: |
           echo "Starting CDK OIDC deployment for stage: qa"
           echo "Stack name will be: github-oidc-qa-cdk"
