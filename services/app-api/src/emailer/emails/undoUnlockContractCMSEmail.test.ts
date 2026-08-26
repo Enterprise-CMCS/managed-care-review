@@ -81,3 +81,32 @@ it('has different content for EQRO', async () => {
     )
     expect(result.bodyText).not.toContain('Rate name:')
 })
+
+it('CHIP only content is similar to EQRO', async () => {
+    const contract = mockContract()
+    contract.packageSubmissions[0].contractRevision.formData.populationCovered =
+        'CHIP'
+    const info = contract.packageSubmissions[0].submitInfo
+    const updatedInfo = {
+        updatedAt: info.updatedAt,
+        updatedBy: info.updatedBy,
+        updatedReason: info.updatedReason,
+    }
+    const assignedUserEmails = ['roku@example.com', 'izumi@example.com']
+    const defaultStatePrograms = mockMNState().programs
+    const emailConfig = testEmailConfig()
+    const result = await undoUnlockContractCMSEmail(
+        contract,
+        updatedInfo,
+        assignedUserEmails,
+        defaultStatePrograms,
+        emailConfig
+    )
+
+    if (result instanceof Error) {
+        throw new Error(
+            `Unexpected error: email template returned an error. ${result.message}`
+        )
+    }
+    expect(result.bodyText).toContain('Review decision:')
+})

@@ -4,7 +4,7 @@ CMS undid the unlock on <%= it.packageName %>. The submission returned to its pr
 <b>Updated on:</b> <%= it.updatedAt %><br />
 <b>Reason for undoing the unlock:</b> <%= it.reason %><br />
 <b>Status:</b> <%= it.status %><br />
-<% if (it.isEQRO) { %>
+<% if (it.isEQRO || it.isCHIPOnly) { %>
     <b>Review decision:</b> <%= it.reviewDecisionText %><br />
 <% } %>
 <% if (it.shouldIncludeRates) { %>

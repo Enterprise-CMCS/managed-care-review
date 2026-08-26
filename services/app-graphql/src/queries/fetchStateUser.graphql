@@ -1,0 +1,7 @@
+query fetchStateUser($input: FetchStateUserInput!) {
+    fetchStateUser(input: $input) {
+        user {
+            ...stateUserFragment
+        }
+    }
+}
