@@ -762,6 +762,17 @@ describe('fetchRevisionDiff', () => {
                                 value: 'MCR-FL-NEMTMTM-20240201-20250201-AMENDMENT-20240415',
                             },
                         },
+                        {
+                            fieldPath: 'actuarialFirms',
+                            oldValue: {
+                                valueType: 'STRING_ARRAY',
+                                value: ['Guidehouse', 'Some Firm'],
+                            },
+                            newValue: {
+                                valueType: 'STRING_ARRAY',
+                                value: ['Mercer', 'Milliman', 'Optumas'],
+                            },
+                        },
                     ],
                     rateDocuments: {
                         added: ['rate-doc-added.xlsx'],

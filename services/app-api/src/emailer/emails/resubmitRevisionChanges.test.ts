@@ -1,6 +1,7 @@
 import type { ContractType, RevisionDiff } from '../../domain-models'
 import { buildResubmitRevisionChanges } from './resubmitRevisionChanges'
 import { mockContract, mockMNState } from '../../testHelpers/emailerHelpers'
+import { ActuaryCommunicationRecord } from '@mc-review/submissions'
 
 describe('buildResubmitRevisionChanges', () => {
     const statePrograms = mockMNState().programs
@@ -824,6 +825,325 @@ describe('buildResubmitRevisionChanges', () => {
         })
     })
 
+    it('formats added, removed, and revised rates for CMS resubmit email', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            rateChanges: {
+                added: [
+                    {
+                        rateID: 'added-rate-id',
+                        rateCertificationName:
+                            'MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507',
+                        includedInAnotherSubmission: false,
+                    },
+                ],
+                removed: [
+                    {
+                        rateID: 'removed-rate-id',
+                        rateCertificationName:
+                            'MCR-FL-NEMTMTM-20260501-20260531-CERTIFICATION-20260507',
+                    },
+                ],
+                revised: [
+                    {
+                        rateID: 'revised-rate-id',
+                        rateCertificationName:
+                            'MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707',
+                        fieldChanges: [
+                            {
+                                fieldPath: 'rateCapitationType',
+                                oldValue: 'RATE_CELL',
+                                newValue: 'RATE_RANGE',
+                            },
+                            {
+                                fieldPath: 'rateCertificationName',
+                                oldValue:
+                                    'MCR-IL-PCCME-01012027-07082027-AMENDMENT-07042026',
+                                newValue:
+                                    'MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707',
+                            },
+                            {
+                                fieldPath: 'rateProgramIDs',
+                                oldValue: [
+                                    'abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce',
+                                ],
+                                newValue: [
+                                    'd95394e5-44d1-45df-8151-1cc1ee66f100',
+                                ],
+                            },
+                            {
+                                fieldPath: 'rateType',
+                                oldValue: 'AMENDMENT',
+                                newValue: 'NEW',
+                            },
+                            {
+                                fieldPath: 'rateDateCertified',
+                                oldValue: new Date('2026-07-04T00:00:00.000Z'),
+                                newValue: new Date('2026-07-21T00:00:00.000Z'),
+                            },
+                            {
+                                fieldPath: 'actuarialFirms',
+                                oldValue: ['Olivier Wyman'],
+                                newValue: ['Mercer'],
+                            },
+                            {
+                                fieldPath: 'actuaryCommunicationPreference',
+                                oldValue: 'OACT_TO_ACTUARY',
+                                newValue: 'OACT_TO_STATE',
+                            },
+                        ],
+                        rateDocuments: { added: [], removed: [] },
+                        supportingRateDocuments: { added: [], removed: [] },
+                        certifyingActuaryContactChanges: [
+                            {
+                                changeType: 'NEW_OR_MODIFIED',
+                                current: {
+                                    name: 'Jalen Brunson',
+                                    titleRole: 'Head of Risk Development',
+                                    email: 'jalen.brunson@ow.com',
+                                    actuarialFirm: 'OTHER',
+                                    actuarialFirmOther: 'Olivier Wyman',
+                                },
+                            },
+                        ],
+                        addtlActuaryContactChanges: [
+                            {
+                                changeType: 'NEW_OR_MODIFIED',
+                                current: {
+                                    name: 'Bill Yard',
+                                    titleRole: 'Executive assistant',
+                                    email: 'byard@mercer.com',
+                                    actuarialFirm: 'MERCER',
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            )
+        ).toEqual({
+            ...baseDates,
+            hasChanges: true,
+            sections: [
+                {
+                    title: 'RATE DETAILS',
+                    rateGroups: [
+                        {
+                            title: 'Added MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507',
+                            rows: [
+                                {
+                                    label: 'Rate included with another submission',
+                                    newValue: 'No',
+                                },
+                            ],
+                        },
+                        {
+                            title: 'Removed MCR-FL-NEMTMTM-20260501-20260531-CERTIFICATION-20260507',
+                        },
+                        {
+                            title: 'Revised MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707',
+                            rows: [
+                                {
+                                    label: 'Rate name',
+                                    oldValue:
+                                        'MCR-IL-PCCME-01012027-07082027-AMENDMENT-07042026',
+                                    newValue:
+                                        'MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707',
+                                    breakBeforeNewValue: true,
+                                },
+                                {
+                                    label: 'Rate programs',
+                                    oldValue: 'SNBC',
+                                    newValue: 'PMAP',
+                                },
+                                {
+                                    label: 'Type',
+                                    oldValue: 'Amendment',
+                                    newValue: 'New',
+                                },
+                                {
+                                    label: 'Date certified',
+                                    oldValue: '07/04/2026',
+                                    newValue: '07/21/2026',
+                                },
+                                {
+                                    label: 'Rate capitation type',
+                                    oldValue: 'Cell',
+                                    newValue: 'Range',
+                                },
+                                {
+                                    label: 'Actuarial firm',
+                                    oldValue: 'Olivier Wyman',
+                                    newValue: 'Mercer',
+                                },
+                                {
+                                    label: 'Actuaries’ communication preference',
+                                    oldValue:
+                                        ActuaryCommunicationRecord.OACT_TO_ACTUARY,
+                                    newValue:
+                                        ActuaryCommunicationRecord.OACT_TO_STATE,
+                                    breakBeforeNewValue: true,
+                                },
+                            ],
+                            contactsLabel: 'New and modified actuaries:',
+                            contacts: [
+                                {
+                                    value: 'Jalen Brunson, Head of Risk Development, jalen.brunson@ow.com',
+                                },
+                                {
+                                    value: 'Bill Yard, Executive assistant, byard@mercer.com',
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ],
+        })
+    })
+
+    it('marks rate fields absent from the prior revision as new and removed rate fields with a dash placeholder', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            rateChanges: {
+                added: [],
+                removed: [],
+                revised: [
+                    {
+                        rateID: 'revised-rate-id',
+                        rateCertificationName: 'RATE-ONE',
+                        fieldChanges: [
+                            {
+                                fieldPath: 'rateMedicaidPopulations',
+                                oldValue: [],
+                                newValue: [
+                                    'MEDICAID_ONLY',
+                                    'MEDICARE_MEDICAID_WITH_DSNP',
+                                    'MEDICARE_MEDICAID_WITHOUT_DSNP',
+                                ],
+                            },
+                            {
+                                fieldPath: 'amendmentEffectiveDateStart',
+                                oldValue: undefined,
+                                newValue: new Date('2027-07-08T00:00:00.000Z'),
+                            },
+                            {
+                                fieldPath: 'rateDateEnd',
+                                oldValue: new Date('2028-01-01T00:00:00.000Z'),
+                                newValue: undefined,
+                            },
+                        ],
+                        rateDocuments: { added: [], removed: [] },
+                        supportingRateDocuments: { added: [], removed: [] },
+                        certifyingActuaryContactChanges: [],
+                        addtlActuaryContactChanges: [],
+                    },
+                ],
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            ).sections
+        ).toEqual([
+            {
+                title: 'RATE DETAILS',
+                rateGroups: [
+                    {
+                        title: 'Revised RATE-ONE',
+                        rows: [
+                            {
+                                label: 'Rate start',
+                                newValue: '07/08/2027',
+                                isNew: true,
+                            },
+                            {
+                                label: 'Original rating end',
+                                oldValue: '01/01/2028',
+                                newValue: '⎯',
+                            },
+                            {
+                                label: 'Medicaid populations included',
+                                newValue:
+                                    'Medicaid-only, Dually eligible individuals enrolled through a D-SNP, Dually eligible individuals not enrolled through a D-SNP',
+                                isNew: true,
+                            },
+                        ],
+                    },
+                ],
+            },
+        ])
+    })
+
+    it('omits a revised rate whose only changes are documents', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            rateChanges: {
+                added: [],
+                removed: [],
+                revised: [
+                    {
+                        rateID: 'revised-rate-id',
+                        rateCertificationName: 'RATE-ONE',
+                        fieldChanges: [],
+                        rateDocuments: {
+                            added: ['new-rate-cert.pdf'],
+                            removed: [],
+                        },
+                        supportingRateDocuments: { added: [], removed: [] },
+                        certifyingActuaryContactChanges: [],
+                        addtlActuaryContactChanges: [],
+                    },
+                ],
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            ).sections
+        ).toEqual([])
+    })
+
+    it('uses the fallback rate name when a changed rate has no rate name', () => {
+        const comparison: RevisionDiff = {
+            ...baseComparison,
+            fieldChanges: [],
+            rateChanges: {
+                added: [],
+                removed: [{ rateID: 'removed-rate-id' }],
+                revised: [],
+            },
+        }
+
+        expect(
+            buildResubmitRevisionChanges(
+                currentContract,
+                comparison,
+                statePrograms
+            ).sections
+        ).toEqual([
+            {
+                title: 'RATE DETAILS',
+                rateGroups: [{ title: 'Removed Unknown rate name' }],
+            },
+        ])
+    })
+
     it('orders formatter sections in the expected email sequence', () => {
         const comparison: RevisionDiff = {
             ...baseComparison,
@@ -867,6 +1187,16 @@ describe('buildResubmitRevisionChanges', () => {
                 totalAdded: 1,
                 totalRemoved: 0,
             },
+            rateChanges: {
+                added: [],
+                removed: [
+                    {
+                        rateID: 'removed-rate-id',
+                        rateCertificationName: 'RATE-ONE',
+                    },
+                ],
+                revised: [],
+            },
         }
 
         const result = buildResubmitRevisionChanges(
@@ -879,6 +1209,7 @@ describe('buildResubmitRevisionChanges', () => {
             'SUBMISSION TYPE',
             'CONTRACT DETAILS',
             'CONTRACT PROVISIONS',
+            'RATE DETAILS',
             'STATE CONTACTS',
             'DOCUMENTS',
         ])
