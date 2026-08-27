@@ -411,7 +411,7 @@ const formatFieldValue = (
         }
 
         const firms = value.filter(
-            (item): item is string => typeof item === 'string' && item !== ''
+            (item): item is string => typeof item === 'string'
         )
 
         return firms.length > 0 ? firms.join(', ') : undefined
