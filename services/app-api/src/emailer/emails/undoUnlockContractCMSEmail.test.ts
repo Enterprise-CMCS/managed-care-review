@@ -76,7 +76,9 @@ it('has different content for EQRO', async () => {
                 ...emailConfig.dmcoEmails,
                 ...emailConfig.devReviewTeamEmails,
             ]),
-            bodyText: expect.stringContaining('Review decision:'),
+            bodyText: expect.stringContaining(
+                'Review decision: Subject to formal review and approval'
+            ),
         })
     )
     expect(result.bodyText).not.toContain('Rate name:')
@@ -108,5 +110,7 @@ it('CHIP only content is similar to EQRO', async () => {
             `Unexpected error: email template returned an error. ${result.message}`
         )
     }
-    expect(result.bodyText).toContain('Review decision:')
+    expect(result.bodyText).toContain(
+        'Review decision: Not subject to DMCO review and validation'
+    )
 })
