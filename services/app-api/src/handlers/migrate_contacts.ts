@@ -1558,7 +1558,7 @@ export const main: Handler = async (
         dryRun,
     })
     // The response contains only contact ids and counts, never names or emails.
-    console.info('Contacts migration complete', response)
+    console.info('Contacts migration complete', JSON.stringify(response))
 
     return response
 }
