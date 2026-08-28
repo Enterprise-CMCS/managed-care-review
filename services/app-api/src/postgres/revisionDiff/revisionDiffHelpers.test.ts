@@ -156,7 +156,8 @@ describe('revisionDiffHelpers', () => {
             contract.id,
             previousSubmission,
             latestSubmissionPackage,
-            statePrograms
+            statePrograms,
+            new Set()
         )
 
         const previousFormData = previousSubmission.contractRevision.formData
@@ -640,7 +641,8 @@ describe('revisionDiffHelpers', () => {
                 },
                 rateRevisions: [],
             },
-            statePrograms
+            statePrograms,
+            new Set()
         )
 
         expect(comparison).not.toBeInstanceOf(Error)
@@ -758,7 +760,8 @@ describe('revisionDiffHelpers', () => {
             contract.id,
             previousSubmission,
             latestSubmissionPackage,
-            statePrograms
+            statePrograms,
+            new Set()
         )
 
         expect(comparison).not.toBeInstanceOf(Error)
@@ -980,7 +983,8 @@ describe('revisionDiffHelpers', () => {
             contract.id,
             previousSubmission,
             latestSubmissionPackage,
-            must(findStatePrograms('FL'))
+            must(findStatePrograms('FL')),
+            new Set()
         )
 
         expect(comparison).not.toBeInstanceOf(Error)
@@ -1207,11 +1211,13 @@ describe('revisionDiffHelpers', () => {
             )
         }
 
+        // The shared rate was linked from another contract, so it is passed as a linked rateID.
         const comparison = buildRevisionDiff(
             contract.id,
             previousSubmission,
             latestSubmissionPackage,
-            must(findStatePrograms('FL'))
+            must(findStatePrograms('FL')),
+            new Set([sharedRateID])
         )
 
         expect(comparison).not.toBeInstanceOf(Error)
@@ -1269,7 +1275,7 @@ describe('revisionDiffHelpers', () => {
                     rateID: sharedRateID,
                     rateCertificationName:
                         addedRateRevision.formData.rateCertificationName,
-                    includedInAnotherSubmission: false,
+                    includedInAnotherSubmission: true,
                 },
             ],
             removed: [

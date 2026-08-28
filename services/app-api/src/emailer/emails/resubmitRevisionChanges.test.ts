@@ -835,7 +835,7 @@ describe('buildResubmitRevisionChanges', () => {
                         rateID: 'added-rate-id',
                         rateCertificationName:
                             'MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507',
-                        includedInAnotherSubmission: false,
+                        includedInAnotherSubmission: true,
                     },
                 ],
                 removed: [
@@ -941,7 +941,7 @@ describe('buildResubmitRevisionChanges', () => {
                             rows: [
                                 {
                                     label: 'Rate included with another submission',
-                                    newValue: 'No',
+                                    newValue: 'Yes',
                                 },
                             ],
                         },

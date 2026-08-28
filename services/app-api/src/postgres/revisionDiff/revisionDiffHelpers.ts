@@ -204,7 +204,8 @@ function buildRevisionDiff(
     contractID: string,
     olderSubmission: ContractPackageSubmissionType,
     newerSubmission: ContractPackageSubmissionType,
-    statePrograms: ProgramType[]
+    statePrograms: ProgramType[],
+    linkedRateIDs: Set<string>
 ): RevisionDiff | Error {
     const olderContractName = buildContractName(olderSubmission, statePrograms)
     if (olderContractName instanceof Error) {
@@ -244,7 +245,11 @@ function buildRevisionDiff(
         newerSubmission.contractRevision.formData.stateContacts
     )
 
-    const rateChanges = buildRateChanges(olderSubmission, newerSubmission)
+    const rateChanges = buildRateChanges(
+        olderSubmission,
+        newerSubmission,
+        linkedRateIDs
+    )
     if (rateChanges instanceof Error) {
         return rateChanges
     }

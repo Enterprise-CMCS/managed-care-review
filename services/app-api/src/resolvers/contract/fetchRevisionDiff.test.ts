@@ -726,7 +726,7 @@ describe('fetchRevisionDiff', () => {
                 {
                     rateID: sharedRateID,
                     rateCertificationName: addedRateCertificationName,
-                    includedInAnotherSubmission: false,
+                    includedInAnotherSubmission: true,
                 },
             ],
             removed: [
