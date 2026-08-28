@@ -56,7 +56,7 @@ export abstract class BaseStack extends Stack {
         this.applyTags()
 
         // Set termination protection for protected stages (matches serverless config)
-        if (['dev', 'val', 'prod', 'main'].includes(this.stage)) {
+        if (['dev', 'val', 'prod', 'qa', 'main'].includes(this.stage)) {
             this.terminationProtection = true
         }
     }

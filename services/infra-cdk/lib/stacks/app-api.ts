@@ -16,7 +16,11 @@ import {
     CfnAccount,
     LogGroupLogDestination,
     AccessLogFormat,
+    DomainName,
+    BasePathMapping,
+    EndpointType,
 } from 'aws-cdk-lib/aws-apigateway'
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager'
 import {
     PolicyStatement,
     Effect,
@@ -88,12 +92,14 @@ export class AppApiStack extends BaseStack {
             vpcId: process.env.VPC_ID!,
         })
 
-        // Review environments skip CfnAccount (AWS::ApiGateway::Account) and CloudWatch
-        // logging entirely. CfnAccount is an account/region-wide singleton — creating it
-        // per review environment causes ResourceExistenceCheck failures on first-time stack
-        // creation when the new IAM role doesn't exist yet. Dev/val/prod stacks own this
-        // setting in their respective accounts and are unaffected.
+        // Review environments do not configure API Gateway access logging. QA
+        // does, but it uses the neutral account baseline because it shares an
+        // AWS account with Val. Dev/Val/Prod temporarily retain their legacy
+        // account resources until the baseline migration is completed.
         const isReview = isReviewEnvironment(this.stage)
+        const managesLegacyApiGatewayAccount = ['dev', 'val', 'prod'].includes(
+            this.stage
+        )
 
         // Import security group from Network stack CloudFormation exports
         const networkStackName = ResourceNames.stackName('network', this.stage)
@@ -116,28 +122,32 @@ export class AppApiStack extends BaseStack {
 
         let apiGatewayLogGroup: LogGroup | undefined
         if (!isReview) {
-            // Create CloudWatch Log Group for API Gateway access logs
+            // Create a stage-specific CloudWatch Log Group for API Gateway access logs.
             apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
                 logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
                 retention: this.stageConfig.monitoring.logRetentionDays,
             })
 
-            const apiGatewayCloudWatchRole = new Role(
-                this,
-                'ApiGatewayCloudWatchRole',
-                {
-                    assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
-                    managedPolicies: [
-                        ManagedPolicy.fromAwsManagedPolicyName(
-                            'service-role/AmazonAPIGatewayPushToCloudWatchLogs' // pragma: allowlist secret
+            if (managesLegacyApiGatewayAccount) {
+                const apiGatewayCloudWatchRole = new Role(
+                    this,
+                    'ApiGatewayCloudWatchRole',
+                    {
+                        assumedBy: new ServicePrincipal(
+                            'apigateway.amazonaws.com'
                         ),
-                    ],
-                }
-            )
+                        managedPolicies: [
+                            ManagedPolicy.fromAwsManagedPolicyName(
+                                'service-role/AmazonAPIGatewayPushToCloudWatchLogs' // pragma: allowlist secret
+                            ),
+                        ],
+                    }
+                )
 
-            new CfnAccount(this, 'ApiGatewayAccount', {
-                cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
-            })
+                new CfnAccount(this, 'ApiGatewayAccount', {
+                    cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
+                })
+            }
         }
 
         // Create dedicated API Gateway for app-api
@@ -145,7 +155,7 @@ export class AppApiStack extends BaseStack {
             restApiName: `${ResourceNames.apiName('app-api', this.stage)}-gateway`,
             description: 'API Gateway for app-api Lambda functions',
             binaryMediaTypes: ['application/x-protobuf'],
-            // Disable CDK's automatic CfnAccount creation — we manage it manually (above)
+            // Disable CDK's automatic account resource; it is managed explicitly.
             cloudWatchRole: false,
             deployOptions: {
                 stageName: this.stage,
@@ -601,6 +611,11 @@ export class AppApiStack extends BaseStack {
 
         // Setup WAF association AFTER routes are configured (ensures deployment exists)
         this.setupWafAssociation(this.apiGateway)
+
+        // Optional custom domain for the API Gateway (currently only used by
+        // qa, to give the Mulesoft/Salesforce integration a stable hostname
+        // instead of the raw execute-api URL)
+        this.setupCustomApiDomain(this.apiGateway)
 
         // Setup cleanup function cron schedule
         this.setupCleanupSchedule()
@@ -1130,6 +1145,42 @@ export class AppApiStack extends BaseStack {
 
         // Ensure WAF association happens after API Gateway deployment
         wafAssociation.node.addDependency(apiGateway)
+    }
+
+    /**
+     * Optional custom domain for the API Gateway. Reuses the same ACM cert as
+     * the CloudFront distributions (CLOUDFRONT_CERT_ARN) - it already carries
+     * this hostname as a SAN - so no separate cert secret is needed, just the
+     * hostname itself. A no-op unless both env vars are set.
+     */
+    private setupCustomApiDomain(apiGateway: RestApi): void {
+        const certArn = process.env.CLOUDFRONT_CERT_ARN
+        const domainName = process.env.API_DOMAIN_NAME
+        if (!certArn || !domainName) return
+
+        const certificate = Certificate.fromCertificateArn(
+            this,
+            'ApiGatewayCertificate',
+            certArn
+        )
+
+        const apiDomainName = new DomainName(this, 'ApiGatewayDomainName', {
+            domainName,
+            certificate,
+            endpointType: EndpointType.EDGE,
+        })
+
+        new BasePathMapping(this, 'ApiGatewayBasePathMapping', {
+            domainName: apiDomainName,
+            restApi: apiGateway,
+        })
+
+        new CfnOutput(this, 'ApiGatewayCustomDomainTarget', {
+            value: apiDomainName.domainNameAliasDomainName,
+            exportName: this.exportName('ApiGatewayCustomDomainTarget'),
+            description:
+                'CloudFront alias target for the custom API domain CNAME (submit this to the DNS/Cloud team)',
+        })
     }
 
     /**

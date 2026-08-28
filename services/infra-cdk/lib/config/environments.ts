@@ -5,7 +5,7 @@
 import { Duration } from 'aws-cdk-lib'
 import { RetentionDays } from 'aws-cdk-lib/aws-logs'
 
-export type Environment = 'dev' | 'val' | 'prod' | 'review'
+export type Environment = 'dev' | 'val' | 'prod' | 'qa' | 'review'
 
 export interface DatabaseConfig {
     minCapacity: number
@@ -91,6 +91,17 @@ const STAGE_OVERRIDES = {
             enablePostgresVm: true,
         },
     },
+    // qa intentionally mirrors val's profile exactly - qa and val are meant to never diverge
+    qa: {
+        database: { backupRetentionDays: 7, deletionProtection: true },
+        lambda: { memorySize: 1024 },
+        monitoring: {
+            logRetentionDays: RetentionDays.ONE_MONTH,
+        },
+        features: {
+            enablePostgresVm: true,
+        },
+    },
     review: {
         database: { backupRetentionDays: 1, deletionProtection: false },
         lambda: { memorySize: 512 },
@@ -124,7 +135,7 @@ const getAccountId = (envVar: string, stage: string): string => {
  * Detect if stage is a review environment
  */
 export function isReviewEnvironment(stage: string): boolean {
-    return !['dev', 'val', 'prod'].includes(stage)
+    return !['dev', 'val', 'prod', 'qa'].includes(stage)
 }
 
 /**
@@ -138,10 +149,10 @@ function validateStageName(stage: string): void {
         )
     }
 
-    // Rule 2: Length constraints (3-23 characters to avoid AWS resource name limits)
-    if (stage.length < 3) {
+    // Rule 2: Length constraints (2-23 characters to avoid AWS resource name limits)
+    if (stage.length < 2) {
         throw new Error(
-            `Invalid stage name '${stage}': must be at least 3 characters long`
+            `Invalid stage name '${stage}': must be at least 2 characters long`
         )
     }
     if (stage.length > 23) {
@@ -193,7 +204,7 @@ export function getEnvironment(stage: string): EnvironmentConfig {
 
     if (!overrides) {
         throw new Error(
-            `Unknown environment: ${stage}. Must be one of: dev, val, prod, or a review environment`
+            `Unknown environment: ${stage}. Must be one of: dev, val, prod, qa, or a review environment`
         )
     }
 

@@ -228,6 +228,36 @@ jobs:
 
           echo "=== CDK OIDC deployment completed ==="
 
+  deploy-api-gateway-account-dev:
+    needs: [begin-deployment, deploy-github-oidc-dev]
+    name: deploy - API Gateway account baseline (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: 'true'
+
+      - name: Deploy API Gateway account baseline
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          pnpm cdk deploy api-gateway-account-dev-cdk \
+            --app 'pnpm tsx bin/api-gateway-account.ts' \
+            --context stage=dev \
+            --require-approval never
+
   deploy-cdk-infrastructure-dev:
     needs: [begin-deployment, deploy-github-oidc-dev]
     name: deploy - CDK infrastructure stacks (dev)
@@ -442,6 +472,7 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-dev,
+        deploy-api-gateway-account-dev,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -449,6 +480,7 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-dev.result == 'success' &&
+      needs.deploy-api-gateway-account-dev.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -502,7 +534,13 @@ jobs:
           node ./add_cypress_test_users_cdk.js dev $TEST_USERS_PASS
 
   end-deployment-dev:
-    needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
+    needs:
+      [
+        begin-deployment,
+        deploy-api-gateway-account-dev,
+        deploy-cdk-app-dev,
+        deploy-frontend-app-dev,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Dev Deployment
     runs-on: ubuntu-24.04
@@ -578,6 +616,36 @@ jobs:
             --require-approval never
 
           echo "=== CDK OIDC deployment completed ==="
+
+  deploy-api-gateway-account-val:
+    needs: [begin-deployment, deploy-github-oidc-val]
+    name: deploy - API Gateway account baseline (val)
+    runs-on: ubuntu-24.04
+    environment: val
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
+          stage-name: val
+          use-cdk-role: 'true'
+
+      - name: Deploy API Gateway account baseline
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: val
+        run: |
+          pnpm cdk deploy api-gateway-account-val-cdk \
+            --app 'pnpm tsx bin/api-gateway-account.ts' \
+            --context stage=val \
+            --require-approval never
 
   deploy-cdk-infrastructure-val:
     needs: [begin-deployment, deploy-github-oidc-val]
@@ -706,6 +774,7 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-val,
+        deploy-api-gateway-account-val,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -713,6 +782,7 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-val.result == 'success' &&
+      needs.deploy-api-gateway-account-val.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -844,7 +914,13 @@ jobs:
             --require-approval never
 
   end-deployment-val:
-    needs: [begin-deployment, deploy-cdk-app-val, deploy-frontend-app-val]
+    needs:
+      [
+        begin-deployment,
+        deploy-api-gateway-account-val,
+        deploy-cdk-app-val,
+        deploy-frontend-app-val,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Val Deployment
     runs-on: ubuntu-24.04
@@ -864,6 +940,377 @@ jobs:
       - name: Update deployment status (success)
         if: needs.deploy-cdk-app-val.result == 'success' &&
           needs.deploy-frontend-app-val.result == 'success'
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          state: 'success'
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+  # ============================================
+  # QA Environment Deployment
+  #
+  # qa shares val's AWS account and VPC (see docs) and deploys in parallel
+  # with val, not sequentially after it - it is intentionally not part of
+  # prod's needs: chain, so a qa failure never blocks a prod deployment.
+  # ============================================
+
+  deploy-github-oidc-qa:
+    needs: [begin-deployment, deploy-github-oidc-val]
+    # Bootstrap QA's role with Val's existing role because both stages share an
+    # AWS account. After the first successful deploy, switch this job to QA.
+    # Do not fail the overall promote run if qa fails - qa is not yet load-bearing
+    # for anyone else's work, and we don't want a qa-only issue blocking other
+    # engineers' unrelated merges. See caveats where this is set on the other qa jobs.
+    continue-on-error: true
+    name: deploy - GitHub OIDC service (qa)
+    runs-on: ubuntu-24.04
+    environment:
+      name: val
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials for QA OIDC bootstrap
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
+          stage-name: val
+          changed-services: 'github-oidc'
+          use-cdk-role: 'true'
+
+      - name: deploy github-oidc with CDK
+        id: deploy-github-oidc-cdk
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+          QA_ACCOUNT_ID: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
+        run: |
+          echo "Starting CDK OIDC deployment for stage: qa"
+          echo "Stack name will be: github-oidc-qa-cdk"
+
+          # Deploy using OIDC-only app (no layer dependencies)
+          echo "=== Deploying OIDC stack ==="
+          pnpm cdk deploy github-oidc-qa-cdk \
+            --app 'pnpm tsx bin/oidc.ts' \
+            --context stage=qa \
+            --require-approval never
+
+          echo "=== CDK OIDC deployment completed ==="
+
+  deploy-cdk-infrastructure-qa:
+    needs: [begin-deployment, deploy-github-oidc-qa]
+    # See continue-on-error note on deploy-github-oidc-qa above. Note this means
+    # needs.deploy-cdk-infrastructure-qa.result will read 'success' downstream
+    # even on failure - deploy-cdk-app-qa may still attempt to run after a real
+    # qa infra failure, but it's also continue-on-error and fails fast/harmlessly.
+    continue-on-error: true
+    name: deploy - CDK infrastructure stacks (qa)
+    runs-on: ubuntu-24.04
+    environment: qa
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.QA_AWS_ACCOUNT_ID }}
+          stage-name: qa
+          use-cdk-role: 'true'
+
+      - name: Deploy Network stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+          VPC_ID: ${{ secrets.QA_VPC_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.QA_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.QA_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.QA_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Network stack ==="
+          pnpm cdk deploy network-qa-cdk \
+            --app 'pnpm tsx bin/network.ts' \
+            --context stage=qa \
+            --require-approval never
+
+      - name: Deploy Uploads stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+        run: |
+          echo "=== Deploying Uploads stack ==="
+          pnpm cdk deploy uploads-qa-cdk \
+            --app 'pnpm tsx bin/uploads.ts' \
+            --context stage=qa \
+            --require-approval never
+
+      - name: Deploy Virus Scanning stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+          VPC_ID: ${{ secrets.QA_VPC_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.QA_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.QA_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.QA_SUBNET_PRIVATE_C_ID }}
+          SUBNET_PUBLIC_A_ID: ${{ secrets.QA_SUBNET_PUBLIC_A_ID }}
+          VITE_APP_OTEL_COLLECTOR_URL: ${{vars.VITE_APP_OTEL_COLLECTOR_URL}}
+          GUARDDUTY_DETECTOR_ID: ${{ secrets.QA_GUARDDUTY_DETECTOR_ID }}
+        run: |
+          echo "=== Deploying Virus Scanning stack ==="
+          pnpm cdk deploy virus-scanning-qa-cdk \
+            --app 'pnpm tsx bin/virus-scanning.ts' \
+            --context stage=qa \
+            --require-approval never
+
+      - name: Deploy Postgres stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+          VPC_ID: ${{ secrets.QA_VPC_ID }}
+          SUBNET_PRIVATE_A_ID: ${{ secrets.QA_SUBNET_PRIVATE_A_ID }}
+          SUBNET_PRIVATE_B_ID: ${{ secrets.QA_SUBNET_PRIVATE_B_ID }}
+          SUBNET_PRIVATE_C_ID: ${{ secrets.QA_SUBNET_PRIVATE_C_ID }}
+        run: |
+          echo "=== Deploying Postgres stack ==="
+          pnpm cdk deploy postgres-qa-cdk \
+            --app 'pnpm tsx bin/postgres.ts' \
+            --context stage=qa \
+            --require-approval never
+
+      - name: Deploy Frontend Infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+          CLOUDFRONT_CERT_ARN: ${{ secrets.QA_CERTIFICATE_ARN }}
+          CLOUDFRONT_DOMAIN_NAME: ${{ secrets.QA_CLOUDFRONT_DOMAIN_NAME }}
+          CLOUDFRONT_SB_DOMAIN_NAME: ${{ secrets.QA_CLOUDFRONT_SB_DOMAIN_NAME }}
+        run: |
+          echo "=== Deploying Frontend Infrastructure stack ==="
+          pnpm cdk deploy frontend-infra-qa-cdk \
+            --app 'pnpm tsx bin/frontend-infra.ts' \
+            --context stage=qa \
+            --require-approval never
+
+      - name: Deploy Cognito stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+        run: |
+          echo "=== Deploying Cognito stack ==="
+          pnpm cdk deploy cognito-qa-cdk \
+            --app 'pnpm tsx bin/cognito.ts' \
+            --context stage=qa \
+            --require-approval never
+
+      - name: Deploy Datadog infrastructure stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+        run: |
+          echo "=== Deploying Datadog infrastructure stack ==="
+          pnpm cdk deploy datadog-infra-qa-cdk \
+            --app 'pnpm tsx bin/datadog-infra.ts' \
+            --context stage=qa \
+            --require-approval never
+
+  deploy-cdk-app-qa:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure-qa,
+        deploy-api-gateway-account-val,
+        web-unit-tests,
+        api-unit-tests,
+        packages-unit-tests,
+      ]
+    # See continue-on-error note on deploy-github-oidc-qa above.
+    continue-on-error: true
+    if: |
+      always() &&
+      needs.deploy-cdk-infrastructure-qa.result == 'success' &&
+      needs.deploy-api-gateway-account-val.result == 'success' &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: deploy - CDK application stacks (qa)
+    runs-on: ubuntu-24.04
+    environment: qa
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.QA_AWS_ACCOUNT_ID }}
+          stage-name: qa
+          use-cdk-role: 'true'
+
+      - name: Deploy AppApi stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+          VPC_ID: ${{ secrets.QA_VPC_ID }}
+          INTERNAL_ALLOWED_ORIGINS: ${{ secrets.QA_INTERNAL_ALLOWED_ORIGINS }}
+          DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          # Custom API Gateway domain - qa only, gives the Mulesoft/Salesforce
+          # integration a stable hostname instead of the raw execute-api URL.
+          # Reuses the same cert as the CloudFront distributions.
+          CLOUDFRONT_CERT_ARN: ${{ secrets.QA_CERTIFICATE_ARN }}
+          API_DOMAIN_NAME: ${{ secrets.QA_API_DOMAIN_NAME }}
+        run: |
+          echo "=== Deploying AppApi stack ==="
+          pnpm cdk deploy app-api-qa-cdk \
+            --app 'pnpm tsx bin/app-api.ts' \
+            --context stage=qa \
+            --require-approval never
+
+  deploy-frontend-app-qa:
+    needs:
+      [
+        begin-deployment,
+        deploy-cdk-infrastructure-qa,
+        deploy-cdk-app-qa,
+        web-unit-tests,
+        api-unit-tests,
+        packages-unit-tests,
+      ]
+    # See continue-on-error note on deploy-github-oidc-qa above.
+    continue-on-error: true
+    if: |
+      always() &&
+      needs.deploy-cdk-infrastructure-qa.result == 'success' &&
+      needs.deploy-cdk-app-qa.result == 'success' &&
+      needs.web-unit-tests.result == 'success' &&
+      needs.api-unit-tests.result == 'success' &&
+      needs.packages-unit-tests.result == 'success' &&
+      needs.begin-deployment.result == 'success'
+    name: deploy - Frontend app with built assets (qa)
+    runs-on: ubuntu-24.04
+    environment: qa
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate Code
+        run: pnpm -r generate
+
+      - name: Build packages
+        shell: bash
+        run: pnpm build:packages
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.QA_AWS_ACCOUNT_ID }}
+          stage-name: qa
+          use-cdk-role: 'true'
+
+      - name: Get CDK configuration for app-web build
+        env:
+          STAGE_NAME: qa
+          VITE_APP_AUTH_MODE: IDM
+        run: |
+          echo "=== Fetching CDK stack outputs for app-web build ==="
+          ./scripts/get-cdk-config.sh qa
+
+          # Source the config to make variables available for the build step
+          echo "Sourcing configuration for build..."
+          source "/tmp/cdk-config-qa.env"
+
+          # Export to GitHub environment for subsequent steps
+          cat "/tmp/cdk-config-qa.env" >> $GITHUB_ENV
+
+      - name: Build app-web with CDK configuration
+        working-directory: services/app-web
+        run: |
+          echo "=== Building React app and Storybook with CDK configuration ==="
+
+          # Source the config file to get all environment variables
+          source "/tmp/cdk-config-qa.env"
+
+          # Verify critical variables are set
+          echo "Using VITE_APP_API_URL: $VITE_APP_API_URL"
+          echo "Using VITE_APP_COGNITO_USER_POOL_ID: $VITE_APP_COGNITO_USER_POOL_ID"
+          echo "Using VITE_APP_S3_DOCUMENTS_BUCKET: $VITE_APP_S3_DOCUMENTS_BUCKET"
+          echo "Using VITE_APP_AUTH_MODE: $VITE_APP_AUTH_MODE"
+
+          # Build with all environment variables available
+          pnpm build
+          pnpm storybook:build
+
+      - name: Deploy Frontend App stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: qa
+        run: |
+          echo "=== Deploying Frontend App stack with built assets ==="
+          pnpm cdk deploy frontend-app-qa-cdk \
+            --app 'pnpm tsx bin/frontend-app.ts' \
+            --context stage=qa \
+            --require-approval never
+
+  end-deployment-qa:
+    needs: [begin-deployment, deploy-cdk-app-qa, deploy-frontend-app-qa]
+    # See continue-on-error note on deploy-github-oidc-qa above.
+    continue-on-error: true
+    if: always() && needs.begin-deployment.result == 'success'
+    name: End CDK QA Deployment
+    runs-on: ubuntu-24.04
+    permissions:
+      deployments: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Update deployment status (failure)
+        if: failure() && needs.begin-deployment.result == 'success'
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: '${{ github.token }}'
+          state: 'failure'
+          deployment-id: ${{ needs.begin-deployment.outputs.deploy-id }}
+
+      - name: Update deployment status (success)
+        if: needs.deploy-cdk-app-qa.result == 'success' &&
+          needs.deploy-frontend-app-qa.result == 'success'
         uses: chrnorm/deployment-status@v2
         with:
           token: '${{ github.token }}'
@@ -920,6 +1367,36 @@ jobs:
             --require-approval never
 
           echo "=== CDK OIDC deployment completed ==="
+
+  deploy-api-gateway-account-prod:
+    needs: [begin-deployment, deploy-github-oidc-prod]
+    name: deploy - API Gateway account baseline (prod)
+    runs-on: ubuntu-24.04
+    environment: prod
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+          use-cdk-role: 'true'
+
+      - name: Deploy API Gateway account baseline
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          pnpm cdk deploy api-gateway-account-prod-cdk \
+            --app 'pnpm tsx bin/api-gateway-account.ts' \
+            --context stage=prod \
+            --require-approval never
 
   deploy-cdk-infrastructure-prod:
     needs: [begin-deployment, deploy-github-oidc-prod]
@@ -1048,6 +1525,7 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-prod,
+        deploy-api-gateway-account-prod,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -1055,6 +1533,7 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-prod.result == 'success' &&
+      needs.deploy-api-gateway-account-prod.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -1304,6 +1783,7 @@ jobs:
     needs:
       [
         begin-deployment,
+        deploy-api-gateway-account-prod,
         deploy-cdk-app-prod,
         deploy-frontend-app-prod,
         cypress-prod,
@@ -1337,7 +1817,13 @@ jobs:
   slack:
     name: Slack notification on failure
     runs-on: ubuntu-24.04
-    needs: [end-deployment-dev, end-deployment-val, end-deployment-prod]
+    needs:
+      [
+        end-deployment-dev,
+        end-deployment-val,
+        end-deployment-qa,
+        end-deployment-prod,
+      ]
     if: always()
     steps:
       # This action sets env.WORKFLOW_CONCLUSION so we can call a
