@@ -1,5 +1,6 @@
 export { updateDivisionAssignment } from './updateDivisionAssignment'
 export { fetchCurrentUserResolver } from './fetchCurrentUser'
+export { fetchStateUserResolver } from './fetchStateUser'
 export { updateStateAssignment } from './updateStateAssignment'
 export {
     stateUserResolver,

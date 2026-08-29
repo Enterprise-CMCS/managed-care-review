@@ -30,9 +30,14 @@ import type {
     SubmissionHistory,
 } from '../domain-models'
 import { findPrograms, findStatePrograms } from './'
-import type { InsertUserArgsType, UpdateUserInfoArgsType } from './user'
+import type {
+    InsertUserArgsType,
+    UpdateUserInfoArgsType,
+    FindStateUserArgsType,
+} from './user'
 import {
     findUser,
+    findStateUser,
     insertUser,
     updateCmsUserProperties,
     updateUserInfo,
@@ -179,6 +184,9 @@ type Store = {
     ) => Promise<UserType[] | Error>
     findAllUsers: () => Promise<UserType[] | Error>
     findUser: (id: string) => Promise<UserType | undefined | Error>
+    findStateUser: (
+        args: FindStateUserArgsType
+    ) => Promise<StateUserType | Error | undefined>
     findStateAssignedUsers: (
         stateCode: StateCodeType
     ) => Promise<UserType[] | Error>
@@ -391,6 +399,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         insertManyUsers: (args) => insertManyUsers(client, args),
         findAllUsers: () => findAllUsers(client),
         findUser: (id) => findUser(client, id),
+        findStateUser: (args) => findStateUser(client, args),
         updateUserInfo: (userID, args) => updateUserInfo(client, userID, args),
         findStateAssignedUsers: (stateCode) =>
             findStateAssignedUsers(client, stateCode),

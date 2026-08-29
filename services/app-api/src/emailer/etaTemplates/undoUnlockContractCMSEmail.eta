@@ -6,6 +6,8 @@ CMS undid the unlock on <%= it.packageName %>. The submission returned to its pr
 <b>Status:</b> <%= it.status %><br />
 <% if (it.isEQRO) { %>
     <b>Review decision:</b> <%= it.reviewDecisionText %><br />
+<% } else if (it.isCHIPOnly) { %>
+    <b>Review decision:</b> Not subject to DMCO review and validation<br />
 <% } %>
 <% if (it.shouldIncludeRates) { %>
     <% if (it.rateInfos.length > 1) { %>

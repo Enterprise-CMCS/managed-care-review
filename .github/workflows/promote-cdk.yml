@@ -228,6 +228,36 @@ jobs:
 
           echo "=== CDK OIDC deployment completed ==="
 
+  deploy-api-gateway-account-dev:
+    needs: [begin-deployment, deploy-github-oidc-dev]
+    name: deploy - API Gateway account baseline (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: 'true'
+
+      - name: Deploy API Gateway account baseline
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          pnpm cdk deploy api-gateway-account-dev-cdk \
+            --app 'pnpm tsx bin/api-gateway-account.ts' \
+            --context stage=dev \
+            --require-approval never
+
   deploy-cdk-infrastructure-dev:
     needs: [begin-deployment, deploy-github-oidc-dev]
     name: deploy - CDK infrastructure stacks (dev)
@@ -442,6 +472,7 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-dev,
+        deploy-api-gateway-account-dev,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -449,6 +480,7 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-dev.result == 'success' &&
+      needs.deploy-api-gateway-account-dev.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -502,7 +534,13 @@ jobs:
           node ./add_cypress_test_users_cdk.js dev $TEST_USERS_PASS
 
   end-deployment-dev:
-    needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
+    needs:
+      [
+        begin-deployment,
+        deploy-api-gateway-account-dev,
+        deploy-cdk-app-dev,
+        deploy-frontend-app-dev,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Dev Deployment
     runs-on: ubuntu-24.04
@@ -578,6 +616,36 @@ jobs:
             --require-approval never
 
           echo "=== CDK OIDC deployment completed ==="
+
+  deploy-api-gateway-account-val:
+    needs: [begin-deployment, deploy-github-oidc-val]
+    name: deploy - API Gateway account baseline (val)
+    runs-on: ubuntu-24.04
+    environment: val
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.VAL_AWS_ACCOUNT_ID }}
+          stage-name: val
+          use-cdk-role: 'true'
+
+      - name: Deploy API Gateway account baseline
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: val
+        run: |
+          pnpm cdk deploy api-gateway-account-val-cdk \
+            --app 'pnpm tsx bin/api-gateway-account.ts' \
+            --context stage=val \
+            --require-approval never
 
   deploy-cdk-infrastructure-val:
     needs: [begin-deployment, deploy-github-oidc-val]
@@ -706,6 +774,7 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-val,
+        deploy-api-gateway-account-val,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -713,6 +782,7 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-val.result == 'success' &&
+      needs.deploy-api-gateway-account-val.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -844,7 +914,13 @@ jobs:
             --require-approval never
 
   end-deployment-val:
-    needs: [begin-deployment, deploy-cdk-app-val, deploy-frontend-app-val]
+    needs:
+      [
+        begin-deployment,
+        deploy-api-gateway-account-val,
+        deploy-cdk-app-val,
+        deploy-frontend-app-val,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Val Deployment
     runs-on: ubuntu-24.04
@@ -879,7 +955,7 @@ jobs:
   # ============================================
 
   deploy-github-oidc-qa:
-    needs: [begin-deployment, end-deployment-dev]
+    needs: [begin-deployment, deploy-github-oidc-val]
     # Do not fail the overall promote run if qa fails - qa is not yet load-bearing
     # for anyone else's work, and we don't want a qa-only issue blocking other
     # engineers' unrelated merges. See caveats where this is set on the other qa jobs.
@@ -916,6 +992,7 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: qa
+
         run: |
           echo "Starting CDK OIDC deployment for stage: qa"
           echo "Stack name will be: github-oidc-qa-cdk"
@@ -1061,6 +1138,7 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-qa,
+        deploy-api-gateway-account-val,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -1070,6 +1148,7 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-qa.result == 'success' &&
+      needs.deploy-api-gateway-account-val.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -1287,6 +1366,36 @@ jobs:
 
           echo "=== CDK OIDC deployment completed ==="
 
+  deploy-api-gateway-account-prod:
+    needs: [begin-deployment, deploy-github-oidc-prod]
+    name: deploy - API Gateway account baseline (prod)
+    runs-on: ubuntu-24.04
+    environment: prod
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+          stage-name: prod
+          use-cdk-role: 'true'
+
+      - name: Deploy API Gateway account baseline
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: prod
+        run: |
+          pnpm cdk deploy api-gateway-account-prod-cdk \
+            --app 'pnpm tsx bin/api-gateway-account.ts' \
+            --context stage=prod \
+            --require-approval never
+
   deploy-cdk-infrastructure-prod:
     needs: [begin-deployment, deploy-github-oidc-prod]
     name: deploy - CDK infrastructure stacks (prod)
@@ -1414,6 +1523,7 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-prod,
+        deploy-api-gateway-account-prod,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -1421,6 +1531,7 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-prod.result == 'success' &&
+      needs.deploy-api-gateway-account-prod.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -1670,6 +1781,7 @@ jobs:
     needs:
       [
         begin-deployment,
+        deploy-api-gateway-account-prod,
         deploy-cdk-app-prod,
         deploy-frontend-app-prod,
         cypress-prod,
