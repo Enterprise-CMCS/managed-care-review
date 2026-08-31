@@ -284,8 +284,8 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       uuid:
-        specifier: ^14.0.1
-        version: 14.0.1
+        specifier: ^14.0.2
+        version: 14.0.2
     devDependencies:
       '@types/jest':
         specifier: ^30.0.0
@@ -399,8 +399,8 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
       uuid:
-        specifier: ^14.0.1
-        version: 14.0.1
+        specifier: ^14.0.2
+        version: 14.0.2
 
   services/app-api:
     dependencies:
@@ -540,8 +540,8 @@ importers:
         specifier: ^1.5.10
         version: 1.5.10
       uuid:
-        specifier: ^14.0.1
-        version: 14.0.1
+        specifier: ^14.0.2
+        version: 14.0.2
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -797,8 +797,8 @@ importers:
         specifier: ^1.8.1
         version: 1.8.1(react@19.2.8)
       uuid:
-        specifier: ^14.0.1
-        version: 14.0.1
+        specifier: ^14.0.2
+        version: 14.0.2
       vite:
         specifier: '>=7.3.2'
         version: 8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.77.2)(terser@5.49.0)(tsx@4.23.12)(yaml@2.9.0)
@@ -12133,8 +12133,8 @@ packages:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
 
-  uuid@14.0.1:
-    resolution: {integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==}
+  uuid@14.0.2:
+    resolution: {integrity: sha512-xZe/16rV4aa+HGSOCiY2YeLT1OybRLrrkL/Rqaq7p7GMVXjFh+6wN4oMYgjFmnSnhY8t6Xpdl2l9qmnHYuMHwQ==}
     hasBin: true
 
   uuid@3.4.0:
@@ -19533,7 +19533,7 @@ snapshots:
 
   '@types/uuid@11.0.0':
     dependencies:
-      uuid: 14.0.1
+      uuid: 14.0.2
 
   '@types/whatwg-mimetype@3.0.2': {}
 
@@ -21553,7 +21553,7 @@ snapshots:
     dependencies:
       import-fresh: 2.0.0
       is-directory: 0.3.1
-      js-yaml: 5.2.3
+      js-yaml: 5.3.0
       parse-json: 4.0.0
 
   cosmiconfig@7.1.0:
@@ -27629,7 +27629,7 @@ snapshots:
 
   utils-merge@1.0.1: {}
 
-  uuid@14.0.1: {}
+  uuid@14.0.2: {}
 
   uuid@3.4.0: {}
 
