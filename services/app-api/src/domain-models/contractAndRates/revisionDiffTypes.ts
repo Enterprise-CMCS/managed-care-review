@@ -62,7 +62,7 @@ type RevisionDiffDocumentChanges = {
 type RevisionDiffAddedRate = {
     rateID: string
     rateCertificationName?: string
-    includedInAnotherSubmission: boolean
+    isLinkedRate: boolean
 }
 
 type RevisionDiffRemovedRate = {

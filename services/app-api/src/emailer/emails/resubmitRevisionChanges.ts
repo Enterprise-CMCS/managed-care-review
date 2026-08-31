@@ -718,9 +718,7 @@ const buildRateDetailsSection = (
             rows: [
                 {
                     label: 'Rate included with another submission',
-                    newValue: addedRate.includedInAnotherSubmission
-                        ? 'Yes'
-                        : 'No',
+                    newValue: addedRate.isLinkedRate ? 'Yes' : 'No',
                 },
             ],
         })
