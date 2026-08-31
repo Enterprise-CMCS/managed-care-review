@@ -119,6 +119,13 @@ const featureFlags = {
         flag: 'revision-history-enhancements',
         defaultValue: false,
     },
+    /**
+     * This flag toggles on or off the procurement attestation feature
+     */
+    PROCUREMENT_ATTESTATION: {
+        flag: 'procurement-attestation',
+        defaultValue: false,
+    },
     // PERMANENT FLAGS for utilities features
     /**
      * This flag toggles the ability for external API users to send write requests.
