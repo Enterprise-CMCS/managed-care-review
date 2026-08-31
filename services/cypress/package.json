@@ -61,7 +61,7 @@
         "cypress-file-upload": "^5.0.8",
         "cypress-pipe": "^2.0.1",
         "axios": "^1.19.0",
-        "graphql": "^16.14.0",
+        "graphql": "^17.0.2",
         "@aws-sdk/signature-v4": "^3.374.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.1120.0",
         "@aws-sdk/client-cognito-identity": "^3.1120.0",
