@@ -211,8 +211,7 @@ function buildAddedRate(
     return {
         rateID: rateRevision.rateID,
         rateCertificationName: buildRateDisplayName(rateRevision),
-        // TODO(MCR-6481): identify when a rate on a submission diff is from another submission but linked to the current submission, e.g. a linked rate.
-        isLinkedRate: false,
+        isLinkedRate: linkedRateIDs.has(rateRevision.rateID),
     }
 }
 
