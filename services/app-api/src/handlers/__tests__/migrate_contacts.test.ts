@@ -632,6 +632,22 @@ describe('classifyContact', () => {
             },
         })
     })
+
+    test.each([null, '', '   '])(
+        'treats a complete migrated name with email %j as already migrated',
+        (email) => {
+            expect(
+                classifyContact({
+                    contactType: 'STATE_CONTACT',
+                    ...(contact('state-missing-email', {
+                        givenName: 'Jane',
+                        familyName: 'Doe',
+                        email,
+                    }) as ReturnType<typeof contact>),
+                } as never)
+            ).toEqual({ status: 'ALREADY_MIGRATED' })
+        }
+    )
 })
 
 describe('runContactsMigration', () => {
@@ -757,7 +773,6 @@ describe('runContactsMigration', () => {
                     familyName: 'Doe',
                     suffix: null,
                     titleRole: 'Chief Actuary',
-                    email: 'contact@example.com',
                 },
             })
         )
@@ -770,7 +785,6 @@ describe('runContactsMigration', () => {
                     familyName: 'Public',
                     suffix: 'FSA',
                     titleRole: 'Chief Actuary',
-                    email: 'contact@example.com',
                 },
             })
         )
@@ -778,6 +792,7 @@ describe('runContactsMigration', () => {
         const stateUpdate = vi.mocked(client.stateContact.updateMany).mock
             .calls[0][0]
         expect(stateUpdate.data).not.toHaveProperty('name')
+        expect(stateUpdate.data).not.toHaveProperty('email')
     })
 
     test('fills a missing required name without overwriting existing fields', async () => {
@@ -822,12 +837,11 @@ describe('runContactsMigration', () => {
                 familyName: 'Doe',
                 suffix: 'FSA',
                 titleRole: 'Chief Actuary',
-                email: 'contact@example.com',
             },
         })
     })
 
-    test('fills missing title and email with required placeholders', async () => {
+    test('fills a missing title while leaving a missing email unchanged', async () => {
         const client = mockClient({
             stateContacts: [
                 contact('state-missing-required', {
@@ -871,9 +885,11 @@ describe('runContactsMigration', () => {
                 familyName: 'Doe',
                 suffix: null,
                 titleRole: 'NO_TITLE_ROLE',
-                email: 'no-email@example.com',
             },
         })
+        const updateData = vi.mocked(client.stateContact.updateMany).mock
+            .calls[0][0].data
+        expect(updateData).not.toHaveProperty('email')
     })
 
     test('reports a concurrent change instead of overwriting it', async () => {

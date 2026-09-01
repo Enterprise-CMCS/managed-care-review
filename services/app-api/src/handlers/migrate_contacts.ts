@@ -28,7 +28,6 @@ import {
 const NO_GIVEN_NAME = 'NO_GIVEN_NAME'
 const NO_FAMILY_NAME = 'NO_FAMILY_NAME'
 const NO_TITLE_ROLE = 'NO_TITLE_ROLE'
-const NO_EMAIL = 'no-email@example.com'
 
 // How many updates run at once. The connection pool holds 10 (a node-postgres
 // pool, built in prismaClient.ts), so 10 is the most that can be in flight and
@@ -455,7 +454,7 @@ function hasValue(value: string | null): value is string {
 
 /**
  * True when a required field has real content, using the same tidy-up the
- * parser uses. For `givenName`, `familyName`, `titleRole` and `email`.
+ * parser uses. For `givenName`, `familyName` and `titleRole`.
  */
 function hasRequiredValue(value: string | null): boolean {
     // Unlike hasValue, this treats a whitespace-only value as missing, because
@@ -1001,8 +1000,9 @@ function mergeParsedName(
  *
  * The order of the checks matters, so nothing already filled in gets
  * overwritten: already-migrated contacts are recognized first, then ones
- * needing only a `titleRole` or `email` placeholder, then names that need a
- * person, then the ones this can split itself.
+ * needing only a `titleRole` placeholder, then names that need a person, then
+ * the ones this can split itself. Email is outside this migration's scope and
+ * never affects classification.
  *
  * An `ELIGIBLE` result carries the values to write. Every other result says
  * why the contact is left alone.
@@ -1011,22 +1011,20 @@ export function classifyContact(contact: ContactRow): ContactClassification {
     const hasGivenName = hasRequiredValue(contact.givenName)
     const hasFamilyName = hasRequiredValue(contact.familyName)
 
-    // Everything the new schema requires is already present.
+    // Everything this migration is responsible for is already present. Email
+    // is deliberately ignored and left exactly as stored.
     const fullyPopulated =
-        hasGivenName &&
-        hasFamilyName &&
-        hasRequiredValue(contact.titleRole) &&
-        hasRequiredValue(contact.email)
+        hasGivenName && hasFamilyName && hasRequiredValue(contact.titleRole)
 
     // check if already populated
     if (fullyPopulated) {
         return { status: 'ALREADY_MIGRATED' }
     }
 
-    // The name is complete but titleRole or email is missing. Do not re-parse
-    // `name` -- the stored name parts are authoritative. Passing them straight
-    // through means the only change the update makes is the missing
-    // titleRole/email placeholder.
+    // The name is complete but titleRole is missing. Do not re-parse `name` --
+    // the stored name parts are authoritative. Passing them straight through
+    // means the only change the update makes is the missing titleRole
+    // placeholder.
     if (hasGivenName && hasFamilyName) {
         return {
             status: 'ELIGIBLE',
@@ -1282,13 +1280,13 @@ async function updateContact(
         middleName: parsedName.middleName,
         familyName: parsedName.familyName,
         suffix: parsedName.suffix,
-        // titleRole and email are required by the new schema but are not
-        // derived from the name. Keep whatever is there, and only substitute a
-        // placeholder when the field is genuinely empty.
+        // titleRole is required by the new schema but is not derived from the
+        // name. Keep whatever is there, and only substitute a placeholder when
+        // the field is genuinely empty. Email is intentionally absent from
+        // `data`, so null, empty and nonblank values all remain untouched.
         titleRole: hasRequiredValue(contact.titleRole)
             ? contact.titleRole
             : NO_TITLE_ROLE,
-        email: hasRequiredValue(contact.email) ? contact.email : NO_EMAIL,
     }
 
     // updateMany rather than update, because update throws when nothing matches
