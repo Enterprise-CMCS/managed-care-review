@@ -10,5 +10,8 @@ export {
     handleNotFoundError,
     handleUserInputPostgresError,
 } from './postgresErrors'
-export { findStatePrograms } from './state/findStatePrograms'
+export {
+    findAllStatePrograms,
+    findStatePrograms,
+} from './state/findStatePrograms'
 export { OPEN_QUESTION_ROUND_ERROR_MESSAGE } from './questionResponse'

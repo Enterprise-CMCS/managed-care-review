@@ -28,8 +28,9 @@ import type {
     QuestionResponseHistory,
     RevisionDiff,
     SubmissionHistory,
+    StateProgramType,
 } from '../domain-models'
-import { findPrograms, findStatePrograms } from './'
+import { findAllStatePrograms, findPrograms, findStatePrograms } from './'
 import type {
     InsertUserArgsType,
     UpdateUserInfoArgsType,
@@ -175,6 +176,7 @@ type Store = {
         programIDs: Array<string>
     ) => ProgramType[] | Error
     findStatePrograms: (stateCode: string) => ProgramType[] | Error
+    findAllStatePrograms: () => Promise<StateProgramType[] | Error>
     findAllSupportedStates: () => Promise<StateType[] | Error>
 
     /** User functions **/
@@ -392,6 +394,7 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             updateEmailSettings(client, emailSettings),
         findPrograms: findPrograms,
         findStatePrograms: findStatePrograms,
+        findAllStatePrograms: findAllStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
 
         /** User functions **/
