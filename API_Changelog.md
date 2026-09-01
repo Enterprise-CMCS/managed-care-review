@@ -1,6 +1,32 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### August 31, 2026
+#### Added
+- New query `getAllStatePrograms` added to the API.
+    - Returns `GetAllStateProgramsPayload` with `totalCount` and `edges` fields.
+    - Each edge contains a `Program` under `node` and its associated `stateName` and `stateCode`.
+    - The edges contain every program defined in `packages/submissions/src/statePrograms/statePrograms.json`.
+    - Available to CMS, CMS approver, admin, help desk, business owner, and read-only users.
+    - Supports OAuth clients with the `client_credentials` grant.
+    - State users receive a `FORBIDDEN` error.
+
+### August 25, 2026
+#### Added
+- New query `fetchStateUser` added to the API.
+    - Parameters (via `FetchStateUserInput`):
+        - `email`: required String, the state user's email address.
+        - `givenName`: required String, the state user's given name.
+        - `familyName`: required String, the state user's family name.
+    - Matches all three input fields case-insensitively and returns only users with the `STATE_USER` role. If multiple records match, the most recently created user is returned.
+    - Returns `FetchStateUserPayload` containing the matched `StateUser` under `user`.
+    - Available to CMS, CMS approver, admin, help desk, business owner, and read-only users.
+    - Supports OAuth clients with the `client_credentials` grant.
+    - Errors:
+        - `FORBIDDEN`: The caller does not have read permissions or the OAuth client does not have the `client_credentials` grant.
+        - `NOT_FOUND`: No state user matches the supplied email, given name, and family name.
+        - `INTERNAL_SERVER_ERROR`: The state-user lookup fails.
+
 ### August 3, 2026
 #### Added
 - New field `undoUnlockPackages` on `Contract` and `UnlockedContract`
