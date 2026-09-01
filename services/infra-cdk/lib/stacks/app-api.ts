@@ -70,6 +70,7 @@ export class AppApiStack extends BaseStack {
     public readonly regenerateZipsFunction: NodejsFunction
     public readonly migrateS3UrlsFunction: NodejsFunction
     public readonly backfillLastActionDateFunction: NodejsFunction
+    public readonly migrateContactsFunction: NodejsFunction
     public readonly restoreIAToStandardFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
@@ -451,6 +452,34 @@ export class AppApiStack extends BaseStack {
                     format: OutputFormat.ESM,
                     banner: AppApiStack.ESM_BANNER,
                     ...this.createBundling('backfill-last-action-date', [
+                        this.getPrismaCleanupCommands(),
+                    ]),
+                },
+            }
+        )
+
+        /**
+         * One-time migration that copies deprecated contact names into the
+         * structured StateContact/ActuaryContact name fields.
+         */
+        this.migrateContactsFunction = this.createLambdaFunction(
+            'migrate-contacts',
+            'migrate_contacts',
+            'main',
+            {
+                timeout: Duration.minutes(15),
+                memorySize: 2048,
+                environment,
+                role,
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    ...this.createBundling('migrate-contacts', [
                         this.getPrismaCleanupCommands(),
                     ]),
                 },
@@ -1192,6 +1221,7 @@ export class AppApiStack extends BaseStack {
             this.regenerateZipsFunction,
             this.migrateS3UrlsFunction,
             this.backfillLastActionDateFunction,
+            this.migrateContactsFunction,
             this.graphqlFunction,
         ]
 
@@ -1328,6 +1358,13 @@ export class AppApiStack extends BaseStack {
             value: this.backfillLastActionDateFunction.functionName,
             exportName: this.exportName('BackfillLastActionDateFunctionName'),
             description: 'Backfill lastActionDate Lambda function name',
+        })
+
+        new CfnOutput(this, 'MigrateContactsFunctionName', {
+            value: this.migrateContactsFunction.functionName,
+            exportName: this.exportName('MigrateContactsFunctionName'),
+            description:
+                'Contact structured-name migration Lambda function name',
         })
 
         new CfnOutput(this, 'ApiGatewayUrl', {
