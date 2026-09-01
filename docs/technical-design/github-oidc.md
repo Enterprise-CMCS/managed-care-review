@@ -15,11 +15,11 @@ GitHub Actions runner
 
 ## AWS resources (managed by CDK)
 
-The CDK stack at `services/infra-cdk/lib/stacks/github-oidc.ts`, deployed via `bin/oidc.ts`, creates two resources per environment:
+The CDK stack at `services/infra-cdk/lib/stacks/github-oidc.ts`, deployed via `bin/oidc.ts`, creates a stage-specific IAM role and, when required, the account's OIDC provider:
 
 ### 1. IAM OIDC Identity Provider
 
-One per AWS account, created only for official stages (`dev`, `val`, `prod`). Review branch stacks reference the provider created by the `dev` stack in the dev account.
+One per AWS account, created only by account-owning stages (`dev`, `val`, `prod`). Review branch stacks reference the provider created by `dev`. QA shares Val's AWS account and references the provider created by `val`.
 
 - URL: `https://token.actions.githubusercontent.com`
 - Audience: `sts.amazonaws.com`
@@ -38,11 +38,12 @@ One per stage, named `github-oidc-cdk-<stage>-ServiceRole`.
 
 The trust policy uses the GitHub subject claim (`sub`) to restrict which workflow runs can assume the role:
 
-| Stage                             | Subject claim                                               | GitHub environment |
-| --------------------------------- | ----------------------------------------------------------- | ------------------ |
-| `val`                             | `repo:Enterprise-CMCS/managed-care-review:environment:val`  | `val`              |
-| `prod`                            | `repo:Enterprise-CMCS/managed-care-review:environment:prod` | `prod`             |
-| all others (dev, review branches) | `repo:Enterprise-CMCS/managed-care-review:environment:dev`  | `dev`              |
+| Stage           | Subject claim                                               | GitHub environment |
+| --------------- | ----------------------------------------------------------- | ------------------ |
+| `val`           | `repo:Enterprise-CMCS/managed-care-review:environment:val`  | `val`              |
+| `qa`            | `repo:Enterprise-CMCS/managed-care-review:environment:qa`   | `qa`               |
+| `prod`          | `repo:Enterprise-CMCS/managed-care-review:environment:prod` | `prod`             |
+| dev and reviews | `repo:Enterprise-CMCS/managed-care-review:environment:dev`  | `dev`              |
 
 GitHub environments are configured in the GitHub UI and control which branches can access the environment and its secrets. See [ADR 021](../architectural-decision-records/021-use-github-environments.md).
 
@@ -81,7 +82,9 @@ jobs:
 
 ## Bootstrapping a new environment
 
-Because the OIDC resources are used by CI to deploy themselves, they must be bootstrapped manually once per AWS account using static credentials (from CloudTamer/Kion).
+Because CI uses an environment's OIDC role to update that role, the role must be created once before it can become self-managing.
+
+For a new AWS account, use static credentials from CloudTamer/Kion:
 
 ```bash
 # 1. Set credentials for the target account
@@ -100,7 +103,9 @@ STAGE_NAME=dev pnpm cdk deploy github-oidc-dev-cdk \
 
 Repeat with `val` and `prod` stage names using their respective account credentials.
 
-After bootstrapping, all subsequent changes to the OIDC stack (e.g. adding new AWS permissions) are deployed automatically by CI — the bootstrap only needs to happen once per account, or if the stack is ever deleted.
+When a new environment shares an account that already has an OIDC provider, an existing role in that account can perform the initial deployment. QA was bootstrapped once by Val's CI role; subsequent promotions run the QA OIDC job under the `qa` GitHub environment and update `github-oidc-qa-cdk` using QA's own role.
+
+The provider is bootstrapped once per account and each service role once per stage. Afterward, CI deploys subsequent changes automatically unless the role or stack is deleted.
 
 ## If the OIDC provider already exists in the account
 
@@ -127,15 +132,16 @@ const allowedActions = [
 ]
 ```
 
-Push the change on a feature branch. The CI OIDC bootstrap job in `deploy-cdk.yml` redeploys the OIDC stack early in the pipeline (before any other infrastructure), so subsequent jobs in the same run will already have the updated permissions.
+Push the change on a feature branch to validate the review role. After merge, `promote-cdk.yml` redeploys the Dev, Val, QA, and Prod OIDC stacks before their dependent infrastructure jobs, so each stage receives the new permissions during the same promotion.
 
 Note that IAM role changes can take a few seconds to propagate. If a job immediately follows the OIDC deploy and hits a permissions error, re-running the job is usually sufficient.
 
 ## Deployed stacks
 
-| Stack name                 | Account | Stage                                                |
-| -------------------------- | ------- | ---------------------------------------------------- |
-| `github-oidc-dev-cdk`      | dev     | `dev` — owns the OIDC provider for the dev account   |
-| `github-oidc-<branch>-cdk` | dev     | ephemeral review branches                            |
-| `github-oidc-val-cdk`      | val     | `val` — owns the OIDC provider for the val account   |
-| `github-oidc-prod-cdk`     | prod    | `prod` — owns the OIDC provider for the prod account |
+| Stack name                 | Account | Stage                                                   |
+| -------------------------- | ------- | ------------------------------------------------------- |
+| `github-oidc-dev-cdk`      | dev     | `dev` — owns the OIDC provider for the dev account      |
+| `github-oidc-<branch>-cdk` | dev     | ephemeral review branches                               |
+| `github-oidc-val-cdk`      | val     | `val` — owns the provider for the shared Val/QA account |
+| `github-oidc-qa-cdk`       | val     | `qa` — imports Val's provider and owns QA's deploy role |
+| `github-oidc-prod-cdk`     | prod    | `prod` — owns the OIDC provider for the prod account    |

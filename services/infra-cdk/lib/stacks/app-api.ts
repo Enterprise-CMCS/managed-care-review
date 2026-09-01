@@ -13,7 +13,6 @@ import {
     AuthorizationType,
     ResponseType,
     MethodLoggingLevel,
-    CfnAccount,
     LogGroupLogDestination,
     AccessLogFormat,
     DomainName,
@@ -92,14 +91,10 @@ export class AppApiStack extends BaseStack {
             vpcId: process.env.VPC_ID!,
         })
 
-        // Review environments do not configure API Gateway access logging. QA
-        // does, but it uses the neutral account baseline because it shares an
-        // AWS account with Val. Dev/Val/Prod temporarily retain their legacy
-        // account resources until the baseline migration is completed.
+        // Review environments do not configure API Gateway access logging.
+        // Official environments and QA use the account-wide baseline stack for
+        // CloudWatch permissions and keep stage-specific access log groups here.
         const isReview = isReviewEnvironment(this.stage)
-        const managesLegacyApiGatewayAccount = ['dev', 'val', 'prod'].includes(
-            this.stage
-        )
 
         // Import security group from Network stack CloudFormation exports
         const networkStackName = ResourceNames.stackName('network', this.stage)
@@ -122,32 +117,10 @@ export class AppApiStack extends BaseStack {
 
         let apiGatewayLogGroup: LogGroup | undefined
         if (!isReview) {
-            // Create a stage-specific CloudWatch Log Group for API Gateway access logs.
             apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
                 logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
                 retention: this.stageConfig.monitoring.logRetentionDays,
             })
-
-            if (managesLegacyApiGatewayAccount) {
-                const apiGatewayCloudWatchRole = new Role(
-                    this,
-                    'ApiGatewayCloudWatchRole',
-                    {
-                        assumedBy: new ServicePrincipal(
-                            'apigateway.amazonaws.com'
-                        ),
-                        managedPolicies: [
-                            ManagedPolicy.fromAwsManagedPolicyName(
-                                'service-role/AmazonAPIGatewayPushToCloudWatchLogs' // pragma: allowlist secret
-                            ),
-                        ],
-                    }
-                )
-
-                new CfnAccount(this, 'ApiGatewayAccount', {
-                    cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
-                })
-            }
         }
 
         // Create dedicated API Gateway for app-api
@@ -155,7 +128,7 @@ export class AppApiStack extends BaseStack {
             restApiName: `${ResourceNames.apiName('app-api', this.stage)}-gateway`,
             description: 'API Gateway for app-api Lambda functions',
             binaryMediaTypes: ['application/x-protobuf'],
-            // Disable CDK's automatic account resource; it is managed explicitly.
+            // The account baseline stack owns the singleton CloudWatch role.
             cloudWatchRole: false,
             deployOptions: {
                 stageName: this.stage,
