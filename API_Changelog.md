@@ -3,8 +3,8 @@
 
 ### August 31, 2026
 #### Added
-- New query `getAllStatePrograms` added to the API.
-    - Returns `GetAllStateProgramsPayload` with `totalCount` and `edges` fields.
+- New query `fetchAllStatePrograms` added to the API.
+    - Returns `FetchAllStateProgramsPayload` with `totalCount` and `edges` fields.
     - Each edge contains a `Program` under `node` and its associated `stateName` and `stateCode`.
     - The edges contain every program defined in `packages/submissions/src/statePrograms/statePrograms.json`.
     - Available to CMS, CMS approver, admin, help desk, business owner, and read-only users.

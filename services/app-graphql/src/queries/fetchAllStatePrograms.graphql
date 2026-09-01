@@ -1,5 +1,5 @@
-query getAllStatePrograms {
-    getAllStatePrograms {
+query fetchAllStatePrograms {
+    fetchAllStatePrograms {
         totalCount
         edges {
             stateCode

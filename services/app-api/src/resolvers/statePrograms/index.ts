@@ -1,1 +1,1 @@
-export { getAllStateProgramsResolver } from './getAllStatePrograms'
+export { fetchAllStateProgramsResolver } from './fetchAllStatePrograms'

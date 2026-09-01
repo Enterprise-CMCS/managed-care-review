@@ -81,7 +81,7 @@ import {
 import type { DocumentZipService } from '../zip/generateZip'
 import { fetchDocumentResolver } from './documents/fetchDocument'
 import { generateUploadURLResolver } from './documents/generateUploadURL'
-import { getAllStateProgramsResolver } from './statePrograms'
+import { fetchAllStateProgramsResolver } from './statePrograms'
 
 export function configureResolvers(
     store: Store,
@@ -102,7 +102,7 @@ export function configureResolvers(
             indexContractsStripped: indexContractsStripped(store),
             indexUsers: indexUsersResolver(store),
             fetchStateUser: fetchStateUserResolver(store),
-            getAllStatePrograms: getAllStateProgramsResolver(store),
+            fetchAllStatePrograms: fetchAllStateProgramsResolver(store),
             fetchMcReviewSettings: fetchMcReviewSettings(store, emailer),
             // Rates refactor
             indexRates: indexRatesResolver(store),

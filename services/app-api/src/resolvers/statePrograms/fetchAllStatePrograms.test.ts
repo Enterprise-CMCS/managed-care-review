@@ -1,5 +1,5 @@
 import type { StateProgramType } from '../../domain-models'
-import { GetAllStateProgramsDocument } from '../../gen/gqlClient'
+import { FetchAllStateProgramsDocument } from '../../gen/gqlClient'
 import type { Store } from '../../postgres'
 import { assertAnError, assertAnErrorCode } from '../../testHelpers'
 import {
@@ -52,21 +52,21 @@ beforeEach(() => {
     findAllStatePrograms.mockResolvedValue(statePrograms)
 })
 
-describe('getAllStatePrograms', () => {
+describe('fetchAllStatePrograms', () => {
     it('returns every state program for a CMS user', async () => {
         const server = await constructTestPostgresServer({
             context: { user: testCMSUser() },
             store: { findAllStatePrograms },
         })
         const result = await executeGraphQLOperation(server, {
-            query: GetAllStateProgramsDocument,
+            query: FetchAllStateProgramsDocument,
         })
 
         expect(result.errors).toBeUndefined()
-        expect(result.data?.getAllStatePrograms.totalCount).toBe(
+        expect(result.data?.fetchAllStatePrograms.totalCount).toBe(
             expectedEdges.length
         )
-        expect(result.data?.getAllStatePrograms.edges).toEqual(expectedEdges)
+        expect(result.data?.fetchAllStatePrograms.edges).toEqual(expectedEdges)
         expect(findAllStatePrograms).toHaveBeenCalledOnce()
     })
 
@@ -76,7 +76,7 @@ describe('getAllStatePrograms', () => {
             store: { findAllStatePrograms },
         })
         const result = await executeGraphQLOperation(server, {
-            query: GetAllStateProgramsDocument,
+            query: FetchAllStateProgramsDocument,
         })
         const error = assertAnError(result)
 
@@ -102,14 +102,14 @@ describe('getAllStatePrograms', () => {
             store: { findAllStatePrograms },
         })
         const result = await executeGraphQLOperation(server, {
-            query: GetAllStateProgramsDocument,
+            query: FetchAllStateProgramsDocument,
         })
 
         expect(result.errors).toBeUndefined()
-        expect(result.data?.getAllStatePrograms.totalCount).toBe(
+        expect(result.data?.fetchAllStatePrograms.totalCount).toBe(
             expectedEdges.length
         )
-        expect(result.data?.getAllStatePrograms.edges).toEqual(expectedEdges)
+        expect(result.data?.fetchAllStatePrograms.edges).toEqual(expectedEdges)
         expect(findAllStatePrograms).toHaveBeenCalledOnce()
     })
 
@@ -123,7 +123,7 @@ describe('getAllStatePrograms', () => {
             store: { findAllStatePrograms },
         })
         const result = await executeGraphQLOperation(server, {
-            query: GetAllStateProgramsDocument,
+            query: FetchAllStateProgramsDocument,
         })
         const error = assertAnError(result)
 

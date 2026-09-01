@@ -53,7 +53,7 @@ type Query {
     fetchStateUser(input: FetchStateUserInput!): FetchStateUserPayload!
 
     """
-    getAllStatePrograms returns all managed care programs with their state codes.
+    fetchAllStatePrograms returns all managed care programs with their state codes.
 
     It can be called by all non-state users and OAuth clients with read permissions.
 
@@ -61,7 +61,7 @@ type Query {
     - ForbiddenError: A State user calls this query
     - ForbiddenError: An OAuth client does not have read permissions
     """
-    getAllStatePrograms: GetAllStateProgramsPayload!
+    fetchAllStatePrograms: FetchAllStateProgramsPayload!
 
     """
     indexRates returns full submitted rates.
@@ -1389,7 +1389,7 @@ type Program {
     deprecatedByProgramId: String
 }
 
-type GetAllStateProgramsPayload {
+type FetchAllStateProgramsPayload {
     totalCount: Int
     edges: [StateProgramEdge!]!
 }
