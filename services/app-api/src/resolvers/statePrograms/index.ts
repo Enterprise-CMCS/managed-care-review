@@ -1,0 +1,1 @@
+export { getAllStateProgramsResolver } from './getAllStatePrograms'

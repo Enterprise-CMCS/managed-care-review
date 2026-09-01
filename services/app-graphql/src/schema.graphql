@@ -53,6 +53,17 @@ type Query {
     fetchStateUser(input: FetchStateUserInput!): FetchStateUserPayload!
 
     """
+    getAllStatePrograms returns all managed care programs with their state codes.
+
+    It can be called by all non-state users and OAuth clients with read permissions.
+
+    Errors:
+    - ForbiddenError: A State user calls this query
+    - ForbiddenError: An OAuth client does not have read permissions
+    """
+    getAllStatePrograms: GetAllStateProgramsPayload!
+
+    """
     indexRates returns full submitted rates.
     indexRates can be called by CMS, admin users, and state users; also used in link rate dropdown.
     If called by a state user, the response will contain rate data from only their state.
@@ -1376,6 +1387,19 @@ type Program {
     isDeprecated: Boolean!
     "UUID of the replacement program when one exists"
     deprecatedByProgramId: String
+}
+
+type GetAllStateProgramsPayload {
+    totalCount: Int
+    edges: [StateProgramEdge!]!
+}
+
+type StateProgramEdge {
+    "The state code (e.g. CA, TN) associated with the program"
+    stateCode: String!
+    "The state name associated with the program"
+    stateName: String!
+    node: Program!
 }
 
 """
