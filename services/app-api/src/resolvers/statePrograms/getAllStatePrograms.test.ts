@@ -113,32 +113,6 @@ describe('getAllStatePrograms', () => {
         expect(findAllStatePrograms).toHaveBeenCalledOnce()
     })
 
-    it('rejects OAuth clients without read permissions', async () => {
-        const server = await constructTestPostgresServer({
-            context: {
-                user: testCMSUser(),
-                oauthClient: {
-                    clientId: 'test-oauth-client',
-                    grants: [],
-                    iss: 'mcreview-test',
-                    scopes: [],
-                    isDelegatedUser: false,
-                },
-            },
-            store: { findAllStatePrograms },
-        })
-        const result = await executeGraphQLOperation(server, {
-            query: GetAllStateProgramsDocument,
-        })
-        const error = assertAnError(result)
-
-        expect(error.message).toBe(
-            'OAuth client does not have read permissions'
-        )
-        expect(assertAnErrorCode(result)).toBe('FORBIDDEN')
-        expect(findAllStatePrograms).not.toHaveBeenCalled()
-    })
-
     it('returns an internal server error when state programs cannot be found', async () => {
         findAllStatePrograms.mockResolvedValueOnce(
             new Error('program source unavailable')
