@@ -119,7 +119,7 @@ describe('getAllStatePrograms', () => {
                 user: testCMSUser(),
                 oauthClient: {
                     clientId: 'test-oauth-client',
-                    grants: ['client_credentials'],
+                    grants: [],
                     iss: 'mcreview-test',
                     scopes: [],
                     isDelegatedUser: false,
