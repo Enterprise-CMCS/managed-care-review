@@ -15,7 +15,7 @@ export type { StateType } from './StateType'
 export type { DivisionType } from './DivisionType'
 export { isValidCmsDivison } from './division'
 
-export type { ProgramType } from './ProgramType'
+export type { ProgramType, StateProgramType } from './ProgramType'
 export {
     isCMSUser,
     isUser,

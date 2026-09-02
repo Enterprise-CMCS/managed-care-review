@@ -1,0 +1,17 @@
+query fetchAllStatePrograms {
+    fetchAllStatePrograms {
+        totalCount
+        edges {
+            stateCode
+            stateName
+            node {
+                id
+                name
+                fullName
+                isRateProgram
+                isDeprecated
+                deprecatedByProgramId
+            }
+        }
+    }
+}

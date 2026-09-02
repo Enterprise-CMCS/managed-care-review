@@ -13,10 +13,13 @@ import {
     AuthorizationType,
     ResponseType,
     MethodLoggingLevel,
-    CfnAccount,
     LogGroupLogDestination,
     AccessLogFormat,
+    DomainName,
+    BasePathMapping,
+    EndpointType,
 } from 'aws-cdk-lib/aws-apigateway'
+import { Certificate } from 'aws-cdk-lib/aws-certificatemanager'
 import {
     PolicyStatement,
     Effect,
@@ -67,6 +70,7 @@ export class AppApiStack extends BaseStack {
     public readonly regenerateZipsFunction: NodejsFunction
     public readonly migrateS3UrlsFunction: NodejsFunction
     public readonly backfillLastActionDateFunction: NodejsFunction
+    public readonly migrateContactsFunction: NodejsFunction
     public readonly restoreIAToStandardFunction: NodejsFunction
 
     public readonly graphqlFunction: NodejsFunction
@@ -88,11 +92,9 @@ export class AppApiStack extends BaseStack {
             vpcId: process.env.VPC_ID!,
         })
 
-        // Review environments skip CfnAccount (AWS::ApiGateway::Account) and CloudWatch
-        // logging entirely. CfnAccount is an account/region-wide singleton — creating it
-        // per review environment causes ResourceExistenceCheck failures on first-time stack
-        // creation when the new IAM role doesn't exist yet. Dev/val/prod stacks own this
-        // setting in their respective accounts and are unaffected.
+        // Review environments do not configure API Gateway access logging.
+        // Official environments and QA use the account-wide baseline stack for
+        // CloudWatch permissions and keep stage-specific access log groups here.
         const isReview = isReviewEnvironment(this.stage)
 
         // Import security group from Network stack CloudFormation exports
@@ -116,27 +118,9 @@ export class AppApiStack extends BaseStack {
 
         let apiGatewayLogGroup: LogGroup | undefined
         if (!isReview) {
-            // Create CloudWatch Log Group for API Gateway access logs
             apiGatewayLogGroup = new LogGroup(this, 'ApiGatewayLogGroup', {
                 logGroupName: `/aws/apigateway/${ResourceNames.apiName('app-api', this.stage)}-gateway`,
                 retention: this.stageConfig.monitoring.logRetentionDays,
-            })
-
-            const apiGatewayCloudWatchRole = new Role(
-                this,
-                'ApiGatewayCloudWatchRole',
-                {
-                    assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
-                    managedPolicies: [
-                        ManagedPolicy.fromAwsManagedPolicyName(
-                            'service-role/AmazonAPIGatewayPushToCloudWatchLogs' // pragma: allowlist secret
-                        ),
-                    ],
-                }
-            )
-
-            new CfnAccount(this, 'ApiGatewayAccount', {
-                cloudWatchRoleArn: apiGatewayCloudWatchRole.roleArn,
             })
         }
 
@@ -145,7 +129,7 @@ export class AppApiStack extends BaseStack {
             restApiName: `${ResourceNames.apiName('app-api', this.stage)}-gateway`,
             description: 'API Gateway for app-api Lambda functions',
             binaryMediaTypes: ['application/x-protobuf'],
-            // Disable CDK's automatic CfnAccount creation — we manage it manually (above)
+            // The account baseline stack owns the singleton CloudWatch role.
             cloudWatchRole: false,
             deployOptions: {
                 stageName: this.stage,
@@ -475,6 +459,34 @@ export class AppApiStack extends BaseStack {
         )
 
         /**
+         * One-time migration that copies deprecated contact names into the
+         * structured StateContact/ActuaryContact name fields.
+         */
+        this.migrateContactsFunction = this.createLambdaFunction(
+            'migrate-contacts',
+            'migrate_contacts',
+            'main',
+            {
+                timeout: Duration.minutes(15),
+                memorySize: 2048,
+                environment,
+                role,
+                vpc: this.vpc,
+                vpcSubnets: {
+                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                },
+                securityGroups,
+                bundling: {
+                    format: OutputFormat.ESM,
+                    banner: AppApiStack.ESM_BANNER,
+                    ...this.createBundling('migrate-contacts', [
+                        this.getPrismaCleanupCommands(),
+                    ]),
+                },
+            }
+        )
+
+        /**
          * Create the restore IA to Standard function with dedicated role
          * Restores Infrequent Access files to S3 Standard storage
          * NOTE: Cannot handle Glacier files - use AWS S3 Batch Operations for those
@@ -601,6 +613,11 @@ export class AppApiStack extends BaseStack {
 
         // Setup WAF association AFTER routes are configured (ensures deployment exists)
         this.setupWafAssociation(this.apiGateway)
+
+        // Optional custom domain for the API Gateway (currently only used by
+        // qa, to give the Mulesoft/Salesforce integration a stable hostname
+        // instead of the raw execute-api URL)
+        this.setupCustomApiDomain(this.apiGateway)
 
         // Setup cleanup function cron schedule
         this.setupCleanupSchedule()
@@ -1133,6 +1150,42 @@ export class AppApiStack extends BaseStack {
     }
 
     /**
+     * Optional custom domain for the API Gateway. Reuses the same ACM cert as
+     * the CloudFront distributions (CLOUDFRONT_CERT_ARN) - it already carries
+     * this hostname as a SAN - so no separate cert secret is needed, just the
+     * hostname itself. A no-op unless both env vars are set.
+     */
+    private setupCustomApiDomain(apiGateway: RestApi): void {
+        const certArn = process.env.CLOUDFRONT_CERT_ARN
+        const domainName = process.env.API_DOMAIN_NAME
+        if (!certArn || !domainName) return
+
+        const certificate = Certificate.fromCertificateArn(
+            this,
+            'ApiGatewayCertificate',
+            certArn
+        )
+
+        const apiDomainName = new DomainName(this, 'ApiGatewayDomainName', {
+            domainName,
+            certificate,
+            endpointType: EndpointType.EDGE,
+        })
+
+        new BasePathMapping(this, 'ApiGatewayBasePathMapping', {
+            domainName: apiDomainName,
+            restApi: apiGateway,
+        })
+
+        new CfnOutput(this, 'ApiGatewayCustomDomainTarget', {
+            value: apiDomainName.domainNameAliasDomainName,
+            exportName: this.exportName('ApiGatewayCustomDomainTarget'),
+            description:
+                'CloudFront alias target for the custom API domain CNAME (submit this to the DNS/Cloud team)',
+        })
+    }
+
+    /**
      * Setup cleanup function cron schedule
      * Runs weekdays at 1 AM UTC to delete old RDS snapshots (>30 days)
      */
@@ -1168,6 +1221,7 @@ export class AppApiStack extends BaseStack {
             this.regenerateZipsFunction,
             this.migrateS3UrlsFunction,
             this.backfillLastActionDateFunction,
+            this.migrateContactsFunction,
             this.graphqlFunction,
         ]
 
@@ -1304,6 +1358,13 @@ export class AppApiStack extends BaseStack {
             value: this.backfillLastActionDateFunction.functionName,
             exportName: this.exportName('BackfillLastActionDateFunctionName'),
             description: 'Backfill lastActionDate Lambda function name',
+        })
+
+        new CfnOutput(this, 'MigrateContactsFunctionName', {
+            value: this.migrateContactsFunction.functionName,
+            exportName: this.exportName('MigrateContactsFunctionName'),
+            description:
+                'Contact structured-name migration Lambda function name',
         })
 
         new CfnOutput(this, 'ApiGatewayUrl', {
