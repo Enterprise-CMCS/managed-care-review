@@ -87,6 +87,54 @@ describe('with rates', () => {
             ],
         },
     ])
+    const rateDetailsRevisionChanges = makeRevisionChanges([
+        {
+            title: 'RATE DETAILS',
+            rateGroups: [
+                {
+                    title: 'Added MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507',
+                    rows: [
+                        {
+                            label: 'Rate included with another submission',
+                            newValue: 'No',
+                        },
+                    ],
+                },
+                {
+                    title: 'Removed MCR-FL-NEMTMTM-20260501-20260531-CERTIFICATION-20260507',
+                },
+                {
+                    title: 'Revised MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707',
+                    rows: [
+                        {
+                            label: 'Rate name',
+                            oldValue:
+                                'MCR-IL-PCCME-01012027-07082027-AMENDMENT-07042026',
+                            newValue:
+                                'MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707',
+                            breakBeforeNewValue: true,
+                        },
+                        {
+                            label: 'Rate start',
+                            newValue: '07/08/2027',
+                            isNew: true,
+                        },
+                        {
+                            label: 'Original rating end',
+                            oldValue: '01/01/2028',
+                            newValue: '⎯',
+                        },
+                    ],
+                    contactsLabel: 'New and modified actuaries:',
+                    contacts: [
+                        {
+                            value: 'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com',
+                        },
+                    ],
+                },
+            ],
+        },
+    ])
     const contractProvisionsRevisionChanges = makeRevisionChanges([
         {
             title: 'CONTRACT PROVISIONS',
@@ -573,6 +621,54 @@ describe('with rates', () => {
         expect(template.bodyText).toContain('NEW CHIP beneficiaries: Yes')
         expect(template.bodyHTML).toContain(
             `<span style="color: ${emailColors.revisionChangesNewIndicator}; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> CHIP beneficiaries`
+        )
+    })
+    it('renders rate details groups, indicators, and nested actuaries when revision changes are provided', async () => {
+        const template = await resubmitContractCMSEmail(
+            submission,
+            resubmitData,
+            testEmailConfig(),
+            testStateAnalystEmails,
+            defaultStatePrograms,
+            rateDetailsRevisionChanges
+        )
+
+        if (template instanceof Error) {
+            throw template
+        }
+
+        expect(template.bodyText).toContain('RATE DETAILS')
+        expect(template.bodyText).toContain(
+            'Added MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507'
+        )
+        expect(template.bodyText).toContain(
+            'Rate included with another submission: No'
+        )
+        expect(template.bodyText).toContain(
+            'Removed MCR-FL-NEMTMTM-20260501-20260531-CERTIFICATION-20260507'
+        )
+        expect(template.bodyText).toContain(
+            'Revised MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707'
+        )
+        expect(template.bodyText).toContain(
+            'Rate name: MCR-IL-PCCME-01012027-07082027-AMENDMENT-07042026\n→ MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707'
+        )
+        expect(template.bodyText).toContain('NEW Rate start: 07/08/2027')
+        expect(template.bodyText).toContain(
+            'Original rating end: 01/01/2028 → ⎯'
+        )
+        expect(template.bodyText).toContain('New and modified actuaries:')
+        expect(template.bodyText).toContain(
+            'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com'
+        )
+        expect(template.bodyHTML).toContain(
+            `<span style="color: ${emailColors.revisionChangesNewIndicator}; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> Rate start`
+        )
+        expect(template.bodyHTML).toContain(
+            '<strong>Rate included with another submission:</strong> No'
+        )
+        expect(template.bodyHTML).toContain(
+            '<strong>Rate name:</strong> MCR-IL-PCCME-01012027-07082027-AMENDMENT-07042026<br />→ MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707'
         )
     })
     it('renders formatter output from a RevisionDiff through the CMS email', async () => {

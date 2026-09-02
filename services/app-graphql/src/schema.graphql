@@ -2963,7 +2963,7 @@ type RevisionDiffDocumentChanges {
 type RevisionDiffAddedRate {
     rateID: ID!
     rateCertificationName: String
-    includedInAnotherSubmission: Boolean!
+    isLinkedRate: Boolean!
 }
 
 type RevisionDiffRemovedRate {

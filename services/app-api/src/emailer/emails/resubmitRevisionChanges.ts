@@ -1,6 +1,11 @@
 import { formatCalendarDate } from '@mc-review/dates'
-import { FederalAuthorityRecord } from '@mc-review/submissions'
 import {
+    ActuaryCommunicationRecord,
+    FederalAuthorityRecord,
+    getActuaryFirm,
+} from '@mc-review/submissions'
+import {
+    type ActuaryContactType,
     type ContractType,
     type ProgramType,
     type RevisionDiff,
@@ -29,11 +34,19 @@ type ResubmitRevisionDocumentGroup = {
     rows: ResubmitRevisionDocumentGroupRow[]
 }
 
+type ResubmitRevisionRateGroup = {
+    title: string
+    rows?: ResubmitRevisionChangeRow[]
+    contactsLabel?: string
+    contacts?: ResubmitRevisionChangeContact[]
+}
+
 type ResubmitRevisionChangeSection = {
     title: string
     rows?: ResubmitRevisionChangeRow[]
     contactsLabel?: string
     contacts?: ResubmitRevisionChangeContact[]
+    rateGroups?: ResubmitRevisionRateGroup[]
     documentSummary?: {
         totalChanged: number
         totalAdded: number
@@ -88,6 +101,19 @@ type ContractProvisionsFieldPath =
     | 'modifiedNonRiskPaymentArrangements'
     | 'modifiedPaymentsForMentalDiseaseInstitutions'
 
+type RateDetailsFieldPath =
+    | 'rateCertificationName'
+    | 'rateProgramIDs'
+    | 'amendmentEffectiveDateStart'
+    | 'amendmentEffectiveDateEnd'
+    | 'rateType'
+    | 'rateDateCertified'
+    | 'rateDateStart'
+    | 'rateDateEnd'
+    | 'rateMedicaidPopulations'
+    | 'rateCapitationType'
+    | 'actuaryCommunicationPreference'
+
 type SubmissionTypeValue = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
 type PopulationCoveredValue = 'MEDICAID' | 'CHIP' | 'MEDICAID_AND_CHIP'
 type ContractActionTypeValue = 'BASE' | 'AMENDMENT'
@@ -100,6 +126,13 @@ type FederalAuthorityValue =
     | 'VOLUNTARY'
     | 'BENCHMARK'
     | 'TITLE_XXI'
+type RateTypeValue = 'NEW' | 'AMENDMENT'
+type RateCapitationTypeValue = 'RATE_CELL' | 'RATE_RANGE'
+type RateMedicaidPopulationValue =
+    | 'MEDICARE_MEDICAID_WITH_DSNP'
+    | 'MEDICAID_ONLY'
+    | 'MEDICARE_MEDICAID_WITHOUT_DSNP'
+type ActuaryCommunicationValue = 'OACT_TO_ACTUARY' | 'OACT_TO_STATE'
 
 const submissionTypeFieldOrder: SubmissionTypeFieldPath[] = [
     'contractName',
@@ -118,6 +151,20 @@ const contractDetailsFieldOrder: ContractDetailsFieldPath[] = [
     'managedCareEntities',
     'federalAuthorities',
     'dsnpContract',
+]
+
+const rateDetailsFieldOrder: RateDetailsFieldPath[] = [
+    'rateCertificationName',
+    'rateProgramIDs',
+    'amendmentEffectiveDateStart',
+    'amendmentEffectiveDateEnd',
+    'rateType',
+    'rateDateCertified',
+    'rateDateStart',
+    'rateDateEnd',
+    'rateMedicaidPopulations',
+    'rateCapitationType',
+    'actuaryCommunicationPreference',
 ]
 
 const isChipOnlyContract = (contract: ContractType): boolean =>
@@ -146,6 +193,27 @@ const contractExecutionStatusValueRecord: Record<
 > = {
     EXECUTED: 'Executed',
     UNEXECUTED: 'Unexecuted',
+}
+
+const rateTypeValueRecord: Record<RateTypeValue, string> = {
+    NEW: 'New',
+    AMENDMENT: 'Amendment',
+}
+
+const rateCapitationTypeValueRecord: Record<RateCapitationTypeValue, string> = {
+    RATE_CELL: 'Cell',
+    RATE_RANGE: 'Range',
+}
+
+const rateMedicaidPopulationValueRecord: Record<
+    RateMedicaidPopulationValue,
+    string
+> = {
+    MEDICARE_MEDICAID_WITH_DSNP:
+        'Dually eligible individuals enrolled through a D-SNP',
+    MEDICAID_ONLY: 'Medicaid-only',
+    MEDICARE_MEDICAID_WITHOUT_DSNP:
+        'Dually eligible individuals not enrolled through a D-SNP',
 }
 
 const formatBooleanValue = (value: unknown): string | undefined => {
@@ -224,7 +292,8 @@ const formatFieldValue = (
     fieldPath:
         | SubmissionTypeFieldPath
         | ContractDetailsFieldPath
-        | ContractProvisionsFieldPath,
+        | ContractProvisionsFieldPath
+        | RateDetailsFieldPath,
     value: unknown,
     statePrograms: ProgramType[]
 ): string | undefined => {
@@ -256,6 +325,26 @@ const formatFieldValue = (
                 value as ContractExecutionStatusValue
             ]
         }
+
+        if (fieldPath === 'rateCertificationName') {
+            return value
+        }
+
+        if (fieldPath === 'rateType') {
+            return rateTypeValueRecord[value as RateTypeValue]
+        }
+
+        if (fieldPath === 'rateCapitationType') {
+            return rateCapitationTypeValueRecord[
+                value as RateCapitationTypeValue
+            ]
+        }
+
+        if (fieldPath === 'actuaryCommunicationPreference') {
+            return ActuaryCommunicationRecord[
+                value as ActuaryCommunicationValue
+            ]
+        }
     }
 
     if (
@@ -282,11 +371,19 @@ const formatFieldValue = (
         return formatBooleanValue(value)
     }
 
-    if (fieldPath === 'programIDs') {
+    if (fieldPath === 'programIDs' || fieldPath === 'rateProgramIDs') {
         return formatProgramsValue(value, statePrograms)
     }
 
-    if (fieldPath === 'contractDateStart' || fieldPath === 'contractDateEnd') {
+    if (
+        fieldPath === 'contractDateStart' ||
+        fieldPath === 'contractDateEnd' ||
+        fieldPath === 'rateDateStart' ||
+        fieldPath === 'rateDateEnd' ||
+        fieldPath === 'rateDateCertified' ||
+        fieldPath === 'amendmentEffectiveDateStart' ||
+        fieldPath === 'amendmentEffectiveDateEnd'
+    ) {
         return formatDateValue(value)
     }
 
@@ -299,6 +396,13 @@ const formatFieldValue = (
             FederalAuthorityValue,
             typeof FederalAuthorityRecord
         >(value, FederalAuthorityRecord)
+    }
+
+    if (fieldPath === 'rateMedicaidPopulations') {
+        return formatStringArrayValue<
+            RateMedicaidPopulationValue,
+            typeof rateMedicaidPopulationValueRecord
+        >(value, rateMedicaidPopulationValueRecord)
     }
 
     return undefined
@@ -500,10 +604,84 @@ const buildContractProvisionsRow = (
     }
 }
 
+const buildRateDetailsRow = (
+    fieldChange: RevisionDiffFieldChange,
+    statePrograms: ProgramType[]
+): ResubmitRevisionChangeRow | undefined => {
+    const rowConfig: Record<RateDetailsFieldPath, string> = {
+        rateCertificationName: 'Rate name',
+        rateProgramIDs: 'Rate programs',
+        amendmentEffectiveDateStart: 'Rate start',
+        amendmentEffectiveDateEnd: 'Rate end',
+        rateType: 'Type',
+        rateDateCertified: 'Date certified',
+        rateDateStart: 'Original rating start',
+        rateDateEnd: 'Original rating end',
+        rateMedicaidPopulations: 'Medicaid populations included',
+        rateCapitationType: 'Rate capitation type',
+        actuaryCommunicationPreference: 'Actuaries’ communication preference',
+    }
+
+    if (!(fieldChange.fieldPath in rowConfig)) {
+        return undefined
+    }
+
+    const typedFieldPath = fieldChange.fieldPath as RateDetailsFieldPath
+    const label = rowConfig[typedFieldPath]
+    const oldValue = formatFieldValue(
+        typedFieldPath,
+        fieldChange.oldValue,
+        statePrograms
+    )
+    const newValue = formatFieldValue(
+        typedFieldPath,
+        fieldChange.newValue,
+        statePrograms
+    )
+
+    if (oldValue === undefined) {
+        if (newValue === undefined) {
+            return undefined
+        }
+
+        return {
+            label,
+            newValue,
+            isNew: true,
+        }
+    }
+
+    return {
+        label,
+        oldValue,
+        newValue: newValue ?? MISSING_VALUE_PLACEHOLDER,
+        ...(typedFieldPath === 'rateCertificationName' ||
+        typedFieldPath === 'actuaryCommunicationPreference'
+            ? { breakBeforeNewValue: true }
+            : {}),
+    }
+}
+
+const getRateNameForDisplay = (rateCertificationName?: string) =>
+    rateCertificationName ?? 'Unknown rate name'
+
 const buildStateContactValue = (
     contact: RevisionDiff['stateContactChanges'][number]['current']
 ): string => {
     return [contact.name, contact.titleRole, contact.email]
+        .filter((value): value is string => Boolean(value))
+        .join(', ')
+}
+
+// Actuarial firm is a property of each actuary, so it displays inside the
+// bullet: getActuaryFirm resolves the firm selection or the "Other" free text.
+const buildActuaryContactValue = (contact: ActuaryContactType): string => {
+    return [
+        contact.name,
+        contact.titleRole,
+        getActuaryFirm(contact),
+        contact.email,
+    ]
         .filter((value): value is string => Boolean(value))
         .join(', ')
 }
@@ -527,6 +705,85 @@ const buildStateContactsSection = (
     }
 }
 
+const buildRateDetailsSection = (
+    comparison: RevisionDiff,
+    statePrograms: ProgramType[]
+): ResubmitRevisionChangeSection | undefined => {
+    const { added, removed, revised } = comparison.rateChanges
+    const rateGroups: ResubmitRevisionRateGroup[] = []
+
+    for (const addedRate of added) {
+        rateGroups.push({
+            title: `Added ${getRateNameForDisplay(addedRate.rateCertificationName)}`,
+            rows: [
+                {
+                    label: 'Rate included with another submission',
+                    newValue: addedRate.isLinkedRate ? 'Yes' : 'No',
+                },
+            ],
+        })
+    }
+
+    for (const removedRate of removed) {
+        rateGroups.push({
+            title: `Removed ${getRateNameForDisplay(removedRate.rateCertificationName)}`,
+        })
+    }
+
+    for (const revisedRate of revised) {
+        const rows = revisedRate.fieldChanges
+            .flatMap((fieldChange) => {
+                const row = buildRateDetailsRow(fieldChange, statePrograms)
+
+                return row
+                    ? [
+                          {
+                              row,
+                              fieldPath:
+                                  fieldChange.fieldPath as RateDetailsFieldPath,
+                          },
+                      ]
+                    : []
+            })
+            .sort(
+                (left, right) =>
+                    rateDetailsFieldOrder.indexOf(left.fieldPath) -
+                    rateDetailsFieldOrder.indexOf(right.fieldPath)
+            )
+            .map(({ row }) => row)
+
+        const contacts = [
+            ...revisedRate.certifyingActuaryContactChanges,
+            ...revisedRate.addtlActuaryContactChanges,
+        ]
+            .map((change) => buildActuaryContactValue(change.current))
+            .filter(Boolean)
+            .map((value) => ({ value }))
+
+        // A rate whose only changes are documents is already reported in the documents section.
+        if (rows.length === 0 && contacts.length === 0) {
+            continue
+        }
+
+        rateGroups.push({
+            title: `Revised ${getRateNameForDisplay(revisedRate.rateCertificationName)}`,
+            ...(rows.length > 0 ? { rows } : {}),
+            ...(contacts.length > 0
+                ? { contactsLabel: 'New and modified actuaries:', contacts }
+                : {}),
+        })
+    }
+
+    if (rateGroups.length === 0) {
+        return undefined
+    }
+
+    return {
+        title: 'RATE DETAILS',
+        rateGroups,
+    }
+}
+
 const buildDocumentGroupRows = (
     added: string[],
     removed: string[]
@@ -545,8 +802,6 @@ const buildDocumentsSection = (
     comparison: RevisionDiff
 ): ResubmitRevisionChangeSection | undefined => {
     const documentGroups: ResubmitRevisionDocumentGroup[] = []
-    const getRateNameForDisplay = (rateCertificationName?: string) =>
-        rateCertificationName ?? 'Unknown rate name'
     const {
         contractDocuments,
         contractSupportingDocuments,
@@ -700,6 +955,14 @@ const buildResubmitRevisionChanges = (
             title: 'CONTRACT PROVISIONS',
             rows: contractProvisionsRows,
         })
+    }
+
+    const rateDetailsSection = buildRateDetailsSection(
+        comparison,
+        statePrograms
+    )
+    if (rateDetailsSection) {
+        sections.push(rateDetailsSection)
     }
 
     const stateContactsSection = buildStateContactsSection(comparison)
