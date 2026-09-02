@@ -21,6 +21,7 @@ cdk deploy "*" --context stage=dev
 infra-cdk/
 ├── bin/                    # CDK app entry points
 │   ├── app-api.ts
+│   ├── api-gateway-account.ts
 │   ├── cognito.ts
 │   ├── frontend-app.ts
 │   ├── frontend-infra.ts
@@ -46,6 +47,7 @@ infra-cdk/
 - **Uploads** - S3 buckets with security policies
 - **Cognito** - User pool and authentication
 - **App-API** - GraphQL API, Lambda functions, API Gateway
+- **API-Gateway-Account** - Account-wide CloudWatch logging role shared by REST APIs
 - **Frontend-Infra** - CloudFront distribution
 - **Frontend-App** - Static website deployment
 - **Virus-Scanning** - GuardDuty malware protection
@@ -76,7 +78,13 @@ pnpm clean
 Required for deployment:
 
 - `AWS_REGION` - AWS region
-- `CDK_STAGE` - Stage (dev/val/prod)
+- `STAGE_NAME` - Stage (`dev`, `val`, `qa`, `prod`, or a review branch)
+
+## Account-wide API Gateway configuration
+
+The `api-gateway-account-<stage>-cdk` stack owns the single API Gateway CloudWatch logging role allowed per AWS account and region. Promote deploys one baseline in each Dev, Val, and Prod account. QA shares Val's AWS account and therefore uses `api-gateway-account-val-cdk`; QA does not create or own account-level Val resources.
+
+Each App API stack still owns its REST API, stage, WAF association, and stage-specific access-log group. Removing QA does not modify the shared baseline or any Val application resource.
 
 ## VPC Prerequisites
 

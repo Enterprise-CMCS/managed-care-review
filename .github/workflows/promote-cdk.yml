@@ -992,7 +992,6 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: qa
-
         run: |
           echo "Starting CDK OIDC deployment for stage: qa"
           echo "Stack name will be: github-oidc-qa-cdk"

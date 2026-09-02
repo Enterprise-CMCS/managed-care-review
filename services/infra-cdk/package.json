@@ -21,8 +21,8 @@
         "@types/jest": "^30.0.0",
         "@types/node": "26.2.0",
         "@typescript-eslint/eslint-plugin": "^8.58.1",
-        "@typescript-eslint/parser": "^8.67.0",
-        "aws-cdk": "^2.1138.0",
+        "@typescript-eslint/parser": "^8.68.0",
+        "aws-cdk": "^2.1139.0",
         "esbuild": "^0.28.2",
         "eslint": "^10.4.0",
         "eslint-plugin-jest": "^29.16.1",
@@ -39,7 +39,7 @@
         "typescript-eslint": "^8.56.0"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.1116.0",
+        "@aws-sdk/client-secrets-manager": "^3.1121.0",
         "@aws-solutions-constructs/aws-apigateway-lambda": "2.103.0",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.102.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.92.1",
@@ -47,7 +47,7 @@
         "@aws-solutions-constructs/aws-lambda-secretsmanager": "2.103.0",
         "@aws-solutions-constructs/aws-s3-lambda": "2.103.0",
         "@aws-solutions-constructs/aws-wafwebacl-apigateway": "2.103.0",
-        "aws-cdk-lib": "2.266.0",
+        "aws-cdk-lib": "2.267.0",
         "constructs": "^10.7.1",
         "source-map-support": "^0.5.21"
     },

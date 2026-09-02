@@ -1,5 +1,5 @@
 /**
- * Supports dev, val, prod, and review environments
+ * Supports dev, val, qa, prod, and review environments
  */
 
 import { Duration } from 'aws-cdk-lib'
