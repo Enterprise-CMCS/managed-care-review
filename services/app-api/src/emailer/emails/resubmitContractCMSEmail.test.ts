@@ -124,16 +124,11 @@ describe('with rates', () => {
                             oldValue: '01/01/2028',
                             newValue: '⎯',
                         },
-                        {
-                            label: 'Actuarial firm',
-                            oldValue: 'Olivier Wyman',
-                            newValue: 'Mercer',
-                        },
                     ],
                     contactsLabel: 'New and modified actuaries:',
                     contacts: [
                         {
-                            value: 'Jalen Brunson, Head of Risk Development, jalen.brunson@ow.com',
+                            value: 'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com',
                         },
                     ],
                 },
@@ -662,12 +657,9 @@ describe('with rates', () => {
         expect(template.bodyText).toContain(
             'Original rating end: 01/01/2028 → ⎯'
         )
-        expect(template.bodyText).toContain(
-            'Actuarial firm: Olivier Wyman → Mercer'
-        )
         expect(template.bodyText).toContain('New and modified actuaries:')
         expect(template.bodyText).toContain(
-            'Jalen Brunson, Head of Risk Development, jalen.brunson@ow.com'
+            'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com'
         )
         expect(template.bodyHTML).toContain(
             `<span style="color: ${emailColors.revisionChangesNewIndicator}; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> Rate start`

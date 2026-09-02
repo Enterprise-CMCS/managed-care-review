@@ -2,8 +2,10 @@ import { formatCalendarDate } from '@mc-review/dates'
 import {
     ActuaryCommunicationRecord,
     FederalAuthorityRecord,
+    getActuaryFirm,
 } from '@mc-review/submissions'
 import {
+    type ActuaryContactType,
     type ContractType,
     type ProgramType,
     type RevisionDiff,
@@ -110,7 +112,6 @@ type RateDetailsFieldPath =
     | 'rateDateEnd'
     | 'rateMedicaidPopulations'
     | 'rateCapitationType'
-    | 'actuarialFirms'
     | 'actuaryCommunicationPreference'
 
 type SubmissionTypeValue = 'CONTRACT_ONLY' | 'CONTRACT_AND_RATES'
@@ -163,7 +164,6 @@ const rateDetailsFieldOrder: RateDetailsFieldPath[] = [
     'rateDateEnd',
     'rateMedicaidPopulations',
     'rateCapitationType',
-    'actuarialFirms',
     'actuaryCommunicationPreference',
 ]
 
@@ -405,18 +405,6 @@ const formatFieldValue = (
         >(value, rateMedicaidPopulationValueRecord)
     }
 
-    if (fieldPath === 'actuarialFirms') {
-        if (!Array.isArray(value)) {
-            return undefined
-        }
-
-        const firms = value.filter(
-            (item): item is string => typeof item === 'string'
-        )
-
-        return firms.length > 0 ? firms.join(', ') : undefined
-    }
-
     return undefined
 }
 
@@ -631,7 +619,6 @@ const buildRateDetailsRow = (
         rateDateEnd: 'Original rating end',
         rateMedicaidPopulations: 'Medicaid populations included',
         rateCapitationType: 'Rate capitation type',
-        actuarialFirms: 'Actuarial firm',
         actuaryCommunicationPreference: 'Actuaries’ communication preference',
     }
 
@@ -678,10 +665,23 @@ const buildRateDetailsRow = (
 const getRateNameForDisplay = (rateCertificationName?: string) =>
     rateCertificationName ?? 'Unknown rate name'
 
-const buildContactValue = (
+const buildStateContactValue = (
     contact: RevisionDiff['stateContactChanges'][number]['current']
 ): string => {
     return [contact.name, contact.titleRole, contact.email]
+        .filter((value): value is string => Boolean(value))
+        .join(', ')
+}
+
+// Actuarial firm is a property of each actuary, so it displays inside the
+// bullet: getActuaryFirm resolves the firm selection or the "Other" free text.
+const buildActuaryContactValue = (contact: ActuaryContactType): string => {
+    return [
+        contact.name,
+        contact.titleRole,
+        getActuaryFirm(contact),
+        contact.email,
+    ]
         .filter((value): value is string => Boolean(value))
         .join(', ')
 }
@@ -690,7 +690,7 @@ const buildStateContactsSection = (
     comparison: RevisionDiff
 ): ResubmitRevisionChangeSection | undefined => {
     const contacts = comparison.stateContactChanges
-        .map((change) => buildContactValue(change.current))
+        .map((change) => buildStateContactValue(change.current))
         .filter(Boolean)
         .map((value) => ({ value }))
 
@@ -756,7 +756,7 @@ const buildRateDetailsSection = (
             ...revisedRate.certifyingActuaryContactChanges,
             ...revisedRate.addtlActuaryContactChanges,
         ]
-            .map((change) => buildContactValue(change.current))
+            .map((change) => buildActuaryContactValue(change.current))
             .filter(Boolean)
             .map((value) => ({ value }))
 

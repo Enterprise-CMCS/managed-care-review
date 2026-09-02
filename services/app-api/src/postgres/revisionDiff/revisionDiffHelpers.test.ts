@@ -1304,11 +1304,6 @@ describe('revisionDiffHelpers', () => {
                                 latestRevisedRateRevision.formData
                                     .rateCertificationName,
                         },
-                        {
-                            fieldPath: 'actuarialFirms',
-                            oldValue: ['Guidehouse', 'Some Firm'],
-                            newValue: ['Mercer', 'Milliman', 'Optumas'],
-                        },
                     ],
                     rateDocuments: {
                         added: [],

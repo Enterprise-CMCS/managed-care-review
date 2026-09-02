@@ -883,11 +883,6 @@ describe('buildResubmitRevisionChanges', () => {
                                 newValue: new Date('2026-07-21T00:00:00.000Z'),
                             },
                             {
-                                fieldPath: 'actuarialFirms',
-                                oldValue: ['Olivier Wyman'],
-                                newValue: ['Mercer'],
-                            },
-                            {
                                 fieldPath: 'actuaryCommunicationPreference',
                                 oldValue: 'OACT_TO_ACTUARY',
                                 newValue: 'OACT_TO_STATE',
@@ -980,11 +975,6 @@ describe('buildResubmitRevisionChanges', () => {
                                     newValue: 'Range',
                                 },
                                 {
-                                    label: 'Actuarial firm',
-                                    oldValue: 'Olivier Wyman',
-                                    newValue: 'Mercer',
-                                },
-                                {
                                     label: 'Actuaries’ communication preference',
                                     oldValue:
                                         ActuaryCommunicationRecord.OACT_TO_ACTUARY,
@@ -996,10 +986,10 @@ describe('buildResubmitRevisionChanges', () => {
                             contactsLabel: 'New and modified actuaries:',
                             contacts: [
                                 {
-                                    value: 'Jalen Brunson, Head of Risk Development, jalen.brunson@ow.com',
+                                    value: 'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com',
                                 },
                                 {
-                                    value: 'Bill Yard, Executive assistant, byard@mercer.com',
+                                    value: 'Bill Yard, Executive assistant, Mercer, byard@mercer.com',
                                 },
                             ],
                         },
