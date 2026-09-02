@@ -1,4 +1,13 @@
-import { isUser, isCMSUser, isStateUser } from './'
+import { hasReadPermissions, isUser, isCMSUser, isStateUser } from './'
+import {
+    testAdminUser,
+    testBusinessOwnerUser,
+    testCMSApproverUser,
+    testCMSUser,
+    testHelpdeskUser,
+    testReadOnlyUser,
+    testStateUser,
+} from '../testHelpers/userHelpers'
 
 describe('user type assertions', () => {
     it('isUser returns as expected', () => {
@@ -67,4 +76,19 @@ describe('user type assertions', () => {
             })
         ).toBe(false)
     })
+
+    it.each([
+        ['CMS user', testCMSUser(), true],
+        ['CMS approver user', testCMSApproverUser(), true],
+        ['admin user', testAdminUser(), true],
+        ['help desk user', testHelpdeskUser(), true],
+        ['business owner user', testBusinessOwnerUser(), true],
+        ['read-only user', testReadOnlyUser(), true],
+        ['state user', testStateUser(), false],
+    ])(
+        'hasReadPermissions returns the expected result for a %s',
+        (_role, user, expected) => {
+            expect(hasReadPermissions(user)).toBe(expected)
+        }
+    )
 })
