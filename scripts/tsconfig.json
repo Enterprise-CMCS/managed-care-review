@@ -4,6 +4,7 @@
         "module": "ESNext",
         "lib": ["es2021", "dom.iterable"],
         "target": "ESNext",
+        "types": ["vitest/globals", "node"],
         "moduleResolution": "bundler",
 
         "baseUrl": "/",
@@ -14,5 +15,6 @@
         "skipLibCheck": true,
         "esModuleInterop": true,
         "resolveJsonModule": true
-    }
+    },
+    "exclude": ["node_modules", "vitest.config.ts"]
 }
