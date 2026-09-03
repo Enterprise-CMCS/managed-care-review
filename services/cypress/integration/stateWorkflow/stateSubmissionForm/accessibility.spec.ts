@@ -6,8 +6,6 @@ describe('state user in state submission form', () => {
         cy.interceptGraphQL()
     })
     it.only('has no a11y violations on submission form with form input errors', () => {
-        // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
-        cy.interceptFeatureFlags({ '438-attestation': false })
         cy.logInAsStateUser()
 
         // Inject the axe run-time
