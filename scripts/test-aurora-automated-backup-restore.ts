@@ -28,7 +28,7 @@ import {
 } from '@aws-sdk/client-ssm'
 import { appendFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 type BackupRestoreEnv = 'dev' | 'val' | 'prod'
 
@@ -44,6 +44,19 @@ type ValidatorBody = {
     appliedMigrations: string[]
 }
 
+type BaselineState = {
+    version: 1
+    tableCounts: Record<string, number>
+    shrinkageWarnings: string[]
+}
+
+type BaselineComparison = {
+    blockingProblems: string[]
+    shrinkageWarnings: string[]
+    shrinkageFailures: string[]
+    nextBaseline: BaselineState
+}
+
 const AWS_REGION = 'us-east-1'
 const RESTORED_CLUSTER_PREFIX = 'mcr-backup-restore-'
 
@@ -56,8 +69,8 @@ const DELETE_TIMEOUT_SECONDS = 1800
 // Clusters older than this were left behind by a cancelled or crashed run.
 const STALE_CLUSTER_AGE_MS = 6 * 60 * 60 * 1000
 
-// Row counts legitimately drop as drafts and join rows are deleted, so only flag
-// a table that lost more than this fraction since the previous run.
+// Larger nonzero drops warn once before becoming failures. Missing and emptied
+// tables always fail immediately.
 const SHRINK_TOLERANCE = 0.1
 
 const ACCOUNT_URLS: Record<BackupRestoreEnv, string> = {
@@ -524,17 +537,115 @@ function baselineParameterName(envName: BackupRestoreEnv): string {
     return `/mcr/${envName}/backup-restore-test/table-counts`
 }
 
+function createBaseline(tableCounts: Record<string, number>): BaselineState {
+    return { version: 1, tableCounts, shrinkageWarnings: [] }
+}
+
+function compareToBaseline(
+    baseline: BaselineState,
+    tableCounts: Record<string, number>
+): BaselineComparison {
+    const blockingProblems: string[] = []
+    const shrinkageWarnings: string[] = []
+    const shrinkageFailures: string[] = []
+    const previouslyWarned = new Set(baseline.shrinkageWarnings)
+    const unresolvedWarnings: string[] = []
+    const nextTableCounts = { ...tableCounts }
+
+    for (const [tableName, baselineRows] of Object.entries(
+        baseline.tableCounts
+    )) {
+        const currentRows = tableCounts[tableName]
+
+        if (currentRows === undefined) {
+            blockingProblems.push(`${tableName}: missing from restore`)
+            continue
+        }
+
+        if (baselineRows > 0 && currentRows === 0) {
+            blockingProblems.push(`${tableName}: emptied (was ${baselineRows})`)
+            continue
+        }
+
+        if (currentRows >= baselineRows * (1 - SHRINK_TOLERANCE)) continue
+
+        const message = `${tableName}: shrank from ${baselineRows} to ${currentRows}`
+        nextTableCounts[tableName] = baselineRows
+        unresolvedWarnings.push(tableName)
+
+        if (previouslyWarned.has(tableName)) {
+            shrinkageFailures.push(message)
+        } else {
+            shrinkageWarnings.push(message)
+        }
+    }
+
+    return {
+        blockingProblems,
+        shrinkageWarnings,
+        shrinkageFailures,
+        nextBaseline: {
+            version: 1,
+            tableCounts: nextTableCounts,
+            shrinkageWarnings: unresolvedWarnings,
+        },
+    }
+}
+
+function isRecordOfNumbers(value: unknown): value is Record<string, number> {
+    return (
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        Object.values(value).every(
+            (entry) =>
+                typeof entry === 'number' &&
+                Number.isFinite(entry) &&
+                entry >= 0
+        )
+    )
+}
+
+function isBaselineState(value: unknown): value is BaselineState {
+    if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+        return false
+    }
+
+    const baseline = value as Partial<BaselineState>
+    return (
+        baseline.version === 1 &&
+        isRecordOfNumbers(baseline.tableCounts) &&
+        Array.isArray(baseline.shrinkageWarnings) &&
+        baseline.shrinkageWarnings.every(
+            (tableName) =>
+                typeof tableName === 'string' &&
+                Object.prototype.hasOwnProperty.call(
+                    baseline.tableCounts,
+                    tableName
+                )
+        )
+    )
+}
+
 async function readBaseline(
     envName: BackupRestoreEnv
-): Promise<Record<string, number> | undefined> {
+): Promise<BaselineState | undefined> {
     try {
         const response = await ssm.send(
             new GetParameterCommand({ Name: baselineParameterName(envName) })
         )
 
-        return response.Parameter?.Value
-            ? (JSON.parse(response.Parameter.Value) as Record<string, number>)
-            : undefined
+        if (!response.Parameter?.Value) return undefined
+
+        const storedBaseline: unknown = JSON.parse(response.Parameter.Value)
+        if (isBaselineState(storedBaseline)) return storedBaseline
+        if (isRecordOfNumbers(storedBaseline)) {
+            return createBaseline(storedBaseline)
+        }
+
+        throw new Error(
+            `Invalid backup restore baseline in ${baselineParameterName(envName)}`
+        )
     } catch (error) {
         if (error instanceof Error && error.name === 'ParameterNotFound') {
             return undefined
@@ -546,54 +657,26 @@ async function readBaseline(
 
 async function writeBaseline(
     envName: BackupRestoreEnv,
-    tableCounts: Record<string, number>
+    baseline: BaselineState
 ): Promise<void> {
     await ssm.send(
         new PutParameterCommand({
             Name: baselineParameterName(envName),
             Description:
-                'Row counts from the most recent successful Aurora backup restore test',
-            Value: JSON.stringify(tableCounts),
+                'Row count baseline and unresolved Aurora backup restore warnings',
+            Value: JSON.stringify(baseline),
             Type: 'String',
             Overwrite: true,
         })
     )
 }
 
-/**
- * Compares this restore against the previous one. Backups degrading over time
- * show up as tables that shrink or empty out between runs, which is detectable
- * without ever reading the live database.
- */
-function compareToBaseline(
-    baseline: Record<string, number>,
-    tableCounts: Record<string, number>
-): void {
-    const problems = Object.entries(baseline).flatMap(
-        ([tableName, baselineRows]) => {
-            const currentRows = tableCounts[tableName]
+function reportWorkflowWarning(message: string): void {
+    console.warn(`Backup data discrepancy: ${message}`)
 
-            if (currentRows === undefined) {
-                return [`${tableName}: missing from restore`]
-            }
-
-            if (baselineRows > 0 && currentRows === 0) {
-                return [`${tableName}: emptied (was ${baselineRows})`]
-            }
-
-            if (currentRows < baselineRows * (1 - SHRINK_TOLERANCE)) {
-                return [
-                    `${tableName}: shrank from ${baselineRows} to ${currentRows}`,
-                ]
-            }
-
-            return []
-        }
-    )
-
-    if (problems.length > 0) {
-        throw new Error(
-            `Restored backup shrank against the previous run: ${problems.join('; ')}`
+    if (process.env.GITHUB_ACTIONS === 'true') {
+        console.warn(
+            `::warning title=Aurora backup restore discrepancy::${message}`
         )
     }
 }
@@ -671,22 +754,47 @@ export async function testDatabaseBackupRestore(
 
         checkMigrations(validatorBody.appliedMigrations)
 
+        let nextBaseline = createBaseline(validatorBody.tableCounts)
+        let baselineSummary = 'no previous run (baseline established)'
+
         if (baseline) {
-            compareToBaseline(baseline, validatorBody.tableCounts)
+            const comparison = compareToBaseline(
+                baseline,
+                validatorBody.tableCounts
+            )
+
+            if (comparison.blockingProblems.length > 0) {
+                throw new Error(
+                    `Restored backup failed baseline validation: ${comparison.blockingProblems.join('; ')}`
+                )
+            }
+
+            if (comparison.shrinkageFailures.length > 0) {
+                throw new Error(
+                    `Restored backup has persistent table shrinkage: ${comparison.shrinkageFailures.join('; ')}`
+                )
+            }
+
+            nextBaseline = comparison.nextBaseline
+            baselineSummary = 'passed'
+
+            if (comparison.shrinkageWarnings.length > 0) {
+                for (const warning of comparison.shrinkageWarnings) {
+                    reportWorkflowWarning(warning)
+                }
+                baselineSummary = `warning: ${comparison.shrinkageWarnings.join('; ')}`
+            }
         } else {
             console.info(
                 'No previous run to compare against; establishing baseline'
             )
         }
 
-        await writeBaseline(envName, validatorBody.tableCounts)
+        await writeBaseline(envName, nextBaseline)
 
         const { appliedMigrations } = validatorBody
         const newestMigration =
             appliedMigrations[appliedMigrations.length - 1] ?? ''
-        console.info(
-            `Aurora automated backup restore validation passed: ${validatorBody.tableCount} tables, ${validatorBody.rowCount} rows, newest migration ${newestMigration}`
-        )
 
         writeStepSummary([
             ['Environment', envName],
@@ -705,7 +813,12 @@ export async function testDatabaseBackupRestore(
                 'Compared against previous run',
                 baseline ? 'yes' : 'no (baseline established)',
             ],
+            ['Baseline comparison', baselineSummary],
         ])
+
+        console.info(
+            `Aurora automated backup restore validation passed: ${validatorBody.tableCount} tables, ${validatorBody.rowCount} rows, newest migration ${newestMigration}`
+        )
     } catch (error) {
         testFailed = true
         throw error
@@ -723,7 +836,16 @@ export async function testDatabaseBackupRestore(
     }
 }
 
-testDatabaseBackupRestore(parseArgs()).catch((error) => {
-    console.error('Aurora automated backup restore validation failed:', error)
-    process.exit(1)
-})
+// Only run when invoked directly so tests can import this module.
+if (
+    process.argv[1] &&
+    import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+    testDatabaseBackupRestore(parseArgs()).catch((error) => {
+        console.error(
+            'Aurora automated backup restore validation failed:',
+            error
+        )
+        process.exit(1)
+    })
+}
