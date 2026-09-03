@@ -16,12 +16,15 @@ const PERMISSION_BOUNDARY_ARN = (accountId: string) =>
 
 // Official stages own the OIDC provider in their respective AWS account.
 // Review branch stacks reference the provider created by the dev stack.
+// qa is intentionally excluded here even though it's a real stage - it shares
+// val's AWS account, and AWS only allows one OIDC provider per URL per account,
+// so qa must import the provider val already creates rather than create its own.
 const OFFICIAL_STAGES = ['dev', 'val', 'prod']
 
 // GitHub thumbprints from https://github.blog/changelog/2022-01-13-github-actions-update-on-oidc-based-deployments-to-aws/
 const GITHUB_THUMBPRINTS = [
-    '6938fd4d98bab03faadb97b34396831e3780aea1',
-    '1c58a3a8518e8759bf075b76b750d4f2df264fcd',
+    '6938fd4d98bab03faadb97b34396831e3780aea1', //pragma: allowlist secret
+    '1c58a3a8518e8759bf075b76b750d4f2df264fcd', //pragma: allowlist secret
 ]
 
 export interface GitHubOidcServiceRoleStackProps extends BaseStackProps {}
@@ -30,8 +33,9 @@ export interface GitHubOidcServiceRoleStackProps extends BaseStackProps {}
  * Stack for creating GitHub Actions OIDC service role for a specific stage.
  *
  * For official stages (dev, val, prod), this also creates the IAM OIDC Identity
- * Provider - one per AWS account. Review branch stacks reference the existing
- * provider created by the dev stage stack in the same account.
+ * Provider - one per AWS account. Review branch stacks, and qa (which shares
+ * val's AWS account), reference the existing provider created by the account's
+ * official stage stack instead of creating their own.
  */
 export class GitHubOidcServiceRoleStack extends BaseStack {
     public readonly serviceRole: Role
@@ -66,8 +70,11 @@ export class GitHubOidcServiceRoleStack extends BaseStack {
 
         const oidcProviderArn = oidcProvider.openIdConnectProviderArn
 
-        // Determine subject claim based on stage (matching Serverless logic)
-        const subjectClaim = ['val', 'prod'].includes(this.stage)
+        // Determine subject claim based on stage (matching Serverless logic).
+        // qa gets its own environment:qa claim (its GitHub Environment is named
+        // "qa") even though it imports val's OIDC provider above rather than
+        // creating a new one.
+        const subjectClaim = ['val', 'prod', 'qa'].includes(this.stage)
             ? `repo:Enterprise-CMCS/managed-care-review:environment:${this.stage}`
             : 'repo:Enterprise-CMCS/managed-care-review:environment:dev'
 

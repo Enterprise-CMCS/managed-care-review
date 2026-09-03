@@ -14,11 +14,11 @@
         "dayjs": "^1.11.21",
         "graphql": "^16.14.0",
         "typescript": "5.9.3",
-        "uuid": "^14.0.1"
+        "uuid": "^14.0.2"
     },
     "devDependencies": {
         "@types/jest": "^30.0.0",
-        "@types/node": "^25.5.0",
+        "@types/node": "^26.2.0",
         "@types/uuid": "^11.0.0"
     }
 }

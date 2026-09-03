@@ -835,6 +835,7 @@ describe('buildResubmitRevisionChanges', () => {
                         rateID: 'added-rate-id',
                         rateCertificationName:
                             'MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507',
+                        // MCR-6481: exercises the Yes branch now that this value is derived.
                         isLinkedRate: true,
                     },
                 ],
@@ -881,11 +882,6 @@ describe('buildResubmitRevisionChanges', () => {
                                 fieldPath: 'rateDateCertified',
                                 oldValue: new Date('2026-07-04T00:00:00.000Z'),
                                 newValue: new Date('2026-07-21T00:00:00.000Z'),
-                            },
-                            {
-                                fieldPath: 'actuarialFirms',
-                                oldValue: ['Olivier Wyman'],
-                                newValue: ['Mercer'],
                             },
                             {
                                 fieldPath: 'actuaryCommunicationPreference',
@@ -980,11 +976,6 @@ describe('buildResubmitRevisionChanges', () => {
                                     newValue: 'Range',
                                 },
                                 {
-                                    label: 'Actuarial firm',
-                                    oldValue: 'Olivier Wyman',
-                                    newValue: 'Mercer',
-                                },
-                                {
                                     label: 'Actuaries’ communication preference',
                                     oldValue:
                                         ActuaryCommunicationRecord.OACT_TO_ACTUARY,
@@ -996,10 +987,10 @@ describe('buildResubmitRevisionChanges', () => {
                             contactsLabel: 'New and modified actuaries:',
                             contacts: [
                                 {
-                                    value: 'Jalen Brunson, Head of Risk Development, jalen.brunson@ow.com',
+                                    value: 'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com',
                                 },
                                 {
-                                    value: 'Bill Yard, Executive assistant, byard@mercer.com',
+                                    value: 'Bill Yard, Executive assistant, Mercer, byard@mercer.com',
                                 },
                             ],
                         },

@@ -21,7 +21,6 @@ import {
     hasRateDocumentListChanges,
 } from './revisionDiffRateDocuments'
 import { buildRateActuaryContactDiffChanges } from './revisionDiffRateActuaries'
-import { getActuaryFirm } from '@mc-review/submissions'
 
 type RateFormData = RateFormDataType
 
@@ -137,25 +136,6 @@ const diffRateFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
 })
 
 /**
- * Actuarial firm is stored per actuary contact, but the resubmit email reports it as a
- * single rate-level value, so the distinct firms across both contact lists are diffed together.
- */
-const actuarialFirmsFieldConfig: DiffFieldConfig = {
-    fieldPath: 'actuarialFirms',
-    getValue: (formData) =>
-        normalizeStringArray([
-            ...new Set(
-                [
-                    ...(formData.certifyingActuaryContacts ?? []),
-                    ...(formData.addtlActuaryContacts ?? []),
-                ]
-                    .map((actuary) => getActuaryFirm(actuary))
-                    .filter((firm) => firm !== '')
-            ),
-        ]),
-}
-
-/**
  * lists rate form fields that are not already excluded, overridden, or supported by existing auto-diffing.
  * used to test if new rate form fields are added which need to be specifically handled in the revision diff logic.
  */
@@ -191,12 +171,10 @@ function getUnhandledRateDiffFieldPaths(): string[] {
 const scalarRateFormDataFieldConfigs: ScalarDiffFieldConfig<
     RateFormData,
     void
->[] = [...diffRateFormDataFieldConfigs, actuarialFirmsFieldConfig].map(
-    (fieldConfig) => ({
-        fieldPath: fieldConfig.fieldPath,
-        getValue: (formData) => fieldConfig.getValue(formData),
-    })
-)
+>[] = diffRateFormDataFieldConfigs.map((fieldConfig) => ({
+    fieldPath: fieldConfig.fieldPath,
+    getValue: (formData) => fieldConfig.getValue(formData),
+}))
 
 function buildRateDisplayName(
     rateRevision: RateRevisionType

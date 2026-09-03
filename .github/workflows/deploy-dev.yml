@@ -235,6 +235,38 @@ jobs:
 
           echo "=== CDK OIDC deployment completed ==="
 
+  deploy-api-gateway-account-dev:
+    needs: [begin-deployment, deploy-github-oidc-dev]
+    name: deploy - API Gateway account baseline (dev)
+    runs-on: ubuntu-24.04
+    environment: dev
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Get AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: dev
+          use-cdk-role: 'true'
+
+      - name: Deploy API Gateway account baseline
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          pnpm cdk deploy api-gateway-account-dev-cdk \
+            --app 'pnpm tsx bin/api-gateway-account.ts' \
+            --context stage=dev \
+            --require-approval never
+
   deploy-cdk-infrastructure-dev:
     needs: [begin-deployment, deploy-github-oidc-dev]
     name: deploy - CDK infrastructure stacks (dev)
@@ -400,6 +432,7 @@ jobs:
       [
         begin-deployment,
         deploy-cdk-infrastructure-dev,
+        deploy-api-gateway-account-dev,
         web-unit-tests,
         api-unit-tests,
         packages-unit-tests,
@@ -407,6 +440,7 @@ jobs:
     if: |
       always() &&
       needs.deploy-cdk-infrastructure-dev.result == 'success' &&
+      needs.deploy-api-gateway-account-dev.result == 'success' &&
       needs.web-unit-tests.result == 'success' &&
       needs.api-unit-tests.result == 'success' &&
       needs.packages-unit-tests.result == 'success' &&
@@ -546,7 +580,13 @@ jobs:
             --require-approval never
 
   end-deployment-dev:
-    needs: [begin-deployment, deploy-cdk-app-dev, deploy-frontend-app-dev]
+    needs:
+      [
+        begin-deployment,
+        deploy-api-gateway-account-dev,
+        deploy-cdk-app-dev,
+        deploy-frontend-app-dev,
+      ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Dev Deployment
     runs-on: ubuntu-24.04
