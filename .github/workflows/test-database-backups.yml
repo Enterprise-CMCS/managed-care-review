@@ -47,7 +47,7 @@ jobs:
     name: Test ${{ matrix.environment }} backup restore
     needs: select-environments
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 220
     environment: ${{ matrix.environment }}
     strategy:
       fail-fast: false
