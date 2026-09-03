@@ -183,6 +183,7 @@ jobs:
       - name: Synthetic data checks
         run: |
           pnpm --filter @mc-review/synthetic-data build
+          pnpm --filter @mc-review/synthetic-data check:runtime
           pnpm --filter @mc-review/synthetic-data lint
           pnpm --filter @mc-review/synthetic-data test:once
 

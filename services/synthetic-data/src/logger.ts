@@ -7,7 +7,8 @@ type LoggerOptions = {
     now?: () => Date
 }
 
-const redactedKey = /authorization|clientsecret|accesstoken|presigned|uploadurl/i
+const redactedKey =
+    /authorization|clientsecret|accesstoken|presigned|uploadurl/i
 
 function sanitize(value: unknown, key = ''): unknown {
     if (redactedKey.test(key)) {
@@ -15,9 +16,21 @@ function sanitize(value: unknown, key = ''): unknown {
     }
 
     if (value instanceof Error) {
+        const details = Object.fromEntries(
+            Object.entries(value)
+                .filter(
+                    ([entryKey]) =>
+                        entryKey !== 'name' && entryKey !== 'message'
+                )
+                .map(([entryKey, entryValue]) => [
+                    entryKey,
+                    sanitize(entryValue, entryKey),
+                ])
+        )
         return {
             name: value.name,
             message: value.message,
+            ...details,
         }
     }
 

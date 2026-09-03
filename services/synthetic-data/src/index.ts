@@ -36,7 +36,6 @@ export {
     SyntheticCreateContractDocument,
     SyntheticFetchContractDocument,
     SyntheticFetchCurrentUserDocument,
-    SyntheticFetchStateProgramsDocument,
     SyntheticGenerateUploadUrlDocument,
     SyntheticSubmitContractDocument,
     SyntheticUpdateContractDraftRevisionDocument,

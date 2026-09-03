@@ -1,3 +1,4 @@
+import { typedStatePrograms } from '@mc-review/submissions/src/statePrograms/StateCodeType.ts'
 import type { GraphQLClient } from '../client/graphqlClient'
 import type { UploadClient } from '../client/uploadClient'
 import {
@@ -9,7 +10,6 @@ import {
 import {
     SyntheticCreateContractDocument,
     SyntheticFetchContractDocument,
-    SyntheticFetchStateProgramsDocument,
     SyntheticSubmitContractDocument,
     SyntheticUpdateContractDraftRevisionDocument,
 } from '../gen/gqlClient'
@@ -43,19 +43,18 @@ export async function runReviewSmokeScenario({
         seed,
     })
 
-    const programsResult = await graphql.execute(
-        SyntheticFetchStateProgramsDocument,
-        {}
-    )
-    const minnesotaProgram = programsResult.fetchAllStatePrograms.edges.find(
-        (edge) => edge.stateCode === 'MN' && !edge.node.isDeprecated
-    )
+    const minnesotaProgram = typedStatePrograms.states
+        .find((state) => state.code === 'MN')
+        ?.programs.filter(
+            (program) => !program.isDeprecated && !program.isRateProgram
+        )
+        .sort((left, right) => left.id.localeCompare(right.id))[0]
     if (!minnesotaProgram) {
         throw new Error(
-            'Synthetic review scenario requires a Minnesota program'
+            'Synthetic review scenario requires an active Minnesota contract program'
         )
     }
-    const programId = minnesotaProgram.node.id
+    const programId = minnesotaProgram.id
 
     const createResult = await graphql.execute(
         SyntheticCreateContractDocument,

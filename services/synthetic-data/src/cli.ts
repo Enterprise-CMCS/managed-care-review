@@ -78,8 +78,15 @@ export async function runSeedReview(seed: string): Promise<void> {
     })
 }
 
+const usage = 'Usage: pnpm cli preflight | pnpm cli seed-review --seed <seed>'
+
 export async function main(args = process.argv.slice(2)): Promise<void> {
     const [command, ...rest] = args
+    if ((command === '--help' || command === '-h') && rest.length === 0) {
+        console.info(usage)
+        return
+    }
+
     if (command === 'preflight' && rest.length === 0) {
         await runPreflight()
         return
@@ -91,9 +98,7 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
         return
     }
 
-    throw new Error(
-        'Usage: pnpm cli preflight | pnpm cli seed-review --seed <seed>'
-    )
+    throw new Error(usage)
 }
 
 main().catch((error: unknown) => {

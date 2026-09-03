@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
+import { GraphQLRequestError } from '../src/client/graphqlClient'
 import { Logger } from '../src/logger'
 
 describe('Logger', () => {
@@ -29,6 +30,49 @@ describe('Logger', () => {
             nested: {
                 accessToken: '[REDACTED]',
                 uploadURL: '[REDACTED]',
+            },
+        })
+    })
+
+    it('preserves structured error details and redacts nested credentials', () => {
+        const sink = vi.fn()
+        const logger = new Logger({
+            sink,
+            now: () => new Date('2026-09-03T21:05:00.000Z'),
+        })
+        const error = new GraphQLRequestError(
+            'GraphQL operation returned errors',
+            403,
+            [
+                {
+                    message: 'State users cannot perform this operation',
+                    extensions: {
+                        code: 'FORBIDDEN',
+                        clientSecret: 'do-not-log',
+                    },
+                },
+            ]
+        )
+
+        logger.error('synthetic.cli.failed', error)
+
+        expect(JSON.parse(sink.mock.calls[0][0])).toEqual({
+            timestamp: '2026-09-03T21:05:00.000Z',
+            level: 'error',
+            event: 'synthetic.cli.failed',
+            error: {
+                name: 'GraphQLRequestError',
+                message: 'GraphQL operation returned errors',
+                status: 403,
+                errors: [
+                    {
+                        message: 'State users cannot perform this operation',
+                        extensions: {
+                            code: 'FORBIDDEN',
+                            clientSecret: '[REDACTED]',
+                        },
+                    },
+                ],
             },
         })
     })

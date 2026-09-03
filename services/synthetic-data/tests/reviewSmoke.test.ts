@@ -4,7 +4,6 @@ import type { UploadClient } from '../src/client/uploadClient'
 import {
     SyntheticCreateContractDocument,
     SyntheticFetchContractDocument,
-    SyntheticFetchStateProgramsDocument,
     SyntheticSubmitContractDocument,
     SyntheticUpdateContractDraftRevisionDocument,
 } from '../src/gen/gqlClient'
@@ -13,21 +12,6 @@ import { runReviewSmokeScenario } from '../src/scenarios/reviewSmoke'
 
 function scenarioDependencies(persistedMarker: string) {
     const execute = vi.fn().mockImplementation(async (document) => {
-        if (document === SyntheticFetchStateProgramsDocument) {
-            return {
-                fetchAllStatePrograms: {
-                    edges: [
-                        {
-                            stateCode: 'MN',
-                            node: {
-                                id: 'minnesota-program',
-                                isDeprecated: false,
-                            },
-                        },
-                    ],
-                },
-            }
-        }
         if (document === SyntheticCreateContractDocument) {
             return {
                 createContract: {
@@ -124,7 +108,7 @@ describe('runReviewSmokeScenario', () => {
             contractId: 'contract-1',
             status: 'SUBMITTED',
         })
-        expect(dependencies.execute).toHaveBeenCalledTimes(5)
+        expect(dependencies.execute).toHaveBeenCalledTimes(4)
         expect(dependencies.upload).toHaveBeenCalledWith(
             expect.objectContaining({
                 name: 'synthetic-review-test-seed.pdf',
@@ -132,7 +116,7 @@ describe('runReviewSmokeScenario', () => {
                 bucketName: 'HEALTH_PLAN_DOCS',
             })
         )
-        expect(dependencies.execute.mock.calls[2][1]).toEqual(
+        expect(dependencies.execute.mock.calls[1][1]).toEqual(
             expect.objectContaining({
                 input: expect.objectContaining({
                     contractID: 'contract-1',
@@ -150,9 +134,9 @@ describe('runReviewSmokeScenario', () => {
                 }),
             })
         )
-        expect(dependencies.execute.mock.calls[1][1]).toEqual({
+        expect(dependencies.execute.mock.calls[0][1]).toEqual({
             input: expect.objectContaining({
-                programIDs: ['minnesota-program'],
+                programIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
             }),
         })
     })

@@ -315,6 +315,8 @@ export class AppApiStack extends BaseStack {
                 this,
                 'SyntheticDataCredentials',
                 {
+                    secretName: `synthetic-data-oauth-credentials-${this.stage}-cdk`, // pragma: allowlist secret
+                    description: `Synthetic data OAuth credentials for ${this.stage}`,
                     generateSecretString: {
                         secretStringTemplate: JSON.stringify({
                             clientId: `synthetic-data-${this.stage}-state`,
