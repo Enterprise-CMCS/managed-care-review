@@ -250,6 +250,12 @@ jobs:
           pnpm --filter "./packages/**" test:coverage
           exit $?
 
+      - name: Synthetic data checks
+        run: |
+          pnpm --filter @mc-review/synthetic-data build
+          pnpm --filter @mc-review/synthetic-data lint
+          pnpm --filter @mc-review/synthetic-data test:once
+
       - name: upload packages test coverage
         uses: actions/upload-artifact@v7
         with:
@@ -541,6 +547,9 @@ jobs:
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          EMAILER_MODE: LOCAL
+          SYNTHETIC_DATA_ENABLED: 'true'
+          SYNTHETIC_DATA_ALLOWED_STAGE: ${{ needs.begin-deployment.outputs.stage-name }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-${STAGE_NAME}-cdk \

@@ -1,17 +1,9 @@
-export {
-    GraphQLClient,
-    GraphQLRequestError,
-} from './client/graphqlClient'
-export type {
-    GraphQLResponseError,
-} from './client/graphqlClient'
+export { GraphQLClient, GraphQLRequestError } from './client/graphqlClient'
+export type { GraphQLResponseError } from './client/graphqlClient'
 export { OAuthClient, OAuthTokenRequestError } from './client/oauthClient'
 export type { OAuthToken } from './client/oauthClient'
 export { UploadClient, DocumentUploadError } from './client/uploadClient'
-export type {
-    UploadedDocument,
-    UploadInput,
-} from './client/uploadClient'
+export type { UploadedDocument, UploadInput } from './client/uploadClient'
 export {
     EnvironmentConfigurationError,
     loadEnvironment,
@@ -21,19 +13,32 @@ export {
     MAX_SCALE,
     OperationInputError,
     parseOperationInput,
+    parseReviewSeedInput,
 } from './config/operationInput'
-export type { OperationInput } from './config/operationInput'
-export {
-    documentFixtures,
-    loadDocumentFixture,
-} from './fixtures/documents'
+export type { OperationInput, ReviewSeedInput } from './config/operationInput'
+export { documentFixtures, loadDocumentFixture } from './fixtures/documents'
 export type { DocumentFixture } from './fixtures/documents'
 export { Logger } from './logger'
 export type { LogFields, LogSink } from './logger'
 export { SeededRandom } from './planning/seededRandom'
 export type { Seed } from './planning/seededRandom'
 export {
+    buildReviewContractFormData,
+    buildReviewCreateContractInput,
+    reviewSmokeMarker,
+    reviewSmokeScenarioKey,
+} from './builders/reviewContract'
+export {
+    runReviewSmokeScenario,
+    type ReviewSmokeResult,
+} from './scenarios/reviewSmoke'
+export {
+    SyntheticCreateContractDocument,
+    SyntheticFetchContractDocument,
     SyntheticFetchCurrentUserDocument,
+    SyntheticFetchStateProgramsDocument,
     SyntheticGenerateUploadUrlDocument,
+    SyntheticSubmitContractDocument,
+    SyntheticUpdateContractDraftRevisionDocument,
 } from './gen/gqlClient'
 export type { UploadBucketName, UploadFileType } from './gen/gqlClient'

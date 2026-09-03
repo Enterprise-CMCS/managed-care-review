@@ -7,6 +7,7 @@ import {
     MAX_SCALE,
     OperationInputError,
     parseOperationInput,
+    parseReviewSeedInput,
 } from '../src/config/operationInput'
 
 const validEnvironment = {
@@ -18,12 +19,11 @@ const validEnvironment = {
 }
 
 describe('loadEnvironment', () => {
-    it('accepts only enabled QA configuration and derives API endpoints', () => {
+    it('accepts enabled QA configuration and derives API endpoints', () => {
         expect(loadEnvironment(validEnvironment)).toEqual({
             stage: 'qa',
             apiBaseUrl: 'https://api.example.com/',
-            graphqlEndpoint:
-                'https://api.example.com/v1/graphql/external',
+            graphqlEndpoint: 'https://api.example.com/v1/graphql/external',
             tokenEndpoint: 'https://api.example.com/oauth/token',
             oauthClientId: 'synthetic-client',
             oauthClientSecret: 'synthetic-secret',
@@ -32,10 +32,29 @@ describe('loadEnvironment', () => {
         })
     })
 
+    it('preserves the API Gateway review stage path', () => {
+        expect(
+            loadEnvironment({
+                ...validEnvironment,
+                SYNTHETIC_DATA_STAGE: 'synth-review',
+                SYNTHETIC_DATA_API_URL:
+                    'https://abc.execute-api.us-east-1.amazonaws.com/synth-review',
+            })
+        ).toMatchObject({
+            stage: 'synth-review',
+            apiBaseUrl:
+                'https://abc.execute-api.us-east-1.amazonaws.com/synth-review/',
+            graphqlEndpoint:
+                'https://abc.execute-api.us-east-1.amazonaws.com/synth-review/v1/graphql/external',
+            tokenEndpoint:
+                'https://abc.execute-api.us-east-1.amazonaws.com/synth-review/oauth/token',
+        })
+    })
+
     it.each([
         { ...validEnvironment, SYNTHETIC_DATA_ENABLED: 'false' },
         { ...validEnvironment, SYNTHETIC_DATA_STAGE: 'prod' },
-    ])('rejects disabled or non-QA execution', (environment) => {
+    ])('rejects disabled or unsafe execution', (environment) => {
         expect(() => loadEnvironment(environment)).toThrow(
             EnvironmentConfigurationError
         )
@@ -80,5 +99,38 @@ describe('parseOperationInput', () => {
                 `--scale=${MAX_SCALE + 1}`,
             ])
         ).toThrow(OperationInputError)
+    })
+
+    it('rejects unknown operation arguments', () => {
+        expect(() =>
+            parseOperationInput([
+                '--operation=verify',
+                '--profile=baseline-v1',
+                '--scale=1',
+                '--unexpected=value',
+            ])
+        ).toThrow(OperationInputError)
+    })
+})
+
+describe('parseReviewSeedInput', () => {
+    it('accepts a bounded filesystem-safe seed', () => {
+        expect(parseReviewSeedInput(['--seed=review-2026.09_03'])).toEqual({
+            seed: 'review-2026.09_03',
+        })
+    })
+
+    it('rejects missing, invalid, and unexpected seed arguments', () => {
+        const invalidArguments: string[][] = [
+            [],
+            ['--seed=contains spaces'],
+            ['--seed=review', '--scale=1'],
+        ]
+
+        for (const args of invalidArguments) {
+            expect(() => parseReviewSeedInput(args)).toThrow(
+                OperationInputError
+            )
+        }
     })
 })

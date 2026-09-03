@@ -1,0 +1,16 @@
+query SyntheticFetchContract($input: FetchContractInput!) {
+    fetchContract(input: $input) {
+        contract {
+            id
+            stateCode
+            status
+            packageSubmissions {
+                contractRevision {
+                    formData {
+                        submissionDescription
+                    }
+                }
+            }
+        }
+    }
+}

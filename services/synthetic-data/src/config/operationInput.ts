@@ -10,10 +10,7 @@ const appendProfileSchema = z.enum([
     'boundary-stress-v1',
     'rolling-v1',
 ])
-const profileSchema = z.union([
-    z.literal('baseline-v1'),
-    appendProfileSchema,
-])
+const profileSchema = z.union([z.literal('baseline-v1'), appendProfileSchema])
 const scaleSchema = z.coerce.number().int().positive().max(MAX_SCALE)
 const commonFields = {
     scale: scaleSchema,
@@ -21,25 +18,43 @@ const commonFields = {
 }
 
 const operationInputSchema = z.discriminatedUnion('operation', [
-    z.object({
-        operation: z.literal('reset-and-seed'),
-        profile: z.literal('baseline-v1'),
-        confirmation: z.literal('RESET_QA'),
-        ...commonFields,
-    }),
-    z.object({
-        operation: z.literal('append'),
-        profile: appendProfileSchema,
-        ...commonFields,
-    }),
-    z.object({
-        operation: z.literal('verify'),
-        profile: profileSchema,
-        ...commonFields,
-    }),
+    z
+        .object({
+            operation: z.literal('reset-and-seed'),
+            profile: z.literal('baseline-v1'),
+            confirmation: z.literal('RESET_QA'),
+            ...commonFields,
+        })
+        .strict(),
+    z
+        .object({
+            operation: z.literal('append'),
+            profile: appendProfileSchema,
+            ...commonFields,
+        })
+        .strict(),
+    z
+        .object({
+            operation: z.literal('verify'),
+            profile: profileSchema,
+            ...commonFields,
+        })
+        .strict(),
 ])
 
+const reviewSeedInputSchema = z
+    .object({
+        seed: z
+            .string()
+            .trim()
+            .min(1)
+            .max(64)
+            .regex(/^[A-Za-z0-9._-]+$/),
+    })
+    .strict()
+
 export type OperationInput = z.infer<typeof operationInputSchema>
+export type ReviewSeedInput = z.infer<typeof reviewSeedInputSchema>
 
 export class OperationInputError extends Error {
     readonly issues: ReadonlyArray<string>
@@ -51,7 +66,9 @@ export class OperationInputError extends Error {
     }
 }
 
-function parseNamedArguments(args: ReadonlyArray<string>): Record<string, string> {
+function parseNamedArguments(
+    args: ReadonlyArray<string>
+): Record<string, string> {
     const values: Record<string, string> = {}
 
     for (let index = 0; index < args.length; index += 1) {
@@ -63,9 +80,14 @@ function parseNamedArguments(args: ReadonlyArray<string>): Record<string, string
         }
 
         const equalsIndex = argument.indexOf('=')
-        const key = argument.slice(2, equalsIndex === -1 ? undefined : equalsIndex)
+        const key = argument.slice(
+            2,
+            equalsIndex === -1 ? undefined : equalsIndex
+        )
         const value =
-            equalsIndex === -1 ? args[index + 1] : argument.slice(equalsIndex + 1)
+            equalsIndex === -1
+                ? args[index + 1]
+                : argument.slice(equalsIndex + 1)
 
         if (!key || !value || value.startsWith('--')) {
             throw new OperationInputError([`Missing value for --${key}`])
@@ -87,6 +109,21 @@ export function parseOperationInput(
     args: ReadonlyArray<string>
 ): OperationInput {
     const result = operationInputSchema.safeParse(parseNamedArguments(args))
+    if (!result.success) {
+        throw new OperationInputError(
+            result.error.issues.map(
+                (issue) => `${issue.path.join('.')}: ${issue.message}`
+            )
+        )
+    }
+
+    return result.data
+}
+
+export function parseReviewSeedInput(
+    args: ReadonlyArray<string>
+): ReviewSeedInput {
+    const result = reviewSeedInputSchema.safeParse(parseNamedArguments(args))
     if (!result.success) {
         throw new OperationInputError(
             result.error.issues.map(

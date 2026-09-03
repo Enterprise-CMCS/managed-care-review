@@ -1,17 +1,23 @@
 import { GraphQLClient } from './client/graphqlClient'
 import { OAuthClient } from './client/oauthClient'
-import { loadEnvironment } from './config/environment'
+import { UploadClient } from './client/uploadClient'
+import {
+    loadEnvironment,
+    type SyntheticDataEnvironment,
+} from './config/environment'
+import { parseReviewSeedInput } from './config/operationInput'
 import { SyntheticFetchCurrentUserDocument } from './gen/gqlClient'
 import { Logger } from './logger'
+import { runReviewSmokeScenario } from './scenarios/reviewSmoke'
 
-async function runPreflight(): Promise<void> {
-    const environment = loadEnvironment()
-    const logger = new Logger({
-        base: {
-            environment: environment.stage,
-            operation: 'preflight',
-        },
-    })
+type AuthenticatedClients = {
+    graphql: GraphQLClient
+    uploads: UploadClient
+}
+
+async function createAuthenticatedClients(
+    environment: SyntheticDataEnvironment
+): Promise<AuthenticatedClients> {
     const retry = {
         maxAttempts: environment.maxAttempts,
         baseDelayMs: environment.retryBaseDelayMs,
@@ -22,14 +28,30 @@ async function runPreflight(): Promise<void> {
         clientSecret: environment.oauthClientSecret,
         retry,
     })
-
-    logger.info('synthetic.preflight.started')
     const token = await oauth.requestToken()
     const graphql = new GraphQLClient({
         endpoint: environment.graphqlEndpoint,
         accessToken: () => token.accessToken,
         retry,
     })
+
+    return {
+        graphql,
+        uploads: new UploadClient({ graphql, retry }),
+    }
+}
+
+export async function runPreflight(): Promise<void> {
+    const environment = loadEnvironment()
+    const logger = new Logger({
+        base: {
+            environment: environment.stage,
+            operation: 'preflight',
+        },
+    })
+
+    logger.info('synthetic.preflight.started')
+    const { graphql } = await createAuthenticatedClients(environment)
     const result = await graphql.execute(SyntheticFetchCurrentUserDocument, {})
 
     logger.info('synthetic.preflight.succeeded', {
@@ -38,18 +60,45 @@ async function runPreflight(): Promise<void> {
     })
 }
 
-async function main(): Promise<void> {
-    const [command, ...rest] = process.argv.slice(2)
-    if (command !== 'preflight' || rest.length > 0) {
-        throw new Error('Usage: pnpm cli preflight')
+export async function runSeedReview(seed: string): Promise<void> {
+    const environment = loadEnvironment()
+    const logger = new Logger({
+        base: {
+            environment: environment.stage,
+            operation: 'seed-review',
+        },
+    })
+    const { graphql, uploads } = await createAuthenticatedClients(environment)
+
+    await runReviewSmokeScenario({
+        graphql,
+        uploads,
+        logger,
+        seed,
+    })
+}
+
+export async function main(args = process.argv.slice(2)): Promise<void> {
+    const [command, ...rest] = args
+    if (command === 'preflight' && rest.length === 0) {
+        await runPreflight()
+        return
     }
 
-    await runPreflight()
+    if (command === 'seed-review') {
+        const { seed } = parseReviewSeedInput(rest)
+        await runSeedReview(seed)
+        return
+    }
+
+    throw new Error(
+        'Usage: pnpm cli preflight | pnpm cli seed-review --seed <seed>'
+    )
 }
 
 main().catch((error: unknown) => {
-    new Logger({ base: { operation: 'preflight' } }).error(
-        'synthetic.preflight.failed',
+    new Logger({ base: { operation: 'cli' } }).error(
+        'synthetic.cli.failed',
         error
     )
     process.exitCode = 1

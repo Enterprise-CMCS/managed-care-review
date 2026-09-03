@@ -5,10 +5,27 @@ const positiveInteger = z
     .regex(/^\d+$/)
     .transform(Number)
     .pipe(z.number().int().positive())
+const forbiddenStages: Record<string, true> = {
+    local: true,
+    main: true,
+    dev: true,
+    val: true,
+    prod: true,
+}
+
+const syntheticDataStage = z
+    .string()
+    .trim()
+    .min(1)
+    .max(128)
+    .regex(/^[a-z0-9][a-z0-9-]*$/)
+    .refine((stage) => !forbiddenStages[stage], {
+        message: 'Synthetic data cannot run in an official environment',
+    })
 
 const environmentSchema = z.object({
     SYNTHETIC_DATA_ENABLED: z.literal('true'),
-    SYNTHETIC_DATA_STAGE: z.literal('qa'),
+    SYNTHETIC_DATA_STAGE: syntheticDataStage,
     SYNTHETIC_DATA_API_URL: z.string().url(),
     SYNTHETIC_DATA_OAUTH_CLIENT_ID: z.string().trim().min(1),
     SYNTHETIC_DATA_OAUTH_CLIENT_SECRET: z.string().min(1),
@@ -21,7 +38,7 @@ const environmentSchema = z.object({
 })
 
 export type SyntheticDataEnvironment = {
-    stage: 'qa'
+    stage: string
     apiBaseUrl: string
     graphqlEndpoint: string
     tokenEndpoint: string
@@ -54,8 +71,11 @@ export function loadEnvironment(
     }
 
     const baseUrl = new URL(result.data.SYNTHETIC_DATA_API_URL)
-    const graphqlEndpoint = new URL('/v1/graphql/external', baseUrl)
-    const tokenEndpoint = new URL('/oauth/token', baseUrl)
+    if (!baseUrl.pathname.endsWith('/')) {
+        baseUrl.pathname += '/'
+    }
+    const graphqlEndpoint = new URL('v1/graphql/external', baseUrl)
+    const tokenEndpoint = new URL('oauth/token', baseUrl)
 
     return {
         stage: result.data.SYNTHETIC_DATA_STAGE,

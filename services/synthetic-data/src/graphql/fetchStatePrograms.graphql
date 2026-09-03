@@ -1,0 +1,11 @@
+query SyntheticFetchStatePrograms {
+    fetchAllStatePrograms {
+        edges {
+            stateCode
+            node {
+                id
+                isDeprecated
+            }
+        }
+    }
+}

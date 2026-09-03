@@ -180,6 +180,12 @@ jobs:
           pnpm --filter "./packages/**" test:coverage
           exit $?
 
+      - name: Synthetic data checks
+        run: |
+          pnpm --filter @mc-review/synthetic-data build
+          pnpm --filter @mc-review/synthetic-data lint
+          pnpm --filter @mc-review/synthetic-data test:once
+
   deploy-github-oidc-dev:
     needs: [begin-deployment]
     name: deploy - GitHub OIDC service (dev)
