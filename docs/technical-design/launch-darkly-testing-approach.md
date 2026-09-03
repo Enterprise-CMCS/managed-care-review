@@ -116,7 +116,7 @@ renderWithProviders(
         },
         featureFlags: {
             'rate-edit-unlock': false,
-            '438-attestation': true,
+            dsnp: true,
         },
     }
 )
@@ -210,7 +210,7 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
 
 -   #### interceptFeatureFlags
 
-    This command allows you to intercept LD calls and set flag values. It also generates a `featureFlagStore.json` file in `services/cypress/fixtures/stores` with default feature flag values along with any specific values passed in.
+    This command allows you to intercept LD calls and set flag values. Every call creates a complete flag state using values passed in by the test first, then Cypress suite defaults, and finally defaults from `@mc-review/common-code`. Each call writes the resulting complete state to `services/cypress/fixtures/stores/featureFlagStore.json` and uses it for the LaunchDarkly client response.
 
     ```typescript
     //Intercept feature flag with flag values.
@@ -219,13 +219,14 @@ The Cypress commands `cy.interceptFeatureFlags` and `cy.stubFeatureFlags` will g
         'modal-countdown-duration': 3,
     })
 
-    //Intercept feature flag with default flag values.
+    //With no values, use the Cypress suite defaults and then common-code
+    //defaults for flags not configured by Cypress.
     cy.interceptFeatureFlags()
     ```
 
 -   #### stubFeatureFlags
 
-    This command intercepts all of LD api calls and returns our own response. This will remove the need for waiting on actual LaunchDarkly API calls to return. This command is being used on all specs in `beforeEach` to intercept requests on each test, set up default feature flag values in `featureFlagStore.json` and reset the LaunchDarkly feature flag store to default values before each test.
+    This command intercepts all LD API calls and returns our own response. It is used by every spec in `beforeEach` to establish the Cypress suite defaults in `featureFlagStore.json`. A later `interceptFeatureFlags()` call applies the values specified by that test while rebuilding omitted flags from the Cypress suite defaults and common-code defaults.
 
     ```typescript
     describe('rate details', () => {
