@@ -10,7 +10,10 @@
         "precommit": "lint-staged",
         "lint": "tsc --noEmit && eslint",
         "build": "tsc",
-        "build:ci-scripts": "tsc"
+        "build:ci-scripts": "tsc",
+        "test": "vitest --watch",
+        "test:once": "vitest run",
+        "test:coverage": "vitest --coverage"
     },
     "lint-staged": {
         "*.sh": [
@@ -34,9 +37,12 @@
     "devDependencies": {
         "@octokit/action": "^8.0.4",
         "@octokit/openapi-types": "^27.0.0",
+        "@types/node": "^25.5.0",
+        "@vitest/coverage-v8": "^4.1.7",
         "csv-parser": "^3.2.0",
         "lint-staged": "^16.4.0",
         "typescript": "5.9.3",
-        "uuid": "^14.0.2"
+        "uuid": "^14.0.2",
+        "vitest": "^4.1.7"
     }
 }
