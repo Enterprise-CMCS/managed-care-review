@@ -98,8 +98,6 @@ Using the app to navigate allows us to check a11y without injecting the runtime 
 
 ```typescript
     it('has not a11y errors with submission form and and form erros', () => {
-        // 438-attestation still needs to go through design, there is an a11y violation for links and spacing
-        cy.interceptFeatureFlags({'438-attestation': false})
         cy.logInAsStateUser()
 
         // Inject the axe run-time

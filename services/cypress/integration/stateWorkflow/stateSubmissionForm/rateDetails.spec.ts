@@ -4,11 +4,6 @@ describe('rate details', () => {
         cy.interceptGraphQL()
     })
     it('can navigate back and save as draft from rate details page', () => {
-        cy.interceptFeatureFlags({
-            '438-attestation': true,
-            'contact-data-model-update': true,
-        })
-
         cy.logInAsStateUser()
         cy.startNewContractAndRatesSubmission()
 

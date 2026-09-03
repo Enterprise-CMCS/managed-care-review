@@ -97,7 +97,11 @@ Cypress.Commands.add('logInAsCMSUser', (args) => {
             cy.findByTestId('cms-dashboard-page', { timeout: 10_000 }).should(
                 'exist'
             )
-            cy.findByText(/rate reviews/).should('exist')
+            cy.findByRole('heading', {
+                name: 'Rate reviews',
+                level: 2,
+                timeout: 10_000,
+            }).should('exist')
         } else if (initialURL.match(submissionRateQAPattern)) {
             cy.wait('@fetchRateWithQuestionsQuery', { timeout: 80_000 })
         } else {

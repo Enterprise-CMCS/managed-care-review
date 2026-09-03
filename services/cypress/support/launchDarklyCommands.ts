@@ -9,29 +9,38 @@ import {
 } from '@mc-review/common-code'
 
 /**
- * interceptFeatureFlags sets the flag to what is passed into it and sets other flags to default values.
- * Passing in an empty object will default all flags.
+ * interceptFeatureFlags applies supplied values over the Cypress suite
+ * defaults. Flags without a Cypress default use their defaults from
+ * common-code.
  *
  * The code below was taken from this blog post and modified a bit for our use of Types in feature flags.
  * https://dev.to/muratkeremozcan/effective-test-strategies-for-testing-front-end-applications-using-launchdarkly-feature-flags-and-cypress-part2-testing-2c72#stubbing-a-feature-flag
  *
  */
 
+const cypressFeatureFlagDefaults: FeatureFlagSettings = {
+    'hide-supporting-docs-page': true,
+    dsnp: true,
+    'cms-user-undo-unlock': true,
+    'contact-data-model-update': true,
+}
+
 // Intercepting LD "GET" calls for feature flag values and returns our default flags and values.
 Cypress.Commands.add(
     'interceptFeatureFlags',
     (toggleFlags?: FeatureFlagSettings) => {
-        // Create feature flag object with default values and update values of flags passed in toggleFlags argument.
-        // defaultFeatureFlags contains all valid feature flags along with default values. toggleFlags is restricted to flag's
-        // contained in app-web/src/common-code/featureFlags/flags.ts.
+        // Build the complete LaunchDarkly response from explicit overrides,
+        // Cypress suite defaults, and finally common-code defaults. The
+        // complete object is required by the client SDK and getFeatureFlagStore.
         const featureFlagObject: FeatureFlagSettings = {}
 
         featureFlagKeys.forEach((flagEnum) => {
-            let key: FeatureFlagLDConstant = featureFlags[flagEnum].flag
-            let value =
-                toggleFlags && toggleFlags[key]
-                    ? toggleFlags[key]
-                    : featureFlags[flagEnum].defaultValue
+            const key: FeatureFlagLDConstant = featureFlags[flagEnum].flag
+            const value =
+                toggleFlags?.[key] ??
+                cypressFeatureFlagDefaults[key] ??
+                featureFlags[flagEnum].defaultValue
+
             featureFlagObject[key] = { value }
         })
 
@@ -92,15 +101,10 @@ Cypress.Commands.add('stubFeatureFlags', () => {
     ).as('LDClientStream')
 
     /**
-     * Setting default values for flags for Cypress E2E tests. Only call `interceptFeatureFlags` once.
+     * Setting default values for flags for Cypress E2E tests.
      * Useful if you want default feature flags for tests that are different than default values set in common-code featureFlags
      **/
-    cy.interceptFeatureFlags({
-        '438-attestation': true,
-        'hide-supporting-docs-page': true,
-        dsnp: true,
-        'cms-user-undo-unlock': true,
-    })
+    cy.interceptFeatureFlags(cypressFeatureFlagDefaults)
 })
 
 //Command to get feature flag values from the featureFlagStore.json file.

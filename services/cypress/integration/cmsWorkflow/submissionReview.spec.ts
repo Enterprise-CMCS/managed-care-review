@@ -165,7 +165,6 @@ describe('CMS user can view submission', () => {
 
     it('and can approve a submission via releasing it to the state', () => {
         cy.interceptFeatureFlags({
-            '438-attestation': true,
             'hide-supporting-docs-page': true,
             dsnp: true,
         })
