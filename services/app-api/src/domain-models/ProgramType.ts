@@ -6,3 +6,9 @@ export type ProgramType = {
     isDeprecated: boolean
     deprecatedByProgramId?: string | null
 }
+
+export type StateProgramType = {
+    stateCode: string
+    stateName: string
+    program: ProgramType
+}

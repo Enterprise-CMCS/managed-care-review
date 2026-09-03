@@ -276,7 +276,7 @@ describe('revisionDiffDocuments', () => {
                     {
                         rateID: addedRateID,
                         rateCertificationName: addedRateName,
-                        includedInAnotherSubmission: false,
+                        isLinkedRate: false,
                     },
                 ],
                 [

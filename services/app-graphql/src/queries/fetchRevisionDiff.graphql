@@ -53,7 +53,7 @@ query FetchRevisionDiff($input: FetchRevisionDiffInput!) {
         added {
           rateID
           rateCertificationName
-          includedInAnotherSubmission
+          isLinkedRate
         }
         removed {
           rateID
