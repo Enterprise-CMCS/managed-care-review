@@ -109,6 +109,12 @@ export function overrideContractData(
                                   contractTypeOp:
                                       input.overrides.revisionOverride
                                           .contractTypeOp,
+                                  dsnpContract:
+                                      input.overrides.revisionOverride
+                                          .dsnpContract,
+                                  dsnpContractOp:
+                                      input.overrides.revisionOverride
+                                          .dsnpContractOp,
                                   contractDocuments:
                                       input.overrides.revisionOverride
                                           .contractDocuments ?? undefined,
