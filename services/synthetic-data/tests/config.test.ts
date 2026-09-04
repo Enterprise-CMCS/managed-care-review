@@ -7,7 +7,7 @@ import {
     MAX_SCALE,
     OperationInputError,
     parseOperationInput,
-    parseReviewSeedInput,
+    parseContractSmokeSeedInput,
 } from '../src/config/operationInput'
 
 const validEnvironment = {
@@ -113,9 +113,11 @@ describe('parseOperationInput', () => {
     })
 })
 
-describe('parseReviewSeedInput', () => {
+describe('parseContractSmokeSeedInput', () => {
     it('accepts a bounded filesystem-safe seed', () => {
-        expect(parseReviewSeedInput(['--seed=review-2026.09_03'])).toEqual({
+        expect(
+            parseContractSmokeSeedInput(['--seed=review-2026.09_03'])
+        ).toEqual({
             seed: 'review-2026.09_03',
         })
     })
@@ -128,7 +130,7 @@ describe('parseReviewSeedInput', () => {
         ]
 
         for (const args of invalidArguments) {
-            expect(() => parseReviewSeedInput(args)).toThrow(
+            expect(() => parseContractSmokeSeedInput(args)).toThrow(
                 OperationInputError
             )
         }

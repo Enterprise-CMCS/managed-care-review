@@ -8,7 +8,7 @@ import {
     SyntheticUpdateContractDraftRevisionDocument,
 } from '../src/gen/gqlClient'
 import { Logger } from '../src/logger'
-import { runReviewSmokeScenario } from '../src/scenarios/reviewSmoke'
+import { runContractSmokeScenario } from '../src/scenarios/contractSmoke'
 
 function scenarioDependencies(persistedMarker: string) {
     const execute = vi.fn().mockImplementation(async (document) => {
@@ -74,10 +74,10 @@ function scenarioDependencies(persistedMarker: string) {
         throw new Error('Unexpected GraphQL operation')
     })
     const upload = vi.fn().mockResolvedValue({
-        name: 'synthetic-review-test-seed.pdf',
-        s3URL: 's3://review-bucket/contract.pdf',
+        name: 'synthetic-contract-smoke-test-seed.pdf',
+        s3URL: 's3://synthetic-bucket/contract.pdf',
         s3Key: 'contract.pdf',
-        bucket: 'review-bucket',
+        bucket: 'synthetic-bucket',
         sha256: 'abc123',
     })
 
@@ -89,12 +89,13 @@ function scenarioDependencies(persistedMarker: string) {
     }
 }
 
-describe('runReviewSmokeScenario', () => {
+describe('runContractSmokeScenario', () => {
     it('uploads, submits, and verifies one marked Minnesota contract', async () => {
-        const marker = '[SYNTHETIC:review-smoke-v1:contract-only:test-seed]'
+        const marker =
+            '[SYNTHETIC:contract-submit-smoke-v1:contract-only:test-seed]'
         const dependencies = scenarioDependencies(marker)
 
-        const result = await runReviewSmokeScenario({
+        const result = await runContractSmokeScenario({
             graphql: dependencies.graphql,
             uploads: dependencies.uploads,
             logger: new Logger({ sink: vi.fn() }),
@@ -102,7 +103,7 @@ describe('runReviewSmokeScenario', () => {
         })
 
         expect(result).toEqual({
-            scenarioKey: 'review-smoke-v1',
+            scenarioKey: 'contract-submit-smoke-v1',
             seed: 'test-seed',
             marker,
             contractId: 'contract-1',
@@ -111,7 +112,7 @@ describe('runReviewSmokeScenario', () => {
         expect(dependencies.execute).toHaveBeenCalledTimes(4)
         expect(dependencies.upload).toHaveBeenCalledWith(
             expect.objectContaining({
-                name: 'synthetic-review-test-seed.pdf',
+                name: 'synthetic-contract-smoke-test-seed.pdf',
                 fileType: 'PDF',
                 bucketName: 'HEALTH_PLAN_DOCS',
             })
@@ -125,8 +126,8 @@ describe('runReviewSmokeScenario', () => {
                         submissionDescription: marker,
                         contractDocuments: [
                             {
-                                name: 'synthetic-review-test-seed.pdf',
-                                s3URL: 's3://review-bucket/contract.pdf',
+                                name: 'synthetic-contract-smoke-test-seed.pdf',
+                                s3URL: 's3://synthetic-bucket/contract.pdf',
                                 sha256: 'abc123',
                             },
                         ],
@@ -145,7 +146,7 @@ describe('runReviewSmokeScenario', () => {
         const dependencies = scenarioDependencies('different marker')
 
         await expect(
-            runReviewSmokeScenario({
+            runContractSmokeScenario({
                 graphql: dependencies.graphql,
                 uploads: dependencies.uploads,
                 logger: new Logger({ sink: vi.fn() }),

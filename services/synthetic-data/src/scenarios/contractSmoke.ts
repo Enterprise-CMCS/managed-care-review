@@ -2,11 +2,11 @@ import { typedStatePrograms } from '@mc-review/submissions/src/statePrograms/Sta
 import type { GraphQLClient } from '../client/graphqlClient'
 import type { UploadClient } from '../client/uploadClient'
 import {
-    buildReviewContractFormData,
-    buildReviewCreateContractInput,
-    reviewSmokeMarker,
-    reviewSmokeScenarioKey,
-} from '../builders/reviewContract'
+    buildContractSmokeFormData,
+    buildContractSmokeCreateContractInput,
+    contractSmokeMarker,
+    contractSmokeScenarioKey,
+} from '../builders/contractSmoke'
 import {
     SyntheticCreateContractDocument,
     SyntheticFetchContractDocument,
@@ -16,30 +16,30 @@ import {
 import { documentFixtures, loadDocumentFixture } from '../fixtures/documents'
 import type { Logger } from '../logger'
 
-export type ReviewSmokeResult = {
-    scenarioKey: typeof reviewSmokeScenarioKey
+export type ContractSmokeResult = {
+    scenarioKey: typeof contractSmokeScenarioKey
     seed: string
     marker: string
     contractId: string
     status: 'SUBMITTED'
 }
 
-type ReviewSmokeOptions = {
+type ContractSmokeOptions = {
     graphql: GraphQLClient
     uploads: UploadClient
     logger: Logger
     seed: string
 }
 
-export async function runReviewSmokeScenario({
+export async function runContractSmokeScenario({
     graphql,
     uploads,
     logger,
     seed,
-}: ReviewSmokeOptions): Promise<ReviewSmokeResult> {
-    const marker = reviewSmokeMarker(seed)
-    logger.info('synthetic.review-smoke.started', {
-        scenarioKey: reviewSmokeScenarioKey,
+}: ContractSmokeOptions): Promise<ContractSmokeResult> {
+    const marker = contractSmokeMarker(seed)
+    logger.info('synthetic.contract-smoke.started', {
+        scenarioKey: contractSmokeScenarioKey,
         seed,
     })
 
@@ -51,7 +51,7 @@ export async function runReviewSmokeScenario({
         .sort((left, right) => left.id.localeCompare(right.id))[0]
     if (!minnesotaProgram) {
         throw new Error(
-            'Synthetic review scenario requires an active Minnesota contract program'
+            'Synthetic contract smoke scenario requires an active Minnesota contract program'
         )
     }
     const programId = minnesotaProgram.id
@@ -59,7 +59,7 @@ export async function runReviewSmokeScenario({
     const createResult = await graphql.execute(
         SyntheticCreateContractDocument,
         {
-            input: buildReviewCreateContractInput(seed, programId),
+            input: buildContractSmokeCreateContractInput(seed, programId),
         }
     )
     const contract = createResult.createContract.contract
@@ -68,13 +68,13 @@ export async function runReviewSmokeScenario({
         throw new Error('Synthetic contract was not created as a draft')
     }
 
-    logger.info('synthetic.review-smoke.contract-created', {
+    logger.info('synthetic.contract-smoke.contract-created', {
         contractId: contract.id,
     })
 
     const fixture = documentFixtures.pdf.small
     const uploadedDocument = await uploads.upload({
-        name: `synthetic-review-${seed}.pdf`,
+        name: `synthetic-contract-smoke-${seed}.pdf`,
         bytes: await loadDocumentFixture(fixture),
         fileType: fixture.fileType,
         bucketName: 'HEALTH_PLAN_DOCS',
@@ -87,7 +87,7 @@ export async function runReviewSmokeScenario({
             input: {
                 contractID: contract.id,
                 lastSeenUpdatedAt,
-                formData: buildReviewContractFormData(
+                formData: buildContractSmokeFormData(
                     seed,
                     programId,
                     uploadedDocument
@@ -133,13 +133,13 @@ export async function runReviewSmokeScenario({
         throw new Error('Synthetic contract verification failed')
     }
 
-    const result: ReviewSmokeResult = {
-        scenarioKey: reviewSmokeScenarioKey,
+    const result: ContractSmokeResult = {
+        scenarioKey: contractSmokeScenarioKey,
         seed,
         marker,
         contractId: contract.id,
         status: 'SUBMITTED',
     }
-    logger.info('synthetic.review-smoke.completed', result)
+    logger.info('synthetic.contract-smoke.completed', result)
     return result
 }

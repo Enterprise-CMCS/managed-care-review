@@ -13,9 +13,12 @@ export {
     MAX_SCALE,
     OperationInputError,
     parseOperationInput,
-    parseReviewSeedInput,
+    parseContractSmokeSeedInput,
 } from './config/operationInput'
-export type { OperationInput, ReviewSeedInput } from './config/operationInput'
+export type {
+    OperationInput,
+    ContractSmokeSeedInput,
+} from './config/operationInput'
 export { documentFixtures, loadDocumentFixture } from './fixtures/documents'
 export type { DocumentFixture } from './fixtures/documents'
 export { Logger } from './logger'
@@ -23,15 +26,15 @@ export type { LogFields, LogSink } from './logger'
 export { SeededRandom } from './planning/seededRandom'
 export type { Seed } from './planning/seededRandom'
 export {
-    buildReviewContractFormData,
-    buildReviewCreateContractInput,
-    reviewSmokeMarker,
-    reviewSmokeScenarioKey,
-} from './builders/reviewContract'
+    buildContractSmokeFormData,
+    buildContractSmokeCreateContractInput,
+    contractSmokeMarker,
+    contractSmokeScenarioKey,
+} from './builders/contractSmoke'
 export {
-    runReviewSmokeScenario,
-    type ReviewSmokeResult,
-} from './scenarios/reviewSmoke'
+    runContractSmokeScenario,
+    type ContractSmokeResult,
+} from './scenarios/contractSmoke'
 export {
     SyntheticCreateContractDocument,
     SyntheticFetchContractDocument,

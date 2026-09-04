@@ -1191,6 +1191,9 @@ jobs:
           VPC_ID: ${{ secrets.QA_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.QA_INTERNAL_ALLOWED_ORIGINS }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          EMAILER_MODE: LOCAL
+          SYNTHETIC_DATA_ENABLED: 'true'
+          SYNTHETIC_DATA_ALLOWED_STAGE: qa
           # Custom API Gateway domain - qa only, gives the Mulesoft/Salesforce
           # integration a stable hostname instead of the raw execute-api URL.
           # Reuses the same cert as the CloudFront distributions.

@@ -5,10 +5,10 @@ import {
     loadEnvironment,
     type SyntheticDataEnvironment,
 } from './config/environment'
-import { parseReviewSeedInput } from './config/operationInput'
+import { parseContractSmokeSeedInput } from './config/operationInput'
 import { SyntheticFetchCurrentUserDocument } from './gen/gqlClient'
 import { Logger } from './logger'
-import { runReviewSmokeScenario } from './scenarios/reviewSmoke'
+import { runContractSmokeScenario } from './scenarios/contractSmoke'
 
 type AuthenticatedClients = {
     graphql: GraphQLClient
@@ -60,17 +60,17 @@ export async function runPreflight(): Promise<void> {
     })
 }
 
-export async function runSeedReview(seed: string): Promise<void> {
+export async function runSeedContractSmoke(seed: string): Promise<void> {
     const environment = loadEnvironment()
     const logger = new Logger({
         base: {
             environment: environment.stage,
-            operation: 'seed-review',
+            operation: 'seed-contract-smoke',
         },
     })
     const { graphql, uploads } = await createAuthenticatedClients(environment)
 
-    await runReviewSmokeScenario({
+    await runContractSmokeScenario({
         graphql,
         uploads,
         logger,
@@ -78,7 +78,8 @@ export async function runSeedReview(seed: string): Promise<void> {
     })
 }
 
-const usage = 'Usage: pnpm cli preflight | pnpm cli seed-review --seed <seed>'
+const usage =
+    'Usage: pnpm cli preflight | pnpm cli seed-contract-smoke --seed <seed>'
 
 export async function main(args = process.argv.slice(2)): Promise<void> {
     const [command, ...rest] = args
@@ -92,9 +93,9 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
         return
     }
 
-    if (command === 'seed-review') {
-        const { seed } = parseReviewSeedInput(rest)
-        await runSeedReview(seed)
+    if (command === 'seed-contract-smoke') {
+        const { seed } = parseContractSmokeSeedInput(rest)
+        await runSeedContractSmoke(seed)
         return
     }
 

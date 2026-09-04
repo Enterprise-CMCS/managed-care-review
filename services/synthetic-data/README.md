@@ -2,17 +2,17 @@
 
 `@mc-review/synthetic-data` creates deterministic, identifiable test data through the deployed MC Review API. It uses the same OAuth, GraphQL, document-upload, persistence, and submission paths as an external client.
 
-The service is intended for review environments and, once separately enabled, QA. It must not run against development, validation, or production.
+The service is intended for review environments and QA. It must not run against development, validation, or production.
 
 ## Current environment support
 
-| Environment                 | Status                                          | Notes                                                                                                                                                     |
-| --------------------------- | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Review branches             | Supported                                       | Review deployment enables the API resources and exact-stage allowlist.                                                                                    |
-| QA                          | Code supports it, but deployment is not enabled | The API/CDK safety checks permit `qa`, but the QA promotion workflow does not currently enable the resources and the manual review workflow rejects `qa`. |
-| Local, main, dev, val, prod | Refused                                         | Both the API and CLI reject these stages.                                                                                                                 |
+| Environment                 | Status    | Notes                                                                                                     |
+| --------------------------- | --------- | --------------------------------------------------------------------------------------------------------- |
+| Review branches             | Supported | Review deployment enables the API resources and exact-stage allowlist.                                    |
+| QA                          | Supported | QA promotion enables the resources with local-only email delivery; a separate protected workflow runs it. |
+| Local, main, dev, val, prod | Refused   | Both the API and CLI reject these stages.                                                                 |
 
-Merging this package makes the manual review workflow available from the default branch. It does **not** by itself make synthetic seeding available in QA. QA requires a separate infrastructure and workflow change; see [Enabling QA](#enabling-qa).
+After this change reaches `main`, the QA promotion deploys the credentials secret and bootstrap Lambda. Operators can then run one append-only contract smoke scenario through the protected QA workflow.
 
 ## Implemented commands
 
@@ -26,13 +26,13 @@ pnpm --filter @mc-review/synthetic-data preflight
 
 Success is logged as `synthetic.preflight.succeeded` with the actor ID and role.
 
-### `seed-review`
+### `seed-contract-smoke`
 
-Runs the `review-smoke-v1` scenario:
+Runs the `contract-submit-smoke-v1` scenario:
 
 ```bash
-pnpm --filter @mc-review/synthetic-data cli seed-review \
-  --seed my-review-smoke-01
+pnpm --filter @mc-review/synthetic-data cli seed-contract-smoke \
+  --seed my-contract-smoke-01
 ```
 
 The scenario:
@@ -45,12 +45,12 @@ The scenario:
 6. Fetches the persisted contract.
 7. Verifies the contract is Minnesota data, has `SUBMITTED` status, and contains the expected synthetic marker.
 
-A successful run ends with `synthetic.review-smoke.completed` and logs the contract ID, status, seed, and marker.
+A successful run ends with `synthetic.contract-smoke.completed` and logs the contract ID, status, seed, and marker.
 
 The marker format is:
 
 ```text
-[SYNTHETIC:review-smoke-v1:contract-only:<seed>]
+[SYNTHETIC:contract-submit-smoke-v1:contract-only:<seed>]
 ```
 
 The command does not deduplicate or delete contracts. Reusing a seed creates another contract with the same marker. Use a distinct seed when separate runs need to be distinguishable.
@@ -69,9 +69,9 @@ CLI
  └─ Presigned S3 upload
 ```
 
-### Review-environment infrastructure
+### Synthetic infrastructure
 
-When a review App API stack is deployed with synthetic data enabled, CDK creates:
+When a review or QA App API stack is deployed with synthetic data enabled, CDK creates:
 
 - A generated Secrets Manager secret containing `clientId` and `clientSecret`.
 - A bootstrap Lambda that upserts the dedicated state user and OAuth client.
@@ -110,6 +110,8 @@ Adding a scenario does not automatically grant it access to more mutations.
 
 ## Running through GitHub Actions
 
+### Review environment
+
 After `.github/workflows/seed-synthetic-review.yml` exists on the default branch:
 
 1. Open **Actions**.
@@ -119,11 +121,27 @@ After `.github/workflows/seed-synthetic-review.yml` exists on the default branch
 5. Enter the confirmation `SEED_REVIEW`.
 6. Run the workflow.
 
-The workflow derives the normalized review stage from the branch, assumes the review CDK role, resolves stack outputs, invokes the bootstrap Lambda, loads and masks the OAuth credentials, then runs `seed-review`.
+The workflow derives the normalized review stage from the branch, assumes the review CDK role, resolves stack outputs, invokes the bootstrap Lambda, loads and masks the OAuth credentials, then runs `seed-contract-smoke`.
 
-The workflow refuses official stages, including QA. It is currently a review-environment workflow.
+The workflow refuses official stages, including QA.
 
-## Running manually in a review environment
+### QA
+
+After the QA promotion has deployed `app-api-qa-cdk`:
+
+1. Open **Actions**.
+2. Select **Seed Synthetic QA Contract Smoke**.
+3. Select `main`.
+4. Enter a unique seed containing only letters, numbers, `.`, `_`, or `-`.
+5. Enter the confirmation `SEED_QA`.
+6. Approve the protected `qa` environment if required.
+7. Run the workflow.
+
+The QA workflow accepts only `main`, validates its request before requesting QA credentials, serializes executions, bootstraps the synthetic state actor, runs `preflight`, creates one submitted contract, and writes its contract ID, status, marker, and seed to the workflow summary.
+
+The QA workflow is append-only. It does not reset, delete, or bulk-generate data.
+
+## Running manually
 
 ### 1. Resolve deployed resources
 
@@ -183,8 +201,8 @@ pnpm --filter @mc-review/synthetic-data preflight
 Then run a scenario:
 
 ```bash
-pnpm --filter @mc-review/synthetic-data cli seed-review \
-  --seed my-review-smoke-01
+pnpm --filter @mc-review/synthetic-data cli seed-contract-smoke \
+  --seed my-contract-smoke-01
 ```
 
 Remove the secret from the shell when finished:
@@ -224,7 +242,7 @@ A scenario should represent one observable business workflow, not a collection o
 
 Choose:
 
-- A stable, versioned scenario key such as `review-smoke-v1`.
+- A stable, versioned scenario key such as `contract-submit-smoke-v1`.
 - The actor and environment it requires.
 - The records and documents it creates.
 - The persisted invariants that prove success.
@@ -323,16 +341,17 @@ synthetic.<scenario>.<lifecycle-step>
 
 Do not rely on redaction as permission to log credentials. Do not pass secrets to the logger.
 
-## Enabling QA
+## QA safety boundaries
 
-The code-level safety model permits QA, but QA is not operationally enabled today. Enabling it requires a separately reviewed change that:
+QA synthetic data is intentionally narrower than the planned baseline generator:
 
-1. Sets `SYNTHETIC_DATA_ENABLED=true` and `SYNTHETIC_DATA_ALLOWED_STAGE=qa` for the QA App API CDK deployment.
-2. Deploys the synthetic credentials secret and bootstrap Lambda in the QA account.
-3. Adds a QA-specific manual workflow path using the QA GitHub environment and QA AWS role.
-4. Uses a distinct, explicit QA confirmation value.
-5. Defines whether QA operations append, verify, or destructively reset data.
-6. Adds concurrency controls so two QA seed/reset operations cannot overlap.
-7. Verifies that dev, val, and prod remain denied.
+- QA sets `EMAILER_MODE=LOCAL`, so contract submission logs email rather than calling SES.
+- The workflow runs only from `main`.
+- The GitHub `qa` environment and QA CDK role protect AWS access.
+- Operators must type `SEED_QA`.
+- GitHub concurrency permits only one QA synthetic run at a time.
+- The current scenario creates exactly one identifiable contract.
+- The current scenario performs no reset, deletion, scheduling, or bulk generation.
+- Dev, Val, and production remain denied by both the API and CLI.
 
-Do not reuse the current review workflow unchanged for QA: it intentionally assumes review-stage naming and the development AWS environment.
+The review and QA workflows remain separate because they use different stage selection, GitHub environments, AWS roles, and confirmation values.

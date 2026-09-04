@@ -4,13 +4,13 @@ import type {
 } from '../gen/gqlClient'
 import type { UploadedDocument } from '../client/uploadClient'
 
-export const reviewSmokeScenarioKey = 'review-smoke-v1'
+export const contractSmokeScenarioKey = 'contract-submit-smoke-v1'
 
-export function reviewSmokeMarker(seed: string): string {
-    return `[SYNTHETIC:${reviewSmokeScenarioKey}:contract-only:${seed}]`
+export function contractSmokeMarker(seed: string): string {
+    return `[SYNTHETIC:${contractSmokeScenarioKey}:contract-only:${seed}]`
 }
 
-export function buildReviewCreateContractInput(
+export function buildContractSmokeCreateContractInput(
     seed: string,
     programId: string
 ): CreateContractInput {
@@ -21,12 +21,12 @@ export function buildReviewCreateContractInput(
         populationCovered: 'MEDICAID',
         programIDs: [programId],
         riskBasedContract: false,
-        submissionDescription: reviewSmokeMarker(seed),
+        submissionDescription: contractSmokeMarker(seed),
         submissionType: 'CONTRACT_ONLY',
     }
 }
 
-export function buildReviewContractFormData(
+export function buildContractSmokeFormData(
     seed: string,
     programId: string,
     uploadedDocument: UploadedDocument
@@ -36,12 +36,12 @@ export function buildReviewContractFormData(
         populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_ONLY',
         riskBasedContract: false,
-        submissionDescription: reviewSmokeMarker(seed),
+        submissionDescription: contractSmokeMarker(seed),
         stateContacts: [
             {
                 givenName: 'Synthetic',
                 familyName: 'Contact',
-                titleRole: 'Review environment test data',
+                titleRole: 'Synthetic test data',
                 email: 'synthetic.state.contact@example.com',
             },
         ],

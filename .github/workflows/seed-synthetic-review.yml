@@ -6,7 +6,7 @@ on:
       seed:
         description: 'Deterministic seed (letters, numbers, dot, underscore, hyphen)'
         required: true
-        default: 'manual-review-smoke'
+        default: 'manual-contract-smoke'
         type: string
       confirmation:
         description: 'Type SEED_REVIEW to authorize one synthetic contract'
@@ -60,6 +60,7 @@ jobs:
         uses: ./.github/actions/get_aws_credentials
         with:
           region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
           stage-name: ${{ steps.stage-name.outputs.stage-name }}
           use-cdk-role: 'true'
 
@@ -75,9 +76,11 @@ jobs:
             echo "Review synthetic data resources are not deployed for ${STAGE_NAME}" >&2
             exit 1
           fi
-          echo "SYNTHETIC_DATA_API_URL=${API_URL}" >> "${GITHUB_ENV}"
-          echo "SYNTHETIC_DATA_BOOTSTRAP_FUNCTION=${BOOTSTRAP_FUNCTION}" >> "${GITHUB_ENV}"
-          echo "SYNTHETIC_DATA_CREDENTIALS_SECRET=${CREDENTIALS_SECRET}" >> "${GITHUB_ENV}"
+          {
+            echo "SYNTHETIC_DATA_API_URL=${API_URL}"
+            echo "SYNTHETIC_DATA_BOOTSTRAP_FUNCTION=${BOOTSTRAP_FUNCTION}"
+            echo "SYNTHETIC_DATA_CREDENTIALS_SECRET=${CREDENTIALS_SECRET}"
+          } >> "${GITHUB_ENV}"
 
       - name: Bootstrap synthetic state actor
         shell: bash
@@ -111,5 +114,5 @@ jobs:
           SYNTHETIC_DATA_RETRY_BASE_DELAY_MS: '250'
           SYNTHETIC_DATA_SEED: ${{ inputs.seed }}
         run: >-
-          pnpm --filter @mc-review/synthetic-data cli seed-review
+          pnpm --filter @mc-review/synthetic-data cli seed-contract-smoke
           --seed "${SYNTHETIC_DATA_SEED}"
