@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { baseUserSchema } from '../UserType'
-import { contractTypeSchema, preprocessNulls } from './formDataTypes'
+import {
+    contractFormDataSchema,
+    contractTypeSchema,
+    preprocessNulls,
+    rateMedicaidPopulationsSchema,
+} from './formDataTypes'
 
 const scalarFieldOverrideOperationSchema = z.enum([
     'OVERRIDE',
@@ -43,6 +48,12 @@ const contractRevisionOverrideDataFragmentSchema = z.object({
     contractTypeOp: preprocessNulls(
         scalarFieldOverrideOperationSchema.nullable().optional()
     ),
+    dsnpContract: preprocessNulls(
+        contractFormDataSchema.shape.dsnpContract.optional()
+    ),
+    dsnpContractOp: preprocessNulls(
+        scalarFieldOverrideOperationSchema.nullable().optional()
+    ),
     contractDocuments: preprocessNulls(
         z.array(contractDocumentOverrideSchema).optional()
     ),
@@ -75,6 +86,12 @@ const rateRevisionOverrideDataFragmentSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
     rateRevisionID: z.uuid(),
+    rateMedicaidPopulations: preprocessNulls(
+        z.array(rateMedicaidPopulationsSchema).optional()
+    ),
+    rateMedicaidPopulationsOp: preprocessNulls(
+        scalarFieldOverrideOperationSchema.nullable().optional()
+    ),
     rateDocuments: preprocessNulls(
         z.array(genericDocumentOverrideSchema).optional()
     ),

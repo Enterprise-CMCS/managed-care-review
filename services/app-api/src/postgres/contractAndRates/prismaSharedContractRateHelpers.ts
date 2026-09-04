@@ -87,6 +87,8 @@ const includeContractFormData = {
             contractRevisionID: true,
             contractType: true,
             contractTypeOp: true,
+            dsnpContract: true,
+            dsnpContractOp: true,
             contractDocuments: true,
             supportingDocuments: true,
         },
@@ -522,6 +524,8 @@ const includeRateFormData = {
             id: true,
             createdAt: true,
             rateRevisionID: true,
+            rateMedicaidPopulations: true,
+            rateMedicaidPopulationsOp: true,
             rateDocuments: true,
             supportingDocuments: true,
         },
@@ -532,6 +536,18 @@ const includeStrippedRateFormData = {
     submitInfo: includeUpdateInfo,
     unlockInfo: includeUpdateInfo,
     undoUnlockInfo: includeUpdateInfo,
+    revisionOverrides: {
+        orderBy: {
+            createdAt: 'desc',
+        },
+        select: {
+            id: true,
+            createdAt: true,
+            rateRevisionID: true,
+            rateMedicaidPopulations: true,
+            rateMedicaidPopulationsOp: true,
+        },
+    },
 } satisfies Prisma.RateRevisionTableInclude
 
 const includeStrippedContractFormData = {
@@ -549,6 +565,8 @@ const includeStrippedContractFormData = {
             contractRevisionID: true,
             contractType: true,
             contractTypeOp: true,
+            dsnpContract: true,
+            dsnpContractOp: true,
         },
     },
 } satisfies Prisma.ContractRevisionTableInclude
@@ -664,7 +682,10 @@ function rateFormDataToDomainModel(
         rateProgramIDs: rateRevision.rateProgramIDs,
         deprecatedRateProgramIDs: rateRevision.deprecatedRateProgramIDs,
         rateCertificationName: rateRevision.rateCertificationName ?? undefined,
-        rateMedicaidPopulations: rateRevision.rateMedicaidPopulations ?? [],
+        rateMedicaidPopulations: mergedOverride.rateMedicaidPopulations
+            .hasOverride
+            ? mergedOverride.rateMedicaidPopulations.value
+            : (rateRevision.rateMedicaidPopulations ?? []),
         certifyingActuaryContacts: rateRevision.certifyingActuaryContacts
             ? rateRevision.certifyingActuaryContacts.map((actuary) => ({
                   name: constructContactName(actuary),
@@ -777,10 +798,9 @@ function contractFormDataToDomainModel(
             contractRevision.riskBasedContract !== null
                 ? contractRevision.riskBasedContract
                 : undefined,
-        dsnpContract:
-            contractRevision.dsnpContract !== null
-                ? contractRevision.dsnpContract
-                : undefined,
+        dsnpContract: mergedOverride.dsnpContract.hasOverride
+            ? mergedOverride.dsnpContract.value
+            : (contractRevision.dsnpContract ?? undefined),
         stateContacts: contractRevision.stateContacts
             ? contractRevision.stateContacts.map((contact) => ({
                   name: constructContactName(contact),
