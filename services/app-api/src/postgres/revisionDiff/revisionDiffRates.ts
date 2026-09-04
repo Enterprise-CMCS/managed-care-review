@@ -182,12 +182,14 @@ function buildRateDisplayName(
     return rateRevision.formData.rateCertificationName ?? undefined
 }
 
-function buildAddedRate(rateRevision: RateRevisionType): RevisionDiffAddedRate {
+function buildAddedRate(
+    rateRevision: RateRevisionType,
+    linkedRateIDs: Set<string>
+): RevisionDiffAddedRate {
     return {
         rateID: rateRevision.rateID,
         rateCertificationName: buildRateDisplayName(rateRevision),
-        // TODO(MCR-6481): identify when a rate on a submission diff is from another submission but linked to the current submission, e.g. a linked rate.
-        isLinkedRate: false,
+        isLinkedRate: linkedRateIDs.has(rateRevision.rateID),
     }
 }
 
@@ -263,7 +265,8 @@ function buildRevisedRate(
 
 function buildRateChanges(
     olderSubmission: ContractPackageSubmissionType,
-    newerSubmission: ContractPackageSubmissionType
+    newerSubmission: ContractPackageSubmissionType,
+    linkedRateIDs: Set<string>
 ): RevisionDiffRateChanges | Error {
     const olderRatesByID = new Map(
         olderSubmission.rateRevisions.map((rateRevision) => [
@@ -321,7 +324,7 @@ function buildRateChanges(
             continue
         }
 
-        added.push(buildAddedRate(newerRateRevision))
+        added.push(buildAddedRate(newerRateRevision, linkedRateIDs))
     }
 
     const sortByName = <TItem extends { rateCertificationName?: string }>(

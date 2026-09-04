@@ -95,7 +95,7 @@ describe('with rates', () => {
                     title: 'Added MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507',
                     rows: [
                         {
-                            label: 'Rate included with another submission',
+                            label: 'Rate created on another submission',
                             newValue: 'No',
                         },
                     ],
@@ -128,7 +128,7 @@ describe('with rates', () => {
                     contactsLabel: 'New and modified actuaries:',
                     contacts: [
                         {
-                            value: 'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com',
+                            value: 'Jalen Brunson, jalen.brunson@ow.com, Head of Risk Development, Olivier Wyman',
                         },
                     ],
                 },
@@ -642,7 +642,7 @@ describe('with rates', () => {
             'Added MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507'
         )
         expect(template.bodyText).toContain(
-            'Rate included with another submission: No'
+            'Rate created on another submission: No'
         )
         expect(template.bodyText).toContain(
             'Removed MCR-FL-NEMTMTM-20260501-20260531-CERTIFICATION-20260507'
@@ -659,13 +659,13 @@ describe('with rates', () => {
         )
         expect(template.bodyText).toContain('New and modified actuaries:')
         expect(template.bodyText).toContain(
-            'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com'
+            'Jalen Brunson, jalen.brunson@ow.com, Head of Risk Development, Olivier Wyman'
         )
         expect(template.bodyHTML).toContain(
             `<span style="color: ${emailColors.revisionChangesNewIndicator}; font-family: Inter, Arial, sans-serif; font-size: 13px; font-style: normal; font-weight: 700; line-height: 150%;">NEW</span> Rate start`
         )
         expect(template.bodyHTML).toContain(
-            '<strong>Rate included with another submission:</strong> No'
+            '<strong>Rate created on another submission:</strong> No'
         )
         expect(template.bodyHTML).toContain(
             '<strong>Rate name:</strong> MCR-IL-PCCME-01012027-07082027-AMENDMENT-07042026<br />→ MCR-IL-FIDESNP-20260101-20261231-CERTIFICATION-20260707'
