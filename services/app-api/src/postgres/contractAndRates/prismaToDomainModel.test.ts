@@ -1,9 +1,12 @@
 import { v4 as uuidv4 } from 'uuid'
 import { mockContractRevision } from '../../testHelpers/contractDataMocks'
+import { mockRateRevision } from '../../testHelpers/rateDataMocks'
 import {
     getContractRateStatus,
     contractFormDataToDomainModel,
+    rateFormDataToDomainModel,
 } from './prismaSharedContractRateHelpers'
+import { strippedRateRevisionToDomainModel } from './parseRateWithHistory'
 import type { ContractRevisionTableWithFormData } from './prismaSharedContractRateHelpers'
 
 describe('prismaToDomainModel', () => {
@@ -44,6 +47,7 @@ describe('prismaToDomainModel', () => {
             const contractRevision = mockContractRevision(undefined, {
                 id: contractRevisionID,
                 contractType: 'BASE',
+                dsnpContract: false,
                 revisionOverrides: [
                     {
                         id: uuidv4(),
@@ -51,6 +55,8 @@ describe('prismaToDomainModel', () => {
                         contractRevisionID,
                         contractType: 'AMENDMENT',
                         contractTypeOp: 'OVERRIDE',
+                        dsnpContract: true,
+                        dsnpContractOp: 'OVERRIDE',
                         contractDocuments: [],
                         supportingDocuments: [],
                     },
@@ -61,6 +67,73 @@ describe('prismaToDomainModel', () => {
                 contractFormDataToDomainModel(contractRevision)
 
             expect(domainFormData.contractType).toBe('AMENDMENT')
+            expect(domainFormData.dsnpContract).toBe(true)
+        })
+    })
+
+    describe('rateFormDataToDomainModel', () => {
+        it('applies rate Medicaid population revision overrides', () => {
+            const rateRevisionID = uuidv4()
+            const rateRevision = mockRateRevision(undefined, {
+                id: rateRevisionID,
+                rateMedicaidPopulations: ['MEDICAID_ONLY'],
+                revisionOverrides: [
+                    {
+                        id: uuidv4(),
+                        createdAt: new Date(),
+                        rateRevisionID,
+                        rateMedicaidPopulations: [
+                            'MEDICARE_MEDICAID_WITH_DSNP',
+                        ],
+                        rateMedicaidPopulationsOp: 'OVERRIDE',
+                        rateDocuments: [],
+                        supportingDocuments: [],
+                    },
+                ],
+            })
+
+            const domainFormData = rateFormDataToDomainModel(rateRevision)
+
+            expect(domainFormData.rateMedicaidPopulations).toEqual([
+                'MEDICARE_MEDICAID_WITH_DSNP',
+            ])
+        })
+
+        it('clears rate Medicaid population overrides in stripped reads', () => {
+            const rateRevisionID = uuidv4()
+            const rateRevision = mockRateRevision(undefined, {
+                id: rateRevisionID,
+                rateMedicaidPopulations: ['MEDICAID_ONLY'],
+                revisionOverrides: [
+                    {
+                        id: uuidv4(),
+                        createdAt: new Date('2026-01-01'),
+                        rateRevisionID,
+                        rateMedicaidPopulations: [
+                            'MEDICARE_MEDICAID_WITH_DSNP',
+                        ],
+                        rateMedicaidPopulationsOp: 'OVERRIDE',
+                        rateDocuments: [],
+                        supportingDocuments: [],
+                    },
+                    {
+                        id: uuidv4(),
+                        createdAt: new Date('2026-01-02'),
+                        rateRevisionID,
+                        rateMedicaidPopulations: [],
+                        rateMedicaidPopulationsOp: 'CLEAR_OVERRIDE',
+                        rateDocuments: [],
+                        supportingDocuments: [],
+                    },
+                ],
+            })
+
+            const domainRevision =
+                strippedRateRevisionToDomainModel(rateRevision)
+
+            expect(domainRevision.formData.rateMedicaidPopulations).toEqual([
+                'MEDICAID_ONLY',
+            ])
         })
     })
 

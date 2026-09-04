@@ -232,6 +232,10 @@ describe('overrideRateData', () => {
         const { client, cmsUser, rateID, submittedContract } =
             await setupSubmittedRateWithDocs()
         const initiallySubmittedAt = new Date('2025-02-02')
+        const overriddenPopulations = [
+            'MEDICARE_MEDICAID_WITH_DSNP' as const,
+            'MEDICAID_ONLY' as const,
+        ]
 
         const overriddenRate = await applyRateOverride({
             client,
@@ -241,6 +245,10 @@ describe('overrideRateData', () => {
             overrides: {
                 initiallySubmittedAt,
                 initiallySubmittedAtOp: 'OVERRIDE',
+                revisionOverride: {
+                    rateMedicaidPopulations: overriddenPopulations,
+                    rateMedicaidPopulationsOp: 'OVERRIDE',
+                },
             },
         })
 
@@ -249,8 +257,15 @@ describe('overrideRateData', () => {
             overrides: {
                 initiallySubmittedAt,
                 initiallySubmittedAtOp: 'OVERRIDE',
+                revisionOverride: {
+                    rateMedicaidPopulations: overriddenPopulations,
+                    rateMedicaidPopulationsOp: 'OVERRIDE',
+                },
             },
         })
+        expect(
+            overriddenRate.revisions[0].formData.rateMedicaidPopulations
+        ).toEqual(overriddenPopulations)
         const contractTableRow = await client.contractTable.findUniqueOrThrow({
             where: { id: submittedContract.id },
             select: { lastActionDate: true },
@@ -267,7 +282,7 @@ describe('overrideRateData', () => {
         )
     })
 
-    it('clears scalar rate metadata overrides', async () => {
+    it('clears scalar rate overrides and accepts an empty population override', async () => {
         const { client, cmsUser, rateID } = await setupSubmittedRateWithDocs()
         const initiallySubmittedAt = new Date('2025-02-02')
 
@@ -279,6 +294,10 @@ describe('overrideRateData', () => {
             overrides: {
                 initiallySubmittedAt,
                 initiallySubmittedAtOp: 'OVERRIDE',
+                revisionOverride: {
+                    rateMedicaidPopulations: ['MEDICARE_MEDICAID_WITH_DSNP'],
+                    rateMedicaidPopulationsOp: 'OVERRIDE',
+                },
             },
         })
 
@@ -289,6 +308,9 @@ describe('overrideRateData', () => {
             description: 'Clear initiallySubmittedAt override',
             overrides: {
                 initiallySubmittedAtOp: 'CLEAR_OVERRIDE',
+                revisionOverride: {
+                    rateMedicaidPopulationsOp: 'CLEAR_OVERRIDE',
+                },
             },
         })
 
@@ -297,15 +319,63 @@ describe('overrideRateData', () => {
         expect(
             clearedRate.rateOverrides?.[0]?.overrides.initiallySubmittedAtOp
         ).toBe('CLEAR_OVERRIDE')
+        expect(
+            clearedRate.revisions[0].formData.rateMedicaidPopulations
+        ).toEqual([])
+        expect(
+            clearedRate.rateOverrides?.[0]?.overrides.revisionOverride
+        ).toMatchObject({
+            rateMedicaidPopulationsOp: 'CLEAR_OVERRIDE',
+        })
+
+        const emptyPopulationOverride = await applyRateRevisionOverride({
+            client,
+            rateID,
+            updatedByID: cmsUser.id,
+            description: 'Override DSNP populations with an empty list',
+            revisionOverride: {
+                rateMedicaidPopulations: [],
+                rateMedicaidPopulationsOp: 'OVERRIDE',
+            },
+        })
+
+        expect(
+            emptyPopulationOverride.revisions[0].formData
+                .rateMedicaidPopulations
+        ).toEqual([])
+        expect(
+            emptyPopulationOverride.rateOverrides?.[0]?.overrides
+                .revisionOverride
+        ).toMatchObject({
+            rateMedicaidPopulations: [],
+            rateMedicaidPopulationsOp: 'OVERRIDE',
+        })
     })
 
-    it('rejects document dateAdded OVERRIDE without a date value', async () => {
+    it('rejects invalid scalar and document override values', async () => {
         const { client, cmsUser, rateID, submittedRateRevision } =
             await setupSubmittedRateWithDocs()
         const baseDoc = submittedRateRevision.formData.rateDocuments?.[0]
         expectToBeDefined(baseDoc)
 
-        const result = await overrideRateData(client, {
+        const invalidPopulationResult = await overrideRateData(client, {
+            rateID,
+            updatedByID: cmsUser.id,
+            description: 'Invalid null DSNP populations override',
+            overrides: {
+                revisionOverride: {
+                    rateMedicaidPopulations: null,
+                    rateMedicaidPopulationsOp: 'OVERRIDE',
+                },
+            },
+        })
+
+        expect(invalidPopulationResult).toBeInstanceOf(Error)
+        expect((invalidPopulationResult as Error).message).toContain(
+            'Invalid rateMedicaidPopulations override: OVERRIDE value failed schema validation'
+        )
+
+        const invalidDocumentResult = await overrideRateData(client, {
             rateID,
             updatedByID: cmsUser.id,
             description: 'Invalid null document dateAdded override',
@@ -324,8 +394,8 @@ describe('overrideRateData', () => {
             },
         })
 
-        expect(result).toBeInstanceOf(Error)
-        expect((result as Error).message).toContain(
+        expect(invalidDocumentResult).toBeInstanceOf(Error)
+        expect((invalidDocumentResult as Error).message).toContain(
             'OVERRIDE value failed schema validation'
         )
     })
