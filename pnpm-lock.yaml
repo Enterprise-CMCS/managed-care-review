@@ -752,11 +752,11 @@ importers:
         specifier: ^16.14.0
         version: 16.14.0
       jotai:
-        specifier: ^2.20.2
-        version: 2.20.2(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8)
+        specifier: ^2.20.3
+        version: 2.20.3(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8)
       jotai-location:
         specifier: ^0.6.2
-        version: 0.6.2(jotai@2.20.2(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8))
+        version: 0.6.2(jotai@2.20.3(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8))
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1
@@ -9542,8 +9542,8 @@ packages:
     peerDependencies:
       jotai: '>=1.11.0'
 
-  jotai@2.20.2:
-    resolution: {integrity: sha512-aHB4CNb9qRcyf0mwSB6EO5bCGAjx8cTwFgOFCE2leOnTzqACbnSWG8XoWB3LxCT1Qoj03I1OWAHszDmN4uHb/w==}
+  jotai@2.20.3:
+    resolution: {integrity: sha512-N8L9FUbeGDP+0qNJw1FebOxt+5hk+jTOwUA2LlRE4C081jUcY6F1T/FSETp4DT2/INMtiSRZyNm2D+yZdzrSgA==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
       '@babel/core': '>=7.0.0'
@@ -24840,11 +24840,11 @@ snapshots:
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
-  jotai-location@0.6.2(jotai@2.20.2(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8)):
+  jotai-location@0.6.2(jotai@2.20.3(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8)):
     dependencies:
-      jotai: 2.20.2(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8)
+      jotai: 2.20.3(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8)
 
-  jotai@2.20.2(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8):
+  jotai@2.20.3(@babel/core@7.29.7(supports-color@10.2.2))(@babel/template@7.29.7)(@types/react@19.2.14)(react@19.2.8):
     optionalDependencies:
       '@babel/core': 7.29.7(supports-color@10.2.2)
       '@babel/template': 7.29.7
