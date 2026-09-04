@@ -835,7 +835,7 @@ describe('buildResubmitRevisionChanges', () => {
                         rateID: 'added-rate-id',
                         rateCertificationName:
                             'MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507',
-                        isLinkedRate: false,
+                        isLinkedRate: true,
                     },
                 ],
                 removed: [
@@ -935,8 +935,8 @@ describe('buildResubmitRevisionChanges', () => {
                             title: 'Added MCR-FL-NEMT-20260501-20260531-CERTIFICATION-20260507',
                             rows: [
                                 {
-                                    label: 'Rate included with another submission',
-                                    newValue: 'No',
+                                    label: 'Rate created on another submission',
+                                    newValue: 'Yes',
                                 },
                             ],
                         },
@@ -986,10 +986,10 @@ describe('buildResubmitRevisionChanges', () => {
                             contactsLabel: 'New and modified actuaries:',
                             contacts: [
                                 {
-                                    value: 'Jalen Brunson, Head of Risk Development, Olivier Wyman, jalen.brunson@ow.com',
+                                    value: 'Jalen Brunson, jalen.brunson@ow.com, Head of Risk Development, Olivier Wyman',
                                 },
                                 {
-                                    value: 'Bill Yard, Executive assistant, Mercer, byard@mercer.com',
+                                    value: 'Bill Yard, byard@mercer.com, Executive assistant, Mercer',
                                 },
                             ],
                         },

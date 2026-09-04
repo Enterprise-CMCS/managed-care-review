@@ -678,9 +678,9 @@ const buildStateContactValue = (
 const buildActuaryContactValue = (contact: ActuaryContactType): string => {
     return [
         contact.name,
+        contact.email,
         contact.titleRole,
         getActuaryFirm(contact),
-        contact.email,
     ]
         .filter((value): value is string => Boolean(value))
         .join(', ')
@@ -717,7 +717,7 @@ const buildRateDetailsSection = (
             title: `Added ${getRateNameForDisplay(addedRate.rateCertificationName)}`,
             rows: [
                 {
-                    label: 'Rate included with another submission',
+                    label: 'Rate created on another submission',
                     newValue: addedRate.isLinkedRate ? 'Yes' : 'No',
                 },
             ],

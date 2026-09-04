@@ -5,6 +5,7 @@ import type {
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { findStatePrograms } from '../state/findStatePrograms'
 import { findContractWithHistory } from '../contractAndRates/findContractWithHistory'
+import { findRateWithHistory } from '../contractAndRates/findRateWithHistory'
 import { buildRevisionDiff } from './revisionDiffHelpers'
 
 type FindRevisionDiffArgs = {
@@ -116,6 +117,43 @@ function resolveRevisionPair(
     }
 }
 
+/**
+ * Returns the IDs of rates in either compared submission that are linked rates
+ */
+async function findLinkedRateIDs(
+    client: ExtendedPrismaClient,
+    contractID: string,
+    olderSubmission: ContractPackageSubmissionType,
+    newerSubmission: ContractPackageSubmissionType
+): Promise<Set<string> | Error> {
+    // Only added rates display linked status, so only they need the parent contract lookup.
+    const olderRateIDs = new Set(
+        olderSubmission.rateRevisions.map((rateRevision) => rateRevision.rateID)
+    )
+    const addedRateIDs = new Set(
+        newerSubmission.rateRevisions
+            .map((rateRevision) => rateRevision.rateID)
+            .filter((rateID) => !olderRateIDs.has(rateID))
+    )
+
+    const linkedRateIDs = new Set<string>()
+
+    for (const rateID of addedRateIDs) {
+        // findRateWithHistory derives parentContractID: the contract that submitted this rate.
+        const rate = await findRateWithHistory(client, rateID)
+
+        if (rate instanceof Error) {
+            return rate
+        }
+
+        if (rate.parentContractID !== contractID) {
+            linkedRateIDs.add(rateID)
+        }
+    }
+
+    return linkedRateIDs
+}
+
 async function findRevisionDiffByContractID(
     client: ExtendedPrismaClient,
     args: FindRevisionDiffArgs
@@ -143,11 +181,23 @@ async function findRevisionDiffByContractID(
         return statePrograms
     }
 
+    // Look up which rates are linked here then pass the result in like statePrograms above.
+    const linkedRateIDs = await findLinkedRateIDs(
+        client,
+        contractWithHistory.id,
+        selectedSubmissions.olderSubmission,
+        selectedSubmissions.newerSubmission
+    )
+    if (linkedRateIDs instanceof Error) {
+        return linkedRateIDs
+    }
+
     return buildRevisionDiff(
         contractWithHistory.id,
         selectedSubmissions.olderSubmission,
         selectedSubmissions.newerSubmission,
-        statePrograms
+        statePrograms,
+        linkedRateIDs
     )
 }
 

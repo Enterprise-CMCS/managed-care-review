@@ -8,7 +8,6 @@ describe('CMS user', () => {
 
     it('can unlock and see state resubmit with child rates', () => {
         cy.interceptFeatureFlags({
-            '438-attestation': true,
             dsnp: true,
             'cms-user-undo-unlock': true,
         })
@@ -261,7 +260,6 @@ describe('CMS user', () => {
     it.only('can unlock and resubmit a linked rate and change history updates', () => {
         // turn on feature flag
         cy.interceptFeatureFlags({
-            '438-attestation': true,
             'hide-supporting-docs-page': true,
             dsnp: true,
             'cms-user-undo-unlock': true,
