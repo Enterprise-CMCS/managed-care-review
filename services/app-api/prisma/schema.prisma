@@ -123,6 +123,8 @@ model ContractRevisionOverrides {
   // Revision form data overrides
   contractType   ContractType?
   contractTypeOp ScalarFieldOverrideOperation?
+  dsnpContract   Boolean?
+  dsnpContractOp ScalarFieldOverrideOperation?
 
   // Revision document overrides
   contractDocuments   ContractDocumentOverride[]
@@ -187,7 +189,10 @@ model RateRevisionOverrides {
   rateRevisionID String
   rateRevision   RateRevisionTable @relation(fields: [rateRevisionID], references: [id])
 
-  // Revision meta data overrides
+  // Revision form data overrides
+  rateMedicaidPopulations   RateMedicaidPopulations[]     @default([])
+  rateMedicaidPopulationsOp ScalarFieldOverrideOperation?
+
   rateDocuments       RateDocumentOverride[]
   supportingDocuments RateSupportingDocumentOverride[]
 }

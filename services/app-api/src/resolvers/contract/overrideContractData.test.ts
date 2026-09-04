@@ -99,6 +99,8 @@ describe('overrideContractData resolver', () => {
                 revisionOverride: {
                     contractType: 'AMENDMENT',
                     contractTypeOp: 'OVERRIDE',
+                    dsnpContract: true,
+                    dsnpContractOp: 'OVERRIDE',
                 },
             },
         })
@@ -106,6 +108,15 @@ describe('overrideContractData resolver', () => {
         expect(
             result.packageSubmissions[0].contractRevision.formData.contractType
         ).toBe('AMENDMENT')
+        expect(
+            result.packageSubmissions[0].contractRevision.formData.dsnpContract
+        ).toBe(true)
+        expect(
+            result.contractOverrides?.[0]?.overrides.revisionOverride
+        ).toMatchObject({
+            dsnpContract: true,
+            dsnpContractOp: 'OVERRIDE',
+        })
 
         const contractTableRow = await client.contractTable.findUniqueOrThrow({
             where: { id: submittedContract.id },

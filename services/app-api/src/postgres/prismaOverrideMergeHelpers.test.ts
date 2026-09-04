@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 import {
+    mapOverriddenDocsToUnlockedRev,
     mergeContractDocumentOverrides,
     mergeScalarFieldOverrides,
     normalizeDocumentOverrideInputs,
@@ -984,5 +985,82 @@ describe('mergeContractDocumentOverrides', () => {
         )
 
         expect(result).toEqual([originalDoc])
+    })
+})
+
+describe('mapOverriddenDocsToUnlockedRev', () => {
+    it('omits deleted docs, preserves base positions, and appends added docs with dateAdded', () => {
+        const originalDateAdded = new Date('2026-01-01T00:00:00.000Z')
+        const overriddenDateAdded = new Date('2026-02-01T00:00:00.000Z')
+        const addedDateAdded = new Date('2026-03-01T00:00:00.000Z')
+        const baseDocuments = [
+            {
+                id: 'deleted-base-doc',
+                createdAt: originalDateAdded,
+                updatedAt: originalDateAdded,
+                position: 2,
+                name: 'deleted.pdf',
+                s3URL: 's3://bucket/deleted',
+                sha256: 'deleted-sha',
+                s3BucketName: 'bucket',
+                s3Key: 'deleted',
+                dateAdded: originalDateAdded,
+            },
+            {
+                id: 'retained-base-doc',
+                createdAt: originalDateAdded,
+                updatedAt: originalDateAdded,
+                position: 5,
+                name: 'retained.pdf',
+                s3URL: 's3://bucket/retained',
+                sha256: 'retained-sha',
+                s3BucketName: 'bucket',
+                s3Key: 'retained',
+                dateAdded: originalDateAdded,
+            },
+        ]
+        const overriddenDocuments = [
+            {
+                ...baseDocuments[1],
+                dateAdded: overriddenDateAdded,
+            },
+            {
+                id: 'override-added-doc',
+                createdAt: addedDateAdded,
+                updatedAt: addedDateAdded,
+                position: -1,
+                name: 'added.pdf',
+                s3URL: 's3://bucket/added',
+                sha256: 'added-sha',
+                s3BucketName: 'bucket',
+                s3Key: 'added',
+                dateAdded: addedDateAdded,
+            },
+        ]
+
+        expect(
+            mapOverriddenDocsToUnlockedRev({
+                baseDocuments,
+                overriddenDocuments,
+            })
+        ).toEqual([
+            {
+                position: 5,
+                name: 'retained.pdf',
+                s3URL: 's3://bucket/retained',
+                sha256: 'retained-sha',
+                s3BucketName: 'bucket',
+                s3Key: 'retained',
+            },
+            {
+                position: 6,
+                name: 'added.pdf',
+                s3URL: 's3://bucket/added',
+                sha256: 'added-sha',
+                s3BucketName: 'bucket',
+                s3Key: 'added',
+                dateAdded: addedDateAdded,
+            },
+        ])
     })
 })

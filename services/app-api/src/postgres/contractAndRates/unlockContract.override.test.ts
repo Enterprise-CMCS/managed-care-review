@@ -106,7 +106,7 @@ async function setupSubmittedContractWithDocsForUnlock() {
 }
 
 describe('unlockContract with revision overrides', () => {
-    it('copies the effective overridden contractType into the unlocked draft revision', async () => {
+    it('copies overridden scalar values into the unlocked draft revision', async () => {
         const client = await sharedTestPrismaClient()
         const stateUser = await client.user.create({
             data: {
@@ -149,6 +149,8 @@ describe('unlockContract with revision overrides', () => {
                     revisionOverride: {
                         contractType: 'AMENDMENT',
                         contractTypeOp: 'OVERRIDE',
+                        dsnpContract: true,
+                        dsnpContractOp: 'OVERRIDE',
                     },
                 },
             })
@@ -165,6 +167,7 @@ describe('unlockContract with revision overrides', () => {
         expect(unlockedContract.draftRevision.formData.contractType).toBe(
             'AMENDMENT'
         )
+        expect(unlockedContract.draftRevision.formData.dsnpContract).toBe(true)
     })
 
     it('materializes an add-mode contract document override into the unlocked draft', async () => {

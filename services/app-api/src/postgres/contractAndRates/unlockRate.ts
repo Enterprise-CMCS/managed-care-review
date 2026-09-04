@@ -3,6 +3,10 @@ import type { ExtendedPrismaClient } from '../prismaClient'
 import type { PrismaTransactionType } from '../prismaTypes'
 import { findRateWithHistory } from './findRateWithHistory'
 import { runTransactionWithRowLock } from '../prismaHelpers'
+import {
+    mapOverriddenDocsToUnlockedRev,
+    mergeRateRevisionOverrides,
+} from '../prismaOverrideMergeHelpers'
 
 type UnlockRateArgsType = {
     rateID: string
@@ -46,6 +50,20 @@ async function unlockRateInDB(
                     position: 'asc',
                 },
             },
+            revisionOverrides: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                select: {
+                    id: true,
+                    createdAt: true,
+                    rateRevisionID: true,
+                    rateMedicaidPopulations: true,
+                    rateMedicaidPopulationsOp: true,
+                    rateDocuments: true,
+                    supportingDocuments: true,
+                },
+            },
             contractsWithSharedRateRevision: true,
             relatedSubmissions: {
                 orderBy: {
@@ -87,6 +105,25 @@ async function unlockRateInDB(
             (contract) => contract.id
         )
 
+    // Collecting overrides for the current revision to apply them as the base
+    // data for creating the unlocked revision
+    const relevantOverrides = currentRev.revisionOverrides.filter(
+        (override) => override.rateRevisionID === currentRev.id
+    )
+    const mergedOverride = mergeRateRevisionOverrides({
+        revisionOverrides: relevantOverrides,
+        rateRevision: currentRev,
+    })
+
+    const rateDocumentsToCreate = mapOverriddenDocsToUnlockedRev({
+        baseDocuments: currentRev.rateDocuments,
+        overriddenDocuments: mergedOverride.rateDocuments,
+    })
+    const supportingDocumentsToCreate = mapOverriddenDocsToUnlockedRev({
+        baseDocuments: currentRev.supportingDocuments,
+        overriddenDocuments: mergedOverride.supportingDocuments,
+    })
+
     await tx.rateRevisionTable.create({
         data: {
             createdAt: manualCreatedAt ?? currentDateTime,
@@ -110,30 +147,16 @@ async function unlockRateInDB(
             rateCertificationName: currentRev.rateCertificationName,
             actuaryCommunicationPreference:
                 currentRev.actuaryCommunicationPreference,
-            rateMedicaidPopulations: currentRev.rateMedicaidPopulations,
+            rateMedicaidPopulations: mergedOverride.rateMedicaidPopulations
+                .hasOverride
+                ? mergedOverride.rateMedicaidPopulations.value
+                : currentRev.rateMedicaidPopulations,
 
-            // Standalone rate unlock is currently inactive. If this path is
-            // reactivated, update it to materialize effective rate overrides
-            // before copying documents, matching unlockContract behavior.
             rateDocuments: {
-                create: currentRev.rateDocuments.map((d) => ({
-                    position: d.position,
-                    name: d.name,
-                    s3URL: d.s3URL,
-                    sha256: d.sha256,
-                    s3BucketName: d.s3BucketName,
-                    s3Key: d.s3Key,
-                })),
+                create: rateDocumentsToCreate,
             },
             supportingDocuments: {
-                create: currentRev.supportingDocuments.map((d) => ({
-                    position: d.position,
-                    name: d.name,
-                    s3URL: d.s3URL,
-                    sha256: d.sha256,
-                    s3BucketName: d.s3BucketName,
-                    s3Key: d.s3Key,
-                })),
+                create: supportingDocumentsToCreate,
             },
             certifyingActuaryContacts: {
                 create: currentRev.certifyingActuaryContacts.map((c) => ({

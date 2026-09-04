@@ -174,6 +174,8 @@ describe('overrideContractData', () => {
                     revisionOverride: {
                         contractType: 'AMENDMENT',
                         contractTypeOp: 'OVERRIDE',
+                        dsnpContract: true,
+                        dsnpContractOp: 'OVERRIDE',
                     },
                 },
             })
@@ -190,12 +192,15 @@ describe('overrideContractData', () => {
                             .id,
                     contractType: 'AMENDMENT',
                     contractTypeOp: 'OVERRIDE',
+                    dsnpContract: true,
+                    dsnpContractOp: 'OVERRIDE',
                 },
             },
         })
         expect(overriddenContract.revisions[0].formData.contractType).toBe(
             'AMENDMENT'
         )
+        expect(overriddenContract.revisions[0].formData.dsnpContract).toBe(true)
         const contractTableRow = await client.contractTable.findUniqueOrThrow({
             where: { id: submittedContract.id },
             select: { lastActionDate: true },
@@ -250,6 +255,8 @@ describe('overrideContractData', () => {
             revisionOverride: {
                 contractType: 'AMENDMENT',
                 contractTypeOp: 'OVERRIDE',
+                dsnpContract: true,
+                dsnpContractOp: 'OVERRIDE',
             },
         })
 
@@ -260,14 +267,42 @@ describe('overrideContractData', () => {
             description: 'Clear contract type override',
             revisionOverride: {
                 contractTypeOp: 'CLEAR_OVERRIDE',
+                dsnpContractOp: 'CLEAR_OVERRIDE',
             },
         })
 
         expect(clearedContract.revisions[0].formData.contractType).toBe('BASE')
         expect(
+            clearedContract.revisions[0].formData.dsnpContract
+        ).toBeUndefined()
+        expect(
             clearedContract.contractOverrides?.[0]?.overrides.revisionOverride
-                ?.contractTypeOp
-        ).toBe('CLEAR_OVERRIDE')
+        ).toMatchObject({
+            contractTypeOp: 'CLEAR_OVERRIDE',
+            dsnpContractOp: 'CLEAR_OVERRIDE',
+        })
+
+        const nullOverriddenContract = await applyRevisionOverride({
+            client,
+            contractID: submittedContract.id,
+            updatedByID: cmsUser.id,
+            description: 'Override DSNP association with null',
+            revisionOverride: {
+                dsnpContract: null,
+                dsnpContractOp: 'OVERRIDE',
+            },
+        })
+
+        expect(
+            nullOverriddenContract.revisions[0].formData.dsnpContract
+        ).toBeUndefined()
+        expect(
+            nullOverriddenContract.contractOverrides?.[0]?.overrides
+                .revisionOverride
+        ).toMatchObject({
+            dsnpContract: undefined,
+            dsnpContractOp: 'OVERRIDE',
+        })
     })
 
     it('deletes original contract and supporting documents as override rows without deleting base rows', async () => {

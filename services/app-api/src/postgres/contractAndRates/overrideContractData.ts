@@ -56,6 +56,8 @@ type OverrideContractDataArgsType = {
         revisionOverride?: {
             contractType?: PrismaContractType | null
             contractTypeOp?: ScalarFieldOverrideOperation | null
+            dsnpContract?: boolean | null
+            dsnpContractOp?: ScalarFieldOverrideOperation | null
             contractDocuments?: ContractDocumentOverrideInput[]
             supportingDocuments?: ContractDocumentOverrideInput[]
         }
@@ -122,6 +124,16 @@ const overrideContractDataInsideTransaction = async (
     })
     if (contractTypeValidation) {
         throw contractTypeValidation
+    }
+
+    const dsnpContractValidation = validateScalarOverrideInput({
+        fieldName: 'dsnpContract',
+        operation: revisionOverride?.dsnpContractOp,
+        value: revisionOverride?.dsnpContract,
+        valueSchema: contractFormDataSchema.shape.dsnpContract,
+    })
+    if (dsnpContractValidation) {
+        throw dsnpContractValidation
     }
 
     // normalize document arrays, empty arrays into undefines.
@@ -207,6 +219,9 @@ const overrideContractDataInsideTransaction = async (
                           contractType: revisionOverride.contractType ?? null,
                           contractTypeOp:
                               revisionOverride.contractTypeOp ?? null,
+                          dsnpContract: revisionOverride.dsnpContract ?? null,
+                          dsnpContractOp:
+                              revisionOverride.dsnpContractOp ?? null,
                           contractDocuments: contractDocumentOverrides
                               ? {
                                     createMany: {

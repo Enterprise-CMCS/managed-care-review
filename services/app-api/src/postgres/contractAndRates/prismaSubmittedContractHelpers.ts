@@ -11,6 +11,8 @@ const selectContractRevisionOverrides = {
     contractRevisionID: true,
     contractType: true,
     contractTypeOp: true,
+    dsnpContract: true,
+    dsnpContractOp: true,
     contractDocuments: {
         select: {
             id: true,
