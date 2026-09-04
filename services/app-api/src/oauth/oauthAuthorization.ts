@@ -2,6 +2,10 @@ import { OAuthScope } from '../generated/client'
 import type { Context } from '../handlers/apollo_gql'
 import type { FeatureFlagSettings } from '@mc-review/common-code'
 import type { UserRoles } from '../domain-models/UserType'
+import {
+    isSyntheticDataEnvironmentEnabled,
+    type SyntheticDataEnvironment,
+} from '../syntheticData/safety'
 
 /**
  * context.oauthClient:
@@ -52,6 +56,36 @@ export function canWrite(context: Context): boolean {
 
     // Regular users can write (subject to role-specific restrictions in resolvers)
     return true
+}
+export type SyntheticDataWriteOperation =
+    | 'createContract'
+    | 'updateContractDraftRevision'
+    | 'submitContract'
+    | 'generateUploadURL'
+
+const syntheticDataWriteOperations: Record<SyntheticDataWriteOperation, true> =
+    {
+        createContract: true,
+        updateContractDraftRevision: true,
+        submitContract: true,
+        generateUploadURL: true,
+    }
+
+export function canSyntheticDataWrite(
+    context: Context,
+    operation: SyntheticDataWriteOperation,
+    environment: SyntheticDataEnvironment = process.env
+): boolean {
+    const oauthClient = context.oauthClient
+
+    return !!(
+        isSyntheticDataEnvironmentEnabled(environment) &&
+        oauthClient &&
+        isOAuthClientCredentials(context) &&
+        !oauthClient.isDelegatedUser &&
+        oauthClient.scopes?.includes(OAuthScope.SYNTHETIC_DATA_WRITE) &&
+        syntheticDataWriteOperations[operation]
+    )
 }
 
 /**

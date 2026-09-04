@@ -97,6 +97,15 @@ generates:
       - 'typed-document-node'
     config:
       enumsAsTypes: true
+  ../synthetic-data/src/gen/gqlClient.ts:
+    documents:
+      - ../synthetic-data/src/graphql/*.graphql
+    plugins:
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typed-document-node'
+    config:
+      enumsAsTypes: true
   ../../packages/mocks/src/gen/gqlClient.tsx:
     documents:
       - src/fragments/*.graphql

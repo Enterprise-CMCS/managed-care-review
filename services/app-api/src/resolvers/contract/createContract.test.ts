@@ -1,10 +1,20 @@
+import { afterEach, vi } from 'vitest'
+import type { GraphQLResolveInfo } from 'graphql'
 import {
     constructTestPostgresServer,
+    defaultContext,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import type { CreateContractInput, Contract } from '../../gen/gqlServer'
 import { CreateContractDocument } from '../../gen/gqlClient'
 import { testCMSUser } from '../../testHelpers/userHelpers'
+import type { Context } from '../../handlers/apollo_gql'
+import type { Store } from '../../postgres'
+import { createContract } from './createContract'
+
+afterEach(() => {
+    vi.unstubAllEnvs()
+})
 
 describe('createContract', () => {
     it('returns contract with unlocked form data', async () => {
@@ -48,6 +58,58 @@ describe('createContract', () => {
         expect(draftData.federalAuthorities).toHaveLength(0)
         expect(draftData.contractDateStart).toBeNull()
         expect(draftData.contractDateEnd).toBeNull()
+    })
+
+    it('allows the synthetic OAuth client in its exact review stage', async () => {
+        vi.stubEnv('stage', 'synth-review')
+        vi.stubEnv('SYNTHETIC_DATA_ENABLED', 'true')
+        vi.stubEnv('SYNTHETIC_DATA_ALLOWED_STAGE', 'synth-review')
+
+        const context: Context = {
+            ...defaultContext(),
+            oauthClient: {
+                clientId: 'synthetic-data-review-state',
+                grants: ['client_credentials'],
+                iss: 'mcreview-synth-review',
+                scopes: ['SYNTHETIC_DATA_WRITE'],
+                isDelegatedUser: false,
+            },
+        }
+        const insertDraftContract = vi.fn().mockResolvedValue({
+            id: 'synthetic-contract',
+            status: 'DRAFT',
+        })
+        const store = {
+            findPrograms: vi.fn().mockReturnValue([]),
+            insertDraftContract,
+        } as unknown as Store
+        const input: CreateContractInput = {
+            populationCovered: 'MEDICAID',
+            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
+            riskBasedContract: false,
+            submissionType: 'CONTRACT_ONLY',
+            submissionDescription:
+                '[SYNTHETIC:review-smoke-v1:contract-only:test]',
+            contractType: 'BASE',
+            contractSubmissionType: 'HEALTH_PLAN',
+        }
+
+        const resolver = createContract(store)
+        if (typeof resolver !== 'function') {
+            throw new Error('Expected createContract resolver function')
+        }
+        const result = await resolver(
+            {},
+            { input },
+            context,
+            {} as GraphQLResolveInfo
+        )
+
+        expect(insertDraftContract).toHaveBeenCalledOnce()
+        expect(result.contract).toMatchObject({
+            id: 'synthetic-contract',
+            status: 'DRAFT',
+        })
     })
 
     it('returns an error if the program id is not in valid', async () => {

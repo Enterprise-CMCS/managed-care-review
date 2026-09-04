@@ -1,0 +1,14 @@
+mutation SyntheticUpdateContractDraftRevision(
+    $input: UpdateContractDraftRevisionInput!
+) {
+    updateContractDraftRevision(input: $input) {
+        contract {
+            id
+            stateCode
+            status
+            draftRevision {
+                updatedAt
+            }
+        }
+    }
+}

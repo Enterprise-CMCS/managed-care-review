@@ -1,0 +1,32 @@
+query SyntheticFetchCurrentUser {
+    fetchCurrentUser {
+        ... on CMSUser {
+            id
+            role
+        }
+        ... on CMSApproverUser {
+            id
+            role
+        }
+        ... on StateUser {
+            id
+            role
+        }
+        ... on AdminUser {
+            id
+            role
+        }
+        ... on HelpdeskUser {
+            id
+            role
+        }
+        ... on BusinessOwnerUser {
+            id
+            role
+        }
+        ... on ReadOnlyUser {
+            id
+            role
+        }
+    }
+}

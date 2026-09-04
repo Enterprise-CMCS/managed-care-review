@@ -1,0 +1,9 @@
+mutation SyntheticSubmitContract($input: SubmitContractInput!) {
+    submitContract(input: $input) {
+        contract {
+            id
+            stateCode
+            status
+        }
+    }
+}
