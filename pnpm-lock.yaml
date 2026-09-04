@@ -74,7 +74,7 @@ importers:
         version: 3.1123.0
       axios:
         specifier: '>=1.15.2'
-        version: 1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+        version: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       node-ssh:
         specifier: ^13.2.1
         version: 13.2.1
@@ -505,7 +505,7 @@ importers:
         version: 8.0.0
       axios:
         specifier: '>=1.15.2'
-        version: 1.19.0(debug@4.4.3(supports-color@5.5.0))(supports-color@5.5.0)
+        version: 1.20.0(debug@4.4.3(supports-color@5.5.0))(supports-color@5.5.0)
       eta:
         specifier: ^2.2.0
         version: 2.2.0
@@ -738,7 +738,7 @@ importers:
         version: 5.3.33(debug@4.4.3(supports-color@10.2.2))(react-native@0.74.3(@babel/core@7.29.7(supports-color@10.2.2))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.8)(supports-color@10.2.2))(supports-color@10.2.2)
       axios:
         specifier: '>=1.15.2'
-        version: 1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+        version: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       dayjs:
         specifier: ^1.11.21
         version: 1.11.21
@@ -1006,7 +1006,7 @@ importers:
         version: link:../../packages/submissions
       axios:
         specifier: '>=1.15.2'
-        version: 1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+        version: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       cypress-file-upload:
         specifier: ^5.0.8
         version: 5.0.8(cypress@15.20.1)
@@ -6880,8 +6880,8 @@ packages:
     resolution: {integrity: sha512-UzGt8zg7Ny8djbYMhxl2zuEevVa7r2gJjYY5Lwr1xM7+XU2nd6CkIWFTVcCIbAP63vSz71NaVyyuSk9lHKcy0A==}
     engines: {node: '>=4'}
 
-  axios@1.19.0:
-    resolution: {integrity: sha512-ht/iuYZXEjFxLH/Hkezgd7m6JKlHHXEUSneaDz8uZe1Gj5QZtCnpyDsckvAiEnT89OEbCLmnte4R4sn7P0EKFw==}
+  axios@1.20.0:
+    resolution: {integrity: sha512-r8aOh8j9cGKpgQAqpzrUHnSIc6a59Y3Xf/cv8sy1DrHCkZHzQGEuoq1tARk6qSyDdtQGSDgpb9kFlruzPvrgwg==}
 
   axobject-query@4.1.0:
     resolution: {integrity: sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ==}
@@ -13020,7 +13020,7 @@ snapshots:
   '@aws-amplify/api-rest@3.5.18(debug@4.4.3(supports-color@10.2.2))(react-native@0.74.3(@babel/core@7.29.7(supports-color@10.2.2))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.8)(supports-color@10.2.2))(supports-color@10.2.2)':
     dependencies:
       '@aws-amplify/core': 5.8.16(react-native@0.74.3(@babel/core@7.29.7(supports-color@10.2.2))(@babel/preset-env@7.29.7(@babel/core@7.29.7(supports-color@10.2.2))(supports-color@10.2.2))(@types/react@19.2.14)(react@19.2.8)(supports-color@10.2.2))
-      axios: 1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
+      axios: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       tslib: 1.14.1
       url: 0.11.0
     transitivePeerDependencies:
@@ -21131,7 +21131,7 @@ snapshots:
 
   axe-core@4.13.0: {}
 
-  axios@1.19.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
+  axios@1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3(supports-color@10.2.2))
       form-data: 4.0.6
@@ -21141,7 +21141,7 @@ snapshots:
       - debug
       - supports-color
 
-  axios@1.19.0(debug@4.4.3(supports-color@5.5.0))(supports-color@5.5.0):
+  axios@1.20.0(debug@4.4.3(supports-color@5.5.0))(supports-color@5.5.0):
     dependencies:
       follow-redirects: 1.16.0(debug@4.4.3(supports-color@5.5.0))
       form-data: 4.0.6
