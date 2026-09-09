@@ -16,8 +16,10 @@ export async function retry<T>(
     options: RetryOptions<T>
 ): Promise<T> {
     const sleep = options.sleep ?? defaultSleep
+    let lastResult: T | undefined
+    let hasLastResult = false
     let lastError: unknown
-
+    let hasLastError = false
     for (let attempt = 1; attempt <= options.maxAttempts; attempt += 1) {
         let result: T | undefined
 
@@ -26,8 +28,13 @@ export async function retry<T>(
             if (!options.shouldRetry(undefined, result)) {
                 return result
             }
+            lastResult = result
+            hasLastResult = true
+            hasLastError = false
         } catch (error) {
             lastError = error
+            hasLastError = true
+            hasLastResult = false
             if (!options.shouldRetry(error, undefined)) {
                 throw error
             }
@@ -38,9 +45,15 @@ export async function retry<T>(
         }
     }
 
-    if (lastError !== undefined) {
+    if (hasLastResult) {
+        return lastResult as T
+    }
+
+    if (hasLastError) {
         throw lastError
     }
 
-    throw new Error(`Operation failed after ${options.maxAttempts} attempts`)
+    throw new Error(
+        `Operation did not run with maxAttempts=${options.maxAttempts}`
+    )
 }

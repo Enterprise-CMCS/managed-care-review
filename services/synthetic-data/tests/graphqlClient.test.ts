@@ -48,6 +48,34 @@ describe('GraphQLClient', () => {
         )
     })
 
+    it('returns the final transient response after exhausting retries', async () => {
+        const fetchMock = vi
+            .fn()
+            .mockResolvedValue(
+                Response.json(
+                    { errors: [{ message: 'Service unavailable' }] },
+                    { status: 503 }
+                )
+            )
+        const sleep = vi.fn().mockResolvedValue(undefined)
+        const client = new GraphQLClient({
+            endpoint: 'https://api.example.com/v1/graphql/external',
+            accessToken: () => 'test-token',
+            fetch: fetchMock,
+            retry: { maxAttempts: 2, baseDelayMs: 1, sleep },
+        })
+
+        await expect(
+            client.execute(SyntheticFetchCurrentUserDocument, {})
+        ).rejects.toMatchObject({
+            name: 'GraphQLRequestError',
+            status: 503,
+            errors: [{ message: 'Service unavailable' }],
+        })
+        expect(fetchMock).toHaveBeenCalledTimes(2)
+        expect(sleep).toHaveBeenCalledWith(1)
+    })
+
     it('reports GraphQL errors without retrying a successful HTTP response', async () => {
         const fetchMock = vi.fn().mockResolvedValue(
             Response.json({
