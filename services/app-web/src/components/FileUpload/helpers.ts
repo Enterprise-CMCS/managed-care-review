@@ -16,7 +16,7 @@ const hasNoFileErrors = (fileItems: FileItemT[]) => {
 
 const hasAtLeastOneFile = (fileItems: FileItemT[]) => fileItems.length > 0
 
-const hasNoMoreThanOneFile = (fileItems: FileItemT[]) => fileItems.length === 1
+const hasNoMoreThanOneFile = (fileItems: FileItemT[]) => fileItems.length <= 1
 
 // Used to prevent save as draft when documents are partially loaded or have file errors
 const isLoadingOrHasFileErrors = (fileItems: FileItemT[]) => {

@@ -233,7 +233,7 @@ const RateDetailsFormSchema = (
               rateForms: Yup.array().of(
                   Yup.object()
                       .when('.ratePreviouslySubmitted', {
-                          // make the user select something for rate preivously submitted yes no question
+                          // make the user select something for rate previously submitted yes no question
                           is: undefined,
                           then: () =>
                               Yup.object().shape({
