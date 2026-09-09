@@ -21,10 +21,8 @@ const SingleRateCertSchema = (
             .optional() // legacy field
             .when('hasSharedRateCert', {
                 is: 'YES',
-                then: Yup.array().min(
-                    1,
-                    'You must select at least one submission'
-                ),
+                then: (schema) =>
+                    schema.min(1, 'You must select at least one submission'),
             })
             .required(),
         rateProgramIDs: Yup.array().min(
@@ -47,94 +45,99 @@ const SingleRateCertSchema = (
         rateCapitationType: Yup.string().defined(
             "You must select whether you're certifying rates or rate ranges"
         ),
-        rateDateStart: Yup.date().when('rateType', (rateType) => {
-            if (rateType) {
-                return (
-                    Yup.date()
+        rateDateStart: Yup.date().when('rateType', ([rateType], schema) => {
+            if (!rateType) return schema
 
-                        // @ts-ignore-next-line
-                        .validateDateFormat('YYYY-MM-DD', true)
-                        .defined('You must enter a start date')
-                        .typeError(
-                            'The start date must be in MM/DD/YYYY format, like 01/01/2030'
-                        )
-                )
-            }
+            return (
+                schema
+
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined('You must enter a start date')
+                    .typeError(
+                        'The start date must be in MM/DD/YYYY format, like 01/01/2030'
+                    )
+            )
         }),
-        rateDateEnd: Yup.date().when('rateType', (rateType) => {
-            if (rateType) {
-                return (
-                    Yup.date()
+        rateDateEnd: Yup.date().when('rateType', ([rateType], schema) => {
+            if (!rateType) return schema
 
-                        // @ts-ignore-next-line
-                        .validateDateFormat('YYYY-MM-DD', true)
-                        .defined('You must enter an end date')
-                        .typeError(
-                            'The end date must be in MM/DD/YYYY format, like 01/01/2030'
-                        )
-                        .when(
-                            // RateDateEnd must be at minimum the day after Start
-                            'rateDateStart',
-                            (rateDateStart: Date, schema: Yup.DateSchema) => {
-                                const startDate = dayjs(rateDateStart)
-                                if (startDate.isValid()) {
-                                    return schema.min(
-                                        startDate.add(1, 'day'),
-                                        'The end date must come after the start date'
-                                    )
-                                }
-                            }
-                        )
-                )
-            }
+            return (
+                schema
+
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined('You must enter an end date')
+                    .typeError(
+                        'The end date must be in MM/DD/YYYY format, like 01/01/2030'
+                    )
+                    .when(
+                        // RateDateEnd must be at minimum the day after Start
+                        'rateDateStart',
+                        (
+                            [rateDateStart]: [Date | undefined],
+                            endDateSchema: Yup.DateSchema
+                        ) => {
+                            const startDate = dayjs(rateDateStart)
+                            return startDate.isValid()
+                                ? endDateSchema.min(
+                                      startDate.add(1, 'day'),
+                                      'The end date must come after the start date'
+                                  )
+                                : endDateSchema
+                        }
+                    )
+            )
         }),
-        rateDateCertified: Yup.date().when('rateType', (rateType) => {
-            if (rateType) {
-                return (
-                    Yup.date()
+        rateDateCertified: Yup.date().when('rateType', ([rateType], schema) => {
+            if (!rateType) return schema
 
-                        // @ts-ignore-next-line
-                        .validateDateFormat('YYYY-MM-DD', true)
-                        .defined(
-                            'You must enter the date the document was certified'
-                        )
-                        .typeError(
-                            'The certified date must be in MM/DD/YYYY format'
-                        )
-                        .max(
-                            dayjs(new Date()),
-                            'The certification date cannot be a future date'
-                        )
-                )
-            }
+            return (
+                schema
+
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined(
+                        'You must enter the date the document was certified'
+                    )
+                    .typeError(
+                        'The certified date must be in MM/DD/YYYY format'
+                    )
+                    .max(
+                        dayjs(new Date()),
+                        'The certification date cannot be a future date'
+                    )
+            )
         }),
         effectiveDateStart: Yup.date().when('rateType', {
             is: 'AMENDMENT',
-            then: Yup.date()
-                .nullable()
+            then: (schema) =>
+                schema
+                    .nullable()
 
-                // @ts-ignore-next-line
-                .validateDateFormat('YYYY-MM-DD', true)
-                .defined('You must enter a start date')
-                .typeError(
-                    'The start date must be in MM/DD/YYYY format, like 01/01/2030'
-                ),
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined('You must enter a start date')
+                    .typeError(
+                        'The start date must be in MM/DD/YYYY format, like 01/01/2030'
+                    ),
         }),
         effectiveDateEnd: Yup.date().when('rateType', {
             is: 'AMENDMENT',
-            then: Yup.date()
-                .nullable()
+            then: (schema) =>
+                schema
+                    .nullable()
 
-                // @ts-ignore-next-line
-                .validateDateFormat('YYYY-MM-DD', true)
-                .defined('You must enter an end date')
-                .typeError(
-                    'The end date must be in MM/DD/YYYY format, like 01/01/2030'
-                )
-                .min(
-                    Yup.ref('effectiveDateStart'),
-                    'The end date must come after the start date'
-                ),
+                    // @ts-ignore-next-line
+                    .validateDateFormat('YYYY-MM-DD', true)
+                    .defined('You must enter an end date')
+                    .typeError(
+                        'The end date must be in MM/DD/YYYY format, like 01/01/2030'
+                    )
+                    .min(
+                        Yup.ref('effectiveDateStart'),
+                        'The end date must come after the start date'
+                    ),
         }),
         actuaryContacts: Yup.array().of(
             Yup.object().shape({
@@ -167,9 +170,10 @@ const SingleRateCertSchema = (
                 actuarialFirmOther: Yup.string()
                     .when('actuarialFirm', {
                         is: 'OTHER',
-                        then: Yup.string()
-                            .required('You must enter a description')
-                            .nullable(),
+                        then: (schema) =>
+                            schema
+                                .required('You must enter a description')
+                                .nullable(),
                     })
                     .nullable(),
             })
@@ -205,9 +209,10 @@ const SingleRateCertSchema = (
                 actuarialFirmOther: Yup.string()
                     .when('actuarialFirm', {
                         is: 'OTHER',
-                        then: Yup.string()
-                            .required('You must enter a description')
-                            .nullable(),
+                        then: (schema) =>
+                            schema
+                                .required('You must enter a description')
+                                .nullable(),
                     })
                     .nullable(),
             })
@@ -230,28 +235,31 @@ const RateDetailsFormSchema = (
                       .when('.ratePreviouslySubmitted', {
                           // make the user select something for rate preivously submitted yes no question
                           is: undefined,
-                          then: Yup.object().shape({
-                              ratePreviouslySubmitted: Yup.string().defined(
-                                  'You must select yes or no '
-                              ),
-                          }),
+                          then: () =>
+                              Yup.object().shape({
+                                  ratePreviouslySubmitted: Yup.string().defined(
+                                      'You must select yes or no '
+                                  ),
+                              }),
                       })
                       .when('.ratePreviouslySubmitted', {
                           // make the user select a linked rate, skip all other validations for a previously submitted rate
                           is: 'YES',
-                          then: Yup.object().shape({
-                              linkRateSelect: Yup.string().defined(
-                                  'You must select a rate certification'
-                              ),
-                          }),
+                          then: () =>
+                              Yup.object().shape({
+                                  linkRateSelect: Yup.string().defined(
+                                      'You must select a rate certification'
+                                  ),
+                              }),
                       })
                       .when('.ratePreviouslySubmitted', {
                           // continue with normal rate form validations when its a new rate
                           is: 'NO',
-                          then: SingleRateCertSchema(
-                              activeFeatureFlags || {},
-                              isDSNP
-                          ),
+                          then: () =>
+                              SingleRateCertSchema(
+                                  activeFeatureFlags || {},
+                                  isDSNP
+                              ),
                       })
               ),
           })
