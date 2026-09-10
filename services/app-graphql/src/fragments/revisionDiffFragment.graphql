@@ -1,0 +1,104 @@
+fragment revisionDiffFragment on RevisionDiff {
+    olderRevisionID
+    newerRevisionID
+    olderSubmittedAt
+    newerSubmittedAt
+    fieldChanges {
+        fieldPath
+        oldValue {
+            valueType
+            value
+        }
+        newValue {
+            valueType
+            value
+        }
+    }
+    stateContactChanges {
+        changeType
+        index
+        current {
+            name
+            titleRole
+            email
+        }
+    }
+    documentChanges {
+        contractDocuments {
+            added
+            removed
+        }
+        contractSupportingDocuments {
+            added
+            removed
+        }
+        ratesDocuments {
+            rateID
+            rateCertificationName
+            rateDocuments {
+                added
+                removed
+            }
+            supportingDocuments {
+                added
+                removed
+            }
+        }
+        totalAdded
+        totalRemoved
+    }
+    rateChanges {
+        added {
+            rateID
+            rateCertificationName
+            isLinkedRate
+        }
+        removed {
+            rateID
+            rateCertificationName
+        }
+        revised {
+            rateID
+            rateCertificationName
+            fieldChanges {
+                fieldPath
+                oldValue {
+                    valueType
+                    value
+                }
+                newValue {
+                    valueType
+                    value
+                }
+            }
+            rateDocuments {
+                added
+                removed
+            }
+            supportingRateDocuments {
+                added
+                removed
+            }
+            certifyingActuaryContactChanges {
+                changeType
+                index
+                current {
+                    name
+                    titleRole
+                    email
+                    actuarialFirm
+                }
+            }
+            addtlActuaryContactChanges {
+                changeType
+                index
+                current {
+                    name
+                    titleRole
+                    email
+                    actuarialFirm
+                }
+            }
+        }
+    }
+}
