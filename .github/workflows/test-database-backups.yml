@@ -1,0 +1,109 @@
+name: Test database backups
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to validate'
+        required: true
+        default: 'val'
+        type: choice
+        options:
+          - dev
+          - val
+          - prod
+          - all
+  schedule:
+    - cron: '0 9 1 * *'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: test-database-backups-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  select-environments:
+    name: Select environments
+    runs-on: ubuntu-24.04
+    outputs:
+      environments: ${{ steps.environments.outputs.environments }}
+    steps:
+      - name: Select environments
+        id: environments
+        shell: bash
+        run: |
+          selected="${{ inputs.environment || 'all' }}"
+
+          if [[ "$selected" == "all" ]]; then
+            echo 'environments=["dev","val","prod"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "environments=[\"$selected\"]" >> "$GITHUB_OUTPUT"
+          fi
+
+  test-backup-restore:
+    name: Test ${{ matrix.environment }} backup restore
+    needs: select-environments
+    runs-on: ubuntu-24.04
+    timeout-minutes: 220
+    environment: ${{ matrix.environment }}
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: ${{ fromJson(needs.select-environments.outputs.environments) }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Configure AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ matrix.environment == 'prod' && secrets.PROD_AWS_ACCOUNT_ID || matrix.environment == 'val' && secrets.VAL_AWS_ACCOUNT_ID || secrets.DEV_AWS_ACCOUNT_ID }}
+          stage-name: ${{ matrix.environment }}
+          use-cdk-role: 'true'
+
+      - name: Test Aurora automated backup restore
+        shell: bash
+        run: |
+          pnpm --filter scripts build
+          node scripts/test-aurora-automated-backup-restore.js --env "${{ matrix.environment }}"
+
+  slack:
+    name: Slack notification
+    runs-on: ubuntu-24.04
+    needs: [test-backup-restore]
+    if: always()
+    steps:
+      - uses: technote-space/workflow-conclusion-action@v3
+
+      - name: Alert Slack On Failure
+        uses: rtCamp/action-slack-notify@v2
+        if: env.WORKFLOW_CONCLUSION == 'failure'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Database Backup Restore Alerts
+          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_COLOR: danger
+          SLACK_TITLE: Aurora backup restore test failed
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: actions url,commit,ref
+
+      # Success is reported too so a silent week reads as "the workflow never
+      # ran" rather than "the backups are fine".
+      - name: Notify Slack On Success
+        uses: rtCamp/action-slack-notify@v2
+        if: env.WORKFLOW_CONCLUSION == 'success'
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Database Backup Restore Alerts
+          SLACK_ICON_EMOJI: ':bell:'
+          SLACK_COLOR: good
+          SLACK_TITLE: Aurora backup restore test passed
+          SLACK_FOOTER: ''
+          MSG_MINIMAL: actions url,commit,ref

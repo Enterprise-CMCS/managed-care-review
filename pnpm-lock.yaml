@@ -364,10 +364,16 @@ importers:
       '@aws-sdk/client-lambda':
         specifier: ^3.1123.0
         version: 3.1123.0
+      '@aws-sdk/client-rds':
+        specifier: ^3.1123.0
+        version: 3.1123.0
       '@aws-sdk/client-s3':
         specifier: ^3.1123.0
         version: 3.1123.0
       '@aws-sdk/client-secrets-manager':
+        specifier: ^3.1123.0
+        version: 3.1123.0
+      '@aws-sdk/client-ssm':
         specifier: ^3.1123.0
         version: 3.1123.0
       '@types/papaparse':
@@ -389,6 +395,12 @@ importers:
       '@octokit/openapi-types':
         specifier: ^27.0.0
         version: 27.0.0
+      '@types/node':
+        specifier: ^26.2.0
+        version: 26.2.0
+      '@vitest/coverage-v8':
+        specifier: ^4.1.7
+        version: 4.1.7(vitest@4.1.7)
       csv-parser:
         specifier: ^3.2.0
         version: 3.2.0
@@ -401,6 +413,9 @@ importers:
       uuid:
         specifier: ^14.0.2
         version: 14.0.2
+      vitest:
+        specifier: ^4.1.7
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(jsdom@30.0.1)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.77.2)(terser@5.49.0)(tsx@4.23.13)(yaml@2.9.0))
 
   services/app-api:
     dependencies:
