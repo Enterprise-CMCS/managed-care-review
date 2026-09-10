@@ -144,6 +144,20 @@ Scalar field merge applies one field at a time. `OVERRIDE` sets the effective
 value for that field. `CLEAR_OVERRIDE` removes the effective override for that
 field and returns to the base submitted value.
 
+The currently supported revision-level scalar fields are `contractType` and
+`dsnpContract` on contract revisions and `rateMedicaidPopulations` on rate
+revisions. `dsnpContract` is nullable, so `OVERRIDE` with a `NULL` payload is a
+valid instruction and is distinct from omitting `dsnpContractOp`.
+
+`rateMedicaidPopulations` uses the scalar override model even though its value is
+an array of enum values. Its non-null Prisma list column defaults to `[]`, so the
+operation column determines intent:
+
+- a nullable operation with stored `[]` means no override instruction
+- `OVERRIDE` with `[]` means the effective value is intentionally an empty array
+- `CLEAR_OVERRIDE` removes the active override and returns to the submitted base
+  array
+
 ### Document Merge
 
 Document arrays are sparse-merged item collections. A newer document override
@@ -163,6 +177,9 @@ Document override rows follow these rules:
 
 - `ADD` must carry full document payload: `name`, `sha256`, and `s3URL`, with
   optional `s3BucketName` and `s3Key`
+- If `s3Key` or `s3BucketName` is omitted, `s3URL` must use the parseable legacy
+  regular-document format `s3://bucket/uuid.ext/filename.ext` so download and
+  lookup paths can recover the missing S3 metadata
 - `ADD` must not carry `documentID`
 - `ADD` is invalid when `documentSha256` does not match payload `sha256`
 - `ADD` does not require `dateAdded`. If `dateAddedOp = OVERRIDE` is supplied,
@@ -227,8 +244,9 @@ contract `initiallySubmittedAt`.
 
 Stripped index responses stay slim. They apply relevant scalar/revision
 overrides for fields they return, such as `initiallySubmittedAt` and
-`contractType`, but they do not include full override history arrays unless the
-API explicitly adds those fields.
+`contractType`, `dsnpContract`, and `rateMedicaidPopulations`, but they do not
+include full override history arrays unless the API explicitly adds those
+fields.
 
 Document lookup is separate from effective form-data merge. `findDocumentById`
 first looks in the base document tables. If no base document is found, it looks
@@ -278,10 +296,12 @@ Unlock creates a new draft revision from effective submitted data.
 On unlock:
 
 - revision scalar overrides that should become draft base data are materialized
-  into the draft value. Today this includes `contractType`.
+  into the draft value. Today this includes `contractType`, `dsnpContract`, and
+  `rateMedicaidPopulations`.
 - parent-level override history, such as `initiallySubmittedAt`, is not copied
   into draft revision form data
-- active override-added documents become normal draft document rows
+- active override-added contract and rate documents become normal draft document
+  rows
 - documents hidden by `DELETE` are not copied into the draft
 - field overrides on existing documents, such as `dateAdded`, are not copied
   into draft document rows

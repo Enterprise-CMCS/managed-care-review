@@ -12,6 +12,8 @@ fragment rateOverridesFragment on RateOverrideType {
             id
             createdAt
             rateRevisionID
+            rateMedicaidPopulations
+            rateMedicaidPopulationsOp
             rateDocuments {
                 ...genericDocumentOverrideFragment
             }

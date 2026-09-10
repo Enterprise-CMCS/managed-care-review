@@ -4,6 +4,7 @@ import type {
     ContractSupportingDocument,
     ContractType,
     RateDocument,
+    RateMedicaidPopulations,
     RateSupportingDocument,
     ScalarFieldOverrideOperation,
 } from '../generated/client'
@@ -14,6 +15,7 @@ import {
     type ContractFormDataType,
     type RateFormDataType,
 } from '../domain-models/contractAndRates'
+import { rateMedicaidPopulationsSchema } from '../domain-models/contractAndRates/formDataTypes'
 import type { ContractRevisionOverridesTablePayload } from './contractAndRates/prismaSubmittedContractHelpers'
 import type { RateRevisionOverridesTablePayload } from './contractAndRates/prismaSubmittedRateHelpers'
 
@@ -489,6 +491,25 @@ const mergeScalarFieldOverrides = <
     return currentOverride
 }
 
+/**
+ * Returns a stored scalar-array value only when its operation represents an
+ * active override. Prisma scalar arrays are non-nullable, so the operation
+ * distinguishes an intentional empty-array override from no override value.
+ * This helper is for arrays containing scalar values, such as enum or string
+ * arrays. Do not use it for arrays of nested objects, which require item-level
+ * override merging.
+ *
+ * @param args.operation Operation stored alongside the scalar-array value.
+ * @param args.value Persisted scalar-array value.
+ */
+const getScalarArrayOverrideValue = <T>({
+    operation,
+    value,
+}: {
+    operation?: ScalarFieldOverrideOperation | null
+    value: T[]
+}): T[] | undefined => (operation === 'OVERRIDE' ? value : undefined)
+
 type DocumentOverrideRow = {
     id: string
     createdAt: Date
@@ -515,6 +536,67 @@ type DocumentWithCommonFields = {
     s3BucketName: string | null
     s3Key: string | null
     dateAdded: Date | null
+}
+
+type UnlockedDocumentCreateData = Pick<
+    DocumentWithCommonFields,
+    'position' | 'name' | 's3URL' | 'sha256' | 's3BucketName' | 's3Key'
+> & {
+    dateAdded?: Date | null
+}
+
+/**
+ * Takes base documents and document overrides for the same revision and merges
+ * them into array for creating a new revision for unlocking contracts or rates.
+ *
+ * @param args.baseDocuments Base documents attached directly to the submitted
+ * revision before overrides are applied.
+ * @param args.overriddenDocuments Merged document list after applying override
+ * operations. Usually generated using mergeContractRevisionOverrides or mergeRateRevisionOverrides
+ */
+const mapOverriddenDocsToUnlockedRev = <T extends DocumentWithCommonFields>({
+    baseDocuments,
+    overriddenDocuments,
+}: {
+    baseDocuments: T[]
+    overriddenDocuments: T[]
+}): UnlockedDocumentCreateData[] => {
+    // Base IDs distinguish base documents from documents added by overrides.
+    const baseDocumentIDs = new Set(
+        baseDocuments.map((document) => document.id)
+    )
+    // Find the last base document position so override-added documents can follow it.
+    const maxBasePosition =
+        baseDocuments.length > 0
+            ? Math.max(...baseDocuments.map((document) => document.position))
+            : -1
+
+    // Count only override-added documents so their new positions stay sequential.
+    let addedDocumentOrdinal = 0
+    return overriddenDocuments.map((document) => {
+        // A matching base ID means this document existed before the overrides.
+        const isBaseDocument = baseDocumentIDs.has(document.id)
+        if (!isBaseDocument) addedDocumentOrdinal++
+
+        // Keep base positions; place added documents after the final base position.
+        // IDs and revision metadata are omitted so Prisma creates new draft rows.
+        const createData = {
+            position: isBaseDocument
+                ? document.position
+                : maxBasePosition + addedDocumentOrdinal,
+            name: document.name,
+            s3URL: document.s3URL,
+            sha256: document.sha256,
+            s3BucketName: document.s3BucketName,
+            s3Key: document.s3Key,
+        }
+
+        // Added documents carry their override date into the draft. Base document
+        // date overrides are recovered from submission history during resubmit.
+        return isBaseDocument
+            ? createData
+            : { ...createData, dateAdded: document.dateAdded }
+    })
 }
 
 /**
@@ -960,6 +1042,7 @@ const mergeDocumentOverrides = <T extends DocumentWithCommonFields>({
 
 type MergedContractScalarFieldOverrides = {
     contractType: ScalarOverrideResult<ContractType>
+    dsnpContract: ScalarOverrideResult<boolean | undefined>
 }
 
 type ContractScalarFieldOverrideRow = {
@@ -967,6 +1050,8 @@ type ContractScalarFieldOverrideRow = {
     createdAt: Date
     contractType: ContractType | null
     contractTypeOp: ScalarFieldOverrideOperation | null
+    dsnpContract: boolean | null
+    dsnpContractOp: ScalarFieldOverrideOperation | null
 }
 
 type ContractRevisionOverrideRow = ContractScalarFieldOverrideRow & {
@@ -992,6 +1077,13 @@ const mergeStrippedContractRevisionOverrides = (
             getValue: (row) => row.contractType,
             valueSchema: contractFormDataSchema.shape.contractType,
             fieldPath: 'ContractRevisionOverrides.contractType',
+        }),
+        dsnpContract: mergeScalarFieldOverrides({
+            rows: revisionOverrideRows,
+            getOperation: (row) => row.dsnpContractOp,
+            getValue: (row) => row.dsnpContract,
+            valueSchema: contractFormDataSchema.shape.dsnpContract,
+            fieldPath: 'ContractRevisionOverrides.dsnpContract',
         }),
     }
 }
@@ -1034,11 +1126,11 @@ const mergeContractRevisionOverrides = ({
     // scalar field overrides and document array changes into these states.
     let mergedOverride: MergedContractScalarFieldOverrides = {
         contractType: { hasOverride: false },
+        dsnpContract: { hasOverride: false },
     }
     let contractDocumentState: DocumentMergeState<ContractDocument> | undefined
     let supportingDocumentState:
-        | DocumentMergeState<ContractSupportingDocument>
-        | undefined
+        DocumentMergeState<ContractSupportingDocument> | undefined
 
     for (const row of ordered) {
         // Apply revision-level scalar field operations from this override row.
@@ -1052,6 +1144,14 @@ const mergeContractRevisionOverrides = ({
                 value: row.contractType,
                 valueSchema: contractFormDataSchema.shape.contractType,
                 fieldPath: 'ContractRevisionOverrides.contractType',
+                overrideID: row.id,
+            }),
+            dsnpContract: applyScalarFieldOverride({
+                currentOverride: mergedOverride.dsnpContract,
+                operation: row.dsnpContractOp,
+                value: row.dsnpContract,
+                valueSchema: contractFormDataSchema.shape.dsnpContract,
+                fieldPath: 'ContractRevisionOverrides.dsnpContract',
                 overrideID: row.id,
             }),
         }
@@ -1113,7 +1213,34 @@ const mergeContractRevisionOverrides = ({
     }
 }
 
-type MergedRateRevisionOverrides = {
+type MergedRateScalarFieldOverrides = {
+    rateMedicaidPopulations: ScalarOverrideResult<RateMedicaidPopulations[]>
+}
+
+type RateScalarFieldOverrideRow = {
+    id: string
+    createdAt: Date
+    rateMedicaidPopulations: RateMedicaidPopulations[]
+    rateMedicaidPopulationsOp: ScalarFieldOverrideOperation | null
+}
+
+const mergeStrippedRateRevisionOverrides = (
+    revisionOverrideRows: RateScalarFieldOverrideRow[]
+): MergedRateScalarFieldOverrides => ({
+    rateMedicaidPopulations: mergeScalarFieldOverrides({
+        rows: revisionOverrideRows,
+        getOperation: (row) => row.rateMedicaidPopulationsOp,
+        getValue: (row) =>
+            getScalarArrayOverrideValue({
+                operation: row.rateMedicaidPopulationsOp,
+                value: row.rateMedicaidPopulations,
+            }),
+        valueSchema: z.array(rateMedicaidPopulationsSchema),
+        fieldPath: 'RateRevisionOverrides.rateMedicaidPopulations',
+    }),
+})
+
+type MergedRateRevisionOverrides = MergedRateScalarFieldOverrides & {
     rateDocuments: RateDocument[]
     supportingDocuments: RateSupportingDocument[]
 }
@@ -1127,8 +1254,8 @@ type RateRevisionOverrideMergeInput = {
 /**
  * Merges all override rows that apply to one full rate revision.
  *
- * Rate revision overrides currently contain document array operations only, but
- * this follows the same event-order merge model as contract revisions.
+ * Rate revision overrides contain scalar population corrections and document
+ * array operations, all following the same event-order merge model.
  *
  * @param args.revisionOverrides Rate revision override events to apply.
  * @param args.rateRevision Stored base rate revision being overlaid.
@@ -1146,14 +1273,28 @@ const mergeRateRevisionOverrides = ({
         (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
     )
 
-    // Rate revision overrides currently only contain document array changes,
-    // but use the same accumulated merge-state pattern as contract revisions.
+    let mergedOverride: MergedRateScalarFieldOverrides = {
+        rateMedicaidPopulations: { hasOverride: false },
+    }
     let rateDocumentState: DocumentMergeState<RateDocument> | undefined
     let supportingDocumentState:
-        | DocumentMergeState<RateSupportingDocument>
-        | undefined
+        DocumentMergeState<RateSupportingDocument> | undefined
 
     for (const row of ordered) {
+        mergedOverride = {
+            rateMedicaidPopulations: applyScalarFieldOverride({
+                currentOverride: mergedOverride.rateMedicaidPopulations,
+                operation: row.rateMedicaidPopulationsOp,
+                value: getScalarArrayOverrideValue({
+                    operation: row.rateMedicaidPopulationsOp,
+                    value: row.rateMedicaidPopulations,
+                }),
+                valueSchema: z.array(rateMedicaidPopulationsSchema),
+                fieldPath: 'RateRevisionOverrides.rateMedicaidPopulations',
+                overrideID: row.id,
+            }),
+        }
+
         // Apply rate document operations from this override event.
         for (const docRow of row.rateDocuments) {
             rateDocumentState ??= createDocumentMergeState(
@@ -1199,6 +1340,7 @@ const mergeRateRevisionOverrides = ({
     // Convert document merge maps back into arrays while preserving original
     // order for base docs and append order for override-added docs.
     return {
+        ...mergedOverride,
         rateDocuments: rateDocumentState
             ? documentMergeStateToDocuments(rateDocumentState)
             : (rateRevision.rateDocuments ?? []),
@@ -1209,12 +1351,15 @@ const mergeRateRevisionOverrides = ({
 }
 
 export {
+    getScalarArrayOverrideValue,
+    mapOverriddenDocsToUnlockedRev,
     mergeContractDocumentOverrides,
     mergeDocumentOverrides,
     mergeContractRevisionOverrides,
     mergeRateRevisionOverrides,
     mergeScalarFieldOverrides,
     mergeStrippedContractRevisionOverrides,
+    mergeStrippedRateRevisionOverrides,
     normalizeDocumentOverrideInputs,
     validateDocumentOverrideInputs,
     validateScalarOverrideInput,

@@ -7,6 +7,7 @@ import {
 import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithRate,
+    unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { overrideTestRateData } from '../../testHelpers/gqlRateHelpers'
 import { testAdminUser, testCMSUser } from '../../testHelpers/userHelpers'
@@ -14,6 +15,7 @@ import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { OverrideRateDataDocument } from '../../gen/gqlClient'
 import { assertAnErrorCode } from '../../testHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import type { GenericDocument } from '../../gen/gqlServer'
 
 describe('overrideRateData resolver', () => {
     const ldService = testLDService({
@@ -93,6 +95,18 @@ describe('overrideRateData resolver', () => {
         const rateID =
             submittedContract.packageSubmissions[0].rateRevisions[0].rateID
         const overrideDate = '2020-01-15T00:00:00.000Z'
+        const populations = [
+            'MEDICARE_MEDICAID_WITH_DSNP' as const,
+            'MEDICAID_ONLY' as const,
+        ]
+        const submittedRateRevision =
+            submittedContract.packageSubmissions[0].rateRevisions[0]
+        const baseRateDocument = submittedRateRevision.formData.rateDocuments[0]
+        const addedRateDocumentSha = 'resolver-added-rate-document-sha'
+        const addedSupportingDocumentSha =
+            'resolver-added-rate-supporting-document-sha'
+        const addedRateDocumentDate = '2025-10-10T00:00:00.000Z'
+        const addedSupportingDocumentDate = '2025-11-11T00:00:00.000Z'
 
         const result = await executeGraphQLOperation(adminServer, {
             query: OverrideRateDataDocument,
@@ -103,6 +117,41 @@ describe('overrideRateData resolver', () => {
                     overrides: {
                         initiallySubmittedAt: overrideDate,
                         initiallySubmittedAtOp: 'OVERRIDE',
+                        revisionOverride: {
+                            rateMedicaidPopulations: populations,
+                            rateMedicaidPopulationsOp: 'OVERRIDE',
+                            rateDocuments: [
+                                {
+                                    documentOp: 'DELETE',
+                                    documentID: baseRateDocument.id,
+                                    documentSha256: baseRateDocument.sha256,
+                                },
+                                {
+                                    documentOp: 'ADD',
+                                    documentSha256: addedRateDocumentSha,
+                                    name: 'resolver-added-rate.pdf',
+                                    s3URL: 's3://bucket/resolver-added-rate',
+                                    s3BucketName: 'bucket',
+                                    s3Key: 'allusers/resolver-added-rate',
+                                    sha256: addedRateDocumentSha,
+                                    dateAdded: addedRateDocumentDate,
+                                    dateAddedOp: 'OVERRIDE',
+                                },
+                            ],
+                            supportingDocuments: [
+                                {
+                                    documentOp: 'ADD',
+                                    documentSha256: addedSupportingDocumentSha,
+                                    name: 'resolver-added-rate-supporting.pdf',
+                                    s3URL: 's3://bucket/resolver-added-rate-supporting',
+                                    s3BucketName: 'bucket',
+                                    s3Key: 'allusers/resolver-added-rate-supporting',
+                                    sha256: addedSupportingDocumentSha,
+                                    dateAdded: addedSupportingDocumentDate,
+                                    dateAddedOp: 'OVERRIDE',
+                                },
+                            ],
+                        },
                     },
                 },
             },
@@ -114,6 +163,44 @@ describe('overrideRateData resolver', () => {
                 result.data?.overrideRateData.rate.initiallySubmittedAt
             ).toISOString()
         ).toBe(overrideDate)
+        expect(
+            result.data?.overrideRateData.rate.packageSubmissions?.[0]
+                .rateRevision.formData.rateMedicaidPopulations
+        ).toEqual(populations)
+        expect(
+            result.data?.overrideRateData.rate.rateOverrides?.[0]?.overrides
+                .revisionOverride
+        ).toMatchObject({
+            rateMedicaidPopulations: populations,
+            rateMedicaidPopulationsOp: 'OVERRIDE',
+        })
+        const overriddenRateFormData =
+            result.data?.overrideRateData.rate.packageSubmissions?.[0]
+                .rateRevision.formData
+        expect(
+            overriddenRateFormData?.rateDocuments.some(
+                (document: GenericDocument) =>
+                    document.id === baseRateDocument.id
+            )
+        ).toBe(false)
+        expect(
+            overriddenRateFormData?.rateDocuments.find(
+                (document: GenericDocument) =>
+                    document.sha256 === addedRateDocumentSha
+            )
+        ).toMatchObject({
+            name: 'resolver-added-rate.pdf',
+            dateAdded: new Date(addedRateDocumentDate),
+        })
+        expect(
+            overriddenRateFormData?.supportingDocuments.find(
+                (document: GenericDocument) =>
+                    document.sha256 === addedSupportingDocumentSha
+            )
+        ).toMatchObject({
+            name: 'resolver-added-rate-supporting.pdf',
+            dateAdded: new Date(addedSupportingDocumentDate),
+        })
 
         const overrideCreatedAt =
             result.data?.overrideRateData.rate.rateOverrides?.[0]?.createdAt
@@ -132,6 +219,45 @@ describe('overrideRateData resolver', () => {
         // contract view of that rate, so both stored action dates should move.
         expect(rateTableRow.lastActionDate).toEqual(overrideCreatedAt)
         expect(contractTableRow.lastActionDate).toEqual(overrideCreatedAt)
+
+        // Now test unlocks retain overrides
+        const unlockedContract = await unlockTestContract(
+            cmsServer,
+            submittedContract.id,
+            'Unlock contract with overridden rate data'
+        )
+        const unlockedRateRevision = unlockedContract.draftRates.find(
+            (rate) => rate.id === rateID
+        )?.draftRevision
+        expect(unlockedRateRevision).toBeDefined()
+        if (!unlockedRateRevision) {
+            throw new Error('Unlocked child rate is missing its draft revision')
+        }
+
+        expect(unlockedRateRevision.formData.rateMedicaidPopulations).toEqual(
+            populations
+        )
+        expect(
+            unlockedRateRevision.formData.rateDocuments.some(
+                (document) => document.sha256 === baseRateDocument.sha256
+            )
+        ).toBe(false)
+        expect(
+            unlockedRateRevision.formData.rateDocuments.find(
+                (document) => document.sha256 === addedRateDocumentSha
+            )
+        ).toMatchObject({
+            name: 'resolver-added-rate.pdf',
+            dateAdded: new Date(addedRateDocumentDate),
+        })
+        expect(
+            unlockedRateRevision.formData.supportingDocuments.find(
+                (document) => document.sha256 === addedSupportingDocumentSha
+            )
+        ).toMatchObject({
+            name: 'resolver-added-rate-supporting.pdf',
+            dateAdded: new Date(addedSupportingDocumentDate),
+        })
     })
 
     it('allows non-delegated admin OAuth clients with admin scope to override rate data', async () => {

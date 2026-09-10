@@ -1176,11 +1176,15 @@ input RateDataOverrideInput {
 input ContractRevisionDataOverrideInput {
     contractType: ContractType
     contractTypeOp: ScalarFieldOverrideOperation
+    dsnpContract: Boolean
+    dsnpContractOp: ScalarFieldOverrideOperation
     contractDocuments: [DocumentDataOverrideInput!]
     supportingDocuments: [DocumentDataOverrideInput!]
 }
 
 input RateRevisionDataOverrideInput {
+    rateMedicaidPopulations: [RateMedicaidPopulations!]
+    rateMedicaidPopulationsOp: ScalarFieldOverrideOperation
     rateDocuments: [DocumentDataOverrideInput!]
     supportingDocuments: [DocumentDataOverrideInput!]
 }
@@ -3489,6 +3493,8 @@ type ContractRevisionOverrideDataType {
     contractRevisionID: String!
     contractType: ContractType
     contractTypeOp: ScalarFieldOverrideOperation
+    dsnpContract: Boolean
+    dsnpContractOp: ScalarFieldOverrideOperation
     contractDocuments: [GenericDocumentOverrideType]
     supportingDocuments: [GenericDocumentOverrideType]
 }
@@ -3511,6 +3517,8 @@ type RateRevisionOverrideDataType {
     id: ID!
     createdAt: DateTime!
     rateRevisionID: String!
+    rateMedicaidPopulations: [RateMedicaidPopulations!]
+    rateMedicaidPopulationsOp: ScalarFieldOverrideOperation
     rateDocuments: [GenericDocumentOverrideType]
     supportingDocuments: [GenericDocumentOverrideType]
 }

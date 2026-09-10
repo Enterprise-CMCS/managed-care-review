@@ -21,6 +21,8 @@ describe('rateOverridesToDomainModel', () => {
                     id: 'rateRevisionOverride1',
                     createdAt: new Date('2024-01-01'),
                     rateRevisionID,
+                    rateMedicaidPopulations: [],
+                    rateMedicaidPopulationsOp: null,
                     rateDocuments: [],
                     supportingDocuments: [
                         {

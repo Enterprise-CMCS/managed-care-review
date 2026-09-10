@@ -89,6 +89,12 @@ export function overrideRateData(
                             input.overrides.initiallySubmittedAtOp,
                         revisionOverride: input.overrides.revisionOverride
                             ? {
+                                  rateMedicaidPopulations:
+                                      input.overrides.revisionOverride
+                                          .rateMedicaidPopulations ?? undefined,
+                                  rateMedicaidPopulationsOp:
+                                      input.overrides.revisionOverride
+                                          .rateMedicaidPopulationsOp,
                                   rateDocuments:
                                       input.overrides.revisionOverride
                                           .rateDocuments ?? undefined,

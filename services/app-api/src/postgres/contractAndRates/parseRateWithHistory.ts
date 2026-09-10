@@ -31,7 +31,11 @@ import {
     isReversedUnlockedRevision,
     isSubmittedRevision,
 } from './prismaSharedContractRateHelpers'
-import { mergeScalarFieldOverrides } from '../prismaOverrideMergeHelpers'
+import {
+    getScalarArrayOverrideValue,
+    mergeScalarFieldOverrides,
+    mergeStrippedRateRevisionOverrides,
+} from '../prismaOverrideMergeHelpers'
 import type {
     RateTableWithoutDraftContractsPayload,
     RateTableWithoutDraftContractsStrippedPayload,
@@ -124,6 +128,19 @@ function rateOverridesToDomainModel(
                               id: revisionOverride.id,
                               createdAt: revisionOverride.createdAt,
                               rateRevisionID: revisionOverride.rateRevisionID,
+                              // This value is returned in the rateOverrides payload,
+                              // where only OVERRIDE represents an active override
+                              // value. For no operation or CLEAR_OVERRIDE, return
+                              // undefined; CLEAR_OVERRIDE is represented by its op.
+                              rateMedicaidPopulations:
+                                  getScalarArrayOverrideValue({
+                                      operation:
+                                          revisionOverride.rateMedicaidPopulationsOp,
+                                      value: revisionOverride.rateMedicaidPopulations,
+                                  }),
+                              rateMedicaidPopulationsOp:
+                                  revisionOverride.rateMedicaidPopulationsOp ??
+                                  undefined,
                               rateDocuments: revisionOverride.rateDocuments.map(
                                   (doc) => ({
                                       ...doc,
@@ -367,6 +384,11 @@ function rateWithHistoryToDomainModel(
 function strippedRateRevisionToDomainModel(
     revision: StrippedRateRevisionTableWithFormData
 ): StrippedRateRevisionType {
+    const relevantOverrides = (revision.revisionOverrides ?? []).filter(
+        (override) => override.rateRevisionID === revision.id
+    )
+    const mergedOverride = mergeStrippedRateRevisionOverrides(relevantOverrides)
+
     const formData = {
         id: revision.rateID,
         rateID: revision.rateID,
@@ -380,7 +402,10 @@ function strippedRateRevisionToDomainModel(
         amendmentEffectiveDateEnd:
             revision.amendmentEffectiveDateEnd ?? undefined,
         rateProgramIDs: revision.rateProgramIDs,
-        rateMedicaidPopulations: revision.rateMedicaidPopulations,
+        rateMedicaidPopulations: mergedOverride.rateMedicaidPopulations
+            .hasOverride
+            ? mergedOverride.rateMedicaidPopulations.value
+            : revision.rateMedicaidPopulations,
         deprecatedRateProgramIDs: revision.deprecatedRateProgramIDs,
         rateCertificationName: revision.rateCertificationName ?? undefined,
     }

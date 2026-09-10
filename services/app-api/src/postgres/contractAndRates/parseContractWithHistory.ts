@@ -152,6 +152,10 @@ function contractOverridesToDomainModel(
                                   revisionOverride.contractType ?? undefined,
                               contractTypeOp:
                                   revisionOverride.contractTypeOp ?? undefined,
+                              dsnpContract:
+                                  revisionOverride.dsnpContract ?? undefined,
+                              dsnpContractOp:
+                                  revisionOverride.dsnpContractOp ?? undefined,
                               contractDocuments:
                                   revisionOverride.contractDocuments.map(
                                       (doc) => ({

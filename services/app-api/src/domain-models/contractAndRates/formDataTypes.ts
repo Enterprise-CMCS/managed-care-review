@@ -509,6 +509,7 @@ export {
     documentSchema,
     strippedRateFormDataSchema,
     strippedContractFormDataSchema,
+    rateMedicaidPopulationsSchema,
     contractTypeSchema,
     populationCoveredSchema,
     eqroContractFormDataSchema,
