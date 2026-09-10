@@ -26,6 +26,8 @@ export function buildContractSmokeCreateContractInput(
     }
 }
 
+// Complete, intentionally fixed form data for the contract-submit smoke path.
+// The seed identifies the run; it does not currently vary field values.
 export function buildContractSmokeFormData(
     seed: string,
     programId: string,

@@ -43,6 +43,7 @@ export async function runContractSmokeScenario({
         seed,
     })
 
+    // Keep program selection deterministic so runs do not depend on catalog order.
     const minnesotaProgram = typedStatePrograms.states
         .find((state) => state.code === 'MN')
         ?.programs.filter(
@@ -63,6 +64,7 @@ export async function runContractSmokeScenario({
         }
     )
     const contract = createResult.createContract.contract
+    // Exercise the same optimistic-concurrency check used by interactive clients.
     const lastSeenUpdatedAt = contract.draftRevision?.updatedAt
     if (!lastSeenUpdatedAt || contract.status !== 'DRAFT') {
         throw new Error('Synthetic contract was not created as a draft')
@@ -72,6 +74,7 @@ export async function runContractSmokeScenario({
         contractId: contract.id,
     })
 
+    // Upload through the deployed presigned-URL path instead of inserting metadata directly.
     const fixture = documentFixtures.pdf.small
     const uploadedDocument = await uploads.upload({
         name: `synthetic-contract-smoke-${seed}.pdf`,
@@ -115,6 +118,7 @@ export async function runContractSmokeScenario({
         throw new Error('Synthetic contract was not submitted')
     }
 
+    // Read the submitted package back to verify persistence, not only the mutation response.
     const fetchResult = await graphql.execute(SyntheticFetchContractDocument, {
         input: { contractID: contract.id },
     })
