@@ -71,6 +71,7 @@ export function loadEnvironment(
     }
 
     const baseUrl = new URL(result.data.SYNTHETIC_DATA_API_URL)
+    // Preserve the deployed stage path when resolving relative API endpoints.
     if (!baseUrl.pathname.endsWith('/')) {
         baseUrl.pathname += '/'
     }

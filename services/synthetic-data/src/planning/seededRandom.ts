@@ -12,6 +12,7 @@ function hashSeed(seed: Seed): number {
     return hash >>> 0
 }
 
+// Keep this sequence stable so existing seeds continue to produce the same plans.
 export class SeededRandom {
     #state: number
 

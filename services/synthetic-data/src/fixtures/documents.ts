@@ -97,14 +97,12 @@ export const documentFixtures = {
             sourceFile: 'mock-m.xlsx',
         },
     },
-} as const satisfies Record<
-    string,
-    Record<'small' | 'medium', DocumentFixture>
->
+} as const satisfies Record<string, Record<'small' | 'medium', DocumentFixture>>
 
 export async function loadDocumentFixture(
     fixture: DocumentFixture
 ): Promise<Uint8Array> {
+    // Reuse the repository's committed sanitized fixtures instead of maintaining copies.
     return readFile(
         new URL(
             `../../../postgres/files/${fixture.sourceFile}`,

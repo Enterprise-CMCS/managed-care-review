@@ -52,6 +52,7 @@ export async function runPreflight(): Promise<void> {
 
     logger.info('synthetic.preflight.started')
     const { graphql } = await createAuthenticatedClients(environment)
+    // Verify the token resolves to the deployed actor without performing a write.
     const result = await graphql.execute(SyntheticFetchCurrentUserDocument, {})
 
     logger.info('synthetic.preflight.succeeded', {
