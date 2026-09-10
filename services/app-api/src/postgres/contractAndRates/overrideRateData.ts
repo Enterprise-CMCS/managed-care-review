@@ -5,6 +5,7 @@ import { z } from 'zod'
 import type {
     ArrayFieldOverrideOperation,
     RateDocumentOverride,
+    RateMedicaidPopulations,
     ScalarFieldOverrideOperation,
 } from '../../generated/client'
 import { findRateWithHistory } from './findRateWithHistory'
@@ -15,6 +16,7 @@ import {
 } from '../prismaOverrideMergeHelpers'
 import { runTransactionWithRowLock } from '../prismaHelpers'
 import { updateRelatedContractsLastActionDateByRateID } from '../updateLastActionDateHelpers'
+import { rateMedicaidPopulationsSchema } from '../../domain-models/contractAndRates/formDataTypes'
 
 type RateDocumentOverrideInput = {
     documentOp: ArrayFieldOverrideOperation
@@ -37,6 +39,8 @@ type OverrideRateDataArgsType = {
         initiallySubmittedAt?: Date | null
         initiallySubmittedAtOp?: ScalarFieldOverrideOperation | null
         revisionOverride?: {
+            rateMedicaidPopulations?: RateMedicaidPopulations[] | null
+            rateMedicaidPopulationsOp?: ScalarFieldOverrideOperation | null
             rateDocuments?: RateDocumentOverrideInput[]
             supportingDocuments?: RateDocumentOverrideInput[]
         }
@@ -90,6 +94,16 @@ const overrideRateDataInsideTransaction = async (
     })
     if (initiallySubmittedAtValidation) {
         throw initiallySubmittedAtValidation
+    }
+
+    const rateMedicaidPopulationsValidation = validateScalarOverrideInput({
+        fieldName: 'rateMedicaidPopulations',
+        operation: revisionOverride?.rateMedicaidPopulationsOp,
+        value: revisionOverride?.rateMedicaidPopulations,
+        valueSchema: z.array(rateMedicaidPopulationsSchema),
+    })
+    if (rateMedicaidPopulationsValidation) {
+        throw rateMedicaidPopulationsValidation
     }
 
     let rateDocumentOverrides = nonEmptyDocumentOverridesOrUndefined(
@@ -170,6 +184,11 @@ const overrideRateDataInsideTransaction = async (
                                   id: latestRevision.id,
                               },
                           },
+                          rateMedicaidPopulations:
+                              revisionOverride.rateMedicaidPopulations ?? [],
+                          rateMedicaidPopulationsOp:
+                              revisionOverride.rateMedicaidPopulationsOp ??
+                              null,
                           rateDocuments: rateDocumentOverrides
                               ? {
                                     createMany: {

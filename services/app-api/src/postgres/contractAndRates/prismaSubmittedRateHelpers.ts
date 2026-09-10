@@ -21,6 +21,8 @@ const selectRateRevisionOverrides = {
     id: true,
     createdAt: true,
     rateRevisionID: true,
+    rateMedicaidPopulations: true,
+    rateMedicaidPopulationsOp: true,
     rateDocuments: {
         select: {
             id: true,
@@ -175,6 +177,18 @@ const includeStrippedRateWithoutDraftContracts = {
             relatedSubmissions: {
                 orderBy: {
                     updatedAt: 'asc',
+                },
+            },
+            revisionOverrides: {
+                orderBy: {
+                    createdAt: 'desc',
+                },
+                select: {
+                    id: true,
+                    createdAt: true,
+                    rateRevisionID: true,
+                    rateMedicaidPopulations: true,
+                    rateMedicaidPopulationsOp: true,
                 },
             },
         },

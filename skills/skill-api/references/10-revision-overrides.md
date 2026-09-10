@@ -73,6 +73,8 @@ Parent-level overrides:
 Revision-level overrides:
 
 - `ContractRevisionOverrides.contractType`
+- `ContractRevisionOverrides.dsnpContract`
+- `RateRevisionOverrides.rateMedicaidPopulations`
 
 Document item overrides:
 
@@ -136,6 +138,22 @@ fields.
 Empty document override arrays are treated the same as omitted arrays: no
 document instructions are written.
 
+### Revision Scalar Semantics
+
+`dsnpContract` is nullable. `OVERRIDE` with a `NULL` payload is a valid
+instruction and is distinct from omitting `dsnpContractOp`, which means no
+instruction.
+
+`rateMedicaidPopulations` is an array of scalar enum values and uses the scalar
+override model rather than document-style item operations. Its non-null Prisma
+list column defaults to `[]`, so always use `rateMedicaidPopulationsOp` to
+interpret the stored value:
+
+- a nullable operation with stored `[]` means no override instruction
+- `OVERRIDE` with `[]` means the effective value is intentionally an empty array
+- `CLEAR_OVERRIDE` removes the active override and returns to the submitted base
+  array
+
 ## Document Overrides
 
 Document arrays are sparse-merged item collections. A newer document override
@@ -151,6 +169,9 @@ Document row operation rules:
 
 - `ADD` must carry full document payload: `name`, `sha256`, and `s3URL`, with
   optional `s3BucketName` and `s3Key`.
+- If `s3Key` or `s3BucketName` is omitted, `s3URL` must use the parseable legacy
+  regular-document format `s3://bucket/uuid.ext/filename.ext` so download and
+  lookup paths can recover the missing S3 metadata.
 - `ADD` must not carry `documentID`.
 - `ADD` is invalid when `documentSha256` does not match payload `sha256`.
 - `ADD` does not require `dateAdded`. If `dateAddedOp = OVERRIDE` is supplied,
@@ -203,10 +224,12 @@ Unlock creates a new draft revision from effective submitted data.
 On unlock:
 
 - revision scalar overrides that should become draft base data are materialized
-  into the draft value. Today this includes `contractType`.
+  into the draft value. Today this includes `contractType`, `dsnpContract`, and
+  `rateMedicaidPopulations`.
 - parent-level override history, such as `initiallySubmittedAt`, is not copied
   into draft revision form data
-- active override-added documents become normal draft document rows
+- active override-added contract and rate documents become normal draft document
+  rows
 - documents hidden by `DELETE` are not copied into the draft
 - field overrides on existing documents, such as `dateAdded`, are not copied
   into draft document rows
@@ -286,8 +309,13 @@ override field.
      `ContractScalarFieldOverrideRow`, and `mergeContractRevisionOverrides`.
    - Stripped contract revision fields should also be added to
      `mergeStrippedContractRevisionOverrides` if stripped reads return the field.
-   - If rate revision scalar fields are added in the future, extend
-     `mergeRateRevisionOverrides` with the same scalar-field pattern.
+   - Rate revision scalar fields should be added to
+     `mergeRateRevisionOverrides` with the same scalar-field pattern. If a
+     stripped rate read returns the field, also update
+     `mergeStrippedRateRevisionOverrides`.
+   - Arrays containing scalar values, such as `rateMedicaidPopulations`, use the
+     scalar-field pattern. Arrays of nested objects require item-level merge
+     behavior instead.
 
 7. Ensure parser output uses the effective value.
    - Full contract/rate reads should get the effective value from parser merge

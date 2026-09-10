@@ -32,6 +32,8 @@ const includeContractRevWithOnlyDocs = {
             contractRevisionID: true,
             contractType: true,
             contractTypeOp: true,
+            dsnpContract: true,
+            dsnpContractOp: true,
             // These document override rows are needed when resubmitting an
             // unlocked contract. Unlock materializes override-added docs into
             // the draft, but previous submitted revisions still carry the
@@ -238,6 +240,8 @@ async function submitContractAndOrRates(
                     id: true,
                     createdAt: true,
                     rateRevisionID: true,
+                    rateMedicaidPopulations: true,
+                    rateMedicaidPopulationsOp: true,
                     // Previous submitted rate revisions may have document
                     // overrides that affect effective dateAdded. Include them
                     // so we can rebuild the effective document arrays below.
