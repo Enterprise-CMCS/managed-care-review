@@ -4,7 +4,6 @@ import {
     hasAdminPermissions,
     hasCMSPermissions,
     isStateUser,
-    type RevisionDiff,
 } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { canRead } from '../../oauth/oauthAuthorization'
@@ -12,116 +11,7 @@ import { NotFoundError, type Store } from '../../postgres'
 import { InvalidRevisionDiffInputError } from '../../postgres/revisionDiff/findRevisionDiffByContractID'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { createUserInputError } from '../errorUtils'
-
-function serializeRevisionDiffFieldValue(value: unknown):
-    | {
-          valueType: 'STRING'
-          value: string
-      }
-    | {
-          valueType: 'BOOLEAN'
-          value: boolean
-      }
-    | {
-          valueType: 'DATE'
-          value: Date
-      }
-    | {
-          valueType: 'STRING_ARRAY'
-          value: string[]
-      }
-    | undefined {
-    if (value === undefined || value === null) {
-        return undefined
-    }
-
-    if (value instanceof Date) {
-        return {
-            valueType: 'DATE',
-            value,
-        }
-    }
-
-    if (Array.isArray(value)) {
-        return {
-            valueType: 'STRING_ARRAY',
-            value: value.map((item) => String(item)),
-        }
-    }
-
-    if (typeof value === 'boolean') {
-        return {
-            valueType: 'BOOLEAN',
-            value,
-        }
-    }
-
-    return {
-        valueType: 'STRING',
-        value: String(value),
-    }
-}
-
-function serializeRevisionDiffFieldChanges(
-    fieldChanges: RevisionDiff['fieldChanges']
-) {
-    return fieldChanges.map((fieldChange) => ({
-        ...fieldChange,
-        oldValue: serializeRevisionDiffFieldValue(fieldChange.oldValue),
-        newValue: serializeRevisionDiffFieldValue(fieldChange.newValue),
-    }))
-}
-
-function serializeRevisionDiffForGraphQL(comparison: RevisionDiff) {
-    const serializeRevisionDiffActuaryContact = (
-        contact: NonNullable<
-            RevisionDiff['rateChanges']['revised'][number]['certifyingActuaryContactChanges'][number]
-        >['current']
-    ) => ({
-        name: contact.name,
-        titleRole: contact.titleRole,
-        email: contact.email,
-        actuarialFirm:
-            contact.actuarialFirm === 'OTHER'
-                ? (contact.actuarialFirmOther ?? null)
-                : (contact.actuarialFirm ?? null),
-    })
-
-    return {
-        ...comparison,
-        fieldChanges: serializeRevisionDiffFieldChanges(
-            comparison.fieldChanges
-        ),
-        stateContactChanges: comparison.stateContactChanges.map((change) => ({
-            changeType: 'NEW_OR_MODIFIED' as const,
-            current: change.current,
-        })),
-        rateChanges: {
-            ...comparison.rateChanges,
-            revised: comparison.rateChanges.revised.map((rate) => ({
-                ...rate,
-                fieldChanges: serializeRevisionDiffFieldChanges(
-                    rate.fieldChanges
-                ),
-                certifyingActuaryContactChanges:
-                    rate.certifyingActuaryContactChanges.map((change) => ({
-                        changeType: 'NEW_OR_MODIFIED' as const,
-                        current: serializeRevisionDiffActuaryContact(
-                            change.current
-                        ),
-                    })),
-                addtlActuaryContactChanges: rate.addtlActuaryContactChanges.map(
-                    (change) => ({
-                        changeType: 'NEW_OR_MODIFIED' as const,
-                        current: serializeRevisionDiffActuaryContact(
-                            change.current
-                        ),
-                    })
-                ),
-            })),
-        },
-    }
-}
+import { serializeRevisionDiffForGraphQL } from './serializeRevisionDiff'
 
 export function fetchRevisionDiffResolver(
     store: Store
