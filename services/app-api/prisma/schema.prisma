@@ -274,6 +274,7 @@ model ContractRevisionTable {
   inLieuServicesAndSettings                    Boolean?
   statutoryRegulatoryAttestation               Boolean?
   statutoryRegulatoryAttestationDescription    String?
+  procurementAttestation                       Boolean?
 
   // EQRO submission fields only
   eqroNewContractor                       Boolean?

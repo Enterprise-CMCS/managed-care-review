@@ -24,7 +24,11 @@ import {
     defaultFloridaRateProgram,
 } from '../../testHelpers/gqlHelpers'
 import { findStatePrograms } from '../../postgres'
-import type { ContractFormDataType } from './formDataTypes'
+import {
+    contractFormDataSchema,
+    eqroContractFormDataSchema,
+    type ContractFormDataType,
+} from './formDataTypes'
 import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
 import { z } from 'zod'
 
@@ -1185,6 +1189,35 @@ describe('EQRO parsing and validation', () => {
             packageSubmissions: [],
         }
     }
+
+    it('allows procurement attestation for health plans but rejects it for EQRO', () => {
+        const healthPlanResult = contractFormDataSchema.safeParse({
+            ...mockSubmittableHealthPlanContract().draftRevision!.formData,
+            procurementAttestation: true,
+        })
+        const eqroResult = eqroContractFormDataSchema.safeParse({
+            ...baseCurrentFormData(),
+            procurementAttestation: true,
+        })
+
+        expect(healthPlanResult.success).toBe(true)
+        expect(eqroResult.success).toBe(false)
+
+        if (eqroResult.success) {
+            throw new Error(
+                'Expected EQRO procurement attestation to be rejected'
+            )
+        }
+
+        expect(eqroResult.error.issues).toContainEqual(
+            expect.objectContaining({
+                expected: 'undefined',
+                code: 'invalid_type',
+                path: ['procurementAttestation'],
+                message: 'Invalid input: expected undefined, received boolean',
+            })
+        )
+    })
 
     describe('validateEQROContractDraftRevisionInput', () => {
         it('Successfully validates EQRO data', async () => {

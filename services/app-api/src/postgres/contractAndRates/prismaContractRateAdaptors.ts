@@ -306,6 +306,9 @@ function prismaUpdateContractFormDataFromDomain(
         statutoryRegulatoryAttestationDescription: nullify(
             contractFormData.statutoryRegulatoryAttestationDescription
         ),
+        procurementAttestation: nullify(
+            contractFormData.procurementAttestation
+        ),
         //EQRO submission fields only
         eqroNewContractor: nullify(contractFormData.eqroNewContractor),
         eqroProvisionMcoNewOptionalActivity: nullify(
