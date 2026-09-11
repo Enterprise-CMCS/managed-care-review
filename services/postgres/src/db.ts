@@ -37,7 +37,7 @@ export class DatabaseClient {
                 rejectUnauthorized: true,
                 ca: cert,
             },
-            connectionTimeoutMillis: 5000,
+            connectionTimeoutMillis: 10000,
             statement_timeout: 10000,
         }
     }
