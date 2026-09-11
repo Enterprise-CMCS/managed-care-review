@@ -25,7 +25,7 @@
         "aws-cdk": "^2.1140.0",
         "esbuild": "^0.28.2",
         "eslint": "^10.4.0",
-        "eslint-plugin-jest": "^29.16.1",
+        "eslint-plugin-jest": "^29.16.6",
         "fs-extra": "^11.3.4",
         "jest": "^30.4.2",
         "jiti": "^2.7.0",
