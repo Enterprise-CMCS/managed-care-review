@@ -326,6 +326,7 @@ async function unlockContractInsideTransaction(
                 currentRev.statutoryRegulatoryAttestation,
             statutoryRegulatoryAttestationDescription:
                 currentRev.statutoryRegulatoryAttestationDescription,
+            procurementAttestation: currentRev.procurementAttestation,
 
             contractDocuments: {
                 create: contractDocumentsToCreate,

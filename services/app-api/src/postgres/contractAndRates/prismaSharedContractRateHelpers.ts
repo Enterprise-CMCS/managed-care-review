@@ -844,6 +844,8 @@ function contractFormDataToDomainModel(
         statutoryRegulatoryAttestationDescription:
             contractRevision.statutoryRegulatoryAttestationDescription ??
             undefined,
+        procurementAttestation:
+            contractRevision.procurementAttestation ?? undefined,
         eqroNewContractor: contractRevision.eqroNewContractor ?? undefined,
         eqroProvisionMcoNewOptionalActivity:
             contractRevision.eqroProvisionMcoNewOptionalActivity ?? undefined,

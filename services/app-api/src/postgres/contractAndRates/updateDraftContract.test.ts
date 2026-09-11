@@ -103,6 +103,7 @@ describe('updateDraftContractWithRates postgres', () => {
             inLieuServicesAndSettings: true,
             statutoryRegulatoryAttestation: false,
             statutoryRegulatoryAttestationDescription: 'No compliance',
+            procurementAttestation: true,
         }
     }
 
@@ -137,6 +138,7 @@ describe('updateDraftContractWithRates postgres', () => {
 
         expect(draft.draftRevision).toBeDefined()
         expect(draft.draftRevision?.formData.submissionDescription).toBe('Test')
+        expect(draft.draftRevision?.formData.procurementAttestation).toBe(true)
 
         const emptyContract = emptyTestContract()
 
