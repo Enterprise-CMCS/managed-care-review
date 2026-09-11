@@ -326,7 +326,6 @@ function genericContractResolver<
                     )
 
                     if (comparison instanceof Error) {
-                        // A contract without two submitted revisions has no diff.
                         if (
                             comparison instanceof InvalidRevisionDiffInputError
                         ) {
