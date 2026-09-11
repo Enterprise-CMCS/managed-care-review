@@ -1,4 +1,7 @@
-import { FetchContractWithQuestionsDocument } from '../../gen/gqlClient'
+import {
+    FetchContractRevisionDiffDocument,
+    FetchContractWithQuestionsDocument,
+} from '../../gen/gqlClient'
 import {
     constructTestPostgresServer,
     createTestQuestion,
@@ -8,7 +11,9 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndUpdateTestContractWithRate,
+    createSubmitAndUnlockTestContract,
     fetchTestContractWithQuestions,
+    resubmitTestContract,
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
@@ -18,6 +23,7 @@ import {
     testCMSUser,
     testStateUser,
 } from '../../testHelpers/userHelpers'
+import { mockStoreThatErrors } from '../../testHelpers/storeHelpers'
 
 describe('contractResolver', () => {
     const dmcoCMSUser = testCMSUser({
@@ -311,5 +317,106 @@ describe('contractResolver', () => {
         expect(fetchResult.errors[0].message).toBe(
             'User from state VA not allowed to access contract from FL'
         )
+    })
+
+    it('returns a revisionDiff comparing the latest two submissions', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: dmcoCMSUser,
+            },
+            s3Client: mockS3,
+        })
+
+        const unlockedContract = await createSubmitAndUnlockTestContract(
+            stateServer,
+            cmsServer
+        )
+        const resubmitted = await resubmitTestContract(
+            stateServer,
+            unlockedContract.id,
+            'Resubmission for diff test'
+        )
+
+        const fetchResult = await executeGraphQLOperation(cmsServer, {
+            query: FetchContractRevisionDiffDocument,
+            variables: {
+                input: {
+                    contractID: unlockedContract.id,
+                },
+            },
+        })
+
+        expect(fetchResult.errors).toBeUndefined()
+        const revisionDiff =
+            fetchResult.data?.fetchContract.contract.revisionDiff
+        expect(revisionDiff).toBeTruthy()
+        expect(revisionDiff?.newerRevisionID).toBe(
+            resubmitted.packageSubmissions[0].contractRevision.id
+        )
+        expect(revisionDiff?.olderRevisionID).toBe(
+            resubmitted.packageSubmissions[1].contractRevision.id
+        )
+    })
+
+    it('returns a null revisionDiff for a contract with a single submission', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const draft = await createAndUpdateTestContractWithRate(stateServer)
+        const submitted = await submitTestContract(stateServer, draft.id)
+
+        const fetchResult = await executeGraphQLOperation(stateServer, {
+            query: FetchContractRevisionDiffDocument,
+            variables: {
+                input: {
+                    contractID: submitted.id,
+                },
+            },
+        })
+
+        expect(fetchResult.errors).toBeUndefined()
+        expect(fetchResult.data?.fetchContract.contract.revisionDiff).toBeNull()
+    })
+
+    it('returns a null revisionDiff instead of failing the query when the diff lookup errors', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: dmcoCMSUser,
+            },
+            s3Client: mockS3,
+            store: {
+                findRevisionDiffByContractID:
+                    mockStoreThatErrors().findRevisionDiffByContractID,
+            },
+        })
+
+        const unlockedContract = await createSubmitAndUnlockTestContract(
+            stateServer,
+            cmsServer
+        )
+        await resubmitTestContract(
+            stateServer,
+            unlockedContract.id,
+            'Resubmission for diff error test'
+        )
+
+        const fetchResult = await executeGraphQLOperation(cmsServer, {
+            query: FetchContractRevisionDiffDocument,
+            variables: {
+                input: {
+                    contractID: unlockedContract.id,
+                },
+            },
+        })
+
+        expect(fetchResult.errors).toBeUndefined()
+        expect(fetchResult.data?.fetchContract.contract.revisionDiff).toBeNull()
     })
 })
