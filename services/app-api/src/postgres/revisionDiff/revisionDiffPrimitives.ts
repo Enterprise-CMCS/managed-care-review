@@ -1,7 +1,7 @@
 import type {
     RevisionDiffDocumentListChanges,
     RevisionDiffCollectionItemChange,
-    RevisionDiffCollectionItemNewOrModified,
+    RevisionDiffContactChange,
     RevisionDiffFieldChange,
 } from '../../domain-models'
 import type { DocumentType } from '../../domain-models/contractAndRates'
@@ -150,36 +150,70 @@ function diffCollectionByKey<TItem, TChange>({
     return changes
 }
 
-function buildNewAndModifiedCollectionChanges<TItem>(
+function buildContactCollectionChanges<TItem>(
     previous: TItem[],
     current: TItem[],
-    getComparisonKey: (item: TItem) => string
-): RevisionDiffCollectionItemNewOrModified<TItem>[] {
-    const previousRemainingCounts = new Map<string, number>()
-
+    getComparisonKey: (item: TItem) => string,
+    getIdentityValues: (item: TItem) => (string | undefined)[]
+): RevisionDiffContactChange<TItem>[] {
+    // Contacts have no stable identity, so changes are found in two passes.
+    // Pass 1: a contact whose exact content appears anywhere in the previous
+    // list is unchanged, so removals and reorders never flag other contacts.
+    const previousCounts = new Map<string, number>()
     for (const item of previous) {
         const key = getComparisonKey(item)
-        previousRemainingCounts.set(
-            key,
-            (previousRemainingCounts.get(key) ?? 0) + 1
-        )
+        previousCounts.set(key, (previousCounts.get(key) ?? 0) + 1)
     }
 
-    const changes: RevisionDiffCollectionItemNewOrModified<TItem>[] = []
-
-    for (const item of current) {
+    const leftoverCurrent: { item: TItem; index: number }[] = []
+    current.forEach((item, index) => {
         const key = getComparisonKey(item)
-        const remainingCount = previousRemainingCounts.get(key) ?? 0
+        const remaining = previousCounts.get(key) ?? 0
 
-        if (remainingCount > 0) {
-            previousRemainingCounts.set(key, remainingCount - 1)
-            continue
+        if (remaining > 0) {
+            previousCounts.set(key, remaining - 1)
+        } else {
+            leftoverCurrent.push({ item, index })
         }
+    })
 
-        changes.push({
-            changeType: 'NEW_OR_MODIFIED',
-            current: item,
-        })
+    const leftoverPrevious: TItem[] = []
+    for (const item of previous) {
+        const key = getComparisonKey(item)
+        const remaining = previousCounts.get(key) ?? 0
+
+        if (remaining > 0) {
+            previousCounts.set(key, remaining - 1)
+            leftoverPrevious.push(item)
+        }
+    }
+
+    // Pass 2: a leftover current contact sharing an identity value (name or
+    // email) with a leftover previous contact is that contact edited, one
+    // with no identity link to the previous list is new.
+    const changes: RevisionDiffContactChange<TItem>[] = []
+    for (const { item, index } of leftoverCurrent) {
+        const identityValues = getIdentityValues(item).filter(Boolean)
+        const editedPreviousIndex = leftoverPrevious.findIndex((previousItem) =>
+            getIdentityValues(previousItem).some(
+                (value) => value && identityValues.includes(value)
+            )
+        )
+
+        if (editedPreviousIndex !== -1) {
+            leftoverPrevious.splice(editedPreviousIndex, 1)
+            changes.push({
+                changeType: 'UPDATED',
+                index,
+                current: item,
+            })
+        } else {
+            changes.push({
+                changeType: 'ADDED',
+                index,
+                current: item,
+            })
+        }
     }
 
     return changes
@@ -269,7 +303,7 @@ function isStringEnumLikeSchema(schema: z.core.$ZodType): boolean {
 export type { ScalarDiffFieldConfig }
 export {
     buildDocumentListChanges,
-    buildNewAndModifiedCollectionChanges,
+    buildContactCollectionChanges,
     buildScalarFieldDiffChanges,
     diffCollectionByKey,
     hasDocumentListChanges,
