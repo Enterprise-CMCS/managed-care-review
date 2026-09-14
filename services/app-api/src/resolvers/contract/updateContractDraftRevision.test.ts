@@ -91,6 +91,7 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 modifiedLengthOfContract: null,
                 modifiedNonRiskPaymentArrangements: null,
                 statutoryRegulatoryAttestationDescription: null,
+                procurementAttestation: null,
                 eqroNewContractor: null,
                 eqroProvisionMcoNewOptionalActivity: null,
                 eqroProvisionNewMcoEqrRelatedActivities: null,
