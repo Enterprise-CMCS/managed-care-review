@@ -1,0 +1,153 @@
+name: Seed Synthetic QA Contract Smoke
+
+on:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: 'Deterministic seed (letters, numbers, dot, underscore, hyphen)'
+        required: true
+        default: 'manual-qa-contract-smoke'
+        type: string
+      confirmation:
+        description: 'Type SEED_QA to authorize one synthetic contract'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: synthetic-data-qa
+  cancel-in-progress: false
+
+jobs:
+  validate-request:
+    name: Validate QA smoke request
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Validate target, confirmation, and seed
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+          SYNTHETIC_DATA_SEED: ${{ inputs.seed }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_REF}" != 'refs/heads/main' ]]; then
+            echo 'QA synthetic data must run from the main branch' >&2
+            exit 1
+          fi
+          if [[ "${CONFIRMATION}" != 'SEED_QA' ]]; then
+            echo 'QA synthetic data requires confirmation SEED_QA' >&2
+            exit 1
+          fi
+          if [[ ! "${SYNTHETIC_DATA_SEED}" =~ ^[A-Za-z0-9._-]{1,64}$ ]]; then
+            echo 'Seed must be 1-64 letters, numbers, dots, underscores, or hyphens' >&2
+            exit 1
+          fi
+
+  seed-contract-smoke:
+    name: Seed and verify one QA contract
+    needs: validate-request
+    environment: qa
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Setup env
+        uses: ./.github/actions/setup_env
+
+      - name: Generate GraphQL clients
+        run: pnpm --filter app-graphql generate
+
+      - name: Build workspace packages
+        run: pnpm build:packages
+
+      - name: Get QA AWS credentials
+        uses: ./.github/actions/get_aws_credentials
+        with:
+          region: ${{ vars.AWS_DEFAULT_REGION }}
+          account-id: ${{ secrets.QA_AWS_ACCOUNT_ID }}
+          stage-name: qa
+          use-cdk-role: 'true'
+
+      - name: Resolve QA synthetic data resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          STACK_NAME='app-api-qa-cdk'
+          API_URL="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[?OutputKey=='ApiGatewayUrl'].OutputValue | [0]" --output text)"
+          BOOTSTRAP_FUNCTION="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[?OutputKey=='SyntheticDataBootstrapFunctionName'].OutputValue | [0]" --output text)"
+          CREDENTIALS_SECRET="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[?OutputKey=='SyntheticDataCredentialsSecretName'].OutputValue | [0]" --output text)"
+          if [[ -z "${API_URL}" || "${API_URL}" == 'None' || -z "${BOOTSTRAP_FUNCTION}" || "${BOOTSTRAP_FUNCTION}" == 'None' || -z "${CREDENTIALS_SECRET}" || "${CREDENTIALS_SECRET}" == 'None' ]]; then
+            echo 'QA synthetic data resources are not deployed' >&2
+            exit 1
+          fi
+          {
+            echo "SYNTHETIC_DATA_API_URL=${API_URL}"
+            echo "SYNTHETIC_DATA_BOOTSTRAP_FUNCTION=${BOOTSTRAP_FUNCTION}"
+            echo "SYNTHETIC_DATA_CREDENTIALS_SECRET=${CREDENTIALS_SECRET}"
+          } >> "${GITHUB_ENV}"
+
+      - name: Bootstrap synthetic state actor
+        shell: bash
+        run: |
+          set -euo pipefail
+          PAYLOAD="$(jq -nc '{stage: "qa", confirmation: "BOOTSTRAP_SYNTHETIC_DATA"}')"
+          aws lambda invoke \
+            --function-name "${SYNTHETIC_DATA_BOOTSTRAP_FUNCTION}" \
+            --cli-binary-format raw-in-base64-out \
+            --payload "${PAYLOAD}" \
+            bootstrap-response.json
+          jq -e '.success == true and .stage == "qa"' bootstrap-response.json
+
+      - name: Load synthetic OAuth credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          SECRET_JSON="$(aws secretsmanager get-secret-value --secret-id "${SYNTHETIC_DATA_CREDENTIALS_SECRET}" --query SecretString --output text)"
+          CLIENT_ID="$(printf '%s' "${SECRET_JSON}" | jq -er '.clientId')"
+          CLIENT_SECRET="$(printf '%s' "${SECRET_JSON}" | jq -er '.clientSecret')"
+          echo "::add-mask::${CLIENT_ID}"
+          echo "::add-mask::${CLIENT_SECRET}"
+          echo "SYNTHETIC_DATA_OAUTH_CLIENT_ID=${CLIENT_ID}" >> "${GITHUB_ENV}"
+          echo "SYNTHETIC_DATA_OAUTH_CLIENT_SECRET=${CLIENT_SECRET}" >> "${GITHUB_ENV}"
+
+      - name: Verify QA synthetic actor
+        env:
+          SYNTHETIC_DATA_ENABLED: 'true'
+          SYNTHETIC_DATA_STAGE: qa
+          SYNTHETIC_DATA_MAX_ATTEMPTS: '4'
+          SYNTHETIC_DATA_RETRY_BASE_DELAY_MS: '250'
+        run: pnpm --filter @mc-review/synthetic-data preflight
+
+      - name: Seed and verify one synthetic contract
+        env:
+          SYNTHETIC_DATA_ENABLED: 'true'
+          SYNTHETIC_DATA_STAGE: qa
+          SYNTHETIC_DATA_MAX_ATTEMPTS: '4'
+          SYNTHETIC_DATA_RETRY_BASE_DELAY_MS: '250'
+          SYNTHETIC_DATA_SEED: ${{ inputs.seed }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pnpm --filter @mc-review/synthetic-data cli seed-contract-smoke \
+            --seed "${SYNTHETIC_DATA_SEED}" | tee synthetic-contract-smoke.log
+          RESULT="$(jq -Rsc '[split("\n")[] | fromjson? | select(.event == "synthetic.contract-smoke.completed")] | last' synthetic-contract-smoke.log)"
+          jq -e '. != null and .status == "SUBMITTED" and .scenarioKey == "contract-submit-smoke-v1"' <<< "${RESULT}" > /dev/null
+          CONTRACT_ID="$(jq -r '.contractId' <<< "${RESULT}")"
+          MARKER="$(jq -r '.marker' <<< "${RESULT}")"
+          {
+            echo '## Synthetic QA contract smoke'
+            echo
+            echo '| Field | Value |'
+            echo '| --- | --- |'
+            printf '| Scenario | %s |\n' 'contract-submit-smoke-v1'
+            printf '| Seed | %s |\n' "${SYNTHETIC_DATA_SEED}"
+            printf '| Contract ID | %s |\n' "${CONTRACT_ID}"
+            printf '| Status | %s |\n' 'SUBMITTED'
+            printf '| Marker | %s |\n' "${MARKER}"
+          } >> "${GITHUB_STEP_SUMMARY}"

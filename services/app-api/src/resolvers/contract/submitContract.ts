@@ -34,7 +34,7 @@ import {
     generateApplicableProvisionsList,
 } from '../../domain-models/contractAndRates'
 import type { GeneralizedProvisionType } from '@mc-review/submissions'
-import { canWrite } from '../../oauth/oauthAuthorization'
+import { canSyntheticDataWrite, canWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 import { buildResubmitRevisionChanges } from '../../emailer/emails/resubmitRevisionChanges'
 import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
@@ -84,7 +84,10 @@ export function submitContract(
                     })) ?? defaultFeatureFlags()
 
                 // Check OAuth client read permissions
-                if (!canWrite(context)) {
+                if (
+                    !canWrite(context) &&
+                    !canSyntheticDataWrite(context, 'submitContract')
+                ) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('submitContract', errMessage, context)
 

@@ -1262,6 +1262,58 @@ importers:
 
   services/storybook: {}
 
+  services/synthetic-data:
+    dependencies:
+      '@graphql-typed-document-node/core':
+        specifier: ^3.2.0
+        version: 3.2.0(graphql@16.14.0)
+      '@mc-review/submissions':
+        specifier: workspace:*
+        version: link:../../packages/submissions
+      graphql:
+        specifier: ^16.14.0
+        version: 16.14.0
+      zod:
+        specifier: ^4.3.6
+        version: 4.4.3
+    devDependencies:
+      '@types/eslint':
+        specifier: ^9.6.1
+        version: 9.6.1
+      '@types/node':
+        specifier: ^26.2.0
+        version: 26.2.0
+      '@typescript-eslint/eslint-plugin':
+        specifier: ^8.58.1
+        version: 8.58.1(@typescript-eslint/parser@8.68.0(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3))(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
+      '@typescript-eslint/parser':
+        specifier: ^8.58.1
+        version: 8.68.0(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
+      '@vitest/coverage-v8':
+        specifier: ^4.1.7
+        version: 4.1.7(vitest@4.1.7)
+      eslint:
+        specifier: ^10.4.0
+        version: 10.4.0(jiti@2.7.0)(supports-color@10.2.2)
+      eslint-config-prettier:
+        specifier: ^10.1.8
+        version: 10.1.8(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))
+      prettier:
+        specifier: ^3.9.6
+        version: 3.9.6
+      tsx:
+        specifier: ^4.21.0
+        version: 4.23.13
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      typescript-eslint:
+        specifier: ^8.56.0
+        version: 8.56.0(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
+      vitest:
+        specifier: ^4.1.7
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(jsdom@30.0.1)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.77.2)(terser@5.49.0)(tsx@4.23.13)(yaml@2.9.0))
+
   services/ui: {}
 
   services/ui-auth:

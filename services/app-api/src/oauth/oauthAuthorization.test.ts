@@ -7,6 +7,8 @@ import {
     canWrite,
     canOauthWrite,
     canOauthAdminWrite,
+    canSyntheticDataWrite,
+    type SyntheticDataWriteOperation,
 } from './oauthAuthorization'
 
 // Mock users for testing
@@ -35,6 +37,22 @@ const mockAdminUser: UserType = {
     givenName: 'Admin',
     familyName: 'User',
     role: 'ADMIN_USER',
+}
+const syntheticOAuthContext: Context = {
+    user: mockStateUser,
+    oauthClient: {
+        clientId: 'synthetic-data-review-state',
+        grants: ['client_credentials'],
+        iss: 'mcreview-review',
+        scopes: ['SYNTHETIC_DATA_WRITE'],
+        isDelegatedUser: false,
+    },
+}
+
+const enabledReviewEnvironment = {
+    stage: 'synth-review',
+    SYNTHETIC_DATA_ENABLED: 'true',
+    SYNTHETIC_DATA_ALLOWED_STAGE: 'synth-review',
 }
 
 describe('OAuth Authorization', () => {
@@ -235,6 +253,97 @@ describe('OAuth Authorization', () => {
             }
 
             expect(canOauthAdminWrite(context)).toBe(true)
+        })
+    })
+    describe('canSyntheticDataWrite', () => {
+        it.each([
+            'createContract',
+            'updateContractDraftRevision',
+            'submitContract',
+            'generateUploadURL',
+        ] as const)(
+            'allows the %s operation in its exact review stage',
+            (operation) => {
+                expect(
+                    canSyntheticDataWrite(
+                        syntheticOAuthContext,
+                        operation,
+                        enabledReviewEnvironment
+                    )
+                ).toBe(true)
+            }
+        )
+
+        it('denies operations outside the explicit allowlist', () => {
+            expect(
+                canSyntheticDataWrite(
+                    syntheticOAuthContext,
+                    'withdrawContract' as SyntheticDataWriteOperation,
+                    enabledReviewEnvironment
+                )
+            ).toBe(false)
+        })
+
+        it.each([
+            {
+                stage: 'synth-review',
+                SYNTHETIC_DATA_ENABLED: 'false',
+                SYNTHETIC_DATA_ALLOWED_STAGE: 'synth-review',
+            },
+            {
+                stage: 'another-review',
+                SYNTHETIC_DATA_ENABLED: 'true',
+                SYNTHETIC_DATA_ALLOWED_STAGE: 'synth-review',
+            },
+            {
+                stage: 'prod',
+                SYNTHETIC_DATA_ENABLED: 'true',
+                SYNTHETIC_DATA_ALLOWED_STAGE: 'prod',
+            },
+        ])('denies an unsafe environment %#', (environment) => {
+            expect(
+                canSyntheticDataWrite(
+                    syntheticOAuthContext,
+                    'createContract',
+                    environment
+                )
+            ).toBe(false)
+        })
+
+        it('denies a delegated OAuth client', () => {
+            const context: Context = {
+                ...syntheticOAuthContext,
+                oauthClient: {
+                    ...syntheticOAuthContext.oauthClient!,
+                    isDelegatedUser: true,
+                },
+            }
+
+            expect(
+                canSyntheticDataWrite(
+                    context,
+                    'createContract',
+                    enabledReviewEnvironment
+                )
+            ).toBe(false)
+        })
+
+        it('denies a client without the synthetic scope', () => {
+            const context: Context = {
+                ...syntheticOAuthContext,
+                oauthClient: {
+                    ...syntheticOAuthContext.oauthClient!,
+                    scopes: [],
+                },
+            }
+
+            expect(
+                canSyntheticDataWrite(
+                    context,
+                    'createContract',
+                    enabledReviewEnvironment
+                )
+            ).toBe(false)
         })
     })
 })

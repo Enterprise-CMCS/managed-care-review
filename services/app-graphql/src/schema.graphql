@@ -3555,6 +3555,7 @@ enum ContractSubmissionType {
 enum OAuthScope {
     CMS_SUBMISSION_ACTIONS
     ADMIN_SUBMISSION_ACTIONS
+    SYNTHETIC_DATA_WRITE
 }
 
 enum UploadBucketName {
