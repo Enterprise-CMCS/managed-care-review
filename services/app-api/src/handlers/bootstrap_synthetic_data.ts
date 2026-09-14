@@ -19,25 +19,32 @@ export type BootstrapSyntheticDataEvent = {
     confirmation?: string
 }
 
+export type SyntheticActorKind = 'state' | 'cms'
+
 export type SyntheticDataCredentials = {
     clientId: string
     clientSecret: string
 }
 
-export type BootstrapSyntheticDataResponse = {
-    success: true
-    stage: string
+type BootstrappedSyntheticActor = {
     userId: string
     clientId: string
 }
 
-function expectedClientId(stage: string): string {
-    return `synthetic-data-${stage}-state`
+export type BootstrapSyntheticDataResponse = {
+    success: true
+    stage: string
+    actors: Record<SyntheticActorKind, BootstrappedSyntheticActor>
+}
+
+function expectedClientId(stage: string, actor: SyntheticActorKind): string {
+    return `synthetic-data-${stage}-${actor}`
 }
 
 export function validateSyntheticDataCredentials(
     value: unknown,
-    stage: string
+    stage: string,
+    actor: SyntheticActorKind
 ): SyntheticDataCredentials {
     if (!value || typeof value !== 'object') {
         throw new Error('Synthetic data credentials secret is invalid')
@@ -47,7 +54,7 @@ export function validateSyntheticDataCredentials(
     const clientSecret = Reflect.get(value, 'clientSecret')
 
     if (
-        clientId !== expectedClientId(stage) ||
+        clientId !== expectedClientId(stage, actor) ||
         typeof clientSecret !== 'string' ||
         clientSecret.length < 32
     ) {
@@ -59,7 +66,8 @@ export function validateSyntheticDataCredentials(
 
 async function loadSyntheticDataCredentials(
     secretId: string,
-    stage: string
+    stage: string,
+    actor: SyntheticActorKind
 ): Promise<SyntheticDataCredentials> {
     const result = await secretsManager.send(
         new GetSecretValueCommand({ SecretId: secretId })
@@ -76,34 +84,34 @@ async function loadSyntheticDataCredentials(
         throw new Error('Synthetic data credentials secret is not valid JSON')
     }
 
-    return validateSyntheticDataCredentials(parsed, stage)
+    return validateSyntheticDataCredentials(parsed, stage, actor)
 }
 
-export async function bootstrapSyntheticActor(
+async function upsertSyntheticActor(
     prismaClient: ExtendedPrismaClient,
     stage: string,
+    actor: SyntheticActorKind,
     credentials: SyntheticDataCredentials
-): Promise<BootstrapSyntheticDataResponse> {
-    const userId = `synthetic-data-${stage}-state-user`
-    const email = `synthetic-data-${stage}@example.com`
+): Promise<BootstrappedSyntheticActor> {
+    const isStateActor = actor === 'state'
+    const userId = `synthetic-data-${stage}-${actor}-user`
+    const user = {
+        givenName: 'Synthetic',
+        familyName: isStateActor ? 'Data' : 'CMS',
+        email: isStateActor
+            ? `synthetic-data-${stage}@example.com`
+            : `synthetic-data-${stage}-cms@example.com`,
+        role: isStateActor ? ('STATE_USER' as const) : ('CMS_USER' as const),
+        stateCode: isStateActor ? 'MN' : null,
+    }
 
     await prismaClient.user.upsert({
         where: { id: userId },
         create: {
             id: userId,
-            givenName: 'Synthetic',
-            familyName: 'Data',
-            email,
-            role: 'STATE_USER',
-            stateCode: 'MN',
+            ...user,
         },
-        update: {
-            givenName: 'Synthetic',
-            familyName: 'Data',
-            email,
-            role: 'STATE_USER',
-            stateCode: 'MN',
-        },
+        update: user,
     })
 
     await prismaClient.oAuthClient.upsert({
@@ -112,24 +120,39 @@ export async function bootstrapSyntheticActor(
             clientId: credentials.clientId,
             clientSecret: credentials.clientSecret,
             grants: ['client_credentials'],
-            description: `Synthetic data client for ${stage}`,
+            description: `Synthetic data ${actor} client for ${stage}`,
             userID: userId,
             scopes: [OAuthScope.SYNTHETIC_DATA_WRITE],
         },
         update: {
             clientSecret: credentials.clientSecret,
             grants: ['client_credentials'],
-            description: `Synthetic data client for ${stage}`,
+            description: `Synthetic data ${actor} client for ${stage}`,
             userID: userId,
             scopes: [OAuthScope.SYNTHETIC_DATA_WRITE],
         },
     })
 
     return {
-        success: true,
-        stage,
         userId,
         clientId: credentials.clientId,
+    }
+}
+
+export async function bootstrapSyntheticActors(
+    prismaClient: ExtendedPrismaClient,
+    stage: string,
+    credentials: Record<SyntheticActorKind, SyntheticDataCredentials>
+): Promise<BootstrapSyntheticDataResponse> {
+    const [state, cms] = await Promise.all([
+        upsertSyntheticActor(prismaClient, stage, 'state', credentials.state),
+        upsertSyntheticActor(prismaClient, stage, 'cms', credentials.cms),
+    ])
+
+    return {
+        success: true,
+        stage,
+        actors: { state, cms },
     }
 }
 
@@ -144,13 +167,17 @@ export const main: Handler<
 
     assertSyntheticDataEnvironment(stage)
 
-    const secretId = process.env.SYNTHETIC_DATA_CREDENTIALS_SECRET
+    const stateSecretId = process.env.SYNTHETIC_DATA_STATE_CREDENTIALS_SECRET
+    const cmsSecretId = process.env.SYNTHETIC_DATA_CMS_CREDENTIALS_SECRET
     const databaseUrl = process.env.DATABASE_URL
-    if (!secretId || !databaseUrl) {
+    if (!stateSecretId || !cmsSecretId || !databaseUrl) {
         throw new Error('Synthetic data bootstrap configuration is incomplete')
     }
 
-    const credentials = await loadSyntheticDataCredentials(secretId, stage)
+    const [stateCredentials, cmsCredentials] = await Promise.all([
+        loadSyntheticDataCredentials(stateSecretId, stage, 'state'),
+        loadSyntheticDataCredentials(cmsSecretId, stage, 'cms'),
+    ])
     const databaseConnection = await getPostgresURL(
         databaseUrl,
         process.env.SECRETS_MANAGER_SECRET
@@ -168,5 +195,8 @@ export const main: Handler<
         )
     }
 
-    return bootstrapSyntheticActor(prismaClient, stage, credentials)
+    return bootstrapSyntheticActors(prismaClient, stage, {
+        state: stateCredentials,
+        cms: cmsCredentials,
+    })
 }

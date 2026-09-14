@@ -7,15 +7,17 @@ import {
     MAX_SCALE,
     OperationInputError,
     parseOperationInput,
-    parseContractSmokeSeedInput,
+    parseScenarioSeedInput,
 } from '../src/config/operationInput'
 
 const validEnvironment = {
     SYNTHETIC_DATA_ENABLED: 'true',
     SYNTHETIC_DATA_STAGE: 'qa',
     SYNTHETIC_DATA_API_URL: 'https://api.example.com',
-    SYNTHETIC_DATA_OAUTH_CLIENT_ID: 'synthetic-client',
-    SYNTHETIC_DATA_OAUTH_CLIENT_SECRET: 'synthetic-secret',
+    SYNTHETIC_DATA_STATE_OAUTH_CLIENT_ID: 'synthetic-state-client',
+    SYNTHETIC_DATA_STATE_OAUTH_CLIENT_SECRET: 'synthetic-state-secret',
+    SYNTHETIC_DATA_CMS_OAUTH_CLIENT_ID: 'synthetic-cms-client',
+    SYNTHETIC_DATA_CMS_OAUTH_CLIENT_SECRET: 'synthetic-cms-secret',
 }
 
 describe('loadEnvironment', () => {
@@ -25,8 +27,10 @@ describe('loadEnvironment', () => {
             apiBaseUrl: 'https://api.example.com/',
             graphqlEndpoint: 'https://api.example.com/v1/graphql/external',
             tokenEndpoint: 'https://api.example.com/oauth/token',
-            oauthClientId: 'synthetic-client',
-            oauthClientSecret: 'synthetic-secret',
+            stateOAuthClientId: 'synthetic-state-client',
+            stateOAuthClientSecret: 'synthetic-state-secret',
+            cmsOAuthClientId: 'synthetic-cms-client',
+            cmsOAuthClientSecret: 'synthetic-cms-secret',
             maxAttempts: 4,
             retryBaseDelayMs: 250,
         })
@@ -113,11 +117,9 @@ describe('parseOperationInput', () => {
     })
 })
 
-describe('parseContractSmokeSeedInput', () => {
+describe('parseScenarioSeedInput', () => {
     it('accepts a bounded filesystem-safe seed', () => {
-        expect(
-            parseContractSmokeSeedInput(['--seed=review-2026.09_03'])
-        ).toEqual({
+        expect(parseScenarioSeedInput(['--seed=review-2026.09_03'])).toEqual({
             seed: 'review-2026.09_03',
         })
     })
@@ -130,7 +132,7 @@ describe('parseContractSmokeSeedInput', () => {
         ]
 
         for (const args of invalidArguments) {
-            expect(() => parseContractSmokeSeedInput(args)).toThrow(
+            expect(() => parseScenarioSeedInput(args)).toThrow(
                 OperationInputError
             )
         }

@@ -12,19 +12,19 @@ The service is intended for review environments and QA. It must not run against 
 | QA                          | Supported | QA promotion enables the resources with local-only email delivery; a separate protected workflow runs it. |
 | Local, main, dev, val, prod | Refused   | Both the API and CLI reject these stages.                                                                 |
 
-After this change reaches `main`, the QA promotion deploys the credentials secret and bootstrap Lambda. Operators can then run one append-only contract smoke scenario through the protected QA workflow.
+After changes reach `main`, QA promotion deploys the actor credentials and bootstrap Lambda. Operators can run allowlisted append-only scenarios through the protected QA workflow.
 
 ## Implemented commands
 
 ### `preflight`
 
-Authenticates with the configured OAuth client and calls `fetchCurrentUser`.
+Authenticates both configured OAuth clients and calls `fetchCurrentUser`.
 
 ```bash
 pnpm --filter @mc-review/synthetic-data preflight
 ```
 
-Success is logged as `synthetic.preflight.succeeded` with the actor ID and role.
+Success is logged as `synthetic.preflight.succeeded` with the state and CMS actor IDs and roles.
 
 ### `seed-contract-smoke`
 
@@ -55,38 +55,56 @@ The marker format is:
 
 The command does not deduplicate or delete contracts. Reusing a seed creates another contract with the same marker. Use a distinct seed when separate runs need to be distinguishable.
 
+### `seed-contract-unlock-resubmit`
+
+Runs the `contract-unlock-resubmit-v1` scenario:
+
+```bash
+pnpm --filter @mc-review/synthetic-data cli seed-contract-unlock-resubmit \
+  --seed my-resubmission-01
+```
+
+The state actor creates and submits a marked contract-only package. The CMS actor unlocks it. The state actor changes provision answers, adds a supporting DOCX, and resubmits it with a reason. The final read verifies both historical revisions, actor roles, reasons, document history, and `RESUBMITTED` status.
+
+The two revision markers are:
+
+```text
+[SYNTHETIC:contract-unlock-resubmit-v1:initial:<seed>]
+[SYNTHETIC:contract-unlock-resubmit-v1:resubmitted:<seed>]
+```
+
 ## How it works
 
 ```text
 CLI
- ├─ OAuth token endpoint (client_credentials)
- ├─ External GraphQL endpoint
- │   ├─ create contract
- │   ├─ generate upload URL
- │   ├─ update draft
- │   ├─ submit contract
- │   └─ fetch and verify contract
- └─ Presigned S3 upload
+ ├─ State OAuth client
+ │   ├─ create and update contract
+ │   ├─ generate upload URL and upload documents
+ │   ├─ submit and resubmit contract
+ │   └─ fetch and verify history
+ ├─ CMS OAuth client
+ │   └─ unlock contract
+ └─ External GraphQL endpoint and presigned S3 upload
 ```
 
 ### Synthetic infrastructure
 
 When a review or QA App API stack is deployed with synthetic data enabled, CDK creates:
 
-- A generated Secrets Manager secret containing `clientId` and `clientSecret`.
-- A bootstrap Lambda that upserts the dedicated state user and OAuth client.
-- CloudFormation outputs for the API URL, bootstrap function name, and credentials secret name.
+- Separate generated Secrets Manager secrets for the state and CMS OAuth clients.
+- A bootstrap Lambda that upserts both dedicated users and OAuth clients.
+- CloudFormation outputs for the API URL, bootstrap function name, and both credentials secret names.
 
 The bootstrap Lambda creates or updates:
 
-- User: `synthetic-data-<stage>-state-user`
-- Role: `STATE_USER`
-- State: `MN`
-- OAuth client: `synthetic-data-<stage>-state`
-- Grant: `client_credentials`
-- Scope: `SYNTHETIC_DATA_WRITE`
+| Actor | User                                | Role                      | OAuth client                   |
+| ----- | ----------------------------------- | ------------------------- | ------------------------------ |
+| State | `synthetic-data-<stage>-state-user` | `STATE_USER` in Minnesota | `synthetic-data-<stage>-state` |
+| CMS   | `synthetic-data-<stage>-cms-user`   | `CMS_USER`                | `synthetic-data-<stage>-cms`   |
 
-The bootstrap invocation is idempotent. Invoke it again whenever CloudFormation replaces the credentials secret.
+Both clients use `client_credentials` and the narrowly allowlisted `SYNTHETIC_DATA_WRITE` scope.
+
+The bootstrap invocation is idempotent. Invoke it again whenever CloudFormation replaces either credentials secret.
 
 ### API authorization
 
@@ -105,6 +123,7 @@ The current mutation allowlist is:
 - `generateUploadURL`
 - `updateContractDraftRevision`
 - `submitContract`
+- `unlockContract`
 
 Adding a scenario does not automatically grant it access to more mutations.
 
@@ -117,11 +136,12 @@ After `.github/workflows/seed-synthetic-review.yml` exists on the default branch
 1. Open **Actions**.
 2. Select **Seed Synthetic Review Data**.
 3. Select the review branch to test.
-4. Enter a seed containing only letters, numbers, `.`, `_`, or `-`.
-5. Enter the confirmation `SEED_REVIEW`.
-6. Run the workflow.
+4. Select an allowlisted scenario.
+5. Enter a seed containing only letters, numbers, `.`, `_`, or `-`.
+6. Enter the confirmation `SEED_REVIEW`.
+7. Run the workflow.
 
-The workflow derives the normalized review stage from the branch, assumes the review CDK role, resolves stack outputs, invokes the bootstrap Lambda, loads and masks the OAuth credentials, then runs `seed-contract-smoke`.
+The workflow derives the normalized review stage from the branch, assumes the review CDK role, resolves stack outputs, bootstraps both actors, loads and masks both OAuth credentials, runs preflight, and executes the selected scenario.
 
 The workflow refuses official stages, including QA.
 
@@ -130,14 +150,15 @@ The workflow refuses official stages, including QA.
 After the QA promotion has deployed `app-api-qa-cdk`:
 
 1. Open **Actions**.
-2. Select **Seed Synthetic QA Contract Smoke**.
+2. Select **Seed Synthetic QA Data**.
 3. Select `main`.
-4. Enter a unique seed containing only letters, numbers, `.`, `_`, or `-`.
-5. Enter the confirmation `SEED_QA`.
-6. Approve the protected `qa` environment if required.
-7. Run the workflow.
+4. Select an allowlisted scenario.
+5. Enter a unique seed containing only letters, numbers, `.`, `_`, or `-`.
+6. Enter the confirmation `SEED_QA`.
+7. Approve the protected `qa` environment if required.
+8. Run the workflow.
 
-The QA workflow accepts only `main`, validates its request before requesting QA credentials, serializes executions, bootstraps the synthetic state actor, runs `preflight`, creates one submitted contract, and writes its contract ID, status, marker, and seed to the workflow summary.
+The QA workflow accepts only `main`, validates its request before requesting QA credentials, serializes executions, bootstraps both actors, runs `preflight`, executes the selected scenario, and writes its contract ID, status, marker, and seed to the workflow summary.
 
 The QA workflow is append-only. It does not reset, delete, or bulk-generate data.
 
@@ -149,9 +170,10 @@ Open the `app-api-<stage>-cdk` CloudFormation stack and record these outputs:
 
 - `ApiGatewayUrl`
 - `SyntheticDataBootstrapFunctionName`
-- `SyntheticDataCredentialsSecretName`
+- `SyntheticDataStateCredentialsSecretName`
+- `SyntheticDataCMSCredentialsSecretName`
 
-### 2. Bootstrap the actor
+### 2. Bootstrap the actors
 
 Invoke the bootstrap Lambda with:
 
@@ -168,8 +190,16 @@ Expected shape:
 {
     "success": true,
     "stage": "<stage>",
-    "userId": "synthetic-data-<stage>-state-user",
-    "clientId": "synthetic-data-<stage>-state"
+    "actors": {
+        "state": {
+            "userId": "synthetic-data-<stage>-state-user",
+            "clientId": "synthetic-data-<stage>-state"
+        },
+        "cms": {
+            "userId": "synthetic-data-<stage>-cms-user",
+            "clientId": "synthetic-data-<stage>-cms"
+        }
+    }
 }
 ```
 
@@ -179,16 +209,20 @@ Expected shape:
 export SYNTHETIC_DATA_ENABLED=true
 export SYNTHETIC_DATA_STAGE='<stage>'
 export SYNTHETIC_DATA_API_URL='<ApiGatewayUrl>'
-export SYNTHETIC_DATA_OAUTH_CLIENT_ID='<clientId>'
+export SYNTHETIC_DATA_STATE_OAUTH_CLIENT_ID='<stateClientId>'
+export SYNTHETIC_DATA_CMS_OAUTH_CLIENT_ID='<cmsClientId>'
 export SYNTHETIC_DATA_MAX_ATTEMPTS=4
 export SYNTHETIC_DATA_RETRY_BASE_DELAY_MS=250
 ```
 
-Avoid putting the client secret in shell history:
+Avoid putting either client secret in shell history:
 
 ```bash
-read -s SYNTHETIC_DATA_OAUTH_CLIENT_SECRET
-export SYNTHETIC_DATA_OAUTH_CLIENT_SECRET
+read -s SYNTHETIC_DATA_STATE_OAUTH_CLIENT_SECRET
+export SYNTHETIC_DATA_STATE_OAUTH_CLIENT_SECRET
+echo
+read -s SYNTHETIC_DATA_CMS_OAUTH_CLIENT_SECRET
+export SYNTHETIC_DATA_CMS_OAUTH_CLIENT_SECRET
 echo
 ```
 
@@ -201,14 +235,15 @@ pnpm --filter @mc-review/synthetic-data preflight
 Then run a scenario:
 
 ```bash
-pnpm --filter @mc-review/synthetic-data cli seed-contract-smoke \
-  --seed my-contract-smoke-01
+pnpm --filter @mc-review/synthetic-data cli seed-contract-unlock-resubmit \
+  --seed my-resubmission-01
 ```
 
 Remove the secret from the shell when finished:
 
 ```bash
-unset SYNTHETIC_DATA_OAUTH_CLIENT_SECRET
+unset SYNTHETIC_DATA_STATE_OAUTH_CLIENT_SECRET
+unset SYNTHETIC_DATA_CMS_OAUTH_CLIENT_SECRET
 ```
 
 Never commit credentials, put them in command arguments, paste them into tickets or chat, or include them in fixtures.
@@ -350,8 +385,8 @@ QA synthetic data is intentionally narrower than the planned baseline generator:
 - The GitHub `qa` environment and QA CDK role protect AWS access.
 - Operators must type `SEED_QA`.
 - GitHub concurrency permits only one QA synthetic run at a time.
-- The current scenario creates exactly one identifiable contract.
-- The current scenario performs no reset, deletion, scheduling, or bulk generation.
+- Each current scenario creates exactly one identifiable contract.
+- Current scenarios perform no reset, deletion, scheduling, or bulk generation.
 - Dev, Val, and production remain denied by both the API and CLI.
 
 The review and QA workflows remain separate because they use different stage selection, GitHub environments, AWS roles, and confirmation values.

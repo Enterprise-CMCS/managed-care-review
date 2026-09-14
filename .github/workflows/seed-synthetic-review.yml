@@ -3,13 +3,21 @@ name: Seed Synthetic Review Data
 on:
   workflow_dispatch:
     inputs:
+      scenario:
+        description: 'Allowlisted synthetic scenario'
+        required: true
+        default: 'contract-unlock-resubmit-v1'
+        type: choice
+        options:
+          - contract-unlock-resubmit-v1
+          - contract-submit-smoke-v1
       seed:
         description: 'Deterministic seed (letters, numbers, dot, underscore, hyphen)'
         required: true
         default: 'manual-contract-smoke'
         type: string
       confirmation:
-        description: 'Type SEED_REVIEW to authorize one synthetic contract'
+        description: 'Type SEED_REVIEW to authorize one synthetic scenario'
         required: true
         type: string
 
@@ -71,18 +79,20 @@ jobs:
           STACK_NAME="app-api-${STAGE_NAME}-cdk"
           API_URL="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[?OutputKey=='ApiGatewayUrl'].OutputValue | [0]" --output text)"
           BOOTSTRAP_FUNCTION="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[?OutputKey=='SyntheticDataBootstrapFunctionName'].OutputValue | [0]" --output text)"
-          CREDENTIALS_SECRET="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[?OutputKey=='SyntheticDataCredentialsSecretName'].OutputValue | [0]" --output text)"
-          if [[ -z "${API_URL}" || "${API_URL}" == "None" || -z "${BOOTSTRAP_FUNCTION}" || "${BOOTSTRAP_FUNCTION}" == "None" || -z "${CREDENTIALS_SECRET}" || "${CREDENTIALS_SECRET}" == "None" ]]; then
+          STATE_CREDENTIALS_SECRET="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[?OutputKey=='SyntheticDataStateCredentialsSecretName'].OutputValue | [0]" --output text)"
+          CMS_CREDENTIALS_SECRET="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[?OutputKey=='SyntheticDataCMSCredentialsSecretName'].OutputValue | [0]" --output text)"
+          if [[ -z "${API_URL}" || "${API_URL}" == "None" || -z "${BOOTSTRAP_FUNCTION}" || "${BOOTSTRAP_FUNCTION}" == "None" || -z "${STATE_CREDENTIALS_SECRET}" || "${STATE_CREDENTIALS_SECRET}" == "None" || -z "${CMS_CREDENTIALS_SECRET}" || "${CMS_CREDENTIALS_SECRET}" == "None" ]]; then
             echo "Review synthetic data resources are not deployed for ${STAGE_NAME}" >&2
             exit 1
           fi
           {
             echo "SYNTHETIC_DATA_API_URL=${API_URL}"
             echo "SYNTHETIC_DATA_BOOTSTRAP_FUNCTION=${BOOTSTRAP_FUNCTION}"
-            echo "SYNTHETIC_DATA_CREDENTIALS_SECRET=${CREDENTIALS_SECRET}"
+            echo "SYNTHETIC_DATA_STATE_CREDENTIALS_SECRET=${STATE_CREDENTIALS_SECRET}"
+            echo "SYNTHETIC_DATA_CMS_CREDENTIALS_SECRET=${CMS_CREDENTIALS_SECRET}"
           } >> "${GITHUB_ENV}"
 
-      - name: Bootstrap synthetic state actor
+      - name: Bootstrap synthetic actors
         shell: bash
         run: |
           set -euo pipefail
@@ -98,21 +108,68 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          SECRET_JSON="$(aws secretsmanager get-secret-value --secret-id "${SYNTHETIC_DATA_CREDENTIALS_SECRET}" --query SecretString --output text)"
-          CLIENT_ID="$(printf '%s' "${SECRET_JSON}" | jq -er '.clientId')"
-          CLIENT_SECRET="$(printf '%s' "${SECRET_JSON}" | jq -er '.clientSecret')"
-          echo "::add-mask::${CLIENT_ID}"
-          echo "::add-mask::${CLIENT_SECRET}"
-          echo "SYNTHETIC_DATA_OAUTH_CLIENT_ID=${CLIENT_ID}" >> "${GITHUB_ENV}"
-          echo "SYNTHETIC_DATA_OAUTH_CLIENT_SECRET=${CLIENT_SECRET}" >> "${GITHUB_ENV}"
+          STATE_SECRET_JSON="$(aws secretsmanager get-secret-value --secret-id "${SYNTHETIC_DATA_STATE_CREDENTIALS_SECRET}" --query SecretString --output text)"
+          CMS_SECRET_JSON="$(aws secretsmanager get-secret-value --secret-id "${SYNTHETIC_DATA_CMS_CREDENTIALS_SECRET}" --query SecretString --output text)"
+          STATE_CLIENT_ID="$(printf '%s' "${STATE_SECRET_JSON}" | jq -er '.clientId')"
+          STATE_CLIENT_SECRET="$(printf '%s' "${STATE_SECRET_JSON}" | jq -er '.clientSecret')"
+          CMS_CLIENT_ID="$(printf '%s' "${CMS_SECRET_JSON}" | jq -er '.clientId')"
+          CMS_CLIENT_SECRET="$(printf '%s' "${CMS_SECRET_JSON}" | jq -er '.clientSecret')"
+          echo "::add-mask::${STATE_CLIENT_ID}"
+          echo "::add-mask::${STATE_CLIENT_SECRET}"
+          echo "::add-mask::${CMS_CLIENT_ID}"
+          echo "::add-mask::${CMS_CLIENT_SECRET}"
+          {
+            echo "SYNTHETIC_DATA_STATE_OAUTH_CLIENT_ID=${STATE_CLIENT_ID}"
+            echo "SYNTHETIC_DATA_STATE_OAUTH_CLIENT_SECRET=${STATE_CLIENT_SECRET}"
+            echo "SYNTHETIC_DATA_CMS_OAUTH_CLIENT_ID=${CMS_CLIENT_ID}"
+            echo "SYNTHETIC_DATA_CMS_OAUTH_CLIENT_SECRET=${CMS_CLIENT_SECRET}"
+          } >> "${GITHUB_ENV}"
 
-      - name: Seed and verify one synthetic contract
+      - name: Verify synthetic actors
+        env:
+          SYNTHETIC_DATA_ENABLED: 'true'
+          SYNTHETIC_DATA_STAGE: ${{ steps.stage-name.outputs.stage-name }}
+          SYNTHETIC_DATA_MAX_ATTEMPTS: '4'
+          SYNTHETIC_DATA_RETRY_BASE_DELAY_MS: '250'
+        run: pnpm --filter @mc-review/synthetic-data preflight
+
+      - name: Seed and verify synthetic scenario
         env:
           SYNTHETIC_DATA_ENABLED: 'true'
           SYNTHETIC_DATA_STAGE: ${{ steps.stage-name.outputs.stage-name }}
           SYNTHETIC_DATA_MAX_ATTEMPTS: '4'
           SYNTHETIC_DATA_RETRY_BASE_DELAY_MS: '250'
           SYNTHETIC_DATA_SEED: ${{ inputs.seed }}
-        run: >-
-          pnpm --filter @mc-review/synthetic-data cli seed-contract-smoke
-          --seed "${SYNTHETIC_DATA_SEED}"
+          SYNTHETIC_DATA_SCENARIO: ${{ inputs.scenario }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${SYNTHETIC_DATA_SCENARIO}" in
+            contract-submit-smoke-v1)
+              COMMAND='seed-contract-smoke'
+              EVENT='synthetic.contract-smoke.completed'
+              ;;
+            contract-unlock-resubmit-v1)
+              COMMAND='seed-contract-unlock-resubmit'
+              EVENT='synthetic.contract-unlock-resubmit.completed'
+              ;;
+            *)
+              echo "Unsupported synthetic scenario ${SYNTHETIC_DATA_SCENARIO}" >&2
+              exit 1
+              ;;
+          esac
+          pnpm --filter @mc-review/synthetic-data cli "${COMMAND}" \
+            --seed "${SYNTHETIC_DATA_SEED}" | tee synthetic-scenario.log
+          RESULT="$(jq -Rsc --arg event "${EVENT}" '[split("\n")[] | fromjson? | select(.event == $event)] | last' synthetic-scenario.log)"
+          jq -e --arg scenario "${SYNTHETIC_DATA_SCENARIO}" '. != null and .scenarioKey == $scenario' <<< "${RESULT}" > /dev/null
+          {
+            echo '## Synthetic review scenario'
+            echo
+            echo '| Field | Value |'
+            echo '| --- | --- |'
+            printf '| Scenario | %s |\n' "${SYNTHETIC_DATA_SCENARIO}"
+            printf '| Seed | %s |\n' "${SYNTHETIC_DATA_SEED}"
+            printf '| Contract ID | %s |\n' "$(jq -r '.contractId' <<< "${RESULT}")"
+            printf '| Status | %s |\n' "$(jq -r '.status' <<< "${RESULT}")"
+            printf '| Marker | %s |\n' "$(jq -r '.resubmittedMarker // .marker' <<< "${RESULT}")"
+          } >> "${GITHUB_STEP_SUMMARY}"

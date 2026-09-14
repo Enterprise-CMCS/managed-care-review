@@ -10,8 +10,8 @@ export function contractSmokeMarker(seed: string): string {
     return `[SYNTHETIC:${contractSmokeScenarioKey}:contract-only:${seed}]`
 }
 
-export function buildContractSmokeCreateContractInput(
-    seed: string,
+export function buildSyntheticContractCreateInput(
+    marker: string,
     programId: string
 ): CreateContractInput {
     return {
@@ -21,24 +21,39 @@ export function buildContractSmokeCreateContractInput(
         populationCovered: 'MEDICAID',
         programIDs: [programId],
         riskBasedContract: false,
-        submissionDescription: contractSmokeMarker(seed),
+        submissionDescription: marker,
         submissionType: 'CONTRACT_ONLY',
     }
 }
 
-// Complete, intentionally fixed form data for the contract-submit smoke path.
-// The seed identifies the run; it does not currently vary field values.
-export function buildContractSmokeFormData(
+export function buildContractSmokeCreateContractInput(
     seed: string,
+    programId: string
+): CreateContractInput {
+    return buildSyntheticContractCreateInput(
+        contractSmokeMarker(seed),
+        programId
+    )
+}
+
+export function buildSyntheticContractFormData(
+    marker: string,
     programId: string,
-    uploadedDocument: UploadedDocument
+    contractDocument: UploadedDocument,
+    supportingDocuments: ReadonlyArray<UploadedDocument> = []
 ): ContractDraftRevisionFormDataInput {
+    const toDocumentInput = (document: UploadedDocument) => ({
+        name: document.name,
+        s3URL: document.s3URL,
+        sha256: document.sha256,
+    })
+
     return {
         programIDs: [programId],
         populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_ONLY',
         riskBasedContract: false,
-        submissionDescription: contractSmokeMarker(seed),
+        submissionDescription: marker,
         stateContacts: [
             {
                 givenName: 'Synthetic',
@@ -47,16 +62,10 @@ export function buildContractSmokeFormData(
                 email: 'synthetic.state.contact@example.com',
             },
         ],
-        supportingDocuments: [],
+        supportingDocuments: supportingDocuments.map(toDocumentInput),
         contractType: 'BASE',
         contractExecutionStatus: 'EXECUTED',
-        contractDocuments: [
-            {
-                name: uploadedDocument.name,
-                s3URL: uploadedDocument.s3URL,
-                sha256: uploadedDocument.sha256,
-            },
-        ],
+        contractDocuments: [toDocumentInput(contractDocument)],
         contractDateStart: '2026-01-01',
         contractDateEnd: '2026-12-31',
         managedCareEntities: ['MCO'],
@@ -82,4 +91,18 @@ export function buildContractSmokeFormData(
         statutoryRegulatoryAttestation: false,
         statutoryRegulatoryAttestationDescription: 'Synthetic test data',
     }
+}
+
+// Complete, intentionally fixed form data for the contract-submit smoke path.
+// The seed identifies the run; it does not currently vary field values.
+export function buildContractSmokeFormData(
+    seed: string,
+    programId: string,
+    uploadedDocument: UploadedDocument
+): ContractDraftRevisionFormDataInput {
+    return buildSyntheticContractFormData(
+        contractSmokeMarker(seed),
+        programId,
+        uploadedDocument
+    )
 }

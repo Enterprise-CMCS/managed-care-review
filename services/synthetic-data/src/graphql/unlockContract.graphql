@@ -1,0 +1,18 @@
+mutation SyntheticUnlockContract($input: UnlockContractInput!) {
+    unlockContract(input: $input) {
+        contract {
+            id
+            status
+            draftRevision {
+                updatedAt
+                unlockInfo {
+                    updatedReason
+                    updatedBy {
+                        role
+                        email
+                    }
+                }
+            }
+        }
+    }
+}

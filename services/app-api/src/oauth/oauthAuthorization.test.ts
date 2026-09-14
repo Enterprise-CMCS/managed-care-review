@@ -261,6 +261,7 @@ describe('OAuth Authorization', () => {
             'updateContractDraftRevision',
             'submitContract',
             'generateUploadURL',
+            'unlockContract',
         ] as const)(
             'allows the %s operation in its exact review stage',
             (operation) => {

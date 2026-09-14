@@ -1,24 +1,35 @@
 import { describe, expect, it, vi } from 'vitest'
 import type { ExtendedPrismaClient } from '../postgres/prismaClient'
 import {
-    bootstrapSyntheticActor,
+    bootstrapSyntheticActors,
     validateSyntheticDataCredentials,
 } from './bootstrap_synthetic_data'
 
 describe('synthetic data actor bootstrap', () => {
-    it('rejects credentials for a different stage', () => {
+    it('rejects credentials for a different stage or actor', () => {
         expect(() =>
             validateSyntheticDataCredentials(
                 {
                     clientId: 'synthetic-data-other-review-state',
                     clientSecret: 'a'.repeat(64),
                 },
-                'synth-review'
+                'synth-review',
+                'state'
+            )
+        ).toThrow('Synthetic data credentials secret is invalid')
+        expect(() =>
+            validateSyntheticDataCredentials(
+                {
+                    clientId: 'synthetic-data-synth-review-state',
+                    clientSecret: 'a'.repeat(64),
+                },
+                'synth-review',
+                'cms'
             )
         ).toThrow('Synthetic data credentials secret is invalid')
     })
 
-    it('upserts one state actor and one narrowly scoped OAuth client', async () => {
+    it('upserts separate state and CMS actors with scoped clients', async () => {
         const userUpsert = vi.fn().mockResolvedValue({})
         const oAuthClientUpsert = vi.fn().mockResolvedValue({})
         const prismaClient = {
@@ -26,16 +37,23 @@ describe('synthetic data actor bootstrap', () => {
             oAuthClient: { upsert: oAuthClientUpsert },
         } as unknown as ExtendedPrismaClient
         const credentials = {
-            clientId: 'synthetic-data-synth-review-state',
-            clientSecret: 'a'.repeat(64),
+            state: {
+                clientId: 'synthetic-data-synth-review-state',
+                clientSecret: 'a'.repeat(64),
+            },
+            cms: {
+                clientId: 'synthetic-data-synth-review-cms',
+                clientSecret: 'b'.repeat(64),
+            },
         }
 
-        const result = await bootstrapSyntheticActor(
+        const result = await bootstrapSyntheticActors(
             prismaClient,
             'synth-review',
             credentials
         )
 
+        expect(userUpsert).toHaveBeenCalledTimes(2)
         expect(userUpsert).toHaveBeenCalledWith({
             where: { id: 'synthetic-data-synth-review-state-user' },
             create: expect.objectContaining({
@@ -47,24 +65,51 @@ describe('synthetic data actor bootstrap', () => {
                 stateCode: 'MN',
             }),
         })
-        expect(oAuthClientUpsert).toHaveBeenCalledWith({
-            where: { clientId: credentials.clientId },
+        expect(userUpsert).toHaveBeenCalledWith({
+            where: { id: 'synthetic-data-synth-review-cms-user' },
             create: expect.objectContaining({
-                grants: ['client_credentials'],
-                scopes: ['SYNTHETIC_DATA_WRITE'],
-                userID: 'synthetic-data-synth-review-state-user',
+                role: 'CMS_USER',
+                stateCode: null,
             }),
             update: expect.objectContaining({
-                clientSecret: credentials.clientSecret,
-                grants: ['client_credentials'],
-                scopes: ['SYNTHETIC_DATA_WRITE'],
+                role: 'CMS_USER',
+                stateCode: null,
             }),
         })
+        expect(oAuthClientUpsert).toHaveBeenCalledTimes(2)
+        for (const [actor, userID] of [
+            ['state', 'synthetic-data-synth-review-state-user'],
+            ['cms', 'synthetic-data-synth-review-cms-user'],
+        ] as const) {
+            const actorCredentials = credentials[actor]
+            expect(oAuthClientUpsert).toHaveBeenCalledWith({
+                where: { clientId: actorCredentials.clientId },
+                create: expect.objectContaining({
+                    grants: ['client_credentials'],
+                    scopes: ['SYNTHETIC_DATA_WRITE'],
+                    userID,
+                }),
+                update: expect.objectContaining({
+                    clientSecret: actorCredentials.clientSecret,
+                    grants: ['client_credentials'],
+                    scopes: ['SYNTHETIC_DATA_WRITE'],
+                    userID,
+                }),
+            })
+        }
         expect(result).toEqual({
             success: true,
             stage: 'synth-review',
-            userId: 'synthetic-data-synth-review-state-user',
-            clientId: credentials.clientId,
+            actors: {
+                state: {
+                    userId: 'synthetic-data-synth-review-state-user',
+                    clientId: credentials.state.clientId,
+                },
+                cms: {
+                    userId: 'synthetic-data-synth-review-cms-user',
+                    clientId: credentials.cms.clientId,
+                },
+            },
         })
     })
 })
