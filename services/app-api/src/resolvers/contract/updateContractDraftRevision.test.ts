@@ -656,5 +656,41 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 'Invalid input: expected undefined, received boolean'
             )
         })
+
+        it('rejects procurement attestation', async () => {
+            const server = await constructTestPostgresServer()
+            const contract = await createAndUpdateTestEQROContract(server)
+            const formData = contract.draftRevision?.formData
+
+            if (!formData) {
+                throw new Error(
+                    'Unexpected error: EQRO contract did not contain form data'
+                )
+            }
+
+            const updateResult = await executeGraphQLOperation(server, {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: contract.id,
+                        lastSeenUpdatedAt: contract.draftRevision?.updatedAt,
+                        formData: mockGqlContractDraftRevisionFormDataInput(
+                            contract.stateCode,
+                            {
+                                ...formData,
+                                procurementAttestation: true,
+                            }
+                        ),
+                    },
+                },
+            })
+
+            expect(updateResult.errors?.[0].message).toContain(
+                'procurementAttestation'
+            )
+            expect(updateResult.errors?.[0].message).toContain(
+                'Invalid input: expected undefined, received boolean'
+            )
+        })
     })
 })

@@ -1948,6 +1948,8 @@ type ContractFormData {
     statutoryRegulatoryAttestation: Boolean
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
+    "If the state has attested to the procurement requirements"
+    procurementAttestation: Boolean
 
     #   EQRO submission fields only
     "If contract has a new EQRO contractor"
@@ -3234,6 +3236,8 @@ input ContractDraftRevisionFormDataInput {
     statutoryRegulatoryAttestation: Boolean
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
+    "If the state has attested to the procurement requirements"
+    procurementAttestation: Boolean
 
     #   EQRO submission fields only
     "If contract has a new EQRO contractor"
