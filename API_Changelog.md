@@ -1,6 +1,12 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### September 11, 2026
+#### Added
+- Nullable `procurementAttestation` Boolean field added to `ContractFormData` and `ContractDraftRevisionFormDataInput` for health-plan contracts.
+    - States can provide `true` when attesting to procurement requirements; `null` indicates the question is unanswered, `false` is unreacheable.
+    - The field is returned by contract queries and rejected for EQRO queries.
+
 ### August 31, 2026
 #### Added
 - New query `fetchAllStatePrograms` added to the API.

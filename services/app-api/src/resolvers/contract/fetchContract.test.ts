@@ -33,6 +33,47 @@ import { ContractSubmissionTypeRecord } from '@mc-review/constants'
 describe('fetchContract', () => {
     const mockS3 = testS3Client()
 
+    it('returns procurement attestation for health plan contracts', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const contract = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            'FL',
+            { procurementAttestation: true }
+        )
+
+        const fetchedContract = await fetchTestContract(
+            stateServer,
+            contract.id
+        )
+
+        expect(
+            fetchedContract.draftRevision?.formData.procurementAttestation
+        ).toBe(true)
+    })
+
+    it('returns procurement attestation in submitted contract revisions', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const draftContract = await createAndUpdateTestContractWithoutRates(
+            stateServer,
+            'FL',
+            {
+                procurementAttestation: true,
+                submissionType: 'CONTRACT_ONLY',
+            }
+        )
+
+        await submitTestContract(stateServer, draftContract.id)
+        const fetchedContract = await fetchTestContract(
+            stateServer,
+            draftContract.id
+        )
+
+        expect(
+            fetchedContract.packageSubmissions[0].contractRevision.formData
+                .procurementAttestation
+        ).toBe(true)
+    })
+
     it('fetches the draft contract and a new child rate', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
