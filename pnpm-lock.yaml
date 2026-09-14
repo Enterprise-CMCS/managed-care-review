@@ -1068,8 +1068,8 @@ importers:
         specifier: 2.102.0
         version: 2.102.0(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1))(@aws-solutions-constructs/resources@2.102.0(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1))(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1))(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1)
       '@aws-solutions-constructs/aws-cognito-apigateway-lambda':
-        specifier: 2.92.1
-        version: 2.92.1(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1))(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1)
+        specifier: 2.104.0
+        version: 2.104.0(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1))(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1)
       '@aws-solutions-constructs/aws-eventbridge-lambda':
         specifier: 2.92.1
         version: 2.92.1(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1))(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1)
@@ -1291,7 +1291,7 @@ importers:
         version: 8.68.0(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
       '@vitest/coverage-v8':
         specifier: ^4.1.7
-        version: 4.1.7(vitest@4.1.7)
+        version: 4.1.7(vitest@4.1.11)
       eslint:
         specifier: ^10.4.0
         version: 10.4.0(jiti@2.7.0)(supports-color@10.2.2)
@@ -1312,7 +1312,7 @@ importers:
         version: 8.56.0(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
       vitest:
         specifier: ^4.1.7
-        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(jsdom@30.0.1)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.77.2)(terser@5.49.0)(tsx@4.23.13)(yaml@2.9.0))
+        version: 4.1.11(@opentelemetry/api@1.9.1)(@types/node@26.2.0)(@vitest/coverage-v8@4.1.7)(@vitest/ui@4.1.7)(jsdom@30.0.1)(vite@8.2.1(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.77.2)(terser@5.49.0)(tsx@4.23.13)(yaml@2.9.0))
 
   services/ui: {}
 
@@ -2038,11 +2038,11 @@ packages:
       aws-cdk-lib: ^2.254.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.92.1':
-    resolution: {integrity: sha512-j+N2Zy3hm3C2mTeZGGXWxBHvDb+vSbIb9uw8AvsU5khk2Ajtk2yKuoyLAUTkT9RvRYZfLw2U+Do9h9mZDZh9qA==}
+  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.104.0':
+    resolution: {integrity: sha512-Tb6ISMoGkxW/q+FcsND+gLHZHLCw2EeOCitVaAlVPE1RBkUMnMQllItgA9h1+0GjLTJG6XaFY339UUiOaL0X4g==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.92.1
-      aws-cdk-lib: ^2.212.0
+      '@aws-solutions-constructs/core': 2.104.0
+      aws-cdk-lib: ^2.260.0
       constructs: ^10.0.0
 
   '@aws-solutions-constructs/aws-eventbridge-lambda@2.92.1':
@@ -14529,7 +14529,7 @@ snapshots:
       aws-cdk-lib: 2.268.0(constructs@10.7.1)
       constructs: 10.7.1
 
-  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.92.1(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1))(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1)':
+  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.104.0(@aws-solutions-constructs/core@2.102.0(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1))(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1)':
     dependencies:
       '@aws-solutions-constructs/core': 2.102.0(aws-cdk-lib@2.268.0(constructs@10.7.1))(constructs@10.7.1)
       aws-cdk-lib: 2.268.0(constructs@10.7.1)
