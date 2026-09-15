@@ -48,7 +48,7 @@
         "cypress": "^15.20.1",
         "cypress-axe": "^1.7.0",
         "husky": "^9.1.7",
-        "lint-staged": "^16.4.0",
+        "lint-staged": "^17.5.1",
         "prettier": "^3.9.6"
     },
     "dependencies": {
