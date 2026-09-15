@@ -74,7 +74,8 @@ export class AppApiStack extends BaseStack {
     public readonly restoreIAToStandardFunction: NodejsFunction
 
     public readonly syntheticDataBootstrapFunction?: NodejsFunction
-    public readonly syntheticDataCredentialsSecret?: Secret
+    public readonly syntheticDataStateCredentialsSecret?: Secret
+    public readonly syntheticDataCMSCredentialsSecret?: Secret
     public readonly graphqlFunction: NodejsFunction
 
     // Network resources from Network stack
@@ -311,12 +312,12 @@ export class AppApiStack extends BaseStack {
                 )
             }
 
-            this.syntheticDataCredentialsSecret = new Secret(
+            this.syntheticDataStateCredentialsSecret = new Secret(
                 this,
                 'SyntheticDataCredentials',
                 {
                     secretName: `synthetic-data-oauth-credentials-${this.stage}-cdk`, // pragma: allowlist secret
-                    description: `Synthetic data OAuth credentials for ${this.stage}`,
+                    description: `Synthetic data state OAuth credentials for ${this.stage}`,
                     generateSecretString: {
                         secretStringTemplate: JSON.stringify({
                             clientId: `synthetic-data-${this.stage}-state`,
@@ -328,7 +329,26 @@ export class AppApiStack extends BaseStack {
                     removalPolicy: RemovalPolicy.DESTROY,
                 }
             )
-            this.syntheticDataCredentialsSecret.grantRead(role)
+            this.syntheticDataStateCredentialsSecret.grantRead(role)
+
+            this.syntheticDataCMSCredentialsSecret = new Secret(
+                this,
+                'SyntheticDataCMSCredentials',
+                {
+                    secretName: `synthetic-data-cms-oauth-credentials-${this.stage}-cdk`, // pragma: allowlist secret
+                    description: `Synthetic data CMS OAuth credentials for ${this.stage}`,
+                    generateSecretString: {
+                        secretStringTemplate: JSON.stringify({
+                            clientId: `synthetic-data-${this.stage}-cms`,
+                        }),
+                        generateStringKey: 'clientSecret',
+                        excludePunctuation: true,
+                        passwordLength: 64,
+                    },
+                    removalPolicy: RemovalPolicy.DESTROY,
+                }
+            )
+            this.syntheticDataCMSCredentialsSecret.grantRead(role)
 
             this.syntheticDataBootstrapFunction = this.createLambdaFunction(
                 'synthetic-data-bootstrap',
@@ -339,8 +359,10 @@ export class AppApiStack extends BaseStack {
                     memorySize: 1024,
                     environment: {
                         ...environment,
-                        SYNTHETIC_DATA_CREDENTIALS_SECRET:
-                            this.syntheticDataCredentialsSecret.secretName,
+                        SYNTHETIC_DATA_STATE_CREDENTIALS_SECRET:
+                            this.syntheticDataStateCredentialsSecret.secretName,
+                        SYNTHETIC_DATA_CMS_CREDENTIALS_SECRET:
+                            this.syntheticDataCMSCredentialsSecret.secretName,
                     },
                     role,
                     vpc: this.vpc,
@@ -1433,7 +1455,8 @@ export class AppApiStack extends BaseStack {
 
         if (
             this.syntheticDataBootstrapFunction &&
-            this.syntheticDataCredentialsSecret
+            this.syntheticDataStateCredentialsSecret &&
+            this.syntheticDataCMSCredentialsSecret
         ) {
             new CfnOutput(this, 'SyntheticDataBootstrapFunctionName', {
                 value: this.syntheticDataBootstrapFunction.functionName,
@@ -1442,12 +1465,20 @@ export class AppApiStack extends BaseStack {
                 ),
                 description: 'Synthetic data bootstrap Lambda function name',
             })
-            new CfnOutput(this, 'SyntheticDataCredentialsSecretName', {
-                value: this.syntheticDataCredentialsSecret.secretName,
+            new CfnOutput(this, 'SyntheticDataStateCredentialsSecretName', {
+                value: this.syntheticDataStateCredentialsSecret.secretName,
                 exportName: this.exportName(
-                    'SyntheticDataCredentialsSecretName'
+                    'SyntheticDataStateCredentialsSecretName'
                 ),
-                description: 'Synthetic data OAuth credentials secret name',
+                description:
+                    'Synthetic data state OAuth credentials secret name',
+            })
+            new CfnOutput(this, 'SyntheticDataCMSCredentialsSecretName', {
+                value: this.syntheticDataCMSCredentialsSecret.secretName,
+                exportName: this.exportName(
+                    'SyntheticDataCMSCredentialsSecretName'
+                ),
+                description: 'Synthetic data CMS OAuth credentials secret name',
             })
         }
 

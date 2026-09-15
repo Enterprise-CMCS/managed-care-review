@@ -8,7 +8,10 @@ import { NotFoundError } from '../../postgres'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { GraphQLError } from 'graphql'
-import { canOauthWrite } from '../../oauth/oauthAuthorization'
+import {
+    canOauthWrite,
+    canSyntheticDataWrite,
+} from '../../oauth/oauthAuthorization'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
 
@@ -33,7 +36,10 @@ export function unlockContractResolver(
                     key: context.user.email,
                 })
 
-                if (!canOauthWrite(context, featureFlags)) {
+                if (
+                    !canOauthWrite(context, featureFlags) &&
+                    !canSyntheticDataWrite(context, 'unlockContract')
+                ) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('unlockContract', errMessage, context)
                     throw new GraphQLError(errMessage, {
@@ -70,11 +76,13 @@ export function unlockContractResolver(
                     })
                 }
 
-                if (
-                    contractResult.draftRevision ||
-                    contractResult.consolidatedStatus === 'APPROVED'
-                ) {
-                    const errMessage = `Attempted to unlock contract with wrong status: ${contractResult.consolidatedStatus}`
+                const { consolidatedStatus } = contractResult
+                const hasUnlockableStatus =
+                    consolidatedStatus === 'SUBMITTED' ||
+                    consolidatedStatus === 'RESUBMITTED' ||
+                    consolidatedStatus === 'NOT_SUBJECT_TO_REVIEW'
+                if (contractResult.draftRevision || !hasUnlockableStatus) {
+                    const errMessage = `Attempted to unlock contract with wrong status: ${consolidatedStatus}`
                     logResolverError('unlockContract', errMessage, context)
                     throw createUserInputError(errMessage, 'contractID')
                 }
