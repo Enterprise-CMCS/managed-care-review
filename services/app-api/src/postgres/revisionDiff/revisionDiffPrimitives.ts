@@ -165,7 +165,7 @@ function buildContactCollectionChanges<TItem>(
         previousCounts.set(key, (previousCounts.get(key) ?? 0) + 1)
     }
 
-    const leftoverCurrent: { item: TItem; index: number }[] = []
+    const unmatchedCurrentContacts: { item: TItem; index: number }[] = []
     current.forEach((item, index) => {
         const key = getComparisonKey(item)
         const remaining = previousCounts.get(key) ?? 0
@@ -173,35 +173,36 @@ function buildContactCollectionChanges<TItem>(
         if (remaining > 0) {
             previousCounts.set(key, remaining - 1)
         } else {
-            leftoverCurrent.push({ item, index })
+            unmatchedCurrentContacts.push({ item, index })
         }
     })
 
-    const leftoverPrevious: TItem[] = []
+    const unmatchedPreviousContacts: TItem[] = []
     for (const item of previous) {
         const key = getComparisonKey(item)
         const remaining = previousCounts.get(key) ?? 0
 
         if (remaining > 0) {
             previousCounts.set(key, remaining - 1)
-            leftoverPrevious.push(item)
+            unmatchedPreviousContacts.push(item)
         }
     }
 
-    // Pass 2: a leftover current contact sharing an identity value (name or
-    // email) with a leftover previous contact is that contact edited, one
-    // with no identity link to the previous list is new.
+    // Pass 2: an unmatched current contact sharing an identity value (name
+    // or email) with an unmatched previous contact is that contact edited,
+    // one with no identity link to the previous list is new.
     const changes: RevisionDiffContactChange<TItem>[] = []
-    for (const { item, index } of leftoverCurrent) {
+    for (const { item, index } of unmatchedCurrentContacts) {
         const identityValues = getIdentityValues(item).filter(Boolean)
-        const editedPreviousIndex = leftoverPrevious.findIndex((previousItem) =>
-            getIdentityValues(previousItem).some(
-                (value) => value && identityValues.includes(value)
-            )
+        const editedPreviousIndex = unmatchedPreviousContacts.findIndex(
+            (previousItem) =>
+                getIdentityValues(previousItem).some(
+                    (value) => value && identityValues.includes(value)
+                )
         )
 
         if (editedPreviousIndex !== -1) {
-            leftoverPrevious.splice(editedPreviousIndex, 1)
+            unmatchedPreviousContacts.splice(editedPreviousIndex, 1)
             changes.push({
                 changeType: 'UPDATED',
                 index,
