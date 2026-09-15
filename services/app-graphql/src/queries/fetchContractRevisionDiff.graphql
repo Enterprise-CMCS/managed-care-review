@@ -1,0 +1,11 @@
+query fetchContractRevisionDiff($input: FetchContractInput!) {
+    fetchContract(input: $input) {
+        contract {
+            id
+
+            revisionDiff {
+                ...revisionDiffFragment
+            }
+        }
+    }
+}

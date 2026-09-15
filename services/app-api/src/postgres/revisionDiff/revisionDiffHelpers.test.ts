@@ -783,11 +783,13 @@ describe('revisionDiffHelpers', () => {
 
         expect(comparison.stateContactChanges).toEqual([
             {
-                changeType: 'NEW_OR_MODIFIED',
+                changeType: 'UPDATED',
+                index: 1,
                 current: modifiedContact,
             },
             {
-                changeType: 'NEW_OR_MODIFIED',
+                changeType: 'ADDED',
+                index: 2,
                 current: newContact,
             },
         ])
@@ -1321,17 +1323,20 @@ describe('revisionDiffHelpers', () => {
                     },
                     certifyingActuaryContactChanges: [
                         {
-                            changeType: 'NEW_OR_MODIFIED',
+                            changeType: 'UPDATED',
+                            index: 0,
                             current: latestCertifyingActuaryContact,
                         },
                     ],
                     addtlActuaryContactChanges: [
                         {
-                            changeType: 'NEW_OR_MODIFIED',
+                            changeType: 'UPDATED',
+                            index: 0,
                             current: latestAddtlActuaryContact,
                         },
                         {
-                            changeType: 'NEW_OR_MODIFIED',
+                            changeType: 'ADDED',
+                            index: 1,
                             current: latestNewAddtlActuaryContact,
                         },
                     ],

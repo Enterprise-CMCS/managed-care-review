@@ -76,7 +76,7 @@ export type {
     RevisionDiff,
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
-    RevisionDiffCollectionItemNewOrModified,
+    RevisionDiffContactChange,
     RevisionDiffRateActuaryContactChange,
     RevisionDiffDocumentListChanges,
     RevisionDiffRateDocumentChanges,

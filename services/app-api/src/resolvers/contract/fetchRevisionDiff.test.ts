@@ -567,7 +567,8 @@ describe('fetchRevisionDiff', () => {
 
         expect(revisionDiff.comparison.stateContactChanges).toEqual([
             {
-                changeType: 'NEW_OR_MODIFIED',
+                changeType: 'UPDATED',
+                index: 1,
                 current: {
                     name: 'Modified Person',
                     titleRole: 'Senior Manager',
@@ -575,7 +576,8 @@ describe('fetchRevisionDiff', () => {
                 },
             },
             {
-                changeType: 'NEW_OR_MODIFIED',
+                changeType: 'ADDED',
+                index: 2,
                 current: {
                     name: 'New Person',
                     titleRole: 'Analyst',
@@ -773,7 +775,8 @@ describe('fetchRevisionDiff', () => {
                     },
                     certifyingActuaryContactChanges: [
                         {
-                            changeType: 'NEW_OR_MODIFIED',
+                            changeType: 'UPDATED',
+                            index: 0,
                             current: {
                                 name: 'Foo Person',
                                 titleRole: 'Bar Job',
@@ -784,7 +787,8 @@ describe('fetchRevisionDiff', () => {
                     ],
                     addtlActuaryContactChanges: [
                         {
-                            changeType: 'NEW_OR_MODIFIED',
+                            changeType: 'UPDATED',
+                            index: 0,
                             current: {
                                 name: 'Bar Person',
                                 titleRole: 'Baz Job',
@@ -793,7 +797,8 @@ describe('fetchRevisionDiff', () => {
                             },
                         },
                         {
-                            changeType: 'NEW_OR_MODIFIED',
+                            changeType: 'ADDED',
+                            index: 1,
                             current: {
                                 name: 'New Actuary',
                                 titleRole: 'Senior Actuary',

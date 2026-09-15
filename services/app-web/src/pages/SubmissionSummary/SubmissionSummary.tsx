@@ -26,6 +26,7 @@ import {
 import { usePage } from '../../contexts/PageContext'
 import {
     UpdateInformation,
+    FetchContractRevisionDiffDocument,
     FetchContractWithQuestionsDocument,
 } from '../../gen/gqlClient'
 import { useQuery } from '@apollo/client/react'
@@ -114,6 +115,17 @@ export const SubmissionSummary = (): React.ReactElement => {
     )
 
     const contract = data?.fetchContract.contract
+
+    useQuery(FetchContractRevisionDiffDocument, {
+        variables: {
+            input: {
+                contractID: id ?? 'unknown-contract',
+            },
+        },
+        // Only resubmissions have a previous submission to diff against
+        skip: (contract?.packageSubmissions.length ?? 0) < 2,
+    })
+
     const name =
         contract && contract?.packageSubmissions.length > 0
             ? contract.packageSubmissions[0].contractRevision.contractName

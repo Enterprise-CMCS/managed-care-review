@@ -31,13 +31,14 @@ type RevisionDiffCollectionItemChange<TItem, TChange> =
     | RevisionDiffCollectionItemRemoved<TItem>
     | RevisionDiffCollectionItemUpdated<TItem, TChange>
 
-type RevisionDiffCollectionItemNewOrModified<TItem> = {
-    changeType: 'NEW_OR_MODIFIED'
+type RevisionDiffContactChange<TItem> = {
+    changeType: 'ADDED' | 'UPDATED'
+    index: number
     current: TItem
 }
 
 type RevisionDiffRateActuaryContactChange =
-    RevisionDiffCollectionItemNewOrModified<ActuaryContactType>
+    RevisionDiffContactChange<ActuaryContactType>
 
 type RevisionDiffDocumentListChanges = {
     added: string[]
@@ -93,7 +94,7 @@ type RevisionDiff<TValue = unknown> = {
     olderSubmittedAt: Date
     newerSubmittedAt: Date
     fieldChanges: RevisionDiffFieldChange<TValue>[]
-    stateContactChanges: RevisionDiffCollectionItemNewOrModified<StateContactType>[]
+    stateContactChanges: RevisionDiffContactChange<StateContactType>[]
     documentChanges: RevisionDiffDocumentChanges
     rateChanges: RevisionDiffRateChanges
 }
@@ -102,7 +103,7 @@ export type {
     RevisionDiff,
     RevisionDiffFieldChange,
     RevisionDiffCollectionItemChange,
-    RevisionDiffCollectionItemNewOrModified,
+    RevisionDiffContactChange,
     RevisionDiffRateActuaryContactChange,
     RevisionDiffDocumentListChanges,
     RevisionDiffRateDocumentChanges,
