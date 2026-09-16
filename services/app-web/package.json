@@ -117,7 +117,7 @@
         "vite": "^8.2.1",
         "vite-tsconfig-paths": "^6.1.1",
         "web-vitals": "^6.0.1",
-        "yup": "^0.32.9"
+        "yup": "^1.7.1"
     },
     "devDependencies": {
         "@aws-sdk/client-amplify": "^3.1131.0",
