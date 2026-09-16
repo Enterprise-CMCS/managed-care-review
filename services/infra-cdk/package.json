@@ -20,7 +20,7 @@
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/jest": "^30.0.0",
         "@types/node": "26.2.0",
-        "@typescript-eslint/eslint-plugin": "^8.58.1",
+        "@typescript-eslint/eslint-plugin": "^8.70.0",
         "@typescript-eslint/parser": "^8.68.0",
         "aws-cdk": "^2.1141.0",
         "esbuild": "^0.28.2",
