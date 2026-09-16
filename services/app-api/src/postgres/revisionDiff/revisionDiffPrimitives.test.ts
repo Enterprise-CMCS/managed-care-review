@@ -1,5 +1,5 @@
 import {
-    buildNewAndModifiedCollectionChanges,
+    buildContactCollectionChanges,
     buildScalarFieldDiffChanges,
     diffCollectionByKey,
 } from './revisionDiffPrimitives'
@@ -160,8 +160,13 @@ describe('revisionDiffPrimitives', () => {
         expect((result as Error).message).toContain('Duplicate diff key')
     })
 
-    it('buildNewAndModifiedCollectionChanges returns only current items not present in the previous collection', () => {
-        const result = buildNewAndModifiedCollectionChanges(
+    const contactIdentity = (item: { name?: string; email?: string }) => [
+        item.name,
+        item.email,
+    ]
+
+    it('buildContactCollectionChanges marks edited contacts UPDATED and appended contacts ADDED', () => {
+        const result = buildContactCollectionChanges(
             [
                 { name: 'Ada', email: 'ada@example.com' },
                 { name: 'Bea', email: 'bea@example.com' },
@@ -171,19 +176,22 @@ describe('revisionDiffPrimitives', () => {
                 { name: 'Bea', email: 'bea-updated@example.com' },
                 { name: 'Cy', email: 'cy@example.com' },
             ],
-            (item) => JSON.stringify(item)
+            (item) => JSON.stringify(item),
+            contactIdentity
         )
 
         expect(result).toEqual([
             {
-                changeType: 'NEW_OR_MODIFIED',
+                changeType: 'UPDATED',
+                index: 1,
                 current: {
                     name: 'Bea',
                     email: 'bea-updated@example.com',
                 },
             },
             {
-                changeType: 'NEW_OR_MODIFIED',
+                changeType: 'ADDED',
+                index: 2,
                 current: {
                     name: 'Cy',
                     email: 'cy@example.com',
@@ -192,18 +200,84 @@ describe('revisionDiffPrimitives', () => {
         ])
     })
 
-    it('buildNewAndModifiedCollectionChanges treats duplicate unchanged items as matched by count', () => {
-        const result = buildNewAndModifiedCollectionChanges(
+    it('buildContactCollectionChanges reports an appended duplicate as ADDED', () => {
+        const result = buildContactCollectionChanges(
             [{ name: 'Ada' }, { name: 'Ada' }],
             [{ name: 'Ada' }, { name: 'Ada' }, { name: 'Ada' }],
-            (item) => JSON.stringify(item)
+            (item) => JSON.stringify(item),
+            contactIdentity
         )
 
         expect(result).toEqual([
             {
-                changeType: 'NEW_OR_MODIFIED',
+                changeType: 'ADDED',
+                index: 2,
                 current: {
                     name: 'Ada',
+                },
+            },
+        ])
+    })
+
+    it('buildContactCollectionChanges reports no changes when contacts are removed or reordered', () => {
+        const removal = buildContactCollectionChanges(
+            [{ name: 'Ada' }, { name: 'Bea' }, { name: 'Cy' }],
+            [{ name: 'Ada' }, { name: 'Cy' }],
+            (item) => JSON.stringify(item),
+            contactIdentity
+        )
+        const reorder = buildContactCollectionChanges(
+            [{ name: 'Ada' }, { name: 'Bea' }, { name: 'Cy' }],
+            [{ name: 'Cy' }, { name: 'Ada' }, { name: 'Bea' }],
+            (item) => JSON.stringify(item),
+            contactIdentity
+        )
+
+        expect(removal).toEqual([])
+        expect(reorder).toEqual([])
+    })
+
+    it('buildContactCollectionChanges reports a replacement contact as ADDED, not UPDATED', () => {
+        const result = buildContactCollectionChanges(
+            [
+                { name: 'Ada', email: 'ada@example.com' },
+                { name: 'Ben', email: 'ben@example.com' },
+            ],
+            [
+                { name: 'Ada', email: 'ada@example.com' },
+                { name: 'Dana', email: 'dana@example.com' },
+            ],
+            (item) => JSON.stringify(item),
+            contactIdentity
+        )
+
+        expect(result).toEqual([
+            {
+                changeType: 'ADDED',
+                index: 1,
+                current: {
+                    name: 'Dana',
+                    email: 'dana@example.com',
+                },
+            },
+        ])
+    })
+
+    it('buildContactCollectionChanges treats a contact keeping only its email as UPDATED', () => {
+        const result = buildContactCollectionChanges(
+            [{ name: 'Ada Old', email: 'ada@example.com' }],
+            [{ name: 'Ada New', email: 'ada@example.com' }],
+            (item) => JSON.stringify(item),
+            contactIdentity
+        )
+
+        expect(result).toEqual([
+            {
+                changeType: 'UPDATED',
+                index: 0,
+                current: {
+                    name: 'Ada New',
+                    email: 'ada@example.com',
                 },
             },
         ])

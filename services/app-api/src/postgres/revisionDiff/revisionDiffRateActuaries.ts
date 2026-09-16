@@ -2,7 +2,7 @@ import type {
     ActuaryContactType,
     RevisionDiffRateActuaryContactChange,
 } from '../../domain-models'
-import { buildNewAndModifiedCollectionChanges } from './revisionDiffPrimitives'
+import { buildContactCollectionChanges } from './revisionDiffPrimitives'
 
 function buildActuaryContactComparisonKey(contact: ActuaryContactType): string {
     return JSON.stringify([
@@ -18,10 +18,11 @@ function buildRateActuaryContactDiffChanges(
     previous: ActuaryContactType[],
     current: ActuaryContactType[]
 ): RevisionDiffRateActuaryContactChange[] {
-    return buildNewAndModifiedCollectionChanges(
+    return buildContactCollectionChanges(
         previous,
         current,
-        buildActuaryContactComparisonKey
+        buildActuaryContactComparisonKey,
+        (contact) => [contact.name, contact.email]
     )
 }
 

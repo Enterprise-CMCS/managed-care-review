@@ -692,7 +692,8 @@ describe('with rates', () => {
             ],
             stateContactChanges: [
                 {
-                    changeType: 'NEW_OR_MODIFIED',
+                    changeType: 'UPDATED',
+                    index: 0,
                     current: {
                         name: 'Kasimir Kraft',
                         titleRole: 'Assistant Division Chief',

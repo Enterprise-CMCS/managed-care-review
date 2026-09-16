@@ -1,5 +1,5 @@
 import type { StateContactType } from '../../domain-models/contractAndRates'
-import { buildNewAndModifiedCollectionChanges } from './revisionDiffPrimitives'
+import { buildContactCollectionChanges } from './revisionDiffPrimitives'
 
 function buildStateContactComparisonKey(contact: StateContactType): string {
     return JSON.stringify([
@@ -13,10 +13,11 @@ function buildStateContactDiffChanges(
     previous: StateContactType[],
     current: StateContactType[]
 ) {
-    return buildNewAndModifiedCollectionChanges(
+    return buildContactCollectionChanges(
         previous,
         current,
-        buildStateContactComparisonKey
+        buildStateContactComparisonKey,
+        (contact) => [contact.name, contact.email]
     )
 }
 

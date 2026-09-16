@@ -8,6 +8,7 @@ import { hasCMSUserPermissions, toGQLError } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import {
+    FetchContractRevisionDiffDocument,
     FetchContractWithQuestionsDocument,
     UpdateInformation,
 } from '../../../gen/gqlClient'
@@ -85,6 +86,17 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     )
 
     const contract = data?.fetchContract.contract
+
+    useQuery(FetchContractRevisionDiffDocument, {
+        variables: {
+            input: {
+                contractID: id ?? 'unknown-contract',
+            },
+        },
+        // Only resubmissions have a previous submission to diff against
+        skip: (contract?.packageSubmissions.length ?? 0) < 2,
+    })
+
     const name =
         contract && contract?.packageSubmissions.length > 0
             ? contract.packageSubmissions[0].contractRevision.contractName
