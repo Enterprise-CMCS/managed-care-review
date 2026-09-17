@@ -15,7 +15,13 @@ import {
  *
  * It never overwrites name data that is already there, never touches `name`
  * itself, and hands anything it is unsure about to a person instead of
- * guessing. Only contacts on submitted revisions are looked at.
+ * guessing. Contacts on submitted revisions and on currently unlocked revisions
+ * are looked at; initial drafts that were never submitted are not.
+ *
+ * Unlocked revisions are migrated because the form reads only the structured
+ * name fields, so an unmigrated unlocked contact shows up blank. They never get
+ * the NO_GIVEN_NAME, NO_FAMILY_NAME or NO_TITLE_ROLE placeholders -- a missing
+ * part stays empty for the user to fill in before resubmitting.
  *
  * This is the second of two passes: names that need a person are fixed by hand
  * with SQL first, then this picks up the rest. Full order of operations is in
@@ -204,6 +210,11 @@ export type MigrateContactsEvent = {
 // and still issue the update against the right table.
 type ContactType = 'STATE_CONTACT' | 'ACTUARY_CONTACT'
 
+// Which revisions a set of contacts was read from. Submitted revisions get
+// placeholders for missing required values; unlocked revisions do not, because
+// the user can still fill them in through the form.
+export type RevisionState = 'SUBMITTED' | 'UNLOCKED'
+
 // One contact as read from the database. Every column is nullable because the
 // deprecated schema never required these fields to be populated.
 type ContactRow = {
@@ -228,6 +239,14 @@ export type ParsedName = {
     middleName: string | null
     familyName: string
     suffix: string | null
+}
+
+// The name values written for one contact. Same as ParsedName, except an
+// unlocked revision leaves a missing given or family name empty rather than
+// storing a placeholder.
+type NameUpdate = Omit<ParsedName, 'givenName' | 'familyName'> & {
+    givenName: string | null
+    familyName: string | null
 }
 
 // Why a contact was not migrated automatically. The first six are decided
@@ -284,6 +303,8 @@ export type MigrateContactsResponse = {
     results: {
         stateContacts?: ContactMigrationEntityResult
         actuaryContacts?: ContactMigrationEntityResult
+        unlockedStateContacts?: ContactMigrationEntityResult
+        unlockedActuaryContacts?: ContactMigrationEntityResult
     }
 }
 
@@ -291,7 +312,7 @@ export type MigrateContactsResponse = {
 // `parsedName` without first checking that the status is ELIGIBLE.
 type ContactClassification =
     | { status: 'ALREADY_MIGRATED' }
-    | { status: 'ELIGIBLE'; parsedName: ParsedName }
+    | { status: 'ELIGIBLE'; parsedName: NameUpdate }
     | { status: 'MANUAL_REVIEW'; reason: ContactMigrationIssueReason }
     | {
           status: 'PARTIALLY_POPULATED'
@@ -302,7 +323,8 @@ type ContactClassification =
 // original row is kept because the update guards on every one of its columns.
 type EligibleContact = {
     contact: ContactRow
-    parsedName: ParsedName
+    parsedName: NameUpdate
+    revisionState: RevisionState
 }
 
 /**
@@ -1007,7 +1029,62 @@ function mergeParsedName(
  * An `ELIGIBLE` result carries the values to write. Every other result says
  * why the contact is left alone.
  */
-export function classifyContact(contact: ContactRow): ContactClassification {
+export function classifyContact(
+    contact: ContactRow,
+    revisionState: RevisionState = 'SUBMITTED'
+): ContactClassification {
+    return revisionState === 'UNLOCKED'
+        ? classifyUnlockedContact(contact)
+        : classifySubmittedContact(contact)
+}
+
+/**
+ * Classifies a contact on an unlocked revision. The user can still edit these,
+ * so the rules are narrower than for a submitted revision:
+ *
+ *   - Any stored name part means the name was already split, by an earlier run
+ *     or by the user in the form. The row is left alone, even when it is only
+ *     half filled in, since that may be the user's work in progress.
+ *   - A missing given or family name *STAYS EMPTY* instead of getting a
+ *     placeholder, and titleRole is never filled in (see updateContact).
+ *
+ * Everything else -- the parser, the two-people check, the manual review
+ * reasons -- is the same as for a submitted revision.
+ */
+function classifyUnlockedContact(contact: ContactRow): ContactClassification {
+    const hasStructuredName = [
+        contact.prefix,
+        contact.givenName,
+        contact.middleName,
+        contact.familyName,
+        contact.suffix,
+    ].some(hasRequiredValue)
+
+    // A blank name has nothing to split, and without placeholders there is
+    // nothing to write. Counted as already migrated so a re-run stays quiet.
+    if (hasStructuredName || clean(contact.name) === '') {
+        return { status: 'ALREADY_MIGRATED' }
+    }
+
+    // With no structured name stored, the submitted rules reduce to exactly
+    // the parse and the checks this needs.
+    const classification = classifySubmittedContact(contact)
+    if (classification.status !== 'ELIGIBLE') {
+        return classification
+    }
+
+    const { givenName, familyName } = classification.parsedName
+    return {
+        status: 'ELIGIBLE',
+        parsedName: {
+            ...classification.parsedName,
+            givenName: givenName === NO_GIVEN_NAME ? null : givenName,
+            familyName: familyName === NO_FAMILY_NAME ? null : familyName,
+        },
+    }
+}
+
+function classifySubmittedContact(contact: ContactRow): ContactClassification {
     const hasGivenName = hasRequiredValue(contact.givenName)
     const hasFamilyName = hasRequiredValue(contact.familyName)
 
@@ -1156,23 +1233,36 @@ function countPlaceholders(
 }
 
 /**
- * Reads every state contact attached to a submitted contract revision.
- * Unsubmitted revisions are excluded because their contacts can still be
- * edited by the user, so migrating them would fight with in-progress work.
+ * The revision filter for each state. Shared by contract and rate revisions,
+ * which use the same three columns.
+ *
+ * A non-null submitInfoID marks a revision as submitted. An unlocked revision
+ * is the open draft created by an unlock: not yet resubmitted, and not
+ * abandoned by an undo unlock. Initial drafts that were never submitted have no
+ * unlockInfoID and are excluded.
  */
-async function findSubmittedStateContacts(
-    client: ExtendedPrismaClient
+function revisionFilter(revisionState: RevisionState) {
+    return revisionState === 'SUBMITTED'
+        ? { submitInfoID: { not: null } }
+        : {
+              submitInfoID: null,
+              unlockInfoID: { not: null },
+              undoUnlockInfoID: null,
+          }
+}
+
+/**
+ * Reads every state contact attached to a contract revision in the given
+ * state.
+ */
+async function findStateContacts(
+    client: ExtendedPrismaClient,
+    revisionState: RevisionState
 ): Promise<ContactRow[]> {
     const contacts = await client.stateContact.findMany({
         where: {
             contractRevision: {
-                is: {
-                    // A non-null submitInfoID is what marks a revision as
-                    // submitted.
-                    submitInfoID: {
-                        not: null,
-                    },
-                },
+                is: revisionFilter(revisionState),
             },
         },
         // Stable ordering so two runs process rows in the same sequence.
@@ -1190,21 +1280,18 @@ async function findSubmittedStateContacts(
 }
 
 /**
- * Reads every actuary contact attached to a submitted rate revision, across
- * both the certifying and additional actuary relationships.
+ * Reads every actuary contact attached to a rate revision in the given state,
+ * across both the certifying and additional actuary relationships.
  */
-async function findSubmittedActuaryContacts(
-    client: ExtendedPrismaClient
+async function findActuaryContacts(
+    client: ExtendedPrismaClient,
+    revisionState: RevisionState
 ): Promise<ContactRow[]> {
     // Query through RateRevisionTable so both actuary roles are selected from
-    // the same submitted-revision condition. This avoids role-specific query
-    // behavior and mirrors the local investigation report.
+    // the same revision condition. This avoids role-specific query behavior
+    // and mirrors the local investigation report.
     const rateRevisions = await client.rateRevisionTable.findMany({
-        where: {
-            submitInfoID: {
-                not: null,
-            },
-        },
+        where: revisionFilter(revisionState),
         orderBy: {
             id: 'asc',
         },
@@ -1254,7 +1341,7 @@ async function updateContact(
     client: ExtendedPrismaClient,
     eligibleContact: EligibleContact
 ): Promise<number> {
-    const { contact, parsedName } = eligibleContact
+    const { contact, parsedName, revisionState } = eligibleContact
 
     // Match on the id plus every original value, so a row edited since the
     // read simply will not match.
@@ -1282,11 +1369,13 @@ async function updateContact(
         suffix: parsedName.suffix,
         // titleRole is required by the new schema but is not derived from the
         // name. Keep whatever is there, and only substitute a placeholder when
-        // the field is genuinely empty. Email is intentionally absent from
-        // `data`, so null, empty and nonblank values all remain untouched.
-        titleRole: hasRequiredValue(contact.titleRole)
-            ? contact.titleRole
-            : NO_TITLE_ROLE,
+        // the field is genuinely empty on a submitted revision -- an unlocked
+        // one is left for the user to fill in. Email is intentionally absent
+        // from `data`, so null, empty and nonblank values all remain untouched.
+        titleRole:
+            revisionState === 'UNLOCKED' || hasRequiredValue(contact.titleRole)
+                ? contact.titleRole
+                : NO_TITLE_ROLE,
     }
 
     // updateMany rather than update, because update throws when nothing matches
@@ -1310,6 +1399,7 @@ async function updateContact(
 async function migrateContactRows(
     client: ExtendedPrismaClient,
     contacts: ContactRow[],
+    revisionState: RevisionState,
     dryRun: boolean
 ): Promise<ContactMigrationEntityResult> {
     const result = emptyResult()
@@ -1318,7 +1408,7 @@ async function migrateContactRows(
 
     // Pass one: decide what happens to each contact. No writes here.
     for (const contact of contacts) {
-        const classification = classifyContact(contact)
+        const classification = classifyContact(contact, revisionState)
 
         switch (classification.status) {
             case 'ALREADY_MIGRATED':
@@ -1341,6 +1431,7 @@ async function migrateContactRows(
                 eligibleContacts.push({
                     contact,
                     parsedName: classification.parsedName,
+                    revisionState,
                 })
                 break
         }
@@ -1439,17 +1530,49 @@ export async function runContactsMigration(
         dryRun: boolean
     }
 ): Promise<MigrateContactsResponse> {
-    // Collect all contacts
-    // Both queries are issued together since they are independent. The one for
-    // a table that was not requested resolves to an empty array immediately.
-    const [stateContacts, actuaryContacts] = await Promise.all([
+    const runState =
         options.entity === 'stateContacts' || options.entity === 'both'
-            ? findSubmittedStateContacts(client)
-            : Promise.resolve([]),
+    const runActuary =
         options.entity === 'actuaryContacts' || options.entity === 'both'
-            ? findSubmittedActuaryContacts(client)
-            : Promise.resolve([]),
-    ])
+
+    // Each table is read once for submitted revisions and once for unlocked
+    // ones, and each read gets its own block in the response. Keeping the two
+    // states apart means the submitted counts stay comparable to earlier runs.
+    // A block for a table that was not requested is skipped entirely.
+    const blocks: Array<{
+        key: keyof MigrateContactsResponse['results']
+        run: boolean
+        revisionState: RevisionState
+        find: (
+            client: ExtendedPrismaClient,
+            revisionState: RevisionState
+        ) => Promise<ContactRow[]>
+    }> = [
+        {
+            key: 'stateContacts',
+            run: runState,
+            revisionState: 'SUBMITTED',
+            find: findStateContacts,
+        },
+        {
+            key: 'actuaryContacts',
+            run: runActuary,
+            revisionState: 'SUBMITTED',
+            find: findActuaryContacts,
+        },
+        {
+            key: 'unlockedStateContacts',
+            run: runState,
+            revisionState: 'UNLOCKED',
+            find: findStateContacts,
+        },
+        {
+            key: 'unlockedActuaryContacts',
+            run: runActuary,
+            revisionState: 'UNLOCKED',
+            find: findActuaryContacts,
+        },
+    ]
 
     // Template response. Starts as a success with zeroed totals
     const response: MigrateContactsResponse = {
@@ -1461,28 +1584,19 @@ export async function runContactsMigration(
         results: {},
     }
 
-    // Run migration on state Contacts
-    if (options.entity === 'stateContacts' || options.entity === 'both') {
-        const stateResult = await migrateContactRows(
+    // Blocks run one after another rather than alongside each other, so they
+    // never compete for the same connections.
+    for (const block of blocks) {
+        if (!block.run) continue
+        const contacts = await block.find(client, block.revisionState)
+        const blockResult = await migrateContactRows(
             client,
-            stateContacts,
+            contacts,
+            block.revisionState,
             options.dryRun
         )
-        response.results.stateContacts = stateResult
-        addResult(response.totals, stateResult)
-    }
-
-    // Run migration on actuary contacts
-    // Runs after the state contacts rather than alongside them, so the two
-    // tables never compete for the same connections.
-    if (options.entity === 'actuaryContacts' || options.entity === 'both') {
-        const actuaryResult = await migrateContactRows(
-            client,
-            actuaryContacts,
-            options.dryRun
-        )
-        response.results.actuaryContacts = actuaryResult
-        addResult(response.totals, actuaryResult)
+        response.results[block.key] = blockResult
+        addResult(response.totals, blockResult)
     }
 
     // Only write failures make the run unsuccessful. Contacts sent to manual
