@@ -96,7 +96,8 @@ function updateDraftContractRates(
                                       name: d.name,
                                       s3URL: d.s3URL,
                                       sha256: d.sha256,
-                                  }))
+                                  })),
+                                  'HEALTH_PLAN_DOCS'
                               )
                             : undefined
 
@@ -107,7 +108,8 @@ function updateDraftContractRates(
                                           name: d.name,
                                           s3URL: d.s3URL,
                                           sha256: d.sha256,
-                                      }))
+                                      })),
+                                      'HEALTH_PLAN_DOCS'
                                   )
                                 : undefined
 

@@ -1,154 +1,214 @@
-import { describe, it, expect } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { parseAndValidateDocuments } from './documentHelpers'
 import { GraphQLError } from 'graphql'
 
 describe('parseAndValidateDocuments', () => {
+    beforeEach(() => {
+        vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', 'cdk-documents-bucket')
+        vi.stubEnv('VITE_APP_S3_QA_BUCKET', 'cdk-qa-bucket')
+    })
+
+    afterEach(() => {
+        vi.unstubAllEnvs()
+    })
+
     it('parses valid s3URLs and extracts bucket and key', () => {
-        const docs = parseAndValidateDocuments([
-            {
-                name: 'test-document.pdf',
-                s3URL: 's3://my-bucket/abc-123-uuid/test-document.pdf',
-                sha256: 'abc123def456', //pragma: allowlist secret
-            },
-        ])
+        const docs = parseAndValidateDocuments(
+            [
+                {
+                    name: 'test-document.pdf',
+                    s3URL: 's3://my-bucket/abc-123-uuid/test-document.pdf',
+                    sha256: 'abc123def456', //pragma: allowlist secret
+                },
+            ],
+            'HEALTH_PLAN_DOCS'
+        )
 
         expect(docs).toHaveLength(1)
         expect(docs[0]).toEqual({
             name: 'test-document.pdf',
-            s3URL: 's3://my-bucket/abc-123-uuid/test-document.pdf',
-            s3BucketName: 'my-bucket',
+            s3URL: 's3://cdk-documents-bucket/abc-123-uuid/test-document.pdf',
+            s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/abc-123-uuid',
             sha256: 'abc123def456', //pragma: allowlist secret
         })
     })
 
     it('parses multiple documents correctly', () => {
-        const docs = parseAndValidateDocuments([
-            {
-                name: 'contract.pdf',
-                s3URL: 's3://bucket-1/key-1/contract.pdf',
-            },
-            {
-                name: 'rate-cert.pdf',
-                s3URL: 's3://bucket-2/key-2/rate-cert.pdf',
-                sha256: 'xyz789', //pragma: allowlist secret
-            },
-        ])
+        const docs = parseAndValidateDocuments(
+            [
+                {
+                    name: 'contract.pdf',
+                    s3URL: 's3://bucket-1/key-1/contract.pdf',
+                },
+                {
+                    name: 'rate-cert.pdf',
+                    s3URL: 's3://bucket-2/key-2/rate-cert.pdf',
+                    sha256: 'xyz789', //pragma: allowlist secret
+                },
+            ],
+            'HEALTH_PLAN_DOCS'
+        )
 
         expect(docs).toHaveLength(2)
         expect(docs[0]).toMatchObject({
-            s3BucketName: 'bucket-1',
+            s3URL: 's3://cdk-documents-bucket/key-1/contract.pdf',
+            s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/key-1',
         })
         expect(docs[1]).toMatchObject({
-            s3BucketName: 'bucket-2',
+            s3URL: 's3://cdk-documents-bucket/key-2/rate-cert.pdf',
+            s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/key-2',
             sha256: 'xyz789', //pragma: allowlist secret
         })
     })
 
     it('works without sha256 field', () => {
-        const docs = parseAndValidateDocuments([
-            {
-                name: 'test.pdf',
-                s3URL: 's3://my-bucket/my-key/test.pdf',
-            },
-        ])
+        const docs = parseAndValidateDocuments(
+            [
+                {
+                    name: 'test.pdf',
+                    s3URL: 's3://my-bucket/my-key/test.pdf',
+                },
+            ],
+            'HEALTH_PLAN_DOCS'
+        )
 
         expect(docs[0]).toEqual({
             name: 'test.pdf',
-            s3URL: 's3://my-bucket/my-key/test.pdf',
-            s3BucketName: 'my-bucket',
+            s3URL: 's3://cdk-documents-bucket/my-key/test.pdf',
+            s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/my-key',
             sha256: undefined,
         })
     })
 
+    it('canonicalizes legacy Q&A document locations to the configured Q&A bucket', () => {
+        const docs = parseAndValidateDocuments(
+            [
+                {
+                    name: 'answer.pdf',
+                    s3URL: 's3://legacy-qa-bucket/key/answer.pdf',
+                },
+            ],
+            'QUESTION_ANSWER_DOCS'
+        )
+
+        expect(docs[0]).toMatchObject({
+            s3URL: 's3://cdk-qa-bucket/key/answer.pdf',
+            s3BucketName: 'cdk-qa-bucket',
+            s3Key: 'allusers/key',
+        })
+    })
+
     it('throws GraphQLError for invalid s3URL format (missing s3:// protocol)', () => {
         expect(() =>
-            parseAndValidateDocuments([
-                {
-                    name: 'invalid-doc.pdf',
-                    s3URL: 'http://bucket/key/file.pdf',
-                    sha256: 'abc123', //pragma: allowlist secret
-                },
-            ])
+            parseAndValidateDocuments(
+                [
+                    {
+                        name: 'invalid-doc.pdf',
+                        s3URL: 'http://bucket/key/file.pdf',
+                        sha256: 'abc123', //pragma: allowlist secret
+                    },
+                ],
+                'HEALTH_PLAN_DOCS'
+            )
         ).toThrow(GraphQLError)
     })
 
     it('throws GraphQLError for malformed s3URL (not enough segments)', () => {
         expect(() =>
-            parseAndValidateDocuments([
-                {
-                    name: 'malformed-doc.pdf',
-                    s3URL: 's3://bucket-only',
-                    sha256: 'abc123', //pragma: allowlist secret
-                },
-            ])
+            parseAndValidateDocuments(
+                [
+                    {
+                        name: 'malformed-doc.pdf',
+                        s3URL: 's3://bucket-only',
+                        sha256: 'abc123', //pragma: allowlist secret
+                    },
+                ],
+                'HEALTH_PLAN_DOCS'
+            )
         ).toThrow(GraphQLError)
     })
 
     it('includes document name in error message', () => {
         expect(() =>
-            parseAndValidateDocuments([
-                {
-                    name: 'my-important-document.pdf',
-                    s3URL: 'invalid-url',
-                },
-            ])
+            parseAndValidateDocuments(
+                [
+                    {
+                        name: 'my-important-document.pdf',
+                        s3URL: 'invalid-url',
+                    },
+                ],
+                'HEALTH_PLAN_DOCS'
+            )
         ).toThrow(/my-important-document\.pdf/)
     })
 
     it('includes document index in error message', () => {
         expect(() =>
-            parseAndValidateDocuments([
-                {
-                    name: 'good-doc.pdf',
-                    s3URL: 's3://bucket/key/good.pdf',
-                },
-                {
-                    name: 'bad-doc.pdf',
-                    s3URL: 'invalid-url',
-                },
-            ])
+            parseAndValidateDocuments(
+                [
+                    {
+                        name: 'good-doc.pdf',
+                        s3URL: 's3://bucket/key/good.pdf',
+                    },
+                    {
+                        name: 'bad-doc.pdf',
+                        s3URL: 'invalid-url',
+                    },
+                ],
+                'HEALTH_PLAN_DOCS'
+            )
         ).toThrow(/index 1/)
     })
 
     it('includes the invalid s3URL value in error', () => {
         expect(() =>
-            parseAndValidateDocuments([
-                {
-                    name: 'test.pdf',
-                    s3URL: 'https://wrong-protocol.com/file.pdf',
-                },
-            ])
+            parseAndValidateDocuments(
+                [
+                    {
+                        name: 'test.pdf',
+                        s3URL: 'https://wrong-protocol.com/file.pdf',
+                    },
+                ],
+                'HEALTH_PLAN_DOCS'
+            )
         ).toThrow(/https:\/\/wrong-protocol\.com\/file\.pdf/)
     })
 
     it('handles real-world s3URL format from frontend', () => {
         // This is the actual format the frontend sends
-        const docs = parseAndValidateDocuments([
-            {
-                name: 'Contract Amendment.pdf',
-                s3URL: 's3://bucketname/key/Contract Amendment.pdf',
-                sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', //pragma: allowlist secret
-            },
-        ])
+        const docs = parseAndValidateDocuments(
+            [
+                {
+                    name: 'Contract Amendment.pdf',
+                    s3URL: 's3://bucketname/key/Contract Amendment.pdf',
+                    sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', //pragma: allowlist secret
+                },
+            ],
+            'HEALTH_PLAN_DOCS'
+        )
 
         expect(docs[0]).toMatchObject({
-            s3BucketName: 'bucketname',
+            s3URL: 's3://cdk-documents-bucket/key/Contract Amendment.pdf',
+            s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/key',
         })
     })
 
     it('throws error with extensions for GraphQL error handling', () => {
         try {
-            parseAndValidateDocuments([
-                {
-                    name: 'test.pdf',
-                    s3URL: 'bad-url',
-                },
-            ])
+            parseAndValidateDocuments(
+                [
+                    {
+                        name: 'test.pdf',
+                        s3URL: 'bad-url',
+                    },
+                ],
+                'HEALTH_PLAN_DOCS'
+            )
             expect.fail('Should have thrown')
         } catch (error) {
             expect(error).toBeInstanceOf(GraphQLError)

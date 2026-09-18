@@ -1,4 +1,4 @@
-import { parseBucketName, parseKey } from '../s3'
+import { parseBucketName, parseKey, type BucketShortName } from '../s3'
 import { createUserInputError } from './errorUtils'
 import { parseErrorToError } from '@mc-review/helpers'
 
@@ -36,16 +36,34 @@ export type TestDocumentInput = {
     id?: string
 }
 
+const bucketEnvironmentVariable: Record<BucketShortName, string> = {
+    HEALTH_PLAN_DOCS: 'VITE_APP_S3_DOCUMENTS_BUCKET',
+    QUESTION_ANSWER_DOCS: 'VITE_APP_S3_QA_BUCKET',
+}
+
+function configuredBucketName(bucketType: BucketShortName): string {
+    const environmentVariable = bucketEnvironmentVariable[bucketType]
+    const bucketName = process.env[environmentVariable]
+    if (!bucketName) {
+        throw new Error(
+            `${environmentVariable} environment variable is required`
+        )
+    }
+    return bucketName
+}
 /**
- * Parses and validates document s3URLs, extracting bucket and key
- * Throws GraphQLError if parsing fails (validation at API boundary)
+ * Validates document s3URLs, extracts their keys, and replaces client-provided
+ * bucket metadata with the configured bucket for the document category.
  *
  * @param documents - Array of documents from GraphQL input
- * @returns Array of documents with s3BucketName and s3Key populated
+ * @param bucketType - Server-configured bucket category for persisted metadata
+ * @returns Documents with canonical bucket, URL, and key fields
  */
 export function parseAndValidateDocuments(
-    documents: DocumentInput[]
+    documents: DocumentInput[],
+    bucketType: BucketShortName
 ): ParsedDocument[] {
+    const canonicalBucket = configuredBucketName(bucketType)
     return documents.map((doc, index) => {
         let bucket: string | Error
         let key: string | Error
@@ -85,8 +103,11 @@ export function parseAndValidateDocuments(
 
         return {
             name: doc.name,
-            s3URL: doc.s3URL,
-            s3BucketName: bucket,
+            s3URL: doc.s3URL.replace(
+                /^s3:\/\/[^/]+/,
+                `s3://${canonicalBucket}`
+            ),
+            s3BucketName: canonicalBucket,
             s3Key: fullKey,
             sha256: doc.sha256,
         }

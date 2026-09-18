@@ -47,6 +47,7 @@ describe('generateDocumentZip', () => {
 
     beforeEach(async () => {
         vi.clearAllMocks()
+        vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', 'test-bucket')
 
         const s3Module = await import('@aws-sdk/client-s3')
         mockSend = (s3Module as any).__mockSendFn
@@ -123,6 +124,10 @@ describe('generateDocumentZip', () => {
         mockCrypto.createHash.mockReturnValue(
             mockHashInstance as unknown as crypto.Hash
         )
+    })
+
+    afterEach(() => {
+        vi.unstubAllEnvs()
     })
 
     describe('successful zip generation', () => {
@@ -315,6 +320,71 @@ describe('generateDocumentZip', () => {
             )
             expect(getObjectCalls.length).toBeGreaterThan(0)
             expect(getObjectCalls[0][0].Key).toBe('zips/contracts/uuid/doc.zip')
+        })
+    })
+
+    describe('canonical bucket handling', () => {
+        it('downloads every document and uploads the zip in the configured bucket', async () => {
+            vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', 'cdk-bucket')
+            const documentsWithStaleMetadata = [
+                {
+                    s3URL: 's3://legacy-bucket/uuid1.pdf/doc1.pdf',
+                    name: 'doc1.pdf',
+                    s3BucketName: 'legacy-bucket',
+                    s3Key: 'allusers/uuid1.pdf',
+                },
+                {
+                    s3URL: 's3://cdk-bucket/uuid2.pdf/doc2.pdf',
+                    name: 'doc2.pdf',
+                    s3BucketName: 'cdk-bucket',
+                    s3Key: 'allusers/uuid2.pdf',
+                },
+            ]
+
+            const result = await generateDocumentZip(
+                documentsWithStaleMetadata,
+                'zips/test.zip'
+            )
+
+            expect(result).not.toBeInstanceOf(Error)
+            const s3Calls = mockSend.mock.calls.map((call) => call[0])
+            expect(
+                s3Calls
+                    .filter((command) => command.commandType === 'GetObject')
+                    .map((command) => command.Bucket)
+            ).toEqual(['cdk-bucket', 'cdk-bucket'])
+            expect(
+                s3Calls.find((command) => command.commandType === 'PutObject')
+                    ?.Bucket
+            ).toBe('cdk-bucket')
+            expect(result).toMatchObject({
+                s3URL: 's3://cdk-bucket/zips/test.zip',
+                s3BucketName: 'cdk-bucket',
+                s3Key: 'zips/test.zip',
+            })
+        })
+
+        it('returns an error when the configured documents bucket is missing', async () => {
+            vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', '')
+
+            const result = await generateDocumentZip(
+                [
+                    {
+                        s3URL: 's3://legacy-bucket/uuid1.pdf/doc1.pdf',
+                        name: 'doc1.pdf',
+                        s3BucketName: 'legacy-bucket',
+                        s3Key: 'allusers/uuid1.pdf',
+                    },
+                ],
+                'zips/test.zip'
+            )
+
+            expect(result).toEqual(
+                new Error(
+                    'VITE_APP_S3_DOCUMENTS_BUCKET must be set to generate zip files'
+                )
+            )
+            expect(mockSend).not.toHaveBeenCalled()
         })
     })
 })

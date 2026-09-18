@@ -129,7 +129,8 @@ export function createRateQuestionResolver(
                     input.documents.map((d) => ({
                         name: d.name,
                         s3URL: d.s3URL,
-                    }))
+                    })),
+                    'QUESTION_ANSWER_DOCS'
                 )
 
                 const inputFormatted = {

@@ -91,16 +91,15 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
     const zipPath = path.join(tempDir, 'output.zip')
 
     try {
-        // Get bucket from first document - all documents must have s3BucketName
-        const bucket = documents[0].s3BucketName
-        if (!bucket) {
+        const documentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
+        if (!documentsBucket) {
             return new Error(
-                'Document missing s3BucketName field - migration may not have completed'
+                'VITE_APP_S3_DOCUMENTS_BUCKET must be set to generate zip files'
             )
         }
-        console.info(`Using s3BucketName from document: ${bucket}`)
 
-        // Prepare document keys for download
+        // Prepare document keys for download. The configured CDK bucket is the
+        // source of truth; persisted bucket metadata is informational only.
         const documentKeys = []
         for (const doc of documents) {
             // All documents must have s3Key with full path
@@ -133,7 +132,7 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
                     mergedOptions.timeoutPerMB * 1000
                 const downloadResult = await downloadFile(
                     s3Client,
-                    bucket,
+                    documentsBucket,
                     docInfo.key,
                     tempDir,
                     timeout
@@ -203,11 +202,15 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         const outputKey = outputPath
         try {
             await withS3Span(
-                { operation: 'PutObject', bucket, key: outputKey },
+                {
+                    operation: 'PutObject',
+                    bucket: documentsBucket,
+                    key: outputKey,
+                },
                 () =>
                     s3Client.send(
                         new PutObjectCommand({
-                            Bucket: bucket,
+                            Bucket: documentsBucket,
                             Key: outputKey,
                             Body: fs.createReadStream(zipPath),
                             ContentType: 'application/zip',
@@ -221,9 +224,9 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         }
 
         return {
-            s3URL: `s3://${bucket}/${outputKey}`,
+            s3URL: `s3://${documentsBucket}/${outputKey}`,
             sha256: hashResult,
-            s3BucketName: bucket,
+            s3BucketName: documentsBucket,
             s3Key: outputKey,
         }
     } catch (error) {
@@ -262,15 +265,15 @@ export const localGenerateDocumentZip: GenerateDocumentZipFunctionType = async (
         return new Error('No documents provided for zip generation')
     }
 
-    // Extract bucket name from first document (simulate real behavior)
-    const bucketMatch = documents[0].s3URL.match(/^s3:\/\/([^/]+)/)
-    if (!bucketMatch) {
-        return new Error('Could not extract bucket name from S3 URL')
+    const documentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
+    if (!documentsBucket) {
+        return new Error(
+            'VITE_APP_S3_DOCUMENTS_BUCKET must be set to generate zip files'
+        )
     }
-    const bucket = bucketMatch[1]
 
-    // Generate realistic s3URL
-    const s3URL = `s3://${bucket}/${outputPath}`
+    // Generate a canonical S3 URL in the configured CDK bucket.
+    const s3URL = `s3://${documentsBucket}/${outputPath}`
 
     // Generate random 64-character hex string (SHA256 format)
     const sha256 = Array.from({ length: 64 }, () =>
@@ -283,7 +286,7 @@ export const localGenerateDocumentZip: GenerateDocumentZipFunctionType = async (
     return {
         s3URL,
         sha256,
-        s3BucketName: bucket,
+        s3BucketName: documentsBucket,
         s3Key: outputPath,
     }
 }
