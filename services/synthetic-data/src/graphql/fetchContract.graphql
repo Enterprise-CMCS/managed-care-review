@@ -4,10 +4,42 @@ query SyntheticFetchContract($input: FetchContractInput!) {
             id
             stateCode
             status
+            initiallySubmittedAt
+            draftRevision {
+                id
+            }
             packageSubmissions {
+                submitInfo {
+                    updatedReason
+                    updatedBy {
+                        role
+                        email
+                    }
+                }
                 contractRevision {
+                    unlockInfo {
+                        updatedReason
+                        updatedBy {
+                            role
+                            email
+                        }
+                    }
                     formData {
                         submissionDescription
+                        modifiedBenefitsProvided
+                        modifiedGeoAreaServed
+                        contractDocuments {
+                            name
+                            s3URL
+                            sha256
+                            dateAdded
+                        }
+                        supportingDocuments {
+                            name
+                            s3URL
+                            sha256
+                            dateAdded
+                        }
                     }
                 }
             }
