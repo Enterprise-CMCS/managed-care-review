@@ -52,12 +52,13 @@ function configuredBucketName(bucketType: BucketShortName): string {
     return bucketName
 }
 /**
- * Validates document s3URLs, extracts their keys, and replaces client-provided
- * bucket metadata with the configured bucket for the document category.
+ * Validates document s3URLs, normalizes their keys, and sets the configured
+ * bucket for the document category. The original URL remains available to the
+ * reconciliation Lambda until it verifies the object in that bucket.
  *
  * @param documents - Array of documents from GraphQL input
  * @param bucketType - Server-configured bucket category for persisted metadata
- * @returns Documents with canonical bucket, URL, and key fields
+ * @returns Documents with canonical bucket/key metadata and their source URL
  */
 export function parseAndValidateDocuments(
     documents: DocumentInput[],
@@ -101,12 +102,12 @@ export function parseAndValidateDocuments(
                 ? key
                 : `allusers/${key}`
 
+        // Keep the submitted URL as the migration's source marker. The
+        // reconciliation Lambda rewrites it only after confirming that the
+        // object exists in the canonical bucket.
         return {
             name: doc.name,
-            s3URL: doc.s3URL.replace(
-                /^s3:\/\/[^/]+/,
-                `s3://${canonicalBucket}`
-            ),
+            s3URL: doc.s3URL,
             s3BucketName: canonicalBucket,
             s3Key: fullKey,
             sha256: doc.sha256,

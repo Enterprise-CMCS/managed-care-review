@@ -168,19 +168,19 @@ describe(`Tests UpdateContractDraftRevision`, () => {
 
             expect(updatedFormData.contractDocuments).toEqual([
                 expect.objectContaining({
-                    s3URL: 's3://bucketname/key/contractDocument1.pdf',
+                    s3URL: 's3://legacy-documents/key/contractDocument1.pdf',
                     s3BucketName: 'bucketname',
                     s3Key: 'allusers/key',
                 }),
                 expect.objectContaining({
-                    s3URL: 's3://bucketname/key/contractDocument1.pdf',
+                    s3URL: 's3://legacy-documents/key/contractDocument1.pdf',
                     s3BucketName: 'bucketname',
                     s3Key: 'allusers/key',
                 }),
             ])
             expect(updatedFormData.supportingDocuments).toEqual([
                 expect.objectContaining({
-                    s3URL: 's3://bucketname/key/supportingDocument11.pdf',
+                    s3URL: 's3://legacy-documents/key/supportingDocument11.pdf',
                     s3BucketName: 'bucketname',
                     s3Key: 'allusers/key',
                 }),

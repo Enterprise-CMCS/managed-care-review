@@ -12,7 +12,7 @@ describe('parseAndValidateDocuments', () => {
         vi.unstubAllEnvs()
     })
 
-    it('parses valid s3URLs and extracts bucket and key', () => {
+    it('normalizes bucket and key while retaining the source URL', () => {
         const docs = parseAndValidateDocuments(
             [
                 {
@@ -27,7 +27,7 @@ describe('parseAndValidateDocuments', () => {
         expect(docs).toHaveLength(1)
         expect(docs[0]).toEqual({
             name: 'test-document.pdf',
-            s3URL: 's3://cdk-documents-bucket/abc-123-uuid/test-document.pdf',
+            s3URL: 's3://my-bucket/abc-123-uuid/test-document.pdf',
             s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/abc-123-uuid',
             sha256: 'abc123def456', //pragma: allowlist secret
@@ -52,12 +52,12 @@ describe('parseAndValidateDocuments', () => {
 
         expect(docs).toHaveLength(2)
         expect(docs[0]).toMatchObject({
-            s3URL: 's3://cdk-documents-bucket/key-1/contract.pdf',
+            s3URL: 's3://bucket-1/key-1/contract.pdf',
             s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/key-1',
         })
         expect(docs[1]).toMatchObject({
-            s3URL: 's3://cdk-documents-bucket/key-2/rate-cert.pdf',
+            s3URL: 's3://bucket-2/key-2/rate-cert.pdf',
             s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/key-2',
             sha256: 'xyz789', //pragma: allowlist secret
@@ -77,14 +77,14 @@ describe('parseAndValidateDocuments', () => {
 
         expect(docs[0]).toEqual({
             name: 'test.pdf',
-            s3URL: 's3://cdk-documents-bucket/my-key/test.pdf',
+            s3URL: 's3://my-bucket/my-key/test.pdf',
             s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/my-key',
             sha256: undefined,
         })
     })
 
-    it('canonicalizes legacy Q&A document locations to the configured Q&A bucket', () => {
+    it('retains the legacy Q&A URL for object reconciliation', () => {
         const docs = parseAndValidateDocuments(
             [
                 {
@@ -96,7 +96,7 @@ describe('parseAndValidateDocuments', () => {
         )
 
         expect(docs[0]).toMatchObject({
-            s3URL: 's3://cdk-qa-bucket/key/answer.pdf',
+            s3URL: 's3://legacy-qa-bucket/key/answer.pdf',
             s3BucketName: 'cdk-qa-bucket',
             s3Key: 'allusers/key',
         })
@@ -192,7 +192,7 @@ describe('parseAndValidateDocuments', () => {
         )
 
         expect(docs[0]).toMatchObject({
-            s3URL: 's3://cdk-documents-bucket/key/Contract Amendment.pdf',
+            s3URL: 's3://bucketname/key/Contract Amendment.pdf',
             s3BucketName: 'cdk-documents-bucket',
             s3Key: 'allusers/key',
         })

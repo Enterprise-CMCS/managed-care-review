@@ -939,20 +939,12 @@ export class AppApiStack extends BaseStack {
         role.addToPolicy(
             new PolicyStatement({
                 effect: Effect.ALLOW,
-                actions: ['s3:*'],
+                actions: ['s3:GetObject'],
                 resources: [
                     `${legacyDocumentsBucket}/allusers/*`,
                     `${legacyQABucket}/allusers/*`,
                     `${legacyDocumentsBucket}/zips/*`,
                 ],
-            })
-        )
-
-        role.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: ['s3:ListBucket', 's3:GetBucketLocation'],
-                resources: [legacyDocumentsBucket, legacyQABucket],
             })
         )
 
