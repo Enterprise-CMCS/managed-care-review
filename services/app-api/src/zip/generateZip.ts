@@ -91,18 +91,28 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
     const zipPath = path.join(tempDir, 'output.zip')
 
     try {
-        // Get bucket from first document - all documents must have s3BucketName
-        const bucket = documents[0].s3BucketName
-        if (!bucket) {
+        // The finished zip must land in the configured documents bucket:
+        // downloadUrl presigns against it, so a zip stored anywhere else
+        // (e.g. a legacy bucket from an old document row) is unreachable.
+        const uploadBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
+        if (!uploadBucket) {
             return new Error(
-                'Document missing s3BucketName field - migration may not have completed'
+                'VITE_APP_S3_DOCUMENTS_BUCKET must be set to upload zip files'
             )
         }
-        console.info(`Using s3BucketName from document: ${bucket}`)
 
-        // Prepare document keys for download
+        // Prepare document downloads. Each document is fetched from its own
+        // bucket - a single revision can reference both the legacy and current
+        // uploads buckets, so one shared bucket would 404 on some files.
         const documentKeys = []
         for (const doc of documents) {
+            const bucket = doc.s3BucketName
+            if (!bucket) {
+                return new Error(
+                    `Document ${doc.name} missing s3BucketName field - migration may not have completed`
+                )
+            }
+
             // All documents must have s3Key with full path
             const key = doc.s3Key
             if (!key) {
@@ -112,6 +122,7 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
             }
 
             documentKeys.push({
+                bucket,
                 key,
                 name: doc.name,
             })
@@ -133,7 +144,7 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
                     mergedOptions.timeoutPerMB * 1000
                 const downloadResult = await downloadFile(
                     s3Client,
-                    bucket,
+                    docInfo.bucket,
                     docInfo.key,
                     tempDir,
                     timeout
@@ -203,11 +214,15 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         const outputKey = outputPath
         try {
             await withS3Span(
-                { operation: 'PutObject', bucket, key: outputKey },
+                {
+                    operation: 'PutObject',
+                    bucket: uploadBucket,
+                    key: outputKey,
+                },
                 () =>
                     s3Client.send(
                         new PutObjectCommand({
-                            Bucket: bucket,
+                            Bucket: uploadBucket,
                             Key: outputKey,
                             Body: fs.createReadStream(zipPath),
                             ContentType: 'application/zip',
@@ -221,9 +236,9 @@ export const generateDocumentZip: GenerateDocumentZipFunctionType = async (
         }
 
         return {
-            s3URL: `s3://${bucket}/${outputKey}`,
+            s3URL: `s3://${uploadBucket}/${outputKey}`,
             sha256: hashResult,
-            s3BucketName: bucket,
+            s3BucketName: uploadBucket,
             s3Key: outputKey,
         }
     } catch (error) {

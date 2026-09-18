@@ -47,6 +47,8 @@ describe('generateDocumentZip', () => {
 
     beforeEach(async () => {
         vi.clearAllMocks()
+        // The upload bucket comes from the environment, not document rows
+        vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', 'test-bucket')
 
         const s3Module = await import('@aws-sdk/client-s3')
         mockSend = (s3Module as any).__mockSendFn
@@ -315,6 +317,106 @@ describe('generateDocumentZip', () => {
             )
             expect(getObjectCalls.length).toBeGreaterThan(0)
             expect(getObjectCalls[0][0].Key).toBe('zips/contracts/uuid/doc.zip')
+        })
+    })
+
+    afterEach(() => {
+        vi.unstubAllEnvs()
+    })
+
+    describe('bucket handling', () => {
+        it('downloads each document from its own bucket', async () => {
+            const mixedBucketDocs = [
+                {
+                    s3URL: 's3://legacy-bucket/allusers/uuid1.pdf',
+                    name: 'doc1.pdf',
+                    s3BucketName: 'legacy-bucket',
+                    s3Key: 'allusers/uuid1.pdf',
+                },
+                {
+                    s3URL: 's3://cdk-bucket/allusers/uuid2.pdf',
+                    name: 'doc2.pdf',
+                    s3BucketName: 'cdk-bucket',
+                    s3Key: 'allusers/uuid2.pdf',
+                },
+            ]
+
+            const result = await generateDocumentZip(
+                mixedBucketDocs,
+                'test.zip'
+            )
+
+            expect(result).not.toBeInstanceOf(Error)
+            const getObjectCalls = mockSend.mock.calls.filter(
+                (call) => call[0].commandType === 'GetObject'
+            )
+            const bucketsByKey = Object.fromEntries(
+                getObjectCalls.map((call) => [call[0].Key, call[0].Bucket])
+            )
+            expect(bucketsByKey['allusers/uuid1.pdf']).toBe('legacy-bucket')
+            expect(bucketsByKey['allusers/uuid2.pdf']).toBe('cdk-bucket')
+        })
+
+        it('uploads the zip to the configured documents bucket', async () => {
+            vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', 'cdk-bucket')
+            const docs = [
+                {
+                    s3URL: 's3://legacy-bucket/allusers/uuid1.pdf',
+                    name: 'doc1.pdf',
+                    s3BucketName: 'legacy-bucket',
+                    s3Key: 'allusers/uuid1.pdf',
+                },
+            ]
+
+            const result = await generateDocumentZip(docs, 'zips/test.zip')
+
+            expect(result).not.toBeInstanceOf(Error)
+            const putObjectCalls = mockSend.mock.calls.filter(
+                (call) => call[0].commandType === 'PutObject'
+            )
+            expect(putObjectCalls[0][0].Bucket).toBe('cdk-bucket')
+            const successResult = result as {
+                s3URL: string
+                s3BucketName: string
+            }
+            expect(successResult.s3BucketName).toBe('cdk-bucket')
+            expect(successResult.s3URL).toBe('s3://cdk-bucket/zips/test.zip')
+        })
+
+        it('returns error when the documents bucket env var is unset', async () => {
+            vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', '')
+            const docs = [
+                {
+                    s3URL: 's3://test-bucket/allusers/uuid1.pdf',
+                    name: 'doc1.pdf',
+                    s3BucketName: 'test-bucket',
+                    s3Key: 'allusers/uuid1.pdf',
+                },
+            ]
+
+            const result = await generateDocumentZip(docs, 'test.zip')
+
+            expect(result).toBeInstanceOf(Error)
+            expect((result as Error).message).toContain(
+                'VITE_APP_S3_DOCUMENTS_BUCKET must be set'
+            )
+        })
+
+        it('returns error when a document is missing s3BucketName', async () => {
+            const docs = [
+                {
+                    s3URL: 's3://test-bucket/allusers/uuid1.pdf',
+                    name: 'doc1.pdf',
+                    s3Key: 'allusers/uuid1.pdf',
+                },
+            ]
+
+            const result = await generateDocumentZip(docs, 'test.zip')
+
+            expect(result).toBeInstanceOf(Error)
+            expect((result as Error).message).toContain(
+                'missing s3BucketName field'
+            )
         })
     })
 })
