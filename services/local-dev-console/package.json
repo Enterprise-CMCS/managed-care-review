@@ -13,13 +13,13 @@
         "@mc-review/common-code": "workspace:*",
         "express": "^5.2.1",
         "express-rate-limit": "^8.7.0",
-        "react": "^19.2.8",
+        "react": "^19.3.0",
         "react-dom": "^19.3.0"
     },
     "devDependencies": {
         "@types/express": "^5.0.6",
         "@types/node": "^26.2.0",
-        "@types/react": "^19.0.0",
+        "@types/react": "^19.3.0",
         "@types/react-dom": "^19.3.0",
         "@vitejs/plugin-react": "^6.0.5",
         "nodemon": "^3.1.14",
