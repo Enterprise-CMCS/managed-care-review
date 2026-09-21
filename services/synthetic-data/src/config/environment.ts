@@ -27,8 +27,10 @@ const environmentSchema = z.object({
     SYNTHETIC_DATA_ENABLED: z.literal('true'),
     SYNTHETIC_DATA_STAGE: syntheticDataStage,
     SYNTHETIC_DATA_API_URL: z.string().url(),
-    SYNTHETIC_DATA_OAUTH_CLIENT_ID: z.string().trim().min(1),
-    SYNTHETIC_DATA_OAUTH_CLIENT_SECRET: z.string().min(1),
+    SYNTHETIC_DATA_STATE_OAUTH_CLIENT_ID: z.string().trim().min(1),
+    SYNTHETIC_DATA_STATE_OAUTH_CLIENT_SECRET: z.string().min(1),
+    SYNTHETIC_DATA_CMS_OAUTH_CLIENT_ID: z.string().trim().min(1),
+    SYNTHETIC_DATA_CMS_OAUTH_CLIENT_SECRET: z.string().min(1),
     SYNTHETIC_DATA_MAX_ATTEMPTS: positiveInteger
         .pipe(z.number().max(10))
         .default(4),
@@ -42,8 +44,10 @@ export type SyntheticDataEnvironment = {
     apiBaseUrl: string
     graphqlEndpoint: string
     tokenEndpoint: string
-    oauthClientId: string
-    oauthClientSecret: string
+    stateOAuthClientId: string
+    stateOAuthClientSecret: string
+    cmsOAuthClientId: string
+    cmsOAuthClientSecret: string
     maxAttempts: number
     retryBaseDelayMs: number
 }
@@ -83,8 +87,12 @@ export function loadEnvironment(
         apiBaseUrl: baseUrl.toString(),
         graphqlEndpoint: graphqlEndpoint.toString(),
         tokenEndpoint: tokenEndpoint.toString(),
-        oauthClientId: result.data.SYNTHETIC_DATA_OAUTH_CLIENT_ID,
-        oauthClientSecret: result.data.SYNTHETIC_DATA_OAUTH_CLIENT_SECRET,
+        stateOAuthClientId: result.data.SYNTHETIC_DATA_STATE_OAUTH_CLIENT_ID,
+        stateOAuthClientSecret:
+            result.data.SYNTHETIC_DATA_STATE_OAUTH_CLIENT_SECRET,
+        cmsOAuthClientId: result.data.SYNTHETIC_DATA_CMS_OAUTH_CLIENT_ID,
+        cmsOAuthClientSecret:
+            result.data.SYNTHETIC_DATA_CMS_OAUTH_CLIENT_SECRET,
         maxAttempts: result.data.SYNTHETIC_DATA_MAX_ATTEMPTS,
         retryBaseDelayMs: result.data.SYNTHETIC_DATA_RETRY_BASE_DELAY_MS,
     }

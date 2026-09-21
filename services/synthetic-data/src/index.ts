@@ -13,12 +13,9 @@ export {
     MAX_SCALE,
     OperationInputError,
     parseOperationInput,
-    parseContractSmokeSeedInput,
+    parseScenarioSeedInput,
 } from './config/operationInput'
-export type {
-    OperationInput,
-    ContractSmokeSeedInput,
-} from './config/operationInput'
+export type { OperationInput, ScenarioSeedInput } from './config/operationInput'
 export { documentFixtures, loadDocumentFixture } from './fixtures/documents'
 export type { DocumentFixture } from './fixtures/documents'
 export { Logger } from './logger'
@@ -30,17 +27,31 @@ export {
     buildContractSmokeCreateContractInput,
     contractSmokeMarker,
     contractSmokeScenarioKey,
+    buildSyntheticContractCreateInput,
+    buildSyntheticContractFormData,
 } from './builders/contractSmoke'
+export {
+    buildResubmittedContractFormData,
+    contractResubmitReason,
+    contractUnlockReason,
+    contractUnlockResubmitMarker,
+    contractUnlockResubmitScenarioKey,
+} from './builders/contractUnlockResubmit'
 export {
     runContractSmokeScenario,
     type ContractSmokeResult,
 } from './scenarios/contractSmoke'
+export {
+    runContractUnlockResubmitScenario,
+    type ContractUnlockResubmitResult,
+} from './scenarios/contractUnlockResubmit'
 export {
     SyntheticCreateContractDocument,
     SyntheticFetchContractDocument,
     SyntheticFetchCurrentUserDocument,
     SyntheticGenerateUploadUrlDocument,
     SyntheticSubmitContractDocument,
+    SyntheticUnlockContractDocument,
     SyntheticUpdateContractDraftRevisionDocument,
 } from './gen/gqlClient'
 export type { UploadBucketName, UploadFileType } from './gen/gqlClient'

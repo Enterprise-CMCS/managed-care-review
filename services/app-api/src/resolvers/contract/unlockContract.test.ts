@@ -1,5 +1,8 @@
+import type { GraphQLResolveInfo } from 'graphql'
+import type { Context } from '../../handlers/apollo_gql'
 import {
     constructTestPostgresServer,
+    defaultContext,
     defaultFloridaProgram,
     executeGraphQLOperation,
     updateTestStateAssignments,
@@ -39,13 +42,96 @@ import {
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { testEmailConfig, testEmailer } from '../../testHelpers/emailerHelpers'
 import { packageName } from '@mc-review/submissions'
-import { NewPostgresStore } from '../../postgres'
+import { NewPostgresStore, NotFoundError, type Store } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
+import { unlockContractResolver } from './unlockContract'
 
 describe('unlockContract', () => {
     const mockS3 = testS3Client()
     afterEach(() => {
         vi.resetAllMocks()
+        vi.unstubAllEnvs()
+    })
+
+    it('allows a scoped synthetic CMS client in its exact stage', async () => {
+        vi.stubEnv('stage', 'synth-review')
+        vi.stubEnv('SYNTHETIC_DATA_ENABLED', 'true')
+        vi.stubEnv('SYNTHETIC_DATA_ALLOWED_STAGE', 'synth-review')
+
+        const findContractWithHistory = vi
+            .fn()
+            .mockResolvedValue(new NotFoundError('not found'))
+        const resolver = unlockContractResolver(
+            { findContractWithHistory } as unknown as Store,
+            testEmailer(testEmailConfig()),
+            testLDService({})
+        )
+        if (typeof resolver !== 'function') {
+            throw new Error('Expected unlockContract resolver function')
+        }
+        const context: Context = {
+            ...defaultContext(),
+            user: testCMSUser(),
+            oauthClient: {
+                clientId: 'synthetic-data-synth-review-cms',
+                grants: ['client_credentials'],
+                iss: 'mcreview-synth-review',
+                scopes: ['SYNTHETIC_DATA_WRITE'],
+                isDelegatedUser: false,
+            },
+        }
+
+        await expect(
+            resolver(
+                {},
+                {
+                    input: {
+                        contractID: 'missing-contract',
+                        unlockedReason: 'Synthetic lifecycle scenario',
+                    },
+                },
+                context,
+                {} as GraphQLResolveInfo
+            )
+        ).rejects.toThrow(
+            'A contract must exist to be unlocked: missing-contract'
+        )
+        expect(findContractWithHistory).toHaveBeenCalledWith('missing-contract')
+    })
+
+    it('rejects withdrawn contracts before calling the store unlock', async () => {
+        const unlockContract = vi.fn()
+        const resolver = unlockContractResolver(
+            {
+                findContractWithHistory: vi.fn().mockResolvedValue({
+                    id: 'withdrawn-contract',
+                    consolidatedStatus: 'WITHDRAWN',
+                }),
+                unlockContract,
+            } as unknown as Store,
+            testEmailer(testEmailConfig()),
+            testLDService({})
+        )
+        if (typeof resolver !== 'function') {
+            throw new Error('Expected unlockContract resolver function')
+        }
+
+        await expect(
+            resolver(
+                {},
+                {
+                    input: {
+                        contractID: 'withdrawn-contract',
+                        unlockedReason: 'Should not unlock',
+                    },
+                },
+                { ...defaultContext(), user: testCMSUser() },
+                {} as GraphQLResolveInfo
+            )
+        ).rejects.toThrow(
+            'Attempted to unlock contract with wrong status: WITHDRAWN'
+        )
+        expect(unlockContract).not.toHaveBeenCalled()
     })
 
     describe('Health plan contract tests', () => {

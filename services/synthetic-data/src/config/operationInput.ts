@@ -42,7 +42,7 @@ const operationInputSchema = z.discriminatedUnion('operation', [
         .strict(),
 ])
 
-const contractSmokeSeedInputSchema = z
+const scenarioSeedInputSchema = z
     .object({
         seed: z
             .string()
@@ -54,9 +54,7 @@ const contractSmokeSeedInputSchema = z
     .strict()
 
 export type OperationInput = z.infer<typeof operationInputSchema>
-export type ContractSmokeSeedInput = z.infer<
-    typeof contractSmokeSeedInputSchema
->
+export type ScenarioSeedInput = z.infer<typeof scenarioSeedInputSchema>
 
 export class OperationInputError extends Error {
     readonly issues: ReadonlyArray<string>
@@ -122,12 +120,10 @@ export function parseOperationInput(
     return result.data
 }
 
-export function parseContractSmokeSeedInput(
+export function parseScenarioSeedInput(
     args: ReadonlyArray<string>
-): ContractSmokeSeedInput {
-    const result = contractSmokeSeedInputSchema.safeParse(
-        parseNamedArguments(args)
-    )
+): ScenarioSeedInput {
+    const result = scenarioSeedInputSchema.safeParse(parseNamedArguments(args))
     if (!result.success) {
         throw new OperationInputError(
             result.error.issues.map(

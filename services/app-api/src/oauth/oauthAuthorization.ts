@@ -62,6 +62,7 @@ export type SyntheticDataWriteOperation =
     | 'updateContractDraftRevision'
     | 'submitContract'
     | 'generateUploadURL'
+    | 'unlockContract'
 
 const syntheticDataWriteOperations: Record<SyntheticDataWriteOperation, true> =
     {
@@ -69,6 +70,7 @@ const syntheticDataWriteOperations: Record<SyntheticDataWriteOperation, true> =
         updateContractDraftRevision: true,
         submitContract: true,
         generateUploadURL: true,
+        unlockContract: true,
     }
 
 export function canSyntheticDataWrite(
