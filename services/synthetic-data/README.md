@@ -26,6 +26,31 @@ pnpm --filter @mc-review/synthetic-data preflight
 
 Success is logged as `synthetic.preflight.succeeded` with the state and CMS actor IDs and roles.
 
+### `seed-baseline-lite`
+
+Runs the fixed `baseline-lite-v1` QA handoff profile:
+
+```bash
+pnpm --filter @mc-review/synthetic-data cli seed-baseline-lite \
+  --seed salesforce-handoff-01
+```
+
+The profile creates 100 contracts using the existing API-backed scenario primitives:
+
+| Contracts | Package shape                                                       |
+| --------: | ------------------------------------------------------------------- |
+|        40 | Submitted contract-only                                             |
+|        10 | Submitted source contract with one owned rate                       |
+|        20 | Submitted contract linked to a pool rate                            |
+|        20 | Contract-only submission, then unlock, add first rate, and resubmit |
+|        10 | Contract-only submission, then unlock, edit, and resubmit           |
+
+Each of the ten pool rates remains parented to its source contract and is linked to two target contracts, so it appears in three submitted contracts. The command runs sequentially to keep the manifest deterministic and to rely on the API client's existing retry behavior.
+
+Progress is checkpointed after every completed contract to `synthetic-baseline-manifest.json`. The review and QA workflows upload that file as an artifact, including when a later profile item fails.
+
+The profile is append-only. Reusing a seed creates another dataset with the same markers; use a unique handoff seed for each run.
+
 ### `seed-contract-smoke`
 
 Runs the `contract-submit-smoke-v1` scenario:
@@ -196,9 +221,9 @@ After the QA promotion has deployed `app-api-qa-cdk`:
 7. Approve the protected `qa` environment if required.
 8. Run the workflow.
 
-The QA workflow accepts only `main`, validates its request before requesting QA credentials, serializes executions, bootstraps both actors, runs `preflight`, executes the selected scenario, and writes its contract ID, status, marker, and seed to the workflow summary.
+The QA workflow accepts only `main`, validates its request before requesting QA credentials, serializes executions, bootstraps both actors, runs `preflight`, and executes the selected scenario. Single scenarios report their contract details; `baseline-lite-v1` reports aggregate counts and uploads its contract manifest.
 
-The QA workflow is append-only. It does not reset, delete, or bulk-generate data.
+The QA workflow is append-only. It does not reset or delete data.
 
 ## Running manually
 

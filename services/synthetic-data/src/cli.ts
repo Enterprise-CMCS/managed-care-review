@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises'
 import { GraphQLClient } from './client/graphqlClient'
 import { OAuthClient } from './client/oauthClient'
 import { UploadClient } from './client/uploadClient'
@@ -8,6 +9,11 @@ import {
 import { parseScenarioSeedInput } from './config/operationInput'
 import { SyntheticFetchCurrentUserDocument } from './gen/gqlClient'
 import { Logger } from './logger'
+import { baselineLiteManifestFileName } from './planning/baselineLite'
+import {
+    runBaselineLiteScenario,
+    type BaselineLiteManifest,
+} from './scenarios/baselineLite'
 import { runContractSmokeScenario } from './scenarios/contractSmoke'
 import { runContractLinkedRateScenario } from './scenarios/contractLinkedRate'
 import { runContractUnlockAddRateScenario } from './scenarios/contractUnlockAddRate'
@@ -128,9 +134,51 @@ export async function runSeedContractLinkedRate(seed: string): Promise<void> {
     })
 }
 
+export async function runSeedBaselineLite(seed: string): Promise<void> {
+    const environment = loadEnvironment()
+    const logger = new Logger({
+        base: {
+            environment: environment.stage,
+            operation: 'seed-baseline-lite',
+        },
+    })
+    const [stateClients, cmsClients] = await Promise.all([
+        createAuthenticatedClients(environment, 'state'),
+        createAuthenticatedClients(environment, 'cms'),
+    ])
+    const persistManifest = async (
+        manifest: BaselineLiteManifest
+    ): Promise<void> => {
+        await writeFile(
+            baselineLiteManifestFileName,
+            `${JSON.stringify(manifest, null, 2)}\n`,
+            'utf8'
+        )
+    }
+    const manifest = await runBaselineLiteScenario({
+        stateGraphql: stateClients.graphql,
+        cmsGraphql: cmsClients.graphql,
+        uploads: stateClients.uploads,
+        logger,
+        seed,
+        onProgress: persistManifest,
+    })
+    await persistManifest(manifest)
+
+    logger.info('synthetic.baseline-lite.completed', {
+        scenarioKey: manifest.scenarioKey,
+        seed,
+        contractCount: manifest.contractCount,
+        rateCount: manifest.rateCount,
+        counts: manifest.counts,
+        manifestPath: baselineLiteManifestFileName,
+    })
+}
+
 const usage = [
     'Usage: pnpm cli preflight',
     'pnpm cli seed-contract-smoke --seed <seed>',
+    'pnpm cli seed-baseline-lite --seed <seed>',
     'pnpm cli seed-contract-linked-rate --seed <seed>',
     'pnpm cli seed-contract-unlock-add-rate --seed <seed>',
     'pnpm cli seed-contract-unlock-resubmit --seed <seed>',
@@ -170,6 +218,7 @@ export async function runSeedContractUnlockAddRate(
             operation: 'seed-contract-unlock-add-rate',
         },
     })
+
     const [stateClients, cmsClients] = await Promise.all([
         createAuthenticatedClients(environment, 'state'),
         createAuthenticatedClients(environment, 'cms'),
@@ -199,6 +248,12 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
     if (command === 'seed-contract-smoke') {
         const { seed } = parseScenarioSeedInput(rest)
         await runSeedContractSmoke(seed)
+        return
+    }
+
+    if (command === 'seed-baseline-lite') {
+        const { seed } = parseScenarioSeedInput(rest)
+        await runSeedBaselineLite(seed)
         return
     }
 
