@@ -10,6 +10,7 @@ on:
         type: choice
         options:
           - contract-linked-rate-v1
+          - contract-unlock-add-rate-v1
           - contract-unlock-resubmit-v1
           - contract-submit-smoke-v1
       seed:
@@ -164,6 +165,10 @@ jobs:
               COMMAND='seed-contract-linked-rate'
               EVENT='synthetic.contract-linked-rate.completed'
               ;;
+            contract-unlock-add-rate-v1)
+              COMMAND='seed-contract-unlock-add-rate'
+              EVENT='synthetic.contract-unlock-add-rate.completed'
+              ;;
             contract-unlock-resubmit-v1)
               COMMAND='seed-contract-unlock-resubmit'
               EVENT='synthetic.contract-unlock-resubmit.completed'
@@ -185,9 +190,11 @@ jobs:
             printf '| Scenario | %s |\n' "${SYNTHETIC_DATA_SCENARIO}"
             printf '| Seed | %s |\n' "${SYNTHETIC_DATA_SEED}"
             printf '| Contract ID | %s |\n' "$(jq -r '.contractId' <<< "${RESULT}")"
-            if jq -e '.sourceContractId and .rateId' <<< "${RESULT}" > /dev/null; then
+            if jq -e '.sourceContractId' <<< "${RESULT}" > /dev/null; then
               printf '| Source contract ID | %s |\n' "$(jq -r '.sourceContractId' <<< "${RESULT}")"
-              printf '| Shared rate ID | %s |\n' "$(jq -r '.rateId' <<< "${RESULT}")"
+            fi
+            if jq -e '.rateId' <<< "${RESULT}" > /dev/null; then
+              printf '| Rate ID | %s |\n' "$(jq -r '.rateId' <<< "${RESULT}")"
             fi
             printf '| Status | %s |\n' "$(jq -r '.status' <<< "${RESULT}")"
             printf '| Marker | %s |\n' "$(jq -r '.resubmittedMarker // .marker' <<< "${RESULT}")"

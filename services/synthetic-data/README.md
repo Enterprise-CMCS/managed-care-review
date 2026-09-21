@@ -73,6 +73,24 @@ The source and linked contract markers are:
 [SYNTHETIC:contract-linked-rate-v1:linked:<seed>]
 ```
 
+### `seed-contract-unlock-add-rate`
+
+Runs the `contract-unlock-add-rate-v1` scenario:
+
+```bash
+pnpm --filter @mc-review/synthetic-data cli seed-contract-unlock-add-rate \
+  --seed my-add-rate-01
+```
+
+The state actor creates and submits a contract-only package. The CMS actor unlocks it, then the state actor changes the package to contract-and-rates, adds the first owned rate, and resubmits it. The final read verifies that the initial package has no rates and the resubmitted package contains the new parent rate.
+
+The initial and resubmitted markers are:
+
+```text
+[SYNTHETIC:contract-unlock-add-rate-v1:initial:<seed>]
+[SYNTHETIC:contract-unlock-add-rate-v1:resubmitted:<seed>]
+```
+
 ### `seed-contract-unlock-resubmit`
 
 Runs the `contract-unlock-resubmit-v1` scenario:
