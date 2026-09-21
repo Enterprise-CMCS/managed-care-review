@@ -60,6 +60,7 @@ export function canWrite(context: Context): boolean {
 export type SyntheticDataWriteOperation =
     | 'createContract'
     | 'updateContractDraftRevision'
+    | 'updateDraftContractRates'
     | 'submitContract'
     | 'generateUploadURL'
     | 'unlockContract'
@@ -67,6 +68,7 @@ export type SyntheticDataWriteOperation =
 const syntheticDataWriteOperations: Record<SyntheticDataWriteOperation, true> =
     {
         createContract: true,
+        updateDraftContractRates: true,
         updateContractDraftRevision: true,
         submitContract: true,
         generateUploadURL: true,

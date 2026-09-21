@@ -259,6 +259,7 @@ describe('OAuth Authorization', () => {
         it.each([
             'createContract',
             'updateContractDraftRevision',
+            'updateDraftContractRates',
             'submitContract',
             'generateUploadURL',
             'unlockContract',
