@@ -5,10 +5,13 @@ import {
     buildSyntheticContractCreateInput,
     buildSyntheticContractFormData,
 } from '../builders/contractSmoke'
+import { buildSyntheticRateFormData } from '../builders/rate'
 import {
     SyntheticCreateContractDocument,
     SyntheticSubmitContractDocument,
     SyntheticUpdateContractDraftRevisionDocument,
+    SyntheticUpdateDraftContractRatesDocument,
+    type UpdateContractRateInput,
 } from '../gen/gqlClient'
 import { documentFixtures, loadDocumentFixture } from '../fixtures/documents'
 
@@ -16,13 +19,18 @@ export type SubmittedSyntheticContract = {
     contractId: string
     programId: string
     contractDocument: UploadedDocument
+    rateIds: string[]
 }
+
+export type SyntheticContractRate =
+    { type: 'CREATE'; documentName: string } | { type: 'LINK'; rateId: string }
 
 type SubmitSyntheticContractOptions = {
     graphql: GraphQLClient
     uploads: UploadClient
     marker: string
     documentName: string
+    rates?: ReadonlyArray<SyntheticContractRate>
 }
 
 function minnesotaContractProgramId(): string {
@@ -40,17 +48,28 @@ function minnesotaContractProgramId(): string {
     return program.id
 }
 
+/**
+ * Creates and submits one Minnesota contract through the public API.
+ * When rates are supplied they are the contract's complete intended rate set:
+ * CREATE entries become owned rates and LINK entries retain their existing parent.
+ */
 export async function submitSyntheticContract({
     graphql,
     uploads,
     marker,
     documentName,
+    rates = [],
 }: SubmitSyntheticContractOptions): Promise<SubmittedSyntheticContract> {
     const programId = minnesotaContractProgramId()
+    const submissionType =
+        rates.length === 0 ? 'CONTRACT_ONLY' : 'CONTRACT_AND_RATES'
     const createResult = await graphql.execute(
         SyntheticCreateContractDocument,
         {
-            input: buildSyntheticContractCreateInput(marker, programId),
+            input: {
+                ...buildSyntheticContractCreateInput(marker, programId),
+                submissionType,
+            },
         }
     )
     const contract = createResult.createContract.contract
@@ -67,6 +86,25 @@ export async function submitSyntheticContract({
         bucketName: 'HEALTH_PLAN_DOCS',
         contentType: fixture.contentType,
     })
+    const updatedRates: UpdateContractRateInput[] = await Promise.all(
+        rates.map(async (rate) => {
+            if (rate.type === 'LINK') {
+                return { type: 'LINK', rateID: rate.rateId }
+            }
+
+            const rateDocument = await uploads.upload({
+                name: rate.documentName,
+                bytes: await loadDocumentFixture(fixture),
+                fileType: fixture.fileType,
+                bucketName: 'HEALTH_PLAN_DOCS',
+                contentType: fixture.contentType,
+            })
+            return {
+                type: 'CREATE',
+                formData: buildSyntheticRateFormData(programId, rateDocument),
+            }
+        })
+    )
 
     const updateResult = await graphql.execute(
         SyntheticUpdateContractDraftRevisionDocument,
@@ -74,19 +112,55 @@ export async function submitSyntheticContract({
             input: {
                 contractID: contract.id,
                 lastSeenUpdatedAt,
-                formData: buildSyntheticContractFormData(
-                    marker,
-                    programId,
-                    contractDocument
-                ),
+                formData: {
+                    ...buildSyntheticContractFormData(
+                        marker,
+                        programId,
+                        contractDocument
+                    ),
+                    submissionType,
+                },
             },
         }
     )
+    const updatedDraft =
+        updateResult.updateContractDraftRevision.contract.draftRevision
     if (
         updateResult.updateContractDraftRevision.contract.id !== contract.id ||
-        !updateResult.updateContractDraftRevision.contract.draftRevision
+        !updatedDraft
     ) {
         throw new Error('Synthetic contract draft update was not persisted')
+    }
+
+    let rateIds: string[] = []
+    if (updatedRates.length > 0) {
+        const rateResult = await graphql.execute(
+            SyntheticUpdateDraftContractRatesDocument,
+            {
+                input: {
+                    contractID: contract.id,
+                    lastSeenUpdatedAt: updatedDraft.updatedAt,
+                    updatedRates,
+                },
+            }
+        )
+        const draftRates =
+            rateResult.updateDraftContractRates.contract.draftRates ?? []
+        rateIds = draftRates.map((rate) => rate.id)
+        const expectedLinkedRateIds = rates
+            .filter(
+                (
+                    rate
+                ): rate is Extract<SyntheticContractRate, { type: 'LINK' }> =>
+                    rate.type === 'LINK'
+            )
+            .map((rate) => rate.rateId)
+        if (
+            draftRates.length !== rates.length ||
+            expectedLinkedRateIds.some((rateId) => !rateIds.includes(rateId))
+        ) {
+            throw new Error('Synthetic contract rate update was not persisted')
+        }
     }
 
     const submitResult = await graphql.execute(
@@ -102,5 +176,5 @@ export async function submitSyntheticContract({
         throw new Error('Synthetic contract was not submitted')
     }
 
-    return { contractId: contract.id, programId, contractDocument }
+    return { contractId: contract.id, programId, contractDocument, rateIds }
 }

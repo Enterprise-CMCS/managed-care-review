@@ -31,6 +31,12 @@ export {
     buildSyntheticContractFormData,
 } from './builders/contractSmoke'
 export {
+    contractLinkedRateMarker,
+    contractLinkedRateScenarioKey,
+} from './builders/contractLinkedRate'
+export type { ContractLinkedRateRole } from './builders/contractLinkedRate'
+export { buildSyntheticRateFormData } from './builders/rate'
+export {
     buildResubmittedContractFormData,
     contractResubmitReason,
     contractUnlockReason,
@@ -41,6 +47,10 @@ export {
     runContractSmokeScenario,
     type ContractSmokeResult,
 } from './scenarios/contractSmoke'
+export {
+    runContractLinkedRateScenario,
+    type ContractLinkedRateResult,
+} from './scenarios/contractLinkedRate'
 export {
     runContractUnlockResubmitScenario,
     type ContractUnlockResubmitResult,
@@ -53,5 +63,11 @@ export {
     SyntheticSubmitContractDocument,
     SyntheticUnlockContractDocument,
     SyntheticUpdateContractDraftRevisionDocument,
+    SyntheticUpdateDraftContractRatesDocument,
 } from './gen/gqlClient'
-export type { UploadBucketName, UploadFileType } from './gen/gqlClient'
+export type {
+    RateFormDataInput,
+    UpdateContractRateInput,
+    UploadBucketName,
+    UploadFileType,
+} from './gen/gqlClient'

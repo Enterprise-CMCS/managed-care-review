@@ -10,7 +10,7 @@ import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { z } from 'zod'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import { generateRateCertificationName } from '../rate/generateRateCertificationName'
-import { canWrite } from '../../oauth/oauthAuthorization'
+import { canSyntheticDataWrite, canWrite } from '../../oauth/oauthAuthorization'
 import { parseAndValidateDocuments } from '../documentHelpers'
 import { getStatePrograms } from '../helpers'
 
@@ -58,8 +58,11 @@ function updateDraftContractRates(
             async (span) => {
                 setResolverDetails(span, user)
 
-                // Check OAuth client read permissions
-                if (!canWrite(context)) {
+                // Synthetic writes remain restricted to the explicit operation and environment allowlists.
+                if (
+                    !canWrite(context) &&
+                    !canSyntheticDataWrite(context, 'updateDraftContractRates')
+                ) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError(
                         'updateDraftContractRates',
