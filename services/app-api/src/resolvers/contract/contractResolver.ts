@@ -12,6 +12,8 @@ import type { StrippedContractType } from '../../domain-models'
 import path from 'path'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
+import { InvalidRevisionDiffInputError } from '../../postgres/revisionDiff/findRevisionDiffByContractID'
+import { serializeRevisionDiffForGraphQL } from './serializeRevisionDiff'
 import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { convertToIndexQuestionsPayload } from '../../postgres/questionResponse'
 import type { Context } from '../../handlers/apollo_gql'
@@ -295,6 +297,52 @@ function genericContractResolver<
                     }
 
                     return convertToIndexQuestionsPayload(questionsForContract)
+                }
+            )
+        },
+
+        revisionDiff(
+            parent: ParentType,
+            _args: Record<string, never>,
+            context: Context
+        ) {
+            return withResolverSpan(
+                context,
+                'Contract.revisionDiff',
+                { 'contract.id': parent.id },
+                async (span) => {
+                    setResolverDetails(span, context.user)
+
+                    // A single-submission contract has nothing to diff
+                    // against, skip the store lookup entirely.
+                    if (parent.packageSubmissions.length < 2) {
+                        return null
+                    }
+
+                    const comparison = await store.findRevisionDiffByContractID(
+                        {
+                            contractID: parent.id,
+                        }
+                    )
+
+                    if (comparison instanceof Error) {
+                        if (
+                            comparison instanceof InvalidRevisionDiffInputError
+                        ) {
+                            return null
+                        }
+
+                        // The diff is supplemental display data: log and return
+                        // null rather than failing the whole contract query
+                        logResolverError(
+                            'genericContractResolver.revisionDiff',
+                            `Issue finding revision diff: ${comparison.message}`,
+                            context
+                        )
+                        return null
+                    }
+
+                    return serializeRevisionDiffForGraphQL(comparison)
                 }
             )
         },

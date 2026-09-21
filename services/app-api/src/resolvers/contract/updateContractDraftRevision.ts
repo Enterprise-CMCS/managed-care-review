@@ -11,7 +11,7 @@ import {
     validateContractDraftRevisionInput,
     validateEQROContractDraftRevisionInput,
 } from '../../domain-models/contractAndRates'
-import { canWrite } from '../../oauth/oauthAuthorization'
+import { canSyntheticDataWrite, canWrite } from '../../oauth/oauthAuthorization'
 import {
     parseAndUpdateChipOnlyFields,
     parseAndUpdateEqroFields,
@@ -33,7 +33,13 @@ export function updateContractDraftRevision(
                 setResolverDetails(span, user)
 
                 // Check OAuth client read permissions
-                if (!canWrite(context)) {
+                if (
+                    !canWrite(context) &&
+                    !canSyntheticDataWrite(
+                        context,
+                        'updateContractDraftRevision'
+                    )
+                ) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError(
                         'updateContractDraftRevision',

@@ -185,6 +185,7 @@ const genericContractFormDataSchema = z.object({
     statutoryRegulatoryAttestationDescription: preprocessNulls(
         z.string().optional()
     ),
+    procurementAttestation: preprocessNulls(z.boolean().optional()),
 
     //EQRO submission field only
     eqroNewContractor: preprocessNulls(z.boolean().optional()),
@@ -321,6 +322,7 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     statutoryRegulatoryAttestationDescription: preprocessNulls(
         z.undefined().optional()
     ),
+    procurementAttestation: preprocessNulls(z.undefined().optional()),
     // should always be an empty array to match GQL types
     federalAuthorities:
         genericContractFormDataSchema.shape.federalAuthorities.default([]),

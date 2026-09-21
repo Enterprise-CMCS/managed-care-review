@@ -274,6 +274,7 @@ model ContractRevisionTable {
   inLieuServicesAndSettings                    Boolean?
   statutoryRegulatoryAttestation               Boolean?
   statutoryRegulatoryAttestationDescription    String?
+  procurementAttestation                       Boolean?
 
   // EQRO submission fields only
   eqroNewContractor                       Boolean?
@@ -939,6 +940,7 @@ enum ContractSubmissionType {
 enum OAuthScope {
   CMS_SUBMISSION_ACTIONS
   ADMIN_SUBMISSION_ACTIONS
+  SYNTHETIC_DATA_WRITE
 }
 
 enum ScalarFieldOverrideOperation {

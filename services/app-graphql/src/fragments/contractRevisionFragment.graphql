@@ -79,6 +79,7 @@ fragment contractRevisionFragment on ContractRevision {
         modifiedNonRiskPaymentArrangements
         statutoryRegulatoryAttestation
         statutoryRegulatoryAttestationDescription
+        procurementAttestation
 
 #       EQRO submission fields only
         eqroNewContractor

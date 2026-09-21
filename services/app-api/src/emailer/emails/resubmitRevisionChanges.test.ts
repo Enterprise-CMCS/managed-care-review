@@ -530,7 +530,8 @@ describe('buildResubmitRevisionChanges', () => {
             fieldChanges: [],
             stateContactChanges: [
                 {
-                    changeType: 'NEW_OR_MODIFIED',
+                    changeType: 'UPDATED',
+                    index: 0,
                     current: {
                         name: 'Kasimir Kraft',
                         titleRole: 'Assistant Division Chief',
@@ -538,7 +539,8 @@ describe('buildResubmitRevisionChanges', () => {
                     },
                 },
                 {
-                    changeType: 'NEW_OR_MODIFIED',
+                    changeType: 'ADDED',
+                    index: 1,
                     current: {
                         name: 'Rhonda Cumberbatch',
                         titleRole: 'ASA PRINCIPLE',
@@ -892,7 +894,8 @@ describe('buildResubmitRevisionChanges', () => {
                         supportingRateDocuments: { added: [], removed: [] },
                         certifyingActuaryContactChanges: [
                             {
-                                changeType: 'NEW_OR_MODIFIED',
+                                changeType: 'UPDATED',
+                                index: 0,
                                 current: {
                                     name: 'Jalen Brunson',
                                     titleRole: 'Head of Risk Development',
@@ -904,7 +907,8 @@ describe('buildResubmitRevisionChanges', () => {
                         ],
                         addtlActuaryContactChanges: [
                             {
-                                changeType: 'NEW_OR_MODIFIED',
+                                changeType: 'ADDED',
+                                index: 0,
                                 current: {
                                     name: 'Bill Yard',
                                     titleRole: 'Executive assistant',
@@ -1156,7 +1160,8 @@ describe('buildResubmitRevisionChanges', () => {
             ],
             stateContactChanges: [
                 {
-                    changeType: 'NEW_OR_MODIFIED',
+                    changeType: 'UPDATED',
+                    index: 0,
                     current: {
                         name: 'Kasimir Kraft',
                         titleRole: 'Assistant Division Chief',

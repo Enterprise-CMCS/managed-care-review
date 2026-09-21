@@ -27,7 +27,7 @@ import {
     ServicePrincipal,
     ManagedPolicy,
 } from 'aws-cdk-lib/aws-iam'
-import { CfnOutput, Duration, Fn } from 'aws-cdk-lib'
+import { CfnOutput, Duration, Fn, RemovalPolicy } from 'aws-cdk-lib'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { LogGroup } from 'aws-cdk-lib/aws-logs'
@@ -73,6 +73,9 @@ export class AppApiStack extends BaseStack {
     public readonly migrateContactsFunction: NodejsFunction
     public readonly restoreIAToStandardFunction: NodejsFunction
 
+    public readonly syntheticDataBootstrapFunction?: NodejsFunction
+    public readonly syntheticDataStateCredentialsSecret?: Secret
+    public readonly syntheticDataCMSCredentialsSecret?: Secret
     public readonly graphqlFunction: NodejsFunction
 
     // Network resources from Network stack
@@ -298,6 +301,85 @@ export class AppApiStack extends BaseStack {
                 },
             }
         )
+        if (environment.SYNTHETIC_DATA_ENABLED === 'true') {
+            const allowedStage = environment.SYNTHETIC_DATA_ALLOWED_STAGE
+            if (
+                allowedStage !== this.stage ||
+                (!isReview && this.stage !== 'qa')
+            ) {
+                throw new Error(
+                    'Synthetic data resources require an exact review or QA stage allowlist'
+                )
+            }
+
+            this.syntheticDataStateCredentialsSecret = new Secret(
+                this,
+                'SyntheticDataCredentials',
+                {
+                    secretName: `synthetic-data-oauth-credentials-${this.stage}-cdk`, // pragma: allowlist secret
+                    description: `Synthetic data state OAuth credentials for ${this.stage}`,
+                    generateSecretString: {
+                        secretStringTemplate: JSON.stringify({
+                            clientId: `synthetic-data-${this.stage}-state`,
+                        }),
+                        generateStringKey: 'clientSecret',
+                        excludePunctuation: true,
+                        passwordLength: 64,
+                    },
+                    removalPolicy: RemovalPolicy.DESTROY,
+                }
+            )
+            this.syntheticDataStateCredentialsSecret.grantRead(role)
+
+            this.syntheticDataCMSCredentialsSecret = new Secret(
+                this,
+                'SyntheticDataCMSCredentials',
+                {
+                    secretName: `synthetic-data-cms-oauth-credentials-${this.stage}-cdk`, // pragma: allowlist secret
+                    description: `Synthetic data CMS OAuth credentials for ${this.stage}`,
+                    generateSecretString: {
+                        secretStringTemplate: JSON.stringify({
+                            clientId: `synthetic-data-${this.stage}-cms`,
+                        }),
+                        generateStringKey: 'clientSecret',
+                        excludePunctuation: true,
+                        passwordLength: 64,
+                    },
+                    removalPolicy: RemovalPolicy.DESTROY,
+                }
+            )
+            this.syntheticDataCMSCredentialsSecret.grantRead(role)
+
+            this.syntheticDataBootstrapFunction = this.createLambdaFunction(
+                'synthetic-data-bootstrap',
+                'bootstrap_synthetic_data',
+                'main',
+                {
+                    timeout: Duration.seconds(30),
+                    memorySize: 1024,
+                    environment: {
+                        ...environment,
+                        SYNTHETIC_DATA_STATE_CREDENTIALS_SECRET:
+                            this.syntheticDataStateCredentialsSecret.secretName,
+                        SYNTHETIC_DATA_CMS_CREDENTIALS_SECRET:
+                            this.syntheticDataCMSCredentialsSecret.secretName,
+                    },
+                    role,
+                    vpc: this.vpc,
+                    vpcSubnets: {
+                        subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+                    },
+                    securityGroups,
+                    bundling: {
+                        format: OutputFormat.ESM,
+                        banner: AppApiStack.ESM_BANNER,
+                        ...this.createBundling('synthetic-data-bootstrap', [
+                            this.getPrismaCleanupCommands(),
+                        ]),
+                    },
+                }
+            )
+        }
 
         this.cleanupFunction = this.createLambdaFunction(
             'cleanup',
@@ -1020,6 +1102,10 @@ export class AppApiStack extends BaseStack {
             VITE_APP_S3_REGION: this.region,
             INTERNAL_ALLOWED_ORIGINS:
                 process.env.INTERNAL_ALLOWED_ORIGINS || '',
+            SYNTHETIC_DATA_ENABLED:
+                process.env.SYNTHETIC_DATA_ENABLED || 'false',
+            SYNTHETIC_DATA_ALLOWED_STAGE:
+                process.env.SYNTHETIC_DATA_ALLOWED_STAGE || '',
         }
     }
 
@@ -1366,6 +1452,35 @@ export class AppApiStack extends BaseStack {
             description:
                 'Contact structured-name migration Lambda function name',
         })
+
+        if (
+            this.syntheticDataBootstrapFunction &&
+            this.syntheticDataStateCredentialsSecret &&
+            this.syntheticDataCMSCredentialsSecret
+        ) {
+            new CfnOutput(this, 'SyntheticDataBootstrapFunctionName', {
+                value: this.syntheticDataBootstrapFunction.functionName,
+                exportName: this.exportName(
+                    'SyntheticDataBootstrapFunctionName'
+                ),
+                description: 'Synthetic data bootstrap Lambda function name',
+            })
+            new CfnOutput(this, 'SyntheticDataStateCredentialsSecretName', {
+                value: this.syntheticDataStateCredentialsSecret.secretName,
+                exportName: this.exportName(
+                    'SyntheticDataStateCredentialsSecretName'
+                ),
+                description:
+                    'Synthetic data state OAuth credentials secret name',
+            })
+            new CfnOutput(this, 'SyntheticDataCMSCredentialsSecretName', {
+                value: this.syntheticDataCMSCredentialsSecret.secretName,
+                exportName: this.exportName(
+                    'SyntheticDataCMSCredentialsSecretName'
+                ),
+                description: 'Synthetic data CMS OAuth credentials secret name',
+            })
+        }
 
         new CfnOutput(this, 'ApiGatewayUrl', {
             value: `https://${this.apiGateway.restApiId}.execute-api.${this.region}.amazonaws.com/${this.stage}`,

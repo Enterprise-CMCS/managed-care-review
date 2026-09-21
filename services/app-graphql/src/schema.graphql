@@ -1948,6 +1948,8 @@ type ContractFormData {
     statutoryRegulatoryAttestation: Boolean
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
+    "If the state has attested to the procurement requirements"
+    procurementAttestation: Boolean
 
     #   EQRO submission fields only
     "If contract has a new EQRO contractor"
@@ -2752,6 +2754,13 @@ type Contract {
     and are returned in descending order by createdAt.
     """
     contractOverrides: [ContractOverrideType]
+
+    """
+    revisionDiff is the field-level comparison between the latest submitted
+    revision and the previous submitted revision. Null when the contract has
+    fewer than two submitted revisions.
+    """
+    revisionDiff: RevisionDiff
 }
 
 """
@@ -2840,6 +2849,13 @@ type UnlockedContract {
     , unlocked, or resubmitted. The array is in descending order by createdAt.
     """
     questions: IndexContractQuestionsPayload
+
+    """
+    revisionDiff is the field-level comparison between the latest submitted
+    revision and the previous submitted revision. Null when the contract has
+    fewer than two submitted revisions.
+    """
+    revisionDiff: RevisionDiff
 }
 
 type RateEdge {
@@ -2992,11 +3008,14 @@ type RevisionDiffRateChanges {
 }
 
 enum RevisionDiffRateActuaryContactChangeType {
-    NEW_OR_MODIFIED
+    ADDED
+    UPDATED
 }
 
 type RevisionDiffRateActuaryContactChange {
     changeType: RevisionDiffRateActuaryContactChangeType!
+    "index is the contact's position in the current revision's actuary contact list"
+    index: Int!
     current: RevisionDiffActuaryContact!
 }
 
@@ -3008,11 +3027,14 @@ type RevisionDiffActuaryContact {
 }
 
 enum RevisionDiffStateContactChangeType {
-    NEW_OR_MODIFIED
+    ADDED
+    UPDATED
 }
 
 type RevisionDiffStateContactChange {
     changeType: RevisionDiffStateContactChangeType!
+    "index is the contact's position in the current revision's state contact list"
+    index: Int!
     current: StateContact!
 }
 
@@ -3234,6 +3256,8 @@ input ContractDraftRevisionFormDataInput {
     statutoryRegulatoryAttestation: Boolean
     "Description provided for if contract has statutory regulatory attestation"
     statutoryRegulatoryAttestationDescription: String
+    "If the state has attested to the procurement requirements"
+    procurementAttestation: Boolean
 
     #   EQRO submission fields only
     "If contract has a new EQRO contractor"
@@ -3555,6 +3579,7 @@ enum ContractSubmissionType {
 enum OAuthScope {
     CMS_SUBMISSION_ACTIONS
     ADMIN_SUBMISSION_ACTIONS
+    SYNTHETIC_DATA_WRITE
 }
 
 enum UploadBucketName {

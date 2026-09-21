@@ -8,7 +8,7 @@ import type { State } from '../../gen/gqlServer'
 import { pluralize } from '@mc-review/common-code'
 import type { InsertContractArgsType } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
-import { canWrite } from '../../oauth/oauthAuthorization'
+import { canSyntheticDataWrite, canWrite } from '../../oauth/oauthAuthorization'
 
 export function createContract(
     store: Store
@@ -24,7 +24,10 @@ export function createContract(
                 setResolverDetails(span, user)
 
                 // Check OAuth client read permissions
-                if (!canWrite(context)) {
+                if (
+                    !canWrite(context) &&
+                    !canSyntheticDataWrite(context, 'createContract')
+                ) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('createContract', errMessage, context)
                     throw new GraphQLError(errMessage, {

@@ -81,6 +81,7 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             modifiedNonRiskPaymentArrangements
             statutoryRegulatoryAttestation
             statutoryRegulatoryAttestationDescription
+            procurementAttestation
 
             #EQRO submission fields only
             eqroNewContractor

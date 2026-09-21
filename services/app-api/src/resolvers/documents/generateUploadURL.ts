@@ -1,7 +1,10 @@
 import { GraphQLError } from 'graphql'
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
-import { canOauthWrite } from '../../oauth/oauthAuthorization'
+import {
+    canOauthWrite,
+    canSyntheticDataWrite,
+} from '../../oauth/oauthAuthorization'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import type { S3ClientT } from '../../s3'
@@ -30,7 +33,10 @@ export function generateUploadURLResolver(
                 })
 
                 // Check OAuth client write permissions
-                if (!canOauthWrite(context, featureFlags)) {
+                if (
+                    !canOauthWrite(context, featureFlags) &&
+                    !canSyntheticDataWrite(context, 'generateUploadURL')
+                ) {
                     const errMessage = `OAuth client does not have write permissions`
                     logResolverError('generateUploadURL', errMessage, context)
                     throw new GraphQLError(errMessage, {

@@ -1,0 +1,157 @@
+import { describe, expect, it, vi } from 'vitest'
+import type { GraphQLClient } from '../src/client/graphqlClient'
+import type { UploadClient } from '../src/client/uploadClient'
+import {
+    SyntheticCreateContractDocument,
+    SyntheticFetchContractDocument,
+    SyntheticSubmitContractDocument,
+    SyntheticUpdateContractDraftRevisionDocument,
+} from '../src/gen/gqlClient'
+import { Logger } from '../src/logger'
+import { runContractSmokeScenario } from '../src/scenarios/contractSmoke'
+
+function scenarioDependencies(persistedMarker: string) {
+    const execute = vi.fn().mockImplementation(async (document) => {
+        if (document === SyntheticCreateContractDocument) {
+            return {
+                createContract: {
+                    contract: {
+                        id: 'contract-1',
+                        stateCode: 'MN',
+                        status: 'DRAFT',
+                        draftRevision: {
+                            updatedAt: '2026-09-03T12:00:00.000Z',
+                        },
+                    },
+                },
+            }
+        }
+        if (document === SyntheticUpdateContractDraftRevisionDocument) {
+            return {
+                updateContractDraftRevision: {
+                    contract: {
+                        id: 'contract-1',
+                        stateCode: 'MN',
+                        status: 'DRAFT',
+                        draftRevision: {
+                            updatedAt: '2026-09-03T12:01:00.000Z',
+                        },
+                    },
+                },
+            }
+        }
+        if (document === SyntheticSubmitContractDocument) {
+            return {
+                submitContract: {
+                    contract: {
+                        id: 'contract-1',
+                        stateCode: 'MN',
+                        status: 'SUBMITTED',
+                    },
+                },
+            }
+        }
+        if (document === SyntheticFetchContractDocument) {
+            return {
+                fetchContract: {
+                    contract: {
+                        id: 'contract-1',
+                        stateCode: 'MN',
+                        status: 'SUBMITTED',
+                        packageSubmissions: [
+                            {
+                                contractRevision: {
+                                    formData: {
+                                        submissionDescription: persistedMarker,
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                },
+            }
+        }
+        throw new Error('Unexpected GraphQL operation')
+    })
+    const upload = vi.fn().mockResolvedValue({
+        name: 'synthetic-contract-smoke-test-seed.pdf',
+        s3URL: 's3://synthetic-bucket/contract.pdf',
+        s3Key: 'contract.pdf',
+        bucket: 'synthetic-bucket',
+        sha256: 'abc123',
+    })
+
+    return {
+        graphql: { execute } as unknown as GraphQLClient,
+        uploads: { upload } as unknown as UploadClient,
+        execute,
+        upload,
+    }
+}
+
+describe('runContractSmokeScenario', () => {
+    it('uploads, submits, and verifies one marked Minnesota contract', async () => {
+        const marker =
+            '[SYNTHETIC:contract-submit-smoke-v1:contract-only:test-seed]'
+        const dependencies = scenarioDependencies(marker)
+
+        const result = await runContractSmokeScenario({
+            graphql: dependencies.graphql,
+            uploads: dependencies.uploads,
+            logger: new Logger({ sink: vi.fn() }),
+            seed: 'test-seed',
+        })
+
+        expect(result).toEqual({
+            scenarioKey: 'contract-submit-smoke-v1',
+            seed: 'test-seed',
+            marker,
+            contractId: 'contract-1',
+            status: 'SUBMITTED',
+        })
+        expect(dependencies.execute).toHaveBeenCalledTimes(4)
+        expect(dependencies.upload).toHaveBeenCalledWith(
+            expect.objectContaining({
+                name: 'synthetic-contract-smoke-test-seed.pdf',
+                fileType: 'PDF',
+                bucketName: 'HEALTH_PLAN_DOCS',
+            })
+        )
+        expect(dependencies.execute.mock.calls[1][1]).toEqual(
+            expect.objectContaining({
+                input: expect.objectContaining({
+                    contractID: 'contract-1',
+                    lastSeenUpdatedAt: '2026-09-03T12:00:00.000Z',
+                    formData: expect.objectContaining({
+                        submissionDescription: marker,
+                        contractDocuments: [
+                            {
+                                name: 'synthetic-contract-smoke-test-seed.pdf',
+                                s3URL: 's3://synthetic-bucket/contract.pdf',
+                                sha256: 'abc123',
+                            },
+                        ],
+                    }),
+                }),
+            })
+        )
+        expect(dependencies.execute.mock.calls[0][1]).toEqual({
+            input: expect.objectContaining({
+                programIDs: ['3fd36500-bf2c-47bc-80e8-e7aa417184c5'],
+            }),
+        })
+    })
+
+    it('fails when the submitted marker cannot be read back', async () => {
+        const dependencies = scenarioDependencies('different marker')
+
+        await expect(
+            runContractSmokeScenario({
+                graphql: dependencies.graphql,
+                uploads: dependencies.uploads,
+                logger: new Logger({ sink: vi.fn() }),
+                seed: 'test-seed',
+            })
+        ).rejects.toThrow('Synthetic contract verification failed')
+    })
+})

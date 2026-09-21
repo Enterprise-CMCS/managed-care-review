@@ -1,0 +1,12 @@
+mutation SyntheticCreateContract($input: CreateContractInput!) {
+    createContract(input: $input) {
+        contract {
+            id
+            stateCode
+            status
+            draftRevision {
+                updatedAt
+            }
+        }
+    }
+}
