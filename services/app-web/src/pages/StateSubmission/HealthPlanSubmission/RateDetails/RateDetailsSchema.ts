@@ -2,6 +2,7 @@ import * as Yup from 'yup'
 import { dayjs } from '@mc-review/dates'
 import { FeatureFlagSettings, featureFlags } from '@mc-review/common-code'
 import {
+    emailAddressRegex,
     validateFileItemsList,
     validateFileItemsListSingleUpload,
     validateDateFormat,
@@ -162,20 +163,21 @@ const SingleRateCertSchema = (
                     'You must provide a title/role'
                 ),
                 email: Yup.string()
-                    .email('You must enter a valid email address')
+                    .matches(emailAddressRegex, {
+                        message: 'You must enter a valid email address',
+                        excludeEmptyString: true,
+                    })
                     .required('You must provide an email address'),
-                actuarialFirm: Yup.string()
-                    .required('You must select an actuarial firm')
-                    .nullable(),
+                actuarialFirm: Yup.string().required(
+                    'You must select an actuarial firm'
+                ),
                 actuarialFirmOther: Yup.string()
+                    .nullable()
                     .when('actuarialFirm', {
                         is: 'OTHER',
                         then: (schema) =>
-                            schema
-                                .required('You must enter a description')
-                                .nullable(),
-                    })
-                    .nullable(),
+                            schema.required('You must enter a description'),
+                    }),
             })
         ),
         addtlActuaryContacts: Yup.array().of(
@@ -201,20 +203,21 @@ const SingleRateCertSchema = (
                     'You must provide a title/role'
                 ),
                 email: Yup.string()
-                    .email('You must enter a valid email address')
+                    .matches(emailAddressRegex, {
+                        message: 'You must enter a valid email address',
+                        excludeEmptyString: true,
+                    })
                     .required('You must provide an email address'),
-                actuarialFirm: Yup.string()
-                    .required('You must select an actuarial firm')
-                    .nullable(),
+                actuarialFirm: Yup.string().required(
+                    'You must select an actuarial firm'
+                ),
                 actuarialFirmOther: Yup.string()
+                    .nullable()
                     .when('actuarialFirm', {
                         is: 'OTHER',
                         then: (schema) =>
-                            schema
-                                .required('You must enter a description')
-                                .nullable(),
-                    })
-                    .nullable(),
+                            schema.required('You must enter a description'),
+                    }),
             })
         ),
         actuaryCommunicationPreference: Yup.string().required(

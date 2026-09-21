@@ -40,6 +40,7 @@ import { featureFlags } from '@mc-review/common-code'
 import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 import { usePage } from '../../../contexts/PageContext'
 import { getSubmissionPath } from '../../../routeHelpers'
+import { emailAddressRegex } from '../../../formHelpers'
 
 export interface ContactsFormValues {
     stateContacts: StateContact[]
@@ -250,7 +251,10 @@ const Contacts = ({
                     'You must provide a title/role'
                 ),
                 email: Yup.string()
-                    .email('You must enter a valid email address')
+                    .matches(emailAddressRegex, {
+                        message: 'You must enter a valid email address',
+                        excludeEmptyString: true,
+                    })
                     .trim()
                     .required('You must provide an email address'),
             })
