@@ -10,11 +10,11 @@
     "dependencies": {
         "@opentelemetry/api": "^1.9.1",
         "@opentelemetry/semantic-conventions": "^1.40.0",
-        "react": "^19.2.8"
+        "react": "^19.3.0"
     },
     "devDependencies": {
         "@types/node": "^26.2.0",
-        "@types/react": "^19.0.0",
+        "@types/react": "^19.3.0",
         "typescript": "5.9.3"
     }
 }
