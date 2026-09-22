@@ -1890,6 +1890,11 @@ describe('RateDetails', () => {
                 screen.getAllByText('You must upload a rate certification')
             ).toHaveLength(2)
             expect(
+                screen.queryByText(
+                    'Only one document is allowed for a rate certification. You must remove documents before continuing.'
+                )
+            ).not.toBeInTheDocument()
+            expect(
                 screen.getAllByText(
                     'You must select which rate(s) are included in this certification'
                 )

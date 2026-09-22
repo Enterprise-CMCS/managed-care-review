@@ -28,6 +28,7 @@ import {
     Label,
 } from '@trussworks/react-uswds'
 import styles from './LocalLogin.module.scss'
+import { emailAddressRegex } from '../formHelpers'
 
 const roleOptions = [
     { value: 'STATE_USER', label: 'State User' },
@@ -57,7 +58,12 @@ const stateCodeSchema = Yup.object()
     .nullable()
 
 const AddLocalUserFromVSchema = Yup.object().shape({
-    email: Yup.string().email().required('email is required'),
+    email: Yup.string()
+        .matches(emailAddressRegex, {
+            message: 'email must be a valid email',
+            excludeEmptyString: true,
+        })
+        .required('email is required'),
     givenName: Yup.string().required('you must enter a first name'),
     familyName: Yup.string().required('you must enter a last name'),
     role: Yup.object()
