@@ -82,7 +82,7 @@ export const YearPicker = ({
                 focusedYear.focus()
             }
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [yearToDisplay])
 
     useEffect(() => {
@@ -93,7 +93,7 @@ export const YearPicker = ({
                 `[data-value="${yearToDisplay}"]`
             )
         if (yearToFocus) yearToFocus.focus()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     const handleYearPickerTab = (event: KeyboardEvent): void => {

@@ -277,7 +277,7 @@ export const EQROContractDetails = ({
             setDraftSaved(false)
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // oxlint-disable-next-line no-unused-vars
         const { __typename, ...formData } =
             draftSubmission.draftRevision.formData
 

@@ -82,7 +82,7 @@ export class Rotator {
                 await this.secrets.getSecretDict(arn, 'AWSPENDING', token)
                 console.log(`Secret already exists for ${arn}`)
                 return
-            } catch (err) {
+            } catch {
                 // This is expected if AWSPENDING doesn't exist yet
                 console.log(
                     `AWSPENDING version not found, creating new secret for ${arn}`

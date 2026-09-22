@@ -6,7 +6,6 @@
         "target": "ES2021",
         "types": ["vitest/globals"],
         "moduleResolution": "bundler",
-        "baseUrl": "/",
         "declaration": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -16,7 +15,8 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "jsx": "react",
-        "outDir": "build"
+        "outDir": "build",
+        "rootDir": "src"
     },
     "include": ["src/**/*.ts", "src/**/*.d.ts"]
 }

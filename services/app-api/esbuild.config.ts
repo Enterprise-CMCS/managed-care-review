@@ -37,7 +37,7 @@ export default () => {
                                 '.esbuild/.build/src/handlers/etaTemplates/',
                                 { overwrite: true }
                             )
-                            console.log('Eta templates copied successfully') // eslint-disable-line no-console
+                            console.log('Eta templates copied successfully') // oxlint-disable-line no-console
                         } catch (err) {
                             console.error('Error copying eta templates:', err)
                         }
