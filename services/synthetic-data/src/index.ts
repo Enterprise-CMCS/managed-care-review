@@ -37,6 +37,13 @@ export {
 export type { ContractLinkedRateRole } from './builders/contractLinkedRate'
 export { buildSyntheticRateFormData } from './builders/rate'
 export {
+    buildContractWithAddedRateFormData,
+    contractAddRateResubmitReason,
+    contractUnlockAddRateMarker,
+    contractUnlockAddRateReason,
+    contractUnlockAddRateScenarioKey,
+} from './builders/contractUnlockAddRate'
+export {
     buildResubmittedContractFormData,
     contractResubmitReason,
     contractUnlockReason,
@@ -51,6 +58,10 @@ export {
     runContractLinkedRateScenario,
     type ContractLinkedRateResult,
 } from './scenarios/contractLinkedRate'
+export {
+    runContractUnlockAddRateScenario,
+    type ContractUnlockAddRateResult,
+} from './scenarios/contractUnlockAddRate'
 export {
     runContractUnlockResubmitScenario,
     type ContractUnlockResubmitResult,
