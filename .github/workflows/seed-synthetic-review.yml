@@ -9,6 +9,7 @@ on:
         default: 'contract-unlock-resubmit-v1'
         type: choice
         options:
+          - baseline-lite-v1
           - contract-linked-rate-v1
           - contract-unlock-add-rate-v1
           - contract-unlock-resubmit-v1
@@ -147,6 +148,10 @@ jobs:
         run: |
           set -euo pipefail
           case "${SYNTHETIC_DATA_SCENARIO}" in
+            baseline-lite-v1)
+              COMMAND='seed-baseline-lite'
+              EVENT='synthetic.baseline-lite.completed'
+              ;;
             contract-submit-smoke-v1)
               COMMAND='seed-contract-smoke'
               EVENT='synthetic.contract-smoke.completed'
@@ -179,13 +184,33 @@ jobs:
             echo '| --- | --- |'
             printf '| Scenario | %s |\n' "${SYNTHETIC_DATA_SCENARIO}"
             printf '| Seed | %s |\n' "${SYNTHETIC_DATA_SEED}"
-            printf '| Contract ID | %s |\n' "$(jq -r '.contractId' <<< "${RESULT}")"
+            if jq -e '.contractId' <<< "${RESULT}" > /dev/null; then
+              printf '| Contract ID | %s |\n' "$(jq -r '.contractId' <<< "${RESULT}")"
+            fi
             if jq -e '.sourceContractId' <<< "${RESULT}" > /dev/null; then
               printf '| Source contract ID | %s |\n' "$(jq -r '.sourceContractId' <<< "${RESULT}")"
             fi
             if jq -e '.rateId' <<< "${RESULT}" > /dev/null; then
               printf '| Rate ID | %s |\n' "$(jq -r '.rateId' <<< "${RESULT}")"
             fi
-            printf '| Status | %s |\n' "$(jq -r '.status' <<< "${RESULT}")"
-            printf '| Marker | %s |\n' "$(jq -r '.resubmittedMarker // .marker' <<< "${RESULT}")"
+            if jq -e '.contractCount' <<< "${RESULT}" > /dev/null; then
+              printf '| Contracts created | %s |\n' "$(jq -r '.contractCount' <<< "${RESULT}")"
+              printf '| Unique rates created | %s |\n' "$(jq -r '.rateCount' <<< "${RESULT}")"
+              printf '| Manifest | %s |\n' "$(jq -r '.manifestPath' <<< "${RESULT}")"
+            fi
+            if jq -e '.status' <<< "${RESULT}" > /dev/null; then
+              printf '| Status | %s |\n' "$(jq -r '.status' <<< "${RESULT}")"
+            fi
+            if jq -e '.resubmittedMarker // .marker' <<< "${RESULT}" > /dev/null; then
+              printf '| Marker | %s |\n' "$(jq -r '.resubmittedMarker // .marker' <<< "${RESULT}")"
+            fi
           } >> "${GITHUB_STEP_SUMMARY}"
+
+      - name: Upload synthetic baseline manifest
+        if: ${{ always() && inputs.scenario == 'baseline-lite-v1' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: synthetic-baseline-review-${{ inputs.seed }}
+          path: services/synthetic-data/synthetic-baseline-manifest.json
+          if-no-files-found: warn
+          retention-days: 30
