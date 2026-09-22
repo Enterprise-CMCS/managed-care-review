@@ -1,4 +1,4 @@
-import { CopyObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3'
+import { CopyObjectCommand, GetObjectTaggingCommand } from '@aws-sdk/client-s3'
 import type { Callback, Context } from 'aws-lambda'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import {
@@ -133,7 +133,7 @@ describe('document object reconciliation', () => {
             })
         )
         expect(send).toHaveBeenCalledTimes(1)
-        expect(send.mock.calls[0][0]).toBeInstanceOf(HeadObjectCommand)
+        expect(send.mock.calls[0][0]).toBeInstanceOf(GetObjectTaggingCommand)
         expect(send.mock.calls[0][0].input).toEqual({
             Bucket: 'cdk-bucket',
             Key: 'allusers/uuid.pdf',
@@ -146,6 +146,31 @@ describe('document object reconciliation', () => {
                 s3Key: 'allusers/uuid.pdf',
             },
         })
+    })
+
+    test('does not treat access denied as a missing object', async () => {
+        const { client, documentTable } = createMigrationClient([
+            legacyDocument,
+        ])
+        const send = vi.fn().mockRejectedValue({
+            name: 'AccessDenied',
+            $metadata: { httpStatusCode: 403 },
+        })
+        vi.spyOn(console, 'error').mockImplementation(() => undefined)
+
+        const result = await migrateDocumentTable(
+            client,
+            'contractDocument',
+            'cdk-bucket',
+            undefined,
+            false,
+            { send }
+        )
+
+        expect(result).toEqual({ processed: 0, failed: 1 })
+        expect(send).toHaveBeenCalledOnce()
+        expect(send.mock.calls[0][0]).toBeInstanceOf(GetObjectTaggingCommand)
+        expect(documentTable.update).not.toHaveBeenCalled()
     })
 
     test('copies an old-bucket-only object before changing its database pointer', async () => {
@@ -181,7 +206,7 @@ describe('document object reconciliation', () => {
             Key: 'allusers/uuid.pdf',
             CopySource: 'legacy-bucket/allusers/uuid.pdf',
         })
-        expect(send.mock.calls[2][0]).toBeInstanceOf(HeadObjectCommand)
+        expect(send.mock.calls[2][0]).toBeInstanceOf(GetObjectTaggingCommand)
         expect(documentTable.update).toHaveBeenCalledOnce()
     })
 

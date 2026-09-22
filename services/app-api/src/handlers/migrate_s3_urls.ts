@@ -24,7 +24,7 @@
 import type { Handler } from 'aws-lambda'
 import {
     CopyObjectCommand,
-    HeadObjectCommand,
+    GetObjectTaggingCommand,
     S3Client,
 } from '@aws-sdk/client-s3'
 import {
@@ -367,7 +367,7 @@ export const main: Handler = async (
 }
 
 type MigrationS3Client = {
-    send(command: HeadObjectCommand | CopyObjectCommand): Promise<unknown>
+    send(command: GetObjectTaggingCommand | CopyObjectCommand): Promise<unknown>
 }
 
 type DocumentTableName =
@@ -541,8 +541,11 @@ async function objectExists(
     key: string
 ): Promise<boolean> {
     try {
+        // HeadObject is authorized as GetObject and can be denied while the
+        // GuardDuty scan tag is absent. Tagging lookup verifies existence
+        // without bypassing or misclassifying that download policy.
         await s3Client.send(
-            new HeadObjectCommand({
+            new GetObjectTaggingCommand({
                 Bucket: bucket,
                 Key: key,
             })
