@@ -109,8 +109,8 @@ export const Calendar = ({
     const forwardOneYear = i18n.forwardOneYear
 
     useEffect(() => {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         calendarWasHidden = false
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -118,7 +118,7 @@ export const Calendar = ({
         if (date && mode === CalendarModes.DATE_PICKER) {
             setDateToDisplay(date)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [date])
 
     useEffect(() => {
@@ -154,7 +154,7 @@ export const Calendar = ({
             }
             setStatuses(newStatuses)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [dateToDisplay])
 
     if (mode === CalendarModes.MONTH_PICKER) {

@@ -4,8 +4,8 @@
         "module": "ESNext",
         "lib": ["ES2021", "DOM"],
         "target": "ES2021",
+        "types": ["jest"],
         "moduleResolution": "bundler",
-        "baseUrl": "/",
         "declaration": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -15,7 +15,8 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
         "jsx": "react-jsx",
-        "outDir": "build"
+        "outDir": "build",
+        "rootDir": "src"
     },
     "include": ["src/**/*"]
 }

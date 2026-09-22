@@ -2965,12 +2965,12 @@ const mockEmptyDraftContractAndRate = (): Contract =>
             formData: {
                 programIDs: [],
                 populationCovered: null,
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // oxlint-disable-next-line typescript/ban-ts-comment
                 // @ts-ignore
                 submissionType: null,
                 riskBasedContract: null,
                 dsnpContract: null,
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // oxlint-disable-next-line typescript/ban-ts-comment
                 // @ts-ignore
                 submissionDescription: null,
                 supportingDocuments: [

@@ -13,7 +13,7 @@
         "@mc-review/submissions": "workspace:*",
         "dayjs": "^1.11.21",
         "graphql": "^16.14.0",
-        "typescript": "5.9.3",
+        "typescript": "7.0.2",
         "uuid": "^14.0.2"
     },
     "devDependencies": {

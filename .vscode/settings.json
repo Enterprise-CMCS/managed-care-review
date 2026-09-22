@@ -1,10 +1,6 @@
 {
-    "eslint.workingDirectories": ["services/app-web", "services/app-api"],
+    "oxc.typeAware": true,
     "launchdarkly.project": "default",
     "launchdarkly.env": "dev",
-    "cSpell.words": [
-        "proto",
-        "TEALIUM",
-        "utag"
-    ]
+    "cSpell.words": ["proto", "TEALIUM", "utag"]
 }

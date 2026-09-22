@@ -1,4 +1,3 @@
-// eslint-disable @typescript-eslint/no-non-null-assertion
 import { screen, waitFor, within } from '@testing-library/react'
 import {
     fetchCurrentUserMock,

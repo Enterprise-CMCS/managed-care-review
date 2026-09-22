@@ -220,7 +220,7 @@ export const SubmissionType = ({
                 return
             }
             // remove out __typename name our response formData to retain existing formData from other pages.
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            // oxlint-disable-next-line no-unused-vars
             const { __typename, ...formData } =
                 draftSubmission.draftRevision.formData
 

@@ -124,11 +124,11 @@ export default defineConfig(() => ({
                         ) {
                             return
                         }
-                        // eslint-disable-next-line no-console
+                        // oxlint-disable-next-line no-console
                         console.warn(message)
                     },
                     debug(message: string) {
-                        // eslint-disable-next-line no-console
+                        // oxlint-disable-next-line no-console
                         console.log(message)
                     },
                 },

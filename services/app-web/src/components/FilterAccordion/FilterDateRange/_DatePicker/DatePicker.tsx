@@ -191,7 +191,7 @@ export const DatePicker = ({
         if (defaultValue) {
             handleSelectDate(defaultValue, false)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     useEffect(() => {
@@ -211,7 +211,7 @@ export const DatePicker = ({
 
     useEffect(() => {
         validateInput()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // oxlint-disable-next-line react-hooks/exhaustive-deps
     }, [externalValue, minDate, maxDate])
 
     const handleToggleClick = (): void => {

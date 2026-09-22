@@ -1,0 +1,138 @@
+{
+    "$schema": "../../node_modules/oxlint/configuration_schema.json",
+    "plugins": [],
+    "categories": {
+        "correctness": "off"
+    },
+    "options": {
+        "typeAware": true
+    },
+    "env": {
+        "builtin": true
+    },
+    "overrides": [
+        {
+            "files": ["**/*.{ts,tsx}"],
+            "rules": {
+                "array-callback-return": "error",
+                "prefer-promise-reject-errors": "error",
+                "no-throw-literal": "error",
+                "no-unused-vars": [
+                    "warn",
+                    {
+                        "argsIgnorePattern": "^_*",
+                        "destructuredArrayIgnorePattern": "^_"
+                    }
+                ],
+                "jest/no-focused-tests": "error",
+                "jest/no-identical-title": "error",
+                "no-console": [
+                    "warn",
+                    {
+                        "allow": [
+                            "assert",
+                            "clear",
+                            "count",
+                            "countReset",
+                            "debug",
+                            "dir",
+                            "dirxml",
+                            "error",
+                            "group",
+                            "groupCollapsed",
+                            "groupEnd",
+                            "info",
+                            "profile",
+                            "profileEnd",
+                            "table",
+                            "time",
+                            "timeEnd",
+                            "timeLog",
+                            "timeStamp",
+                            "trace",
+                            "warn"
+                        ]
+                    }
+                ],
+                "no-unused-expressions": [
+                    "error",
+                    {
+                        "allowShortCircuit": true,
+                        "allowTernary": true,
+                        "allowTaggedTemplates": true
+                    }
+                ],
+                "react/rules-of-hooks": "error",
+                "react/exhaustive-deps": "warn",
+                "typescript/no-floating-promises": [
+                    "error",
+                    {
+                        "allowForKnownSafeCalls": [
+                            {
+                                "from": "package",
+                                "name": "NavigateFunction",
+                                "package": "react-router"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "globals": {
+                "window": "readonly",
+                "document": "readonly",
+                "console": "readonly",
+                "navigator": "readonly",
+                "location": "readonly",
+                "localStorage": "readonly",
+                "sessionStorage": "readonly",
+                "fetch": "readonly",
+                "FormData": "readonly",
+                "URLSearchParams": "readonly",
+                "setTimeout": "readonly",
+                "clearTimeout": "readonly",
+                "setInterval": "readonly",
+                "clearInterval": "readonly",
+                "global": "readonly",
+                "React": "readonly",
+                "JSX": "readonly",
+                "RowData": "readonly",
+                "FilterFn": "readonly"
+            },
+            "plugins": ["typescript", "jest", "react"]
+        },
+        {
+            "files": [
+                "**/*.test.{js,jsx,ts,tsx}",
+                "**/*.spec.{js,jsx,ts,tsx}",
+                "**/setupTests.ts"
+            ],
+            "globals": {
+                "jest": "readonly",
+                "describe": "readonly",
+                "it": "readonly",
+                "test": "readonly",
+                "expect": "readonly",
+                "beforeEach": "readonly",
+                "afterEach": "readonly",
+                "beforeAll": "readonly",
+                "afterAll": "readonly",
+                "vi": "readonly",
+                "vitest": "readonly"
+            }
+        },
+        {
+            "files": ["src/**/*.stories.tsx"],
+            "rules": {
+                "import/no-anonymous-default-export": "off"
+            },
+            "plugins": ["import"]
+        }
+    ],
+    "ignorePatterns": [
+        "src/gen/*",
+        "*.config.ts",
+        "*.config.js",
+        "*.config.mjs",
+        "esbuild.config.js"
+    ]
+}
