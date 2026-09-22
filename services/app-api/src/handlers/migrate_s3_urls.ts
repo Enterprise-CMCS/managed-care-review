@@ -1,13 +1,17 @@
 /**
- * Lambda handler to migrate s3URL fields to s3BucketName and s3Key
+ * Lambda handler to reconcile persisted S3 locations with the CDK buckets.
  *
- * This script populates the new s3BucketName and s3Key fields from the existing
- * malformed s3URL values. The s3URL format is: s3://bucket/uuid.ext/filename.ext
- * We extract the uuid.ext part and create proper S3 references.
+ * For each noncanonical document or zip record, this handler verifies the
+ * object exists in the configured bucket. If it only exists in the legacy
+ * bucket, the object is copied before the database pointer is updated. The
+ * deprecated s3URL is rewritten too because clients still round-trip it.
  *
- * Buckets are determined from environment variables:
- * - VITE_APP_S3_DOCUMENTS_BUCKET: for contract/rate documents and zips
- * - VITE_APP_S3_QA_BUCKET: for question/response documents
+ * Runs are idempotent: existing target objects are reused, and database
+ * pointers change only after the target object is confirmed.
+ *
+ * Canonical buckets are determined from environment variables:
+ * - VITE_APP_S3_DOCUMENTS_BUCKET: contract/rate documents and zips
+ * - VITE_APP_S3_QA_BUCKET: question/response documents
  *
  * Usage:
  *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls response.json
@@ -18,9 +22,21 @@
  */
 
 import type { Handler } from 'aws-lambda'
-import { NewPrismaClient } from '../postgres/prismaClient'
+import {
+    CopyObjectCommand,
+    GetObjectTaggingCommand,
+    S3Client,
+} from '@aws-sdk/client-s3'
+import {
+    NewPrismaClient,
+    type ExtendedPrismaClient,
+} from '../postgres/prismaClient'
 import { getPostgresURL } from './configuration'
 import { parseErrorToError } from '@mc-review/helpers'
+
+const migrationS3Client = new S3Client({
+    region: process.env.AWS_REGION || 'us-east-1',
+})
 
 export type MigrateS3UrlsEvent = {
     limit?: number // Optional: limit number of documents to migrate per table (default: all)
@@ -127,7 +143,7 @@ export const main: Handler = async (
         )
     }
 
-    console.info('Starting s3URL migration', {
+    console.info('Starting S3 location reconciliation', {
         dryRun,
         limit,
         documentsBucket,
@@ -158,7 +174,8 @@ export const main: Handler = async (
         )
     }
 
-    const prismaClient = prismaClientResult
+    const migrationPrismaClient =
+        createMigrationPrismaClient(prismaClientResult)
 
     const response: MigrateS3UrlsResponse = {
         success: true,
@@ -192,7 +209,7 @@ export const main: Handler = async (
         // Migrate ContractDocument (uses DOCUMENTS bucket)
         console.info('Migrating ContractDocument...')
         const contractDocsResult = await migrateDocumentTable(
-            prismaClient,
+            migrationPrismaClient,
             'contractDocument',
             documentsBucket,
             limit,
@@ -208,7 +225,7 @@ export const main: Handler = async (
         // Migrate ContractSupportingDocument (uses DOCUMENTS bucket)
         console.info('Migrating ContractSupportingDocument...')
         const contractSupportingDocsResult = await migrateDocumentTable(
-            prismaClient,
+            migrationPrismaClient,
             'contractSupportingDocument',
             documentsBucket,
             limit,
@@ -225,7 +242,7 @@ export const main: Handler = async (
         // Migrate RateDocument (uses DOCUMENTS bucket)
         console.info('Migrating RateDocument...')
         const rateDocsResult = await migrateDocumentTable(
-            prismaClient,
+            migrationPrismaClient,
             'rateDocument',
             documentsBucket,
             limit,
@@ -241,7 +258,7 @@ export const main: Handler = async (
         // Migrate RateSupportingDocument (uses DOCUMENTS bucket)
         console.info('Migrating RateSupportingDocument...')
         const rateSupportingDocsResult = await migrateDocumentTable(
-            prismaClient,
+            migrationPrismaClient,
             'rateSupportingDocument',
             documentsBucket,
             limit,
@@ -257,7 +274,7 @@ export const main: Handler = async (
         // Migrate ContractQuestionDocument (uses QA bucket)
         console.info('Migrating ContractQuestionDocument...')
         const contractQuestionDocsResult = await migrateDocumentTable(
-            prismaClient,
+            migrationPrismaClient,
             'contractQuestionDocument',
             qaBucket,
             limit,
@@ -273,7 +290,7 @@ export const main: Handler = async (
         // Migrate ContractQuestionResponseDocument (uses QA bucket)
         console.info('Migrating ContractQuestionResponseDocument...')
         const contractQuestionResponseDocsResult = await migrateDocumentTable(
-            prismaClient,
+            migrationPrismaClient,
             'contractQuestionResponseDocument',
             qaBucket,
             limit,
@@ -290,7 +307,7 @@ export const main: Handler = async (
         // Migrate RateQuestionDocument (uses QA bucket)
         console.info('Migrating RateQuestionDocument...')
         const rateQuestionDocsResult = await migrateDocumentTable(
-            prismaClient,
+            migrationPrismaClient,
             'rateQuestionDocument',
             qaBucket,
             limit,
@@ -306,7 +323,7 @@ export const main: Handler = async (
         // Migrate RateQuestionResponseDocument (uses QA bucket)
         console.info('Migrating RateQuestionResponseDocument...')
         const rateQuestionResponseDocsResult = await migrateDocumentTable(
-            prismaClient,
+            migrationPrismaClient,
             'rateQuestionResponseDocument',
             qaBucket,
             limit,
@@ -323,7 +340,7 @@ export const main: Handler = async (
         // Migrate DocumentZipPackage (uses DOCUMENTS bucket)
         console.info('Migrating DocumentZipPackage...')
         const documentZipPackagesResult = await migrateZipTable(
-            prismaClient,
+            migrationPrismaClient,
             documentsBucket,
             limit,
             dryRun
@@ -335,6 +352,7 @@ export const main: Handler = async (
             )
         }
 
+        response.success = response.errors.length === 0
         console.info('Migration complete', response)
         return response
     } catch (error) {
@@ -348,36 +366,275 @@ export const main: Handler = async (
     // across warm Lambda invocations. AWS cleans up when the container terminates.
 }
 
-async function migrateDocumentTable(
-    prismaClient: any,
-    tableName:
-        | 'contractDocument'
-        | 'contractSupportingDocument'
-        | 'rateDocument'
-        | 'rateSupportingDocument'
-        | 'contractQuestionDocument'
-        | 'contractQuestionResponseDocument'
-        | 'rateQuestionDocument'
-        | 'rateQuestionResponseDocument',
+type MigrationS3Client = {
+    send(command: GetObjectTaggingCommand | CopyObjectCommand): Promise<unknown>
+}
+
+type DocumentTableName =
+    | 'contractDocument'
+    | 'contractSupportingDocument'
+    | 'rateDocument'
+    | 'rateSupportingDocument'
+    | 'contractQuestionDocument'
+    | 'contractQuestionResponseDocument'
+    | 'rateQuestionDocument'
+    | 'rateQuestionResponseDocument'
+
+type MigratableDocument = {
+    id: string
+    s3URL: string
+    name: string
+    s3BucketName: string | null
+    s3Key: string | null
+}
+
+type MigratableZip = Omit<MigratableDocument, 'name'>
+
+type MigrationCandidateFilter =
+    | { s3BucketName: null }
+    | { s3BucketName: { not: string } }
+    | { s3Key: null }
+    | { s3Key: { not: { startsWith: string } } }
+    | { s3URL: { not: { startsWith: string } } }
+
+type MigrationLocationUpdate = {
+    where: { id: string }
+    data: {
+        s3URL: string
+        s3BucketName: string
+        s3Key: string
+    }
+}
+
+type DocumentTableDelegate = {
+    findMany(args: {
+        where: { OR: MigrationCandidateFilter[] }
+        select: {
+            id: true
+            s3URL: true
+            name: true
+            s3BucketName: true
+            s3Key: true
+        }
+        take: number | undefined
+    }): Promise<MigratableDocument[]>
+    update(args: MigrationLocationUpdate): Promise<unknown>
+}
+
+type ZipTableDelegate = {
+    findMany(args: {
+        where: { OR: MigrationCandidateFilter[] }
+        select: {
+            id: true
+            s3URL: true
+            s3BucketName: true
+            s3Key: true
+        }
+        take: number | undefined
+    }): Promise<MigratableZip[]>
+    update(args: MigrationLocationUpdate): Promise<unknown>
+}
+
+export type MigrationPrismaClient = Record<
+    DocumentTableName,
+    DocumentTableDelegate
+> & {
+    documentZipPackage: ZipTableDelegate
+}
+
+/**
+ * Adapts each concrete Prisma model delegate independently. Keeping these
+ * wrappers explicit lets TypeScript verify every generated delegate signature
+ * without casting the Prisma client to a shared structural type.
+ */
+function createMigrationPrismaClient(
+    prismaClient: ExtendedPrismaClient
+): MigrationPrismaClient {
+    return {
+        contractDocument: {
+            findMany: (args) => prismaClient.contractDocument.findMany(args),
+            update: (args) => prismaClient.contractDocument.update(args),
+        },
+        contractSupportingDocument: {
+            findMany: (args) =>
+                prismaClient.contractSupportingDocument.findMany(args),
+            update: (args) =>
+                prismaClient.contractSupportingDocument.update(args),
+        },
+        rateDocument: {
+            findMany: (args) => prismaClient.rateDocument.findMany(args),
+            update: (args) => prismaClient.rateDocument.update(args),
+        },
+        rateSupportingDocument: {
+            findMany: (args) =>
+                prismaClient.rateSupportingDocument.findMany(args),
+            update: (args) => prismaClient.rateSupportingDocument.update(args),
+        },
+        contractQuestionDocument: {
+            findMany: (args) =>
+                prismaClient.contractQuestionDocument.findMany(args),
+            update: (args) =>
+                prismaClient.contractQuestionDocument.update(args),
+        },
+        contractQuestionResponseDocument: {
+            findMany: (args) =>
+                prismaClient.contractQuestionResponseDocument.findMany(args),
+            update: (args) =>
+                prismaClient.contractQuestionResponseDocument.update(args),
+        },
+        rateQuestionDocument: {
+            findMany: (args) =>
+                prismaClient.rateQuestionDocument.findMany(args),
+            update: (args) => prismaClient.rateQuestionDocument.update(args),
+        },
+        rateQuestionResponseDocument: {
+            findMany: (args) =>
+                prismaClient.rateQuestionResponseDocument.findMany(args),
+            update: (args) =>
+                prismaClient.rateQuestionResponseDocument.update(args),
+        },
+        documentZipPackage: {
+            findMany: (args) => prismaClient.documentZipPackage.findMany(args),
+            update: (args) => prismaClient.documentZipPackage.update(args),
+        },
+    }
+}
+
+function extractBucketFromS3URL(s3URL: string): string | Error {
+    const parts = s3URL.split('/')
+    const bucket = parts[2]
+    if (parts[0] !== 's3:' || parts[1] !== '' || !bucket) {
+        return new Error(`Invalid s3URL format: ${s3URL}`)
+    }
+    return bucket
+}
+
+function canonicalizeS3URL(
+    s3URL: string,
+    targetBucket: string
+): string | Error {
+    const sourceBucket = extractBucketFromS3URL(s3URL)
+    if (sourceBucket instanceof Error) {
+        return sourceBucket
+    }
+    return s3URL.replace(/^s3:\/\/[^/]+/, `s3://${targetBucket}`)
+}
+
+function isS3NotFoundError(error: unknown): boolean {
+    if (!error || typeof error !== 'object') {
+        return false
+    }
+    const s3Error = error as {
+        name?: string
+        $metadata?: { httpStatusCode?: number }
+    }
+    return (
+        s3Error.name === 'NotFound' ||
+        s3Error.name === 'NoSuchKey' ||
+        s3Error.$metadata?.httpStatusCode === 404
+    )
+}
+
+async function objectExists(
+    s3Client: MigrationS3Client,
+    bucket: string,
+    key: string
+): Promise<boolean> {
+    try {
+        // HeadObject is authorized as GetObject and can be denied while the
+        // GuardDuty scan tag is absent. Tagging lookup verifies existence
+        // without bypassing or misclassifying that download policy.
+        await s3Client.send(
+            new GetObjectTaggingCommand({
+                Bucket: bucket,
+                Key: key,
+            })
+        )
+        return true
+    } catch (error) {
+        if (isS3NotFoundError(error)) {
+            return false
+        }
+        throw error
+    }
+}
+
+/**
+ * Makes the target object available before its database pointer can change.
+ * Reusing an existing target makes retries safe; a copied object is checked
+ * again so a successful copy response alone cannot advance the database.
+ */
+async function ensureObjectInTargetBucket(
+    s3Client: MigrationS3Client,
+    sourceBucket: string,
+    targetBucket: string,
+    key: string
+): Promise<void> {
+    if (await objectExists(s3Client, targetBucket, key)) {
+        return
+    }
+
+    if (sourceBucket === targetBucket) {
+        throw new Error(
+            `Object s3://${targetBucket}/${key} is missing from the canonical bucket`
+        )
+    }
+
+    const encodedKey = encodeURIComponent(key).replace(/%2F/g, '/')
+    await s3Client.send(
+        new CopyObjectCommand({
+            Bucket: targetBucket,
+            Key: key,
+            CopySource: `${sourceBucket}/${encodedKey}`,
+        })
+    )
+
+    if (!(await objectExists(s3Client, targetBucket, key))) {
+        throw new Error(
+            `Copied object s3://${sourceBucket}/${key} was not found in ${targetBucket}`
+        )
+    }
+}
+
+/**
+ * A noncanonical stored bucket is the best source location. When that field is
+ * missing or already canonical, the legacy s3URL may still identify the source
+ * for a partially migrated record.
+ */
+function sourceBucketForRecord(
+    storedBucket: string | null,
+    s3URL: string,
+    targetBucket: string
+): string | Error {
+    if (storedBucket && storedBucket !== targetBucket) {
+        return storedBucket
+    }
+    return extractBucketFromS3URL(s3URL)
+}
+
+export async function migrateDocumentTable(
+    prismaClient: MigrationPrismaClient,
+    tableName: DocumentTableName,
     targetBucket: string,
     limit: number | undefined,
-    dryRun: boolean
+    dryRun: boolean,
+    s3Client: MigrationS3Client = migrationS3Client
 ): Promise<{ processed: number; failed: number }> {
     const result = { processed: 0, failed: 0 }
 
-    // Find all documents that need migration:
-    // 1. s3BucketName is null (old unmigrated docs)
-    // 2. s3Key doesn't start with 'allusers/' or 'zips/' (incorrectly migrated docs)
+    // A record is complete only when bucket, key, and deprecated URL all agree.
+    // Checking each field catches partial migrations and later client roundtrips.
     const documents = await prismaClient[tableName].findMany({
         where: {
             OR: [
                 { s3BucketName: null },
+                { s3BucketName: { not: targetBucket } },
+                { s3Key: null },
+                { s3Key: { not: { startsWith: 'allusers/' } } },
                 {
-                    AND: [
-                        { s3Key: { not: null } },
-                        { s3Key: { not: { startsWith: 'allusers/' } } },
-                        { s3Key: { not: { startsWith: 'zips/' } } },
-                    ],
+                    s3URL: {
+                        not: { startsWith: `s3://${targetBucket}/` },
+                    },
                 },
             ],
         },
@@ -397,39 +654,53 @@ async function migrateDocumentTable(
 
     for (const doc of documents) {
         try {
-            // Extract s3Key from malformed s3URL
-            const s3Key = extractS3KeyFromMalformedUrl(doc.s3URL)
-
+            const s3Key =
+                doc.s3Key?.startsWith('allusers/') === true
+                    ? doc.s3Key
+                    : extractS3KeyFromMalformedUrl(doc.s3URL)
             if (s3Key instanceof Error) {
-                console.error(
-                    `Failed to extract S3 key for ${tableName} ${doc.id}: ${s3Key.message}`
-                )
-                result.failed++
-                continue
+                throw s3Key
+            }
+
+            const sourceBucket = sourceBucketForRecord(
+                doc.s3BucketName,
+                doc.s3URL,
+                targetBucket
+            )
+            if (sourceBucket instanceof Error) {
+                throw sourceBucket
+            }
+
+            const canonicalS3URL = canonicalizeS3URL(doc.s3URL, targetBucket)
+            if (canonicalS3URL instanceof Error) {
+                throw canonicalS3URL
             }
 
             if (dryRun) {
-                const action = doc.s3BucketName
-                    ? `fix s3Key: "${doc.s3Key}" -> "${s3Key}"`
-                    : `migrate: s3BucketName="${targetBucket}", s3Key="${s3Key}"`
                 console.info(
-                    `[DRY RUN] Would update ${tableName} ${doc.id} (${doc.name}): ${action}`
+                    `[DRY RUN] Would reconcile ${tableName} ${doc.id} (${doc.name}) from s3://${sourceBucket}/${s3Key} to s3://${targetBucket}/${s3Key}`
                 )
                 result.processed++
                 continue
             }
 
-            // Update the document with new fields
+            await ensureObjectInTargetBucket(
+                s3Client,
+                sourceBucket,
+                targetBucket,
+                s3Key
+            )
+
             await prismaClient[tableName].update({
                 where: { id: doc.id },
                 data: {
+                    s3URL: canonicalS3URL,
                     s3BucketName: targetBucket,
-                    s3Key: s3Key,
+                    s3Key,
                 },
             })
 
             result.processed++
-
             if (result.processed % 100 === 0) {
                 console.info(
                     `Progress: ${result.processed}/${documents.length} documents migrated in ${tableName}`
@@ -453,22 +724,35 @@ async function migrateDocumentTable(
  * Input: s3://bucket/zips/contracts/uuid/contract-documents.zip
  * Output: s3Key = zips/contracts/uuid/contract-documents.zip
  */
-async function migrateZipTable(
-    prismaClient: any,
+export async function migrateZipTable(
+    prismaClient: MigrationPrismaClient,
     targetBucket: string,
     limit: number | undefined,
-    dryRun: boolean
+    dryRun: boolean,
+    s3Client: MigrationS3Client = migrationS3Client
 ): Promise<{ processed: number; failed: number }> {
     const result = { processed: 0, failed: 0 }
 
-    // Find all zips that need migration (s3BucketName is null)
+    // Zip records use the same completeness rule, with a zips/ key prefix.
     const zips = await prismaClient.documentZipPackage.findMany({
         where: {
-            s3BucketName: null,
+            OR: [
+                { s3BucketName: null },
+                { s3BucketName: { not: targetBucket } },
+                { s3Key: null },
+                { s3Key: { not: { startsWith: 'zips/' } } },
+                {
+                    s3URL: {
+                        not: { startsWith: `s3://${targetBucket}/` },
+                    },
+                },
+            ],
         },
         select: {
             id: true,
             s3URL: true,
+            s3BucketName: true,
+            s3Key: true,
         },
         take: limit,
     })
@@ -479,55 +763,59 @@ async function migrateZipTable(
 
     for (const zip of zips) {
         try {
-            // Extract the full S3 key from s3URL
-            // s3URL format: s3://bucket-name/zips/contracts/uuid/file.zip
-            // We want everything after the bucket: zips/contracts/uuid/file.zip
             const parts = zip.s3URL.split('/')
-            if (parts.length < 4) {
-                console.error(
-                    `Invalid s3URL format for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
-                )
-                result.failed++
-                continue
-            }
-
-            // parts[0] = 's3:'
-            // parts[1] = ''
-            // parts[2] = bucket name
-            // parts[3+] = the key path
-            const keyParts = parts.slice(3) // Everything after bucket
-            const s3Key = keyParts.join('/')
-
-            if (!s3Key || !s3Key.startsWith('zips/')) {
-                console.error(
+            const parsedS3Key = parts.slice(3).join('/')
+            const s3Key = zip.s3Key?.startsWith('zips/')
+                ? zip.s3Key
+                : parsedS3Key
+            if (!s3Key.startsWith('zips/')) {
+                throw new Error(
                     `Expected zip s3URL to have path starting with 'zips/', got: ${s3Key} for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
                 )
-                result.failed++
-                continue
+            }
+
+            const sourceBucket = sourceBucketForRecord(
+                zip.s3BucketName,
+                zip.s3URL,
+                targetBucket
+            )
+            if (sourceBucket instanceof Error) {
+                throw sourceBucket
+            }
+
+            const canonicalS3URL = canonicalizeS3URL(zip.s3URL, targetBucket)
+            if (canonicalS3URL instanceof Error) {
+                throw canonicalS3URL
             }
 
             if (dryRun) {
                 console.info(
-                    `[DRY RUN] Would update DocumentZipPackage ${zip.id}: s3BucketName="${targetBucket}", s3Key="${s3Key}"`
+                    `[DRY RUN] Would reconcile DocumentZipPackage ${zip.id} from s3://${sourceBucket}/${s3Key} to s3://${targetBucket}/${s3Key}`
                 )
                 result.processed++
                 continue
             }
 
-            // Update the zip package with new fields
+            await ensureObjectInTargetBucket(
+                s3Client,
+                sourceBucket,
+                targetBucket,
+                s3Key
+            )
+
             await prismaClient.documentZipPackage.update({
                 where: { id: zip.id },
                 data: {
+                    s3URL: canonicalS3URL,
                     s3BucketName: targetBucket,
-                    s3Key: s3Key,
+                    s3Key,
                 },
             })
 
             result.processed++
-
             if (result.processed % 100 === 0) {
                 console.info(
-                    `Progress: ${result.processed}/${zips.length} zips migrated in DocumentZipPackage`
+                    `Progress: ${result.processed}/${zips.length} zip packages migrated`
                 )
             }
         } catch (error) {
