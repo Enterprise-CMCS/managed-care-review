@@ -42,6 +42,23 @@ query SyntheticFetchContract($input: FetchContractInput!) {
                         }
                     }
                 }
+                rateRevisions {
+                    rateID
+                    rate {
+                        id
+                        parentContractID
+                        status
+                    }
+                    formData {
+                        rateCertificationName
+                        rateDocuments {
+                            name
+                            s3URL
+                            sha256
+                            dateAdded
+                        }
+                    }
+                }
             }
         }
     }
