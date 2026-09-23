@@ -1,7 +1,15 @@
-.newTag {
+@use '../../../styles/custom.scss' as custom;
+
+.newTag,
+.updatedTag {
     padding: 1px 8px;
     border-radius: 2px;
     font-size: 0.875rem;
     font-weight: 700;
     line-height: 100%;
+}
+
+.updatedTag {
+    background: custom.$mcr-gold-vivid-light !important;
+    border: 1px solid custom.$mcr-gold-vivid-lighter;
 }
