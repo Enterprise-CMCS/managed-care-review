@@ -16,7 +16,8 @@
         "allowSyntheticDefaultImports": true,
         "resolveJsonModule": true,
 
-        "outDir": "build"
+        "outDir": "build",
+        "rootDir": "."
     },
     "include": ["src"]
 }
