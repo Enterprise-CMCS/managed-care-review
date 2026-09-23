@@ -545,8 +545,8 @@ importers:
         specifier: ^8.0.4
         version: 8.0.4
       '@octokit/openapi-types':
-        specifier: ^27.0.0
-        version: 27.0.0
+        specifier: ^29.0.1
+        version: 29.0.1
       csv-parser:
         specifier: ^3.2.0
         version: 3.2.0
@@ -4436,6 +4436,9 @@ packages:
 
   '@octokit/openapi-types@27.0.0':
     resolution: {integrity: sha512-whrdktVs1h6gtR+09+QsNk2+FO+49j6ga1c55YZudfEG+oKJVvJLQi3zkOm5JjiUXAagWK2tI2kTGKJ2Ys7MGA==}
+
+  '@octokit/openapi-types@29.0.1':
+    resolution: {integrity: sha512-9qWOMFNxxLokERcms42rU0PTLqQmVs7g5E41TI4mCOxmpFayD1rfC7XxOL55cG9MBZLFlC31BrR37myMKardwg==}
 
   '@octokit/openapi-webhooks-types@12.1.0':
     resolution: {integrity: sha512-WiuzhOsiOvb7W3Pvmhf8d2C6qaLHXrWiLBP4nJ/4kydu+wpagV5Fkz9RfQwV2afYzv3PB+3xYgp4mAdNGjDprA==}
@@ -17855,6 +17858,8 @@ snapshots:
   '@octokit/openapi-types@24.2.0': {}
 
   '@octokit/openapi-types@27.0.0': {}
+
+  '@octokit/openapi-types@29.0.1': {}
 
   '@octokit/openapi-webhooks-types@12.1.0': {}
 
