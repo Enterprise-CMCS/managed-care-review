@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from './DataDetail.module.scss'
 import { DataDetailMissingField } from './DataDetailMissingField'
+import { ChangeTag, ChangeTagType } from '../InfoTag'
 
 export type DataDetailProps = {
     id: string
@@ -8,6 +9,8 @@ export type DataDetailProps = {
     children?: React.ReactNode | string[]
     explainMissingData?: boolean // Display fallback text when data is undefined or null. Should be true on review-and-submit
     explainMissingDataMsg?: string
+    changeTag?: ChangeTagType // Revision-history indicator shown on the latest resubmission
+    changeTagPlacement?: 'value' | 'label' // Design puts most tags before the value; contacts and actuaries tag the label
 }
 
 /*
@@ -32,6 +35,8 @@ export const DataDetail = ({
     children,
     explainMissingData = false,
     explainMissingDataMsg,
+    changeTag,
+    changeTagPlacement = 'value',
 }: DataDetailProps): React.ReactElement | null => {
     const handleArray = Array.isArray(children)
     const noData =
@@ -39,8 +44,21 @@ export const DataDetail = ({
     if (!explainMissingData && noData) return null // displays nothing - this is generally used for submission summary page
     return (
         <div className={styles.dataDetail} data-testid={id}>
-            <dt id={id}>{label}</dt>
+            <dt id={id}>
+                {label}
+                {changeTag && changeTagPlacement === 'label' && (
+                    <>
+                        {' '}
+                        <ChangeTag tag={changeTag} />
+                    </>
+                )}
+            </dt>
             <dd role="definition" aria-labelledby={id}>
+                {changeTag && changeTagPlacement === 'value' && !noData && (
+                    <>
+                        <ChangeTag tag={changeTag} />{' '}
+                    </>
+                )}
                 {explainMissingData && noData ? (
                     <DataDetailMissingField
                         requiredText={explainMissingDataMsg}
