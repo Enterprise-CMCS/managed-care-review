@@ -80,6 +80,22 @@ Required for deployment:
 - `AWS_REGION` - AWS region
 - `STAGE_NAME` - Stage (`dev`, `val`, `qa`, `prod`, or a review branch)
 
+## CloudFront US-only routing
+
+The application and Storybook distributions use `PriceClass_All`, which is required before AWS can enable CMS Strict Region Routing (SRR). SRR itself is an AWS-managed setting and is not visible in CDK, CloudFormation, or the AWS console.
+
+For every affected stage:
+
+1. Deploy `frontend-infra-<stage>-cdk` and wait for the stack update and both CloudFront distributions to report `Deployed`. This updates the existing distributions in place; do not create replacements or change their aliases.
+2. For each affected distribution, open an AWS Support case:
+    - Service: CloudFront
+    - Category: Distribution Issue
+    - Severity: General guidance
+    - Subject: `CMS CloudFront distro SRR onboarding`
+    - Description: `Requesting expedited U.S.-only SRR onboarding for: <distribution DNS name>. Reference case #175512056000814.`
+3. Keep the existing distributions live while AWS processes the requests; the expected turnaround is 48–72 hours. After AWS confirms SRR for every distribution, allow about 20 minutes for routing propagation. AWS states that this does not require downtime.
+4. Verify the application and Storybook endpoints after confirmation. Keep `PriceClass_All`; changing the price class makes the distributions noncompliant with SRR.
+
 ## Account-wide API Gateway configuration
 
 The `api-gateway-account-<stage>-cdk` stack owns the single API Gateway CloudWatch logging role allowed per AWS account and region. Promote deploys one baseline in each Dev, Val, and Prod account. QA shares Val's AWS account and therefore uses `api-gateway-account-val-cdk`; QA does not create or own account-level Val resources.
