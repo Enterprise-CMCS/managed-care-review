@@ -9,6 +9,7 @@ import {
     RateFormData,
     HealthPlanPackageStatus,
     ActuaryContact,
+    RevisionDiffFragmentFragment,
 } from '../../../../gen/gqlClient'
 import { formatCalendarDate } from '@mc-review/dates'
 import { featureFlags } from '@mc-review/common-code'
@@ -29,7 +30,7 @@ import { GenericErrorPage } from '../../../../pages/Errors/GenericErrorPage'
 import { SectionCard } from '../../../SectionCard'
 import { useAuth } from '../../../../contexts/AuthContext'
 import { useParams } from 'react-router-dom'
-import { InfoTag } from '../../../InfoTag'
+import { InfoTag, NewTag, ChangeTagType } from '../../../InfoTag'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { DocumentHeader } from '../../../DocumentHeader/DocumentHeader'
 import {
@@ -42,6 +43,10 @@ import { SectionHeader } from '../../../SectionHeader'
 import styles from '../../SubmissionSummarySection.module.scss'
 import { NavLinkWithLogging } from '../../../TealiumLogging'
 import { formattedProgramNames } from '../../../../formHelpers'
+import {
+    fieldChangeTag,
+    changedListItemTags,
+} from '../../revisionDiffTagHelpers'
 
 export type RateDetailsSummarySectionProps = {
     contract: Contract | UnlockedContract
@@ -53,6 +58,7 @@ export type RateDetailsSummarySectionProps = {
     statePrograms: Program[]
     onDocumentError?: (error: true) => void
     explainMissingData?: boolean
+    revisionDiff?: RevisionDiffFragmentFragment // present only on the latest resubmission when tags should display
 }
 
 export type SharedRateCertDisplay = {
@@ -75,6 +81,7 @@ export const RateDetailsSummarySection = ({
     statePrograms,
     onDocumentError,
     explainMissingData,
+    revisionDiff,
 }: RateDetailsSummarySectionProps): React.ReactElement => {
     const { loggedInUser } = useAuth()
     const { revisionVersion } = useParams()
@@ -251,6 +258,35 @@ export const RateDetailsSummarySection = ({
             {rateRevs && rateRevs.length > 0
                 ? rateRevs.map((rateRev) => {
                       const rateFormData = getRateFormData(rateRev)
+                      // Revision-history tags: added rates get one NEW tag at the
+                      // top per design; revised rates get per-field tags.
+                      const isAddedRate = revisionDiff?.rateChanges.added.some(
+                          (addedRate) => addedRate.rateID === rateRev.rateID
+                      )
+                      const revisedRate =
+                          revisionDiff?.rateChanges.revised.find(
+                              (revised) => revised.rateID === rateRev.rateID
+                          )
+                      const rateFieldChanges = revisedRate?.fieldChanges
+                      const rateDocumentDiffFor = (listChanges?: {
+                          added: string[]
+                          removed: string[]
+                      }) =>
+                          revisionDiff && listChanges ? listChanges : undefined
+                      const actuaryChangeTag = (
+                          changes:
+                              | RevisionDiffFragmentFragment['rateChanges']['revised'][number]['certifyingActuaryContactChanges']
+                              | undefined,
+                          index: number
+                      ): ChangeTagType | undefined => {
+                          const change = changes?.find(
+                              (actuaryChange) => actuaryChange.index === index
+                          )
+                          if (!change) return undefined
+                          return change.changeType === 'ADDED'
+                              ? 'NEW'
+                              : 'UPDATED'
+                      }
                       const hasDeprecatedRatePrograms =
                           rateFormData.deprecatedRateProgramIDs.length > 0
                       const hasNoRatePrograms =
@@ -291,6 +327,11 @@ export const RateDetailsSummarySection = ({
                               id={`rate-details-${rateRev.id}`}
                               key={rateRev.id}
                           >
+                              {isAddedRate && (
+                                  <div>
+                                      <NewTag />
+                                  </div>
+                              )}
                               <div className={styles.rateNameContainer}>
                                   <h3
                                       aria-label={`Rate ID: ${rateFormData.rateCertificationName}`}
@@ -320,6 +361,10 @@ export const RateDetailsSummarySection = ({
                                           <DataDetail
                                               id="ratePrograms"
                                               label="Rates this rate certification covers"
+                                              changeTag={fieldChangeTag(
+                                                  rateFieldChanges,
+                                                  'rateProgramIDs'
+                                              )}
                                               explainMissingData={
                                                   isLinkedRate
                                                       ? false
@@ -349,6 +394,10 @@ export const RateDetailsSummarySection = ({
                                                       dict={
                                                           RateMedicaidPopulationsRecord
                                                       }
+                                                      itemTags={changedListItemTags(
+                                                          rateFieldChanges,
+                                                          'rateMedicaidPopulations'
+                                                      )}
                                                       displayEmptyList={
                                                           !explainMissingData
                                                       }
@@ -358,6 +407,10 @@ export const RateDetailsSummarySection = ({
                                       )}
                                       <DataDetail
                                           id="rateType"
+                                          changeTag={fieldChangeTag(
+                                              rateFieldChanges,
+                                              'rateType'
+                                          )}
                                           label="Rate certification type"
                                           explainMissingData={
                                               isLinkedRate
@@ -372,6 +425,16 @@ export const RateDetailsSummarySection = ({
                                   <MultiColumnGrid columns={2}>
                                       <DataDetail
                                           id="ratingPeriod"
+                                          changeTag={
+                                              fieldChangeTag(
+                                                  rateFieldChanges,
+                                                  'rateDateStart'
+                                              ) ??
+                                              fieldChangeTag(
+                                                  rateFieldChanges,
+                                                  'rateDateEnd'
+                                              )
+                                          }
                                           label={
                                               rateFormData.rateType ===
                                               'AMENDMENT'
@@ -390,6 +453,10 @@ export const RateDetailsSummarySection = ({
                                       />
                                       <DataDetail
                                           id="dateCertified"
+                                          changeTag={fieldChangeTag(
+                                              rateFieldChanges,
+                                              'rateDateCertified'
+                                          )}
                                           label={
                                               rateFormData.amendmentEffectiveDateStart
                                                   ? 'Date certified for rate amendment'
@@ -408,6 +475,16 @@ export const RateDetailsSummarySection = ({
                                       {rateFormData.rateType === 'AMENDMENT' ? (
                                           <DataDetail
                                               id="effectiveRatingPeriod"
+                                              changeTag={
+                                                  fieldChangeTag(
+                                                      rateFieldChanges,
+                                                      'amendmentEffectiveDateStart'
+                                                  ) ??
+                                                  fieldChangeTag(
+                                                      rateFieldChanges,
+                                                      'amendmentEffectiveDateEnd'
+                                                  )
+                                              }
                                               label="Rate amendment effective dates"
                                               explainMissingData={
                                                   isLinkedRate
@@ -422,6 +499,10 @@ export const RateDetailsSummarySection = ({
                                       ) : null}
                                       <DataDetail
                                           id="rateCapitationType"
+                                          changeTag={fieldChangeTag(
+                                              rateFieldChanges,
+                                              'rateCapitationType'
+                                          )}
                                           label="Does the actuary certify capitation rates specific to each rate cell or a rate range?"
                                           explainMissingData={
                                               isLinkedRate
@@ -433,6 +514,11 @@ export const RateDetailsSummarySection = ({
                                       <DataDetail
                                           id="certifyingActuary"
                                           label="Certifying actuary"
+                                          changeTag={actuaryChangeTag(
+                                              revisedRate?.certifyingActuaryContactChanges,
+                                              0
+                                          )}
+                                          changeTagPlacement="label"
                                           explainMissingData={
                                               isLinkedRate
                                                   ? false
@@ -458,6 +544,11 @@ export const RateDetailsSummarySection = ({
                                                   key={`addtlCertifyingActuary-${addtlContactIndex}`}
                                                   id={`addtlCertifyingActuary-${addtlContactIndex}`}
                                                   label="Certifying actuary"
+                                                  changeTag={actuaryChangeTag(
+                                                      revisedRate?.addtlActuaryContactChanges,
+                                                      addtlContactIndex
+                                                  )}
+                                                  changeTagPlacement="label"
                                                   explainMissingData={
                                                       isLinkedRate
                                                           ? false
@@ -479,6 +570,10 @@ export const RateDetailsSummarySection = ({
                                   <MultiColumnGrid columns={1}>
                                       <DataDetail
                                           id="communicationPreference"
+                                          changeTag={fieldChangeTag(
+                                              rateFieldChanges,
+                                              'actuaryCommunicationPreference'
+                                          )}
                                           label="Actuaries’ communication preference"
                                           children={
                                               rateFormData.actuaryCommunicationPreference &&
@@ -521,6 +616,9 @@ export const RateDetailsSummarySection = ({
                                       }
                                       multipleDocumentsAllowed={false}
                                       caption="Rate certification"
+                                      documentDiff={rateDocumentDiffFor(
+                                          revisedRate?.rateDocuments
+                                      )}
                                       documentCategory="Rate certification"
                                       isInitialSubmission={isInitialSubmission}
                                       previousSubmissionDate={
@@ -550,6 +648,9 @@ export const RateDetailsSummarySection = ({
                                                 )
                                       }
                                       caption="Rate supporting documents"
+                                      documentDiff={rateDocumentDiffFor(
+                                          revisedRate?.supportingRateDocuments
+                                      )}
                                       documentCategory="Rate-supporting"
                                       isSupportingDocuments
                                       hideDynamicFeedback={isSubmittedOrCMSUser}

@@ -33,12 +33,17 @@ import {
 } from '@mc-review/constants'
 import { SectionHeader } from '../../SectionHeader'
 import { NewTag } from '../../InfoTag'
+import { RevisionDiffFragmentFragment } from '../../../gen/gqlClient'
+import { fieldChangeTag, changedListItemTags } from '../revisionDiffTagHelpers'
+
+type RevisionDiffFieldChanges = RevisionDiffFragmentFragment['fieldChanges']
 
 type SummaryDetailProps = {
     contractFormData: ContractFormData
     reviewDecision?: string
     explainMissingData?: boolean
     label?: string
+    fieldChanges?: RevisionDiffFieldChanges // present only when revision-history tags should display
 }
 
 export const ReviewDecisionSummary = ({
@@ -60,10 +65,12 @@ export const PopulationCoverageSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     return (
         <DataDetail
             id="populationCoverage"
+            changeTag={fieldChangeTag(fieldChanges, 'populationCovered')}
             label={
                 label ?? 'Which populations does this contract action cover?'
             }
@@ -80,10 +87,12 @@ export const SubmissionDescriptionSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     return (
         <DataDetail
             id="submissionDescription"
+            changeTag={fieldChangeTag(fieldChanges, 'submissionDescription')}
             label={label ?? 'Submission description'}
             explainMissingData={explainMissingData}
             children={contractFormData.submissionDescription}
@@ -95,10 +104,12 @@ export const RiskBasedContractSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     return (
         <DataDetail
             id="riskBasedContract"
+            changeTag={fieldChangeTag(fieldChanges, 'riskBasedContract')}
             label={label ?? 'Is this a risk based contract'}
             explainMissingData={explainMissingData}
             children={booleanAsYesNoUserValue(
@@ -112,10 +123,12 @@ export const ContractTypeSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     return (
         <DataDetail
             id="contractType"
+            changeTag={fieldChangeTag(fieldChanges, 'contractType')}
             label={label ?? 'Contract action type'}
             explainMissingData={explainMissingData}
             children={
@@ -131,10 +144,12 @@ export const SubmissionTypeSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     return (
         <DataDetail
             id="submissionType"
+            changeTag={fieldChangeTag(fieldChanges, 'submissionType')}
             label={label ?? 'Submission type'}
             explainMissingData={explainMissingData}
             children={SubmissionTypeRecord[contractFormData.submissionType]}
@@ -146,14 +161,17 @@ export const ContractProgramsSummary = ({
     programNames,
     explainMissingData,
     label,
+    fieldChanges,
 }: {
     programNames?: string[] | React.ReactNode
     explainMissingData?: boolean
     label?: string
+    fieldChanges?: RevisionDiffFieldChanges
 }) => {
     return (
         <DataDetail
             id="program"
+            changeTag={fieldChangeTag(fieldChanges, 'programIDs')}
             label={label ?? 'Program(s)'}
             explainMissingData={explainMissingData}
             children={programNames}
@@ -247,6 +265,7 @@ export const ManagedCareEntitySummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     return (
         <DataDetail
@@ -257,6 +276,10 @@ export const ManagedCareEntitySummary = ({
                     <DataDetailCheckboxList
                         list={contractFormData?.managedCareEntities}
                         dict={ManagedCareEntityRecord}
+                        itemTags={changedListItemTags(
+                            fieldChanges,
+                            'managedCareEntities'
+                        )}
                         // if showing error for missing data, then we do NOT display empty list
                         displayEmptyList={!explainMissingData}
                     />
@@ -270,6 +293,7 @@ export const FederalAuthoritySummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     const isCHIPOnly = contractFormData.populationCovered === 'CHIP'
     const applicableFederalAuthorities = isCHIPOnly
@@ -289,6 +313,10 @@ export const FederalAuthoritySummary = ({
                     <DataDetailCheckboxList
                         list={applicableFederalAuthorities}
                         dict={FederalAuthorityRecord}
+                        itemTags={changedListItemTags(
+                            fieldChanges,
+                            'federalAuthorities'
+                        )}
                         // if error for missing data, then we do NOT display empty list
                         displayEmptyList={!explainMissingData}
                     />
@@ -302,6 +330,7 @@ export const ContractEffectiveDateSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     const dynamicLabel = label
         ? label
@@ -312,6 +341,10 @@ export const ContractEffectiveDateSummary = ({
     return (
         <DataDetail
             id="contractEffectiveDates"
+            changeTag={
+                fieldChangeTag(fieldChanges, 'contractDateStart') ??
+                fieldChangeTag(fieldChanges, 'contractDateEnd')
+            }
             label={dynamicLabel}
             explainMissingData={explainMissingData}
             children={
@@ -334,10 +367,12 @@ export const ContractExecutionSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     return (
         <DataDetail
             id="contractExecutionStatus"
+            changeTag={fieldChangeTag(fieldChanges, 'contractExecutionStatus')}
             label={label ?? 'Contract status'}
             explainMissingData={explainMissingData}
             children={
@@ -354,6 +389,7 @@ export const ContractExecutionSummary = ({
 export const StatutoryRegulatoryAttestationSummary = ({
     contractFormData,
     explainMissingData,
+    fieldChanges,
 }: SummaryDetailProps) => {
     const attestationYesNo =
         contractFormData?.statutoryRegulatoryAttestation != null &&
@@ -366,6 +402,10 @@ export const StatutoryRegulatoryAttestationSummary = ({
                     attestationYesNo !== undefined && (
                         <DataDetail
                             id="statutoryRegulatoryAttestation"
+                            changeTag={fieldChangeTag(
+                                fieldChanges,
+                                'statutoryRegulatoryAttestation'
+                            )}
                             label={StatutoryRegulatoryAttestationQuestion}
                             explainMissingData={explainMissingData}
                             children={
@@ -381,6 +421,10 @@ export const StatutoryRegulatoryAttestationSummary = ({
                 >
                     <DataDetail
                         id="statutoryRegulatoryAttestationDescription"
+                        changeTag={fieldChangeTag(
+                            fieldChanges,
+                            'statutoryRegulatoryAttestationDescription'
+                        )}
                         label="Non-compliance description"
                         explainMissingData={explainMissingData}
                         children={
@@ -397,6 +441,7 @@ export const DsnpSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     const dsnpNotProvided =
         contractFormData?.dsnpContract === null ||
@@ -413,6 +458,7 @@ export const DsnpSummary = ({
     return (
         <DataDetail
             id="dsnp"
+            changeTag={fieldChangeTag(fieldChanges, 'dsnpContract')}
             label={
                 label ??
                 'Is this contract associated with a Dual-Eligible Special Needs Plan (D-SNP) that covers Medicaid benefits?'
@@ -428,11 +474,13 @@ export const ModifiedProvisionSummary = ({
     isEditing,
     explainMissingData,
     label,
+    fieldChanges,
 }: {
     formData: ContractFormData
     isEditing?: boolean
     explainMissingData?: boolean
     label?: string
+    fieldChanges?: RevisionDiffFieldChanges
 }) => {
     const provisionsAreInvalid = isMissingProvisions(formData) && isEditing
     const dynamicLabel = label
@@ -441,6 +489,13 @@ export const ModifiedProvisionSummary = ({
           ? 'This contract action includes provisions related to the following'
           : 'This contract action includes new or modified provisions related to the following'
     const [modifiedProvisions] = sortModifiedProvisions(formData)
+    // Each provision is its own boolean form field, so each list item derives its own tag
+    const provisionItemTags = Object.fromEntries(
+        modifiedProvisions.map((provision) => [
+            provision,
+            fieldChangeTag(fieldChanges, provision),
+        ])
+    )
 
     return (
         <DataDetail
@@ -453,6 +508,7 @@ export const ModifiedProvisionSummary = ({
                     list={modifiedProvisions}
                     dict={getProvisionDictionary(formData)}
                     displayEmptyList
+                    itemTags={provisionItemTags}
                 />
             )}
         </DataDetail>
@@ -464,11 +520,13 @@ export const UnmodifiedProvisionSummary = ({
     isEditing,
     explainMissingData,
     label,
+    fieldChanges,
 }: {
     formData: ContractFormData
     isEditing?: boolean
     explainMissingData?: boolean
     label?: string
+    fieldChanges?: RevisionDiffFieldChanges
 }) => {
     const provisionsAreInvalid = isMissingProvisions(formData) && isEditing
     const dynamicLabel = label
@@ -477,6 +535,13 @@ export const UnmodifiedProvisionSummary = ({
           ? 'This contract action does NOT include provisions related to the following'
           : 'This contract action does NOT include new or modified provisions related to the following'
     const unmodifiedProvisions = sortModifiedProvisions(formData)[1]
+    // Each provision is its own boolean form field, so each list item derives its own tag
+    const provisionItemTags = Object.fromEntries(
+        unmodifiedProvisions.map((provision) => [
+            provision,
+            fieldChangeTag(fieldChanges, provision),
+        ])
+    )
 
     return (
         <DataDetail
@@ -489,6 +554,7 @@ export const UnmodifiedProvisionSummary = ({
                     list={unmodifiedProvisions}
                     dict={getProvisionDictionary(formData)}
                     displayEmptyList
+                    itemTags={provisionItemTags}
                 />
             )}
         </DataDetail>
@@ -499,6 +565,7 @@ export const NewEQROContractorSummary = ({
     contractFormData,
     explainMissingData,
     label,
+    fieldChanges,
 }: SummaryDetailProps) => {
     // Base contract that includes MCO shows new EQRO contractor question.
     const showField =
@@ -512,6 +579,7 @@ export const NewEQROContractorSummary = ({
     return (
         <DataDetail
             id="newEQROContractor"
+            changeTag={fieldChangeTag(fieldChanges, 'eqroNewContractor')}
             label={label ?? 'Is this contract with a new EQRO contractor'}
             explainMissingData={explainMissingData}
             children={booleanAsYesNoUserValue(
@@ -563,6 +631,7 @@ export const EQROModifiedProvisionSummary = ({
     contractID,
     contractFormData,
     explainMissingData,
+    fieldChanges,
 }: { contractID: string } & SummaryDetailProps) => {
     const isValidEQROProvisions = !(
         eqroValidationAndReviewDetermination(
@@ -573,6 +642,19 @@ export const EQROModifiedProvisionSummary = ({
 
     const { includedProvisions, excludedProvisions, provisionDictionary } =
         getEQROProvisionDictionary(contractFormData)
+    // Each EQRO provision is its own boolean form field, so each item derives its own tag
+    const includedProvisionTags = Object.fromEntries(
+        includedProvisions.map((provision) => [
+            provision,
+            fieldChangeTag(fieldChanges, provision),
+        ])
+    )
+    const excludedProvisionTags = Object.fromEntries(
+        excludedProvisions.map((provision) => [
+            provision,
+            fieldChangeTag(fieldChanges, provision),
+        ])
+    )
 
     // Population covered of Medicaid and no MCO in managed care entities do not have provision questions.
     const hideProvisions =
@@ -601,6 +683,7 @@ export const EQROModifiedProvisionSummary = ({
                             list={includedProvisions}
                             dict={provisionDictionary}
                             displayEmptyList
+                            itemTags={includedProvisionTags}
                         />
                     ) : (
                         <DataDetailMissingField />
@@ -616,6 +699,7 @@ export const EQROModifiedProvisionSummary = ({
                             list={excludedProvisions}
                             dict={provisionDictionary}
                             displayEmptyList
+                            itemTags={excludedProvisionTags}
                         />
                     ) : (
                         <DataDetailMissingField />

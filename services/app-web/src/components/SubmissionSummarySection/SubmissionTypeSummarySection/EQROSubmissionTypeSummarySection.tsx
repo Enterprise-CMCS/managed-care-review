@@ -13,6 +13,7 @@ import {
     Contract,
     ContractRevision,
     UnlockedContract,
+    RevisionDiffFragmentFragment,
 } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
@@ -36,6 +37,7 @@ export type EQROSubmissionTypeSummarySection = {
     headerText: string
     isStateUser: boolean
     explainMissingData?: boolean
+    revisionDiff?: RevisionDiffFragmentFragment // present only on the latest resubmission when tags should display
 }
 
 const calcChangeInReviewDetermination = (
@@ -82,6 +84,7 @@ export const EQROSubmissionTypeSummarySection = ({
     subHeaderComponent,
     explainMissingData,
     headerText,
+    revisionDiff,
 }: EQROSubmissionTypeSummarySection): React.ReactElement => {
     const contractOrRev = contractRev ? contractRev : contract
     const contractFormData = getVisibleLatestContractFormData(
@@ -165,6 +168,7 @@ export const EQROSubmissionTypeSummarySection = ({
                             contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
                             label="Populations included in EQRO activities"
+                            fieldChanges={revisionDiff?.fieldChanges}
                         />
                     )}
                     {(contractFormData.programIDs.length > 0 ||
@@ -173,16 +177,19 @@ export const EQROSubmissionTypeSummarySection = ({
                             programNames={programNames}
                             explainMissingData={explainMissingData}
                             label="Programs reviewed by this EQRO"
+                            fieldChanges={revisionDiff?.fieldChanges}
                         />
                     )}
                     <ManagedCareEntitySummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={revisionDiff?.fieldChanges}
                     />
                     {(contractFormData.contractType || !isSubmitted) && (
                         <ContractTypeSummary
                             contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
+                            fieldChanges={revisionDiff?.fieldChanges}
                         />
                     )}
                 </MultiColumnGrid>
@@ -194,6 +201,7 @@ export const EQROSubmissionTypeSummarySection = ({
                             <SubmissionDescriptionSummary
                                 contractFormData={contractFormData}
                                 explainMissingData={explainMissingData}
+                                fieldChanges={revisionDiff?.fieldChanges}
                             />
                         )}
                     </Grid>

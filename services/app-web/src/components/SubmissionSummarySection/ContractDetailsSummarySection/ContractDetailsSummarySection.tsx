@@ -3,6 +3,7 @@ import {
     Contract,
     ContractRevision,
     UnlockedContract,
+    RevisionDiffFragmentFragment,
 } from '../../../gen/gqlClient'
 import { useParams } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
@@ -41,6 +42,7 @@ export type ContractDetailsSummarySectionProps = {
     isStateUser: boolean
     onDocumentError?: (error: true) => void
     explainMissingData?: boolean
+    revisionDiff?: RevisionDiffFragmentFragment // present only on the latest resubmission when tags should display
 }
 
 // Get the zip download URL from the pre-generated zip packages
@@ -68,7 +70,13 @@ export const ContractDetailsSummarySection = ({
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     onDocumentError,
     explainMissingData,
+    revisionDiff,
 }: ContractDetailsSummarySectionProps): React.ReactElement => {
+    const fieldChanges = revisionDiff?.fieldChanges
+    const documentDiffFor = (listChanges?: {
+        added: string[]
+        removed: string[]
+    }) => (revisionDiff && listChanges ? listChanges : undefined)
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
     const ldClient = useLDClient()
@@ -150,24 +158,29 @@ export const ContractDetailsSummarySection = ({
                     <StatutoryRegulatoryAttestationSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={fieldChanges}
                     />
                 )}
                 <MultiColumnGrid columns={2}>
                     <ContractExecutionSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={fieldChanges}
                     />
                     <ContractEffectiveDateSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={fieldChanges}
                     />
                     <ManagedCareEntitySummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={fieldChanges}
                     />
                     <FederalAuthoritySummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={fieldChanges}
                     />
                 </MultiColumnGrid>
                 {contractDsnp &&
@@ -179,6 +192,7 @@ export const ContractDetailsSummarySection = ({
                             <DsnpSummary
                                 contractFormData={contractFormData}
                                 explainMissingData={explainMissingData}
+                                fieldChanges={fieldChanges}
                             />
                         </MultiColumnGrid>
                     )}
@@ -188,12 +202,14 @@ export const ContractDetailsSummarySection = ({
                             formData={contractFormData}
                             isEditing={isEditing}
                             explainMissingData={explainMissingData}
+                            fieldChanges={fieldChanges}
                         />
 
                         <UnmodifiedProvisionSummary
                             formData={contractFormData}
                             isEditing={isEditing}
                             explainMissingData={explainMissingData}
+                            fieldChanges={fieldChanges}
                         />
                     </MultiColumnGrid>
                 )}
@@ -224,6 +240,9 @@ export const ContractDetailsSummarySection = ({
                     caption="Contract"
                     documentCategory="Contract"
                     hideDynamicFeedback={isSubmittedOrCMSUser}
+                    documentDiff={documentDiffFor(
+                        revisionDiff?.documentChanges.contractDocuments
+                    )}
                 />
             )}
             {contractSupportingDocuments && (
@@ -239,6 +258,10 @@ export const ContractDetailsSummarySection = ({
                     isSupportingDocuments
                     isInitialSubmission={isInitialSubmission}
                     hideDynamicFeedback={isSubmittedOrCMSUser}
+                    documentDiff={documentDiffFor(
+                        revisionDiff?.documentChanges
+                            .contractSupportingDocuments
+                    )}
                 />
             )}
         </SectionCard>
