@@ -28,24 +28,47 @@ function contact(
     }
 }
 
+type MockRateRevision = {
+    certifyingActuaryContacts: Record<string, unknown>[]
+    addtlActuaryContacts: Record<string, unknown>[]
+}
+
+// Prisma's revision filter, read back to tell which query a findMany call is.
+// Unlocked queries filter on submitInfoID: null; submitted ones do not.
+function isUnlockedQuery(where: unknown): boolean {
+    const filter = where as {
+        submitInfoID?: unknown
+        contractRevision?: { is: { submitInfoID?: unknown } }
+    }
+    const revision = filter.contractRevision?.is ?? filter
+    return revision.submitInfoID === null
+}
+
 function mockClient(options?: {
     stateContacts?: Record<string, unknown>[]
-    rateRevisions?: Array<{
-        certifyingActuaryContacts: Record<string, unknown>[]
-        addtlActuaryContacts: Record<string, unknown>[]
-    }>
+    rateRevisions?: MockRateRevision[]
+    unlockedStateContacts?: Record<string, unknown>[]
+    unlockedRateRevisions?: MockRateRevision[]
     stateUpdateCount?: number
     actuaryUpdateCount?: number
 }): ExtendedPrismaClient {
     return {
         stateContact: {
-            findMany: vi.fn().mockResolvedValue(options?.stateContacts ?? []),
+            findMany: vi.fn(async ({ where }: { where: unknown }) =>
+                isUnlockedQuery(where)
+                    ? (options?.unlockedStateContacts ?? [])
+                    : (options?.stateContacts ?? [])
+            ),
             updateMany: vi
                 .fn()
                 .mockResolvedValue({ count: options?.stateUpdateCount ?? 1 }),
         },
         rateRevisionTable: {
-            findMany: vi.fn().mockResolvedValue(options?.rateRevisions ?? []),
+            findMany: vi.fn(async ({ where }: { where: unknown }) =>
+                isUnlockedQuery(where)
+                    ? (options?.unlockedRateRevisions ?? [])
+                    : (options?.rateRevisions ?? [])
+            ),
         },
         actuaryContact: {
             updateMany: vi
@@ -1029,5 +1052,203 @@ describe('missing-name placeholders', () => {
             placeholderFamilyNames: 0,
         })
         expect(client.stateContact.updateMany).not.toHaveBeenCalled()
+    })
+})
+
+describe('unlocked revisions', () => {
+    test('queries only revisions that are currently unlocked', async () => {
+        const client = mockClient()
+
+        await runContactsMigration(client, { entity: 'both', dryRun: true })
+
+        const unlockedFilter = {
+            submitInfoID: null,
+            unlockInfoID: { not: null },
+            undoUnlockInfoID: null,
+        }
+        expect(client.stateContact.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: { contractRevision: { is: unlockedFilter } },
+            })
+        )
+        expect(client.rateRevisionTable.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({ where: unlockedFilter })
+        )
+    })
+
+    test('reports unlocked contacts separately from submitted ones', async () => {
+        const client = mockClient({
+            stateContacts: [contact('submitted-state')],
+            unlockedStateContacts: [
+                contact('unlocked-state'),
+                contact('unlocked-ambiguous', { name: 'Mary Beth Smith' }),
+            ],
+            unlockedRateRevisions: [
+                {
+                    certifyingActuaryContacts: [contact('unlocked-actuary')],
+                    addtlActuaryContacts: [],
+                },
+            ],
+        })
+
+        const result = await runContactsMigration(client, {
+            entity: 'both',
+            dryRun: true,
+        })
+
+        expect(result.results.stateContacts).toMatchObject({
+            queried: 1,
+            eligible: 1,
+        })
+        expect(result.results.actuaryContacts).toMatchObject({ queried: 0 })
+        expect(result.results.unlockedStateContacts).toMatchObject({
+            queried: 2,
+            eligible: 1,
+            manualReview: 1,
+        })
+        expect(result.results.unlockedActuaryContacts).toMatchObject({
+            queried: 1,
+            eligible: 1,
+        })
+        expect(result.totals).toMatchObject({
+            queried: 4,
+            eligible: 3,
+            manualReview: 1,
+        })
+        // Unlocked manual review rows still need a person.
+        expect(result.complete).toBe(false)
+    })
+
+    test('omits unlocked blocks for a table that was not requested', async () => {
+        const result = await runContactsMigration(mockClient(), {
+            entity: 'stateContacts',
+            dryRun: true,
+        })
+
+        expect(Object.keys(result.results)).toEqual([
+            'stateContacts',
+            'unlockedStateContacts',
+        ])
+    })
+
+    test.each([
+        {
+            label: 'single-part name',
+            name: 'Prince',
+            titleRole: 'Chief Actuary',
+            givenName: 'Prince',
+            familyName: null,
+        },
+        {
+            label: 'missing titleRole',
+            name: 'Jane Doe',
+            titleRole: null,
+            givenName: 'Jane',
+            familyName: 'Doe',
+        },
+        {
+            label: 'whitespace titleRole',
+            name: 'Jane Doe',
+            titleRole: '   ',
+            givenName: 'Jane',
+            familyName: 'Doe',
+        },
+    ])(
+        'writes no placeholders for a $label',
+        async ({ name, titleRole, givenName, familyName }) => {
+            const client = mockClient({
+                unlockedStateContacts: [
+                    contact('unlocked', { name, titleRole }),
+                ],
+            })
+
+            const result = await runContactsMigration(client, {
+                entity: 'stateContacts',
+                dryRun: false,
+            })
+
+            expect(result.results.unlockedStateContacts).toMatchObject({
+                eligible: 1,
+                migrated: 1,
+                placeholderGivenNames: 0,
+                placeholderFamilyNames: 0,
+            })
+            expect(client.stateContact.updateMany).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    data: {
+                        prefix: null,
+                        givenName,
+                        middleName: null,
+                        familyName,
+                        suffix: null,
+                        titleRole,
+                    },
+                })
+            )
+        }
+    )
+
+    test.each([
+        { label: 'blank name', overrides: { name: '   ' } },
+        {
+            label: 'given name only',
+            overrides: { name: 'Jane Doe', givenName: 'Jane' },
+        },
+        {
+            label: 'family name only',
+            overrides: { name: 'Jane Doe', familyName: 'Doe' },
+        },
+        {
+            label: 'earlier single-part migration',
+            overrides: { name: 'Prince', givenName: 'Prince', titleRole: null },
+        },
+        {
+            label: 'full name with no titleRole',
+            overrides: {
+                givenName: 'Jane',
+                familyName: 'Doe',
+                titleRole: null,
+            },
+        },
+    ])('leaves a $label alone', async ({ overrides }) => {
+        const client = mockClient({
+            unlockedStateContacts: [contact('unlocked', overrides)],
+        })
+
+        const result = await runContactsMigration(client, {
+            entity: 'stateContacts',
+            dryRun: false,
+        })
+
+        expect(result.results.unlockedStateContacts).toMatchObject({
+            queried: 1,
+            alreadyMigrated: 1,
+            eligible: 0,
+            partiallyPopulated: 0,
+        })
+        expect(client.stateContact.updateMany).not.toHaveBeenCalled()
+    })
+
+    test('classifies an unlocked contact without placeholders', () => {
+        expect(
+            classifyContact(
+                {
+                    contactType: 'ACTUARY_CONTACT',
+                    ...(contact('unlocked', { name: 'Cher' }) as ReturnType<
+                        typeof contact
+                    >),
+                } as never,
+                'UNLOCKED'
+            )
+        ).toEqual({
+            status: 'ELIGIBLE',
+            parsedName: {
+                prefix: null,
+                givenName: 'Cher',
+                middleName: null,
+                familyName: null,
+                suffix: null,
+            },
+        })
     })
 })
