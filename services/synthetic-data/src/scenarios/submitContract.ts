@@ -87,7 +87,7 @@ export async function submitSyntheticContract({
         contentType: fixture.contentType,
     })
     const updatedRates: UpdateContractRateInput[] = await Promise.all(
-        rates.map(async (rate) => {
+        rates.map(async (rate): Promise<UpdateContractRateInput> => {
             if (rate.type === 'LINK') {
                 return { type: 'LINK', rateID: rate.rateId }
             }
