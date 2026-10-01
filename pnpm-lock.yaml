@@ -683,8 +683,8 @@ importers:
         specifier: ^8.4.2
         version: 8.4.2
       pg:
-        specifier: ^8.16.3
-        version: 8.19.0
+        specifier: ^8.23.0
+        version: 8.23.0
       prisma:
         specifier: ^7.10.0
         version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.3)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3)
@@ -720,8 +720,8 @@ importers:
         specifier: ^9.0.10
         version: 9.0.10
       '@types/pg':
-        specifier: ^8.15.5
-        version: 8.16.0
+        specifier: ^8.23.1
+        version: 8.23.1
       '@types/url-parse':
         specifier: ^1.4.3
         version: 1.4.11
@@ -1221,28 +1221,28 @@ importers:
         version: 3.1141.0
       '@aws-solutions-constructs/aws-apigateway-lambda':
         specifier: 2.103.0
-        version: 2.103.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.103.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-cloudfront-s3':
         specifier: 2.102.0
-        version: 2.102.0(@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1))(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.102.0(@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1))(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-cognito-apigateway-lambda':
         specifier: 2.104.0
-        version: 2.104.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.104.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-eventbridge-lambda':
         specifier: 2.92.1
-        version: 2.92.1(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.92.1(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-lambda-secretsmanager':
         specifier: 2.104.0
-        version: 2.104.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.104.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-s3-lambda':
         specifier: 2.103.0
-        version: 2.103.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.103.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-wafwebacl-apigateway':
         specifier: 2.103.0
-        version: 2.103.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.103.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)
       aws-cdk-lib:
-        specifier: 2.270.0
-        version: 2.270.0(constructs@10.8.1)
+        specifier: 2.271.0
+        version: 2.271.0(constructs@10.8.1)
       constructs:
         specifier: ^10.8.1
         version: 10.8.1
@@ -1266,8 +1266,8 @@ importers:
         specifier: ^8.68.0
         version: 8.68.0(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
       aws-cdk:
-        specifier: ^2.1142.0
-        version: 2.1142.0
+        specifier: ^2.1143.0
+        version: 2.1143.0
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
@@ -1375,8 +1375,8 @@ importers:
         specifier: ^7.10.0
         version: 7.10.0(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.3)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3))(typescript@5.9.3)
       pg:
-        specifier: ^8.19.0
-        version: 8.19.0
+        specifier: ^8.23.0
+        version: 8.23.0
       prisma:
         specifier: ^7.10.0
         version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.3)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@5.9.3)
@@ -1388,8 +1388,8 @@ importers:
         specifier: ^9.6.1
         version: 9.6.1
       '@types/pg':
-        specifier: ^8.16.0
-        version: 8.16.0
+        specifier: ^8.23.1
+        version: 8.23.1
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.70.0
         version: 8.70.0(@typescript-eslint/parser@8.68.0(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3))(eslint@10.4.0(jiti@2.7.0)(supports-color@10.2.2))(supports-color@10.2.2)(typescript@5.9.3)
@@ -1688,8 +1688,8 @@ packages:
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.2':
     resolution: {integrity: sha512-pDiuqH+qY3zM9lhhLjbKJ1tnKOHzQ2V4Wr/3qsxyKeKAkuPMI/BVGvZG1PbrikUw949cGVTfVEt4ETKKYnrj0Q==}
 
-  '@aws-cdk/cloud-assembly-schema@54.14.0':
-    resolution: {integrity: sha512-JCZCzgp3SuXQVljaKqXnttHzcezEHt9Ag/YipK0XwUFD+Iz2T4jY7gUc3pA25Uq6pzY2n9DvO/nEU++dPXW4Rw==}
+  '@aws-cdk/cloud-assembly-schema@54.25.0':
+    resolution: {integrity: sha512-aZkzPqWLg1Oozm53NeyrBZPguTq3e6v7NpQ3QOGULj0IIrodLzGPM7fmAvjcJcHzjtuZU9IP1gIY92nKIM+Bvw==}
     engines: {node: '>= 18.0.0'}
     bundledDependencies:
       - jsonschema
@@ -6225,8 +6225,8 @@ packages:
   '@types/path-browserify@1.0.3':
     resolution: {integrity: sha512-ZmHivEbNCBtAfcrFeBCiTjdIc2dey0l7oCGNGpSuRTy8jP6UVND7oUowlvDujBy8r2Hoa8bfFUOCiPWfmtkfxw==}
 
-  '@types/pg@8.16.0':
-    resolution: {integrity: sha512-RmhMd/wD+CF8Dfo+cVIy3RR5cl8CyfXQ0tGgW6XBL8L4LM/UTEbNXYRbLwU6w+CgrKBNbrQWt4FUtTfaU5jSYQ==}
+  '@types/pg@8.23.1':
+    resolution: {integrity: sha512-fKVHpikPdg4GKks3JuLEhvwSyvwzF23hnabPy6DD8ljVbC7+6J5dQzdv4arV6jqq57djnMgs1HKBxX4P8aBI3A==}
 
   '@types/prompts@2.4.9':
     resolution: {integrity: sha512-qTxFi6Buiu8+50/+3DGIWLHM6QuWsEKugJnnP6iv2Mc4ncxE4A/OJkjuVOA+5X0X1S/nq5VJRa8Lu+nwcvbrKA==}
@@ -7065,8 +7065,8 @@ packages:
     resolution: {integrity: sha512-Rf3eSj8IhM4chp3SOe58sONSX8idY/NlttqNjsP6mUC6dSfBOLfvDjoYDLAhfDZbv8imNbxfx+hIFDqIZ3/IMg==}
     deprecated: 'Amplify JavaScript v5 is in maintenance mode. Upgrade to v6. See the migration guide: https://docs.amplify.aws/gen1/javascript/build-a-backend/troubleshooting/migrate-from-javascript-v5-to-v6/'
 
-  aws-cdk-lib@2.270.0:
-    resolution: {integrity: sha512-xoO9FEqcVTTK39N6n+LxvAAsS5WZSGX/p+uv3l2W+LXDEIWctq6VECdluuFwdXnbyf4v4eIxo2btrkUepnEy0Q==}
+  aws-cdk-lib@2.271.0:
+    resolution: {integrity: sha512-VdLda/mCneNUZkfKIYiTYSCbDdGaTmH9uhfGs5TYIfvIqKuyUcZK6S7+LaF+pRhkNnbTGgKqvCqRIMemZOvCnA==}
     engines: {node: '>= 20.0.0'}
     peerDependencies:
       constructs: ^10.5.0
@@ -7084,8 +7084,8 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1142.0:
-    resolution: {integrity: sha512-gNOeii+avTJmOwfR8tVgraZ5A2EBC/529EXg7e+yBp8Zl608dAv5CtFRoJt8QoKiruiCwYr4HF6ClNAse/NkSg==}
+  aws-cdk@2.1143.0:
+    resolution: {integrity: sha512-bTbgEmNuN6UMDAyhGFWOAnriafSu7j0cAjaFKRw1/WEs6RE5g062D2v2+YE8Dw6qw7RgNGQPH5Nv47TsK5kZSQ==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
 
@@ -10819,33 +10819,33 @@ packages:
   performance-now@2.1.0:
     resolution: {integrity: sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==}
 
-  pg-cloudflare@1.3.0:
-    resolution: {integrity: sha512-6lswVVSztmHiRtD6I8hw4qP/nDm1EJbKMRhf3HCYaqud7frGysPv7FYJ5noZQdhQtN2xJnimfMtvQq21pdbzyQ==}
+  pg-cloudflare@1.4.0:
+    resolution: {integrity: sha512-Vo7z/6rrQYxpNRylp4Tlob2elzbh+N/MOQbxFVWCxS7oEx6jF53GTJFxK2WWpKuBRkmiin4Mt+xofFDjx09R0A==}
 
-  pg-connection-string@2.11.0:
-    resolution: {integrity: sha512-kecgoJwhOpxYU21rZjULrmrBJ698U2RxXofKVzOn5UDj61BPj/qMb7diYUR1nLScCDbrztQFl1TaQZT0t1EtzQ==}
+  pg-connection-string@2.14.0:
+    resolution: {integrity: sha512-XwWDGcLRGCXAR8F/AM5bG7Q+A3Wm2s6QeEjlOKZLlH3UYcguiqCWKyWXVag5TLTIjR7oOJUY8kcADaZgWPyLeg==}
 
   pg-int8@1.0.1:
     resolution: {integrity: sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==}
     engines: {node: '>=4.0.0'}
 
-  pg-pool@3.12.0:
-    resolution: {integrity: sha512-eIJ0DES8BLaziFHW7VgJEBPi5hg3Nyng5iKpYtj3wbcAUV9A1wLgWiY7ajf/f/oO1wfxt83phXPY8Emztg7ITg==}
+  pg-pool@3.14.0:
+    resolution: {integrity: sha512-gKtPkFdQPU3DksooVLi9LsjZxrsBUZIpa+7aVx+LV5pNh0KzP4Zleud2po+ConrxbuXGBJ6Hfer6hdgpIBpBaw==}
     peerDependencies:
       pg: '>=8.0'
 
-  pg-protocol@1.10.3:
-    resolution: {integrity: sha512-6DIBgBQaTKDJyxnXaLiLR8wBpQQcGWuAESkRBX/t6OwA8YsqP+iVSiond2EDy6Y/dsGk8rh/jtax3js5NeV7JQ==}
-
   pg-protocol@1.12.0:
     resolution: {integrity: sha512-uOANXNRACNdElMXJ0tPz6RBM0XQ61nONGAwlt8da5zs/iUOOCLBQOHSXnrC6fMsvtjxbOJrZZl5IScGv+7mpbg==}
+
+  pg-protocol@1.16.0:
+    resolution: {integrity: sha512-sILXutLVjCLjcDuOmvhX5e2Z4cS5qG/6Bu3VkpFwdf/633ElGLpEh9bgmuI5I4sqKqkifQiGyiCcx1HdtrK7tg==}
 
   pg-types@2.2.0:
     resolution: {integrity: sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA==}
     engines: {node: '>=4'}
 
-  pg@8.19.0:
-    resolution: {integrity: sha512-QIcLGi508BAHkQ3pJNptsFz5WQMlpGbuBGBaIaXsWK8mel2kQ/rThYI+DbgjUvZrIr7MiuEuc9LcChJoEZK1xQ==}
+  pg@8.23.0:
+    resolution: {integrity: sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg==}
     engines: {node: '>= 16.0.0'}
     peerDependencies:
       pg-native: '>=3.0.1'
@@ -13381,7 +13381,7 @@ snapshots:
 
   '@aws-cdk/asset-node-proxy-agent-v6@2.1.2': {}
 
-  '@aws-cdk/cloud-assembly-schema@54.14.0': {}
+  '@aws-cdk/cloud-assembly-schema@54.25.0': {}
 
   '@aws-crypto/crc32@1.2.2':
     dependencies:
@@ -14771,45 +14771,45 @@ snapshots:
       '@smithy/types': 4.19.0
       tslib: 2.8.1
 
-  '@aws-solutions-constructs/aws-apigateway-lambda@2.103.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-apigateway-lambda@2.103.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.270.0(constructs@10.8.1)
+      aws-cdk-lib: 2.271.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-cloudfront-s3@2.102.0(@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1))(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-cloudfront-s3@2.102.0(@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1))(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      '@aws-solutions-constructs/resources': 2.102.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)
-      aws-cdk-lib: 2.270.0(constructs@10.8.1)
+      '@aws-solutions-constructs/resources': 2.102.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)
+      aws-cdk-lib: 2.271.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.104.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.104.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.270.0(constructs@10.8.1)
+      aws-cdk-lib: 2.271.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-eventbridge-lambda@2.92.1(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-eventbridge-lambda@2.92.1(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.270.0(constructs@10.8.1)
+      aws-cdk-lib: 2.271.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.104.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.104.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.270.0(constructs@10.8.1)
+      aws-cdk-lib: 2.271.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-s3-lambda@2.103.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-s3-lambda@2.103.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.270.0(constructs@10.8.1)
+      aws-cdk-lib: 2.271.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.103.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.103.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.270.0(constructs@10.8.1)
+      aws-cdk-lib: 2.271.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.270.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.271.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.270.0(constructs@10.8.1)
+      aws-cdk-lib: 2.271.0(constructs@10.8.1)
       constructs: 10.8.1
 
   '@aws/lambda-invoke-store@0.2.4': {}
@@ -18628,8 +18628,8 @@ snapshots:
   '@prisma/adapter-pg@7.10.0':
     dependencies:
       '@prisma/driver-adapter-utils': 7.10.0
-      '@types/pg': 8.16.0
-      pg: 8.19.0
+      '@types/pg': 8.23.1
+      pg: 8.23.0
       postgres-array: 3.0.4
     transitivePeerDependencies:
       - pg-native
@@ -20028,10 +20028,10 @@ snapshots:
 
   '@types/path-browserify@1.0.3': {}
 
-  '@types/pg@8.16.0':
+  '@types/pg@8.23.1':
     dependencies:
       '@types/node': 26.2.0
-      pg-protocol: 1.10.3
+      pg-protocol: 1.12.0
       pg-types: 2.2.0
 
   '@types/prompts@2.4.9':
@@ -21227,14 +21227,14 @@ snapshots:
       - react-native
       - supports-color
 
-  aws-cdk-lib@2.270.0(constructs@10.8.1):
+  aws-cdk-lib@2.271.0(constructs@10.8.1):
     dependencies:
       '@aws-cdk/asset-awscli-v1': 2.2.292
       '@aws-cdk/asset-node-proxy-agent-v6': 2.1.2
-      '@aws-cdk/cloud-assembly-schema': 54.14.0
+      '@aws-cdk/cloud-assembly-schema': 54.25.0
       constructs: 10.8.1
 
-  aws-cdk@2.1142.0: {}
+  aws-cdk@2.1143.0: {}
 
   aws-sign2@0.7.0: {}
 
@@ -26174,20 +26174,20 @@ snapshots:
 
   performance-now@2.1.0: {}
 
-  pg-cloudflare@1.3.0:
+  pg-cloudflare@1.4.0:
     optional: true
 
-  pg-connection-string@2.11.0: {}
+  pg-connection-string@2.14.0: {}
 
   pg-int8@1.0.1: {}
 
-  pg-pool@3.12.0(pg@8.19.0):
+  pg-pool@3.14.0(pg@8.23.0):
     dependencies:
-      pg: 8.19.0
-
-  pg-protocol@1.10.3: {}
+      pg: 8.23.0
 
   pg-protocol@1.12.0: {}
+
+  pg-protocol@1.16.0: {}
 
   pg-types@2.2.0:
     dependencies:
@@ -26197,15 +26197,15 @@ snapshots:
       postgres-date: 1.0.7
       postgres-interval: 1.2.0
 
-  pg@8.19.0:
+  pg@8.23.0:
     dependencies:
-      pg-connection-string: 2.11.0
-      pg-pool: 3.12.0(pg@8.19.0)
-      pg-protocol: 1.12.0
+      pg-connection-string: 2.14.0
+      pg-pool: 3.14.0(pg@8.23.0)
+      pg-protocol: 1.16.0
       pg-types: 2.2.0
       pgpass: 1.0.5
     optionalDependencies:
-      pg-cloudflare: 1.3.0
+      pg-cloudflare: 1.4.0
 
   pgpass@1.0.5:
     dependencies:
