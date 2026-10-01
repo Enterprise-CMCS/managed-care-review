@@ -23,6 +23,12 @@
     color: custom.$mcr-foundation-ink;
 }
 
+.light-gold {
+    background: custom.$mcr-gold-vivid-light;
+    border: 1px solid custom.$mcr-gold-vivid-lighter;
+    color: custom.$mcr-foundation-ink;
+}
+
 .gold {
     @include uswds.u-bg('gold-20v');
     color: custom.$mcr-foundation-ink;

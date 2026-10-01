@@ -11,6 +11,7 @@ import {
     Contract,
     UnlockedContract,
     ContractRevision,
+    RevisionDiffFragmentFragment,
 } from '../../../gen/gqlClient'
 import styles from '../SubmissionSummarySection.module.scss'
 import {
@@ -38,6 +39,7 @@ export type SubmissionTypeSummarySectionProps = {
     submissionName: string
     isStateUser: boolean
     explainMissingData?: boolean
+    revisionDiff?: RevisionDiffFragmentFragment // present only on the latest resubmission when tags should display
 }
 
 export const SubmissionTypeSummarySection = ({
@@ -50,7 +52,9 @@ export const SubmissionTypeSummarySection = ({
     submissionName,
     isStateUser,
     explainMissingData,
+    revisionDiff,
 }: SubmissionTypeSummarySectionProps): React.ReactElement => {
+    const fieldChanges = revisionDiff?.fieldChanges
     const contractOrRev = contractRev ? contractRev : contract
     const ldClient = useLDClient()
     const contractFormData = getVisibleLatestContractFormData(
@@ -115,24 +119,28 @@ export const SubmissionTypeSummarySection = ({
                         <PopulationCoverageSummary
                             contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
+                            fieldChanges={fieldChanges}
                         />
                     )}
                     {(programIDs.length > 0 || !isSubmitted) && (
                         <ContractProgramsSummary
                             programNames={programNames}
                             explainMissingData={explainMissingData}
+                            fieldChanges={fieldChanges}
                         />
                     )}
                     {(contractFormData.submissionType || !isSubmitted) && (
                         <SubmissionTypeSummary
                             contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
+                            fieldChanges={fieldChanges}
                         />
                     )}
                     {(contractFormData.contractType || !isSubmitted) && (
                         <ContractTypeSummary
                             contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
+                            fieldChanges={fieldChanges}
                         />
                     )}
                     {(contractFormData.riskBasedContract !== null ||
@@ -141,6 +149,7 @@ export const SubmissionTypeSummarySection = ({
                         <RiskBasedContractSummary
                             contractFormData={contractFormData}
                             explainMissingData={explainMissingData}
+                            fieldChanges={fieldChanges}
                         />
                     )}
                 </MultiColumnGrid>
@@ -152,6 +161,7 @@ export const SubmissionTypeSummarySection = ({
                             <SubmissionDescriptionSummary
                                 contractFormData={contractFormData}
                                 explainMissingData={explainMissingData}
+                                fieldChanges={fieldChanges}
                             />
                         )}
                     </Grid>

@@ -70,6 +70,11 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
         featureFlags.UNDO_WITHDRAW_SUBMISSION.defaultValue
     )
 
+    const revisionHistoryFlag = ldClient?.variation(
+        featureFlags.REVISION_HISTORY_ENHANCEMENTS.flag,
+        featureFlags.REVISION_HISTORY_ENHANCEMENTS.defaultValue
+    )
+
     const modalRef = useRef<ModalRef>(null)
 
     // API requests
@@ -87,14 +92,18 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
 
     const contract = data?.fetchContract.contract
 
-    useQuery(FetchContractRevisionDiffDocument, {
+    const { data: diffData } = useQuery(FetchContractRevisionDiffDocument, {
         variables: {
             input: {
                 contractID: id ?? 'unknown-contract',
             },
         },
-        // Only resubmissions have a previous submission to diff against
-        skip: (contract?.packageSubmissions.length ?? 0) < 2,
+        // Change tags only display to CMS users on the latest resubmission, behind the flag
+        skip:
+            !revisionHistoryFlag ||
+            !hasCMSPermissions ||
+            contract?.status !== 'RESUBMITTED' ||
+            (contract?.packageSubmissions.length ?? 0) < 2,
     })
 
     const name =
@@ -146,6 +155,14 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     }
 
     const submissionStatus = contract.status
+    // Tags render only when this page shows the latest resubmission; a failed
+    // or skipped diff fetch simply renders the page without tags.
+    const revisionDiff =
+        (revisionHistoryFlag &&
+            hasCMSPermissions &&
+            submissionStatus === 'RESUBMITTED' &&
+            diffData?.fetchContract.contract.revisionDiff) ||
+        undefined
     const isSubmitted =
         submissionStatus === 'SUBMITTED' || submissionStatus === 'RESUBMITTED'
     const statePrograms = contract.state.programs
@@ -510,18 +527,21 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
                     initiallySubmittedAt={contract.initiallySubmittedAt}
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
+                    revisionDiff={revisionDiff}
                 />
 
                 <EQROContractDetailsSummarySection
                     contract={contract}
                     onDocumentError={handleDocumentDownloadError}
                     explainMissingData={explainMissingData}
+                    revisionDiff={revisionDiff}
                 />
 
                 <ContactsSummarySection
                     contract={contract}
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
+                    revisionDiff={revisionDiff}
                 />
 
                 <ChangeHistory contract={contract} />

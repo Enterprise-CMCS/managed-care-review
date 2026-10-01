@@ -3,6 +3,7 @@ import {
     Contract,
     ContractRevision,
     UnlockedContract,
+    RevisionDiffFragmentFragment,
 } from '../../../gen/gqlClient'
 import { useParams } from 'react-router-dom'
 import { SectionHeader } from '../../SectionHeader'
@@ -35,6 +36,7 @@ export type EQROContractDetailsSummarySection = {
     editNavigateTo?: string
     onDocumentError?: (error: true) => void
     explainMissingData?: boolean
+    revisionDiff?: RevisionDiffFragmentFragment // present only on the latest resubmission when tags should display
 }
 
 export const EQROContractDetailsSummarySection = ({
@@ -43,7 +45,13 @@ export const EQROContractDetailsSummarySection = ({
     editNavigateTo, // this is the edit link for the section. When this prop exists, summary section is loaded in edit mode
     onDocumentError,
     explainMissingData,
+    revisionDiff,
 }: EQROContractDetailsSummarySection): React.ReactElement => {
+    const fieldChanges = revisionDiff?.fieldChanges
+    const documentDiffFor = (listChanges?: {
+        added: string[]
+        removed: string[]
+    }) => (revisionDiff && listChanges ? listChanges : undefined)
     // Checks if submission is a previous submission
     const isPreviousSubmission = usePreviousSubmission()
     const { loggedInUser } = useAuth()
@@ -105,20 +113,24 @@ export const EQROContractDetailsSummarySection = ({
                     <ContractExecutionSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={fieldChanges}
                     />
                     <ContractEffectiveDateSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={fieldChanges}
                     />
                     <NewEQROContractorSummary
                         contractFormData={contractFormData}
                         explainMissingData={explainMissingData}
+                        fieldChanges={fieldChanges}
                     />
                 </MultiColumnGrid>
                 <EQROModifiedProvisionSummary
                     contractID={contract.id}
                     contractFormData={contractFormData}
                     explainMissingData={explainMissingData}
+                    fieldChanges={fieldChanges}
                 />
             </dl>
             <DocumentHeader
@@ -147,6 +159,9 @@ export const EQROContractDetailsSummarySection = ({
                     caption="Contract"
                     documentCategory="Contract"
                     hideDynamicFeedback={isSubmittedOrCMSUser}
+                    documentDiff={documentDiffFor(
+                        revisionDiff?.documentChanges.contractDocuments
+                    )}
                 />
             )}
             {contractSupportingDocuments && (
@@ -162,6 +177,10 @@ export const EQROContractDetailsSummarySection = ({
                     isSupportingDocuments
                     isInitialSubmission={isInitialSubmission}
                     hideDynamicFeedback={isSubmittedOrCMSUser}
+                    documentDiff={documentDiffFor(
+                        revisionDiff?.documentChanges
+                            .contractSupportingDocuments
+                    )}
                 />
             )}
         </SectionCard>

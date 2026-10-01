@@ -14,6 +14,7 @@ import {
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
+import { FetchContractRevisionDiffDocument } from '../../gen/gqlClient'
 import { SubmissionSideNav } from '../SubmissionSideNav'
 import { mockContractPackageUnlockedWithUnlockedType } from '@mc-review/mocks'
 import { ReviewSubmit } from '../StateSubmission/HealthPlanSubmission/ReviewSubmit'
@@ -2715,4 +2716,200 @@ describe('SubmissionSummary', () => {
             })
         }
     )
+    describe('revision history change tags', () => {
+        const resubmittedContract = () => {
+            const contract =
+                mockContractPackageSubmittedWithQuestions('test-abc-123')
+            contract.status = 'RESUBMITTED'
+            contract.consolidatedStatus = 'RESUBMITTED'
+            contract.packageSubmissions[0].contractRevision.formData.stateContacts =
+                [
+                    {
+                        __typename: 'StateContact',
+                        name: 'Test Person',
+                        titleRole: 'Title',
+                        email: 'test@example.com',
+                    },
+                ]
+            // tags only display when a prior submission exists to diff against
+            contract.packageSubmissions = [
+                contract.packageSubmissions[0],
+                contract.packageSubmissions[0],
+            ]
+            return contract
+        }
+
+        const fetchContractRevisionDiffMock = () => ({
+            request: {
+                query: FetchContractRevisionDiffDocument,
+                variables: { input: { contractID: 'test-abc-123' } },
+            },
+            result: {
+                data: {
+                    fetchContract: {
+                        __typename: 'FetchContractPayload' as const,
+                        contract: {
+                            __typename: 'Contract' as const,
+                            id: 'test-abc-123',
+                            revisionDiff: {
+                                __typename: 'RevisionDiff' as const,
+                                olderRevisionID: 'older-rev',
+                                newerRevisionID: 'newer-rev',
+                                olderSubmittedAt: '2024-01-01T00:00:00.000Z',
+                                newerSubmittedAt: '2024-02-01T00:00:00.000Z',
+                                fieldChanges: [
+                                    {
+                                        __typename:
+                                            'RevisionDiffFieldChange' as const,
+                                        fieldPath: 'submissionDescription',
+                                        oldValue: {
+                                            __typename:
+                                                'RevisionDiffFieldValue' as const,
+                                            valueType: 'STRING' as const,
+                                            value: 'An old description',
+                                        },
+                                        newValue: {
+                                            __typename:
+                                                'RevisionDiffFieldValue' as const,
+                                            valueType: 'STRING' as const,
+                                            value: 'A new description',
+                                        },
+                                    },
+                                    {
+                                        __typename:
+                                            'RevisionDiffFieldChange' as const,
+                                        fieldPath: 'riskBasedContract',
+                                        oldValue: null,
+                                        newValue: {
+                                            __typename:
+                                                'RevisionDiffFieldValue' as const,
+                                            valueType: 'BOOLEAN' as const,
+                                            value: true,
+                                        },
+                                    },
+                                ],
+                                stateContactChanges: [
+                                    {
+                                        __typename:
+                                            'RevisionDiffStateContactChange' as const,
+                                        changeType: 'UPDATED' as const,
+                                        index: 0,
+                                        current: {
+                                            __typename: 'StateContact' as const,
+                                            name: 'Test Person',
+                                            titleRole: 'Title',
+                                            email: 'test@example.com',
+                                        },
+                                    },
+                                ],
+                                documentChanges: {
+                                    __typename:
+                                        'RevisionDiffDocumentChanges' as const,
+                                    totalAdded: 0,
+                                    totalRemoved: 0,
+                                    contractDocuments: {
+                                        __typename:
+                                            'RevisionDiffDocumentListChanges' as const,
+                                        added: [],
+                                        removed: [],
+                                    },
+                                    contractSupportingDocuments: {
+                                        __typename:
+                                            'RevisionDiffDocumentListChanges' as const,
+                                        added: [],
+                                        removed: [],
+                                    },
+                                    ratesDocuments: [],
+                                },
+                                rateChanges: {
+                                    __typename:
+                                        'RevisionDiffRateChanges' as const,
+                                    added: [],
+                                    removed: [],
+                                    revised: [],
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+
+        const renderSummary = (
+            flagOn: boolean,
+            user:
+                | ReturnType<typeof mockValidCMSUser>
+                | ReturnType<typeof mockValidStateUser> = mockValidCMSUser()
+        ) => {
+            const contract = resubmittedContract()
+            return renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                            element={<SubmissionSummary />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                user,
+                                statusCode: 200,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract,
+                            }),
+                            fetchContractRevisionDiffMock(),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/health-plan/test-abc-123',
+                    },
+                    featureFlags: {
+                        'revision-history-enhancements': flagOn,
+                    },
+                }
+            )
+        }
+
+        it('displays UPDATED and NEW tags on the latest resubmission when the flag is on', async () => {
+            renderSummary(true)
+
+            const description = await screen.findByTestId(
+                'submissionDescription'
+            )
+            await waitFor(() => {
+                expect(
+                    within(description).getByText('UPDATED')
+                ).toBeInTheDocument()
+            })
+            expect(
+                within(screen.getByTestId('riskBasedContract')).getByText('NEW')
+            ).toBeInTheDocument()
+            expect(
+                within(screen.getByTestId('statecontact_0')).getByText(
+                    'UPDATED'
+                )
+            ).toBeInTheDocument()
+        })
+
+        it('displays no change tags when the flag is off', async () => {
+            renderSummary(false)
+
+            await screen.findByTestId('submissionDescription')
+            expect(screen.queryAllByText('UPDATED')).toHaveLength(0)
+        })
+
+        it('displays no change tags for state users', async () => {
+            renderSummary(true, mockValidStateUser())
+
+            await screen.findByTestId('submissionDescription')
+            expect(screen.queryAllByText('UPDATED')).toHaveLength(0)
+        })
+    })
 })
