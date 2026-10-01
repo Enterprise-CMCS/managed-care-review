@@ -9,6 +9,7 @@ import { parseScenarioSeedInput } from './config/operationInput'
 import { SyntheticFetchCurrentUserDocument } from './gen/gqlClient'
 import { Logger } from './logger'
 import { runContractSmokeScenario } from './scenarios/contractSmoke'
+import { runContractLinkedRateScenario } from './scenarios/contractLinkedRate'
 import { runContractUnlockResubmitScenario } from './scenarios/contractUnlockResubmit'
 
 type AuthenticatedClients = {
@@ -105,8 +106,33 @@ export async function runSeedContractSmoke(seed: string): Promise<void> {
     })
 }
 
-const usage =
-    'Usage: pnpm cli preflight | pnpm cli seed-contract-smoke --seed <seed> | pnpm cli seed-contract-unlock-resubmit --seed <seed>'
+export async function runSeedContractLinkedRate(seed: string): Promise<void> {
+    const environment = loadEnvironment()
+    const logger = new Logger({
+        base: {
+            environment: environment.stage,
+            operation: 'seed-contract-linked-rate',
+        },
+    })
+    const { graphql, uploads } = await createAuthenticatedClients(
+        environment,
+        'state'
+    )
+
+    await runContractLinkedRateScenario({
+        graphql,
+        uploads,
+        logger,
+        seed,
+    })
+}
+
+const usage = [
+    'Usage: pnpm cli preflight',
+    'pnpm cli seed-contract-smoke --seed <seed>',
+    'pnpm cli seed-contract-linked-rate --seed <seed>',
+    'pnpm cli seed-contract-unlock-resubmit --seed <seed>',
+].join(' | ')
 
 export async function runSeedContractUnlockResubmit(
     seed: string
@@ -147,6 +173,12 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
     if (command === 'seed-contract-smoke') {
         const { seed } = parseScenarioSeedInput(rest)
         await runSeedContractSmoke(seed)
+        return
+    }
+
+    if (command === 'seed-contract-linked-rate') {
+        const { seed } = parseScenarioSeedInput(rest)
+        await runSeedContractLinkedRate(seed)
         return
     }
 
