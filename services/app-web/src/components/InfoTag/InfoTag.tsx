@@ -15,6 +15,7 @@ export type TagProps = {
         | 'cyan'
         | 'blue'
         | 'light green'
+        | 'light gold'
         | 'gray'
         | 'gray-medium'
         | 'base-dark'
@@ -33,6 +34,7 @@ export const InfoTag = ({
         {
             [styles['green']]: color === 'green',
             [styles['light-green']]: color === 'light green',
+            [styles['light-gold']]: color === 'light gold',
             [styles['cyan']]: color === 'cyan',
             [styles['gold']]: color === 'gold',
             [styles['blue']]: color === 'blue',

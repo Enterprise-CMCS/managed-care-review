@@ -4,7 +4,10 @@ import classnames from 'classnames'
 import { InfoTag } from '../InfoTag'
 
 export const UpdatedTag = ({ className }: { className?: string }) => (
-    <InfoTag className={classnames(styles.updatedTag, className)} color="gold">
+    <InfoTag
+        className={classnames(styles.updatedTag, className)}
+        color="light gold"
+    >
         UPDATED
     </InfoTag>
 )
