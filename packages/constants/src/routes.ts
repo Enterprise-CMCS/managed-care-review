@@ -37,6 +37,7 @@ const ROUTES = [
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
+    'SUBMISSIONS_ATTESTATIONS',
     'SUBMISSIONS_REVIEW_SUBMIT',
     'SUBMISSIONS_REVISION',
     'SUBMISSIONS_SUMMARY',
@@ -117,6 +118,8 @@ const RoutesRecord: Record<RouteT, string> = {
         '/submissions/:contractSubmissionType/:id/edit/contacts',
     SUBMISSIONS_DOCUMENTS:
         '/submissions/:contractSubmissionType/:id/edit/documents',
+    SUBMISSIONS_ATTESTATIONS:
+        '/submissions/:contractSubmissionType/:id/edit/attestations',
     SUBMISSIONS_REVIEW_SUBMIT:
         '/submissions/:contractSubmissionType/:id/edit/review-and-submit',
     SUBMISSIONS_SUMMARY: '/submissions/:contractSubmissionType/:id',
@@ -199,6 +202,7 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
+    'SUBMISSIONS_ATTESTATIONS',
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
 
@@ -238,6 +242,7 @@ const SUBMISSION_PAGE_HEADING_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
+    'SUBMISSIONS_ATTESTATIONS',
     'SUBMISSIONS_REVIEW_SUBMIT',
     'SUBMISSIONS_REVISION',
     'SUBMISSIONS_SUMMARY',
@@ -307,6 +312,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_RATE_DETAILS: 'Rate details',
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Supporting documents',
+    SUBMISSIONS_ATTESTATIONS: 'Attestations',
     SUBMISSIONS_MCCRSID: 'Add MC-CRS record number',
     SUBMISSIONS_REVIEW_SUBMIT: 'Review and submit',
     SUBMISSIONS_REVISION: 'Submission revision',
