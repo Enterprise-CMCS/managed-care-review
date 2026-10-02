@@ -538,8 +538,8 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5
       papaparse:
-        specifier: ^5.5.3
-        version: 5.5.3
+        specifier: ^5.7.0
+        version: 5.7.0
     devDependencies:
       '@octokit/action':
         specifier: ^8.0.4
@@ -10704,8 +10704,8 @@ packages:
   pako@2.0.4:
     resolution: {integrity: sha512-v8tweI900AUkZN6heMU/4Uy4cXRc2AYNRggVmTR+dEncawDJgCdLMximOVA2p4qO57WMynangsfGRb5WD6L1Bg==}
 
-  papaparse@5.5.3:
-    resolution: {integrity: sha512-5QvjGxYVjxO59MGU2lHVYpRWBBtKHnlIAcSe1uNFCkkptUh63NFRj0FJQm7nR67puEruUci/ZkjmEFrjCAyP4A==}
+  papaparse@5.7.0:
+    resolution: {integrity: sha512-qBGxg/7Q3Kl9Wfhrz2Z74UnvnHTXLNG6jmKJFeBvP2+y4lV7So+7SR62+Zd47JvdrCkX+nDcnr0ObPzek/+6RA==}
 
   param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
@@ -26075,7 +26075,7 @@ snapshots:
 
   pako@2.0.4: {}
 
-  papaparse@5.5.3: {}
+  papaparse@5.7.0: {}
 
   param-case@3.0.4:
     dependencies:
