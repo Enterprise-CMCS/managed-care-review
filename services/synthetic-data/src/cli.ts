@@ -10,6 +10,7 @@ import { SyntheticFetchCurrentUserDocument } from './gen/gqlClient'
 import { Logger } from './logger'
 import { runContractSmokeScenario } from './scenarios/contractSmoke'
 import { runContractLinkedRateScenario } from './scenarios/contractLinkedRate'
+import { runContractUnlockAddRateScenario } from './scenarios/contractUnlockAddRate'
 import { runContractUnlockResubmitScenario } from './scenarios/contractUnlockResubmit'
 
 type AuthenticatedClients = {
@@ -131,6 +132,7 @@ const usage = [
     'Usage: pnpm cli preflight',
     'pnpm cli seed-contract-smoke --seed <seed>',
     'pnpm cli seed-contract-linked-rate --seed <seed>',
+    'pnpm cli seed-contract-unlock-add-rate --seed <seed>',
     'pnpm cli seed-contract-unlock-resubmit --seed <seed>',
 ].join(' | ')
 
@@ -150,6 +152,30 @@ export async function runSeedContractUnlockResubmit(
     ])
 
     await runContractUnlockResubmitScenario({
+        stateGraphql: stateClients.graphql,
+        cmsGraphql: cmsClients.graphql,
+        uploads: stateClients.uploads,
+        logger,
+        seed,
+    })
+}
+
+export async function runSeedContractUnlockAddRate(
+    seed: string
+): Promise<void> {
+    const environment = loadEnvironment()
+    const logger = new Logger({
+        base: {
+            environment: environment.stage,
+            operation: 'seed-contract-unlock-add-rate',
+        },
+    })
+    const [stateClients, cmsClients] = await Promise.all([
+        createAuthenticatedClients(environment, 'state'),
+        createAuthenticatedClients(environment, 'cms'),
+    ])
+
+    await runContractUnlockAddRateScenario({
         stateGraphql: stateClients.graphql,
         cmsGraphql: cmsClients.graphql,
         uploads: stateClients.uploads,
@@ -179,6 +205,12 @@ export async function main(args = process.argv.slice(2)): Promise<void> {
     if (command === 'seed-contract-linked-rate') {
         const { seed } = parseScenarioSeedInput(rest)
         await runSeedContractLinkedRate(seed)
+        return
+    }
+
+    if (command === 'seed-contract-unlock-add-rate') {
+        const { seed } = parseScenarioSeedInput(rest)
+        await runSeedContractUnlockAddRate(seed)
         return
     }
 
