@@ -52,8 +52,6 @@ import { SubmissionTypeFormSchema } from './SubmissionTypeSchema'
 import {
     RoutesRecord,
     RouteT,
-    STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
-    STATE_SUBMISSION_FORM_ROUTES,
     ContractSubmissionTypeRecord,
 } from '@mc-review/constants'
 import { FormContainer } from '../../../../components'
@@ -105,6 +103,11 @@ export const SubmissionType = ({
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
+
+    const showProcurementAttestation = ldClient?.variation(
+        featureFlags.PROCUREMENT_ATTESTATION.flag,
+        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
     )
     const showEqroSubmissions: boolean = ldClient?.variation(
         featureFlags.EQRO_SUBMISSIONS.flag,
@@ -333,16 +336,11 @@ export const SubmissionType = ({
         <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={
-                        draftSubmission
-                            ? activeFormPages(
-                                  draftSubmission.draftRevision.formData,
-                                  hideSupportingDocs
-                              )
-                            : hideSupportingDocs
-                              ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
-                              : STATE_SUBMISSION_FORM_ROUTES
-                    }
+                    formPages={activeFormPages(
+                        draftSubmission?.draftRevision.formData,
+                        hideSupportingDocs,
+                        showProcurementAttestation
+                    )}
                     currentFormPage={
                         draftSubmission ? currentRoute : 'SUBMISSIONS_TYPE'
                     }

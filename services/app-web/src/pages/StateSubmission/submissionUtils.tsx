@@ -15,12 +15,14 @@ const getRelativePathFromNestedRoute = (formRouteType: RouteT): string =>
     })
 
 const activeFormPages = (
-    draft: ContractFormData,
-    hideSupportingDocs?: boolean
+    draft?: ContractFormData,
+    hideSupportingDocs?: boolean,
+    showProcurementAttestation?: boolean
 ): RouteTWithUnknown[] => {
     // If submission type is contract only, rate details is left out of the step indicator
     // If feature flag for hiding supporting docs is on, that documents page is left out of the
     // step indicator
+    // Attestation page only renders if the flag is on and it is a BASE only submission
     return STATE_SUBMISSION_FORM_ROUTES.filter((formPage) => {
         if (
             draft?.submissionType === 'CONTRACT_ONLY' &&
@@ -28,6 +30,11 @@ const activeFormPages = (
         ) {
             return false
         } else if (hideSupportingDocs && formPage === 'SUBMISSIONS_DOCUMENTS') {
+            return false
+        } else if (
+            formPage === 'SUBMISSIONS_ATTESTATIONS' &&
+            (!showProcurementAttestation || draft?.contractType !== 'BASE')
+        ) {
             return false
         }
         return true

@@ -1,15 +1,30 @@
 import React from 'react'
 import formContainerStyles from '../../../components/FormContainer/FormContainer.module.scss'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useOutletContext } from 'react-router-dom'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 import { getRelativePathFromNestedRoute } from '../submissionUtils'
+import { SideNavOutletContextType } from '../../SubmissionSideNav/SubmissionSideNav'
 import { SubmissionType } from './SubmissionType'
 import { ContractDetails } from './ContractDetails'
 import { RateDetails } from './RateDetails'
 import { Contacts } from '../SharedContactsPage'
+import { Attestations } from './Attestations'
 import { ReviewSubmit } from './ReviewSubmit'
 import { Error404 } from '../../Errors/Error404Page'
 
 export const HealthPlanSubmissionForm = (): React.ReactElement => {
+    const { contract } = useOutletContext<SideNavOutletContextType>()
+    const ldClient = useLDClient()
+    const showProcurementAttestation: boolean = ldClient?.variation(
+        featureFlags.PROCUREMENT_ATTESTATION.flag,
+        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
+    )
+    // Attestations page only exists for base contract submissions
+    const showAttestationsPage =
+        showProcurementAttestation &&
+        contract.draftRevision?.formData.contractType === 'BASE'
+
     return (
         <div
             data-testid="state-submission-form-page"
@@ -37,6 +52,14 @@ export const HealthPlanSubmissionForm = (): React.ReactElement => {
                         'SUBMISSIONS_CONTACTS'
                     )}
                     element={<Contacts />}
+                />
+                <Route
+                    path={getRelativePathFromNestedRoute(
+                        'SUBMISSIONS_ATTESTATIONS'
+                    )}
+                    element={
+                        showAttestationsPage ? <Attestations /> : <Error404 />
+                    }
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
