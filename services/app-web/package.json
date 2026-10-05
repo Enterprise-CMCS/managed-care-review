@@ -114,9 +114,9 @@
         "sass": "^1.49.11",
         "use-deep-compare-effect": "^1.8.1",
         "uuid": "^14.0.2",
-        "vite": "^8.3.0",
+        "vite": "^8.3.2",
         "vite-tsconfig-paths": "^6.1.1",
-        "web-vitals": "^6.0.1",
+        "web-vitals": "^6.2.2",
         "yup": "^1.7.1"
     },
     "devDependencies": {

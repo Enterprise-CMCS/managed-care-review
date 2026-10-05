@@ -31,7 +31,7 @@
         "@types/papaparse": "^5.5.2",
         "@types/uuid": "^11.0.0",
         "octokit": "^5.0.5",
-        "papaparse": "^5.5.3"
+        "papaparse": "^5.7.0"
     },
     "devDependencies": {
         "@octokit/action": "^8.0.4",
