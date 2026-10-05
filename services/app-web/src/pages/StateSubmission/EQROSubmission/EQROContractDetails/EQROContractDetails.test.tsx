@@ -415,7 +415,7 @@ describe('EQROContractDetails', () => {
             // Optional activity questions should not be visible initially (NO is selected)
             expect(
                 screen.queryByRole('group', {
-                    name: /New optional activities to be performed on MCO/,
+                    name: /New optional activities to be performed on an MCO/,
                 })
             ).not.toBeInTheDocument()
 
@@ -434,7 +434,7 @@ describe('EQROContractDetails', () => {
             await waitFor(() => {
                 expect(
                     screen.getByRole('group', {
-                        name: /New optional activities to be performed on MCO/,
+                        name: /New optional activities to be performed on an MCO/,
                     })
                 ).toBeInTheDocument()
                 expect(
@@ -483,7 +483,7 @@ describe('EQROContractDetails', () => {
             // Optional activity questions should be visible initially (YES is selected)
             expect(
                 screen.getByRole('group', {
-                    name: /New optional activities to be performed on MCO/,
+                    name: /New optional activities to be performed on an MCO/,
                 })
             ).toBeInTheDocument()
 
@@ -502,7 +502,7 @@ describe('EQROContractDetails', () => {
             await waitFor(() => {
                 expect(
                     screen.queryByRole('group', {
-                        name: /New optional activities to be performed on MCO/,
+                        name: /New optional activities to be performed on an MCO/,
                     })
                 ).not.toBeInTheDocument()
                 expect(
@@ -550,7 +550,7 @@ describe('EQROContractDetails', () => {
             // For base contracts, optional activity questions should be visible immediately
             expect(
                 screen.getByRole('group', {
-                    name: /New optional activities to be performed on MCO/,
+                    name: /New optional activities to be performed on an MCO/,
                 })
             ).toBeInTheDocument()
             expect(
