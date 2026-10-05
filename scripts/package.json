@@ -9,11 +9,14 @@
     "scripts": {
         "precommit": "lint-staged",
         "generate-client-credentials": "tsx generate-client-credentials.ts",
-        "lint": "tsc --noEmit",
+        "lint": "tsc --noEmit && oxlint --deny-warnings .",
         "build": "tsc",
         "build:ci-scripts": "tsc"
     },
     "lint-staged": {
+        "*.ts": [
+            "oxlint --deny-warnings"
+        ],
         "*.sh": [
             "shellcheck"
         ]

@@ -5,6 +5,17 @@ import { MultiColumnGrid, MultiColumnGridProps } from './MultiColumnGrid'
 export default {
     title: 'Components/MultiColumnGrid',
     component: MultiColumnGrid,
+    argTypes: {
+        columns: {
+            options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            control: 'select',
+            table: {
+                type: {
+                    summary: '1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12',
+                },
+            },
+        },
+    },
 }
 
 const Template: StoryFn<MultiColumnGridProps> = (args) => (

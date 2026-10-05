@@ -1,9 +1,17 @@
 import { StoryFn } from '@storybook/react'
+import { StateCodes } from '@mc-review/submissions'
 import { StateIcon, StateIconProps } from './StateIcon'
 
 export default {
     title: 'Components/Header/StateIcon',
     component: StateIcon,
+    argTypes: {
+        code: {
+            options: StateCodes,
+            control: 'select',
+            table: { type: { summary: 'StateCodeType' } },
+        },
+    },
     parameters: {
         componentSubtitle: 'StateIcon displays the state outline svg',
         backgrounds: {
