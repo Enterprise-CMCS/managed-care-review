@@ -149,12 +149,15 @@ const Contacts = ({
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
     const contractSubmissionType = draftSubmission.contractSubmissionType
 
-    // Attestations page follows contacts for base contract submissions
-    const nextFormPage: RouteT =
+    const previousFormPage: RouteT =
+        !isEQROSubmission &&
         showProcurementAttestation &&
         draftSubmission.draftRevision.formData.contractType === 'BASE'
             ? 'SUBMISSIONS_ATTESTATIONS'
-            : 'SUBMISSIONS_REVIEW_SUBMIT'
+            : draftSubmission.draftRevision.formData.submissionType ===
+                'CONTRACT_ONLY'
+              ? 'SUBMISSIONS_CONTRACT_DETAILS'
+              : 'SUBMISSIONS_RATE_DETAILS'
 
     const emptyStateContact = {
         name: '',
@@ -308,7 +311,7 @@ const Contacts = ({
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
                             type: 'CONTINUE',
-                            redirectPath: nextFormPage,
+                            redirectPath: 'SUBMISSIONS_REVIEW_SUBMIT',
                         })
                     }}
                     validationSchema={contactSchema}
@@ -551,16 +554,9 @@ const Contacts = ({
                                         )
                                     }}
                                     backOnClick={() => {
-                                        const previousPage =
-                                            draftSubmission.draftRevision
-                                                .formData.submissionType ===
-                                            'CONTRACT_ONLY'
-                                                ? 'SUBMISSIONS_CONTRACT_DETAILS'
-                                                : 'SUBMISSIONS_RATE_DETAILS'
-
                                         navigate(
                                             getSubmissionPath(
-                                                previousPage,
+                                                previousFormPage,
                                                 contractSubmissionType,
                                                 id
                                             )
@@ -575,22 +571,13 @@ const Contacts = ({
                                         !!Object.keys(errors).length
                                     }
                                     actionInProgress={isSubmitting}
-                                    backOnClickUrl={
-                                        draftSubmission.draftRevision.formData
-                                            .submissionType === 'CONTRACT_ONLY'
-                                            ? getSubmissionPath(
-                                                  'SUBMISSIONS_CONTRACT_DETAILS',
-                                                  contractSubmissionType,
-                                                  id
-                                              )
-                                            : getSubmissionPath(
-                                                  'SUBMISSIONS_RATE_DETAILS',
-                                                  contractSubmissionType,
-                                                  id
-                                              )
-                                    }
+                                    backOnClickUrl={getSubmissionPath(
+                                        previousFormPage,
+                                        contractSubmissionType,
+                                        id
+                                    )}
                                     continueOnClickUrl={getSubmissionPath(
-                                        nextFormPage,
+                                        'SUBMISSIONS_REVIEW_SUBMIT',
                                         contractSubmissionType,
                                         id
                                     )}

@@ -177,6 +177,13 @@ export const ContractDetails = ({
         return <ErrorOrLoadingPage state={'GENERIC_ERROR'} />
     }
 
+    const nextFormPage: RouteT =
+        formData.submissionType === 'CONTRACT_ONLY'
+            ? showProcurementAttestation && formData.contractType === 'BASE'
+                ? 'SUBMISSIONS_ATTESTATIONS'
+                : 'SUBMISSIONS_CONTACTS'
+            : 'SUBMISSIONS_RATE_DETAILS'
+
     const fileItemsFromDraftSubmission = (docType: string): FileItemT[] => {
         const docs =
             docType === 'contract'
@@ -373,6 +380,7 @@ export const ContractDetails = ({
                         ? yesNoFormValueAsBoolean(values.dsnpContract)
                         : undefined,
                 submissionType: formData.submissionType,
+                procurementAttestation: formData.procurementAttestation,
                 statutoryRegulatoryAttestation: yesNoFormValueAsBoolean(
                     values.statutoryRegulatoryAttestation
                 ),
@@ -518,10 +526,7 @@ export const ContractDetails = ({
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
                             type: 'CONTINUE',
-                            redirectPath:
-                                formData.submissionType === 'CONTRACT_ONLY'
-                                    ? 'SUBMISSIONS_CONTACTS'
-                                    : 'SUBMISSIONS_RATE_DETAILS',
+                            redirectPath: nextFormPage,
                         })
                     }}
                     validationSchema={() =>
@@ -1308,24 +1313,13 @@ export const ContractDetails = ({
                                             contractSubmissionType,
                                         }
                                     )}
-                                    continueOnClickUrl={
-                                        formData.submissionType ===
-                                        'CONTRACT_ONLY'
-                                            ? generatePath(
-                                                  RoutesRecord.SUBMISSIONS_RATE_DETAILS,
-                                                  {
-                                                      id,
-                                                      contractSubmissionType,
-                                                  }
-                                              )
-                                            : generatePath(
-                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
-                                                  {
-                                                      id,
-                                                      contractSubmissionType,
-                                                  }
-                                              )
-                                    }
+                                    continueOnClickUrl={generatePath(
+                                        RoutesRecord[nextFormPage],
+                                        {
+                                            id,
+                                            contractSubmissionType,
+                                        }
+                                    )}
                                 />
                             </UswdsForm>
                         </>
