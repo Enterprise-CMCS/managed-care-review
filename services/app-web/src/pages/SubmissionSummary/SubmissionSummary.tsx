@@ -89,6 +89,11 @@ export const SubmissionSummary = (): React.ReactElement => {
         featureFlags.CMS_USER_UNDO_UNLOCK.defaultValue
     )
 
+    const revisionHistoryFlag = ldClient?.variation(
+        featureFlags.REVISION_HISTORY_ENHANCEMENTS.flag,
+        featureFlags.REVISION_HISTORY_ENHANCEMENTS.defaultValue
+    )
+
     const incompleteMessage = useMemo(() => {
         if (isStateUser) {
             return 'You must contact your CMS point of contact and request an unlock to complete the submission.'
@@ -116,14 +121,18 @@ export const SubmissionSummary = (): React.ReactElement => {
 
     const contract = data?.fetchContract.contract
 
-    useQuery(FetchContractRevisionDiffDocument, {
+    const { data: diffData } = useQuery(FetchContractRevisionDiffDocument, {
         variables: {
             input: {
                 contractID: id ?? 'unknown-contract',
             },
         },
-        // Only resubmissions have a previous submission to diff against
-        skip: (contract?.packageSubmissions.length ?? 0) < 2,
+        // Change tags only display to CMS users on the latest resubmission, behind the flag
+        skip:
+            !revisionHistoryFlag ||
+            !hasCMSPermissions ||
+            contract?.status !== 'RESUBMITTED' ||
+            (contract?.packageSubmissions.length ?? 0) < 2,
     })
 
     const name =
@@ -241,6 +250,15 @@ export const SubmissionSummary = (): React.ReactElement => {
                 : contract.packageSubmissions[0].contractRevision.submitInfo) ||
             undefined
     }
+
+    // Tags render only when this page shows the latest resubmission; a failed
+    // or skipped diff fetch simply renders the page without tags.
+    const revisionDiff =
+        (revisionHistoryFlag &&
+            hasCMSPermissions &&
+            submissionStatus === 'RESUBMITTED' &&
+            diffData?.fetchContract.contract.revisionDiff) ||
+        undefined
 
     const isContractActionAndRateCertification =
         contractFormData?.submissionType === 'CONTRACT_AND_RATES'
@@ -588,6 +606,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     initiallySubmittedAt={contract.initiallySubmittedAt}
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
+                    revisionDiff={revisionDiff}
                 />
 
                 <ContractDetailsSummarySection
@@ -595,6 +614,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     isStateUser={isStateUser}
                     onDocumentError={handleDocumentDownloadError}
                     explainMissingData={explainMissingData}
+                    revisionDiff={revisionDiff}
                 />
 
                 {isContractActionAndRateCertification && (
@@ -605,6 +625,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                         statePrograms={statePrograms}
                         onDocumentError={handleDocumentDownloadError}
                         explainMissingData={explainMissingData}
+                        revisionDiff={revisionDiff}
                     />
                 )}
 
@@ -612,6 +633,7 @@ export const SubmissionSummary = (): React.ReactElement => {
                     contract={contract}
                     isStateUser={isStateUser}
                     explainMissingData={explainMissingData}
+                    revisionDiff={revisionDiff}
                 />
 
                 <ChangeHistory contract={contract} />

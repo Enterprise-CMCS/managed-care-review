@@ -16,16 +16,16 @@
     "devDependencies": {
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/node": "26.2.0",
-        "aws-cdk": "^2.1141.0",
+        "aws-cdk": "^2.1143.0",
         "esbuild": "^0.28.2",
-        "fs-extra": "^11.3.4",
+        "fs-extra": "^11.4.0",
         "lint-staged": "^17.5.1",
-        "prettier": "^3.9.6",
+        "prettier": "^3.9.9",
         "tsx": "^4.23.13",
         "typescript": "7.0.2"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.1132.0",
+        "@aws-sdk/client-secrets-manager": "^3.1145.0",
         "@aws-solutions-constructs/aws-apigateway-lambda": "2.103.0",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.102.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.104.0",
@@ -33,7 +33,7 @@
         "@aws-solutions-constructs/aws-lambda-secretsmanager": "2.104.0",
         "@aws-solutions-constructs/aws-s3-lambda": "2.103.0",
         "@aws-solutions-constructs/aws-wafwebacl-apigateway": "2.103.0",
-        "aws-cdk-lib": "2.269.0",
+        "aws-cdk-lib": "2.271.0",
         "constructs": "^10.8.1",
         "source-map-support": "^0.5.21"
     },

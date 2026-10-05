@@ -1,0 +1,23 @@
+mutation SyntheticUpdateDraftContractRates(
+    $input: UpdateDraftContractRatesInput!
+) {
+    updateDraftContractRates(input: $input) {
+        contract {
+            id
+            stateCode
+            status
+            draftRevision {
+                updatedAt
+            }
+            draftRates {
+                id
+                parentContractID
+                status
+                consolidatedStatus
+                draftRevision {
+                    updatedAt
+                }
+            }
+        }
+    }
+}

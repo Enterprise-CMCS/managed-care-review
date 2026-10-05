@@ -132,19 +132,19 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                         contractDocuments: [
                             {
                                 name: 'contractDocument1.pdf',
-                                s3URL: 's3://bucketname/key/contractDocument1.pdf',
+                                s3URL: 's3://legacy-documents/key/contractDocument1.pdf',
                                 sha256: 'needs-to-be-there',
                             },
                             {
                                 name: 'contractDocument1.pdf',
-                                s3URL: 's3://bucketname/key/contractDocument1.pdf',
+                                s3URL: 's3://legacy-documents/key/contractDocument1.pdf',
                                 sha256: 'needs-to-be-there',
                             },
                         ],
                         supportingDocuments: [
                             {
                                 name: 'supportingDocument11.pdf',
-                                s3URL: 's3://bucketname/key/supportingDocument11.pdf',
+                                s3URL: 's3://legacy-documents/key/supportingDocument11.pdf',
                                 sha256: 'needs-to-be-there',
                             },
                         ],
@@ -166,16 +166,33 @@ describe(`Tests UpdateContractDraftRevision`, () => {
 
             const updatedFormData = updateResult.draftRevision?.formData
 
-            expect(updatedFormData.supportingDocuments).toEqual(
-                expect.arrayContaining(updatedFormData.supportingDocuments)
-            )
-            expect(updatedFormData.contractDocuments).toEqual(
-                expect.arrayContaining(updatedFormData.contractDocuments)
-            )
+            expect(updatedFormData.contractDocuments).toEqual([
+                expect.objectContaining({
+                    s3URL: 's3://legacy-documents/key/contractDocument1.pdf',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'allusers/key',
+                }),
+                expect.objectContaining({
+                    s3URL: 's3://legacy-documents/key/contractDocument1.pdf',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'allusers/key',
+                }),
+            ])
+            expect(updatedFormData.supportingDocuments).toEqual([
+                expect.objectContaining({
+                    s3URL: 's3://legacy-documents/key/supportingDocument11.pdf',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'allusers/key',
+                }),
+            ])
 
-            expect(updatedFormData.stateContacts).toEqual(
-                expect.arrayContaining(updatedFormData.stateContacts)
-            )
+            expect(updatedFormData.stateContacts).toEqual([
+                expect.objectContaining({
+                    name: 'statecontact',
+                    titleRole: 'thestatestofcontacts',
+                    email: 'statemcstate@examepl.com',
+                }),
+            ])
         })
 
         it('writes givenName, familyName and suffix on state contacts', async () => {

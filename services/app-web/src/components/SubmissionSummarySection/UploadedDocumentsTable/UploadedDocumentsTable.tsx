@@ -25,6 +25,12 @@ export type UploadedDocumentsTableProps = {
     multipleDocumentsAllowed?: boolean // used to determined if we display validations based on doc list length
     documentCategory?: string // used to determine if we display document category column
     isLinkedRate?: boolean
+    documentDiff?: DocumentDiff
+}
+
+export type DocumentDiff = {
+    added: string[] // document names added since the prior submission (a name in both lists means the file was replaced)
+    removed: string[]
 }
 
 export const UploadedDocumentsTable = ({
@@ -38,6 +44,7 @@ export const UploadedDocumentsTable = ({
     multipleDocumentsAllowed = true,
     hideDynamicFeedback = false,
     isLinkedRate = false,
+    documentDiff,
 }: UploadedDocumentsTableProps): React.ReactElement => {
     const initialDocState = documents.map((doc) => ({
         ...doc,
@@ -70,7 +77,21 @@ export const UploadedDocumentsTable = ({
         )
     }
 
+    // Diff-based tags: a name only in added is a new doc, in both lists a replaced doc
+    const documentDiffTag = (
+        doc: DocumentWithS3Data
+    ): 'NEW' | 'UPDATED' | undefined => {
+        if (!documentDiff || !documentDiff.added.includes(doc.name)) {
+            return undefined
+        }
+        return documentDiff.removed.includes(doc.name) ? 'UPDATED' : 'NEW'
+    }
+
     const shouldHaveNewTag = (doc: DocumentWithS3Data) => {
+        if (documentDiff) {
+            return documentDiffTag(doc) === 'NEW' // diff data replaces the date-based calculation
+        }
+
         if (!isCMSUser) {
             return false // design requirement, don't show new tag to state users on review submit
         }
@@ -169,8 +190,12 @@ export const UploadedDocumentsTable = ({
                     <tr>
                         <th scope="col">Document name</th>
                         <th scope="col">Date added</th>
-                        {documentCategory && (
-                            <th scope="col">Document category</th>
+                        {documentDiff ? (
+                            <th scope="col">Last updated</th>
+                        ) : (
+                            documentCategory && (
+                                <th scope="col">Document category</th>
+                            )
                         )}
                         {showLegacySharedRatesAcross && (
                             <th scope="col">Linked submissions</th>
@@ -184,6 +209,9 @@ export const UploadedDocumentsTable = ({
                                 <th scope="row">
                                     <DocumentTag
                                         isNew={shouldHaveNewTag(doc)}
+                                        isUpdated={
+                                            documentDiffTag(doc) === 'UPDATED'
+                                        }
                                         isShared={showLegacySharedRatesAcross}
                                     />
                                     <LinkWithLogging
@@ -199,6 +227,9 @@ export const UploadedDocumentsTable = ({
                                 <th scope="row">
                                     <DocumentTag
                                         isNew={shouldHaveNewTag(doc)}
+                                        isUpdated={
+                                            documentDiffTag(doc) === 'UPDATED'
+                                        }
                                         isShared={showLegacySharedRatesAcross}
                                     />
                                     {doc.name}
@@ -214,7 +245,20 @@ export const UploadedDocumentsTable = ({
                                     <span className="srOnly">N/A</span>
                                 )}
                             </td>
-                            {documentCategory && <td>{documentCategory}</td>}
+                            {documentDiff ? (
+                                <td>
+                                    {canDisplayDateAddedForDocument(doc) ? (
+                                        formatCalendarDate(
+                                            doc.dateAdded,
+                                            'America/Los_Angeles'
+                                        )
+                                    ) : (
+                                        <span className="srOnly">N/A</span>
+                                    )}
+                                </td>
+                            ) : (
+                                documentCategory && <td>{documentCategory}</td>
+                            )}
                             {showLegacySharedRatesAcross && (
                                 <td>
                                     {linkedPackagesList({

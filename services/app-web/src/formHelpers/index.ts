@@ -5,6 +5,7 @@ export {
     getAvailableContractPrograms,
 } from './programHelpers'
 export {
+    emailAddressRegex,
     isDateRangeEmpty,
     validateDateFormat,
     validateDateRange12Months,

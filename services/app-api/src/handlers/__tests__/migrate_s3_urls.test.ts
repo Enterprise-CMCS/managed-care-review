@@ -1,188 +1,292 @@
-import { describe, test, expect, beforeEach, afterEach } from 'vitest'
+import { CopyObjectCommand, GetObjectTaggingCommand } from '@aws-sdk/client-s3'
+import type { Callback, Context } from 'aws-lambda'
+import { afterEach, describe, expect, test, vi } from 'vitest'
+import {
+    main,
+    migrateDocumentTable,
+    migrateZipTable,
+    type MigrationPrismaClient,
+} from '../migrate_s3_urls'
+
+const testContext = {} as Context
+const testCallback: Callback = vi.fn()
+
+function createMigrationClient(
+    documents: Array<{
+        id: string
+        s3URL: string
+        name: string
+        s3BucketName: string | null
+        s3Key: string | null
+    }> = [],
+    zips: Array<{
+        id: string
+        s3URL: string
+        s3BucketName: string | null
+        s3Key: string | null
+    }> = []
+): {
+    client: MigrationPrismaClient
+    documentTable: MigrationPrismaClient['contractDocument']
+    zipTable: MigrationPrismaClient['documentZipPackage']
+} {
+    const emptyDocumentTable: MigrationPrismaClient['contractDocument'] = {
+        findMany: vi.fn().mockResolvedValue([]),
+        update: vi.fn().mockResolvedValue({}),
+    }
+    const documentTable: MigrationPrismaClient['contractDocument'] = {
+        findMany: vi.fn().mockResolvedValue(documents),
+        update: vi.fn().mockResolvedValue({}),
+    }
+    const zipTable: MigrationPrismaClient['documentZipPackage'] = {
+        findMany: vi.fn().mockResolvedValue(zips),
+        update: vi.fn().mockResolvedValue({}),
+    }
+
+    return {
+        // These helper tests exercise one representative document table and
+        // the zip table. The remaining required document delegates return no
+        // candidates so they satisfy the migration client without affecting
+        // the table under test.
+        client: {
+            contractDocument: documentTable,
+            contractSupportingDocument: emptyDocumentTable,
+            rateDocument: emptyDocumentTable,
+            rateSupportingDocument: emptyDocumentTable,
+            contractQuestionDocument: emptyDocumentTable,
+            contractQuestionResponseDocument: emptyDocumentTable,
+            rateQuestionDocument: emptyDocumentTable,
+            rateQuestionResponseDocument: emptyDocumentTable,
+            documentZipPackage: zipTable,
+        },
+        documentTable,
+        zipTable,
+    }
+}
 
 describe('migrate_s3_urls handler', () => {
-    const originalEnv = process.env
-
-    beforeEach(() => {
-        // Reset env vars before each test
-        process.env = { ...originalEnv }
-    })
-
     afterEach(() => {
-        // Restore original env
-        process.env = originalEnv
+        vi.unstubAllEnvs()
+        vi.restoreAllMocks()
     })
 
     describe('environment variable validation', () => {
         test('throws error when VITE_APP_S3_DOCUMENTS_BUCKET is missing', async () => {
-            delete process.env.VITE_APP_S3_DOCUMENTS_BUCKET
-            process.env.VITE_APP_S3_QA_BUCKET = 'test-qa-bucket'
+            vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', '')
+            vi.stubEnv('VITE_APP_S3_QA_BUCKET', 'test-qa-bucket')
 
-            const { main } = await import('../migrate_s3_urls')
-
-            await expect(main({}, {} as any, {} as any)).rejects.toThrow(
+            await expect(main({}, testContext, testCallback)).rejects.toThrow(
                 'VITE_APP_S3_DOCUMENTS_BUCKET environment variable is required'
             )
         })
 
         test('throws error when VITE_APP_S3_QA_BUCKET is missing', async () => {
-            process.env.VITE_APP_S3_DOCUMENTS_BUCKET = 'test-docs-bucket'
-            delete process.env.VITE_APP_S3_QA_BUCKET
+            vi.stubEnv('VITE_APP_S3_DOCUMENTS_BUCKET', 'test-docs-bucket')
+            vi.stubEnv('VITE_APP_S3_QA_BUCKET', '')
 
-            const { main } = await import('../migrate_s3_urls')
-
-            await expect(main({}, {} as any, {} as any)).rejects.toThrow(
+            await expect(main({}, testContext, testCallback)).rejects.toThrow(
                 'VITE_APP_S3_QA_BUCKET environment variable is required'
             )
         })
     })
+})
 
-    describe('event parameter handling', () => {
-        test('handles undefined event gracefully with defaults', async () => {
-            process.env.VITE_APP_S3_DOCUMENTS_BUCKET = 'test-docs-bucket'
-            process.env.VITE_APP_S3_QA_BUCKET = 'test-qa-bucket'
-            process.env.DATABASE_URL = 'postgresql://invalid-url-for-test'
+describe('document object reconciliation', () => {
+    const legacyDocument = {
+        id: 'document-1',
+        s3URL: 's3://legacy-bucket/uuid.pdf/original.pdf',
+        name: 'original.pdf',
+        s3BucketName: 'legacy-bucket',
+        s3Key: 'allusers/uuid.pdf',
+    }
 
-            const { main } = await import('../migrate_s3_urls')
+    test('reuses an existing CDK object instead of copying it again', async () => {
+        const { client, documentTable } = createMigrationClient([
+            legacyDocument,
+        ])
+        const send = vi.fn().mockResolvedValue({})
 
-            // Handler catches errors and returns response with success: false
-            const result = await main(undefined as any, {} as any, {} as any)
+        const result = await migrateDocumentTable(
+            client,
+            'contractDocument',
+            'cdk-bucket',
+            undefined,
+            false,
+            { send }
+        )
 
-            expect(result.success).toBe(false)
-            expect(result.dryRun).toBe(false) // defaults to false
-            expect(result.documentsBucket).toBe('test-docs-bucket')
-            expect(result.qaBucket).toBe('test-qa-bucket')
-            // Should not throw "Cannot read property 'dryRun' of undefined"
+        expect(result).toEqual({ processed: 1, failed: 0 })
+        expect(documentTable.findMany).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: {
+                    OR: expect.arrayContaining([
+                        { s3BucketName: { not: 'cdk-bucket' } },
+                        {
+                            s3URL: {
+                                not: {
+                                    startsWith: 's3://cdk-bucket/',
+                                },
+                            },
+                        },
+                    ]),
+                },
+            })
+        )
+        expect(send).toHaveBeenCalledTimes(1)
+        expect(send.mock.calls[0][0]).toBeInstanceOf(GetObjectTaggingCommand)
+        expect(send.mock.calls[0][0].input).toEqual({
+            Bucket: 'cdk-bucket',
+            Key: 'allusers/uuid.pdf',
         })
-
-        test('handles empty event object with defaults', async () => {
-            process.env.VITE_APP_S3_DOCUMENTS_BUCKET = 'test-docs-bucket'
-            process.env.VITE_APP_S3_QA_BUCKET = 'test-qa-bucket'
-            process.env.DATABASE_URL = 'postgresql://invalid-url-for-test'
-
-            const { main } = await import('../migrate_s3_urls')
-
-            const result = await main({}, {} as any, {} as any)
-
-            expect(result.success).toBe(false)
-            expect(result.dryRun).toBe(false) // defaults to false
-            expect(result.documentsBucket).toBe('test-docs-bucket')
-            expect(result.qaBucket).toBe('test-qa-bucket')
-        })
-
-        test('respects dryRun and limit from event', async () => {
-            process.env.VITE_APP_S3_DOCUMENTS_BUCKET = 'test-docs-bucket'
-            process.env.VITE_APP_S3_QA_BUCKET = 'test-qa-bucket'
-            process.env.DATABASE_URL = 'postgresql://invalid-url-for-test'
-
-            const { main } = await import('../migrate_s3_urls')
-
-            const result = await main(
-                { dryRun: true, limit: 10 },
-                {} as any,
-                {} as any
-            )
-
-            expect(result.dryRun).toBe(true)
-            // limit would be used in the actual migration (can't easily test without DB)
-        })
-    })
-
-    describe('bucket selection logic', () => {
-        test('uses correct bucket types based on document tables', () => {
-            // This is implicit in the implementation, but we document the expected behavior:
-            // - ContractDocument, RateDocument, ContractSupportingDocument, RateSupportingDocument, DocumentZipPackage
-            //   should use DOCUMENTS bucket
-            // - ContractQuestionDocument, ContractQuestionResponseDocument, RateQuestionDocument, RateQuestionResponseDocument
-            //   should use QA bucket
-
-            const documentsBucketTables = [
-                'ContractDocument',
-                'RateDocument',
-                'ContractSupportingDocument',
-                'RateSupportingDocument',
-                'DocumentZipPackage',
-            ]
-
-            const qaBucketTables = [
-                'ContractQuestionDocument',
-                'ContractQuestionResponseDocument',
-                'RateQuestionDocument',
-                'RateQuestionResponseDocument',
-            ]
-
-            // This test documents the expected bucket mapping
-            expect(documentsBucketTables).toHaveLength(5)
-            expect(qaBucketTables).toHaveLength(4)
+        expect(documentTable.update).toHaveBeenCalledWith({
+            where: { id: 'document-1' },
+            data: {
+                s3URL: 's3://cdk-bucket/uuid.pdf/original.pdf',
+                s3BucketName: 'cdk-bucket',
+                s3Key: 'allusers/uuid.pdf',
+            },
         })
     })
 
-    describe('zip s3URL key extraction', () => {
-        test('extracts full path from contract zip URL', () => {
-            const s3URL =
-                's3://bucket/zips/contracts/abc-123/contract-documents.zip'
-            const parts = s3URL.split('/')
-            const keyParts = parts.slice(3)
-            const s3Key = keyParts.join('/')
-
-            expect(s3Key).toBe('zips/contracts/abc-123/contract-documents.zip')
-            expect(s3Key).toContain('zips/')
+    test('does not treat access denied as a missing object', async () => {
+        const { client, documentTable } = createMigrationClient([
+            legacyDocument,
+        ])
+        const send = vi.fn().mockRejectedValue({
+            name: 'AccessDenied',
+            $metadata: { httpStatusCode: 403 },
         })
+        vi.spyOn(console, 'error').mockImplementation(() => undefined)
 
-        test('extracts full path from rate zip URL', () => {
-            const s3URL = 's3://bucket/zips/rates/def-456/rate-documents.zip'
-            const parts = s3URL.split('/')
-            const keyParts = parts.slice(3)
-            const s3Key = keyParts.join('/')
+        const result = await migrateDocumentTable(
+            client,
+            'contractDocument',
+            'cdk-bucket',
+            undefined,
+            false,
+            { send }
+        )
 
-            expect(s3Key).toBe('zips/rates/def-456/rate-documents.zip')
-            expect(s3Key).toContain('zips/')
+        expect(result).toEqual({ processed: 0, failed: 1 })
+        expect(send).toHaveBeenCalledOnce()
+        expect(send.mock.calls[0][0]).toBeInstanceOf(GetObjectTaggingCommand)
+        expect(documentTable.update).not.toHaveBeenCalled()
+    })
+
+    test('copies an old-bucket-only object before changing its database pointer', async () => {
+        const migratedMetadataWithStaleURL = {
+            ...legacyDocument,
+            s3BucketName: 'cdk-bucket',
+        }
+        const { client, documentTable } = createMigrationClient([
+            migratedMetadataWithStaleURL,
+        ])
+        const send = vi
+            .fn()
+            .mockRejectedValueOnce({
+                name: 'NotFound',
+                $metadata: { httpStatusCode: 404 },
+            })
+            .mockResolvedValueOnce({})
+            .mockResolvedValueOnce({})
+
+        const result = await migrateDocumentTable(
+            client,
+            'contractDocument',
+            'cdk-bucket',
+            undefined,
+            false,
+            { send }
+        )
+
+        expect(result).toEqual({ processed: 1, failed: 0 })
+        expect(send.mock.calls[1][0]).toBeInstanceOf(CopyObjectCommand)
+        expect(send.mock.calls[1][0].input).toEqual({
+            Bucket: 'cdk-bucket',
+            Key: 'allusers/uuid.pdf',
+            CopySource: 'legacy-bucket/allusers/uuid.pdf',
         })
+        expect(send.mock.calls[2][0]).toBeInstanceOf(GetObjectTaggingCommand)
+        expect(documentTable.update).toHaveBeenCalledOnce()
+    })
 
-        test('extracts full path from supporting docs zip URL', () => {
-            const s3URL =
-                's3://bucket/zips/contracts/xyz-789/contract-supporting-documents.zip'
-            const parts = s3URL.split('/')
-            const keyParts = parts.slice(3)
-            const s3Key = keyParts.join('/')
+    test('does not change the database pointer when copying the object fails', async () => {
+        const { client, documentTable } = createMigrationClient([
+            legacyDocument,
+        ])
+        const copyError = new Error('legacy object unavailable')
+        const send = vi
+            .fn()
+            .mockRejectedValueOnce({
+                name: 'NotFound',
+                $metadata: { httpStatusCode: 404 },
+            })
+            .mockRejectedValueOnce(copyError)
+        vi.spyOn(console, 'error').mockImplementation(() => undefined)
 
-            expect(s3Key).toBe(
-                'zips/contracts/xyz-789/contract-supporting-documents.zip'
-            )
-        })
+        const result = await migrateDocumentTable(
+            client,
+            'contractDocument',
+            'cdk-bucket',
+            undefined,
+            false,
+            { send }
+        )
 
-        test('does not double-prepend zips/ prefix', () => {
-            // This was the bug Copilot caught
-            const s3URL =
-                's3://bucket/zips/contracts/abc-123/contract-documents.zip'
-            const parts = s3URL.split('/')
+        expect(result).toEqual({ processed: 0, failed: 1 })
+        expect(documentTable.update).not.toHaveBeenCalled()
+    })
 
-            // OLD BUGGY CODE would do:
-            // const zipFilename = parts[3] // 'zips'
-            // const s3Key = `zips/${zipFilename}` // 'zips/zips' ❌
+    test('dry run reports the repair without touching S3 or the database', async () => {
+        const { client, documentTable } = createMigrationClient([
+            legacyDocument,
+        ])
+        const send = vi.fn()
 
-            // NEW CORRECT CODE:
-            const keyParts = parts.slice(3)
-            const s3Key = keyParts.join('/')
+        const result = await migrateDocumentTable(
+            client,
+            'contractDocument',
+            'cdk-bucket',
+            undefined,
+            true,
+            { send }
+        )
 
-            expect(s3Key).toBe('zips/contracts/abc-123/contract-documents.zip')
-            expect(s3Key).not.toBe('zips/zips') // Should not double-prepend
-            expect(s3Key).not.toContain('zips/zips')
-        })
+        expect(result).toEqual({ processed: 1, failed: 0 })
+        expect(send).not.toHaveBeenCalled()
+        expect(documentTable.update).not.toHaveBeenCalled()
+    })
 
-        test('validates zip URLs start with zips/', () => {
-            const validUrl = 's3://bucket/zips/contracts/abc/file.zip'
-            const parts = validUrl.split('/')
-            const s3Key = parts.slice(3).join('/')
+    test('canonicalizes existing zip package records', async () => {
+        const { client, zipTable } = createMigrationClient(
+            [],
+            [
+                {
+                    id: 'zip-1',
+                    s3URL: 's3://legacy-bucket/zips/contracts/revision/documents.zip',
+                    s3BucketName: 'legacy-bucket',
+                    s3Key: 'zips/contracts/revision/documents.zip',
+                },
+            ]
+        )
+        const send = vi.fn().mockResolvedValue({})
 
-            expect(s3Key.startsWith('zips/')).toBe(true)
+        const result = await migrateZipTable(
+            client,
+            'cdk-bucket',
+            undefined,
+            false,
+            { send }
+        )
 
-            // Invalid URL without zips/ prefix
-            const invalidUrl = 's3://bucket/contracts/abc/file.zip'
-            const invalidParts = invalidUrl.split('/')
-            const invalidKey = invalidParts.slice(3).join('/')
-
-            expect(invalidKey.startsWith('zips/')).toBe(false)
+        expect(result).toEqual({ processed: 1, failed: 0 })
+        expect(zipTable.update).toHaveBeenCalledWith({
+            where: { id: 'zip-1' },
+            data: {
+                s3URL: 's3://cdk-bucket/zips/contracts/revision/documents.zip',
+                s3BucketName: 'cdk-bucket',
+                s3Key: 'zips/contracts/revision/documents.zip',
+            },
         })
     })
 })

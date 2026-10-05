@@ -100,14 +100,17 @@ export const EQROContractDetailsFormSchema = (
             .when(
                 // ContractDateEnd must be at minimum the day after Start
                 'contractDateStart',
-                (contractDateStart: Date, schema: Yup.DateSchema) => {
+                (
+                    [contractDateStart]: [Date | undefined],
+                    schema: Yup.DateSchema
+                ) => {
                     const startDate = dayjs(contractDateStart)
-                    if (startDate.isValid()) {
-                        return schema.min(
-                            startDate.add(1, 'day'),
-                            'The end date must come after the start date'
-                        )
-                    }
+                    return startDate.isValid()
+                        ? schema.min(
+                              startDate.add(1, 'day'),
+                              'The end date must come after the start date'
+                          )
+                        : schema
                 }
             ),
         eqroNewContractor: eqroProvisionValidation('eqroNewContractor'),
