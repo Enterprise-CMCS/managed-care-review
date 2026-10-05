@@ -264,7 +264,7 @@ Cypress.Commands.add('fillOutEQROContractDetails', () => {
         })
 
     cy.findAllByText(
-        'New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)'
+        'New optional activities to be performed on an MCO in accordance with 42 CFR § 438.358(c)'
     )
         .first()
         .parent()

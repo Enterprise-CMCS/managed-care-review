@@ -852,7 +852,7 @@ export const EQROContractDetails = ({
                                                     >
                                                         <Fieldset
                                                             id="eqroProvisionMcoNewOptionalActivity"
-                                                            legend="New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)"
+                                                            legend="New optional activities to be performed on an MCO in accordance with 42 CFR § 438.358(c)"
                                                         >
                                                             <span
                                                                 className={
@@ -864,7 +864,7 @@ export const EQROContractDetails = ({
                                                             <FieldYesNo
                                                                 id="eqroProvisionMcoNewOptionalActivity"
                                                                 name="eqroProvisionMcoNewOptionalActivity"
-                                                                label="New optional activities to be performed on MCO in accordance with 42 CFR $ 438.358(c)"
+                                                                label="New optional activities to be performed on an MCO in accordance with 42 CFR § 438.358(c)"
                                                                 showError={Boolean(
                                                                     showFieldErrors(
                                                                         'eqroProvisionMcoNewOptionalActivity',
