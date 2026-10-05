@@ -43,6 +43,10 @@ import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
 import type { IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
+import {
+    SubmissionEventsPoc,
+    submissionEventsPocEnabled,
+} from '../constructs/submission-events-poc'
 
 export interface AppApiStackProps extends BaseStackProps {
     // VPC imported from environment (Vpc.fromLookup), security groups from Network stack exports
@@ -77,6 +81,8 @@ export class AppApiStack extends BaseStack {
     public readonly syntheticDataStateCredentialsSecret?: Secret
     public readonly syntheticDataCMSCredentialsSecret?: Secret
     public readonly graphqlFunction: NodejsFunction
+    public readonly submissionEventsPublisherFunction?: NodejsFunction
+    public readonly submissionEventsRecoveryRule?: Rule
 
     // Network resources from Network stack
     private readonly vpc: IVpc
@@ -664,6 +670,112 @@ export class AppApiStack extends BaseStack {
             }
         )
 
+        if (
+            submissionEventsPocEnabled(
+                this.stage,
+                process.env.SUBMISSION_EVENTS_POC_ENABLED
+            )
+        ) {
+            const destinations = new SubmissionEventsPoc(
+                this,
+                'SubmissionEventsPoc',
+                this.stage
+            )
+            const publisherRole = new Role(
+                this,
+                'SubmissionEventsPublisherRole',
+                {
+                    assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
+                    managedPolicies: [
+                        ManagedPolicy.fromAwsManagedPolicyName(
+                            'service-role/AWSLambdaVPCAccessExecutionRole'
+                        ),
+                    ],
+                }
+            )
+            Secret.fromSecretNameV2(
+                this,
+                'SubmissionEventsDatabaseSecret',
+                environment.SECRETS_MANAGER_SECRET
+            ).grantRead(publisherRole)
+            destinations.topic.grantPublish(publisherRole)
+
+            this.submissionEventsPublisherFunction = this.createLambdaFunction(
+                'publish-submission-events',
+                'publish_submission_events',
+                'main',
+                {
+                    timeout: Duration.seconds(60),
+                    memorySize: 512,
+                    reservedConcurrentExecutions: 1,
+                    role: publisherRole,
+                    vpc: this.vpc,
+                    vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_EGRESS },
+                    securityGroups,
+                    environment: {
+                        stage: this.stage,
+                        DATABASE_URL: environment.DATABASE_URL,
+                        SECRETS_MANAGER_SECRET:
+                            environment.SECRETS_MANAGER_SECRET,
+                        SUBMISSION_EVENTS_POC_ENABLED: 'true',
+                        SUBMISSION_EVENTS_TOPIC_ARN:
+                            destinations.topic.topicArn,
+                    },
+                    bundling: this.createBundling('publish-submission-events', [
+                        this.getPrismaCleanupCommands(),
+                    ]),
+                }
+            )
+            this.graphqlFunction.addEnvironment(
+                'SUBMISSION_EVENTS_POC_ENABLED',
+                'true'
+            )
+            this.graphqlFunction.addEnvironment(
+                'SUBMISSION_EVENTS_PUBLISHER_FUNCTION_NAME',
+                this.submissionEventsPublisherFunction.functionName
+            )
+            // The existing shared API role already permits Lambda invocation.
+            // Adding a function-ARN grant to that role would make the migration
+            // Lambda depend on the publisher, which itself waits on migrations.
+            this.submissionEventsRecoveryRule = new Rule(
+                this,
+                'SubmissionEventsRecovery',
+                {
+                    description:
+                        'Recover pending submission notifications and missed post-commit wakeups',
+                    schedule: Schedule.rate(Duration.minutes(1)),
+                    targets: [
+                        new LambdaFunction(
+                            this.submissionEventsPublisherFunction
+                        ),
+                    ],
+                }
+            )
+            new CfnOutput(this, 'SubmissionEventsTopicArn', {
+                value: destinations.topic.topicArn,
+            })
+            new CfnOutput(this, 'SubmissionEventsQueueUrl', {
+                value: destinations.queue.queueUrl,
+            })
+            new CfnOutput(this, 'SubmissionEventsQueueArn', {
+                value: destinations.queue.queueArn,
+            })
+            new CfnOutput(this, 'SubmissionEventsDeadLetterQueueUrl', {
+                value: destinations.deadLetterQueue.queueUrl,
+            })
+            new CfnOutput(this, 'SubmissionEventsPublisherFunctionName', {
+                value: this.submissionEventsPublisherFunction.functionName,
+            })
+            new CfnOutput(this, 'SubmissionEventsConsumerPolicy', {
+                description:
+                    'Queue-scoped policy for an approved consumer identity; not automatically attached',
+                value: Fn.toJsonString({
+                    Version: '2012-10-17',
+                    Statement: [destinations.consumerPolicy.toStatementJson()],
+                }),
+            })
+        }
+
         // Run database migrations as part of the deploy, ordered so the schema is
         // always migrated before the GraphQL Lambda swaps onto new code.
         //
@@ -687,7 +799,15 @@ export class AppApiStack extends BaseStack {
             // covers the trigger provider's invoke overhead and retries.
             timeout: Duration.minutes(2),
             executeAfter: [this.migrateFunction],
-            executeBefore: [this.graphqlFunction],
+            executeBefore: [
+                this.graphqlFunction,
+                ...(this.submissionEventsPublisherFunction
+                    ? [
+                          this.submissionEventsPublisherFunction,
+                          this.submissionEventsRecoveryRule!,
+                      ]
+                    : []),
+            ],
         })
 
         // Create API Gateway resources and methods first

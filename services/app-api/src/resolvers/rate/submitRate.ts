@@ -1,6 +1,7 @@
 import type { MutationResolvers } from '../../gen/gqlServer'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
+import { wakeSubmissionEventPublisher } from '../../submissionEvents/wakePublisher'
 import { logResolverError } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { NotFoundError, type Store } from '../../postgres'
@@ -253,6 +254,8 @@ export function submitRate(
                         },
                     })
                 }
+
+                await wakeSubmissionEventPublisher()
 
                 // generate zips
                 const rateRevision = submittedRate.revisions[0]

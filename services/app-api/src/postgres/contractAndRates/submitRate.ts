@@ -10,6 +10,8 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import { submitContractAndOrRates } from './submitContractAndOrRates'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { runTransactionWithRowLock } from '../prismaHelpers'
+import { captureRateSubmissionEvent } from '../../submissionEvents/capture'
+import { submissionEventsStage } from '../../submissionEvents/config'
 
 async function submitRateInsideTransaction(
     tx: PrismaTransactionType,
@@ -107,7 +109,15 @@ async function submitRate(
         operationName: 'submitRate',
         table: 'RateTable',
         id: args.rateID,
-        transaction: async (tx) => await submitRateInsideTransaction(tx, args),
+        transaction: async (tx) => {
+            const result = await submitRateInsideTransaction(tx, args)
+            if (result instanceof Error) return result
+
+            const eventStage = submissionEventsStage()
+            if (eventStage)
+                await captureRateSubmissionEvent(tx, result, eventStage)
+            return result
+        },
     })
 }
 

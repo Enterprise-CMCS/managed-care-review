@@ -551,6 +551,8 @@ jobs:
           EMAILER_MODE: LOCAL
           SYNTHETIC_DATA_ENABLED: 'true'
           SYNTHETIC_DATA_ALLOWED_STAGE: ${{ needs.begin-deployment.outputs.stage-name }}
+          # Opt in only the named review stage; unset means no SNS/SQS POC resources.
+          SUBMISSION_EVENTS_POC_ENABLED: ${{ vars.SUBMISSION_EVENTS_POC_STAGE != '' && vars.SUBMISSION_EVENTS_POC_STAGE == needs.begin-deployment.outputs.stage-name && 'true' || 'false' }}
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-${STAGE_NAME}-cdk \

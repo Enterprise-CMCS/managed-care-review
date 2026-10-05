@@ -38,6 +38,7 @@ import { canSyntheticDataWrite, canWrite } from '../../oauth/oauthAuthorization'
 import type { DocumentZipService } from '../../zip/generateZip'
 import { buildResubmitRevisionChanges } from '../../emailer/emails/resubmitRevisionChanges'
 import { getStateAnalystsEmails, getStatePrograms } from '../helpers'
+import { wakeSubmissionEventPublisher } from '../../submissionEvents/wakePublisher'
 
 const validateStatusAndUpdateInfo = (
     status: PackageStatusType,
@@ -506,6 +507,10 @@ export function submitContract(
                         },
                     })
                 }
+
+                // Submission and its outbox entry are committed. Publication failure
+                // must not turn a saved submission into an API failure.
+                await wakeSubmissionEventPublisher()
 
                 // Generate zips!
                 const contractZipRes =

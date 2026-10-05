@@ -374,6 +374,26 @@ model UpdateInfoTable {
   relatedRates     RateRevisionTable[]
 }
 
+// Review-only submission notification POC. Captured in the submission transaction;
+// publication is at-least-once and never runs inside that transaction.
+model SubmissionEventOutbox {
+  id            String    @id @default(uuid())
+  stage         String
+  submissionID  String
+  event         Json
+  createdAt     DateTime  @default(now())
+  publishedAt   DateTime?
+  snsMessageID  String?
+  attempts      Int       @default(0)
+  nextAttemptAt DateTime  @default(now())
+  leaseToken    String?
+  leaseUntil    DateTime?
+  lastError     String?
+
+  @@unique([stage, submissionID])
+  @@index([stage, publishedAt, nextAttemptAt])
+}
+
 // SubmissionPackageJoinTable records the set of related rate and contracts for a given submission.
 model SubmissionPackageJoinTable {
   submissionID       String

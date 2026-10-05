@@ -9,6 +9,8 @@ import {
     healthPlanReviewDetermination,
 } from '@mc-review/submissions'
 import { runTransactionWithRowLock } from '../prismaHelpers'
+import { captureSubmissionEvent } from '../../submissionEvents/capture'
+import { submissionEventsStage } from '../../submissionEvents/config'
 
 async function submitContractInsideTransaction(
     tx: PrismaTransactionType,
@@ -231,7 +233,7 @@ async function submitContract(
             timeout: 10000,
         },
         transaction: async (tx) => {
-            const result = await submitContractInsideTransaction(tx, {
+            let result = await submitContractInsideTransaction(tx, {
                 contractID,
                 submittedByUserID,
                 submittedReason,
@@ -252,11 +254,8 @@ async function submitContract(
                     throw eqroReviewUpdate
                 }
 
-                //return updated contract with review action.
-                return eqroReviewUpdate
-            }
-
-            if (
+                result = eqroReviewUpdate
+            } else if (
                 chipSubmissionAutomationFlag &&
                 result.contractSubmissionType === 'HEALTH_PLAN'
             ) {
@@ -270,7 +269,12 @@ async function submitContract(
                     throw healthPlanReviewUpdate
                 }
 
-                return healthPlanReviewUpdate
+                result = healthPlanReviewUpdate
+            }
+
+            const eventStage = submissionEventsStage()
+            if (eventStage) {
+                await captureSubmissionEvent(tx, result, eventStage)
             }
 
             return result

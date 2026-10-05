@@ -23,5 +23,12 @@
     "ts-node": {
         "esm": true
     },
-    "include": ["src", "bin", "lib", "eslint.config.ts", "jest.config.js"]
+    "include": [
+        "src",
+        "bin",
+        "lib",
+        "test",
+        "eslint.config.ts",
+        "jest.config.js"
+    ]
 }
