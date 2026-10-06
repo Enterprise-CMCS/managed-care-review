@@ -53,6 +53,14 @@ export const HealthPlanSubmissionForm = (): React.ReactElement => {
                     )}
                     element={<Contacts />}
                 />
+                {showAttestationsPage && (
+                    <Route
+                        path={getRelativePathFromNestedRoute(
+                            'SUBMISSIONS_ATTESTATIONS'
+                        )}
+                        element={<Attestations />}
+                    />
+                )}
                 <Route
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_ATTESTATIONS'
