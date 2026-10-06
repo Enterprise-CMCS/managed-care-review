@@ -54,6 +54,11 @@ export const ReviewSubmit = (): React.ReactElement => {
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
 
+    const showProcurementAttestation = ldClient?.variation(
+        featureFlags.PROCUREMENT_ATTESTATION.flag,
+        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
+    )
+
     const chipSubmissionAutomation = ldClient?.variation(
         featureFlags.CHIP_SUBMISSION_AUTOMATION.flag,
         featureFlags.CHIP_SUBMISSION_AUTOMATION.defaultValue
@@ -107,6 +112,12 @@ export const ReviewSubmit = (): React.ReactElement => {
     const isContractActionAndRateCertification =
         contractFormData.submissionType === 'CONTRACT_AND_RATES'
 
+    // Attestations page precedes review and submit for base contract submissions
+    const previousFormPage: RouteT =
+        showProcurementAttestation && contractFormData.contractType === 'BASE'
+            ? 'SUBMISSIONS_ATTESTATIONS'
+            : 'SUBMISSIONS_CONTACTS'
+
     const submissionName =
         packageName(
             contract.stateCode,
@@ -120,7 +131,8 @@ export const ReviewSubmit = (): React.ReactElement => {
                 <DynamicStepIndicator
                     formPages={activeFormPages(
                         contractFormData,
-                        hideSupportingDocs
+                        hideSupportingDocs,
+                        showProcurementAttestation
                     )}
                     currentFormPage="SUBMISSIONS_REVIEW_SUBMIT"
                 />
@@ -166,11 +178,9 @@ export const ReviewSubmit = (): React.ReactElement => {
                     <ActionButton
                         type="button"
                         variant="outline"
-                        link_url={getPath('SUBMISSIONS_CONTACTS')}
+                        link_url={getPath(previousFormPage)}
                         parent_component_type="page body"
-                        onClick={() =>
-                            navigate(getPath('SUBMISSIONS_CONTACTS'))
-                        }
+                        onClick={() => navigate(getPath(previousFormPage))}
                         disabled={isSubmitting}
                     >
                         Back
