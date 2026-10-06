@@ -25,7 +25,7 @@
         "typescript": "7.0.2"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.1145.0",
+        "@aws-sdk/client-secrets-manager": "^3.1146.0",
         "@aws-solutions-constructs/aws-apigateway-lambda": "2.103.0",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.102.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.104.0",
