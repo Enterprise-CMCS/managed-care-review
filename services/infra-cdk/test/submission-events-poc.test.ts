@@ -23,6 +23,27 @@ describe('submission events review POC', () => {
             )
         }
     })
+    it('enforces HTTPS publication with an explicit SNS topic-policy action', () => {
+        const stack = new Stack(new App(), 'Test')
+        const poc = new SubmissionEventsPoc(stack, 'Events', 'poc-events')
+        const template = Template.fromStack(stack)
+        // SNS rejected sns:* at deployment with "action out of service scope".
+        // Keep the TLS deny scoped to the supported, explicit Publish action.
+        template.hasResourceProperties('AWS::SNS::TopicPolicy', {
+            PolicyDocument: {
+                Statement: [
+                    Match.objectLike({
+                        Effect: 'Deny',
+                        Action: 'sns:Publish',
+                        Principal: { AWS: '*' },
+                        Resource: stack.resolve(poc.topic.topicArn),
+                        Condition: { Bool: { 'aws:SecureTransport': 'false' } },
+                    }),
+                ],
+                Version: '2012-10-17',
+            },
+        })
+    })
     it('creates an encrypted topic and independent durable queue with raw delivery and dead letters', () => {
         const stack = new Stack(new App(), 'Test')
         const poc = new SubmissionEventsPoc(stack, 'Events', 'poc-events')

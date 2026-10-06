@@ -54,8 +54,10 @@ HTTPS access to Lambda for prompt wakeups. Missing wakeups are recoverable, but
 missing SNS/database connectivity prevents eventual delivery until fixed.
 The publisher has a dedicated role with database-secret read permission,
 publication to its one encrypted topic (including its KMS key), and Lambda
-logging/VPC permissions. The topic/queues require TLS. Queue send grants are
-restricted to the topic's ARN. No consumer credentials or identities are created.
+logging/VPC permissions. SNS publishing and SQS access require TLS. The topic's
+TLS deny uses the explicit `sns:Publish` action because SNS rejects `sns:*` in
+this resource policy. Queue send grants are restricted to the topic's ARN.
+No consumer credentials or identities are created.
 
 ## Envelope v1
 

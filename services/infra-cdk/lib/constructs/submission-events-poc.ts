@@ -49,7 +49,8 @@ export class SubmissionEventsPoc extends Construct {
             new PolicyStatement({
                 effect: Effect.DENY,
                 principals: [new AnyPrincipal()],
-                actions: ['sns:*'],
+                // SNS topic policies require supported, explicit SNS actions.
+                actions: ['sns:Publish'],
                 resources: [this.topic.topicArn],
                 conditions: { Bool: { 'aws:SecureTransport': 'false' } },
             })
