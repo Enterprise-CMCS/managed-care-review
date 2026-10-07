@@ -28,5 +28,5 @@ Default.decorators = [(StoryFn) => ProvidersDecorator(StoryFn, {})]
 
 Default.args = {
     formPages: STATE_SUBMISSION_FORM_ROUTES,
-    currentFormPage: STATE_SUBMISSION_FORM_ROUTES[4],
+    currentFormPage: 'SUBMISSIONS_DOCUMENTS',
 }

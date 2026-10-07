@@ -19,12 +19,8 @@ import {
     FileItemT,
     isLoadingOrHasFileErrors,
 } from '../../../../components/FileUpload'
-import {
-    RouteT,
-    RoutesRecord,
-    STATE_SUBMISSION_FORM_ROUTES,
-    STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS,
-} from '@mc-review/constants'
+import { RouteT, RoutesRecord } from '@mc-review/constants'
+import { activeFormPages } from '../../submissionUtils'
 import {
     HealthPlanPackageStatus,
     Rate,
@@ -111,6 +107,11 @@ const RateDetails = ({
     const hideSupportingDocs = ldClient?.variation(
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    )
+
+    const showProcurementAttestation = ldClient?.variation(
+        featureFlags.PROCUREMENT_ATTESTATION.flag,
+        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
     )
 
     const dsnpEnabled = ldClient?.variation(
@@ -479,11 +480,11 @@ const RateDetails = ({
             <FormNotificationContainer>
                 {!displayAsStandaloneRate && (
                     <DynamicStepIndicator
-                        formPages={
-                            hideSupportingDocs
-                                ? STATE_SUBMISSION_FORM_ROUTES_WITHOUT_SUPPORTING_DOCS
-                                : STATE_SUBMISSION_FORM_ROUTES
-                        }
+                        formPages={activeFormPages(
+                            contract?.draftRevision?.formData,
+                            hideSupportingDocs,
+                            showProcurementAttestation
+                        )}
                         currentFormPage="SUBMISSIONS_RATE_DETAILS"
                     />
                 )}
