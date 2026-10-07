@@ -34,6 +34,12 @@ describe('buildBaselineLitePlan', () => {
                 )
             }
         }
+        expect([...linksBySource.keys()].sort((a, b) => a - b)).toEqual(
+            Array.from(
+                { length: baselineLiteCounts.ownedRateSource },
+                (_, index) => index + 1
+            )
+        )
         expect([...linksBySource.values()]).toEqual(
             Array.from({ length: baselineLiteCounts.ownedRateSource }, () => 2)
         )

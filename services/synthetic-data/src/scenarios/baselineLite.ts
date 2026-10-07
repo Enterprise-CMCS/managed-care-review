@@ -1,5 +1,6 @@
 import type { GraphQLClient } from '../client/graphqlClient'
 import type { UploadClient } from '../client/uploadClient'
+import { SyntheticFetchContractDocument } from '../gen/gqlClient'
 import type { Logger } from '../logger'
 import {
     baselineLiteCounts,
@@ -39,9 +40,54 @@ type BaselineLiteOptions = {
     onProgress?: (manifest: BaselineLiteManifest) => Promise<void>
 }
 
+type LinkedRateTarget = {
+    contractId: string
+    marker: string
+}
+
 type OwnedRateSource = {
     contractId: string
+    marker: string
     rateId: string
+    linkedTargets: LinkedRateTarget[]
+}
+
+async function verifyOwnedRatePool(
+    graphql: GraphQLClient,
+    source: OwnedRateSource
+): Promise<void> {
+    const contracts = await Promise.all(
+        [
+            { contractId: source.contractId, marker: source.marker },
+            ...source.linkedTargets,
+        ].map(async ({ contractId, marker }) => {
+            const fetched = await graphql.execute(
+                SyntheticFetchContractDocument,
+                {
+                    input: { contractID: contractId },
+                }
+            )
+            return { contract: fetched.fetchContract.contract, marker }
+        })
+    )
+    const topologyIsValid = contracts.every(({ contract, marker }) => {
+        const submission = contract.packageSubmissions.find(
+            (candidate) =>
+                candidate.contractRevision.formData.submissionDescription ===
+                marker
+        )
+        const rate = submission?.rateRevisions.find(
+            (revision) => revision.rateID === source.rateId
+        )
+        return (
+            contract.status === 'SUBMITTED' &&
+            rate?.rate?.parentContractID === source.contractId
+        )
+    })
+
+    if (!topologyIsValid) {
+        throw new Error('Baseline linked-rate topology verification failed')
+    }
 }
 
 function buildManifest(
@@ -84,6 +130,10 @@ export async function runBaselineLiteScenario({
         expectedContractCount: plan.length,
         counts: baselineLiteCounts,
     })
+
+    if (onProgress) {
+        await onProgress(buildManifest(seed, plan.length, contracts))
+    }
 
     // Sequential execution keeps manifest order stable and avoids introducing a
     // second concurrency/retry system around the API client's existing retries.
@@ -128,7 +178,9 @@ export async function runBaselineLiteScenario({
                 }
                 ownedRatePool.set(item.index, {
                     contractId: submitted.contractId,
+                    marker: item.marker,
                     rateId,
+                    linkedTargets: [],
                 })
                 entry = {
                     scenario: item.type,
@@ -148,6 +200,11 @@ export async function runBaselineLiteScenario({
                         `Baseline linked target ${item.index} has no source rate`
                     )
                 }
+                if (source.linkedTargets.length >= 2) {
+                    throw new Error(
+                        `Baseline source rate ${item.sourceIndex} has more than two linked targets`
+                    )
+                }
                 const submitted = await submitSyntheticContract({
                     graphql: stateGraphql,
                     uploads,
@@ -155,6 +212,13 @@ export async function runBaselineLiteScenario({
                     documentName: `synthetic-baseline-${item.seed}.pdf`,
                     rates: [{ type: 'LINK', rateId: source.rateId }],
                 })
+                source.linkedTargets.push({
+                    contractId: submitted.contractId,
+                    marker: item.marker,
+                })
+                if (source.linkedTargets.length === 2) {
+                    await verifyOwnedRatePool(stateGraphql, source)
+                }
                 entry = {
                     scenario: item.type,
                     contractId: submitted.contractId,

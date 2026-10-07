@@ -165,6 +165,7 @@ The bootstrap Lambda creates or updates:
 | CMS   | `synthetic-data-<stage>-cms-user`   | `CMS_USER`                | `synthetic-data-<stage>-cms`   |
 
 Both clients use `client_credentials` and the narrowly allowlisted `SYNTHETIC_DATA_WRITE` scope.
+OAuth access tokens are cached and refreshed before their reported expiration so long-running profiles do not continue with an expired credential.
 
 The bootstrap invocation is idempotent. Invoke it again whenever CloudFormation replaces either credentials secret.
 

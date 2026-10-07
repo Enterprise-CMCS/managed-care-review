@@ -35,6 +35,9 @@ export class OAuthClient {
     readonly #clientSecret: string
     readonly #fetch: Fetch
     readonly #retry: HttpRetryConfig
+    #cachedAccessToken?: string
+    #refreshAtMs = 0
+    #tokenRequest?: Promise<OAuthToken>
 
     constructor(options: OAuthClientOptions) {
         this.#tokenEndpoint = options.tokenEndpoint
@@ -113,5 +116,32 @@ export class OAuthClient {
             tokenType,
             expiresInSeconds,
         }
+    }
+
+    async getAccessToken(): Promise<string> {
+        if (this.#cachedAccessToken && Date.now() < this.#refreshAtMs) {
+            return this.#cachedAccessToken
+        }
+
+        if (!this.#tokenRequest) {
+            this.#tokenRequest = this.requestToken()
+                .then((token) => {
+                    this.#cachedAccessToken = token.accessToken
+                    if (token.expiresInSeconds === undefined) {
+                        this.#refreshAtMs = Number.POSITIVE_INFINITY
+                    } else {
+                        const lifetimeMs = token.expiresInSeconds * 1_000
+                        const refreshSkewMs = Math.min(60_000, lifetimeMs / 10)
+                        this.#refreshAtMs =
+                            Date.now() + lifetimeMs - refreshSkewMs
+                    }
+                    return token
+                })
+                .finally(() => {
+                    this.#tokenRequest = undefined
+                })
+        }
+
+        return (await this.#tokenRequest).accessToken
     }
 }

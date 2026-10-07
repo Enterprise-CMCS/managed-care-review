@@ -46,10 +46,10 @@ async function createAuthenticatedClients(
         clientSecret,
         retry,
     })
-    const token = await oauth.requestToken()
+    await oauth.getAccessToken()
     const graphql = new GraphQLClient({
         endpoint: environment.graphqlEndpoint,
-        accessToken: () => token.accessToken,
+        accessToken: () => oauth.getAccessToken(),
         retry,
     })
 
