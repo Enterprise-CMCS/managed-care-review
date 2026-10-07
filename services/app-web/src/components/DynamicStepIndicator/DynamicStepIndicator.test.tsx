@@ -46,7 +46,7 @@ describe('DynamicStepIndicator', () => {
         render(
             <DynamicStepIndicator
                 formPages={activeFormPages(contract)}
-                currentFormPage={STATE_SUBMISSION_FORM_ROUTES[5]}
+                currentFormPage="SUBMISSIONS_REVIEW_SUBMIT"
             />
         )
 
@@ -60,11 +60,25 @@ describe('DynamicStepIndicator', () => {
         render(
             <DynamicStepIndicator
                 formPages={activeFormPages(contract)}
-                currentFormPage={STATE_SUBMISSION_FORM_ROUTES[5]}
+                currentFormPage="SUBMISSIONS_REVIEW_SUBMIT"
             />
         )
 
         expect(screen.queryByText('Rate details')).not.toBeInTheDocument()
+    })
+
+    it('does not render the attestations step for amendment contracts', () => {
+        const contract = mockContractFormData({
+            contractType: 'AMENDMENT',
+        })
+        render(
+            <DynamicStepIndicator
+                formPages={activeFormPages(contract, false, true)}
+                currentFormPage="SUBMISSIONS_REVIEW_SUBMIT"
+            />
+        )
+
+        expect(screen.queryByText('Attestations')).not.toBeInTheDocument()
     })
 
     describe('EQRO submissions', () => {

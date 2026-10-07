@@ -151,6 +151,11 @@ export const ContractDetails = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
 
+    const showProcurementAttestation = ldClient?.variation(
+        featureFlags.PROCUREMENT_ATTESTATION.flag,
+        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
+    )
+
     const enableDSNPs = ldClient?.variation(
         featureFlags.DSNP.flag,
         featureFlags.DSNP.defaultValue
@@ -493,7 +498,11 @@ export const ContractDetails = ({
         <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(formData, hideSupportingDocs)}
+                    formPages={activeFormPages(
+                        formData,
+                        hideSupportingDocs,
+                        showProcurementAttestation
+                    )}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts

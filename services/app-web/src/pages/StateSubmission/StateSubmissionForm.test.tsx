@@ -787,4 +787,214 @@ describe('StateSubmissionForm', () => {
             })
         })
     })
+
+    describe('attestations page', () => {
+        const renderAttestationsPage = (
+            contract: ReturnType<typeof mockContractPackageDraft>,
+            flags?: { [flag: string]: boolean }
+        ) =>
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: '15',
+                                },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/edit/attestations`,
+                    },
+                    featureFlags: flags,
+                }
+            )
+
+        it('renders attestations page for base contract', async () => {
+            const mockContract = mockContractPackageDraft()
+            mockContract.draftRevision!.formData.contractType = 'BASE'
+
+            renderAttestationsPage(mockContract, {
+                'procurement-attestation': true,
+            })
+
+            expect(
+                await screen.findByTestId('attestations-page')
+            ).toHaveTextContent('attestation page')
+        })
+
+        it('renders 404 page for amendment contract', async () => {
+            const mockContract = mockContractPackageDraft()
+            mockContract.draftRevision!.formData.contractType = 'AMENDMENT'
+
+            renderAttestationsPage(mockContract, {
+                'procurement-attestation': true,
+            })
+
+            expect(
+                await screen.findByText('404 / Page not found')
+            ).toBeInTheDocument()
+        })
+
+        const renderFormPage = (
+            contract: ReturnType<typeof mockContractPackageDraft>,
+            page: string,
+            setLocation: (location: Location) => Location
+        ) =>
+            renderWithProviders(
+                <Routes>
+                    <Route element={<SubmissionSideNav />}>
+                        <Route
+                            path={RoutesRecord.SUBMISSIONS_EDIT_TOP_LEVEL}
+                            element={<StateSubmissionForm />}
+                        />
+                    </Route>
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractWithQuestionsMockSuccess({
+                                contract: { ...contract, id: '15' },
+                            }),
+                            fetchContractMockSuccess({
+                                contract: { ...contract, id: '15' },
+                            }),
+                            updateContractDraftRevisionMockSuccess({
+                                contract: { ...contract, id: '15' },
+                            }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: `/submissions/${ContractSubmissionTypeRecord[contract.contractSubmissionType]}/15/edit/${page}`,
+                    },
+                    featureFlags: {
+                        'hide-supporting-docs-page': true,
+                        'procurement-attestation': true,
+                    },
+                    location: setLocation,
+                }
+            )
+
+        it('continues from contacts to attestations page for base contract', async () => {
+            const mockContract = mockContractPackageDraft()
+            mockContract.draftRevision!.formData.contractType = 'BASE'
+            let testLocation: Location
+
+            renderFormPage(
+                mockContract,
+                'contacts',
+                (location) => (testLocation = location)
+            )
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    generatePath(RoutesRecord.SUBMISSIONS_ATTESTATIONS, {
+                        id: '15',
+                        contractSubmissionType: 'health-plan',
+                    })
+                )
+            })
+            expect(
+                await screen.findByTestId('attestations-page')
+            ).toHaveTextContent('attestation page')
+        })
+
+        it('continues from contacts to review and submit for amendment contract', async () => {
+            const mockContract = mockContractPackageDraft()
+            mockContract.draftRevision!.formData.contractType = 'AMENDMENT'
+            let testLocation: Location
+
+            renderFormPage(
+                mockContract,
+                'contacts',
+                (location) => (testLocation = location)
+            )
+
+            const continueButton = await screen.findByRole('button', {
+                name: 'Continue',
+            })
+            await userEvent.click(continueButton)
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    generatePath(RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT, {
+                        id: '15',
+                        contractSubmissionType: 'health-plan',
+                    })
+                )
+            })
+        })
+
+        it('goes back from review and submit to attestations page for base contract', async () => {
+            const mockContract = mockContractPackageDraft()
+            mockContract.draftRevision!.formData.contractType = 'BASE'
+            let testLocation: Location
+
+            renderFormPage(
+                mockContract,
+                'review-and-submit',
+                (location) => (testLocation = location)
+            )
+
+            const backButton = await screen.findByRole('button', {
+                name: 'Back',
+            })
+            await userEvent.click(backButton)
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    generatePath(RoutesRecord.SUBMISSIONS_ATTESTATIONS, {
+                        id: '15',
+                        contractSubmissionType: 'health-plan',
+                    })
+                )
+            })
+            expect(
+                await screen.findByTestId('attestations-page')
+            ).toHaveTextContent('attestation page')
+        })
+
+        it('goes back from review and submit to contacts for amendment contract', async () => {
+            const mockContract = mockContractPackageDraft()
+            mockContract.draftRevision!.formData.contractType = 'AMENDMENT'
+            let testLocation: Location
+
+            renderFormPage(
+                mockContract,
+                'review-and-submit',
+                (location) => (testLocation = location)
+            )
+
+            const backButton = await screen.findByRole('button', {
+                name: 'Back',
+            })
+            await userEvent.click(backButton)
+
+            await waitFor(() => {
+                expect(testLocation.pathname).toBe(
+                    generatePath(RoutesRecord.SUBMISSIONS_CONTACTS, {
+                        id: '15',
+                        contractSubmissionType: 'health-plan',
+                    })
+                )
+            })
+        })
+    })
 })

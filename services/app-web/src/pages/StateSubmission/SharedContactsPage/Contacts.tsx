@@ -100,6 +100,11 @@ const Contacts = ({
         featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
     )
 
+    const showProcurementAttestation = ldClient?.variation(
+        featureFlags.PROCUREMENT_ATTESTATION.flag,
+        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
+    )
+
     // Collect first/last name (required) plus an optional suffix, rather than
     // a single required full name.
     const showNewContactNameFields = ldClient?.variation(
@@ -143,6 +148,13 @@ const Contacts = ({
     const isEQROSubmission = draftSubmission.contractSubmissionType === 'EQRO'
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
     const contractSubmissionType = draftSubmission.contractSubmissionType
+
+    // Attestations page follows contacts for base contract submissions
+    const nextFormPage: RouteT =
+        showProcurementAttestation &&
+        draftSubmission.draftRevision.formData.contractType === 'BASE'
+            ? 'SUBMISSIONS_ATTESTATIONS'
+            : 'SUBMISSIONS_REVIEW_SUBMIT'
 
     const emptyStateContact = {
         name: '',
@@ -270,7 +282,8 @@ const Contacts = ({
                             ? EQRO_SUBMISSION_FORM_ROUTES
                             : activeFormPages(
                                   draftSubmission.draftRevision.formData,
-                                  hideSupportingDocs
+                                  hideSupportingDocs,
+                                  showProcurementAttestation
                               )
                     }
                     currentFormPage={currentRoute}
@@ -295,7 +308,7 @@ const Contacts = ({
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
                             type: 'CONTINUE',
-                            redirectPath: 'SUBMISSIONS_REVIEW_SUBMIT',
+                            redirectPath: nextFormPage,
                         })
                     }}
                     validationSchema={contactSchema}
@@ -577,7 +590,7 @@ const Contacts = ({
                                               )
                                     }
                                     continueOnClickUrl={getSubmissionPath(
-                                        'SUBMISSIONS_REVIEW_SUBMIT',
+                                        nextFormPage,
                                         contractSubmissionType,
                                         id
                                     )}
