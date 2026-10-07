@@ -32,34 +32,6 @@ const uploadedDocument = {
     sha256: 'contract-sha',
 }
 
-function fetchedContract(
-    contractId: string,
-    marker: string,
-    parentContractId: string
-) {
-    return {
-        fetchContract: {
-            contract: {
-                id: contractId,
-                status: 'SUBMITTED',
-                packageSubmissions: [
-                    {
-                        contractRevision: {
-                            formData: { submissionDescription: marker },
-                        },
-                        rateRevisions: [
-                            {
-                                rateID: 'rate-1',
-                                rate: { parentContractID: parentContractId },
-                            },
-                        ],
-                    },
-                ],
-            },
-        },
-    }
-}
-
 function configureThreeContractPlan(): void {
     mockedBuildPlan.mockReturnValue([
         {
@@ -111,34 +83,11 @@ describe('runBaselineLiteScenario', () => {
         configureThreeContractPlan()
     })
 
-    it('persists progress and verifies the source parent across both linked targets', async () => {
-        const execute = vi
-            .fn()
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'source-contract',
-                    'source-marker',
-                    'source-contract'
-                )
-            )
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'target-one',
-                    'target-one-marker',
-                    'source-contract'
-                )
-            )
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'target-two',
-                    'target-two-marker',
-                    'source-contract'
-                )
-            )
+    it('checkpoints progress for each generated contract', async () => {
         const onProgress = vi.fn().mockResolvedValue(undefined)
 
         const manifest = await runBaselineLiteScenario({
-            stateGraphql: { execute } as unknown as GraphQLClient,
+            stateGraphql: {} as GraphQLClient,
             cmsGraphql: {} as GraphQLClient,
             uploads: {} as UploadClient,
             logger: new Logger({ sink: vi.fn() }),
@@ -147,48 +96,55 @@ describe('runBaselineLiteScenario', () => {
         })
 
         expect(manifest).toMatchObject({ contractCount: 3, rateCount: 1 })
-        expect(execute.mock.calls.map((call) => call[1])).toEqual([
-            { input: { contractID: 'source-contract' } },
-            { input: { contractID: 'target-one' } },
-            { input: { contractID: 'target-two' } },
+        expect(manifest.contracts).toEqual([
+            expect.objectContaining({
+                contractId: 'source-contract',
+                rateIds: ['rate-1'],
+            }),
+            expect.objectContaining({
+                contractId: 'target-one',
+                sourceContractId: 'source-contract',
+                rateIds: ['rate-1'],
+            }),
+            expect.objectContaining({
+                contractId: 'target-two',
+                sourceContractId: 'source-contract',
+                rateIds: ['rate-1'],
+            }),
         ])
         expect(
             onProgress.mock.calls.map(([manifest]) => manifest.contractCount)
         ).toEqual([0, 1, 2, 3])
     })
 
-    it('stops before checkpointing a linked target with changed parentage', async () => {
-        const execute = vi
-            .fn()
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'source-contract',
-                    'source-marker',
-                    'source-contract'
-                )
-            )
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'target-one',
-                    'target-one-marker',
-                    'source-contract'
-                )
-            )
-            .mockResolvedValueOnce(
-                fetchedContract('target-two', 'target-two-marker', 'target-two')
-            )
+    it('retains the last successful checkpoint when later generation fails', async () => {
+        mockedSubmitContract.mockReset()
+        mockedSubmitContract
+            .mockResolvedValueOnce({
+                contractId: 'source-contract',
+                programId: 'program-1',
+                contractDocument: uploadedDocument,
+                rateIds: ['rate-1'],
+            })
+            .mockResolvedValueOnce({
+                contractId: 'target-one',
+                programId: 'program-1',
+                contractDocument: uploadedDocument,
+                rateIds: ['rate-1'],
+            })
+            .mockRejectedValueOnce(new Error('Synthetic API request failed'))
         const onProgress = vi.fn().mockResolvedValue(undefined)
 
         await expect(
             runBaselineLiteScenario({
-                stateGraphql: { execute } as unknown as GraphQLClient,
+                stateGraphql: {} as GraphQLClient,
                 cmsGraphql: {} as GraphQLClient,
                 uploads: {} as UploadClient,
                 logger: new Logger({ sink: vi.fn() }),
                 seed: 'test-seed',
                 onProgress,
             })
-        ).rejects.toThrow('Baseline linked-rate topology verification failed')
+        ).rejects.toThrow('Synthetic API request failed')
         expect(
             onProgress.mock.calls.map(([manifest]) => manifest.contractCount)
         ).toEqual([0, 1, 2])

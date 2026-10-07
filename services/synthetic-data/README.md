@@ -4,6 +4,8 @@
 
 The service is intended for review environments and QA. It must not run against development, validation, or production.
 
+This package generates data; it does not test App API functionality. Scenarios validate response IDs and timestamps needed for subsequent operations and accurate output, but do not fetch records back to assert persisted statuses, rate ownership, or revision/document history. Backend domain behavior belongs in App API tests. Result `status` and `submissionCount` fields describe the completed generation workflow, not independently verified persisted state.
+
 ## Current environment support
 
 | Environment                 | Status    | Notes                                                                                                     |
@@ -66,9 +68,7 @@ The scenario:
 2. Creates a contract-only health plan submission as a draft.
 3. Requests an upload URL and uploads the small PDF fixture.
 4. Updates the draft with complete contract form data.
-5. Submits the contract.
-6. Fetches the persisted contract.
-7. Verifies the contract is Minnesota data, has `SUBMITTED` status, and contains the expected synthetic marker.
+5. Submits the contract and returns its ID and synthetic marker.
 
 A successful run ends with `synthetic.contract-smoke.completed` and logs the contract ID, status, seed, and marker.
 
@@ -89,7 +89,7 @@ pnpm --filter @mc-review/synthetic-data cli seed-contract-linked-rate \
   --seed my-linked-rate-01
 ```
 
-The state actor creates and submits a source contract with one owned rate, then creates a second contract that links the submitted rate. The final reads verify that both packages contain the same rate and that the source contract remains its parent.
+The state actor creates and submits a source contract with one owned rate, then creates a second contract that links the returned rate ID. The result includes both contract IDs and the shared rate ID.
 
 The source and linked contract markers are:
 
@@ -107,7 +107,7 @@ pnpm --filter @mc-review/synthetic-data cli seed-contract-unlock-add-rate \
   --seed my-add-rate-01
 ```
 
-The state actor creates and submits a contract-only package. The CMS actor unlocks it, then the state actor changes the package to contract-and-rates, adds the first owned rate, and resubmits it. The final read verifies that the initial package has no rates and the resubmitted package contains the new parent rate.
+The state actor creates and submits a contract-only package. The CMS actor unlocks it, then the state actor changes the package to contract-and-rates, adds the first owned rate, and resubmits it. The result includes the contract ID and the new rate ID.
 
 The initial and resubmitted markers are:
 
@@ -125,7 +125,7 @@ pnpm --filter @mc-review/synthetic-data cli seed-contract-unlock-resubmit \
   --seed my-resubmission-01
 ```
 
-The state actor creates and submits a marked contract-only package. The CMS actor unlocks it. The state actor changes provision answers, adds a supporting DOCX, and resubmits it with a reason. The final read verifies both historical revisions, actor roles, reasons, document history, and `RESUBMITTED` status.
+The state actor creates and submits a marked contract-only package. The CMS actor unlocks it. The state actor changes provision answers, adds a supporting DOCX, and resubmits it with a reason. The result includes the contract ID and both synthetic markers.
 
 The two revision markers are:
 
@@ -142,8 +142,7 @@ CLI
  │   ├─ create and update contracts and owned rates
  │   ├─ link submitted rates to other contracts
  │   ├─ generate upload URLs and upload documents
- │   ├─ submit and resubmit contracts
- │   └─ fetch and verify persisted packages
+ │   └─ submit and resubmit contracts
  ├─ CMS OAuth client
  │   └─ unlock contract
  └─ External GraphQL endpoint and presigned S3 upload
@@ -325,10 +324,10 @@ services/synthetic-data/
 │   ├── gen/            Generated GraphQL client types and documents
 │   ├── graphql/        Source GraphQL operations
 │   ├── planning/       Deterministic seeded-random utility
-│   ├── scenarios/      End-to-end scenario orchestration and verification
+│   ├── scenarios/      API-backed data-generation orchestration
 │   ├── cli.ts          Command dispatch
 │   └── logger.ts       Structured logging and secret redaction
-└── tests/              Unit and scenario contract tests
+└── tests/              Generator and client unit tests
 ```
 
 Do not edit `src/gen/gqlClient.ts` manually.
@@ -344,7 +343,7 @@ Choose:
 - A stable, versioned scenario key such as `contract-submit-smoke-v1`.
 - The actor and environment it requires.
 - The records and documents it creates.
-- The persisted invariants that prove success.
+- The operation sequence and response IDs/timestamps needed to complete generation.
 - A marker that makes generated data identifiable.
 
 Prefer existing domain types and committed reference data. Do not hard-code identifiers that already have a canonical repository source.
@@ -368,17 +367,17 @@ Put request construction and marker formatting in `src/builders/`. Builders shou
 - Avoid network calls and mutable global state.
 - Produce identifiable synthetic descriptions or markers.
 
-### 4. Implement orchestration and verification
+### 4. Implement generation orchestration
 
 Put the workflow in `src/scenarios/`. A scenario should:
 
 - Use the shared OAuth, GraphQL, and upload clients.
 - Use canonical repository data where available.
 - Log stable lifecycle events.
-- Check intermediate invariants before continuing.
-- Fetch the final record back from the API.
-- Verify persisted state, not only the mutation response.
-- Return a small result containing identifiers and final status.
+- Check response identifiers and required concurrency timestamps before continuing.
+- Propagate API failures without reporting incomplete work as complete.
+- Return a small result containing generated identifiers and completed workflow information.
+- Do not fetch records back solely to verify backend domain semantics.
 
 If variability is needed, use `SeededRandom`; do not use `Math.random()`. The same seed should produce the same planned inputs.
 
@@ -406,8 +405,9 @@ At minimum, cover:
 - Builder output and marker stability.
 - Scenario operation order.
 - Upload metadata.
-- Final persisted-state verification.
-- Failure when the final marker or status is wrong.
+- Generated request inputs and returned identifiers.
+- Missing response IDs/timestamps required for generation.
+- API failure propagation and incremental manifest checkpointing.
 - Input and environment safety boundaries.
 - Structured errors without credential leakage.
 
