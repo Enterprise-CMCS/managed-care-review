@@ -910,11 +910,11 @@ importers:
         specifier: ^16.14.2
         version: 16.14.2
       jotai:
-        specifier: ^3.0.0
-        version: 3.0.0(@types/react@19.3.0)(react@19.3.0)
+        specifier: ^3.0.1
+        version: 3.0.1(@types/react@19.3.0)(react@19.3.0)
       jotai-location:
         specifier: ^0.6.2
-        version: 0.6.2(jotai@3.0.0(@types/react@19.3.0)(react@19.3.0))
+        version: 0.6.2(jotai@3.0.1(@types/react@19.3.0)(react@19.3.0))
       jsdom:
         specifier: ^30.0.1
         version: 30.0.1
@@ -9772,8 +9772,8 @@ packages:
     peerDependencies:
       jotai: '>=1.11.0'
 
-  jotai@3.0.0:
-    resolution: {integrity: sha512-KxhbmsJUp/tmrv6aZgO+nzB3H9K8C0xmk5i3aGkwy/EANg73DVBkggv3zVHaAi5PlNlQgTgP4uiVepo+JC+wSA==}
+  jotai@3.0.1:
+    resolution: {integrity: sha512-6tS7wY9otdiNp26Wqb/1ds3OuVJVoV+tJlN4hpLrYmfFf/t9bauVt+zKBNSpS5qSl5h6GieVQ+OknVraZX+udQ==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
       '@types/react': '>=18.0.0'
@@ -24998,11 +24998,11 @@ snapshots:
       '@sideway/formula': 3.0.1
       '@sideway/pinpoint': 2.0.0
 
-  jotai-location@0.6.2(jotai@3.0.0(@types/react@19.3.0)(react@19.3.0)):
+  jotai-location@0.6.2(jotai@3.0.1(@types/react@19.3.0)(react@19.3.0)):
     dependencies:
-      jotai: 3.0.0(@types/react@19.3.0)(react@19.3.0)
+      jotai: 3.0.1(@types/react@19.3.0)(react@19.3.0)
 
-  jotai@3.0.0(@types/react@19.3.0)(react@19.3.0):
+  jotai@3.0.1(@types/react@19.3.0)(react@19.3.0):
     optionalDependencies:
       '@types/react': 19.3.0
       react: 19.3.0
