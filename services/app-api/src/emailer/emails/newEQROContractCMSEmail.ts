@@ -41,10 +41,7 @@ export const newEQROContractCMSEmail = async (
         return isSubjectToReview
     }
 
-    const reviewerEmails = [
-        ...devReviewTeamEmails,
-        ...(isSubjectToReview ? dmcoEmails : []),
-    ]
+    const reviewerEmails = [...devReviewTeamEmails, ...dmcoEmails]
 
     const packagePrograms = findContractPrograms(contractRev, statePrograms)
 
