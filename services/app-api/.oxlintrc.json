@@ -1,0 +1,97 @@
+{
+    "$schema": "../../node_modules/oxlint/configuration_schema.json",
+    "plugins": [],
+    "categories": {
+        "correctness": "off"
+    },
+    "options": {
+        "typeAware": true
+    },
+    "env": {
+        "builtin": true
+    },
+    "ignorePatterns": [
+        "gen/*",
+        "src/gen/**",
+        "src/generated/**",
+        "*.config.js",
+        "**/esbuild.config.js",
+        ".esbuild/**",
+        ".local-build/**",
+        ".serverless/**",
+        "coverage/**"
+    ],
+    "overrides": [
+        {
+            "files": ["**/*.ts"],
+            "rules": {
+                "array-callback-return": "error",
+                "prefer-promise-reject-errors": "error",
+                "no-throw-literal": "error",
+                "no-unused-vars": [
+                    "warn",
+                    {
+                        "argsIgnorePattern": "^_*"
+                    }
+                ],
+                "jest/no-focused-tests": "error",
+                "jest/no-identical-title": "error",
+                "no-console": [
+                    "warn",
+                    {
+                        "allow": [
+                            "assert",
+                            "clear",
+                            "count",
+                            "countReset",
+                            "debug",
+                            "dir",
+                            "dirxml",
+                            "error",
+                            "group",
+                            "groupCollapsed",
+                            "groupEnd",
+                            "info",
+                            "profile",
+                            "profileEnd",
+                            "table",
+                            "time",
+                            "timeEnd",
+                            "timeLog",
+                            "timeStamp",
+                            "trace",
+                            "warn"
+                        ]
+                    }
+                ],
+                "typescript/no-floating-promises": "error",
+                "typescript/consistent-type-exports": "error",
+                "typescript/consistent-type-imports": "error"
+            },
+            "globals": {
+                "process": "readonly",
+                "Buffer": "readonly",
+                "__dirname": "readonly",
+                "__filename": "readonly",
+                "console": "readonly",
+                "global": "readonly",
+                "setTimeout": "readonly",
+                "clearTimeout": "readonly",
+                "setInterval": "readonly",
+                "clearInterval": "readonly",
+                "jest": "readonly",
+                "describe": "readonly",
+                "it": "readonly",
+                "test": "readonly",
+                "expect": "readonly",
+                "beforeEach": "readonly",
+                "afterEach": "readonly",
+                "beforeAll": "readonly",
+                "afterAll": "readonly",
+                "vi": "readonly",
+                "vitest": "readonly"
+            },
+            "plugins": ["typescript", "jest"]
+        }
+    ]
+}

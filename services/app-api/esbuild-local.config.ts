@@ -43,7 +43,7 @@ esbuild
                                 '.local-build/etaTemplates/',
                                 { overwrite: true }
                             )
-                            console.log('Eta templates copied successfully') // eslint-disable-line no-console
+                            console.log('Eta templates copied successfully') // oxlint-disable-line no-console
                         } catch (err) {
                             console.error('Error copying eta templates:', err)
                         }
@@ -53,7 +53,7 @@ esbuild
         ],
     })
     .then(() => {
-        console.log('✅ Local server built successfully') // eslint-disable-line no-console
+        console.log('✅ Local server built successfully') // oxlint-disable-line no-console
     })
     .catch((error) => {
         console.error('Build failed:', error)

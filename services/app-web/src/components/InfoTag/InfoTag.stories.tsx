@@ -3,6 +3,14 @@ import { InfoTag } from './InfoTag'
 export default {
     title: 'Components/InfoTag',
     component: InfoTag,
+    argTypes: {
+        background: {
+            control: false,
+            description:
+                'Inherited USWDS Tag prop. InfoTag uses color instead of forwarding background.',
+            table: { type: { summary: 'string' } },
+        },
+    },
 }
 
 export const Default = (): React.ReactElement => (

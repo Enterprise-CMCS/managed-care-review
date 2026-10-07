@@ -32,7 +32,7 @@ describe('submitContract', () => {
 
         // create the draft contract
         const draftContractForm1 = mockInsertContractArgs({})
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // oxlint-disable-next-line no-unused-vars
         const { stateCode, ...draftContractFormData } = draftContractForm1
         const contract = must(
             await insertDraftContract(client, {
@@ -126,7 +126,7 @@ describe('submitContract', () => {
 
         // create the draft contract
         const draftContractForm1 = mockInsertContractArgs({})
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // oxlint-disable-next-line no-unused-vars
         const { stateCode, ...draftContractFormData } = draftContractForm1
         const contract = must(
             await insertDraftContract(client, {

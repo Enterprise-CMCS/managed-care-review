@@ -1,6 +1,6 @@
 *.js
-!jest.config.js
 *.d.ts
+!lint-staged.config.mjs
 node_modules/
 
 # TypeScript build output

@@ -13,5 +13,5 @@
         "resolveJsonModule": true,
         "allowImportingTsExtensions": true
     },
-    "include": ["src", "tests", "eslint.config.ts"]
+    "include": ["src", "tests"]
 }

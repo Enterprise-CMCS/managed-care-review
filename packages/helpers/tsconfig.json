@@ -6,7 +6,6 @@
         "target": "ESNext",
         "types": ["vitest/globals"],
         "moduleResolution": "bundler",
-        "baseUrl": "/",
         "declaration": true,
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,

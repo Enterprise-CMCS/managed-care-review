@@ -1,6 +1,6 @@
 const config = {
     '**/*.{js,jsx,ts,tsx}': [
-        'eslint --max-warnings=0 --no-warn-ignored',
+        () => 'oxlint --deny-warnings src/',
         'prettier --write',
     ],
     '**/*.{ts,tsx}': () => 'tsc --noEmit',

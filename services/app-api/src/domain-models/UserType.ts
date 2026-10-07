@@ -56,12 +56,12 @@ const adminUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.ADMIN_USER),
 })
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// oxlint-disable-next-line no-unused-vars
 const helpdeskUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.HELPDESK_USER),
 })
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// oxlint-disable-next-line no-unused-vars
 const businessOwnerUserSchema = baseUserSchema.extend({
     role: z.literal(userRolesSchema.enum.BUSINESSOWNER_USER),
 })

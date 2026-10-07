@@ -408,7 +408,7 @@ async function clearS3BucketsInStack(stackName: string): Promise<void | Error> {
     )
 
     const errors: Error[] = []
-    clearBucketOutput.forEach((result, index) => {
+    clearBucketOutput.forEach((result) => {
         if (result.status === 'rejected') {
             errors.push(
                 result.reason instanceof Error
