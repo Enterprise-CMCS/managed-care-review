@@ -3,7 +3,6 @@ import * as Yup from 'yup'
 import { Form as UswdsForm, Fieldset, FormGroup } from '@trussworks/react-uswds'
 import { Formik, FormikErrors } from 'formik'
 import { useNavigate } from 'react-router-dom'
-import { useLDClient } from 'launchdarkly-react-client-sdk'
 import styles from '../../StateSubmissionForm.module.scss'
 import { UpdateContractDraftRevisionInput } from '../../../../gen/gqlClient'
 import {
@@ -28,7 +27,6 @@ import {
     ErrorOrLoadingPage,
     PageBannerAlerts,
 } from '../../SharedSubmissionComponents'
-import { featureFlags } from '@mc-review/common-code'
 import { useFocusOnRender } from '../../../../hooks/useFocusOnRender'
 import { usePage } from '../../../../contexts/PageContext'
 import { getSubmissionPath } from '../../../../routeHelpers'
@@ -80,7 +78,6 @@ const Attestations = ({
     const [shouldValidate, setShouldValidate] = useState(showValidations)
     const [draftSaved, setDraftSaved] = useState(false)
     useFocusOnRender(draftSaved, '[data-testid="saveAsDraftSuccessBanner"]')
-    const ldClient = useLDClient()
 
     const { loggedInUser } = useAuth()
     const { currentRoute } = useCurrentRoute()
@@ -90,16 +87,6 @@ const Attestations = ({
         useContractForm(id)
 
     const navigate = useNavigate()
-
-    const hideSupportingDocs = ldClient?.variation(
-        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
-        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
-    )
-
-    const showProcurementAttestation = ldClient?.variation(
-        featureFlags.PROCUREMENT_ATTESTATION.flag,
-        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
-    )
 
     const activeMainContentId = 'attestationsPageMainContent'
 
@@ -169,11 +156,9 @@ const Attestations = ({
         <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={activeFormPages(
-                        formData,
-                        hideSupportingDocs,
-                        showProcurementAttestation
-                    )}
+                    // The deprecated supporting docs page is always hidden, and the route only
+                    // renders when the procurement attestation flag is on, so skip loading flags
+                    formPages={activeFormPages(formData, true, true)}
                     currentFormPage={currentRoute}
                 />
                 <PageBannerAlerts

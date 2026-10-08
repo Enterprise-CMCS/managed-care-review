@@ -149,15 +149,23 @@ const Contacts = ({
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
     const contractSubmissionType = draftSubmission.contractSubmissionType
 
-    const previousFormPage: RouteT =
-        !isEQROSubmission &&
-        showProcurementAttestation &&
-        draftSubmission.draftRevision.formData.contractType === 'BASE'
-            ? 'SUBMISSIONS_ATTESTATIONS'
-            : draftSubmission.draftRevision.formData.submissionType ===
-                'CONTRACT_ONLY'
-              ? 'SUBMISSIONS_CONTRACT_DETAILS'
-              : 'SUBMISSIONS_RATE_DETAILS'
+    const getPreviousFormPage = (): RouteT => {
+        const { contractType, submissionType } =
+            draftSubmission.draftRevision.formData
+        // Attestations page precedes contacts for base contract submissions
+        if (
+            !isEQROSubmission &&
+            showProcurementAttestation &&
+            contractType === 'BASE'
+        ) {
+            return 'SUBMISSIONS_ATTESTATIONS'
+        }
+        if (submissionType === 'CONTRACT_ONLY') {
+            return 'SUBMISSIONS_CONTRACT_DETAILS'
+        }
+        return 'SUBMISSIONS_RATE_DETAILS'
+    }
+    const previousFormPage = getPreviousFormPage()
 
     const emptyStateContact = {
         name: '',

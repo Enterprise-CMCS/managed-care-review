@@ -177,12 +177,17 @@ export const ContractDetails = ({
         return <ErrorOrLoadingPage state={'GENERIC_ERROR'} />
     }
 
-    const nextFormPage: RouteT =
-        formData.submissionType === 'CONTRACT_ONLY'
-            ? showProcurementAttestation && formData.contractType === 'BASE'
-                ? 'SUBMISSIONS_ATTESTATIONS'
-                : 'SUBMISSIONS_CONTACTS'
-            : 'SUBMISSIONS_RATE_DETAILS'
+    const getNextFormPage = (): RouteT => {
+        if (formData.submissionType !== 'CONTRACT_ONLY') {
+            return 'SUBMISSIONS_RATE_DETAILS'
+        }
+        // Attestations page follows contract details for contract only base contract submissions
+        if (showProcurementAttestation && formData.contractType === 'BASE') {
+            return 'SUBMISSIONS_ATTESTATIONS'
+        }
+        return 'SUBMISSIONS_CONTACTS'
+    }
+    const nextFormPage = getNextFormPage()
 
     const fileItemsFromDraftSubmission = (docType: string): FileItemT[] => {
         const docs =
