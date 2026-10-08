@@ -23,6 +23,13 @@ export type { LogFields, LogSink } from './logger'
 export { SeededRandom } from './planning/seededRandom'
 export type { Seed } from './planning/seededRandom'
 export {
+    baselineLiteCounts,
+    baselineLiteManifestFileName,
+    baselineLiteScenarioKey,
+    buildBaselineLitePlan,
+} from './planning/baselineLite'
+export type { BaselineLitePlanItem } from './planning/baselineLite'
+export {
     buildContractSmokeFormData,
     buildContractSmokeCreateContractInput,
     contractSmokeMarker,
@@ -50,6 +57,11 @@ export {
     contractUnlockResubmitMarker,
     contractUnlockResubmitScenarioKey,
 } from './builders/contractUnlockResubmit'
+export {
+    runBaselineLiteScenario,
+    type BaselineLiteManifest,
+    type BaselineLiteManifestEntry,
+} from './scenarios/baselineLite'
 export {
     runContractSmokeScenario,
     type ContractSmokeResult,
