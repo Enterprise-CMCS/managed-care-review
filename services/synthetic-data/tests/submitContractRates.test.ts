@@ -17,7 +17,6 @@ describe('submitSyntheticContract rate support', () => {
                 createContract: {
                     contract: {
                         id: 'linked-contract',
-                        status: 'DRAFT',
                         draftRevision: {
                             updatedAt: '2026-01-01T00:00:00.000Z',
                         },
@@ -37,11 +36,10 @@ describe('submitSyntheticContract rate support', () => {
             .mockResolvedValueOnce({
                 updateDraftContractRates: {
                     contract: {
+                        id: 'linked-contract',
                         draftRates: [
                             {
                                 id: 'existing-rate',
-                                parentContractID: 'source-contract',
-                                status: 'SUBMITTED',
                             },
                         ],
                     },
@@ -51,7 +49,6 @@ describe('submitSyntheticContract rate support', () => {
                 submitContract: {
                     contract: {
                         id: 'linked-contract',
-                        status: 'SUBMITTED',
                     },
                 },
             })
@@ -113,8 +110,6 @@ describe('submitSyntheticContract rate support', () => {
                     createContract: {
                         contract: {
                             id: 'contract-1',
-                            stateCode: 'MN',
-                            status: 'DRAFT',
                             draftRevision: {
                                 updatedAt: '2026-01-01T00:00:00.000Z',
                             },
@@ -127,8 +122,6 @@ describe('submitSyntheticContract rate support', () => {
                     updateContractDraftRevision: {
                         contract: {
                             id: 'contract-1',
-                            stateCode: 'MN',
-                            status: 'DRAFT',
                             draftRevision: {
                                 updatedAt: '2026-01-01T00:01:00.000Z',
                             },
@@ -141,17 +134,12 @@ describe('submitSyntheticContract rate support', () => {
                     updateDraftContractRates: {
                         contract: {
                             id: 'contract-1',
-                            stateCode: 'MN',
-                            status: 'DRAFT',
                             draftRevision: {
                                 updatedAt: '2026-01-01T00:02:00.000Z',
                             },
                             draftRates: [
                                 {
                                     id: 'rate-1',
-                                    parentContractID: 'contract-1',
-                                    status: 'DRAFT',
-                                    consolidatedStatus: 'DRAFT',
                                     draftRevision: {
                                         updatedAt: '2026-01-01T00:02:00.000Z',
                                     },
@@ -166,8 +154,6 @@ describe('submitSyntheticContract rate support', () => {
                     submitContract: {
                         contract: {
                             id: 'contract-1',
-                            stateCode: 'MN',
-                            status: 'SUBMITTED',
                         },
                     },
                 }
@@ -236,4 +222,62 @@ describe('submitSyntheticContract rate support', () => {
             },
         })
     })
+
+    it.each([
+        { id: 'other-contract', draftRates: [{ id: 'existing-rate' }] },
+        { id: 'linked-contract', draftRates: [{ id: '' }] },
+        { id: 'linked-contract', draftRates: [{ id: 'different-rate' }] },
+    ])(
+        'stops before submitting when the rate response lacks the expected identifiers: %j',
+        async (contract) => {
+            const execute = vi
+                .fn()
+                .mockResolvedValueOnce({
+                    createContract: {
+                        contract: {
+                            id: 'linked-contract',
+                            draftRevision: {
+                                updatedAt: '2026-01-01T00:00:00.000Z',
+                            },
+                        },
+                    },
+                })
+                .mockResolvedValueOnce({
+                    updateContractDraftRevision: {
+                        contract: {
+                            id: 'linked-contract',
+                            draftRevision: {
+                                updatedAt: '2026-01-01T00:01:00.000Z',
+                            },
+                        },
+                    },
+                })
+                .mockResolvedValueOnce({
+                    updateDraftContractRates: { contract },
+                })
+            const upload = vi.fn().mockResolvedValue({
+                name: 'linked-contract.pdf',
+                s3URL: 's3://synthetic-bucket/linked-contract.pdf',
+                s3Key: 'linked-contract.pdf',
+                bucket: 'synthetic-bucket',
+                sha256: 'contract-sha',
+            })
+
+            await expect(
+                submitSyntheticContract({
+                    graphql: { execute } as unknown as GraphQLClient,
+                    uploads: { upload } as unknown as UploadClient,
+                    marker: '[SYNTHETIC:test:linked-rate:seed]',
+                    documentName: 'linked-contract.pdf',
+                    rates: [{ type: 'LINK', rateId: 'existing-rate' }],
+                })
+            ).rejects.toThrow(
+                'Synthetic rate update response did not contain the expected rate IDs'
+            )
+            expect(execute).toHaveBeenCalledTimes(3)
+            expect(
+                execute.mock.calls.map(([document]) => document)
+            ).not.toContain(SyntheticSubmitContractDocument)
+        }
+    )
 })

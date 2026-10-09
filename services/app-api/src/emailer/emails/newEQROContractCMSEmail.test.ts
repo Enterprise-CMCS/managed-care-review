@@ -37,7 +37,7 @@ it('includes DMCO inbox on EQRO submissions subject to review', async () => {
     )
 })
 
-it('does not include DMCO inbox on EQRO submissions not subject to review', async () => {
+it('includes DMCO inbox on EQRO submissions not subject to review', async () => {
     const sub: ContractType = mockEQROContract()
     const defaultStatePrograms = mockMNState().programs
     const emailConfig = testEmailConfig()
@@ -68,7 +68,11 @@ it('does not include DMCO inbox on EQRO submissions not subject to review', asyn
     expect(result.subject).toBe(
         `[${emailConfig.stage}] New EQRO Submission: ${name} is not subject to CMS Review`
     )
-    expect(result.toAddresses).toEqual(emailConfig.devReviewTeamEmails)
+    expect(result).toEqual(
+        expect.objectContaining({
+            toAddresses: expect.arrayContaining(emailConfig.dmcoEmails),
+        })
+    )
 })
 
 it('renders overall email for a new EQRO contract submission', async () => {

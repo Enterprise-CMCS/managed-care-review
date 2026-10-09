@@ -1,5 +1,9 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { OAuthClient } from '../src/client/oauthClient'
+
+afterEach(() => {
+    vi.restoreAllMocks()
+})
 
 describe('OAuthClient', () => {
     it('requests a client-credentials token with form encoding', async () => {
@@ -33,10 +37,7 @@ describe('OAuthClient', () => {
             .fn()
             .mockResolvedValueOnce(new Response('', { status: 500 }))
             .mockResolvedValueOnce(
-                Response.json(
-                    { error: 'invalid_client' },
-                    { status: 401 }
-                )
+                Response.json({ error: 'invalid_client' }, { status: 401 })
             )
         const client = new OAuthClient({
             tokenEndpoint: 'https://api.example.com/oauth/token',
@@ -50,13 +51,48 @@ describe('OAuthClient', () => {
             },
         })
 
-        const error = await client.requestToken().catch(
-            (caught: unknown) => caught
-        )
+        const error = await client
+            .requestToken()
+            .catch((caught: unknown) => caught)
         expect(error).toBeInstanceOf(Error)
         expect(String(error)).toContain(
             'OAuth token request failed with status 401: invalid_client'
         )
         expect(String(error)).not.toContain('must-not-leak')
+    })
+
+    it('reuses a token and refreshes it before expiration', async () => {
+        const now = vi.spyOn(Date, 'now').mockReturnValue(1_000)
+        const fetchMock = vi
+            .fn()
+            .mockResolvedValueOnce(
+                Response.json({
+                    access_token: 'first-token',
+                    token_type: 'Bearer',
+                    expires_in: 100,
+                })
+            )
+            .mockResolvedValueOnce(
+                Response.json({
+                    access_token: 'refreshed-token',
+                    token_type: 'Bearer',
+                    expires_in: 100,
+                })
+            )
+        const client = new OAuthClient({
+            tokenEndpoint: 'https://api.example.com/oauth/token',
+            clientId: 'synthetic-client',
+            clientSecret: 'synthetic-secret',
+            fetch: fetchMock,
+        })
+
+        await expect(client.getAccessToken()).resolves.toBe('first-token')
+        now.mockReturnValue(90_999)
+        await expect(client.getAccessToken()).resolves.toBe('first-token')
+        expect(fetchMock).toHaveBeenCalledTimes(1)
+
+        now.mockReturnValue(91_000)
+        await expect(client.getAccessToken()).resolves.toBe('refreshed-token')
+        expect(fetchMock).toHaveBeenCalledTimes(2)
     })
 })

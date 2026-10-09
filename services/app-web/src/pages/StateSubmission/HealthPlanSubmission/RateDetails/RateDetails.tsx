@@ -210,6 +210,12 @@ const RateDetails = ({
     )
     const [submitRate] = useMutation(SubmitRateDocument)
     const isDSNP = contract?.draftRevision?.formData?.dsnpContract === true
+
+    const nextFormPage: RouteT =
+        showProcurementAttestation &&
+        contract?.draftRevision?.formData?.contractType === 'BASE'
+            ? 'SUBMISSIONS_ATTESTATIONS'
+            : 'SUBMISSIONS_CONTACTS'
     const rateDetailsFormSchema = RateDetailsFormSchema(
         {
             'rate-edit-unlock': useEditUnlockRate,
@@ -509,7 +515,7 @@ const RateDetails = ({
                         type: 'CONTINUE',
                         redirectPath: displayAsStandaloneRate
                             ? 'DASHBOARD_SUBMISSIONS'
-                            : 'SUBMISSIONS_CONTACTS',
+                            : nextFormPage,
                     })
                 }
                 validationSchema={rateDetailsFormSchema}
@@ -804,7 +810,7 @@ const RateDetails = ({
                                         displayAsStandaloneRate
                                             ? RoutesRecord.DASHBOARD_SUBMISSIONS
                                             : generatePath(
-                                                  RoutesRecord.SUBMISSIONS_CONTACTS,
+                                                  RoutesRecord[nextFormPage],
                                                   {
                                                       id,
                                                       contractSubmissionType,
