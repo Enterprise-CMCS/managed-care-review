@@ -336,6 +336,22 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                     }
                 })
             }
+            if (featureFlags['procurement-attestation']) {
+                // once procurement attestation ships this refinement should be moved to the
+                // submittableContractSchema and procurementAttestation made required for
+                // health plan base contracts.
+                if (
+                    contract.contractSubmissionType === 'HEALTH_PLAN' &&
+                    contractFormData.contractType === 'BASE' &&
+                    contractFormData.procurementAttestation !== true
+                ) {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message:
+                            'procurementAttestation is required for health plan base contracts when procurement-attestation feature flag is on',
+                    })
+                }
+            }
         })
     } else {
         return submittableContractSchema
