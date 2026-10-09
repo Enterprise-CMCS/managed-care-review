@@ -2952,7 +2952,7 @@ describe('submitContract', () => {
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
                 expect.objectContaining({
                     subject: expect.stringContaining(
-                        `Submission ${contractName} is subject to CMS review`
+                        `New EQRO Submission: ${contractName} is subject to CMS Review`
                     ),
                     sourceEmail: config.emailSource,
                     toAddresses: expect.arrayContaining(Array.from(cmsEmails)),
