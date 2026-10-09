@@ -17,7 +17,7 @@ import {
     Effect,
 } from 'aws-cdk-lib/aws-iam'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
-import { CfnOutput, Fn } from 'aws-cdk-lib'
+import { CfnOutput, Fn, RemovalPolicy } from 'aws-cdk-lib'
 
 /**
  * Cognito stack - User Pool and Identity Pool for authentication
@@ -91,6 +91,8 @@ export class CognitoStack extends BaseStack {
             // Create Cognito User Pool
             this.userPool = new UserPool(this, 'CognitoUserPool', {
                 userPoolName: `${this.stage}-user-pool`,
+                // CDK defaults UserPool to RETAIN; review pools must be deleted with the stack
+                removalPolicy: RemovalPolicy.DESTROY,
                 signInAliases: {
                     email: true,
                 },
