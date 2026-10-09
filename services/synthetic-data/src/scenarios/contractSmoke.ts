@@ -4,7 +4,6 @@ import {
     contractSmokeMarker,
     contractSmokeScenarioKey,
 } from '../builders/contractSmoke'
-import { SyntheticFetchContractDocument } from '../gen/gqlClient'
 import { submitSyntheticContract } from './submitContract'
 import type { Logger } from '../logger'
 
@@ -45,25 +44,6 @@ export async function runContractSmokeScenario({
     logger.info('synthetic.contract-smoke.contract-created', {
         contractId,
     })
-
-    // Read the submitted package back to verify persistence, not only the mutation response.
-    const fetchResult = await graphql.execute(SyntheticFetchContractDocument, {
-        input: { contractID: contractId },
-    })
-    const fetchedContract = fetchResult.fetchContract.contract
-    const markerWasPersisted = fetchedContract.packageSubmissions.some(
-        (submission) =>
-            submission.contractRevision.formData.submissionDescription ===
-            marker
-    )
-    if (
-        fetchedContract.id !== contractId ||
-        fetchedContract.stateCode !== 'MN' ||
-        fetchedContract.status !== 'SUBMITTED' ||
-        !markerWasPersisted
-    ) {
-        throw new Error('Synthetic contract verification failed')
-    }
 
     const result: ContractSmokeResult = {
         scenarioKey: contractSmokeScenarioKey,

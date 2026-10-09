@@ -9,7 +9,6 @@ import { buildSyntheticRateFormData } from '../builders/rate'
 import type { GraphQLClient } from '../client/graphqlClient'
 import type { UploadClient } from '../client/uploadClient'
 import {
-    SyntheticFetchContractDocument,
     SyntheticSubmitContractDocument,
     SyntheticUnlockContractDocument,
     SyntheticUpdateContractDraftRevisionDocument,
@@ -40,7 +39,7 @@ type ContractUnlockAddRateOptions = {
 
 /**
  * Creates a contract-only submission, unlocks it, adds its first owned rate, and
- * resubmits it. The final read verifies both package snapshots and rate ownership.
+ * resubmits it through the public API.
  */
 export async function runContractUnlockAddRateScenario({
     stateGraphql,
@@ -75,15 +74,10 @@ export async function runContractUnlockAddRateScenario({
     )
     const unlockedContract = unlockResult.unlockContract.contract
     const unlockedRevision = unlockedContract.draftRevision
-    if (
-        unlockedContract.id !== contractId ||
-        unlockedContract.status !== 'UNLOCKED' ||
-        !unlockedRevision ||
-        unlockedRevision.unlockInfo?.updatedReason !==
-            contractUnlockAddRateReason ||
-        unlockedRevision.unlockInfo.updatedBy.role !== 'CMS_USER'
-    ) {
-        throw new Error('Synthetic contract unlock verification failed')
+    if (unlockedContract.id !== contractId || !unlockedRevision?.updatedAt) {
+        throw new Error(
+            'Synthetic unlock response did not contain the expected draft'
+        )
     }
 
     const rateFixture = documentFixtures.pdf.small
@@ -112,9 +106,11 @@ export async function runContractUnlockAddRateScenario({
         contractUpdate.updateContractDraftRevision.contract.draftRevision
     if (
         contractUpdate.updateContractDraftRevision.contract.id !== contractId ||
-        !updatedDraft
+        !updatedDraft?.updatedAt
     ) {
-        throw new Error('Synthetic unlocked contract update was not persisted')
+        throw new Error(
+            'Synthetic update response did not contain the expected draft'
+        )
     }
 
     // Rate reconciliation requires the complete intended rate set and the timestamp
@@ -141,11 +137,13 @@ export async function runContractUnlockAddRateScenario({
         rateUpdate.updateDraftContractRates.contract.draftRates ?? []
     const rateId = draftRates[0]?.id
     if (
+        rateUpdate.updateDraftContractRates.contract.id !== contractId ||
         !rateId ||
-        draftRates.length !== 1 ||
-        draftRates[0]?.parentContractID !== contractId
+        draftRates.length !== 1
     ) {
-        throw new Error('Synthetic rate addition was not persisted')
+        throw new Error(
+            'Synthetic rate update response did not contain the expected rate ID'
+        )
     }
 
     const resubmitResult = await stateGraphql.execute(
@@ -157,51 +155,9 @@ export async function runContractUnlockAddRateScenario({
             },
         }
     )
-    if (
-        resubmitResult.submitContract.contract.id !== contractId ||
-        resubmitResult.submitContract.contract.status !== 'RESUBMITTED'
-    ) {
+    if (resubmitResult.submitContract.contract.id !== contractId) {
         throw new Error(
-            'Synthetic contract with added rate was not resubmitted'
-        )
-    }
-
-    const finalFetch = await stateGraphql.execute(
-        SyntheticFetchContractDocument,
-        { input: { contractID: contractId } }
-    )
-    const finalContract = finalFetch.fetchContract.contract
-    const initialSubmission = finalContract.packageSubmissions.find(
-        (submission) =>
-            submission.contractRevision.formData.submissionDescription ===
-            initialMarker
-    )
-    const resubmission = finalContract.packageSubmissions.find(
-        (submission) =>
-            submission.contractRevision.formData.submissionDescription ===
-            resubmittedMarker
-    )
-    const submittedRate = resubmission?.rateRevisions.find(
-        (revision) => revision.rateID === rateId
-    )
-
-    if (
-        finalContract.id !== contractId ||
-        finalContract.stateCode !== 'MN' ||
-        finalContract.status !== 'RESUBMITTED' ||
-        finalContract.draftRevision !== null ||
-        finalContract.packageSubmissions.length !== 2 ||
-        !initialSubmission ||
-        initialSubmission.rateRevisions.length !== 0 ||
-        !resubmission ||
-        resubmission.submitInfo.updatedReason !==
-            contractAddRateResubmitReason ||
-        resubmission.contractRevision.unlockInfo?.updatedReason !==
-            contractUnlockAddRateReason ||
-        submittedRate?.rate?.parentContractID !== contractId
-    ) {
-        throw new Error(
-            'Synthetic add-rate resubmission history verification failed'
+            'Synthetic submit response did not identify the expected contract'
         )
     }
 

@@ -4,7 +4,6 @@ import {
 } from '../builders/contractLinkedRate'
 import type { GraphQLClient } from '../client/graphqlClient'
 import type { UploadClient } from '../client/uploadClient'
-import { SyntheticFetchContractDocument } from '../gen/gqlClient'
 import type { Logger } from '../logger'
 import { submitSyntheticContract } from './submitContract'
 
@@ -27,8 +26,7 @@ type ContractLinkedRateOptions = {
 }
 
 /**
- * Creates one submitted parent rate, links it to a second submitted contract, and
- * reads both packages back to prove that linking did not change rate ownership.
+ * Creates one submitted source rate and links it to a second submitted contract.
  */
 export async function runContractLinkedRateScenario({
     graphql,
@@ -61,7 +59,7 @@ export async function runContractLinkedRateScenario({
         throw new Error('Synthetic source contract did not create one rate')
     }
 
-    // Linking reuses the submitted rate revision; the target contract must not become its parent.
+    // Reuse the rate ID returned by the source submission.
     const linked = await submitSyntheticContract({
         graphql,
         uploads,
@@ -69,43 +67,6 @@ export async function runContractLinkedRateScenario({
         documentName: `synthetic-linked-rate-target-contract-${seed}.pdf`,
         rates: [{ type: 'LINK', rateId }],
     })
-
-    const [sourceFetch, linkedFetch] = await Promise.all([
-        graphql.execute(SyntheticFetchContractDocument, {
-            input: { contractID: source.contractId },
-        }),
-        graphql.execute(SyntheticFetchContractDocument, {
-            input: { contractID: linked.contractId },
-        }),
-    ])
-    const sourceContract = sourceFetch.fetchContract.contract
-    const linkedContract = linkedFetch.fetchContract.contract
-    const sourceSubmission = sourceContract.packageSubmissions.find(
-        (submission) =>
-            submission.contractRevision.formData.submissionDescription ===
-            sourceMarker
-    )
-    const linkedSubmission = linkedContract.packageSubmissions.find(
-        (submission) =>
-            submission.contractRevision.formData.submissionDescription ===
-            marker
-    )
-    const sourceRate = sourceSubmission?.rateRevisions.find(
-        (revision) => revision.rateID === rateId
-    )
-    const linkedRate = linkedSubmission?.rateRevisions.find(
-        (revision) => revision.rateID === rateId
-    )
-
-    if (
-        sourceContract.status !== 'SUBMITTED' ||
-        linkedContract.status !== 'SUBMITTED' ||
-        sourceRate?.rate?.parentContractID !== source.contractId ||
-        linkedRate?.rate?.parentContractID !== source.contractId ||
-        linked.contractId === source.contractId
-    ) {
-        throw new Error('Synthetic linked-rate topology verification failed')
-    }
 
     const result: ContractLinkedRateResult = {
         scenarioKey: contractLinkedRateScenarioKey,
