@@ -2762,6 +2762,33 @@ describe('submitContract', () => {
 
                 expect(submitResult.errors).toBeUndefined()
             }, 20000)
+
+            it('clears a stale procurement attestation when submitting a contract that is no longer a base contract', async () => {
+                const server = await constructTestPostgresServer({
+                    ldService: ldService,
+                })
+
+                const initialContract =
+                    await createAndUpdateTestContractWithoutRates(
+                        server,
+                        'FL',
+                        {
+                            submissionType: 'CONTRACT_ONLY',
+                            contractType: 'AMENDMENT',
+                            procurementAttestation: true,
+                        }
+                    )
+
+                const contract = await submitTestContract(
+                    server,
+                    initialContract.id
+                )
+
+                expect(
+                    contract.packageSubmissions[0].contractRevision.formData
+                        .procurementAttestation
+                ).toBeNull()
+            }, 20000)
         })
     })
 

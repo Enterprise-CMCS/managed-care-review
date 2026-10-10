@@ -224,6 +224,11 @@ export function submitContract(
                         )
                 }
 
+                // Clear the procurement attestation if the contract is no longer a base contract
+                if (initialFormData.contractType !== 'BASE') {
+                    initialFormData.procurementAttestation = undefined
+                }
+
                 const contractToParse = Object.assign({}, contractWithHistory)
                 contractToParse.draftRevision = {
                     ...contractWithHistory.draftRevision,
