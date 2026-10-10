@@ -337,9 +337,9 @@ const refineForFeatureFlags = (featureFlags?: FeatureFlagSettings) => {
                 })
             }
             if (featureFlags['procurement-attestation']) {
-                // once procurement attestation ships this refinement should be moved to the
-                // submittableContractSchema and procurementAttestation made required for
-                // health plan base contracts.
+                // once procurement attestation ships this refinement should graduate into
+                // a health plan specific submittable schema, alongside the other shipped
+                // health plan only refinements above.
                 if (
                     contract.contractSubmissionType === 'HEALTH_PLAN' &&
                     contractFormData.contractType === 'BASE' &&
