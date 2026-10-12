@@ -10,7 +10,7 @@
     "devDependencies": {
         "@aws-sdk/types": "^3.974.6",
         "@types/pg": "^8.23.1",
-        "fs-extra": "^11.4.0",
+        "fs-extra": "^11.4.1",
         "typescript": "7.0.2"
     },
     "dependencies": {

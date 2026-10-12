@@ -112,12 +112,6 @@ export const ReviewSubmit = (): React.ReactElement => {
     const isContractActionAndRateCertification =
         contractFormData.submissionType === 'CONTRACT_AND_RATES'
 
-    // Attestations page precedes review and submit for base contract submissions
-    const previousFormPage: RouteT =
-        showProcurementAttestation && contractFormData.contractType === 'BASE'
-            ? 'SUBMISSIONS_ATTESTATIONS'
-            : 'SUBMISSIONS_CONTACTS'
-
     const submissionName =
         packageName(
             contract.stateCode,
@@ -178,9 +172,11 @@ export const ReviewSubmit = (): React.ReactElement => {
                     <ActionButton
                         type="button"
                         variant="outline"
-                        link_url={getPath(previousFormPage)}
+                        link_url={getPath('SUBMISSIONS_CONTACTS')}
                         parent_component_type="page body"
-                        onClick={() => navigate(getPath(previousFormPage))}
+                        onClick={() =>
+                            navigate(getPath('SUBMISSIONS_CONTACTS'))
+                        }
                         disabled={isSubmitting}
                     >
                         Back

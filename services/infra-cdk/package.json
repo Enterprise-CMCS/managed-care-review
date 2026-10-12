@@ -18,7 +18,7 @@
         "@types/node": "26.2.0",
         "aws-cdk": "^2.1144.0",
         "esbuild": "^0.28.2",
-        "fs-extra": "^11.4.0",
+        "fs-extra": "^11.4.1",
         "lint-staged": "^17.5.1",
         "prettier": "^3.9.9",
         "tsx": "^4.23.13",

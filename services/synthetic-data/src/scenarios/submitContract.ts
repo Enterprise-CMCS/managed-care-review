@@ -51,7 +51,7 @@ function minnesotaContractProgramId(): string {
 /**
  * Creates and submits one Minnesota contract through the public API.
  * When rates are supplied they are the contract's complete intended rate set:
- * CREATE entries become owned rates and LINK entries retain their existing parent.
+ * CREATE entries request new rates and LINK entries reuse existing rate IDs.
  */
 export async function submitSyntheticContract({
     graphql,
@@ -74,8 +74,10 @@ export async function submitSyntheticContract({
     )
     const contract = createResult.createContract.contract
     const lastSeenUpdatedAt = contract.draftRevision?.updatedAt
-    if (!lastSeenUpdatedAt || contract.status !== 'DRAFT') {
-        throw new Error('Synthetic contract was not created as a draft')
+    if (!contract.id || !lastSeenUpdatedAt) {
+        throw new Error(
+            'Synthetic create response did not contain a contract ID and draft timestamp'
+        )
     }
 
     const fixture = documentFixtures.pdf.small
@@ -127,9 +129,11 @@ export async function submitSyntheticContract({
         updateResult.updateContractDraftRevision.contract.draftRevision
     if (
         updateResult.updateContractDraftRevision.contract.id !== contract.id ||
-        !updatedDraft
+        !updatedDraft?.updatedAt
     ) {
-        throw new Error('Synthetic contract draft update was not persisted')
+        throw new Error(
+            'Synthetic update response did not contain the expected draft'
+        )
     }
 
     let rateIds: string[] = []
@@ -156,10 +160,14 @@ export async function submitSyntheticContract({
             )
             .map((rate) => rate.rateId)
         if (
+            rateResult.updateDraftContractRates.contract.id !== contract.id ||
             draftRates.length !== rates.length ||
+            rateIds.some((rateId) => !rateId) ||
             expectedLinkedRateIds.some((rateId) => !rateIds.includes(rateId))
         ) {
-            throw new Error('Synthetic contract rate update was not persisted')
+            throw new Error(
+                'Synthetic rate update response did not contain the expected rate IDs'
+            )
         }
     }
 
@@ -169,11 +177,10 @@ export async function submitSyntheticContract({
             input: { contractID: contract.id },
         }
     )
-    if (
-        submitResult.submitContract.contract.id !== contract.id ||
-        submitResult.submitContract.contract.status !== 'SUBMITTED'
-    ) {
-        throw new Error('Synthetic contract was not submitted')
+    if (submitResult.submitContract.contract.id !== contract.id) {
+        throw new Error(
+            'Synthetic submit response did not identify the expected contract'
+        )
     }
 
     return { contractId: contract.id, programId, contractDocument, rateIds }

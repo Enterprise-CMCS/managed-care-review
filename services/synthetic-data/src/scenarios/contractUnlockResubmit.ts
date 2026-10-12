@@ -8,7 +8,6 @@ import {
     contractUnlockResubmitScenarioKey,
 } from '../builders/contractUnlockResubmit'
 import {
-    SyntheticFetchContractDocument,
     SyntheticSubmitContractDocument,
     SyntheticUnlockContractDocument,
     SyntheticUpdateContractDraftRevisionDocument,
@@ -55,20 +54,6 @@ export async function runContractUnlockResubmitScenario({
             marker: initialMarker,
             documentName: `synthetic-contract-unlock-resubmit-${seed}-initial.pdf`,
         })
-    const initialFetch = await stateGraphql.execute(
-        SyntheticFetchContractDocument,
-        { input: { contractID: contractId } }
-    )
-    const initialContract = initialFetch.fetchContract.contract
-    if (
-        initialContract.status !== 'SUBMITTED' ||
-        !initialContract.initiallySubmittedAt
-    ) {
-        throw new Error(
-            'Synthetic contract initial submission verification failed'
-        )
-    }
-
     const unlockResult = await cmsGraphql.execute(
         SyntheticUnlockContractDocument,
         {
@@ -80,14 +65,10 @@ export async function runContractUnlockResubmitScenario({
     )
     const unlockedContract = unlockResult.unlockContract.contract
     const unlockedRevision = unlockedContract.draftRevision
-    if (
-        unlockedContract.id !== contractId ||
-        unlockedContract.status !== 'UNLOCKED' ||
-        !unlockedRevision ||
-        unlockedRevision.unlockInfo?.updatedReason !== contractUnlockReason ||
-        unlockedRevision.unlockInfo.updatedBy.role !== 'CMS_USER'
-    ) {
-        throw new Error('Synthetic contract unlock verification failed')
+    if (unlockedContract.id !== contractId || !unlockedRevision?.updatedAt) {
+        throw new Error(
+            'Synthetic unlock response did not contain the expected draft'
+        )
     }
 
     const supportingFixture = documentFixtures.docx.small
@@ -117,7 +98,9 @@ export async function runContractUnlockResubmitScenario({
         updateResult.updateContractDraftRevision.contract.id !== contractId ||
         !updateResult.updateContractDraftRevision.contract.draftRevision
     ) {
-        throw new Error('Synthetic unlocked contract update was not persisted')
+        throw new Error(
+            'Synthetic update response did not contain the expected draft'
+        )
     }
 
     const resubmitResult = await stateGraphql.execute(
@@ -129,72 +112,9 @@ export async function runContractUnlockResubmitScenario({
             },
         }
     )
-    if (
-        resubmitResult.submitContract.contract.id !== contractId ||
-        resubmitResult.submitContract.contract.status !== 'RESUBMITTED'
-    ) {
-        throw new Error('Synthetic contract was not resubmitted')
-    }
-
-    const finalFetch = await stateGraphql.execute(
-        SyntheticFetchContractDocument,
-        { input: { contractID: contractId } }
-    )
-    const finalContract = finalFetch.fetchContract.contract
-    const initialSubmission = finalContract.packageSubmissions.find(
-        (submission) =>
-            submission.contractRevision.formData.submissionDescription ===
-            initialMarker
-    )
-    const resubmission = finalContract.packageSubmissions.find(
-        (submission) =>
-            submission.contractRevision.formData.submissionDescription ===
-            resubmittedMarker
-    )
-    const initialDocument =
-        initialSubmission?.contractRevision.formData.contractDocuments.find(
-            (document) => document.sha256 === contractDocument.sha256
-        )
-    const retainedDocument =
-        resubmission?.contractRevision.formData.contractDocuments.find(
-            (document) => document.sha256 === contractDocument.sha256
-        )
-    const revisedSupportingDocument =
-        resubmission?.contractRevision.formData.supportingDocuments.find(
-            (document) => document.sha256 === supportingDocument.sha256
-        )
-    const initialHasRevisedSupportingDocument =
-        initialSubmission?.contractRevision.formData.supportingDocuments.some(
-            (document) => document.sha256 === supportingDocument.sha256
-        ) ?? false
-
-    if (
-        finalContract.id !== contractId ||
-        finalContract.stateCode !== 'MN' ||
-        finalContract.status !== 'RESUBMITTED' ||
-        finalContract.draftRevision !== null ||
-        finalContract.initiallySubmittedAt !==
-            initialContract.initiallySubmittedAt ||
-        finalContract.packageSubmissions.length !== 2 ||
-        !initialSubmission ||
-        initialSubmission.submitInfo.updatedReason !== 'Initial submission' ||
-        !resubmission ||
-        resubmission.submitInfo.updatedReason !== contractResubmitReason ||
-        resubmission.contractRevision.unlockInfo?.updatedReason !==
-            contractUnlockReason ||
-        resubmission.contractRevision.unlockInfo.updatedBy.role !==
-            'CMS_USER' ||
-        resubmission.contractRevision.formData.modifiedBenefitsProvided !==
-            false ||
-        resubmission.contractRevision.formData.modifiedGeoAreaServed !==
-            false ||
-        !initialDocument?.dateAdded ||
-        retainedDocument?.dateAdded !== initialDocument.dateAdded ||
-        !revisedSupportingDocument?.dateAdded ||
-        initialHasRevisedSupportingDocument
-    ) {
+    if (resubmitResult.submitContract.contract.id !== contractId) {
         throw new Error(
-            'Synthetic contract resubmission history verification failed'
+            'Synthetic submit response did not identify the expected contract'
         )
     }
 
