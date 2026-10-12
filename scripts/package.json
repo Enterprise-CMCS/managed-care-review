@@ -10,7 +10,8 @@
         "precommit": "lint-staged",
         "lint": "tsc --noEmit && eslint",
         "build": "tsc",
-        "build:ci-scripts": "tsc"
+        "build:ci-scripts": "tsc",
+        "test:cognito-cleanup": "tsc --noEmit && tsx --test tests/cognito-cleanup.test.ts"
     },
     "lint-staged": {
         "*.sh": [
@@ -24,6 +25,7 @@
         "@aws-sdk/client-lambda": "^3.1146.0",
         "@aws-sdk/client-s3": "^3.1146.0",
         "@aws-sdk/client-secrets-manager": "^3.1146.0",
+        "@aws-sdk/client-sts": "^3.1148.0",
         "@types/papaparse": "^5.5.2",
         "@types/uuid": "^11.0.0",
         "octokit": "^5.0.5",
@@ -34,6 +36,7 @@
         "@octokit/openapi-types": "^27.0.0",
         "csv-parser": "^3.2.1",
         "lint-staged": "^17.5.1",
+        "tsx": "^4.23.13",
         "typescript": "5.9.3",
         "uuid": "^14.0.2"
     }
