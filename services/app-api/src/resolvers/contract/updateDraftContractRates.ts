@@ -21,7 +21,7 @@ import { getStatePrograms } from '../helpers'
 // LINK: rateID: YES, formData: NO
 const rateCreateSchema = z.object({
     type: z.literal('CREATE'),
-    rateID: z.undefined(),
+    rateID: z.undefined().optional(),
     formData: rateFormDataSchema,
 })
 
@@ -34,7 +34,7 @@ const rateUpdateSchema = z.object({
 const rateLinkSchema = z.object({
     type: z.literal('LINK'),
     rateID: z.string(),
-    formData: z.undefined(),
+    formData: z.undefined().optional(),
 })
 
 const updatedRateUnion = z.discriminatedUnion('type', [

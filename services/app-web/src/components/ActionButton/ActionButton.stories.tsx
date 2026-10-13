@@ -1,9 +1,93 @@
 import React from 'react'
+import type { Meta, StoryObj } from '@storybook/react'
 import { ActionButton } from './ActionButton'
 
 export default {
     title: 'Components/ActionButton',
     component: ActionButton,
+    argTypes: {
+        type: {
+            options: ['button', 'submit', 'reset'],
+            control: 'select',
+            table: { type: { summary: "'button' | 'submit' | 'reset'" } },
+        },
+        secondary: {
+            control: false,
+            description: 'Set through variant; overridden by ActionButton.',
+            table: { type: { summary: 'boolean' } },
+        },
+        base: { control: 'boolean', table: { type: { summary: 'boolean' } } },
+        accentStyle: {
+            options: ['cool', 'warm'],
+            control: 'select',
+            table: { type: { summary: "'cool' | 'warm'" } },
+        },
+        outline: {
+            control: false,
+            description: 'Set through variant; overridden by ActionButton.',
+            table: { type: { summary: 'boolean' } },
+        },
+        inverse: {
+            control: 'boolean',
+            table: { type: { summary: 'boolean' } },
+        },
+        size: {
+            options: ['big'],
+            control: 'select',
+            table: { type: { summary: "'big'" } },
+        },
+        unstyled: {
+            control: false,
+            description: 'Set through variant; overridden by ActionButton.',
+            table: { type: { summary: 'boolean' } },
+        },
+        button_style: {
+            options: [
+                'default',
+                'primary',
+                'success',
+                'secondary',
+                'outline',
+                'unstyled',
+            ],
+            control: 'select',
+            description: 'Button style recorded in the Tealium event.',
+            table: {
+                category: 'Tealium',
+                type: { summary: 'ButtonEventStyle' },
+            },
+        },
+        button_type: {
+            control: 'text',
+            description: 'Button type recorded in the Tealium event.',
+            table: { category: 'Tealium', type: { summary: 'string' } },
+        },
+        parent_component_heading: {
+            control: 'text',
+            description:
+                'Heading of the parent component recorded in the Tealium event.',
+            table: { category: 'Tealium', type: { summary: 'string' } },
+        },
+        parent_component_type: {
+            control: 'text',
+            description: 'Parent component type recorded in the Tealium event.',
+            table: { category: 'Tealium', type: { summary: 'string' } },
+        },
+        link_url: {
+            control: 'text',
+            description: 'Link URL recorded in the Tealium event.',
+            table: { category: 'Tealium', type: { summary: 'string' } },
+        },
+        event_extension: {
+            control: 'text',
+            description: 'Additional metadata recorded in the Tealium event.',
+            table: { category: 'Tealium', type: { summary: 'string' } },
+        },
+    },
+} satisfies Meta<typeof ActionButton>
+
+export const Playground: StoryObj<typeof ActionButton> = {
+    args: { type: 'button', children: 'Click Me', variant: 'default' },
 }
 
 export const Default = (): React.ReactElement => (

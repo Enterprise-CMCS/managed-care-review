@@ -6,7 +6,6 @@ import {
     StackStatus,
 } from '@aws-sdk/client-cloudformation'
 import { S3Client, DeleteBucketCommand } from '@aws-sdk/client-s3'
-import { CloudFrontClient } from '@aws-sdk/client-cloudfront'
 import {
     emptyS3Bucket,
     deleteStack,

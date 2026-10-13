@@ -20,14 +20,7 @@ const config: StorybookConfig = {
 
     typescript: {
         check: false,
-        reactDocgen: 'react-docgen-typescript',
-        reactDocgenTypescriptOptions: {
-            shouldExtractLiteralValuesFromEnum: true,
-            compilerOptions: {
-                allowSyntheticDefaultImports: false,
-                esModuleInterop: false,
-            },
-        },
+        reactDocgen: 'react-docgen',
     },
 
     framework: { name: getAbsolutePath('@storybook/react-vite'), options: {} },
