@@ -1088,6 +1088,90 @@ describe('Health plan parsing and validation', () => {
 
             expect(parsedContract).toEqual(contract)
         })
+
+        it.each([undefined, false])(
+            'return error for base health plan contract when procurementAttestation is %s and the procurement attestation flag is on',
+            async (attestationValue) => {
+                const prismaClient = await sharedTestPrismaClient()
+                const postgresStore = NewPostgresStore(prismaClient)
+                const contract = mockSubmittableHealthPlanContract()
+                contract.draftRevision!.formData.contractType = 'BASE'
+                contract.draftRevision!.formData.procurementAttestation =
+                    attestationValue
+
+                const parsedWithFlag = parseContract(
+                    contract,
+                    'KY',
+                    postgresStore,
+                    { 'procurement-attestation': true }
+                )
+
+                if (!(parsedWithFlag instanceof z.ZodError)) {
+                    throw new Error(
+                        'Expected parseContract to return a ZodError'
+                    )
+                }
+                expect(parsedWithFlag.issues).toEqual(
+                    expect.arrayContaining([
+                        expect.objectContaining({
+                            message:
+                                'procurementAttestation is required for health plan base contracts when procurement-attestation feature flag is on',
+                        }),
+                    ])
+                )
+            }
+        )
+
+        it('success for base health plan contract when procurementAttestation is true and the procurement attestation flag is on', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockSubmittableHealthPlanContract()
+            contract.draftRevision!.formData.contractType = 'BASE'
+            contract.draftRevision!.formData.procurementAttestation = true
+
+            const parsedContract = parseContract(
+                contract,
+                'KY',
+                postgresStore,
+                { 'procurement-attestation': true }
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
+
+        it('success for amendment contract without procurementAttestation when the procurement attestation flag is on', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockSubmittableHealthPlanContract()
+            contract.draftRevision!.formData.contractType = 'AMENDMENT'
+            contract.draftRevision!.formData.procurementAttestation = undefined
+
+            const parsedContract = parseContract(
+                contract,
+                'KY',
+                postgresStore,
+                { 'procurement-attestation': true }
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
+
+        it('success for base health plan contract without procurementAttestation when the procurement attestation flag is off', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockSubmittableHealthPlanContract()
+            contract.draftRevision!.formData.contractType = 'BASE'
+            contract.draftRevision!.formData.procurementAttestation = undefined
+
+            const parsedContract = parseContract(
+                contract,
+                'KY',
+                postgresStore,
+                {}
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
     })
 })
 
