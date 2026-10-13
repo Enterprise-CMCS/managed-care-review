@@ -58,7 +58,8 @@ export const unlockContractCMSEmail = async (
         contract.stateCode,
         contract.stateNumber,
         contractRev.formData.programIDs,
-        packagePrograms
+        packagePrograms,
+        contract.contractSubmissionType
     )
 
     //Both EQRO and health plans use the same eta template but diff data, we can handle that here.

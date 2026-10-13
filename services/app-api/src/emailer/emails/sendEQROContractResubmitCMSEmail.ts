@@ -48,7 +48,8 @@ export const sendEQROContractResubmitCMSEmail = async (
         contract.stateCode,
         contract.stateNumber,
         formData.programIDs,
-        pkgPrograms
+        pkgPrograms,
+        contract.contractSubmissionType
     )
 
     const submissionURL = submissionSummaryURL(

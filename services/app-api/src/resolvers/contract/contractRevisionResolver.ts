@@ -52,7 +52,8 @@ export function contractRevisionResolver(
                         stateCode,
                         parent.contract.stateNumber,
                         parent.formData.programIDs,
-                        programsForContractState ?? []
+                        programsForContractState ?? [],
+                        parent.contract.contractSubmissionType
                     )
                 }
             )
@@ -140,7 +141,8 @@ export function contractRevisionStrippedResolver(
                         stateCode,
                         parent.contract.stateNumber,
                         parent.formData.programIDs,
-                        programsForContractState ?? []
+                        programsForContractState ?? [],
+                        parent.contract.contractSubmissionType
                     )
                 }
             )
