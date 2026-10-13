@@ -1134,28 +1134,28 @@ importers:
         version: 3.1146.0
       '@aws-solutions-constructs/aws-apigateway-lambda':
         specifier: 2.103.0
-        version: 2.103.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-cloudfront-s3':
         specifier: 2.102.0
-        version: 2.102.0(@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1))(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.102.0(@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1))(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-cognito-apigateway-lambda':
         specifier: 2.104.0
-        version: 2.104.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.104.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-eventbridge-lambda':
         specifier: 2.92.1
-        version: 2.92.1(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.92.1(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-lambda-secretsmanager':
         specifier: 2.104.0
-        version: 2.104.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.104.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-s3-lambda':
         specifier: 2.103.0
-        version: 2.103.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-wafwebacl-apigateway':
         specifier: 2.103.0
-        version: 2.103.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)
+        version: 2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       aws-cdk-lib:
-        specifier: 2.272.0
-        version: 2.272.0(constructs@10.8.1)
+        specifier: 2.273.0
+        version: 2.273.0(constructs@10.8.1)
       constructs:
         specifier: ^10.8.1
         version: 10.8.1
@@ -1170,8 +1170,8 @@ importers:
         specifier: 26.2.0
         version: 26.2.0
       aws-cdk:
-        specifier: ^2.1144.0
-        version: 2.1144.0
+        specifier: ^2.1145.0
+        version: 2.1145.0
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
@@ -6578,8 +6578,8 @@ packages:
     resolution: {integrity: sha512-Rf3eSj8IhM4chp3SOe58sONSX8idY/NlttqNjsP6mUC6dSfBOLfvDjoYDLAhfDZbv8imNbxfx+hIFDqIZ3/IMg==}
     deprecated: 'Amplify JavaScript v5 is in maintenance mode. Upgrade to v6. See the migration guide: https://docs.amplify.aws/gen1/javascript/build-a-backend/troubleshooting/migrate-from-javascript-v5-to-v6/'
 
-  aws-cdk-lib@2.272.0:
-    resolution: {integrity: sha512-XHqU7msDtp03JLoFqtbIuNPDeCebQxOBwRcuL6BpH8B1rV/sMHSdH9EY0ZRn+P004RKHs/+b5DPssN6F966k1A==}
+  aws-cdk-lib@2.273.0:
+    resolution: {integrity: sha512-H7hBQHnKn0ZBbpnWRL1Hn0GunSQUsYaLqOk2xIqV0HWr3qbYMwTEZT0HbJBUSxeUdzp1nz0AE2LN3K6qvYr4Zg==}
     engines: {node: '>= 20.0.0'}
     peerDependencies:
       constructs: ^10.5.0
@@ -6597,8 +6597,8 @@ packages:
       - yaml
       - mime-types
 
-  aws-cdk@2.1144.0:
-    resolution: {integrity: sha512-T3Kkke7c/vlGzrovtgxtb83u0ihF/Lq9z/R0hvOk+ncUZ734zrbG+0IWO/xZLd5tTQphwAO7OYufarg/wl5ZFA==}
+  aws-cdk@2.1145.0:
+    resolution: {integrity: sha512-kV3vJCQX5XvlyVvmRHH79Nn2kOmDicN1WSFGkSaZXsNaDdNj2Re25yehsp+L2ixv0VCm0/HLLmYSoehmVPDkJg==}
     engines: {node: '>= 18.0.0'}
     hasBin: true
 
@@ -13285,45 +13285,45 @@ snapshots:
       '@smithy/types': 4.19.0
       tslib: 2.8.1
 
-  '@aws-solutions-constructs/aws-apigateway-lambda@2.103.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-apigateway-lambda@2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.272.0(constructs@10.8.1)
+      aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-cloudfront-s3@2.102.0(@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1))(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-cloudfront-s3@2.102.0(@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1))(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      '@aws-solutions-constructs/resources': 2.102.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)
-      aws-cdk-lib: 2.272.0(constructs@10.8.1)
+      '@aws-solutions-constructs/resources': 2.102.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
+      aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.104.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-cognito-apigateway-lambda@2.104.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.272.0(constructs@10.8.1)
+      aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-eventbridge-lambda@2.92.1(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-eventbridge-lambda@2.92.1(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.272.0(constructs@10.8.1)
+      aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.104.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-lambda-secretsmanager@2.104.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.272.0(constructs@10.8.1)
+      aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-s3-lambda@2.103.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-s3-lambda@2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.272.0(constructs@10.8.1)
+      aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.103.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.272.0(constructs@10.8.1)
+      aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.272.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/resources@2.102.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
-      aws-cdk-lib: 2.272.0(constructs@10.8.1)
+      aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
   '@aws/lambda-invoke-store@0.2.4': {}
@@ -18698,14 +18698,14 @@ snapshots:
       - react-native
       - supports-color
 
-  aws-cdk-lib@2.272.0(constructs@10.8.1):
+  aws-cdk-lib@2.273.0(constructs@10.8.1):
     dependencies:
       '@aws-cdk/asset-awscli-v1': 2.2.292
       '@aws-cdk/asset-node-proxy-agent-v6': 2.1.2
       '@aws-cdk/cloud-assembly-schema': 54.25.0
       constructs: 10.8.1
 
-  aws-cdk@2.1144.0: {}
+  aws-cdk@2.1145.0: {}
 
   aws-sign2@0.7.0: {}
 
