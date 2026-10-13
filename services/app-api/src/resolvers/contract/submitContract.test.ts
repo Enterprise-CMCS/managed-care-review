@@ -2789,6 +2789,31 @@ describe('submitContract', () => {
                         .procurementAttestation
                 ).toBeNull()
             }, 20000)
+
+            it('successfully submits a base contract without a procurement attestation when the flag is off', async () => {
+                const server = await constructTestPostgresServer()
+
+                const initialContract =
+                    await createAndUpdateTestContractWithoutRates(
+                        server,
+                        'FL',
+                        {
+                            submissionType: 'CONTRACT_ONLY',
+                            procurementAttestation: undefined,
+                        }
+                    )
+
+                const submitResult = await executeGraphQLOperation(server, {
+                    query: SubmitContractDocument,
+                    variables: {
+                        input: {
+                            contractID: initialContract.id,
+                        },
+                    },
+                })
+
+                expect(submitResult.errors).toBeUndefined()
+            }, 20000)
         })
     })
 
