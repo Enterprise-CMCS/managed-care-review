@@ -180,7 +180,7 @@ function packageName(
     submissionType: ContractSubmissionType = 'HEALTH_PLAN'
 ): string {
     const padNumber = stateNumber.toString().padStart(4, '0')
-    if (submissionType !== 'HEALTH_PLAN') {
+    if (submissionType === 'EQRO') {
         return `MCR-${submissionType}-${stateCode.toUpperCase()}-${padNumber}`
     }
     const pNames = programNames(statePrograms, programIDs)
