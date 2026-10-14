@@ -1378,6 +1378,18 @@ export class AppApiStack extends BaseStack {
     }
 
     private createOutputs(): void {
+        new CfnOutput(this, 'OtelFunctionName', {
+            value: this.otelFunction.functionName,
+            exportName: this.exportName('OtelFunctionName'),
+            description: 'OTEL proxy Lambda function name',
+        })
+
+        new CfnOutput(this, 'ThirdPartyApiAuthorizerFunctionName', {
+            value: this.thirdPartyApiAuthorizerFunction.functionName,
+            exportName: this.exportName('ThirdPartyApiAuthorizerFunctionName'),
+            description: 'External GraphQL authorizer Lambda function name',
+        })
+
         new CfnOutput(this, 'HealthFunctionName', {
             value: this.healthFunction.functionName,
             exportName: this.exportName('HealthFunctionName'),
