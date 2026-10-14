@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
 import { FileItemT } from './FileProcessor/FileProcessor'
 import { SPACER_GIF } from './constants'
+import { ScanTimeoutError } from '../../s3/s3Error'
 import {
     TEST_DOC_FILE,
     TEST_PDF_FILE,
@@ -295,6 +296,72 @@ describe('FileUpload component', () => {
 
         await userClickByRole(screen, 'button', { name: /Retry/ })
         await waitFor(() => expect(props.uploadFile).toHaveBeenCalled())
+    })
+
+    it('treats a returned scan Error as a failure, not upload completion', async () => {
+        renderWithProviders(
+            <FileUpload
+                {...testProps}
+                scanFile={async () => new Error('scan failed')}
+            />
+        )
+        await userEvent.upload(
+            screen.getByTestId('file-input-input'),
+            TEST_PDF_FILE
+        )
+        await screen.findByText('Failed security scan, please remove')
+        expect(screen.getByText(/1 error/)).toBeInTheDocument()
+    })
+
+    it('shows an explicit scan timeout with a retry action', async () => {
+        renderWithProviders(
+            <FileUpload
+                {...testProps}
+                scanFile={async () => {
+                    throw new ScanTimeoutError()
+                }}
+            />
+        )
+        await userEvent.upload(
+            screen.getByTestId('file-input-input'),
+            TEST_PDF_FILE
+        )
+        await screen.findByText(
+            'Virus scan timed out. Please retry the upload.'
+        )
+        expect(
+            screen.getByRole('button', { name: /Retry upload/ })
+        ).toBeInTheDocument()
+    })
+
+    it('aborts a removed upload and never starts its scan', async () => {
+        let finishUpload!: (value: S3FileData) => void
+        let signal: AbortSignal | undefined
+        const scan = vi.fn()
+        const upload = vi.fn((_file: File, uploadSignal?: AbortSignal) => {
+            signal = uploadSignal
+            return new Promise<S3FileData>((resolve) => {
+                finishUpload = resolve
+            })
+        })
+        renderWithProviders(
+            <FileUpload {...testProps} uploadFile={upload} scanFile={scan} />
+        )
+        await userEvent.upload(
+            screen.getByTestId('file-input-input'),
+            TEST_PDF_FILE
+        )
+        await waitFor(() => expect(upload).toHaveBeenCalled())
+        await userClickByRole(screen, 'button', { name: /Remove.*document/ })
+        expect(signal?.aborted).toBe(true)
+        finishUpload({
+            key: 'removed.pdf',
+            s3URL: 's3://bucket/removed.pdf/report.pdf',
+        })
+        await waitFor(() =>
+            expect(screen.queryByRole('listitem')).not.toBeInTheDocument()
+        )
+        expect(scan).not.toHaveBeenCalled()
     })
 
     describe('list summary heading', () => {

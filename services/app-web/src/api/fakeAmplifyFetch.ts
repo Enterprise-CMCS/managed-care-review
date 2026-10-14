@@ -67,6 +67,8 @@ export async function fakeAmplifyFetch(
     options?: RequestInit
 ): Promise<Response> {
     options = options ?? {}
+    const signal = options.signal
+    signal?.throwIfAborted()
     if (options.method !== 'POST') {
         throw new Error('unexpected GQL request')
     }
@@ -102,7 +104,13 @@ export async function fakeAmplifyFetch(
               : uri.url
 
     return new Promise<Response>((resolve, reject) => {
-        API.post('api', uriString, apiOptions)
+        const request = API.post('api', uriString, apiOptions)
+        const onAbort = () => {
+            API.cancel(request, 'Request aborted')
+            reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'))
+        }
+        signal?.addEventListener('abort', onAbort, { once: true })
+        request
             .then((apiResponse: AxiosResponse) => {
                 // The Apollo Link wants a fetch.Response shaped response,
                 // not the axios shaped response that Amplify.API returns
@@ -121,5 +129,6 @@ export async function fakeAmplifyFetch(
                     reject(e)
                 }
             })
+            .finally(() => signal?.removeEventListener('abort', onAbort))
     })
 }

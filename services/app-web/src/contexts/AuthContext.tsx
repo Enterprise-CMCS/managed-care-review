@@ -18,6 +18,7 @@ import { useQuery } from '@apollo/client/react'
 // Constants and types
 type LoginStatusType = 'LOADING' | 'LOGGED_OUT' | 'LOGGED_IN'
 type LogoutType = 'TIMEOUT' | 'ERROR' | 'DEFAULT'
+type FeatureFlagsStatus = 'PENDING' | 'READY' | 'ERROR'
 const LOGOUT_TYPES: Record<LogoutType, LogoutType> = {
     TIMEOUT: 'TIMEOUT',
     ERROR: 'ERROR',
@@ -36,6 +37,7 @@ type AuthContextType = {
     refreshAuth: () => Promise<void>
     loggedInUser: UserType | undefined
     loginStatus: LoginStatusType
+    featureFlagsStatus?: FeatureFlagsStatus
     logout: ({ type }: { type: LogoutType }) => Promise<void>
 }
 
@@ -44,6 +46,7 @@ const AuthContext = React.createContext<AuthContextType>({
     checkAuth: () => Promise.reject(Error('Auth context error')),
     loggedInUser: undefined,
     loginStatus: 'LOADING',
+    featureFlagsStatus: 'PENDING',
     refreshAuth: () => Promise.resolve(undefined),
     logout: () => Promise.resolve(undefined),
 })
@@ -70,6 +73,8 @@ function AuthProvider({
         }
     )
 
+    const [featureFlagsStatus, setFeatureFlagsStatus] =
+        useState<FeatureFlagsStatus>('PENDING')
     const isAuthenticated = loggedInUser !== undefined
 
     // add current authenticated user to launchdarkly client
@@ -86,10 +91,20 @@ function AuthProvider({
             ldContext.state = user.state.code
         }
 
+        // Storage rollout must use authenticated targeting, but flag outages must
+        // fall back to legacy storage instead of blocking the application.
+        const timeout = setTimeout(() => setFeatureFlagsStatus('ERROR'), 3000)
         try {
-            await client?.identify(ldContext)
+            if (!client) throw new Error('Feature flag client unavailable')
+            await client.identify(ldContext)
+            setFeatureFlagsStatus((status) =>
+                status === 'PENDING' ? 'READY' : status
+            )
         } catch (err) {
+            setFeatureFlagsStatus('ERROR')
             return new Error(`Could not identify user ${err}`)
+        } finally {
+            clearTimeout(timeout)
         }
     }
 
@@ -209,6 +224,7 @@ function AuthProvider({
             value={{
                 loggedInUser,
                 loginStatus,
+                featureFlagsStatus,
                 checkAuth,
                 refreshAuth,
                 logout,

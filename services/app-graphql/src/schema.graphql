@@ -158,6 +158,18 @@ type Query {
     - ForbiddenError: OAuth client must have read permissions granted
     """
     fetchDocument(input: FetchDocumentInput!): FetchDocumentPayload!
+
+    """
+    Scan status for a shared upload, including uploads not yet saved as documents.
+    Missing scan tags are pending; only a clean GuardDuty result permits completion.
+    """
+    fetchUploadScanStatus(input: S3ObjectInput!): UploadScanStatus!
+
+    """
+    A short-lived download URL within the existing authenticated shared-file scope.
+    S3 continues to enforce malware-scan restrictions when the URL is used.
+    """
+    fetchS3DownloadURL(input: S3ObjectInput!): String!
     """
     fetchMcReviewSettings returns settings for the MC review app
 
@@ -3486,6 +3498,11 @@ input GenerateUploadURLInput {
     fileName: String!
     fileType: UploadFileType!
     bucketName: UploadBucketName!
+    """
+    Opt in to signing the attachment filename header. Existing callers need not
+    send this header unless they request it here.
+    """
+    includeContentDisposition: Boolean = false
 }
 
 type GenerateUploadURLPayload {
@@ -3494,6 +3511,19 @@ type GenerateUploadURLPayload {
     bucket: String!
     expiresIn: Int
     s3URL: String!
+    contentType: String!
+}
+
+input S3ObjectInput {
+    key: String!
+    bucketName: UploadBucketName!
+}
+
+enum UploadScanStatus {
+    PENDING
+    CLEAN
+    INFECTED
+    ERROR
 }
 
 type GenericDocumentOverrideType {
@@ -3568,6 +3598,8 @@ enum UploadFileType {
     XLS
     XLSX
     XLSM
+    XLTM
+    XLAM
     CSV
 }
 

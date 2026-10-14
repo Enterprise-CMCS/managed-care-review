@@ -21,6 +21,7 @@ export type FileItemT = {
     s3URL?: string // only items uploaded to s3 have this
     sha256?: string
     status: FileStatus
+    scanErrorMessage?: string
     dateAdded?: Date
 }
 
@@ -36,11 +37,13 @@ const DocumentError = ({
     hasScanningError,
     hasUploadError,
     hasUnexpectedError,
+    scanErrorMessage,
 }: {
     hasDuplicateNameError: boolean
     hasScanningError: boolean
     hasUploadError: boolean
     hasUnexpectedError: boolean
+    scanErrorMessage?: string
 }): React.ReactElement | null => {
     if (hasDuplicateNameError)
         return (
@@ -55,7 +58,7 @@ const DocumentError = ({
         return (
             <>
                 <span className={styles.fileItemBoldMessage}>
-                    Failed security scan, please remove
+                    {scanErrorMessage ?? 'Failed security scan, please remove'}
                 </span>
             </>
         )
@@ -157,6 +160,7 @@ export const FileProcessor = ({
                 <DocumentError
                     hasDuplicateNameError={hasDuplicateNameError}
                     hasScanningError={hasScanningError}
+                    scanErrorMessage={item.scanErrorMessage}
                     hasUploadError={hasUploadError}
                     hasUnexpectedError={hasUnexpectedError}
                 />

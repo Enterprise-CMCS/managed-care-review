@@ -35,12 +35,14 @@ export type AppProps = {
     authMode: AuthModeType
     apolloClient: ApolloClient
     s3Client: S3ClientT
+    apiS3Client?: S3ClientT
 }
 
 function App({
     authMode,
     apolloClient,
     s3Client,
+    apiS3Client,
 }: AppProps): React.ReactElement {
     const environmentName = import.meta.env.VITE_APP_STAGE_NAME || ''
     const isLocal = environmentName == 'local'
@@ -57,7 +59,10 @@ function App({
                     <BrowserRouter>
                         <ApolloProvider client={apolloClient}>
                             <AuthProvider authMode={authMode}>
-                                <S3Provider client={s3Client}>
+                                <S3Provider
+                                    client={s3Client}
+                                    apiClient={apiS3Client}
+                                >
                                     <PageProvider>
                                         <TealiumProvider
                                             client={newTealiumClient}

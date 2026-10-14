@@ -15,6 +15,7 @@ import { FileItemsList } from './FileItemList/FileItemsList'
 import { pluralize, calculateSHA256 } from '@mc-review/common-code'
 import { recordUserInputException } from '@mc-review/otel'
 import { parseErrorToError } from '@mc-review/helpers'
+import { ScanTimeoutError } from '../../s3/s3Error'
 
 export type S3FileData = {
     key: string
@@ -30,8 +31,8 @@ export type FileUploadProps = {
     initialItems?: FileItemT[]
     isLabelVisible?: boolean
     allowMultipleUploads?: boolean
-    uploadFile: (file: File) => Promise<S3FileData>
-    scanFile?: (key: string) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
+    uploadFile: (file: File, signal?: AbortSignal) => Promise<S3FileData>
+    scanFile?: (key: string, signal?: AbortSignal) => Promise<void | Error> // optional function to be called after uploading (used for scanning)
     onFileItemsUpdate: ({ fileItems }: { fileItems: FileItemT[] }) => void
 } & JSX.IntrinsicElements['input']
 
@@ -60,6 +61,14 @@ export const FileUpload = ({
     const fileInputRef = useRef<FileInputRef>(null) // reference to the HTML input which has files
     const summaryRef = useRef<HTMLHeadingElement>(null) // reference to the heading that we will focus
     const previousFileItems = usePrevious(fileItems)
+    const uploads = useRef(new Map<string, AbortController>())
+    React.useEffect(() => {
+        const activeUploads = uploads.current
+        return () => {
+            activeUploads.forEach((controller) => controller.abort())
+            activeUploads.clear()
+        }
+    }, [])
     const isRequired = inputProps['aria-required']
     const inputRequired = inputProps['aria-required'] || inputProps.required
 
@@ -155,6 +164,7 @@ export const FileUpload = ({
     }
 
     const deleteItem = (deletedItem: FileItemT) => {
+        uploads.current.get(deletedItem.id)?.abort()
         setFileItems((prevItems) => {
             return refreshItems(prevItems, deletedItem)
         })
@@ -165,15 +175,23 @@ export const FileUpload = ({
     }
     // Upload to S3 and update file items in component state with the async loading status
     // This includes moving from pending/loading UI to display success or errors
-    const asyncS3Upload = (files: File[] | File) => {
-        const upload = async (file: File) => {
+    const asyncS3Upload = (items: FileItemT[]) => {
+        const upload = async (uploadItem: FileItemT) => {
+            const file = uploadItem.file
+            if (!file) return
+            uploads.current.get(uploadItem.id)?.abort()
+            const controller = new AbortController()
+            uploads.current.set(uploadItem.id, controller)
+            const { signal } = controller
             const sha = (await calculateSHA256(file)) || ''
-            uploadFile(file)
+            if (signal.aborted) return
+            uploadFile(file, signal)
                 .then((data) => {
+                    if (signal.aborted) return
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
-                            if (item.file && item.file === file) {
+                            if (item.id === uploadItem.id) {
                                 return {
                                     ...item,
                                     key: data.key,
@@ -194,13 +212,15 @@ export const FileUpload = ({
                     return data
                 })
                 .then(async (data) => {
-                    if (scanFile && data) {
+                    if (scanFile && data && !signal.aborted) {
                         try {
-                            await scanFile(data.key)
+                            const scanError = await scanFile(data.key, signal)
+                            if (signal.aborted) return
+                            if (scanError instanceof Error) throw scanError
                             setFileItems((prevItems) => {
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
-                                    if (item.key === data.key) {
+                                    if (item.id === uploadItem.id) {
                                         if (
                                             item.status ===
                                             'DUPLICATE_NAME_ERROR'
@@ -226,6 +246,7 @@ export const FileUpload = ({
                             })
                             return
                         } catch (e) {
+                            if (signal.aborted) return
                             console.info(
                                 'SCANNING_ERROR: ',
                                 parseErrorToError(e).message
@@ -233,14 +254,18 @@ export const FileUpload = ({
                             setFileItems((prevItems) => {
                                 const newItems = [...prevItems]
                                 return newItems.map((item) => {
-                                    if (item.key === data.key) {
+                                    if (item.id === uploadItem.id) {
                                         const error = new Error(
                                             `SCANNING_ERROR: ${item}`
                                         )
                                         recordJSException(error)
                                         return {
                                             ...item,
-                                            S3URL: null,
+                                            s3URL: undefined,
+                                            scanErrorMessage:
+                                                e instanceof ScanTimeoutError
+                                                    ? e.message
+                                                    : undefined,
                                             status: 'SCANNING_ERROR',
                                         } as FileItemT
                                     } else {
@@ -252,10 +277,11 @@ export const FileUpload = ({
                     }
                 })
                 .catch((_e) => {
+                    if (signal.aborted) return
                     setFileItems((prevItems) => {
                         const newItems = [...prevItems]
                         return newItems.map((item) => {
-                            if (item.file === file) {
+                            if (item.id === uploadItem.id) {
                                 const error = new Error(`UPLOAD_ERROR: ${item}`)
                                 recordJSException(error)
                                 return {
@@ -268,15 +294,16 @@ export const FileUpload = ({
                         })
                     })
                 })
+                .finally(() => {
+                    if (uploads.current.get(uploadItem.id) === controller) {
+                        uploads.current.delete(uploadItem.id)
+                    }
+                })
         }
 
-        if (!(files instanceof File)) {
-            files.forEach((file) => {
-                upload(file).catch((e) => console.error(e))
-            })
-        } else {
-            upload(files).catch((e) => console.error(e))
-        }
+        items.forEach((item) => {
+            upload(item).catch((e) => console.error(e))
+        })
     }
 
     const retryFile = (item: FileItemT) => {
@@ -288,9 +315,10 @@ export const FileUpload = ({
         setFileItems((prevItems) => {
             const newItems = [...prevItems]
             return newItems.map((i) => {
-                if (item.file === i.file) {
+                if (item.id === i.id) {
                     return {
                         ...i,
+                        scanErrorMessage: undefined,
                         status: 'PENDING',
                     } as FileItemT
                 } else {
@@ -299,16 +327,18 @@ export const FileUpload = ({
             })
         })
 
-        asyncS3Upload(item.file)
+        asyncS3Upload([item])
     }
 
     const addFilesAndUpdateList = (files: File[]) => {
         const items = generateFileItems(files) // UI data objects -  used to track file upload state in a list below the input
         if (!allowMultipleUploads) {
+            uploads.current.forEach((controller) => controller.abort())
+            uploads.current.clear()
             setFileItems([])
         }
         setFileItems((array) => [...array, ...items])
-        asyncS3Upload(files)
+        asyncS3Upload(items)
 
         // reset input immediately to prepare for next interaction
         fileInputRef.current?.clearFiles()

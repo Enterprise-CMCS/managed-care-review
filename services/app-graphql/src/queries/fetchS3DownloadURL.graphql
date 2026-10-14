@@ -1,0 +1,3 @@
+query fetchS3DownloadURL($input: S3ObjectInput!) {
+    fetchS3DownloadURL(input: $input)
+}

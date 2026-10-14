@@ -74,6 +74,8 @@ export function newLocalS3Client(
                 }
             }
         },
+        // LocalStack does not run GuardDuty.
+        getScanStatus: async () => 'CLEAN',
         scanFile: async (
             s3Key: string,
             bucket: BucketShortName
@@ -123,12 +125,16 @@ export function newLocalS3Client(
             key: string,
             bucket: BucketShortName,
             contentType: string,
-            expiresIn: number
+            expiresIn: number,
+            fileName?: string
         ): Promise<string> => {
             const command = new PutObjectCommand({
                 Bucket: bucketConfig[bucket],
                 Key: `allusers/${key}`,
                 ContentType: contentType,
+                ...(fileName && {
+                    ContentDisposition: `attachment; filename=${encodeURIComponent(fileName)}`,
+                }),
             })
             return getSignedUrl(s3Client, command, { expiresIn })
         },

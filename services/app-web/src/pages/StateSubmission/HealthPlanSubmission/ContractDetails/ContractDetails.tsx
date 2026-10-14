@@ -635,16 +635,18 @@ export const ContractDetails = ({
                                             initialItems={fileItemsFromDraftSubmission(
                                                 'contract'
                                             )}
-                                            uploadFile={(file) =>
+                                            uploadFile={(file, signal) =>
                                                 handleUploadFile(
                                                     file,
-                                                    'HEALTH_PLAN_DOCS'
+                                                    'HEALTH_PLAN_DOCS',
+                                                    signal
                                                 )
                                             }
-                                            scanFile={(key) =>
+                                            scanFile={(key, signal) =>
                                                 handleScanFile(
                                                     key,
-                                                    'HEALTH_PLAN_DOCS'
+                                                    'HEALTH_PLAN_DOCS',
+                                                    signal
                                                 )
                                             }
                                             onFileItemsUpdate={({
@@ -711,16 +713,18 @@ export const ContractDetails = ({
                                                 initialItems={fileItemsFromDraftSubmission(
                                                     'supporting'
                                                 )}
-                                                uploadFile={(file) =>
+                                                uploadFile={(file, signal) =>
                                                     handleUploadFile(
                                                         file,
-                                                        'HEALTH_PLAN_DOCS'
+                                                        'HEALTH_PLAN_DOCS',
+                                                        signal
                                                     )
                                                 }
-                                                scanFile={(key) =>
+                                                scanFile={(key, signal) =>
                                                     handleScanFile(
                                                         key,
-                                                        'HEALTH_PLAN_DOCS'
+                                                        'HEALTH_PLAN_DOCS',
+                                                        signal
                                                     )
                                                 }
                                                 onFileItemsUpdate={({

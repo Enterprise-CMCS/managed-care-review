@@ -1,6 +1,11 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { newDeployedS3Client } from './s3Deployed'
-import { GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
+import {
+    GetObjectCommand,
+    PutObjectCommand,
+    GetObjectTaggingCommand,
+    S3Client,
+} from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 // Mock AWS SDK
@@ -165,6 +170,62 @@ describe('newDeployedS3Client', () => {
         })
     })
 
+    describe('getScanStatus', () => {
+        test.each([
+            [undefined, 'PENDING'],
+            ['NO_THREATS_FOUND', 'CLEAN'],
+            ['THREATS_FOUND', 'INFECTED'],
+            ['UNSUPPORTED', 'ERROR'],
+            ['ACCESS_DENIED', 'ERROR'],
+            ['FAILED', 'ERROR'],
+            ['unexpected', 'ERROR'],
+        ] as const)(
+            'maps GuardDuty %s to %s without a file download',
+            async (tag, expected) => {
+                vi.mocked(S3Client.prototype.send).mockImplementation(
+                    async () => ({
+                        TagSet:
+                            tag === undefined
+                                ? []
+                                : [
+                                      {
+                                          Key: 'GuardDutyMalwareScanStatus',
+                                          Value: tag,
+                                      },
+                                  ],
+                    })
+                )
+                const client = newDeployedS3Client(
+                    mockBucketConfig,
+                    'us-east-1'
+                )
+                expect(
+                    await client.getScanStatus(
+                        'upload.pdf',
+                        'QUESTION_ANSWER_DOCS'
+                    )
+                ).toBe(expected)
+                expect(
+                    vi.mocked(GetObjectTaggingCommand).mock.calls[0][0]
+                ).toEqual({
+                    Bucket: 'test-qa-bucket',
+                    Key: 'allusers/upload.pdf',
+                })
+                expect(GetObjectCommand).not.toHaveBeenCalled()
+            }
+        )
+
+        test('does not turn an S3 failure into a clean or pending result', async () => {
+            vi.mocked(S3Client.prototype.send).mockRejectedValue(
+                new Error('AccessDenied')
+            )
+            const client = newDeployedS3Client(mockBucketConfig, 'us-east-1')
+            await expect(
+                client.getScanStatus('upload.pdf', 'HEALTH_PLAN_DOCS')
+            ).rejects.toThrow('AccessDenied')
+        })
+    })
+
     describe('getUploadURL', () => {
         test('prepends allusers/ to upload key', async () => {
             const mockSignedUrl = 'https://s3.amazonaws.com/upload-url'
@@ -176,7 +237,8 @@ describe('newDeployedS3Client', () => {
                 'uuid-123.pdf',
                 'HEALTH_PLAN_DOCS',
                 'application/pdf',
-                600
+                600,
+                'report name.pdf'
             )
 
             expect(result).toBe(mockSignedUrl)
@@ -187,6 +249,9 @@ describe('newDeployedS3Client', () => {
             expect(callArgs.Key).toBe('allusers/uuid-123.pdf')
             expect(callArgs.Bucket).toBe('test-docs-bucket')
             expect(callArgs.ContentType).toBe('application/pdf')
+            expect(callArgs.ContentDisposition).toBe(
+                'attachment; filename=report%20name.pdf'
+            )
 
             const options = vi.mocked(getSignedUrl).mock.calls[0][2]
             expect(options).toBeDefined()

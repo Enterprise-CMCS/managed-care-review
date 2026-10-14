@@ -1,3 +1,10 @@
+export class ScanTimeoutError extends Error {
+    constructor() {
+        super('Virus scan timed out. Please retry the upload.')
+        this.name = 'ScanTimeoutError'
+    }
+}
+
 export const S3ErrorCodes = ['NETWORK_ERROR'] as const
 type S3ErrorCode = (typeof S3ErrorCodes)[number] // iterable union type
 

@@ -8,6 +8,10 @@
  */
 
 const featureFlags = {
+    API_S3_STORAGE: {
+        flag: 'api-s3-storage',
+        defaultValue: false,
+    },
     CONTRACT_438_ATTESTATION: {
         flag: '438-attestation',
         defaultValue: false,

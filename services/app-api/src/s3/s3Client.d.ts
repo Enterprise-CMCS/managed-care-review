@@ -1,4 +1,4 @@
-import type { BucketShortName } from './s3Amplify'
+import type { BucketShortName } from './helpers'
 import type { S3Error } from './s3Error'
 import type { GenerateDocumentZipFunctionType } from '../zip'
 
@@ -8,6 +8,10 @@ export type S3ClientT = {
         bucket: BucketShortName
     ) => Promise<string | S3Error>
     scanFile: (key: string, bucket: BucketShortName) => Promise<void | S3Error>
+    getScanStatus: (
+        key: string,
+        bucket: BucketShortName
+    ) => Promise<'PENDING' | 'CLEAN' | 'INFECTED' | 'ERROR'>
     getKey: (S3URL: string) => string | null
     getURL: (
         key: string,
@@ -18,7 +22,8 @@ export type S3ClientT = {
         key: string,
         bucket: BucketShortName,
         contentType: string,
-        expiresIn: number
+        expiresIn: number,
+        fileName?: string
     ) => Promise<string>
     getZipURL: (key: string, bucket: BucketShortName) => Promise<string>
     getS3URL: (

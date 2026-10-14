@@ -175,11 +175,11 @@ export const SingleRateCert = ({
                         }
                         accept={ACCEPTED_RATE_CERTIFICATION_FILE_TYPES}
                         initialItems={rateInfo.rateDocuments}
-                        uploadFile={(file) =>
-                            handleUploadFile(file, 'HEALTH_PLAN_DOCS')
+                        uploadFile={(file, signal) =>
+                            handleUploadFile(file, 'HEALTH_PLAN_DOCS', signal)
                         }
-                        scanFile={(key) =>
-                            handleScanFile(key, 'HEALTH_PLAN_DOCS')
+                        scanFile={(key, signal) =>
+                            handleScanFile(key, 'HEALTH_PLAN_DOCS', signal)
                         }
                         onFileItemsUpdate={({ fileItems }) =>
                             setFieldValue(
@@ -224,11 +224,11 @@ export const SingleRateCert = ({
                         }
                         accept={ACCEPTED_RATE_SUPPORTING_DOCS_FILE_TYPES}
                         initialItems={rateInfo.supportingDocuments}
-                        uploadFile={(file) =>
-                            handleUploadFile(file, 'HEALTH_PLAN_DOCS')
+                        uploadFile={(file, signal) =>
+                            handleUploadFile(file, 'HEALTH_PLAN_DOCS', signal)
                         }
-                        scanFile={(key) =>
-                            handleScanFile(key, 'HEALTH_PLAN_DOCS')
+                        scanFile={(key, signal) =>
+                            handleScanFile(key, 'HEALTH_PLAN_DOCS', signal)
                         }
                         onFileItemsUpdate={({ fileItems }) =>
                             setFieldValue(

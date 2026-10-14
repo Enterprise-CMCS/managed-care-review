@@ -7,7 +7,12 @@ import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from '@mc-review/common-code'
-import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
+import {
+    S3ClientT,
+    newAmplifyS3Client,
+    newLocalS3Client,
+    newApiS3Client,
+} from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
 import type { S3BucketConfigType } from './s3'
 
@@ -113,12 +118,14 @@ if (s3Region !== undefined && s3LocalURL !== undefined) {
 }
 
 let s3Client: S3ClientT
+let apiS3Client: S3ClientT | undefined
 const S3_BUCKETS_CONFIG: S3BucketConfigType = {
     HEALTH_PLAN_DOCS: s3DocumentsBucket,
     QUESTION_ANSWER_DOCS: s3QABucket,
 }
 if (s3Region) {
     s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
+    apiS3Client = newApiS3Client(S3_BUCKETS_CONFIG, apolloClient)
 } else if (s3LocalURL) {
     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
 } else {
@@ -172,6 +179,7 @@ if (ldClientId === undefined) {
                     authMode={authMode}
                     apolloClient={apolloClient}
                     s3Client={s3Client}
+                    apiS3Client={apiS3Client}
                 />
             </LDProvider>
         </React.StrictMode>

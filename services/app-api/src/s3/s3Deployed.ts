@@ -2,6 +2,7 @@ import {
     S3Client,
     GetObjectCommand,
     PutObjectCommand,
+    GetObjectTaggingCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -20,7 +21,11 @@ export function newDeployedS3Client(
     bucketConfig: S3BucketConfigType,
     region: string
 ): S3ClientT {
-    const s3Client = new S3Client({ region })
+    // Presigned PUTs have an unknown body; never sign a checksum of an empty body.
+    const s3Client = new S3Client({
+        region,
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+    })
 
     return {
         uploadFile: async (
@@ -81,14 +86,33 @@ export function newDeployedS3Client(
             key: string,
             bucket: BucketShortName,
             contentType: string,
-            expiresIn: number
+            expiresIn: number,
+            fileName?: string
         ): Promise<string> => {
             const command = new PutObjectCommand({
                 Bucket: bucketConfig[bucket],
                 Key: `allusers/${key}`,
                 ContentType: contentType,
+                ...(fileName && {
+                    ContentDisposition: `attachment; filename=${encodeURIComponent(fileName)}`,
+                }),
             })
             return getSignedUrl(s3Client, command, { expiresIn })
+        },
+        getScanStatus: async (key, bucket) => {
+            const result = await s3Client.send(
+                new GetObjectTaggingCommand({
+                    Bucket: bucketConfig[bucket],
+                    Key: key.startsWith('allusers/') ? key : `allusers/${key}`,
+                })
+            )
+            const status = result.TagSet?.find(
+                (tag) => tag.Key === 'GuardDutyMalwareScanStatus'
+            )?.Value
+            if (status === undefined) return 'PENDING'
+            if (status === 'NO_THREATS_FOUND') return 'CLEAN'
+            if (status === 'THREATS_FOUND') return 'INFECTED'
+            return 'ERROR'
         },
         scanFile: async (
             s3Key: string,
