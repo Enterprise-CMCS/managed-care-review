@@ -48,7 +48,8 @@ const buildContractName = (
         submission.contractRevision.contract.stateCode,
         submission.contractRevision.contract.stateNumber,
         submission.contractRevision.formData.programIDs,
-        statePrograms
+        statePrograms,
+        submission.contractRevision.contract.contractSubmissionType
     )
 }
 

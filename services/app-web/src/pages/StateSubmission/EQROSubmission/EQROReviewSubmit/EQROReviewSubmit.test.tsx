@@ -45,6 +45,8 @@ const testEQROContract = (
 it('renders EQRO fields', async () => {
     const testData = testEQROContract({
         id: 'test-id',
+        stateCode: 'MN',
+        stateNumber: 5,
     })
 
     renderWithProviders(
@@ -74,6 +76,10 @@ it('renders EQRO fields', async () => {
             screen.getByText('Is this contract with a new EQRO contractor')
         ).toBeInTheDocument()
     })
+
+    expect(
+        screen.getByRole('heading', { name: 'MCR-EQRO-MN-0005' })
+    ).toBeInTheDocument()
 
     expect(
         within(screen.getByTestId('contractExecutionStatus')).getByText(

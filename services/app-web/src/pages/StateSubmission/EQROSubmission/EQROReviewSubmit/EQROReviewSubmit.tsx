@@ -99,7 +99,8 @@ export const EQROReviewSubmit = (): React.ReactElement => {
             contract.stateCode,
             contract.stateNumber,
             contractFormData.programIDs,
-            contract.state.programs
+            contract.state.programs,
+            contract.contractSubmissionType
         ) || ''
 
     return (

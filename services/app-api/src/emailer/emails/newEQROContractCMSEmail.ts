@@ -53,7 +53,8 @@ export const newEQROContractCMSEmail = async (
         contract.stateCode,
         contract.stateNumber,
         contractRev.formData.programIDs,
-        packagePrograms
+        packagePrograms,
+        contract.contractSubmissionType
     )
 
     const packageURL = submissionSummaryURL(

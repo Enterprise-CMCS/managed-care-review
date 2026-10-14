@@ -1,3 +1,4 @@
+import { packageName as generatePackageName } from '@mc-review/submissions'
 import type { ContractType } from '../../domain-models'
 import {
     mockEQROContract,
@@ -5,7 +6,6 @@ import {
     testEmailConfig,
 } from '../../testHelpers/emailerHelpers'
 import { newEqroContractStateEmail } from './newEqroContractStateEmail'
-import { packageName } from '@mc-review/submissions'
 
 describe('newEqroContractStateEmail', () => {
     const submitterEmails = ['submitter1@example.com', 'submitter2@example.com']
@@ -120,11 +120,12 @@ describe('newEqroContractStateEmail', () => {
         const contract: ContractType = mockEQROContract()
         const statePrograms = mockMNState().programs
         const emailConfig = testEmailConfig()
-        const name = packageName(
+        const name = generatePackageName(
             contract.stateCode,
             contract.stateNumber,
             contract.packageSubmissions[0].contractRevision.formData.programIDs,
-            statePrograms
+            statePrograms,
+            contract.contractSubmissionType
         )
 
         contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities = false
@@ -158,11 +159,12 @@ describe('newEqroContractStateEmail', () => {
         const contract: ContractType = mockEQROContract()
         const statePrograms = mockMNState().programs
         const emailConfig = testEmailConfig()
-        const name = packageName(
+        const name = generatePackageName(
             contract.stateCode,
             contract.stateNumber,
             contract.packageSubmissions[0].contractRevision.formData.programIDs,
-            statePrograms
+            statePrograms,
+            contract.contractSubmissionType
         )
 
         const template = await newEqroContractStateEmail(

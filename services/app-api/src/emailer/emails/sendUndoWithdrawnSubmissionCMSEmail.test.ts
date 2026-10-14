@@ -117,7 +117,7 @@ const expectEQROUndoWithdrawContent = (
     reviewDecision: string
 ) => {
     expect(bodyHTML).toContain(
-        `Submission MCR-MN-0004-SNBC status was updated to '${status}' by CMS`
+        `Submission MCR-EQRO-MN-0004 status was updated to '${status}' by CMS`
     )
     expect(bodyHTML).toContain(
         '<b>Withdraw reversed by:</b> <a href="mailto:zuko@example.com">zuko@example.com</a>'
@@ -187,7 +187,7 @@ describe('sendUndoWithdrawnSubmissionCMSEmail', () => {
             ...emailConfig.devReviewTeamEmails,
         ])
         expect(template.subject).toBe(
-            "[LOCAL] MCR-MN-0004-SNBC status was updated to 'Submitted' by CMS"
+            "[LOCAL] MCR-EQRO-MN-0004 status was updated to 'Submitted' by CMS"
         )
         expectEQROUndoWithdrawContent(
             template.bodyHTML,
@@ -215,7 +215,7 @@ describe('sendUndoWithdrawnSubmissionCMSEmail', () => {
             ...emailConfig.devReviewTeamEmails,
         ])
         expect(template.subject).toBe(
-            "[LOCAL] MCR-MN-0004-SNBC status was updated to 'Not subject to review' by CMS"
+            "[LOCAL] MCR-EQRO-MN-0004 status was updated to 'Not subject to review' by CMS"
         )
         expectEQROUndoWithdrawContent(
             template.bodyHTML,

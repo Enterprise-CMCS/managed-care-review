@@ -11,6 +11,7 @@ import {
     RateRevision,
     UnlockedContract,
     ActuaryContact,
+    ContractSubmissionType,
 } from '../gen/gqlClient'
 import { type ProgramArgType, typedStatePrograms } from '../statePrograms'
 import { ActuaryFirmsRecord } from './healthPlanFormDataConstants'
@@ -175,9 +176,13 @@ function packageName(
     stateCode: string,
     stateNumber: number,
     programIDs: string[],
-    statePrograms: ProgramArgType[]
+    statePrograms: ProgramArgType[],
+    submissionType: ContractSubmissionType = 'HEALTH_PLAN'
 ): string {
     const padNumber = stateNumber.toString().padStart(4, '0')
+    if (submissionType === 'EQRO') {
+        return `MCR-EQRO-${stateCode.toUpperCase()}-${padNumber}`
+    }
     const pNames = programNames(statePrograms, programIDs)
     const formattedProgramNames = pNames
         .sort(naturalSort)
