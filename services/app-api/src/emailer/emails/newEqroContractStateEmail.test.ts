@@ -125,7 +125,7 @@ describe('newEqroContractStateEmail', () => {
             contract.stateNumber,
             contract.packageSubmissions[0].contractRevision.formData.programIDs,
             statePrograms,
-            'EQRO'
+            contract.contractSubmissionType
         )
 
         contract.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities = false
@@ -164,7 +164,7 @@ describe('newEqroContractStateEmail', () => {
             contract.stateNumber,
             contract.packageSubmissions[0].contractRevision.formData.programIDs,
             statePrograms,
-            'EQRO'
+            contract.contractSubmissionType
         )
 
         const template = await newEqroContractStateEmail(

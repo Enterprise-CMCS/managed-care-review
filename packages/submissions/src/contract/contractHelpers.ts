@@ -181,7 +181,7 @@ function packageName(
 ): string {
     const padNumber = stateNumber.toString().padStart(4, '0')
     if (submissionType === 'EQRO') {
-        return `MCR-${submissionType}-${stateCode.toUpperCase()}-${padNumber}`
+        return `MCR-EQRO-${stateCode.toUpperCase()}-${padNumber}`
     }
     const pNames = programNames(statePrograms, programIDs)
     const formattedProgramNames = pNames
