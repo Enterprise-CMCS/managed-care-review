@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit when changed from not subject to review to subject to review 1`] = `
-"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC is now subject to review</span><br />
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-EQRO-MN-0004 is now subject to review</span><br />
   This determination is based on your updated submission responses.<br />
   <br />
 <b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
@@ -21,7 +21,7 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
 `;
 
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit when changed from subject to review to not subject to review 1`] = `
-"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC is no longer subject to review</span><br />
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-EQRO-MN-0004 is no longer subject to review</span><br />
   This determination is based on your updated submission responses.<br />
   <br />
 <b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
@@ -46,7 +46,7 @@ exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resub
 `;
 
 exports[`sendEQROContractResubmitStateEmail > should render email for EQRO resubmit with no change in review determination 1`] = `
-"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-MN-0004-SNBC was resubmitted</span><br />
+"<span style="font-size: 22px; font-weight: 400; line-height: normal">Submission MCR-EQRO-MN-0004 was resubmitted</span><br />
   <br />
 <b>Submitted by:</b> <a href="mailto:house@example.com">house@example.com</a><br /> 
 <b>Updated on:</b> 03/08/2026<br />

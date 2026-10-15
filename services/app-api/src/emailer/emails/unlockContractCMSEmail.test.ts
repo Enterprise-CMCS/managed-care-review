@@ -833,7 +833,8 @@ describe('unlockEQROCMSEmail', () => {
             eqroSub.stateCode,
             eqroSub.stateNumber,
             eqroSub.draftRevision.formData.programIDs,
-            defaultStatePrograms
+            defaultStatePrograms,
+            eqroSub.contractSubmissionType
         )
 
         const template = await unlockContractCMSEmail(

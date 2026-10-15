@@ -53,7 +53,8 @@ export const newEQROContractCMSEmail = async (
         contract.stateCode,
         contract.stateNumber,
         contractRev.formData.programIDs,
-        packagePrograms
+        packagePrograms,
+        contract.contractSubmissionType
     )
 
     const packageURL = submissionSummaryURL(
@@ -128,7 +129,7 @@ export const newEQROContractCMSEmail = async (
             sourceEmail: config.emailSource,
             subject: `${
                 isTestEnvironment ? `[${config.stage}] ` : ''
-            }Submission ${packageName} ${subjectToReviewText}`,
+            }New EQRO Submission: ${packageName} is ${isSubjectToReview ? '' : 'not '}subject to CMS Review`,
             bodyText: stripHTMLFromTemplate(result),
             bodyHTML: result,
         }
