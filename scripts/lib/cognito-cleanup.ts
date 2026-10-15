@@ -78,7 +78,8 @@ function assertNewPaginationToken(
 }
 
 async function loadLiveStackOwnership(
-    client: CloudFormationClient
+    client: CloudFormationClient,
+    onProgress?: (message: string) => void
 ): Promise<LiveStackOwnership> {
     const ownership: LiveStackOwnership = {
         stackNames: new Set(),
@@ -86,6 +87,8 @@ async function loadLiveStackOwnership(
         poolIds: new Set(),
     }
     const stackTokens = new Set<string>()
+    let scannedStacks = 0
+    onProgress?.('Scanning CloudFormation stacks and resources...')
     for await (const page of paginateListStacks({ client }, {})) {
         assertNewPaginationToken(page.NextToken, stackTokens)
         for (const stack of page.StackSummaries ?? []) {
@@ -93,6 +96,12 @@ async function loadLiveStackOwnership(
                 throw new Error('Incomplete CloudFormation stack summary')
             // Failed, in-progress, and rollback stacks all remain protected.
             if (stack.StackStatus === 'DELETE_COMPLETE') continue
+            scannedStacks++
+            if (scannedStacks === 1 || scannedStacks % 10 === 0) {
+                onProgress?.(
+                    `CloudFormation: scanning live stack ${scannedStacks} (${stack.StackName}); ${ownership.poolIds.size} managed pools found`
+                )
+            }
             ownership.stackNames.add(stack.StackName)
             ownership.stackIds.add(stack.StackId)
             const resourceTokens = new Set<string>()
@@ -115,6 +124,9 @@ async function loadLiveStackOwnership(
             }
         }
     }
+    onProgress?.(
+        `CloudFormation inventory complete: ${scannedStacks} live stacks, ${ownership.poolIds.size} managed pools`
+    )
     return ownership
 }
 
@@ -257,17 +269,28 @@ export async function buildCleanupPlan(
         region: string
         minAgeDays?: number
         now?: number
+        onProgress?: (message: string) => void
     }
 ): Promise<CleanupPlan> {
-    const { accountId, region, minAgeDays = 7, now = Date.now() } = options
+    const {
+        accountId,
+        region,
+        minAgeDays = 7,
+        now = Date.now(),
+        onProgress,
+    } = options
     if (!/^\d{12}$/.test(accountId))
         throw new Error('Expected a 12-digit dev account ID')
     if (region !== 'us-east-1')
         throw new Error('Only the MCR dev region us-east-1 is supported')
     if (!Number.isInteger(minAgeDays) || minAgeDays < 1)
         throw new Error('Minimum age must be an integer of at least 1 day')
+    onProgress?.('Verifying AWS caller account...')
     await assertCallerAccount(clients.sts, accountId)
-    const ownership = await loadLiveStackOwnership(clients.cloudFormation)
+    const ownership = await loadLiveStackOwnership(
+        clients.cloudFormation,
+        onProgress
+    )
     const plan: CleanupPlan = {
         version: 1,
         accountId,
@@ -278,6 +301,8 @@ export async function buildCleanupPlan(
         skipped: [],
     }
     const poolTokens = new Set<string>()
+    let inspectedPools = 0
+    onProgress?.('Scanning Cognito user pools...')
     for await (const page of paginateListUserPools(
         { client: clients.cognito },
         { MaxResults: 60 }
@@ -286,13 +311,24 @@ export async function buildCleanupPlan(
         for (const summary of page.UserPools ?? []) {
             if (!summary.Id) throw new Error('Incomplete Cognito pool summary')
             const pool = await describeUserPool(clients.cognito, summary.Id)
-            if (!pool) continue // Disappeared during inventory.
-            const reason = getPoolSkipReason(pool, plan, ownership, now)
-            if (reason)
-                plan.skipped.push({ id: pool.id, name: pool.name, reason })
-            else plan.candidates.push(pool)
+            inspectedPools++
+            if (pool) {
+                // Pools can disappear during inventory.
+                const reason = getPoolSkipReason(pool, plan, ownership, now)
+                if (reason)
+                    plan.skipped.push({ id: pool.id, name: pool.name, reason })
+                else plan.candidates.push(pool)
+            }
+            if (inspectedPools === 1 || inspectedPools % 25 === 0) {
+                onProgress?.(
+                    `Cognito: inspected ${inspectedPools} pools; ${plan.candidates.length} candidates, ${plan.skipped.length} protected/skipped`
+                )
+            }
         }
     }
+    onProgress?.(
+        `Cognito inventory complete: inspected ${inspectedPools} pools; ${plan.candidates.length} candidates, ${plan.skipped.length} protected/skipped`
+    )
     plan.candidates.sort(
         (a, b) =>
             a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id)
@@ -402,15 +438,17 @@ export async function applyCleanupPlan(
         audit: (event: CleanupAuditEvent) => void
         now?: number
         sleep?: (milliseconds: number) => Promise<unknown>
+        onProgress?: (message: string) => void
     }
 ): Promise<void> {
-    const { now = Date.now(), sleep = delay, audit } = options
+    const { now = Date.now(), sleep = delay, audit, onProgress } = options
     const plan = validateCleanupPlan(value, now)
     if (
         options.accountId !== plan.accountId ||
         options.confirmDelete !== plan.accountId
     )
         throw new Error('Account confirmation does not match the plan')
+    onProgress?.('Verifying AWS caller account...')
     await assertCallerAccount(clients.sts, plan.accountId)
     if (
         !Number.isInteger(options.limit) ||
@@ -419,10 +457,23 @@ export async function applyCleanupPlan(
     )
         throw new Error('Batch limit must be between 1 and 100')
     // Complete a fresh ownership inventory before the first deletion.
-    const ownership = await loadLiveStackOwnership(clients.cloudFormation)
+    const ownership = await loadLiveStackOwnership(
+        clients.cloudFormation,
+        onProgress
+    )
+    onProgress?.(
+        `Revalidating ${plan.candidates.length} reviewed candidates; at most ${options.limit} pool deletions will be requested`
+    )
     let deletedCount = 0
+    let checkedCount = 0
     for (const approved of plan.candidates) {
         if (deletedCount >= options.limit) break
+        checkedCount++
+        if (checkedCount === 1 || checkedCount % 25 === 0) {
+            onProgress?.(
+                `Checking reviewed candidate ${checkedCount}/${plan.candidates.length}; ${deletedCount} pool deletions requested`
+            )
+        }
         const pool = await describeUserPool(clients.cognito, approved.id)
         if (!pool) {
             audit({ id: approved.id, action: 'already-absent' })
@@ -465,9 +516,15 @@ export async function applyCleanupPlan(
                     })
                 )
                 audit({ id: pool.id, action: 'domain-delete-requested' })
+                onProgress?.(
+                    `Waiting for Cognito domain removal on ${pool.id}...`
+                )
                 await waitForDomainDeletion(clients.cognito, pool.id, sleep)
                 audit({ id: pool.id, action: 'domain-deletion-confirmed' })
             }
+            onProgress?.(
+                `Requesting pool deletion ${deletedCount + 1}/${options.limit}: ${pool.id}`
+            )
             await clients.cognito.send(
                 new DeleteUserPoolCommand({ UserPoolId: pool.id })
             )
@@ -482,4 +539,7 @@ export async function applyCleanupPlan(
             throw error // Stop after a partial failure; never silently continue.
         }
     }
+    onProgress?.(
+        `Batch complete: ${deletedCount} pool deletions requested; ${checkedCount} reviewed candidates checked`
+    )
 }

@@ -49,6 +49,10 @@ pnpm --filter scripts exec tsx cleanup-cognito.ts \
   --dev-account-id "$DEV_ACCOUNT_ID"
 ```
 
+The script prints startup and phase/count progress to stderr, plus a heartbeat
+every 10 seconds while waiting on AWS (including retries). Plan JSON and audit
+records keep their existing formats.
+
 This paginates all pools and CloudFormation resources, then describes each pool.
 Expect several thousand read requests for an account with nearly 1,000 pools;
 requests are sequential with AWS SDK adaptive throttling/retries. No user records

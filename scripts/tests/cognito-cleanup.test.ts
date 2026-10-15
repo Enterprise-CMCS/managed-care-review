@@ -89,6 +89,7 @@ function mockAws(t: TestContext, pools = [makeUserPool()]) {
         requestedDomains: new Set<string>(),
         operations: [] as string[],
         audit: [] as CleanupAuditEvent[],
+        progress: [] as string[],
     }
     function page<T>(items: T[], token?: string) {
         const start = Number(token ?? 0)
@@ -188,6 +189,9 @@ function mockAws(t: TestContext, pools = [makeUserPool()]) {
         limit: 10,
         now: NOW,
         sleep: async () => {},
+        onProgress: (message: string) => {
+            state.progress.push(message)
+        },
         audit: (event: CleanupAuditEvent) => {
             state.audit.push(event)
         },
@@ -195,11 +199,14 @@ function mockAws(t: TestContext, pools = [makeUserPool()]) {
     return { clients, state, applyOptions }
 }
 async function reviewedPlan(
-    clients: Parameters<typeof buildCleanupPlan>[0]
+    clients: Parameters<typeof buildCleanupPlan>[0],
+    onProgress?: (message: string) => void
 ): Promise<CleanupPlan> {
     // Match an actual plan file: dates are strings and undefined fields are omitted.
     return JSON.parse(
-        JSON.stringify(await buildCleanupPlan(clients, planOptions))
+        JSON.stringify(
+            await buildCleanupPlan(clients, { ...planOptions, onProgress })
+        )
     ) as CleanupPlan
 }
 
@@ -210,7 +217,10 @@ test('planning is read-only, reports skipped pools, and orders eligible orphans 
     older.UserPoolTags!['aws:cloudformation:stack-id'] =
         `arn:aws:cloudformation:us-east-1:${ACCOUNT_ID}:stack/cognito-older-cdk/deleted-long-ago`
     const { clients, state } = mockAws(t, [newer, makeUserPool('dev'), older])
-    const plan = await reviewedPlan(clients)
+    const progress: string[] = []
+    const plan = await reviewedPlan(clients, (message) => {
+        progress.push(message)
+    })
     assert.deepEqual(
         plan.candidates.map((pool) => pool.id),
         [older.Id, newer.Id]
@@ -218,6 +228,16 @@ test('planning is read-only, reports skipped pools, and orders eligible orphans 
     assert.equal(plan.skipped.length, 1)
     assert.ok(plan.skipped[0].reason)
     assert.deepEqual(state.operations, [])
+    assert.match(progress[0], /Verifying AWS caller account/)
+    assert.ok(
+        progress.some((message) =>
+            message.includes('CloudFormation inventory complete')
+        )
+    )
+    assert.match(
+        progress[progress.length - 1],
+        /Cognito inventory complete: inspected 3 pools; 2 candidates, 1 protected\/skipped/
+    )
 })
 
 test('eligibility excludes persistent stages, ambiguous pools, young pools, and protected domains', async (t) => {
@@ -517,6 +537,13 @@ test('a reviewed prefix domain is removed and checked before its pool; no-domain
             clients,
             await reviewedPlan(clients),
             applyOptions
+        )
+        assert.ok(
+            state.progress.some((message) => message.includes('Revalidating'))
+        )
+        assert.match(
+            state.progress[state.progress.length - 1],
+            /Batch complete: 1 pool deletions requested/
         )
         assert.deepEqual(
             state.operations,

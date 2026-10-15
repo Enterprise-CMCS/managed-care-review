@@ -24,6 +24,31 @@ Use AWS_PROFILE or standard AWS SDK credentials. No default mode deletes anythin
 Plans expire after 24 hours. Read scripts/README-cognito-cleanup.md before applying.
 `
 
+async function runWithProgress<T>(
+    description: string,
+    run: (onProgress: (message: string) => void) => Promise<T>
+): Promise<T> {
+    const startedAt = Date.now()
+    let activity = description
+    const report = (message: string) => {
+        activity = message
+        console.error(`[cognito-cleanup] ${message}`)
+    }
+    report(description)
+    const heartbeat = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000)
+        console.error(
+            `[cognito-cleanup] Still running (${elapsed}s elapsed). Last update: ${activity}`
+        )
+    }, 10_000)
+    heartbeat.unref()
+    try {
+        return await run(report)
+    } finally {
+        clearInterval(heartbeat)
+    }
+}
+
 async function main(): Promise<void> {
     const { values: args } = parseArgs({
         options: {
@@ -63,11 +88,16 @@ async function main(): Promise<void> {
     if (args.plan) {
         if (args['confirm-delete'] || args['audit-log'] || args.limit)
             throw new Error('Deletion options cannot be used in plan mode')
-        const plan = await buildCleanupPlan(clients, {
-            accountId: account,
-            region,
-            minAgeDays: Number(args['min-age-days'] ?? 7),
-        })
+        const plan = await runWithProgress(
+            `Starting read-only plan for account ${account} in ${region}`,
+            (onProgress) =>
+                buildCleanupPlan(clients, {
+                    accountId: account,
+                    region,
+                    minAgeDays: Number(args['min-age-days'] ?? 7),
+                    onProgress,
+                })
+        )
         // Do not overwrite a previously reviewed plan. Reports may contain operational metadata.
         writeFileSync(args.plan, JSON.stringify(plan, null, 2) + '\n', {
             flag: 'wx',
@@ -82,7 +112,8 @@ async function main(): Promise<void> {
         throw new Error(
             'Age threshold is fixed by the plan; regenerate to change it'
         )
-    if (args['confirm-delete'] !== account || !args['audit-log'])
+    const confirmDelete = args['confirm-delete']
+    if (confirmDelete !== account || !args['audit-log'])
         throw new Error(
             'Apply requires --confirm-delete ACCOUNT and --audit-log FILE'
         )
@@ -90,21 +121,26 @@ async function main(): Promise<void> {
     // Exclusive creation also prevents accidentally sharing/overwriting an audit file.
     writeFileSync(args['audit-log'], '', { flag: 'wx', mode: 0o600 })
     const auditFile = args['audit-log']
-    await applyCleanupPlan(clients, plan, {
-        accountId: account,
-        confirmDelete: args['confirm-delete'],
-        limit: Number(args.limit ?? 10),
-        audit(event) {
-            const line = JSON.stringify({
-                at: new Date().toISOString(),
+    await runWithProgress(
+        `Starting reviewed deletion batch for account ${account} in ${region}`,
+        (onProgress) =>
+            applyCleanupPlan(clients, plan, {
+                onProgress,
                 accountId: account,
-                region,
-                ...event,
+                confirmDelete,
+                limit: Number(args.limit ?? 10),
+                audit(event) {
+                    const line = JSON.stringify({
+                        at: new Date().toISOString(),
+                        accountId: account,
+                        region,
+                        ...event,
+                    })
+                    appendFileSync(auditFile, line + '\n')
+                    console.info(line)
+                },
             })
-            appendFileSync(auditFile, line + '\n')
-            console.info(line)
-        },
-    })
+    )
     console.info(
         `Batch finished. Audit log: ${auditFile}. Review results; regenerate the plan before the next batch.`
     )
