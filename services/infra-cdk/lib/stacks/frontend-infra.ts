@@ -17,6 +17,7 @@ import {
     AllowedMethods,
     FunctionEventType,
     SecurityPolicyProtocol,
+    PriceClass,
 } from 'aws-cdk-lib/aws-cloudfront'
 import { S3BucketOrigin } from 'aws-cdk-lib/aws-cloudfront-origins'
 import { CfnWebACL } from 'aws-cdk-lib/aws-wafv2'
@@ -167,6 +168,7 @@ function handler(event) {
             comment: 'CloudFront Distro for the static website hosted in S3',
             defaultRootObject: 'index.html',
             httpVersion: HttpVersion.HTTP2,
+            priceClass: PriceClass.PRICE_CLASS_ALL,
 
             // Add custom domain aliases if configured
             domainNames: hasCustomDomain ? [cloudfrontDomainName!] : undefined,
@@ -263,6 +265,7 @@ function handler(event) {
                     'CloudFront Distro for the storybook static website hosted in S3',
                 defaultRootObject: 'index.html',
                 httpVersion: HttpVersion.HTTP2,
+                priceClass: PriceClass.PRICE_CLASS_ALL,
 
                 // Add custom domain aliases if configured
                 domainNames: hasCustomStorybookDomain
