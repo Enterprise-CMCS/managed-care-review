@@ -15,7 +15,8 @@ it('includes DMCO inbox on EQRO submissions subject to review', async () => {
         sub.stateCode,
         sub.stateNumber,
         sub.packageSubmissions[0].contractRevision.formData.programIDs,
-        defaultStatePrograms
+        defaultStatePrograms,
+        sub.contractSubmissionType
     )
     const result = await newEQROContractCMSEmail(
         sub,
@@ -45,7 +46,8 @@ it('includes DMCO inbox on EQRO submissions not subject to review', async () => 
         sub.stateCode,
         sub.stateNumber,
         sub.packageSubmissions[0].contractRevision.formData.programIDs,
-        defaultStatePrograms
+        defaultStatePrograms,
+        sub.contractSubmissionType
     )
 
     //modify contract to not be subject to review
