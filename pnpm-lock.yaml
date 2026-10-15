@@ -1151,8 +1151,8 @@ importers:
         specifier: 2.103.0
         version: 2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-wafwebacl-apigateway':
-        specifier: 2.103.0
-        version: 2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
+        specifier: 2.105.0
+        version: 2.105.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       aws-cdk-lib:
         specifier: 2.273.0
         version: 2.273.0(constructs@10.8.1)
@@ -2103,10 +2103,10 @@ packages:
       aws-cdk-lib: ^2.260.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.103.0':
-    resolution: {integrity: sha512-fTp6svQ1p45ax90ZRTp5ax1YKDqG4GnBjlwaZOyuX/rW6ETfTsrYTK04nlmE0Limch8OTFzVjSDUpFQQEH8dRQ==}
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.105.0':
+    resolution: {integrity: sha512-bM1Q65sAOVRdGwlbsIjw3qK+dFnEEtk2HuuzX7SPzgO2r6gIuwMvlWxdopbQiwGoTfw66s6ADGeUM7JLhekZlQ==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.103.0
+      '@aws-solutions-constructs/core': 2.105.0
       aws-cdk-lib: ^2.260.0
       constructs: ^10.0.0
 
@@ -13348,7 +13348,7 @@ snapshots:
       aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.105.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
       aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
