@@ -18,6 +18,26 @@ permissions:
   deployments: write
 
 jobs:
+  # Warm the same container caches while deployment runs, not after tests.
+  prepare-cypress:
+    name: Prepare Cypress caches
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Cache warming is optional: test jobs can install on a cache miss.
+    continue-on-error: true
+    container:
+      image: cypress/browsers:node-20.14.0-chrome-126.0.6478.114-1-ff-127.0.1-edge-126.0.2592.61-1
+      options: --user 1001
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Setup env and populate Cypress caches
+        uses: ./.github/actions/setup_env
+        with:
+          cache-mode: cypress-read-write
+
   begin-deployment:
     name: Begin CDK Deployment
     runs-on: ubuntu-24.04
@@ -735,7 +755,7 @@ jobs:
   cypress:
     name: cypress-cdk-run
     timeout-minutes: 25
-    needs: [begin-deployment, extract-endpoints]
+    needs: [begin-deployment, extract-endpoints, prepare-cypress]
     environment: dev
     if: always() && needs.extract-endpoints.result == 'success'
     runs-on: ubuntu-24.04
@@ -756,6 +776,8 @@ jobs:
 
       - name: Setup env
         uses: ./.github/actions/setup_env
+        with:
+          cache-mode: cypress-read-only
 
       - name: Get AWS credentials
         id: 'creds'
@@ -787,6 +809,7 @@ jobs:
         id: cypress
         uses: cypress-io/github-action@v7
         with:
+          install: false
           config: baseUrl=${{ needs.extract-endpoints.outputs.application-endpoint }}
           record: true
           parallel: true

@@ -1,6 +1,12 @@
 name: 'Setup MC-Review environment'
 description: 'Runs common tasks for setting up the build environment in GHA'
 
+inputs:
+  cache-mode:
+    description: 'shared (default), cypress-read-write (cache warmer), or cypress-read-only (test workers)'
+    required: false
+    default: shared
+
 runs:
   using: 'composite'
   steps:
@@ -25,8 +31,10 @@ runs:
       run: |
         echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
+    # Preserve the existing cache behavior for non-Cypress callers.
     - uses: actions/cache@v5
       name: Setup pnpm cache
+      if: inputs.cache-mode == 'shared'
       with:
         path: |
           ${{ steps.pnpm-cache.outputs.STORE_PATH }}
@@ -36,9 +44,68 @@ runs:
         restore-keys: |
           ${{ runner.os }}-pnpm-store-
 
+    - name: Get Cypress cache metadata
+      if: inputs.cache-mode != 'shared'
+      id: cypress-cache
+      shell: bash
+      run: |
+        # The first Cypress dependency in this lockfile is the root CLI version.
+        # Read its resolution, not the semver range in package.json.
+        VERSION=$(awk '
+          /^      cypress:$/ { found=1; next }
+          found && /^        version:/ { print $2; exit }
+          found && /^      [^ ]/ { exit 1 }
+        ' pnpm-lock.yaml)
+        [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Cannot resolve Cypress version from pnpm-lock.yaml' >&2; exit 1; }
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "folder=${CYPRESS_CACHE_FOLDER:-$HOME/.cache/Cypress}/$VERSION" >> "$GITHUB_OUTPUT"
+
+    - name: Restore Cypress pnpm store
+      if: inputs.cache-mode != 'shared'
+      id: cypress-pnpm-restore
+      uses: actions/cache/restore@v5
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-${{ runner.arch }}-cypress-pnpm-v1-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'pnpm-workspace.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ runner.arch }}-cypress-pnpm-v1-
+
+    - name: Restore Cypress binary
+      if: inputs.cache-mode != 'shared'
+      id: cypress-binary-restore
+      uses: actions/cache/restore@v5
+      with:
+        path: ${{ steps.cypress-cache.outputs.folder }}
+        key: ${{ runner.os }}-${{ runner.arch }}-cypress-binary-v1-${{ steps.cypress-cache.outputs.version }}
+
     - name: Install dependencies
       shell: bash
       run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
+
+    - name: Ensure Cypress binary is installed and verified
+      if: inputs.cache-mode != 'shared'
+      shell: bash
+      run: |
+        pnpm exec cypress install
+        pnpm exec cypress verify
+
+    # Only the early cache warmer writes these caches. Test workers never
+    # register a post-job save, even when they restore a fallback or miss.
+    - name: Save Cypress pnpm store
+      if: inputs.cache-mode == 'cypress-read-write' && steps.cypress-pnpm-restore.outputs.cache-hit != 'true'
+      continue-on-error: true
+      uses: actions/cache/save@v5
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ steps.cypress-pnpm-restore.outputs.cache-primary-key }}
+
+    - name: Save Cypress binary
+      if: inputs.cache-mode == 'cypress-read-write' && steps.cypress-binary-restore.outputs.cache-hit != 'true'
+      continue-on-error: true
+      uses: actions/cache/save@v5
+      with:
+        path: ${{ steps.cypress-cache.outputs.folder }}
+        key: ${{ steps.cypress-binary-restore.outputs.cache-primary-key }}
 
     - name: Set PATH for project binaries
       shell: bash
