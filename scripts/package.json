@@ -11,7 +11,8 @@
         "generate-client-credentials": "tsx generate-client-credentials.ts",
         "lint": "tsc --noEmit && oxlint --deny-warnings .",
         "build": "tsc",
-        "build:ci-scripts": "tsc"
+        "build:ci-scripts": "tsc",
+        "test:cognito-cleanup": "tsc --noEmit && tsx --test tests/cognito-cleanup.test.ts"
     },
     "lint-staged": {
         "*.ts": [
@@ -28,6 +29,7 @@
         "@aws-sdk/client-lambda": "^3.1149.0",
         "@aws-sdk/client-s3": "^3.1149.0",
         "@aws-sdk/client-secrets-manager": "^3.1149.0",
+        "@aws-sdk/client-sts": "^3.1148.0",
         "@types/papaparse": "^5.5.2",
         "@types/uuid": "^11.0.0",
         "octokit": "^5.0.5",
