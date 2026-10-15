@@ -2,7 +2,7 @@
 // @types/archiver is still on v7 and uses the old factory-function API.
 // Remove this file once @types/archiver@8 is published (track: DefinitelyTyped#75017).
 declare module 'archiver' {
-    import { Writable } from 'stream'
+    import type { Writable } from 'stream'
 
     class Archiver extends Writable {
         pipe<T extends NodeJS.WritableStream>(destination: T): T

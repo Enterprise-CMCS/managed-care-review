@@ -812,6 +812,12 @@ describe('StateSubmissionForm', () => {
                                     id: '15',
                                 },
                             }),
+                            fetchContractMockSuccess({
+                                contract: {
+                                    ...contract,
+                                    id: '15',
+                                },
+                            }),
                         ],
                     },
                     routerProvider: {
@@ -830,8 +836,10 @@ describe('StateSubmissionForm', () => {
             })
 
             expect(
-                await screen.findByTestId('attestations-page')
-            ).toHaveTextContent('attestation page')
+                await screen.findByText(
+                    'Compliance with procurement requirements'
+                )
+            ).toBeInTheDocument()
         })
 
         it('renders 404 page for amendment contract', async () => {
@@ -871,6 +879,9 @@ describe('StateSubmissionForm', () => {
                             fetchContractMockSuccess({
                                 contract: { ...contract, id: '15' },
                             }),
+                            fetchContractMockSuccess({
+                                contract: { ...contract, id: '15' },
+                            }),
                             updateContractDraftRevisionMockSuccess({
                                 contract: { ...contract, id: '15' },
                             }),
@@ -887,14 +898,15 @@ describe('StateSubmissionForm', () => {
                 }
             )
 
-        it('continues from contacts to attestations page for base contract', async () => {
+        it('continues from attestations to contacts for base contract', async () => {
             const mockContract = mockContractPackageDraft()
             mockContract.draftRevision!.formData.contractType = 'BASE'
+            mockContract.draftRevision!.formData.procurementAttestation = true
             let testLocation: Location
 
             renderFormPage(
                 mockContract,
-                'contacts',
+                'attestations',
                 (location) => (testLocation = location)
             )
 
@@ -905,20 +917,17 @@ describe('StateSubmissionForm', () => {
 
             await waitFor(() => {
                 expect(testLocation.pathname).toBe(
-                    generatePath(RoutesRecord.SUBMISSIONS_ATTESTATIONS, {
+                    generatePath(RoutesRecord.SUBMISSIONS_CONTACTS, {
                         id: '15',
                         contractSubmissionType: 'health-plan',
                     })
                 )
             })
-            expect(
-                await screen.findByTestId('attestations-page')
-            ).toHaveTextContent('attestation page')
         })
 
-        it('continues from contacts to review and submit for amendment contract', async () => {
+        it('continues from contacts to review and submit for base contract', async () => {
             const mockContract = mockContractPackageDraft()
-            mockContract.draftRevision!.formData.contractType = 'AMENDMENT'
+            mockContract.draftRevision!.formData.contractType = 'BASE'
             let testLocation: Location
 
             renderFormPage(
@@ -942,14 +951,14 @@ describe('StateSubmissionForm', () => {
             })
         })
 
-        it('goes back from review and submit to attestations page for base contract', async () => {
+        it('goes back from contacts to attestations page for base contract', async () => {
             const mockContract = mockContractPackageDraft()
             mockContract.draftRevision!.formData.contractType = 'BASE'
             let testLocation: Location
 
             renderFormPage(
                 mockContract,
-                'review-and-submit',
+                'contacts',
                 (location) => (testLocation = location)
             )
 
@@ -967,18 +976,20 @@ describe('StateSubmissionForm', () => {
                 )
             })
             expect(
-                await screen.findByTestId('attestations-page')
-            ).toHaveTextContent('attestation page')
+                await screen.findByText(
+                    'Compliance with procurement requirements'
+                )
+            ).toBeInTheDocument()
         })
 
-        it('goes back from review and submit to contacts for amendment contract', async () => {
+        it('goes back from contacts to rate details for amendment contract', async () => {
             const mockContract = mockContractPackageDraft()
             mockContract.draftRevision!.formData.contractType = 'AMENDMENT'
             let testLocation: Location
 
             renderFormPage(
                 mockContract,
-                'review-and-submit',
+                'contacts',
                 (location) => (testLocation = location)
             )
 
@@ -989,7 +1000,7 @@ describe('StateSubmissionForm', () => {
 
             await waitFor(() => {
                 expect(testLocation.pathname).toBe(
-                    generatePath(RoutesRecord.SUBMISSIONS_CONTACTS, {
+                    generatePath(RoutesRecord.SUBMISSIONS_RATE_DETAILS, {
                         id: '15',
                         contractSubmissionType: 'health-plan',
                     })

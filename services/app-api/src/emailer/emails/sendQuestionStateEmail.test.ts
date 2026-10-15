@@ -339,7 +339,8 @@ test('renders correctly for an EQRO submission', async () => {
         sub.contract.stateCode,
         sub.contract.stateNumber,
         sub.formData.programIDs,
-        defaultStatePrograms
+        defaultStatePrograms,
+        sub.contract.contractSubmissionType
     )
 
     const template = await sendQuestionStateEmail(

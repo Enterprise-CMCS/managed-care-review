@@ -1,0 +1,43 @@
+{
+    "$schema": "../../node_modules/oxlint/configuration_schema.json",
+    "plugins": [],
+    "categories": {
+        "correctness": "off"
+    },
+    "env": {
+        "builtin": true
+    },
+    "overrides": [
+        {
+            "files": ["**/*.ts"],
+            "rules": {
+                "no-unused-vars": [
+                    "warn",
+                    {
+                        "argsIgnorePattern": "^_*"
+                    }
+                ]
+            },
+            "globals": {
+                "process": "readonly",
+                "Buffer": "readonly",
+                "__dirname": "readonly",
+                "__filename": "readonly",
+                "console": "readonly",
+                "global": "readonly",
+                "setTimeout": "readonly",
+                "clearTimeout": "readonly",
+                "setInterval": "readonly",
+                "clearInterval": "readonly"
+            },
+            "plugins": ["typescript"]
+        }
+    ],
+    "ignorePatterns": [
+        "dist/*",
+        "*.config.js",
+        "*.config.mjs",
+        "*.config.ts",
+        "**/esbuild.config.js"
+    ]
+}

@@ -56,7 +56,8 @@ export const sendQuestionResponseStateEmail = async (
         contractRev.contract.stateCode,
         contractRev.contract.stateNumber,
         contractRev.formData.programIDs,
-        packagePrograms
+        packagePrograms,
+        contractRev.contract.contractSubmissionType
     )
 
     const questionResponseURL = submissionQuestionResponseURL(

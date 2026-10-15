@@ -1,5 +1,5 @@
 const config = {
-    '**/*.{js,ts}': ['eslint --max-warnings=0', 'prettier --write'],
+    '**/*.{js,ts}': [() => 'oxlint --deny-warnings .', 'prettier --write'],
     '**/*.ts': () => 'tsc --noEmit',
     '*.sql': ['sh ../../scripts/validate_migration.sh'],
 };

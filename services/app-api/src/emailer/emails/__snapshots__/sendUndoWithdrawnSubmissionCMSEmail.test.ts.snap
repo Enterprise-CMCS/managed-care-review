@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`sendUndoWithdrawnSubmissionCMSEmail > renders EQRO email when undo withdraw returns to not subject to review 1`] = `
-"<h1 style="font-weight: normal;">Submission MCR-MN-0004-SNBC status was updated to 'Not subject to review' by CMS</h1>
+"<h1 style="font-weight: normal;">Submission MCR-EQRO-MN-0004 status was updated to 'Not subject to review' by CMS</h1>
 <b>Withdraw reversed by:</b> <a href="mailto:zuko@example.com">zuko@example.com</a><br />
 <b>Status:</b> Not subject to review<br />
 <b>Review decision:</b> Not subject to formal review and approval<br />
@@ -12,7 +12,7 @@ exports[`sendUndoWithdrawnSubmissionCMSEmail > renders EQRO email when undo with
 `;
 
 exports[`sendUndoWithdrawnSubmissionCMSEmail > renders EQRO email when undo withdraw returns to subject to review 1`] = `
-"<h1 style="font-weight: normal;">Submission MCR-MN-0004-SNBC status was updated to 'Submitted' by CMS</h1>
+"<h1 style="font-weight: normal;">Submission MCR-EQRO-MN-0004 status was updated to 'Submitted' by CMS</h1>
 <b>Withdraw reversed by:</b> <a href="mailto:zuko@example.com">zuko@example.com</a><br />
 <b>Status:</b> Submitted<br />
 <b>Review decision:</b> Subject to formal review and approval<br />

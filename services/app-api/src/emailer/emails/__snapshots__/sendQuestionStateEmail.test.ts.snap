@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`renders correctly for an EQRO submission 1`] = `
-"CMS asked questions about MCR-MN-0004-SNBC<br />
+"CMS asked questions about MCR-EQRO-MN-0004<br />
 <b>Sent by:</b> Ronald McDonald (DMCO) <a href="cms@email.com">cms@email.com</a>
 <br />
 <b>Date:</b> 12/31/2023<br />

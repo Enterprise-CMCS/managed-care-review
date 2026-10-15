@@ -5,11 +5,19 @@ import {
     testEmailConfig,
 } from '../../testHelpers/emailerHelpers'
 import { newEQROContractCMSEmail } from './newEQROContractCMSEmail'
+import { packageName } from '@mc-review/submissions'
 
 it('includes DMCO inbox on EQRO submissions subject to review', async () => {
     const sub: ContractType = mockEQROContract()
     const defaultStatePrograms = mockMNState().programs
     const emailConfig = testEmailConfig()
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.packageSubmissions[0].contractRevision.formData.programIDs,
+        defaultStatePrograms,
+        sub.contractSubmissionType
+    )
     const result = await newEQROContractCMSEmail(
         sub,
         emailConfig,
@@ -24,16 +32,23 @@ it('includes DMCO inbox on EQRO submissions subject to review', async () => {
 
     expect(result).toEqual(
         expect.objectContaining({
-            subject: expect.stringContaining('is subject to CMS review'),
+            subject: `[${emailConfig.stage}] New EQRO Submission: ${name} is subject to CMS Review`,
             toAddresses: expect.arrayContaining(emailConfig.dmcoEmails),
         })
     )
 })
 
-it('does not include DMCO inbox on EQRO submissions not subject to review', async () => {
+it('includes DMCO inbox on EQRO submissions not subject to review', async () => {
     const sub: ContractType = mockEQROContract()
     const defaultStatePrograms = mockMNState().programs
     const emailConfig = testEmailConfig()
+    const name = packageName(
+        sub.stateCode,
+        sub.stateNumber,
+        sub.packageSubmissions[0].contractRevision.formData.programIDs,
+        defaultStatePrograms,
+        sub.contractSubmissionType
+    )
 
     //modify contract to not be subject to review
     sub.packageSubmissions[0].contractRevision.formData.eqroProvisionMcoEqrOrRelatedActivities = false
@@ -52,8 +67,14 @@ it('does not include DMCO inbox on EQRO submissions not subject to review', asyn
         )
     }
 
-    expect(result.subject).toContain('is not subject to CMS review')
-    expect(result.toAddresses).toEqual(emailConfig.devReviewTeamEmails)
+    expect(result.subject).toBe(
+        `[${emailConfig.stage}] New EQRO Submission: ${name} is not subject to CMS Review`
+    )
+    expect(result).toEqual(
+        expect.objectContaining({
+            toAddresses: expect.arrayContaining(emailConfig.dmcoEmails),
+        })
+    )
 })
 
 it('renders overall email for a new EQRO contract submission', async () => {

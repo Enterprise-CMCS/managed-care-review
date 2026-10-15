@@ -2700,6 +2700,121 @@ describe('submitContract', () => {
                 expect(submitResult.errors).toBeUndefined()
             }, 20000)
         })
+
+        describe('Feature flagged procurement attestation test', () => {
+            const ldService = testLDService({
+                'procurement-attestation': true,
+            })
+
+            it('errors when submitting a base contract without a procurement attestation', async () => {
+                const server = await constructTestPostgresServer({
+                    ldService: ldService,
+                })
+
+                const initialContract =
+                    await createAndUpdateTestContractWithoutRates(
+                        server,
+                        'FL',
+                        {
+                            submissionType: 'CONTRACT_ONLY',
+                            procurementAttestation: undefined,
+                        }
+                    )
+
+                const submitResult = await executeGraphQLOperation(server, {
+                    query: SubmitContractDocument,
+                    variables: {
+                        input: {
+                            contractID: initialContract.id,
+                        },
+                    },
+                })
+
+                expect(submitResult.errors).toBeDefined()
+                expect(submitResult.errors?.[0].message).toContain(
+                    'procurementAttestation is required'
+                )
+            }, 20000)
+
+            it('successfully submits a base contract with a procurement attestation', async () => {
+                const server = await constructTestPostgresServer({
+                    ldService: ldService,
+                })
+
+                const initialContract =
+                    await createAndUpdateTestContractWithoutRates(
+                        server,
+                        'FL',
+                        {
+                            submissionType: 'CONTRACT_ONLY',
+                            procurementAttestation: true,
+                        }
+                    )
+
+                const submitResult = await executeGraphQLOperation(server, {
+                    query: SubmitContractDocument,
+                    variables: {
+                        input: {
+                            contractID: initialContract.id,
+                        },
+                    },
+                })
+
+                expect(submitResult.errors).toBeUndefined()
+            }, 20000)
+
+            it('clears a stale procurement attestation when submitting a contract that is no longer a base contract', async () => {
+                const server = await constructTestPostgresServer({
+                    ldService: ldService,
+                })
+
+                const initialContract =
+                    await createAndUpdateTestContractWithoutRates(
+                        server,
+                        'FL',
+                        {
+                            submissionType: 'CONTRACT_ONLY',
+                            contractType: 'AMENDMENT',
+                            procurementAttestation: true,
+                        }
+                    )
+
+                const contract = await submitTestContract(
+                    server,
+                    initialContract.id
+                )
+
+                expect(
+                    contract.packageSubmissions[0].contractRevision.formData
+                        .procurementAttestation
+                ).toBeNull()
+            }, 20000)
+
+            it('successfully submits a base contract without a procurement attestation when the flag is off', async () => {
+                const server = await constructTestPostgresServer()
+
+                const initialContract =
+                    await createAndUpdateTestContractWithoutRates(
+                        server,
+                        'FL',
+                        {
+                            submissionType: 'CONTRACT_ONLY',
+                            procurementAttestation: undefined,
+                        }
+                    )
+
+                const submitResult = await executeGraphQLOperation(server, {
+                    query: SubmitContractDocument,
+                    variables: {
+                        input: {
+                            contractID: initialContract.id,
+                        },
+                    },
+                })
+
+                expect(submitResult.errors).toBeUndefined()
+            }, 20000)
+        })
     })
 
     describe('EQRO contract tests', () => {
@@ -2952,7 +3067,7 @@ describe('submitContract', () => {
             expect(mockEmailer.sendEmail).toHaveBeenCalledWith(
                 expect.objectContaining({
                     subject: expect.stringContaining(
-                        `Submission ${contractName} is subject to CMS review`
+                        `New EQRO Submission: ${contractName} is subject to CMS Review`
                     ),
                     sourceEmail: config.emailSource,
                     toAddresses: expect.arrayContaining(Array.from(cmsEmails)),

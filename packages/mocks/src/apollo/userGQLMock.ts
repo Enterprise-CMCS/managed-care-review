@@ -128,7 +128,7 @@ type fetchCurrentUserMockProps = {
 const fetchCurrentUserMock = ({
     user = mockValidUser(), // defaults to logged in state user, we can override though from test
     statusCode,
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: // oxlint-disable-next-line typescript/no-explicit-any
 fetchCurrentUserMockProps): MockLink.MockedResponse<Record<string, any>> => {
     const mockError = (message: string, statusCode?: number) => {
         return new ServerError(message, {
@@ -339,10 +339,7 @@ const iterableAdminUsersMockData: {
 
 const iterableNonCMSUsersMockData: {
     userRole:
-        | 'HELPDESK_USER'
-        | 'BUSINESSOWNER_USER'
-        | 'ADMIN_USER'
-        | 'STATE_USER'
+        'HELPDESK_USER' | 'BUSINESSOWNER_USER' | 'ADMIN_USER' | 'STATE_USER'
     mockUser: <T>(
         userData?: Partial<T>
     ) => AdminUser | BusinessOwnerUser | HelpdeskUser | StateUser

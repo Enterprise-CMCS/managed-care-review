@@ -17,58 +17,21 @@ const uploadedDocument = {
     bucket: 'synthetic-bucket',
     sha256: 'contract-sha',
 }
+const sourceResult = {
+    contractId: 'source-contract',
+    programId: 'program-1',
+    contractDocument: uploadedDocument,
+    rateIds: ['rate-1'],
+}
 
-function fetchedContract(
-    contractId: string,
-    marker: string,
-    parentContractId: string
-) {
+function scenarioDependencies() {
+    const execute = vi.fn()
     return {
-        fetchContract: {
-            contract: {
-                id: contractId,
-                stateCode: 'MN',
-                status: 'SUBMITTED',
-                initiallySubmittedAt: '2026-01-01T00:00:00.000Z',
-                draftRevision: null,
-                packageSubmissions: [
-                    {
-                        submitInfo: {
-                            updatedReason: 'Initial submission',
-                            updatedBy: {
-                                role: 'STATE_USER',
-                                email: 'synthetic@example.com',
-                            },
-                        },
-                        contractRevision: {
-                            unlockInfo: null,
-                            formData: {
-                                submissionDescription: marker,
-                                modifiedBenefitsProvided: true,
-                                modifiedGeoAreaServed: true,
-                                contractDocuments: [],
-                                supportingDocuments: [],
-                            },
-                        },
-                        rateRevisions: [
-                            {
-                                rateID: 'rate-1',
-                                rate: {
-                                    id: 'rate-1',
-                                    parentContractID: parentContractId,
-                                    status: 'SUBMITTED',
-                                },
-                                formData: {
-                                    rateCertificationName:
-                                        'MN-20260101-20261231-PMAP',
-                                    rateDocuments: [],
-                                },
-                            },
-                        ],
-                    },
-                ],
-            },
-        },
+        graphql: { execute } as unknown as GraphQLClient,
+        uploads: {} as UploadClient,
+        logger: new Logger({ sink: vi.fn() }),
+        seed: 'test-seed',
+        execute,
     }
 }
 
@@ -76,84 +39,73 @@ describe('runContractLinkedRateScenario', () => {
     beforeEach(() => {
         mockedSubmitContract.mockReset()
         mockedSubmitContract
+            .mockResolvedValueOnce(sourceResult)
             .mockResolvedValueOnce({
-                contractId: 'source-contract',
-                programId: 'program-1',
-                contractDocument: uploadedDocument,
-                rateIds: ['rate-1'],
-            })
-            .mockResolvedValueOnce({
+                ...sourceResult,
                 contractId: 'linked-contract',
-                programId: 'program-1',
-                contractDocument: uploadedDocument,
-                rateIds: ['rate-1'],
             })
     })
 
-    it('verifies that the linked contract does not become the rate parent', async () => {
-        const execute = vi
-            .fn()
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'source-contract',
-                    '[SYNTHETIC:contract-linked-rate-v1:source:test-seed]',
-                    'source-contract'
-                )
-            )
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'linked-contract',
-                    '[SYNTHETIC:contract-linked-rate-v1:linked:test-seed]',
-                    'source-contract'
-                )
-            )
+    it('submits the source before linking its returned rate ID, without fetching either contract', async () => {
+        const dependencies = scenarioDependencies()
+        const result = await runContractLinkedRateScenario(dependencies)
 
-        const result = await runContractLinkedRateScenario({
-            graphql: { execute } as unknown as GraphQLClient,
-            uploads: {} as UploadClient,
-            logger: new Logger({ sink: vi.fn() }),
-            seed: 'test-seed',
-        })
-
-        expect(result).toMatchObject({
+        expect(result).toEqual({
             scenarioKey: 'contract-linked-rate-v1',
+            seed: 'test-seed',
+            sourceMarker:
+                '[SYNTHETIC:contract-linked-rate-v1:source:test-seed]',
+            marker: '[SYNTHETIC:contract-linked-rate-v1:linked:test-seed]',
             contractId: 'linked-contract',
             sourceContractId: 'source-contract',
             rateId: 'rate-1',
             status: 'SUBMITTED',
         })
-        expect(mockedSubmitContract.mock.calls[1][0]).toEqual(
-            expect.objectContaining({
-                rates: [{ type: 'LINK', rateId: 'rate-1' }],
-            })
-        )
+        expect(mockedSubmitContract).toHaveBeenCalledTimes(2)
+        expect(mockedSubmitContract).toHaveBeenNthCalledWith(1, {
+            graphql: dependencies.graphql,
+            uploads: dependencies.uploads,
+            marker: result.sourceMarker,
+            documentName: 'synthetic-linked-rate-source-contract-test-seed.pdf',
+            rates: [
+                {
+                    type: 'CREATE',
+                    documentName:
+                        'synthetic-linked-rate-source-rate-test-seed.pdf',
+                },
+            ],
+        })
+        expect(mockedSubmitContract).toHaveBeenNthCalledWith(2, {
+            graphql: dependencies.graphql,
+            uploads: dependencies.uploads,
+            marker: result.marker,
+            documentName: 'synthetic-linked-rate-target-contract-test-seed.pdf',
+            rates: [{ type: 'LINK', rateId: 'rate-1' }],
+        })
+        expect(dependencies.execute).not.toHaveBeenCalled()
     })
 
-    it('rejects a linked package that changed the rate parent', async () => {
-        const execute = vi
-            .fn()
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'source-contract',
-                    '[SYNTHETIC:contract-linked-rate-v1:source:test-seed]',
-                    'source-contract'
-                )
-            )
-            .mockResolvedValueOnce(
-                fetchedContract(
-                    'linked-contract',
-                    '[SYNTHETIC:contract-linked-rate-v1:linked:test-seed]',
-                    'linked-contract'
-                )
-            )
+    it('does not generate a linked target without a usable source rate ID', async () => {
+        mockedSubmitContract.mockReset().mockResolvedValueOnce({
+            ...sourceResult,
+            rateIds: [],
+        })
 
         await expect(
-            runContractLinkedRateScenario({
-                graphql: { execute } as unknown as GraphQLClient,
-                uploads: {} as UploadClient,
-                logger: new Logger({ sink: vi.fn() }),
-                seed: 'test-seed',
-            })
-        ).rejects.toThrow('Synthetic linked-rate topology verification failed')
+            runContractLinkedRateScenario(scenarioDependencies())
+        ).rejects.toThrow('Synthetic source contract did not create one rate')
+        expect(mockedSubmitContract).toHaveBeenCalledTimes(1)
+    })
+
+    it('propagates a target submission failure', async () => {
+        mockedSubmitContract
+            .mockReset()
+            .mockResolvedValueOnce(sourceResult)
+            .mockRejectedValueOnce(new Error('Target submission rejected'))
+
+        await expect(
+            runContractLinkedRateScenario(scenarioDependencies())
+        ).rejects.toThrow('Target submission rejected')
+        expect(mockedSubmitContract).toHaveBeenCalledTimes(2)
     })
 })
