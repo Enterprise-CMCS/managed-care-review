@@ -4,7 +4,6 @@ import { afterEach, describe, expect, test, vi } from 'vitest'
 import {
     main,
     migrateDocumentTable,
-    migrateZipTable,
     type MigrationPrismaClient,
 } from '../migrate_s3_urls'
 
@@ -18,17 +17,10 @@ function createMigrationClient(
         name: string
         s3BucketName: string | null
         s3Key: string | null
-    }> = [],
-    zips: Array<{
-        id: string
-        s3URL: string
-        s3BucketName: string | null
-        s3Key: string | null
     }> = []
 ): {
     client: MigrationPrismaClient
     documentTable: MigrationPrismaClient['contractDocument']
-    zipTable: MigrationPrismaClient['documentZipPackage']
 } {
     const emptyDocumentTable: MigrationPrismaClient['contractDocument'] = {
         findMany: vi.fn().mockResolvedValue([]),
@@ -38,16 +30,10 @@ function createMigrationClient(
         findMany: vi.fn().mockResolvedValue(documents),
         update: vi.fn().mockResolvedValue({}),
     }
-    const zipTable: MigrationPrismaClient['documentZipPackage'] = {
-        findMany: vi.fn().mockResolvedValue(zips),
-        update: vi.fn().mockResolvedValue({}),
-    }
 
     return {
-        // These helper tests exercise one representative document table and
-        // the zip table. The remaining required document delegates return no
-        // candidates so they satisfy the migration client without affecting
-        // the table under test.
+        // The remaining required document delegates return no candidates so
+        // they satisfy the migration client without affecting this test.
         client: {
             contractDocument: documentTable,
             contractSupportingDocument: emptyDocumentTable,
@@ -57,10 +43,8 @@ function createMigrationClient(
             contractQuestionResponseDocument: emptyDocumentTable,
             rateQuestionDocument: emptyDocumentTable,
             rateQuestionResponseDocument: emptyDocumentTable,
-            documentZipPackage: zipTable,
         },
         documentTable,
-        zipTable,
     }
 }
 
@@ -255,38 +239,5 @@ describe('document object reconciliation', () => {
         expect(result).toEqual({ processed: 1, failed: 0 })
         expect(send).not.toHaveBeenCalled()
         expect(documentTable.update).not.toHaveBeenCalled()
-    })
-
-    test('canonicalizes existing zip package records', async () => {
-        const { client, zipTable } = createMigrationClient(
-            [],
-            [
-                {
-                    id: 'zip-1',
-                    s3URL: 's3://legacy-bucket/zips/contracts/revision/documents.zip',
-                    s3BucketName: 'legacy-bucket',
-                    s3Key: 'zips/contracts/revision/documents.zip',
-                },
-            ]
-        )
-        const send = vi.fn().mockResolvedValue({})
-
-        const result = await migrateZipTable(
-            client,
-            'cdk-bucket',
-            undefined,
-            false,
-            { send }
-        )
-
-        expect(result).toEqual({ processed: 1, failed: 0 })
-        expect(zipTable.update).toHaveBeenCalledWith({
-            where: { id: 'zip-1' },
-            data: {
-                s3URL: 's3://cdk-bucket/zips/contracts/revision/documents.zip',
-                s3BucketName: 'cdk-bucket',
-                s3Key: 'zips/contracts/revision/documents.zip',
-            },
-        })
     })
 })

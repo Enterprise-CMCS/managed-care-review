@@ -965,7 +965,6 @@ export class AppApiStack extends BaseStack {
                 resources: [
                     `${legacyDocumentsBucket}/allusers/*`,
                     `${legacyQABucket}/allusers/*`,
-                    `${legacyDocumentsBucket}/zips/*`,
                 ],
             })
         )

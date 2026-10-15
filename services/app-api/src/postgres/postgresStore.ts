@@ -162,6 +162,7 @@ import {
     createDocumentZipPackage,
     findDocumentZipPackagesByContractRevision,
     findDocumentZipPackagesByRateRevision,
+    saveRegeneratedDocumentZipPackage,
 } from './documents'
 import type { DocumentTypes } from '../domain-models/DocumentType'
 
@@ -356,6 +357,9 @@ type Store = {
     createDocumentZipPackage: (
         args: CreateDocumentZipPackageArgsType
     ) => Promise<DocumentZipPackage | Error>
+    saveRegeneratedDocumentZipPackage: (
+        args: CreateDocumentZipPackageArgsType
+    ) => Promise<void | Error>
     findDocumentZipPackagesByContractRevision: (
         contractRevisionID: string,
         documentType?: DocumentZipType
@@ -524,6 +528,8 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
             findDocumentById(client, docID, docType),
         createDocumentZipPackage: (args) =>
             createDocumentZipPackage(client, args),
+        saveRegeneratedDocumentZipPackage: (args) =>
+            saveRegeneratedDocumentZipPackage(client, args),
         findDocumentZipPackagesByContractRevision: (
             contractRevisionID,
             documentType

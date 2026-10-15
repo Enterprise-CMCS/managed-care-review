@@ -388,10 +388,12 @@ export type DocumentZipService = {
     createContractZips: (contract: ContractType) => Promise<Error | undefined>
     createRateZips: (contract: ContractType) => Promise<Error[] | undefined>
     generateRateDocumentsZip: (
-        rateRevision: RateRevisionType
+        rateRevision: RateRevisionType,
+        persistenceMode?: 'CREATE' | 'REPLACE'
     ) => Promise<void | Error>
     generateContractDocumentsZip: (
-        contractRevision: ContractRevisionType
+        contractRevision: ContractRevisionType,
+        persistenceMode?: 'CREATE' | 'REPLACE'
     ) => Promise<void | Error>
 }
 
@@ -515,7 +517,10 @@ export function documentZipService(
             // Return errors if any occurred, otherwise return void
             return errors.length > 0 ? errors : undefined
         },
-        generateRateDocumentsZip: async (rateRevision) => {
+        generateRateDocumentsZip: async (
+            rateRevision,
+            persistenceMode = 'CREATE'
+        ) => {
             const rateRevisionID = rateRevision.id
 
             // Get all rate-related documents
@@ -556,23 +561,31 @@ export function documentZipService(
                             return zipResult
                         }
 
-                        // Store zip information in database
-                        const createResult =
-                            await store.createDocumentZipPackage({
-                                s3URL: zipResult.s3URL,
-                                sha256: zipResult.sha256,
-                                s3BucketName: zipResult.s3BucketName,
-                                s3Key: zipResult.s3Key,
-                                rateRevisionID,
-                                documentType: 'RATE_DOCUMENTS',
-                            })
+                        // Regeneration replaces legacy metadata only after the
+                        // canonical zip upload succeeds.
+                        const packageData = {
+                            s3URL: zipResult.s3URL,
+                            sha256: zipResult.sha256,
+                            s3BucketName: zipResult.s3BucketName,
+                            s3Key: zipResult.s3Key,
+                            rateRevisionID,
+                            documentType: 'RATE_DOCUMENTS' as const,
+                        }
+                        const saveResult =
+                            persistenceMode === 'REPLACE'
+                                ? await store.saveRegeneratedDocumentZipPackage(
+                                      packageData
+                                  )
+                                : await store.createDocumentZipPackage(
+                                      packageData
+                                  )
 
-                        if (createResult instanceof Error) {
+                        if (saveResult instanceof Error) {
                             logError(
                                 'generateRateDocumentsZip - database storage failed',
-                                createResult
+                                saveResult
                             )
-                            return createResult
+                            return saveResult
                         }
 
                         console.info(
@@ -589,7 +602,10 @@ export function documentZipService(
                 }
             )
         },
-        generateContractDocumentsZip: async (contractRevision) => {
+        generateContractDocumentsZip: async (
+            contractRevision,
+            persistenceMode = 'CREATE'
+        ) => {
             const contractRevisionID = contractRevision.id
             const contractDocuments = [
                 ...(contractRevision.formData.contractDocuments || []),
@@ -629,23 +645,31 @@ export function documentZipService(
                             return zipResult
                         }
 
-                        // Store zip information in database
-                        const createResult =
-                            await store.createDocumentZipPackage({
-                                s3URL: zipResult.s3URL,
-                                sha256: zipResult.sha256,
-                                s3BucketName: zipResult.s3BucketName,
-                                s3Key: zipResult.s3Key,
-                                contractRevisionID,
-                                documentType: 'CONTRACT_DOCUMENTS',
-                            })
+                        // Regeneration replaces legacy metadata only after the
+                        // canonical zip upload succeeds.
+                        const packageData = {
+                            s3URL: zipResult.s3URL,
+                            sha256: zipResult.sha256,
+                            s3BucketName: zipResult.s3BucketName,
+                            s3Key: zipResult.s3Key,
+                            contractRevisionID,
+                            documentType: 'CONTRACT_DOCUMENTS' as const,
+                        }
+                        const saveResult =
+                            persistenceMode === 'REPLACE'
+                                ? await store.saveRegeneratedDocumentZipPackage(
+                                      packageData
+                                  )
+                                : await store.createDocumentZipPackage(
+                                      packageData
+                                  )
 
-                        if (createResult instanceof Error) {
+                        if (saveResult instanceof Error) {
                             logError(
                                 'generateContractDocumentsZip - database storage failed',
-                                createResult
+                                saveResult
                             )
-                            return createResult
+                            return saveResult
                         }
 
                         console.info(

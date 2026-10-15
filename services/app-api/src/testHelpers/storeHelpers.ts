@@ -246,6 +246,9 @@ function mockStoreThatErrors(): Store {
         createDocumentZipPackage: async (_userID) => {
             return genericError
         },
+        saveRegeneratedDocumentZipPackage: async (_args) => {
+            return genericError
+        },
         findDocumentZipPackagesByContractRevision: async (_userID) => {
             return genericError
         },

@@ -2,6 +2,7 @@ import {
     createDocumentZipPackage,
     findDocumentZipPackagesByContractRevision,
     findDocumentZipPackagesByRateRevision,
+    saveRegeneratedDocumentZipPackage,
     type CreateDocumentZipPackageArgsType,
 } from './zip'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
@@ -18,6 +19,7 @@ import type {
     DocumentZipType,
     DocumentZipPackage,
 } from '../../generated/client'
+import { findContractRevisionsNeedingZips } from '../../handlers/regenerate_zips'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import type { User } from '../../generated/client'
 
@@ -225,6 +227,196 @@ describe('Document Zip Package Database Functions', () => {
             expect((result as Error).message).toContain(
                 'Failed to create document zip package'
             )
+        })
+    })
+
+    describe('saveRegeneratedDocumentZipPackage', () => {
+        it('updates an existing package instead of creating a duplicate', async () => {
+            const client = await sharedTestPrismaClient()
+            const stateUser = await client.user.create({
+                data: {
+                    id: uuidv4(),
+                    givenName: 'Test',
+                    familyName: 'User',
+                    email: `${uuidv4()}@example.com`,
+                    role: 'STATE_USER',
+                    stateCode: 'FL',
+                },
+            })
+            const draftContract = must(
+                await insertDraftContract(
+                    client,
+                    mockInsertContractArgs({ stateCode: 'FL' })
+                )
+            )
+            const submittedContract = must(
+                await submitContract(client, {
+                    contractID: draftContract.id,
+                    submittedByUserID: stateUser.id,
+                    submittedReason: 'initial submit',
+                })
+            )
+            const contractRevisionID = submittedContract.revisions[0].id
+
+            must(
+                await createDocumentZipPackage(client, {
+                    s3URL: 's3://legacy-bucket/zips/contracts/legacy.zip',
+                    sha256: 'legacy-hash',
+                    s3BucketName: 'legacy-bucket',
+                    s3Key: 'zips/contracts/legacy.zip',
+                    contractRevisionID,
+                    documentType: 'CONTRACT_DOCUMENTS',
+                })
+            )
+
+            const saveResult = await saveRegeneratedDocumentZipPackage(client, {
+                s3URL: `s3://cdk-bucket/zips/contracts/${contractRevisionID}/contract-documents.zip`,
+                sha256: 'canonical-hash',
+                s3BucketName: 'cdk-bucket',
+                s3Key: `zips/contracts/${contractRevisionID}/contract-documents.zip`,
+                contractRevisionID,
+                documentType: 'CONTRACT_DOCUMENTS',
+            })
+
+            expect(saveResult).toBeUndefined()
+            const packages = must(
+                await findDocumentZipPackagesByContractRevision(
+                    client,
+                    contractRevisionID
+                )
+            )
+            expect(packages).toHaveLength(1)
+            expect(packages[0]).toMatchObject({
+                s3URL: `s3://cdk-bucket/zips/contracts/${contractRevisionID}/contract-documents.zip`,
+                sha256: 'canonical-hash',
+                s3BucketName: 'cdk-bucket',
+                s3Key: `zips/contracts/${contractRevisionID}/contract-documents.zip`,
+            })
+        })
+
+        it('creates a package when the revision has none', async () => {
+            const client = await sharedTestPrismaClient()
+            const stateUser = await client.user.create({
+                data: {
+                    id: uuidv4(),
+                    givenName: 'Test',
+                    familyName: 'User',
+                    email: `${uuidv4()}@example.com`,
+                    role: 'STATE_USER',
+                    stateCode: 'FL',
+                },
+            })
+            const draftContract = must(
+                await insertDraftContract(
+                    client,
+                    mockInsertContractArgs({ stateCode: 'FL' })
+                )
+            )
+            const submittedContract = must(
+                await submitContract(client, {
+                    contractID: draftContract.id,
+                    submittedByUserID: stateUser.id,
+                    submittedReason: 'initial submit',
+                })
+            )
+            const contractRevisionID = submittedContract.revisions[0].id
+
+            const saveResult = await saveRegeneratedDocumentZipPackage(client, {
+                s3URL: `s3://cdk-bucket/zips/contracts/${contractRevisionID}/contract-documents.zip`,
+                sha256: 'canonical-hash',
+                s3BucketName: 'cdk-bucket',
+                s3Key: `zips/contracts/${contractRevisionID}/contract-documents.zip`,
+                contractRevisionID,
+                documentType: 'CONTRACT_DOCUMENTS',
+            })
+
+            expect(saveResult).toBeUndefined()
+            const packages = must(
+                await findDocumentZipPackagesByContractRevision(
+                    client,
+                    contractRevisionID
+                )
+            )
+            expect(packages).toHaveLength(1)
+        })
+    })
+
+    describe('zip regeneration selection', () => {
+        it('selects a legacy package until regenerated metadata is canonical', async () => {
+            const client = await sharedTestPrismaClient()
+            const stateUser = await client.user.create({
+                data: {
+                    id: uuidv4(),
+                    givenName: 'Test',
+                    familyName: 'User',
+                    email: `${uuidv4()}@example.com`,
+                    role: 'STATE_USER',
+                    stateCode: 'FL',
+                },
+            })
+            const draftContract = must(
+                await insertDraftContract(
+                    client,
+                    mockInsertContractArgs({
+                        stateCode: 'FL',
+                        contractDocuments: [
+                            {
+                                name: 'contract.pdf',
+                                s3URL: 's3://cdk-bucket/uuid.pdf/contract.pdf',
+                                s3BucketName: 'cdk-bucket',
+                                s3Key: 'allusers/uuid.pdf',
+                                sha256: 'document-hash',
+                            },
+                        ],
+                    })
+                )
+            )
+            const submittedContract = must(
+                await submitContract(client, {
+                    contractID: draftContract.id,
+                    submittedByUserID: stateUser.id,
+                    submittedReason: 'initial submit',
+                })
+            )
+            const contractRevisionID = submittedContract.revisions[0].id
+            must(
+                await createDocumentZipPackage(client, {
+                    s3URL: 's3://legacy-bucket/zips/contracts/legacy.zip',
+                    sha256: 'legacy-hash',
+                    s3BucketName: 'legacy-bucket',
+                    s3Key: 'zips/contracts/legacy.zip',
+                    contractRevisionID,
+                    documentType: 'CONTRACT_DOCUMENTS',
+                })
+            )
+            const allTestCandidatesLimit = 100_000
+
+            const candidatesBefore = await findContractRevisionsNeedingZips(
+                client,
+                'cdk-bucket',
+                allTestCandidatesLimit
+            )
+            expect(candidatesBefore).toContainEqual({ id: contractRevisionID })
+
+            must(
+                await saveRegeneratedDocumentZipPackage(client, {
+                    s3URL: `s3://cdk-bucket/zips/contracts/${contractRevisionID}/contract-documents.zip`,
+                    sha256: 'canonical-hash',
+                    s3BucketName: 'cdk-bucket',
+                    s3Key: `zips/contracts/${contractRevisionID}/contract-documents.zip`,
+                    contractRevisionID,
+                    documentType: 'CONTRACT_DOCUMENTS',
+                })
+            )
+
+            const candidatesAfter = await findContractRevisionsNeedingZips(
+                client,
+                'cdk-bucket',
+                allTestCandidatesLimit
+            )
+            expect(candidatesAfter).not.toContainEqual({
+                id: contractRevisionID,
+            })
         })
     })
 
