@@ -213,8 +213,8 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^17.5.1
-        version: 17.5.1
+        specifier: ^17.6.0
+        version: 17.6.0
       oxlint:
         specifier: 1.83.0
         version: 1.83.0(oxlint-tsgolint@7.0.2003)
@@ -262,8 +262,8 @@ importers:
         specifier: ^17.0.35
         version: 17.0.35
       lint-staged:
-        specifier: ^17.5.1
-        version: 17.5.1
+        specifier: ^17.6.0
+        version: 17.6.0
       prettier:
         specifier: ^3.9.9
         version: 3.9.9
@@ -536,8 +536,8 @@ importers:
         specifier: ^3.2.1
         version: 3.2.1
       lint-staged:
-        specifier: ^17.5.1
-        version: 17.5.1
+        specifier: ^17.6.0
+        version: 17.6.0
       tsx:
         specifier: ^4.23.13
         version: 4.23.13
@@ -723,8 +723,8 @@ importers:
         specifier: ^11.4.1
         version: 11.4.1
       lint-staged:
-        specifier: ^17.5.1
-        version: 17.5.1
+        specifier: ^17.6.0
+        version: 17.6.0
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
@@ -922,8 +922,8 @@ importers:
         specifier: ^6.1.1
         version: 6.1.1(supports-color@10.2.2)(typescript@7.0.2)(vite@8.3.0(@types/node@26.2.0)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.77.2)(terser@5.49.0)(tsx@4.23.13)(yaml@2.9.0))
       web-vitals:
-        specifier: ^6.2.2
-        version: 6.2.2
+        specifier: ^6.2.3
+        version: 6.2.3
       yup:
         specifier: ^1.7.1
         version: 1.7.1
@@ -1013,8 +1013,8 @@ importers:
         specifier: ^2.2.1
         version: 2.2.1(launchdarkly-react-client-sdk@3.9.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
       lint-staged:
-        specifier: ^17.5.1
-        version: 17.5.1
+        specifier: ^17.6.0
+        version: 17.6.0
       prettier:
         specifier: ^3.9.9
         version: 3.9.9
@@ -1122,8 +1122,8 @@ importers:
         specifier: ^9.1.7
         version: 9.1.7
       lint-staged:
-        specifier: ^17.5.1
-        version: 17.5.1
+        specifier: ^17.6.0
+        version: 17.6.0
       prettier:
         specifier: ^3.9.9
         version: 3.9.9
@@ -1154,8 +1154,8 @@ importers:
         specifier: 2.103.0
         version: 2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       '@aws-solutions-constructs/aws-wafwebacl-apigateway':
-        specifier: 2.103.0
-        version: 2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
+        specifier: 2.105.0
+        version: 2.105.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)
       aws-cdk-lib:
         specifier: 2.273.0
         version: 2.273.0(constructs@10.8.1)
@@ -1182,8 +1182,8 @@ importers:
         specifier: ^11.4.1
         version: 11.4.1
       lint-staged:
-        specifier: ^17.5.1
-        version: 17.5.1
+        specifier: ^17.6.0
+        version: 17.6.0
       prettier:
         specifier: ^3.9.9
         version: 3.9.9
@@ -1206,8 +1206,8 @@ importers:
         specifier: ^5.2.1
         version: 5.2.1(supports-color@10.2.2)
       express-rate-limit:
-        specifier: ^8.7.0
-        version: 8.7.0(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2)
+        specifier: ^8.7.1
+        version: 8.7.1(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2)
       react:
         specifier: ^19.3.0
         version: 19.3.0
@@ -2110,10 +2110,10 @@ packages:
       aws-cdk-lib: ^2.260.0
       constructs: ^10.0.0
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.103.0':
-    resolution: {integrity: sha512-fTp6svQ1p45ax90ZRTp5ax1YKDqG4GnBjlwaZOyuX/rW6ETfTsrYTK04nlmE0Limch8OTFzVjSDUpFQQEH8dRQ==}
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.105.0':
+    resolution: {integrity: sha512-bM1Q65sAOVRdGwlbsIjw3qK+dFnEEtk2HuuzX7SPzgO2r6gIuwMvlWxdopbQiwGoTfw66s6ADGeUM7JLhekZlQ==}
     peerDependencies:
-      '@aws-solutions-constructs/core': 2.103.0
+      '@aws-solutions-constructs/core': 2.105.0
       aws-cdk-lib: ^2.260.0
       constructs: ^10.0.0
 
@@ -7724,8 +7724,8 @@ packages:
   exponential-backoff@3.1.3:
     resolution: {integrity: sha512-ZgEeZXj30q+I0EN+CbSSpIyPaJ5HVQD18Z1m+u1FXbAeT94mr1zw50q4q6jiiC447Nl/YTcIYSAftiGqetwXCA==}
 
-  express-rate-limit@8.7.0:
-    resolution: {integrity: sha512-hOwV7WOxXfjRpAM1DSJWZDXx3GhplwD8IfwuwvogD8i1Qnkgosw/H45s4ZnFAUHDAhPjlY9hLBvJhKmGMyY26g==}
+  express-rate-limit@8.7.1:
+    resolution: {integrity: sha512-2FXbqkygil3mZiXzEtM0IjE/UBmBNot0J1GEVrJT4JbrvwOSoEtqtO+wHbiMQELWe1eNvHoYRg2dkjOid+6JkA==}
     engines: {node: '>= 16'}
     peerDependencies:
       express: '>= 4.11'
@@ -8891,8 +8891,8 @@ packages:
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
 
-  lint-staged@17.5.1:
-    resolution: {integrity: sha512-7EDuco1xnBMeVpvAbeMq1U5KXwJGLmY8q6l+Ye78r36C4mPc+Vg1Z2SK8gHyRTyvPro90A0q5/FAZ+Au23d6QQ==}
+  lint-staged@17.6.0:
+    resolution: {integrity: sha512-nOhBfYkZEwkFtNzD5pK9s9LkcWoxJ+whLzEnhqi9nl7zTB5n7tg8+9iYgMGx2Wm3VlLu8cbNj0RACzY+nWi5iQ==}
     engines: {node: '>=22.22.1'}
     hasBin: true
 
@@ -11281,8 +11281,8 @@ packages:
     resolution: {integrity: sha512-d2JWLCivmZYTSIoge9MsgFCZrt571BikcWGYkjC1khllbTeDlGqZ2D8vD8E/lJa8WGWbb7Plm8/XJYV7IJHZZw==}
     engines: {node: '>= 8'}
 
-  web-vitals@6.2.2:
-    resolution: {integrity: sha512-oto5x6dLEgrRqfcWed+pZEUb2q6ikbFmqF54CRDhI/QGbn+qxC49b4C4OkbH+kb9C3a8shpFD3SgR9kRcs80ZQ==}
+  web-vitals@6.2.3:
+    resolution: {integrity: sha512-Dmy+vdO1UPMqXiAtZSNayhl4f794Bxfd94W4HIj2HlYtczEQfEOon969memlcpcHrTuOKLa5baFjX7WbgmOq+A==}
 
   webcrypto-core@1.9.2:
     resolution: {integrity: sha512-gsXecm82UQNlTBURJGuqOWy1Ww08S3kZUcr3aOJS02Pk0xLtkfeUAVC0u0xhgdonFme80edSJUIJyuvL/7250Q==}
@@ -13367,7 +13367,7 @@ snapshots:
       aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
 
-  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.103.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
+  '@aws-solutions-constructs/aws-wafwebacl-apigateway@2.105.0(aws-cdk-lib@2.273.0(constructs@10.8.1))(constructs@10.8.1)':
     dependencies:
       aws-cdk-lib: 2.273.0(constructs@10.8.1)
       constructs: 10.8.1
@@ -20025,7 +20025,7 @@ snapshots:
 
   exponential-backoff@3.1.3: {}
 
-  express-rate-limit@8.7.0(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2):
+  express-rate-limit@8.7.1(express@5.2.1(supports-color@10.2.2))(supports-color@10.2.2):
     dependencies:
       debug: 4.4.3(supports-color@10.2.2)
       express: 5.2.1(supports-color@10.2.2)
@@ -21348,7 +21348,7 @@ snapshots:
 
   lines-and-columns@1.2.4: {}
 
-  lint-staged@17.5.1:
+  lint-staged@17.6.0:
     dependencies:
       picomatch: 4.0.7
       string-argv: 0.3.2
@@ -23958,7 +23958,7 @@ snapshots:
 
   web-streams-polyfill@3.3.3: {}
 
-  web-vitals@6.2.2: {}
+  web-vitals@6.2.3: {}
 
   webcrypto-core@1.9.2:
     dependencies:
