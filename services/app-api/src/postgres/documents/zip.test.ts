@@ -389,11 +389,12 @@ describe('Document Zip Package Database Functions', () => {
                     documentType: 'CONTRACT_DOCUMENTS',
                 })
             )
+            const allTestCandidatesLimit = 100_000
 
             const candidatesBefore = await findContractRevisionsNeedingZips(
                 client,
                 'cdk-bucket',
-                100
+                allTestCandidatesLimit
             )
             expect(candidatesBefore).toContainEqual({ id: contractRevisionID })
 
@@ -411,7 +412,7 @@ describe('Document Zip Package Database Functions', () => {
             const candidatesAfter = await findContractRevisionsNeedingZips(
                 client,
                 'cdk-bucket',
-                100
+                allTestCandidatesLimit
             )
             expect(candidatesAfter).not.toContainEqual({
                 id: contractRevisionID,
