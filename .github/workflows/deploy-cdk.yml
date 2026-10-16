@@ -415,6 +415,9 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          OKTA_ISSUER: ${{ vars.DEV_OKTA_ISSUER }}
+          OKTA_CLIENT_ID: ${{ vars.DEV_OKTA_CLIENT_ID }}
+          OKTA_AUDIENCE: ${{ vars.DEV_OKTA_AUDIENCE }}
         run: |
           echo "=== Deploying Okta stack ==="
           pnpm cdk deploy okta-${STAGE_NAME}-cdk \

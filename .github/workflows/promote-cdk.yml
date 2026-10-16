@@ -383,6 +383,9 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: dev
+          OKTA_ISSUER: ${{ vars.DEV_OKTA_ISSUER }}
+          OKTA_CLIENT_ID: ${{ vars.DEV_OKTA_CLIENT_ID }}
+          OKTA_AUDIENCE: ${{ vars.DEV_OKTA_AUDIENCE }}
         run: |
           echo "=== Deploying Okta stack ==="
           pnpm cdk deploy okta-dev-cdk \
@@ -798,6 +801,9 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: val
+          OKTA_ISSUER: ${{ vars.VAL_OKTA_ISSUER }}
+          OKTA_CLIENT_ID: ${{ vars.VAL_OKTA_CLIENT_ID }}
+          OKTA_AUDIENCE: ${{ vars.VAL_OKTA_AUDIENCE }}
         run: |
           echo "=== Deploying Okta stack ==="
           pnpm cdk deploy okta-val-cdk \
@@ -1187,6 +1193,9 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: qa
+          OKTA_ISSUER: ${{ vars.VAL_OKTA_ISSUER }}
+          OKTA_CLIENT_ID: ${{ vars.VAL_OKTA_CLIENT_ID }}
+          OKTA_AUDIENCE: ${{ vars.VAL_OKTA_AUDIENCE }}
         run: |
           echo "=== Deploying Okta stack ==="
           pnpm cdk deploy okta-qa-cdk \
@@ -1601,6 +1610,9 @@ jobs:
         working-directory: services/infra-cdk
         env:
           STAGE_NAME: prod
+          OKTA_ISSUER: ${{ vars.PROD_OKTA_ISSUER }}
+          OKTA_CLIENT_ID: ${{ vars.PROD_OKTA_CLIENT_ID }}
+          OKTA_AUDIENCE: ${{ vars.PROD_OKTA_AUDIENCE }}
         run: |
           echo "=== Deploying Okta stack ==="
           pnpm cdk deploy okta-prod-cdk \
