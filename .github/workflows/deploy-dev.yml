@@ -281,6 +281,9 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Infrastructure Unit Tests
+        run: pnpm --filter mcr-infra-cdk test
+
       - name: Generate Code
         run: pnpm -r generate
 
@@ -427,6 +430,17 @@ jobs:
             --context stage=dev \
             --require-approval never
 
+      - name: Deploy Okta stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+        run: |
+          echo "=== Deploying Okta stack ==="
+          pnpm cdk deploy okta-dev-cdk \
+            --app 'pnpm tsx bin/okta.ts' \
+            --context stage=dev \
+            --require-approval never
+
   deploy-cdk-app-dev:
     needs:
       [
@@ -483,6 +497,18 @@ jobs:
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-dev-cdk \
             --app 'pnpm tsx bin/app-api.ts' \
+            --context stage=dev \
+            --require-approval never
+
+      - name: Deploy HTTP API stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: dev
+          INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
+        run: |
+          echo "=== Deploying HTTP API stack ==="
+          pnpm cdk deploy app-api-http-dev-cdk \
+            --app 'pnpm tsx bin/app-api-http.ts' \
             --context stage=dev \
             --require-approval never
 

@@ -275,6 +275,9 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      - name: Infrastructure Unit Tests
+        run: pnpm --filter mcr-infra-cdk test
+
       - name: Generate Code
         run: pnpm -r generate
 
@@ -405,6 +408,17 @@ jobs:
           echo "=== Deploying Cognito stack ==="
           pnpm cdk deploy cognito-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/cognito.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Deploy Okta stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: |
+          echo "=== Deploying Okta stack ==="
+          pnpm cdk deploy okta-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/okta.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
 
@@ -555,6 +569,18 @@ jobs:
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-${STAGE_NAME}-cdk \
             --app 'pnpm tsx bin/app-api.ts' \
+            --context stage=${STAGE_NAME} \
+            --require-approval never
+
+      - name: Deploy HTTP API stack
+        working-directory: services/infra-cdk
+        env:
+          STAGE_NAME: ${{ needs.begin-deployment.outputs.stage-name }}
+          INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
+        run: |
+          echo "=== Deploying HTTP API stack ==="
+          pnpm cdk deploy app-api-http-${STAGE_NAME}-cdk \
+            --app 'pnpm tsx bin/app-api-http.ts' \
             --context stage=${STAGE_NAME} \
             --require-approval never
 
