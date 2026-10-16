@@ -34,15 +34,15 @@ export class AppApiHttpStack extends BaseStack {
             description: 'Parallel HTTP API infrastructure for OIDC migration',
         })
 
-        const internalOrigins = (process.env.INTERNAL_ALLOWED_ORIGINS || '')
+        const additionalOrigins = (process.env.HTTP_API_ALLOWED_ORIGINS || '')
             .split(',')
             .map((origin) => origin.trim())
             .filter(Boolean)
-        // The Lambda CORS helper supports suffix wildcards such as *.cms.gov.
-        // Native HTTP API CORS needs concrete origins to preserve that boundary.
-        if (internalOrigins.some((origin) => origin.includes('*'))) {
+        // Keep native HTTP CORS independent of the Lambda helper's shared
+        // INTERNAL_ALLOWED_ORIGINS setting, which can contain suffix wildcards.
+        if (additionalOrigins.some((origin) => origin.includes('*'))) {
             throw new Error(
-                'HTTP API INTERNAL_ALLOWED_ORIGINS must contain explicit origins; expand wildcard domains before deployment.'
+                'HTTP_API_ALLOWED_ORIGINS must contain explicit origins; expand wildcard domains before deployment.'
             )
         }
 
@@ -56,7 +56,7 @@ export class AppApiHttpStack extends BaseStack {
                     Fn.importValue(
                         `${ResourceNames.stackName('frontend-infra', this.stage)}-ApplicationUrl`
                     ),
-                    ...internalOrigins,
+                    ...additionalOrigins,
                 ],
                 allowCredentials: true,
                 allowMethods: [
