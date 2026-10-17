@@ -466,4 +466,79 @@ describe('ReviewSubmit', () => {
             ).toBeInTheDocument()
         })
     })
+
+    it('renders attestations section with edit link for base contract when flag is on', async () => {
+        const baseDraft = mockContractPackageDraft({
+            id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
+        })
+        baseDraft.draftRevision!.formData.contractType = 'BASE'
+        baseDraft.draftRevision!.formData.procurementAttestation = true
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmit />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({ contract: baseDraft }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: { 'procurement-attestation': true },
+            }
+        )
+
+        expect(
+            await screen.findByRole('heading', { name: 'Attestations' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('link', { name: 'Edit Attestations' })
+        ).toHaveAttribute(
+            'href',
+            '/submissions/health-plan/test-abc-123/edit/attestations'
+        )
+    })
+
+    it('does not render attestations section for amendment contract', async () => {
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmit />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({
+                            contract: mockContractPackageDraft({
+                                id: 'test-abc-123',
+                                contractSubmissionType: 'HEALTH_PLAN',
+                            }),
+                        }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: { 'procurement-attestation': true },
+            }
+        )
+
+        expect(
+            await screen.findByRole('heading', { name: 'State contacts' })
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByRole('heading', { name: 'Attestations' })
+        ).not.toBeInTheDocument()
+    })
 })

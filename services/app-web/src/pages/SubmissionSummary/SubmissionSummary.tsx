@@ -9,6 +9,7 @@ import React, {
 import { useAuth } from '../../contexts/AuthContext'
 import {
     ContractDetailsSummarySection,
+    AttestationsSummarySection,
     ContactsSummarySection,
     RateDetailsSummarySection,
     SubmissionTypeSummarySection,
@@ -92,6 +93,11 @@ export const SubmissionSummary = (): React.ReactElement => {
     const revisionHistoryFlag = ldClient?.variation(
         featureFlags.REVISION_HISTORY_ENHANCEMENTS.flag,
         featureFlags.REVISION_HISTORY_ENHANCEMENTS.defaultValue
+    )
+
+    const showProcurementAttestation = ldClient?.variation(
+        featureFlags.PROCUREMENT_ATTESTATION.flag,
+        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
     )
 
     const incompleteMessage = useMemo(() => {
@@ -282,6 +288,10 @@ export const SubmissionSummary = (): React.ReactElement => {
         ? 'Edit MC-CRS number'
         : 'Add MC-CRS record number'
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
+    const showAttestations =
+        showProcurementAttestation &&
+        contractFormData?.contractType === 'BASE' &&
+        (contractFormData.procurementAttestation || explainMissingData)
 
     const latestContractAction = contract.reviewStatusActions?.[0]
 
@@ -626,6 +636,14 @@ export const SubmissionSummary = (): React.ReactElement => {
                         onDocumentError={handleDocumentDownloadError}
                         explainMissingData={explainMissingData}
                         revisionDiff={revisionDiff}
+                    />
+                )}
+
+                {showAttestations && (
+                    <AttestationsSummarySection
+                        contract={contract}
+                        isStateUser={isStateUser}
+                        explainMissingData={explainMissingData}
                     />
                 )}
 
