@@ -71,12 +71,17 @@ describe('rate details', () => {
 
         // Navigate to contacts page by clicking continue
         cy.navigateContractRatesForm('CONTINUE')
+        cy.findByRole('heading', { level: 2, name: /Attestations/ })
+        cy.fillOutAttestations()
+        cy.navigateContractForm('CONTINUE')
         cy.findByRole('heading', { level: 2, name: /Contacts/ })
 
         //Fill out one state and one additional actuary contact
         cy.fillOutStateContact()
 
         // Navigate back to rate details page
+        cy.navigateContractForm('BACK')
+        cy.findByRole('heading', { level: 2, name: /Attestations/ })
         cy.navigateContractForm('BACK')
         cy.findByRole('heading', { level: 2, name: /Rate details/ })
 
@@ -98,6 +103,8 @@ describe('rate details', () => {
 
         // Navigate to contacts page by clicking continue
         cy.navigateContractRatesForm('CONTINUE')
+        cy.findByRole('heading', { level: 2, name: /Attestations/ })
+        cy.navigateContractForm('CONTINUE')
         cy.findByRole('heading', { level: 2, name: /Contacts/ })
     })
 })

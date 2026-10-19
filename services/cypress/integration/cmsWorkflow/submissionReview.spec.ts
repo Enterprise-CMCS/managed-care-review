@@ -23,6 +23,13 @@ describe('CMS user can view submission', () => {
 
         cy.findByRole('heading', {
             level: 2,
+            name: /Attestations/,
+        }).should('exist')
+        cy.fillOutAttestations()
+        cy.navigateContractForm('CONTINUE')
+
+        cy.findByRole('heading', {
+            level: 2,
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()
@@ -181,6 +188,13 @@ describe('CMS user can view submission', () => {
         cy.fillOutNewRateCertification()
         cy.fillOutAdditionalActuaryContact()
         cy.navigateContractRatesForm('CONTINUE')
+
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Attestations/,
+        }).should('exist')
+        cy.fillOutAttestations()
+        cy.navigateContractForm('CONTINUE')
 
         cy.findByRole('heading', {
             level: 2,
