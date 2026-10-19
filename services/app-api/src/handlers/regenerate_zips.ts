@@ -1,14 +1,20 @@
 /**
- * Lambda handler to regenerate missing zip files for submitted contracts and rates
+ * Lambda handler to generate missing zip files and replace noncanonical ones.
  *
- * This script finds all submitted contract/rate revisions that have documents but
- * are missing their zip files, and regenerates them.
+ * Submitted revisions with documents are selected when their zip package is
+ * missing or still references a noncanonical S3 location.
+ *
+ * Regeneration uploads to the configured CDK documents bucket before replacing
+ * existing package metadata. A generation failure leaves the old row unchanged.
  *
  * Usage:
- *   aws lambda invoke --function-name app-api-prod-cdk-regenerate-zips response.json
+ *   aws lambda invoke \
+ *     --function-name app-api-{stage}-cdk-regenerate-zips response.json
  *
  * Or with a specific revision:
- *   aws lambda invoke --function-name app-api-prod-cdk-regenerate-zips \
+ *   aws lambda invoke \
+ *     --function-name app-api-{stage}-cdk-regenerate-zips \
+ *     --cli-binary-format raw-in-base64-out \
  *     --payload '{"contractRevisionID":"abc-123"}' response.json
  */
 
@@ -56,6 +62,10 @@ export const main: Handler = async (
     // Get configuration from environment variables
     const dbURL = process.env.DATABASE_URL
     const secretsManagerSecret = process.env.SECRETS_MANAGER_SECRET
+    const documentsBucket = process.env.VITE_APP_S3_DOCUMENTS_BUCKET
+    if (!documentsBucket) {
+        throw new Error('Init Error: VITE_APP_S3_DOCUMENTS_BUCKET is required')
+    }
 
     if (!dbURL) {
         throw new Error('Init Error: DATABASE_URL is required')
@@ -128,6 +138,7 @@ export const main: Handler = async (
             } else {
                 response.contractsFailed++
                 response.errors.push(result.error!)
+                response.success = false
             }
             return response
         }
@@ -147,23 +158,26 @@ export const main: Handler = async (
             } else {
                 response.ratesFailed++
                 response.errors.push(result.error!)
+                response.success = false
             }
             return response
         }
 
-        // Otherwise, find all missing zips and regenerate them
-        console.info('Finding contract revisions missing zips...')
-        const missingContractZips = await findContractRevisionsMissingZips(
-            prismaClient,
-            limit
-        )
+        // Otherwise, generate missing zips and replace noncanonical packages.
+        console.info('Finding contract revisions needing zips...')
+        const contractRevisionsNeedingZips =
+            await findContractRevisionsNeedingZips(
+                prismaClient,
+                documentsBucket,
+                limit
+            )
         console.info(
-            `Found ${missingContractZips.length} contract revisions missing zips`
+            `Found ${contractRevisionsNeedingZips.length} contract revisions needing zips`
         )
 
         let remainingLimit = limit
 
-        for (const contractRev of missingContractZips) {
+        for (const contractRev of contractRevisionsNeedingZips) {
             if (remainingLimit <= 0) {
                 console.info(
                     `Reached limit of ${limit} total zips, stopping contract processing`
@@ -186,16 +200,17 @@ export const main: Handler = async (
             }
         }
 
-        console.info('Finding rate revisions missing zips...')
-        const missingRateZips = await findRateRevisionsMissingZips(
+        console.info('Finding rate revisions needing zips...')
+        const rateRevisionsNeedingZips = await findRateRevisionsNeedingZips(
             prismaClient,
+            documentsBucket,
             remainingLimit
         )
         console.info(
-            `Found ${missingRateZips.length} rate revisions missing zips`
+            `Found ${rateRevisionsNeedingZips.length} rate revisions needing zips`
         )
 
-        for (const rateRev of missingRateZips) {
+        for (const rateRev of rateRevisionsNeedingZips) {
             if (remainingLimit <= 0) {
                 console.info(
                     `Reached limit of ${limit} total zips, stopping rate processing`
@@ -218,6 +233,8 @@ export const main: Handler = async (
             }
         }
 
+        response.success = response.errors.length === 0
+
         console.info('Zip regeneration complete', response)
         return response
     } catch (error) {
@@ -239,77 +256,129 @@ export const main: Handler = async (
     // across warm Lambda invocations. AWS cleans up when the container terminates.
 }
 
-async function findContractRevisionsMissingZips(
+export async function findContractRevisionsNeedingZips(
     prismaClient: ExtendedPrismaClient,
+    documentsBucket: string,
     limit: number
 ): Promise<Array<{ id: string }>> {
-    // Query directly for contract revisions that are submitted, have documents, but no zips
-    const revisionsWithoutZips =
-        await prismaClient.contractRevisionTable.findMany({
-            where: {
-                submitInfoID: {
-                    not: null, // Only submitted revisions
-                },
-                // Has at least one contract document OR at least one supporting document
-                OR: [
-                    {
-                        contractDocuments: {
-                            some: {},
-                        },
-                    },
-                    {
-                        supportingDocuments: {
-                            some: {},
-                        },
-                    },
-                ],
-                documentZipPackage: {
-                    none: {}, // No zip packages exist
-                },
-            },
-            select: {
-                id: true,
-            },
-            take: limit,
-        })
-
-    return revisionsWithoutZips
-}
-
-async function findRateRevisionsMissingZips(
-    prismaClient: ExtendedPrismaClient,
-    limit: number
-): Promise<Array<{ id: string }>> {
-    // Query directly for rate revisions that are submitted, have documents, but no zips
-    const revisionsWithoutZips = await prismaClient.rateRevisionTable.findMany({
+    return prismaClient.contractRevisionTable.findMany({
         where: {
-            submitInfoID: {
-                not: null, // Only submitted revisions
-            },
-            // Has at least one contract document OR at least one supporting document
-            OR: [
+            submitInfoID: { not: null },
+            AND: [
                 {
-                    rateDocuments: {
-                        some: {},
-                    },
+                    OR: [
+                        { contractDocuments: { some: {} } },
+                        { supportingDocuments: { some: {} } },
+                    ],
                 },
                 {
-                    supportingDocuments: {
-                        some: {},
-                    },
+                    OR: [
+                        {
+                            documentZipPackage: {
+                                none: {
+                                    documentType: 'CONTRACT_DOCUMENTS',
+                                },
+                            },
+                        },
+                        {
+                            documentZipPackage: {
+                                some: {
+                                    documentType: 'CONTRACT_DOCUMENTS',
+                                    OR: [
+                                        { s3BucketName: null },
+                                        {
+                                            s3BucketName: {
+                                                not: documentsBucket,
+                                            },
+                                        },
+                                        { s3Key: null },
+                                        {
+                                            s3Key: {
+                                                not: {
+                                                    startsWith:
+                                                        'zips/contracts/',
+                                                },
+                                            },
+                                        },
+                                        {
+                                            s3URL: {
+                                                not: {
+                                                    startsWith: `s3://${documentsBucket}/zips/contracts/`,
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        },
+                    ],
                 },
             ],
-            documentZipPackage: {
-                none: {}, // No zip packages exist
-            },
         },
-        select: {
-            id: true,
-        },
+        select: { id: true },
         take: limit,
     })
+}
 
-    return revisionsWithoutZips
+export async function findRateRevisionsNeedingZips(
+    prismaClient: ExtendedPrismaClient,
+    documentsBucket: string,
+    limit: number
+): Promise<Array<{ id: string }>> {
+    return prismaClient.rateRevisionTable.findMany({
+        where: {
+            submitInfoID: { not: null },
+            AND: [
+                {
+                    OR: [
+                        { rateDocuments: { some: {} } },
+                        { supportingDocuments: { some: {} } },
+                    ],
+                },
+                {
+                    OR: [
+                        {
+                            documentZipPackage: {
+                                none: { documentType: 'RATE_DOCUMENTS' },
+                            },
+                        },
+                        {
+                            documentZipPackage: {
+                                some: {
+                                    documentType: 'RATE_DOCUMENTS',
+                                    OR: [
+                                        { s3BucketName: null },
+                                        {
+                                            s3BucketName: {
+                                                not: documentsBucket,
+                                            },
+                                        },
+                                        { s3Key: null },
+                                        {
+                                            s3Key: {
+                                                not: {
+                                                    startsWith: 'zips/rates/',
+                                                },
+                                            },
+                                        },
+                                        {
+                                            s3URL: {
+                                                not: {
+                                                    startsWith: `s3://${documentsBucket}/zips/rates/`,
+                                                },
+                                            },
+                                        },
+                                    ],
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+        },
+        select: { id: true },
+        take: limit,
+    })
 }
 
 async function regenerateContractZip(
@@ -370,8 +439,10 @@ async function regenerateContractZip(
             }
         }
 
-        const zipResult =
-            await zipService.generateContractDocumentsZip(domainRevision)
+        const zipResult = await zipService.generateContractDocumentsZip(
+            domainRevision,
+            'REPLACE'
+        )
 
         if (zipResult instanceof Error) {
             return {
@@ -449,8 +520,10 @@ async function regenerateRateZip(
             }
         }
 
-        const zipResult =
-            await zipService.generateRateDocumentsZip(domainRevision)
+        const zipResult = await zipService.generateRateDocumentsZip(
+            domainRevision,
+            'REPLACE'
+        )
 
         if (zipResult instanceof Error) {
             return {

@@ -1,23 +1,29 @@
 /**
  * Lambda handler to reconcile persisted S3 locations with the CDK buckets.
  *
- * For each noncanonical document or zip record, this handler verifies the
- * object exists in the configured bucket. If it only exists in the legacy
- * bucket, the object is copied before the database pointer is updated. The
- * deprecated s3URL is rewritten too because clients still round-trip it.
+ * For each noncanonical document record, this handler verifies the object exists
+ * in the configured bucket. If it only exists in the legacy bucket, the object
+ * is copied before the database pointer is updated. The deprecated s3URL is
+ * rewritten too because clients still round-trip it.
  *
  * Runs are idempotent: existing target objects are reused, and database
  * pointers change only after the target object is confirmed.
  *
+ * Derived zip packages are intentionally excluded. The regenerate-zips Lambda
+ * rebuilds them from canonical documents and replaces stale package metadata.
+ *
  * Canonical buckets are determined from environment variables:
- * - VITE_APP_S3_DOCUMENTS_BUCKET: contract/rate documents and zips
+ * - VITE_APP_S3_DOCUMENTS_BUCKET: contract/rate documents
  * - VITE_APP_S3_QA_BUCKET: question/response documents
  *
  * Usage:
- *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls response.json
+ *   aws lambda invoke \
+ *     --function-name app-api-{stage}-cdk-migrateS3Urls response.json
  *
  * With options:
- *   aws lambda invoke --function-name app-api-{stage}-migrate-s3-urls \
+ *   aws lambda invoke \
+ *     --function-name app-api-{stage}-cdk-migrateS3Urls \
+ *     --cli-binary-format raw-in-base64-out \
  *     --payload '{"limit":100,"dryRun":true}' response.json
  */
 
@@ -78,10 +84,6 @@ export type MigrateS3UrlsResponse = {
             failed: number
         }
         rateQuestionResponseDocuments: {
-            processed: number
-            failed: number
-        }
-        documentZipPackages: {
             processed: number
             failed: number
         }
@@ -200,7 +202,6 @@ export const main: Handler = async (
                 processed: 0,
                 failed: 0,
             },
-            documentZipPackages: { processed: 0, failed: 0 },
         },
         errors: [],
     }
@@ -337,21 +338,6 @@ export const main: Handler = async (
             )
         }
 
-        // Migrate DocumentZipPackage (uses DOCUMENTS bucket)
-        console.info('Migrating DocumentZipPackage...')
-        const documentZipPackagesResult = await migrateZipTable(
-            migrationPrismaClient,
-            documentsBucket,
-            limit,
-            dryRun
-        )
-        response.results.documentZipPackages = documentZipPackagesResult
-        if (documentZipPackagesResult.failed > 0) {
-            response.errors.push(
-                `DocumentZipPackage: ${documentZipPackagesResult.failed} failures`
-            )
-        }
-
         response.success = response.errors.length === 0
         console.info('Migration complete', response)
         return response
@@ -388,8 +374,6 @@ type MigratableDocument = {
     s3Key: string | null
 }
 
-type MigratableZip = Omit<MigratableDocument, 'name'>
-
 type MigrationCandidateFilter =
     | { s3BucketName: null }
     | { s3BucketName: { not: string } }
@@ -421,26 +405,10 @@ type DocumentTableDelegate = {
     update(args: MigrationLocationUpdate): Promise<unknown>
 }
 
-type ZipTableDelegate = {
-    findMany(args: {
-        where: { OR: MigrationCandidateFilter[] }
-        select: {
-            id: true
-            s3URL: true
-            s3BucketName: true
-            s3Key: true
-        }
-        take: number | undefined
-    }): Promise<MigratableZip[]>
-    update(args: MigrationLocationUpdate): Promise<unknown>
-}
-
 export type MigrationPrismaClient = Record<
     DocumentTableName,
     DocumentTableDelegate
-> & {
-    documentZipPackage: ZipTableDelegate
-}
+>
 
 /**
  * Adapts each concrete Prisma model delegate independently. Keeping these
@@ -492,10 +460,6 @@ function createMigrationPrismaClient(
                 prismaClient.rateQuestionResponseDocument.findMany(args),
             update: (args) =>
                 prismaClient.rateQuestionResponseDocument.update(args),
-        },
-        documentZipPackage: {
-            findMany: (args) => prismaClient.documentZipPackage.findMany(args),
-            update: (args) => prismaClient.documentZipPackage.update(args),
         },
     }
 }
@@ -716,117 +680,5 @@ export async function migrateDocumentTable(
     }
 
     console.info(`${tableName} migration complete:`, result)
-    return result
-}
-
-/**
- * Migrate DocumentZipPackage table - zip files are stored in zips/ folder
- * Input: s3://bucket/zips/contracts/uuid/contract-documents.zip
- * Output: s3Key = zips/contracts/uuid/contract-documents.zip
- */
-export async function migrateZipTable(
-    prismaClient: MigrationPrismaClient,
-    targetBucket: string,
-    limit: number | undefined,
-    dryRun: boolean,
-    s3Client: MigrationS3Client = migrationS3Client
-): Promise<{ processed: number; failed: number }> {
-    const result = { processed: 0, failed: 0 }
-
-    // Zip records use the same completeness rule, with a zips/ key prefix.
-    const zips = await prismaClient.documentZipPackage.findMany({
-        where: {
-            OR: [
-                { s3BucketName: null },
-                { s3BucketName: { not: targetBucket } },
-                { s3Key: null },
-                { s3Key: { not: { startsWith: 'zips/' } } },
-                {
-                    s3URL: {
-                        not: { startsWith: `s3://${targetBucket}/` },
-                    },
-                },
-            ],
-        },
-        select: {
-            id: true,
-            s3URL: true,
-            s3BucketName: true,
-            s3Key: true,
-        },
-        take: limit,
-    })
-
-    console.info(
-        `Found ${zips.length} zip packages to migrate in DocumentZipPackage`
-    )
-
-    for (const zip of zips) {
-        try {
-            const parts = zip.s3URL.split('/')
-            const parsedS3Key = parts.slice(3).join('/')
-            const s3Key = zip.s3Key?.startsWith('zips/')
-                ? zip.s3Key
-                : parsedS3Key
-            if (!s3Key.startsWith('zips/')) {
-                throw new Error(
-                    `Expected zip s3URL to have path starting with 'zips/', got: ${s3Key} for DocumentZipPackage ${zip.id}: ${zip.s3URL}`
-                )
-            }
-
-            const sourceBucket = sourceBucketForRecord(
-                zip.s3BucketName,
-                zip.s3URL,
-                targetBucket
-            )
-            if (sourceBucket instanceof Error) {
-                throw sourceBucket
-            }
-
-            const canonicalS3URL = canonicalizeS3URL(zip.s3URL, targetBucket)
-            if (canonicalS3URL instanceof Error) {
-                throw canonicalS3URL
-            }
-
-            if (dryRun) {
-                console.info(
-                    `[DRY RUN] Would reconcile DocumentZipPackage ${zip.id} from s3://${sourceBucket}/${s3Key} to s3://${targetBucket}/${s3Key}`
-                )
-                result.processed++
-                continue
-            }
-
-            await ensureObjectInTargetBucket(
-                s3Client,
-                sourceBucket,
-                targetBucket,
-                s3Key
-            )
-
-            await prismaClient.documentZipPackage.update({
-                where: { id: zip.id },
-                data: {
-                    s3URL: canonicalS3URL,
-                    s3BucketName: targetBucket,
-                    s3Key,
-                },
-            })
-
-            result.processed++
-            if (result.processed % 100 === 0) {
-                console.info(
-                    `Progress: ${result.processed}/${zips.length} zip packages migrated`
-                )
-            }
-        } catch (error) {
-            const errorMessage = parseErrorToError(error).message
-            console.error(
-                `Failed to migrate DocumentZipPackage ${zip.id}: ${errorMessage}`
-            )
-            result.failed++
-        }
-    }
-
-    console.info('DocumentZipPackage migration complete:', result)
     return result
 }
