@@ -38,8 +38,9 @@ describe('state user in health plan submission form', () => {
             )
             cy.findByTestId('step-indicator')
                 .findAllByRole('listitem')
-                .should('have.length', 4)
+                .should('have.length', 5)
             cy.findByText('Rate details').should('not.exist')
+            cy.findByText('Attestations').should('exist')
 
             //Navigate back to previous page
             cy.findByRole('button', { name: /Cancel/, timeout: 5_000 }).click()
