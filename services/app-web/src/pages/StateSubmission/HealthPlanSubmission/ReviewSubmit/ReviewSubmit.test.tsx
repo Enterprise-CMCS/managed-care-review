@@ -507,6 +507,43 @@ describe('ReviewSubmit', () => {
         )
     })
 
+    it('does not render attestations section when flag is off', async () => {
+        const baseDraft = mockContractPackageDraft({
+            id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
+        })
+        baseDraft.draftRevision!.formData.contractType = 'BASE'
+        baseDraft.draftRevision!.formData.procurementAttestation = true
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<ReviewSubmit />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({ contract: baseDraft }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123/edit/review-and-submit',
+                },
+                featureFlags: { 'procurement-attestation': false },
+            }
+        )
+
+        expect(
+            await screen.findByRole('heading', { name: 'State contacts' })
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByRole('heading', { name: 'Attestations' })
+        ).not.toBeInTheDocument()
+    })
+
     it('does not render attestations section for amendment contract', async () => {
         renderWithProviders(
             <Routes>

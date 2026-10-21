@@ -288,6 +288,7 @@ export const SubmissionSummary = (): React.ReactElement => {
         ? 'Edit MC-CRS number'
         : 'Add MC-CRS record number'
     const explainMissingData = (isHelpDeskUser || isStateUser) && !isSubmitted
+
     const showAttestations =
         showProcurementAttestation &&
         contractFormData?.contractType === 'BASE' &&
