@@ -1,0 +1,6 @@
+BEGIN;
+
+-- AlterEnum
+ALTER TYPE "ContractSubmissionType" ADD VALUE 'ENROLLMENT_BROKER';
+
+COMMIT;
