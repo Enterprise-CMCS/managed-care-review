@@ -34,10 +34,11 @@ export const sendWithdrawnSubmissionStateEmail = async (
         return etaData
     }
 
-    const template = await renderTemplate(
-        'sendWithdrawnSubmissionStateEmail',
-        etaData
-    )
+    const template = await renderTemplate('sendWithdrawnSubmissionStateEmail', {
+        ...etaData,
+        MCGDMCOContactEmail: 'MCGDMCOactions@cms.hhs.gov',
+        CMSContactEmail: 'MC_Review_HelpDesk@cms.hhs.gov',
+    })
 
     if (template instanceof Error) {
         return template
