@@ -1,3 +1,4 @@
+export { AttestationsSummarySection } from './AttestationsSummarySection'
 export { ContactsSummarySection } from './ContactsSummarySection'
 export {
     ContractDetailsSummarySection,
