@@ -207,8 +207,8 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0(axe-core@4.14.0)(cypress@15.20.1)
       danger:
-        specifier: ^13.0.10
-        version: 13.0.10(supports-color@8.1.1)
+        specifier: ^14.0.7
+        version: 14.0.7(supports-color@8.1.1)(undici@7.29.0)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -7350,10 +7350,15 @@ packages:
     resolution: {integrity: sha512-VqKjzBLejbSMT4IgbmVgDjpkYrNWUYJnbCGo874u7MMKIWsILRX+OpX/gTk8MqjpT1A/c6HY2dCA77ZN0lkQ2Q==}
     engines: {node: '>=12'}
 
-  danger@13.0.10:
-    resolution: {integrity: sha512-qMa/YdfVP/a1HhuvMUsocTO0otgLphuiV5z4G5P7C4+qHvNtCSlzvZm3UuwBut2iwQ/r5NGcwcmD4t+8LjIS0A==}
-    engines: {node: '>=18'}
+  danger@14.0.7:
+    resolution: {integrity: sha512-tOPndifqtQchQxJ0Wfs7cr9s+cCVtt0RSUzaLEoL9quzLi2tDfa1POyqFF1f4bL7DNOgpNOKAIdP9lSlgksLhw==}
+    engines: {node: '>=18.17'}
     hasBin: true
+    peerDependencies:
+      undici: '>=7.25.0 <8'
+    peerDependenciesMeta:
+      undici:
+        optional: true
 
   dashdash@1.14.1:
     resolution: {integrity: sha512-jRFi8UDGo6j+odZiEpjazZaWqEal3w/basFjQHQEwVtZJGDpxbH1MeYluwCS8Xq5wmLJooDlMgvVarmWfGM44g==}
@@ -10680,10 +10685,6 @@ packages:
   supports-color@8.1.1:
     resolution: {integrity: sha512-MpUEN2OodtUzxvKQl72cUF7RQ5EiHsGvSsVG0ia9c5RbWGL2CI4C7EpPS8UTBIplnlzZiNuV56w+FuNxy3ty2Q==}
     engines: {node: '>=10'}
-
-  supports-hyperlinks@4.4.0:
-    resolution: {integrity: sha512-UKbpT93hN5Nr9go5UY7bopIB9YQlMz9nm/ct4IXt/irb5YRkn9WaqrOBJGZ5Pwvsd5FQzSVeYlGdXoCAPQZrPg==}
-    engines: {node: '>=20'}
 
   supports-hyperlinks@4.5.0:
     resolution: {integrity: sha512-ZW2OvfeCXrNTbLakPUzjQG922EeGCOteFSVoek5DKStTh898wf7zgtuFlzQN8HfZCxC3Eh02yJVrRW51hADf+w==}
@@ -14926,12 +14927,12 @@ snapshots:
   '@gitbeaker/core@38.12.1':
     dependencies:
       '@gitbeaker/requester-utils': 38.12.1
-      qs: 6.15.1
+      qs: 6.16.0
       xcase: 2.0.1
 
   '@gitbeaker/requester-utils@38.12.1':
     dependencies:
-      qs: 6.15.1
+      qs: 6.16.0
       xcase: 2.0.1
 
   '@gitbeaker/rest@38.12.1':
@@ -19714,7 +19715,7 @@ snapshots:
     dependencies:
       d3-array: 3.2.4
 
-  danger@13.0.10(supports-color@8.1.1):
+  danger@14.0.7(supports-color@8.1.1)(undici@7.29.0):
     dependencies:
       '@gitbeaker/rest': 38.12.1
       '@octokit/rest': 20.1.2
@@ -19728,7 +19729,6 @@ snapshots:
       ini: 5.0.0
       json5: 2.2.3
       jsonpointer: 5.0.1
-      jsonwebtoken: 9.0.3
       lodash.includes: 4.3.0
       lodash.isobject: 3.0.2
       lodash.mapvalues: 4.6.0
@@ -19745,7 +19745,8 @@ snapshots:
       readline-sync: 1.4.10
       regenerator-runtime: 0.13.11
       require-from-string: 2.0.2
-      supports-hyperlinks: 4.4.0
+      supports-hyperlinks: 4.5.0
+    optionalDependencies:
       undici: 7.29.0
     transitivePeerDependencies:
       - supports-color
@@ -23528,11 +23529,6 @@ snapshots:
   supports-color@8.1.1:
     dependencies:
       has-flag: 4.0.0
-
-  supports-hyperlinks@4.4.0:
-    dependencies:
-      has-flag: 5.0.1
-      supports-color: 10.2.2
 
   supports-hyperlinks@4.5.0:
     dependencies:
