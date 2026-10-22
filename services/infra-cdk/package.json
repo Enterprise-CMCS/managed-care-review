@@ -20,7 +20,7 @@
         "esbuild": "^0.28.2",
         "fs-extra": "^11.4.1",
         "lint-staged": "^17.6.0",
-        "prettier": "^3.9.9",
+        "prettier": "^3.9.10",
         "tsx": "^4.23.13",
         "typescript": "7.0.2"
     },
