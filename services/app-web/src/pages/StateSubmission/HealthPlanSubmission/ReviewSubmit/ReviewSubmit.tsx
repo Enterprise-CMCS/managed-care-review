@@ -21,6 +21,7 @@ import {
 import { useAuth } from '../../../../contexts/AuthContext'
 import {
     RateDetailsSummarySection,
+    AttestationsSummarySection,
     ContactsSummarySection,
     ContractDetailsSummarySection,
     SubmissionTypeSummarySection,
@@ -111,6 +112,8 @@ export const ReviewSubmit = (): React.ReactElement => {
 
     const isContractActionAndRateCertification =
         contractFormData.submissionType === 'CONTRACT_AND_RATES'
+    const showAttestations =
+        showProcurementAttestation && contractFormData.contractType === 'BASE'
 
     const submissionName =
         packageName(
@@ -157,6 +160,15 @@ export const ReviewSubmit = (): React.ReactElement => {
                         editNavigateTo={getPath('SUBMISSIONS_RATE_DETAILS')}
                         submissionName={submissionName}
                         statePrograms={statePrograms}
+                        explainMissingData
+                    />
+                )}
+
+                {showAttestations && (
+                    <AttestationsSummarySection
+                        contract={contract}
+                        isStateUser={isStateUser}
+                        editNavigateTo={getPath('SUBMISSIONS_ATTESTATIONS')}
                         explainMissingData
                     />
                 )}

@@ -23,6 +23,7 @@ const cypressFeatureFlagDefaults: FeatureFlagSettings = {
     dsnp: true,
     'cms-user-undo-unlock': true,
     'contact-data-model-update': true,
+    'procurement-attestation': true,
 }
 
 // Intercepting LD "GET" calls for feature flag values and returns our default flags and values.

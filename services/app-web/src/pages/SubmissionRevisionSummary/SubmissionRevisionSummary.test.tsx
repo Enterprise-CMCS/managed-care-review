@@ -463,4 +463,43 @@ describe('SubmissionRevisionSummary', () => {
             })
         }
     )
+
+    it('renders attestations section for base contract revision when flag is on', async () => {
+        const mockContract = mockContractPackageSubmittedWithRevisions({
+            id: '15',
+            contractSubmissionType: 'HEALTH_PLAN',
+        })
+        const formData =
+            mockContract.packageSubmissions[0].contractRevision.formData
+        formData.contractType = 'BASE'
+        formData.procurementAttestation = true
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVISION}
+                    element={<SubmissionRevisionSummary />}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchContractMockSuccess({ contract: mockContract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/15/revisions/3',
+                },
+                featureFlags: { 'procurement-attestation': true },
+            }
+        )
+
+        expect(
+            await screen.findByRole('heading', { name: 'Attestations' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(/The state has attested that the procurement/)
+        ).toBeInTheDocument()
+    })
 })
