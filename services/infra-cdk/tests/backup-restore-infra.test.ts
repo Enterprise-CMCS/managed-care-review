@@ -81,7 +81,7 @@ void test('runner has its own OIDC role, no deployment/secret-reading privileges
     const [id, role] = roleEntries[0]
     const trust = JSON.stringify(role.Properties.AssumeRolePolicyDocument)
     assert.match(trust, /environment:prod/)
-    assert.match(trust, /sts.amazonaws.com/)
+    assert.match(trust, /sts\.amazonaws\.com/)
     const policies = Object.values(t.findResources('AWS::IAM::Policy')).filter(
         (policy) => JSON.stringify(policy.Properties.Roles).includes(id)
     )
