@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import {
     ContractDetailsSummarySection,
+    AttestationsSummarySection,
     ContactsSummarySection,
     RateDetailsSummarySection,
     SubmissionTypeSummarySection,
@@ -21,6 +22,8 @@ import {
 import { Error404 } from '../Errors/Error404Page'
 import { getSubmissionPath } from '../../routeHelpers'
 import { useMemoizedStateHeader } from '../../hooks'
+import { useLDClient } from 'launchdarkly-react-client-sdk'
+import { featureFlags } from '@mc-review/common-code'
 
 export const SubmissionRevisionSummary = (): React.ReactElement => {
     // Page level state
@@ -34,6 +37,11 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
 
     const isStateUser = loggedInUser?.role === 'STATE_USER'
+    const ldClient = useLDClient()
+    const showProcurementAttestation = ldClient?.variation(
+        featureFlags.PROCUREMENT_ATTESTATION.flag,
+        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
+    )
 
     const {
         data: fetchContractData,
@@ -112,6 +120,10 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
     const submitInfo = revision.submitInfo || undefined
     const isContractActionAndRateCertification =
         contractData.submissionType === 'CONTRACT_AND_RATES'
+    const showAttestations =
+        showProcurementAttestation &&
+        contractData.contractType === 'BASE' &&
+        contractData.procurementAttestation
 
     return (
         <div className={styles.background}>
@@ -158,6 +170,13 @@ export const SubmissionRevisionSummary = (): React.ReactElement => {
                         submissionName={name}
                         statePrograms={statePrograms}
                         rateRevisions={rateRevisions}
+                    />
+                )}
+                {showAttestations && (
+                    <AttestationsSummarySection
+                        contract={contract}
+                        contractRev={revision}
+                        isStateUser={isStateUser}
                     />
                 )}
                 <ContactsSummarySection

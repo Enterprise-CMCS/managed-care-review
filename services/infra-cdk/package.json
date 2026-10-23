@@ -21,12 +21,12 @@
         "esbuild": "^0.28.2",
         "fs-extra": "^11.4.1",
         "lint-staged": "^17.6.0",
-        "prettier": "^3.9.9",
-        "tsx": "^4.23.13",
+        "prettier": "^3.9.10",
+        "tsx": "^4.23.15",
         "typescript": "7.0.2"
     },
     "dependencies": {
-        "@aws-sdk/client-secrets-manager": "^3.1152.0",
+        "@aws-sdk/client-secrets-manager": "^3.1153.0",
         "@aws-solutions-constructs/aws-apigateway-lambda": "2.105.0",
         "@aws-solutions-constructs/aws-cloudfront-s3": "2.102.0",
         "@aws-solutions-constructs/aws-cognito-apigateway-lambda": "2.104.0",

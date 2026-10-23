@@ -81,11 +81,11 @@
         "c8": "^12.0.0",
         "cypress": "^15.20.1",
         "cypress-axe": "^1.7.0",
-        "danger": "^13.0.10",
+        "danger": "^14.0.7",
         "husky": "^9.1.7",
         "lint-staged": "^17.6.0",
         "oxlint": "1.83.0",
-        "oxlint-tsgolint": "^7.0.2002",
-        "prettier": "^3.9.9"
+        "oxlint-tsgolint": "^7.0.2004",
+        "prettier": "^3.9.10"
     }
 }

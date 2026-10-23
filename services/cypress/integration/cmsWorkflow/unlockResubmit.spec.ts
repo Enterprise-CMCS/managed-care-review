@@ -36,6 +36,13 @@ describe('CMS user', () => {
 
         cy.navigateContractRatesForm('CONTINUE')
 
+        cy.findByRole('heading', {
+            level: 2,
+            name: /Attestations/,
+        }).should('exist')
+        cy.fillOutAttestations()
+        cy.navigateContractForm('CONTINUE')
+
         // fill out the rest of the form
         cy.findByRole('heading', {
             level: 2,
@@ -281,6 +288,13 @@ describe('CMS user', () => {
             cy.fillOutNewRateCertification()
 
             cy.navigateContractRatesForm('CONTINUE')
+
+            cy.findByRole('heading', {
+                level: 2,
+                name: /Attestations/,
+            }).should('exist')
+            cy.fillOutAttestations()
+            cy.navigateContractForm('CONTINUE')
 
             cy.findByRole('heading', {
                 level: 2,

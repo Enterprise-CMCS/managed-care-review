@@ -2912,4 +2912,95 @@ describe('SubmissionSummary', () => {
             expect(screen.queryAllByText('UPDATED')).toHaveLength(0)
         })
     })
+
+    it('renders attestations section without edit link for base contract when flag is on', async () => {
+        const contract = mockContractPackageSubmitted({
+            id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
+        })
+        const formData =
+            contract.packageSubmissions[0].contractRevision.formData
+        formData.contractType = 'BASE'
+        formData.procurementAttestation = true
+
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123',
+                },
+                featureFlags: { 'procurement-attestation': true },
+            }
+        )
+
+        expect(
+            await screen.findByRole('heading', { name: 'Attestations' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(/The state has attested that the procurement/)
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByRole('link', { name: 'Edit Attestations' })
+        ).not.toBeInTheDocument()
+    })
+
+    it('does not render attestations section for submitted base contract without an attestation', async () => {
+        const contract = mockContractPackageSubmitted({
+            id: 'test-abc-123',
+            contractSubmissionType: 'HEALTH_PLAN',
+        })
+        contract.packageSubmissions[0].contractRevision.formData.contractType =
+            'BASE'
+
+        renderWithProviders(
+            <Routes>
+                <Route element={<SubmissionSideNav />}>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                        element={<SubmissionSummary />}
+                    />
+                </Route>
+            </Routes>,
+            {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidCMSUser(),
+                            statusCode: 200,
+                        }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                        fetchContractWithQuestionsMockSuccess({ contract }),
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123',
+                },
+                featureFlags: { 'procurement-attestation': true },
+            }
+        )
+
+        expect(
+            await screen.findByRole('heading', { name: 'State contacts' })
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByRole('heading', { name: 'Attestations' })
+        ).not.toBeInTheDocument()
+    })
 })

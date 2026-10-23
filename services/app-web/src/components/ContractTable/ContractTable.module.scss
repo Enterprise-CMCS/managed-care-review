@@ -116,4 +116,11 @@
     .notSubjectToReviewTag {
         white-space: normal;
     }
+
+    .statusColumn .notSubjectToReviewTag {
+        text-align: center;
+        line-height: 1;
+        // hug the wrapped text instead of stretching to the cell width
+        max-width: 8.5rem;
+    }
 }
