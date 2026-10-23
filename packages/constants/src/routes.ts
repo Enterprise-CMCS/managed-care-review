@@ -62,6 +62,7 @@ type RouteTWithUnknown = RouteT | 'UNKNOWN_ROUTE'
 const ContractSubmissionTypeRecord = {
     HEALTH_PLAN: 'health-plan',
     EQRO: 'eqro',
+    ENROLLMENT_BROKER: 'enrollment-broker',
     SDP: 'sdp'
 } as const
 type ContractSubmissionTypeRecordKeys =
