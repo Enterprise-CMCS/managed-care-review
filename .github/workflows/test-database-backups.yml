@@ -1,0 +1,47 @@
+name: Test production database backups
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 1 * *'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: production-backup-restore
+  cancel-in-progress: false
+
+jobs:
+  restore:
+    name: Restore, validate, and clean up production backup copy
+    # Scheduled workflows run on main; never expose production testing to a PR ref.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: prod
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup_env
+      - name: Test native Aurora PITR
+        env:
+          BACKUP_TEST_ACCOUNT_ID: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+        run: pnpm --filter scripts exec tsx test-aurora-automated-backup-restore.ts --stage prod
+
+  notify:
+    needs: restore
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Report result, including cancellation
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Database Backup Restore Alerts
+          SLACK_TITLE: Production backup restore test — ${{ needs.restore.result }}
+          SLACK_MESSAGE: 'Only success confirms restoration, read-only SQL checks, and cleanup. Any other result requires investigation.'
+          SLACK_COLOR: ${{ needs.restore.result == 'success' && 'good' || 'danger' }}
+          MSG_MINIMAL: actions url,commit,ref

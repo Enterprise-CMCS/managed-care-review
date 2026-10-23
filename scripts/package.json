@@ -12,7 +12,8 @@
         "lint": "tsc --noEmit && oxlint --deny-warnings .",
         "build": "tsc",
         "build:ci-scripts": "tsc",
-        "test:cognito-cleanup": "tsc --noEmit && tsx --test tests/cognito-cleanup.test.ts"
+        "test:cognito-cleanup": "tsc --noEmit && tsx --test tests/cognito-cleanup.test.ts",
+        "test:backup-restore": "tsx --test tests/backup-restore.test.ts"
     },
     "lint-staged": {
         "*.ts": [
@@ -27,8 +28,10 @@
         "@aws-sdk/client-cloudfront": "^3.1153.0",
         "@aws-sdk/client-cognito-identity-provider": "^3.1153.0",
         "@aws-sdk/client-lambda": "^3.1153.0",
+        "@aws-sdk/client-rds": "^3.1153.0",
         "@aws-sdk/client-s3": "^3.1153.0",
         "@aws-sdk/client-secrets-manager": "^3.1153.0",
+        "@aws-sdk/client-ssm": "^3.1153.0",
         "@aws-sdk/client-sts": "^3.1153.0",
         "@types/papaparse": "^5.5.2",
         "@types/uuid": "^11.0.0",
