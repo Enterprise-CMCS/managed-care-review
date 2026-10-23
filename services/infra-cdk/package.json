@@ -11,7 +11,8 @@
         "deploy": "cdk deploy",
         "destroy": "cdk destroy",
         "bootstrap": "cdk bootstrap",
-        "lint": "oxlint ."
+        "lint": "oxlint .",
+        "test:backup-restore": "tsx --test tests/backup-restore*.test.ts"
     },
     "devDependencies": {
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",

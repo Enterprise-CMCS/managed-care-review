@@ -1,0 +1,41 @@
+name: Check production backup health
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 10 * * *'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  check:
+    name: Read-only backup freshness and monthly-test watchdog
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: prod
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup_env
+      - name: Check retention, recovery point, last successful restore, and stranded copies
+        env:
+          BACKUP_TEST_ACCOUNT_ID: ${{ secrets.PROD_AWS_ACCOUNT_ID }}
+        run: pnpm --filter scripts exec tsx test-aurora-automated-backup-restore.ts --stage prod --check
+
+  notify:
+    needs: check
+    if: always() && github.ref == 'refs/heads/main' && needs.check.result != 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_USERNAME: Database Backup Restore Alerts
+          SLACK_COLOR: danger
+          SLACK_TITLE: Production backup health check — ${{ needs.check.result }}
+          SLACK_MESSAGE: 'Inspect the workflow logs. This check cannot create/delete databases or update the last-success record.'
+          MSG_MINIMAL: actions url,commit,ref

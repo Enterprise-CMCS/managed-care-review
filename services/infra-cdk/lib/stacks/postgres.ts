@@ -32,7 +32,9 @@ import {
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput, Duration, Fn, Tags } from 'aws-cdk-lib'
 import { AuroraServerlessV2 } from '../constructs/database'
-import { isReviewEnvironment } from '../config/environments'
+import { getEnvironment, isReviewEnvironment } from '../config/environments'
+import { BackupRestoreTest } from '../constructs/database/backup-restore-test'
+import { isBackupTestStage } from '../../../../scripts/backup-restore-config'
 import { ResourceNames } from '../config/shared'
 import { join } from 'path'
 
@@ -129,6 +131,21 @@ export class Postgres extends BaseStack {
 
         // Create the logical database manager Lambda
         this.logicalDbManagerFunction = this.createLogicalDbManagerLambda()
+
+        // Production is scheduled; review stacks expose the same runner only for
+        // explicit dev-account CI tests. No dev/val/qa scheduled test resources.
+        if (isBackupTestStage(this.stage)) {
+            new BackupRestoreTest(this, 'BackupRestoreTest', {
+                stage: this.stage,
+                vpc: this.vpc,
+                secretsEndpointGroup:
+                    this.devSecurityGroup ?? this.applicationSecurityGroup,
+                databaseSecret: this.databaseSecret,
+                sourceRetentionDays: isReview
+                    ? getEnvironment('dev').database.backupRetentionDays
+                    : this.stageConfig.database.backupRetentionDays,
+            })
+        }
 
         // Create outputs
         this.createOutputs()

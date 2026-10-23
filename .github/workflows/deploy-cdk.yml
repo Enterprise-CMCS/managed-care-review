@@ -6,6 +6,11 @@ on:
       - '**'
       - '!main'
   workflow_dispatch:
+    inputs:
+      test_native_backups:
+        description: 'Explicitly test native dev backups after deploying this review environment'
+        type: boolean
+        default: false
 
     # Prevent concurrent deployments to the same branch
 concurrency:
@@ -68,8 +73,15 @@ jobs:
       - name: set stage name
         id: stage-name
         shell: bash
+        env:
+          TEST_NATIVE_BACKUPS: ${{ inputs.test_native_backups }}
         run: |
-          echo "stage-name-for-branch=$(./scripts/stage_name_for_branch.sh ${GITHUB_REF#refs/heads/})" >> "$GITHUB_OUTPUT"
+          stage="$(./scripts/stage_name_for_branch.sh "$GITHUB_REF_NAME")"
+          if [[ "$TEST_NATIVE_BACKUPS" == true && "$stage" =~ ^(local|dev|main|master|develop|impl|val|qa|prod|production)$ ]]; then
+            echo 'Use a disposable review branch for the dev backup test' >&2
+            exit 1
+          fi
+          echo "stage-name-for-branch=$stage" >> "$GITHUB_OUTPUT"
 
       - name: set branch name
         id: branch-name
@@ -276,6 +288,11 @@ jobs:
           pnpm --filter @mc-review/synthetic-data check:runtime
           pnpm --filter @mc-review/synthetic-data lint
           pnpm --filter @mc-review/synthetic-data test:once
+
+      - name: Backup restore safety tests
+        run: |
+          pnpm --filter scripts test:backup-restore
+          pnpm --filter mcr-infra-cdk test:backup-restore
 
       - name: upload packages test coverage
         uses: actions/upload-artifact@v7
@@ -990,6 +1007,23 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "📦 Download the \`combined-test-coverage\` artifact for detailed HTML reports." >> $GITHUB_STEP_SUMMARY
 
+  native-backup-test:
+    if: github.event_name == 'workflow_dispatch' && inputs.test_native_backups
+    needs: [begin-deployment, deploy-cdk-app]
+    name: Explicit native backup test against the review database
+    runs-on: ubuntu-24.04
+    environment: dev
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup_env
+      # No deployment credentials: the script renews its dedicated test role via OIDC.
+      - name: Restore shared dev into an isolated copy and validate this review DB
+        env:
+          BACKUP_TEST_ACCOUNT_ID: ${{ secrets.DEV_AWS_ACCOUNT_ID }}
+          REVIEW_STAGE: ${{ needs.begin-deployment.outputs.stage-name }}
+        run: pnpm --filter scripts exec tsx test-aurora-automated-backup-restore.ts --stage "$REVIEW_STAGE"
+
   end-deployment:
     needs:
       [
@@ -998,6 +1032,7 @@ jobs:
         deploy-frontend-app,
         extract-endpoints,
         cypress,
+        native-backup-test,
       ]
     if: always() && needs.begin-deployment.result == 'success'
     name: End CDK Deployment
@@ -1018,7 +1053,7 @@ jobs:
       - name: Update deployment status (success)
         if:
           needs.deploy-cdk-app.result == 'success' && needs.deploy-frontend-app.result
-          == 'success'
+          == 'success' && (needs.native-backup-test.result == 'success' || needs.native-backup-test.result == 'skipped')
         uses: chrnorm/deployment-status@v2
         with:
           token: '${{ github.token }}'
