@@ -70,6 +70,7 @@ declare global {
             fillOutNewRateCertification(): void
             fillOutLinkedRate(): void
             fillOutAmendmentToPriorRateCertification(id?: number): void
+            fillOutAttestations(): void
             fillOutStateContact(): void
             fillOutAdditionalActuaryContact(): void
             fillOutSupportingDocuments(): void

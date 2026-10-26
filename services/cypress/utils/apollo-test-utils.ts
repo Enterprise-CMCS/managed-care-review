@@ -50,6 +50,7 @@ const contractFormData = (
     ],
     supportingDocuments: [],
     contractType: 'BASE',
+    procurementAttestation: true,
     contractExecutionStatus: 'EXECUTED',
     contractDocuments: [
         {

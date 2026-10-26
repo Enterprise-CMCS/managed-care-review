@@ -153,6 +153,18 @@
     }
 }
 
+.attestationList {
+    margin: 0;
+
+    > div {
+        @include uswds.at-media(tablet) {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: uswds.units(4);
+        }
+    }
+}
+
 .tagSpacing {
     margin-right: uswds.units(0.5) !important;
 }

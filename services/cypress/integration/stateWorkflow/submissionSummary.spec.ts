@@ -39,6 +39,13 @@ describe('State user can view submissions', () => {
 
         cy.findByRole('heading', {
             level: 2,
+            name: /Attestations/,
+        }).should('exist')
+        cy.fillOutAttestations()
+        cy.navigateContractForm('CONTINUE')
+
+        cy.findByRole('heading', {
+            level: 2,
             name: /Contacts/,
         }).should('exist')
         cy.fillOutStateContact()

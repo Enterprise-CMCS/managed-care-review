@@ -609,6 +609,14 @@ Cypress.Commands.add('fillOutAmendmentToPriorRateCertification', (id = 0) => {
     cy.findAllByTestId('errorMessage').should('have.length', 0)
 })
 
+Cypress.Commands.add('fillOutAttestations', () => {
+    // Must be on '/submissions/:id/edit/attestations' and we can use this in the future as the attestations page expands
+    cy.findByLabelText(/By checking this box, the state assures/).check({
+        force: true,
+    })
+    cy.findAllByTestId('errorMessage').should('have.length', 0)
+})
+
 Cypress.Commands.add('fillOutStateContact', () => {
     // Must be on '/submissions/:id/contacts'
     cy.getFeatureFlagStore([contactModelUpdateFlag]).then((store) => {
