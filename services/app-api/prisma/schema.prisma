@@ -283,7 +283,25 @@ model ContractRevisionTable {
   eqroProvisionChipEqrRelatedActivities   Boolean?
   eqroProvisionMcoEqrOrRelatedActivities  Boolean?
 
+  // ILOS submission fields only
+  isILOSRatesIncluded Boolean? // Whether the API should expect rates on this ILOS submission
+  ilosExternalRates   ILOSExternalRate[] // Rates outside MC-Review on this revision
+
   revisionOverrides ContractRevisionOverrides[]
+}
+
+// A rate outside MC-Review on an ILOS submission revision. Shares one position sequence with the linked rates'
+// ratePosition on DraftRateJoinTable and SubmissionPackageJoinTable.
+model ILOSExternalRate {
+  id                 String                @id @default(uuid())
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @default(now()) @updatedAt
+  position           Int
+  rateControlNumber  String? // Rate control number the external system identifies the rate under
+  rateDateStart      DateTime?             @db.Date // Named as on RateRevisionTable; nullable so an incomplete draft can be saved, required on submit
+  rateDateEnd        DateTime?             @db.Date
+  contractRevisionID String
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
 
 model RateRevisionTable {
@@ -936,6 +954,7 @@ enum ContractSubmissionType {
   HEALTH_PLAN
   EQRO
   ENROLLMENT_BROKER
+  ILOS
 }
 
 enum OAuthScope {
