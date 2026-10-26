@@ -3574,6 +3574,7 @@ enum UploadFileType {
 enum ContractSubmissionType {
     HEALTH_PLAN
     EQRO
+    ENROLLMENT_BROKER
 }
 
 enum OAuthScope {
