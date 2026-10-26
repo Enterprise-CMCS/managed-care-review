@@ -1115,8 +1115,8 @@ export class AppApiStack extends BaseStack {
      * same browser permissions QA would receive from a dedicated Cognito stack:
      * invoke the internal GraphQL endpoint and access user-facing upload paths.
      *
-     * The legacy Val stack owns the role under an IAM path and gives it a
-     * CloudFormation-generated physical name. Resolve that physical name from
+     * Val's externally managed auth stack owns the role under an IAM path and
+     * gives it a CloudFormation-generated physical name. Resolve that name from
      * the owning stack instead of parsing the role ARN or hard-coding its suffix.
      * Keeping the managed inline policy in the App API stack lets it reference
      * the exact API ID and update automatically if API Gateway is replaced.
@@ -1131,7 +1131,7 @@ export class AppApiStack extends BaseStack {
         const qaUploadsBucketArn = Fn.importValue(
             `${uploadsStackName}-QAUploadsBucketArn`
         )
-        const legacyValAuthStackName = 'ui-auth-val'
+        const valAuthStackName = 'ui-auth-val'
         const authenticatedRole = new AwsCustomResource(
             this,
             'QaSharedCognitoAuthRole',
@@ -1140,11 +1140,11 @@ export class AppApiStack extends BaseStack {
                     service: 'CloudFormation',
                     action: 'describeStackResource',
                     parameters: {
-                        StackName: legacyValAuthStackName,
+                        StackName: valAuthStackName,
                         LogicalResourceId: 'CognitoAuthRole',
                     },
                     physicalResourceId: PhysicalResourceId.of(
-                        `${legacyValAuthStackName}:CognitoAuthRole`
+                        `${valAuthStackName}:CognitoAuthRole`
                     ),
                 },
                 policy: AwsCustomResourcePolicy.fromStatements([
@@ -1152,7 +1152,7 @@ export class AppApiStack extends BaseStack {
                         effect: Effect.ALLOW,
                         actions: ['cloudformation:DescribeStackResource'],
                         resources: [
-                            `arn:${this.partition}:cloudformation:${this.region}:${this.account}:stack/${legacyValAuthStackName}/*`,
+                            `arn:${this.partition}:cloudformation:${this.region}:${this.account}:stack/${valAuthStackName}/*`,
                         ],
                     }),
                 ]),
