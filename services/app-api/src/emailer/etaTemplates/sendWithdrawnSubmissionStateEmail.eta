@@ -18,4 +18,7 @@ If you need assistance or have any questions:
 <ul>
   <li>For assistance with programmatic, contractual, or operational issues, please reach out to <a href="mailto:<%= it.MCGDMCOContactEmail %>"><%= it.MCGDMCOContactEmail %></a> and/or your CMS primary contact.</li>
   <li>For issues related to MC-Review or all other inquiries, please reach out to <a href="mailto:<%= it.CMSContactEmail %>"><%= it.CMSContactEmail %></a>.</li>
+<% if (!it.isEQRO) { %>
+  <li>For assistance on policy and actuarial issues, please reach out to <a href="mailto:<%= it.cmsRateHelpEmailAddress %>"><%= it.cmsRateHelpEmailAddress %></a>.</li>
+<% } %>
 </ul>
