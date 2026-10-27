@@ -8,15 +8,15 @@
         "typecheck": "tsc --noEmit"
     },
     "devDependencies": {
-        "@aws-sdk/types": "^3.974.6",
+        "@aws-sdk/types": "^3.975.0",
         "@types/pg": "^8.23.1",
         "fs-extra": "^11.4.1",
         "typescript": "7.0.2"
     },
     "dependencies": {
-        "@aws-sdk/client-cloudformation": "^3.1153.0",
-        "@aws-sdk/client-secrets-manager": "^3.1153.0",
-        "@aws-sdk/client-s3": "^3.1153.0",
+        "@aws-sdk/client-cloudformation": "^3.1156.0",
+        "@aws-sdk/client-secrets-manager": "^3.1156.0",
+        "@aws-sdk/client-s3": "^3.1156.0",
         "pg": "^8.23.0",
         "@prisma/client": "^7.10.1",
         "prisma": "^7.10.0"
