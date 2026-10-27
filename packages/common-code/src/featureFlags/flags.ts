@@ -85,6 +85,13 @@ const featureFlags = {
         defaultValue: false,
     },
     /**
+     *  Enables Enrollment Broker submissions
+     */
+    ENROLLMENT_BROKER_SUBMISSIONS: {
+        flag: 'enrollment-broker-submissions',
+        defaultValue: false
+    },
+    /**
      * This flag toggles CHIP only health plan submission review automation.
      */
     CHIP_SUBMISSION_AUTOMATION: {

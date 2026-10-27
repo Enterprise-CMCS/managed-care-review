@@ -21,6 +21,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway'
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager'
 import {
+    CfnPolicy,
     PolicyStatement,
     Effect,
     Role,
@@ -43,6 +44,11 @@ import { ApiEndpoint } from '../constructs/api/api-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
 import type { IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
+import {
+    AwsCustomResource,
+    AwsCustomResourcePolicy,
+    PhysicalResourceId,
+} from 'aws-cdk-lib/custom-resources'
 
 export interface AppApiStackProps extends BaseStackProps {
     // VPC imported from environment (Vpc.fromLookup), security groups from Network stack exports
@@ -693,6 +699,10 @@ export class AppApiStack extends BaseStack {
         // Create API Gateway resources and methods first
         this.setupApiGatewayRoutes(this.apiGateway)
 
+        // QA reuses Val's Cognito identity pool, so its authenticated role needs
+        // explicit grants for QA's separate API Gateway and upload buckets.
+        this.grantQaFrontendAccessToSharedAuthRole()
+
         // Setup WAF association AFTER routes are configured (ensures deployment exists)
         this.setupWafAssociation(this.apiGateway)
 
@@ -1098,6 +1108,99 @@ export class AppApiStack extends BaseStack {
             SYNTHETIC_DATA_ALLOWED_STAGE:
                 process.env.SYNTHETIC_DATA_ALLOWED_STAGE || '',
         }
+    }
+
+    /**
+     * Grant the authenticated role attached to Val's shared identity pool the
+     * same browser permissions QA would receive from a dedicated Cognito stack:
+     * invoke the internal GraphQL endpoint and access user-facing upload paths.
+     *
+     * The role has a CloudFormation-generated physical name, so resolve it at
+     * deployment time rather than hard-coding the current suffix. Keeping the
+     * managed inline policy in the App API stack lets it reference the exact API
+     * ID and update automatically if API Gateway is replaced.
+     */
+    private grantQaFrontendAccessToSharedAuthRole(): void {
+        if (this.stage !== 'qa') return
+
+        const cognitoStackName = ResourceNames.stackName('cognito', this.stage)
+        const uploadsStackName = ResourceNames.stackName('uploads', this.stage)
+        const identityPoolId = Fn.importValue(
+            `${cognitoStackName}-IdentityPoolId`
+        )
+        const documentUploadsBucketArn = Fn.importValue(
+            `${uploadsStackName}-DocumentUploadsBucketArn`
+        )
+        const qaUploadsBucketArn = Fn.importValue(
+            `${uploadsStackName}-QAUploadsBucketArn`
+        )
+        const identityPoolRoles = new AwsCustomResource(
+            this,
+            'QaSharedIdentityPoolRoles',
+            {
+                onUpdate: {
+                    service: 'CognitoIdentity',
+                    action: 'getIdentityPoolRoles',
+                    parameters: {
+                        IdentityPoolId: identityPoolId,
+                    },
+                    physicalResourceId: PhysicalResourceId.of(identityPoolId),
+                },
+                policy: AwsCustomResourcePolicy.fromStatements([
+                    new PolicyStatement({
+                        effect: Effect.ALLOW,
+                        actions: ['cognito-identity:GetIdentityPoolRoles'],
+                        resources: [
+                            `arn:${this.partition}:cognito-identity:${this.region}:${this.account}:identitypool/${identityPoolId}`,
+                        ],
+                    }),
+                ]),
+                installLatestAwsSdk: false,
+            }
+        )
+
+        const authenticatedRoleArn = identityPoolRoles.getResponseField(
+            'Roles.authenticated'
+        )
+        const authenticatedRoleName = Fn.select(
+            1,
+            Fn.split('/', authenticatedRoleArn)
+        )
+
+        new CfnPolicy(this, 'QaFrontendAccessPolicy', {
+            policyName: 'mc-review-qa-frontend-access',
+            roles: [authenticatedRoleName],
+            policyDocument: {
+                Version: '2012-10-17',
+                Statement: [
+                    {
+                        Sid: 'InvokeQaGraphql',
+                        Effect: 'Allow',
+                        Action: 'execute-api:Invoke',
+                        Resource: ['GET', 'POST'].map((method) =>
+                            this.apiGateway.arnForExecuteApi(
+                                method,
+                                '/graphql',
+                                this.stage
+                            )
+                        ),
+                    },
+                    {
+                        // Match the legacy per-environment Cognito role policy.
+                        // Amplify Storage maps public objects to allusers/ and
+                        // can use the identity-scoped private documents path.
+                        Sid: 'AccessQaUploadObjects',
+                        Effect: 'Allow',
+                        Action: 's3:*',
+                        Resource: [
+                            `${documentUploadsBucketArn}/allusers/*`,
+                            `${qaUploadsBucketArn}/allusers/*`,
+                            `${documentUploadsBucketArn}/private/\${cognito-identity.amazonaws.com:sub}/*`,
+                        ],
+                    },
+                ],
+            },
+        })
     }
 
     private setupApiGatewayRoutes(apiGateway: IRestApi): void {
