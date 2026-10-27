@@ -284,10 +284,44 @@ model ContractRevisionTable {
   eqroProvisionMcoEqrOrRelatedActivities  Boolean?
 
   // ILOS submission fields only
-  isILOSRatesIncluded Boolean? // Whether the API should expect rates on this ILOS submission
-  ilosExternalRates   ILOSExternalRate[] // Rates outside MC-Review on this revision
+  isILOSRatesIncluded     Boolean? // Whether the API should expect rates on this ILOS submission
+  ilosExternalRates       ILOSExternalRate[] // Rates outside MC-Review on this revision
+  ilosDocuments           ILOSDocument[] // ILOS report documents uploaded by the state
+  ilosSupportingDocuments ILOSSupportingDocument[] // ILOS supporting documents uploaded by the state
 
   revisionOverrides ContractRevisionOverrides[]
+}
+
+// ILOS report documents, kept separate from ContractDocument so ILOS submissions never
+// share document rows or overrides with contracts. Modeled on ContractDocument without
+// the deprecated s3URL column.
+model ILOSDocument {
+  id                 String                @id @default(uuid())
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @default(now()) @updatedAt
+  position           Int
+  name               String // Original filename from user upload
+  s3BucketName       String
+  s3Key              String
+  sha256             String
+  dateAdded          DateTime? // Date first submitted to CMS
+  contractRevisionID String
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+}
+
+// ILOS supporting documents, the ILOS counterpart to ContractSupportingDocument.
+model ILOSSupportingDocument {
+  id                 String                @id @default(uuid())
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @default(now()) @updatedAt
+  position           Int
+  name               String // Original filename from user upload
+  s3BucketName       String
+  s3Key              String
+  sha256             String
+  dateAdded          DateTime? // Date first submitted to CMS
+  contractRevisionID String
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
 
 // A rate outside MC-Review on an ILOS submission revision. Shares one position sequence with the linked rates'
