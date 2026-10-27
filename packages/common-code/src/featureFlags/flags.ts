@@ -119,10 +119,6 @@ const featureFlags = {
         flag: 'cms-user-undo-unlock',
         defaultValue: false,
     },
-    ENROLLMENT_BROKER_SUBMISSIONS: { 
-        flag: 'enrollment-broker-submissions', 
-        defaultValue: false,
-    },
     /**
      * This flag toggles on or off enhanced revision history features for emails and state portal web app.
      */
