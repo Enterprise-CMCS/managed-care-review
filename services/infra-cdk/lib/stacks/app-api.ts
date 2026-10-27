@@ -1115,44 +1115,45 @@ export class AppApiStack extends BaseStack {
      * same browser permissions QA would receive from a dedicated Cognito stack:
      * invoke the internal GraphQL endpoint and access user-facing upload paths.
      *
-     * Val's externally managed auth stack owns the role under an IAM path and
-     * gives it a CloudFormation-generated physical name. Resolve that name from
-     * the owning stack instead of parsing the role ARN or hard-coding its suffix.
-     * Keeping the managed inline policy in the App API stack lets it reference
-     * the exact API ID and update automatically if API Gateway is replaced.
+     * The role has a CloudFormation-generated physical name under the
+     * organization-managed /delegatedadmin/developer/ IAM path. Resolve its ARN
+     * from the shared identity pool, then remove that known path rather than
+     * hard-coding the role's generated suffix. Keeping the managed inline policy
+     * in the App API stack lets it reference the exact API ID and update
+     * automatically if API Gateway is replaced.
      */
     private grantQaFrontendAccessToSharedAuthRole(): void {
         if (this.stage !== 'qa') return
 
+        const cognitoStackName = ResourceNames.stackName('cognito', this.stage)
         const uploadsStackName = ResourceNames.stackName('uploads', this.stage)
+        const identityPoolId = Fn.importValue(
+            `${cognitoStackName}-IdentityPoolId`
+        )
         const documentUploadsBucketArn = Fn.importValue(
             `${uploadsStackName}-DocumentUploadsBucketArn`
         )
         const qaUploadsBucketArn = Fn.importValue(
             `${uploadsStackName}-QAUploadsBucketArn`
         )
-        const valAuthStackName = 'ui-auth-val'
-        const authenticatedRole = new AwsCustomResource(
+        const identityPoolRoles = new AwsCustomResource(
             this,
-            'QaSharedCognitoAuthRole',
+            'QaSharedIdentityPoolRoles',
             {
                 onUpdate: {
-                    service: 'CloudFormation',
-                    action: 'describeStackResource',
+                    service: 'CognitoIdentity',
+                    action: 'getIdentityPoolRoles',
                     parameters: {
-                        StackName: valAuthStackName,
-                        LogicalResourceId: 'CognitoAuthRole',
+                        IdentityPoolId: identityPoolId,
                     },
-                    physicalResourceId: PhysicalResourceId.of(
-                        `${valAuthStackName}:CognitoAuthRole`
-                    ),
+                    physicalResourceId: PhysicalResourceId.of(identityPoolId),
                 },
                 policy: AwsCustomResourcePolicy.fromStatements([
                     new PolicyStatement({
                         effect: Effect.ALLOW,
-                        actions: ['cloudformation:DescribeStackResource'],
+                        actions: ['cognito-identity:GetIdentityPoolRoles'],
                         resources: [
-                            `arn:${this.partition}:cloudformation:${this.region}:${this.account}:stack/${valAuthStackName}/*`,
+                            `arn:${this.partition}:cognito-identity:${this.region}:${this.account}:identitypool/${identityPoolId}`,
                         ],
                     }),
                 ]),
@@ -1160,8 +1161,12 @@ export class AppApiStack extends BaseStack {
             }
         )
 
-        const authenticatedRoleName = authenticatedRole.getResponseField(
-            'StackResourceDetail.PhysicalResourceId'
+        const authenticatedRoleArn = identityPoolRoles.getResponseField(
+            'Roles.authenticated'
+        )
+        const authenticatedRoleName = Fn.select(
+            1,
+            Fn.split('/delegatedadmin/developer/', authenticatedRoleArn)
         )
 
         new CfnPolicy(this, 'QaFrontendAccessPolicy', {
