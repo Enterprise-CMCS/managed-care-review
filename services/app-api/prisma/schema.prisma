@@ -293,14 +293,14 @@ model ContractRevisionTable {
 }
 
 // ILOS report documents, kept separate from ContractDocument so ILOS submissions never
-// share document rows or overrides with contracts. Modeled on ContractDocument without
-// the deprecated s3URL column.
+// share document rows or overrides with contracts. Modeled on ContractDocument.
 model ILOSDocument {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
   position           Int
   name               String // Original filename from user upload
+  s3URL              String // DEPRECATED: Use s3BucketName + s3Key instead. Kept so GenericDocument works end to end; drop with the other document tables
   s3BucketName       String
   s3Key              String
   sha256             String
@@ -316,6 +316,7 @@ model ILOSSupportingDocument {
   updatedAt          DateTime              @default(now()) @updatedAt
   position           Int
   name               String // Original filename from user upload
+  s3URL              String // DEPRECATED: Use s3BucketName + s3Key instead. Kept so GenericDocument works end to end; drop with the other document tables
   s3BucketName       String
   s3Key              String
   sha256             String
