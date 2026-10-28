@@ -84,7 +84,7 @@
         "@opentelemetry/exporter-trace-otlp-http": "^0.217.0",
         "@opentelemetry/instrumentation": "^0.223.0",
         "@opentelemetry/instrumentation-fetch": "^0.217.0",
-        "@opentelemetry/resources": "^2.7.1",
+        "@opentelemetry/resources": "^3.0.0",
         "@opentelemetry/sdk-trace-web": "^2.12.0",
         "@opentelemetry/semantic-conventions": "^1.40.0",
         "@tanstack/react-table": "^8.21.3",
