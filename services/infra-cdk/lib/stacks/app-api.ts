@@ -1115,10 +1115,12 @@ export class AppApiStack extends BaseStack {
      * same browser permissions QA would receive from a dedicated Cognito stack:
      * invoke the internal GraphQL endpoint and access user-facing upload paths.
      *
-     * The role has a CloudFormation-generated physical name, so resolve it at
-     * deployment time rather than hard-coding the current suffix. Keeping the
-     * managed inline policy in the App API stack lets it reference the exact API
-     * ID and update automatically if API Gateway is replaced.
+     * The role has a CloudFormation-generated physical name under the
+     * organization-managed /delegatedadmin/developer/ IAM path. Resolve its ARN
+     * from the shared identity pool, then remove that known path rather than
+     * hard-coding the role's generated suffix. Keeping the managed inline policy
+     * in the App API stack lets it reference the exact API ID and update
+     * automatically if API Gateway is replaced.
      */
     private grantQaFrontendAccessToSharedAuthRole(): void {
         if (this.stage !== 'qa') return
@@ -1164,7 +1166,7 @@ export class AppApiStack extends BaseStack {
         )
         const authenticatedRoleName = Fn.select(
             1,
-            Fn.split('/', authenticatedRoleArn)
+            Fn.split('/delegatedadmin/developer/', authenticatedRoleArn)
         )
 
         new CfnPolicy(this, 'QaFrontendAccessPolicy', {
