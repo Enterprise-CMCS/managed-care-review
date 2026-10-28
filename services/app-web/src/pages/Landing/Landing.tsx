@@ -156,6 +156,7 @@ export const Landing = (): React.ReactElement => {
                                             </li>
                                         </ul>
                                     </li>
+                                    <li>Enrollment Broker (EB) submissions</li>
                                 </ol>
 
                                 <h5 className="margin-bottom-0">
@@ -177,7 +178,6 @@ export const Landing = (): React.ReactElement => {
                                             </li>
                                         </ul>
                                     </li>
-                                    <li>Enrollment Broker (EB) submissions</li>
                                     <li>State Directed Preprints (SDP)</li>
                                 </ol>
                             </Grid>
