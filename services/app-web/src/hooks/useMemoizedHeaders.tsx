@@ -19,6 +19,7 @@ const parseContractType = (
     if (contractType === 'EQRO' || contractType === 'eqro') return 'EQRO'
     if (contractType === 'HEALTH_PLAN' || contractType === 'health-plan')
         return 'Health plan'
+    if (contractType === 'ENROLLMENT_BROKER') return 'EB'
 
     return undefined
 }
