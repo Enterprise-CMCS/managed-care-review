@@ -12,6 +12,7 @@ import { EQROSubmissionForm } from './EQROSubmission'
 import { HealthPlanSubmissionForm } from './HealthPlanSubmission/HealthPlanSubmissionForm'
 import { Error404 } from '../Errors/Error404Page'
 import { usePage } from '../../contexts/PageContext'
+import { EBSubmissionForm } from './EnrollmentBrokerSubmission'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { contractSubmissionType } = useRouteParams()
@@ -61,8 +62,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
     if(
         contractSubmissionType === ContractSubmissionTypeRecord['ENROLLMENT_BROKER']
     ) {
-        // TODO: replace with <EBSubmissionDetails /> once merged.
-        return showEBSubmissions ? <h1>TESTING</h1> : <Error404/>
+        return showEBSubmissions ? <EBSubmissionForm /> : <Error404/>
     }
 
     return <Error404 />
