@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { matchPath, useLocation, useNavigate } from 'react-router-dom'
 import { Form } from '@trussworks/react-uswds'
-import { EB_SUBMISSION_FORM_ROUTES, RoutesRecord } from '@mc-review/constants'
+import {
+    EB_SUBMISSION_FORM_ROUTES,
+    RoutesRecord,
+} from '@mc-review/constants'
 import {
     DynamicStepIndicator,
     FormContainer,
