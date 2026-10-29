@@ -21,6 +21,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
         featureFlags.EQRO_SUBMISSIONS.flag,
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
+    const showEBSubmissions: boolean = ldClient?.variation(
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.flag,
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
+    )
     const { contract } = useOutletContext<SideNavOutletContextType>()
     const stateHeader = useMemoizedStateHeader({
         subHeaderText: contract?.draftRevision?.contractName,
@@ -52,6 +56,13 @@ export const StateSubmissionForm = (): React.ReactElement => {
         contractSubmissionType === ContractSubmissionTypeRecord['HEALTH_PLAN']
     ) {
         return <HealthPlanSubmissionForm />
+    }
+
+    if(
+        contractSubmissionType === ContractSubmissionTypeRecord['ENROLLMENT_BROKER']
+    ) {
+        // TODO: replace with <EBSubmissionDetails /> once merged.
+        return showEBSubmissions ? <h1>TESTING</h1> : <Error404/>
     }
 
     return <Error404 />
