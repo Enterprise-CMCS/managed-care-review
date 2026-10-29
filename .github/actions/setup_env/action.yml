@@ -31,18 +31,15 @@ runs:
       run: |
         echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
-    # Preserve the existing cache behavior for non-Cypress callers.
+    # Native jobs only cache the pnpm store; they do not need a Cypress binary.
     - uses: actions/cache@v5
       name: Setup pnpm cache
       if: inputs.cache-mode == 'shared'
       with:
-        path: |
-          ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          /root/.cache/Cypress
-          /github/home/.cache/Cypress
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-${{ runner.arch }}-shared-pnpm-v2-${{ hashFiles('.nvmrc', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-pnpm-store-
+          ${{ runner.os }}-${{ runner.arch }}-shared-pnpm-v2-
 
     - name: Get Cypress cache metadata
       if: inputs.cache-mode != 'shared'
@@ -66,9 +63,9 @@ runs:
       uses: actions/cache/restore@v5
       with:
         path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-        key: ${{ runner.os }}-${{ runner.arch }}-cypress-pnpm-v1-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml', 'pnpm-workspace.yaml') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-cypress-pnpm-v2-${{ hashFiles('.nvmrc', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml') }}
         restore-keys: |
-          ${{ runner.os }}-${{ runner.arch }}-cypress-pnpm-v1-
+          ${{ runner.os }}-${{ runner.arch }}-cypress-pnpm-v2-
 
     - name: Restore Cypress binary
       if: inputs.cache-mode != 'shared'
@@ -80,14 +77,12 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: PRISMA_CLI_BINARY_TARGETS=rhel-openssl-3.0.x pnpm install --frozen-lockfile
+      run: bash "$GITHUB_ACTION_PATH/install.sh" dependencies
 
     - name: Ensure Cypress binary is installed and verified
       if: inputs.cache-mode != 'shared'
       shell: bash
-      run: |
-        pnpm exec cypress install
-        pnpm exec cypress verify
+      run: bash "$GITHUB_ACTION_PATH/install.sh" cypress
 
     # Only the early cache warmer writes these caches. Test workers never
     # register a post-job save, even when they restore a fallback or miss.

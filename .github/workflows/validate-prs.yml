@@ -18,6 +18,11 @@ jobs:
       - name: Setup env
         uses: ./.github/actions/setup_env
 
+      # pull_request checkout uses the merge result, unlike review deployments
+      # on branch pushes. Catch stale lockfile references before promotion.
+      - name: Postgres unit tests (merge result)
+        run: pnpm --filter postgres test:once
+
       - name: DangerJS
         run: pnpm danger ci
         env:
