@@ -332,7 +332,7 @@ model ILOSExternalRate {
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
   position           Int
-  rateControlNumber  String? // Rate control number the external system identifies the rate under
+  rateControlName    String? // Rate control name the state identifies the external rate under
   rateDateStart      DateTime?             @db.Date // Named as on RateRevisionTable; nullable so an incomplete draft can be saved, required on submit
   rateDateEnd        DateTime?             @db.Date
   contractRevisionID String
