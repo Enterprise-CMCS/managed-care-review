@@ -113,7 +113,7 @@
         "rxjs": "^7.8.1",
         "sass": "^1.49.11",
         "use-deep-compare-effect": "^1.8.1",
-        "uuid": "^14.0.2",
+        "uuid": "^14.0.3",
         "vite": "^8.3.2",
         "vite-tsconfig-paths": "^6.1.1",
         "web-vitals": "^6.2.3",
