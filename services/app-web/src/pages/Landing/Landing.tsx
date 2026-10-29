@@ -34,6 +34,11 @@ export const Landing = (): React.ReactElement => {
         featureFlags.EQRO_SUBMISSIONS.defaultValue
     )
 
+    const enrollmentBrokerFlag: boolean = ldClient?.variation(
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.flag,
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
+    )
+
     const maybeMaintenaceBanner = maintenanceBannerForVariation(
         siteUnderMaintenanceBannerFlag
     )
@@ -156,6 +161,11 @@ export const Landing = (): React.ReactElement => {
                                             </li>
                                         </ul>
                                     </li>
+                                    {enrollmentBrokerFlag && (
+                                        <li>
+                                            Enrollment Broker (EB) submissions
+                                        </li>
+                                    )}
                                 </ol>
 
                                 <h5 className="margin-bottom-0">
@@ -177,7 +187,11 @@ export const Landing = (): React.ReactElement => {
                                             </li>
                                         </ul>
                                     </li>
-                                    <li>Enrollment Broker (EB) submissions</li>
+                                    {!enrollmentBrokerFlag && (
+                                        <li>
+                                            Enrollment Broker (EB) submissions
+                                        </li>
+                                    )}
                                     <li>State Directed Preprints (SDP)</li>
                                 </ol>
                             </Grid>

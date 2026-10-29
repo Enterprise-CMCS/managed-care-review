@@ -76,7 +76,7 @@ describe('AppRoutes and routing configuration', () => {
             })
         ).toHaveAttribute(
             'href',
-            'https://www.medicaid.gov/medicaid/managed-care/idm-instns-mc-rvw-state-user-manul.pdf'
+            '/resources/State-User-Manual-MC-Review-October-2026.pdf'
         )
 
         expect(
