@@ -69,6 +69,127 @@ describe('prismaToDomainModel', () => {
             expect(domainFormData.contractType).toBe('AMENDMENT')
             expect(domainFormData.dsnpContract).toBe(true)
         })
+
+        const ilosRows = {
+            isILOSRatesIncluded: true,
+            ilosDocuments: [
+                {
+                    id: uuidv4(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    position: 0,
+                    name: 'ilos report',
+                    s3URL: 's3://bucketname/key/ilosreport',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'key/ilosreport',
+                    sha256: 'ilosreportsha',
+                    dateAdded: null,
+                    contractRevisionID: 'rev',
+                },
+            ],
+            ilosSupportingDocuments: [
+                {
+                    id: uuidv4(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    position: 0,
+                    name: 'ilos supporting',
+                    s3URL: 's3://bucketname/key/ilossupporting',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'key/ilossupporting',
+                    sha256: 'ilossupportingsha',
+                    dateAdded: new Date('2024-01-15'),
+                    contractRevisionID: 'rev',
+                },
+            ],
+            ilosExternalRates: [
+                {
+                    id: uuidv4(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    position: 2,
+                    rateControlName: 'FL-RATE-001',
+                    rateDateStart: new Date('2025-01-01'),
+                    rateDateEnd: new Date('2025-12-31'),
+                    contractRevisionID: 'rev',
+                },
+                {
+                    id: uuidv4(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    position: 3,
+                    rateControlName: null,
+                    rateDateStart: null,
+                    rateDateEnd: null,
+                    contractRevisionID: 'rev',
+                },
+            ],
+        }
+
+        it('maps ILOS columns and relations for an ILOS submission', () => {
+            const contractRevision = mockContractRevision(
+                { contractSubmissionType: 'ILOS' },
+                ilosRows
+            )
+
+            const domainFormData =
+                contractFormDataToDomainModel(contractRevision)
+
+            expect(domainFormData.isILOSRatesIncluded).toBe(true)
+            expect(domainFormData.ilosDocuments).toEqual([
+                expect.objectContaining({
+                    name: 'ilos report',
+                    s3URL: 's3://bucketname/key/ilosreport',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'key/ilosreport',
+                    sha256: 'ilosreportsha',
+                    dateAdded: undefined,
+                }),
+            ])
+            expect(domainFormData.ilosSupportingDocuments).toEqual([
+                expect.objectContaining({
+                    name: 'ilos supporting',
+                    sha256: 'ilossupportingsha',
+                    dateAdded: new Date('2024-01-15'),
+                }),
+            ])
+            expect(domainFormData.ilosExternalRates).toEqual([
+                {
+                    id: ilosRows.ilosExternalRates[0].id,
+                    rateControlName: 'FL-RATE-001',
+                    rateDateStart: new Date('2025-01-01'),
+                    rateDateEnd: new Date('2025-12-31'),
+                    position: 2,
+                },
+                {
+                    id: ilosRows.ilosExternalRates[1].id,
+                    rateControlName: undefined,
+                    rateDateStart: undefined,
+                    rateDateEnd: undefined,
+                    position: 3,
+                },
+            ])
+        })
+
+        it.each(['HEALTH_PLAN', 'EQRO'] as const)(
+            'does not add ILOS keys to a %s revision even when ILOS rows exist',
+            (contractSubmissionType) => {
+                const contractRevision = mockContractRevision(
+                    { contractSubmissionType },
+                    ilosRows
+                )
+
+                const domainFormData =
+                    contractFormDataToDomainModel(contractRevision)
+
+                expect(domainFormData).not.toHaveProperty('isILOSRatesIncluded')
+                expect(domainFormData).not.toHaveProperty('ilosDocuments')
+                expect(domainFormData).not.toHaveProperty(
+                    'ilosSupportingDocuments'
+                )
+                expect(domainFormData).not.toHaveProperty('ilosExternalRates')
+            }
+        )
     })
 
     describe('rateFormDataToDomainModel', () => {

@@ -42,14 +42,16 @@ const normalizeProgramIDs = (programIDs: string[]): string[] =>
  */
 const buildContractName = (
     submission: ContractPackageSubmissionType,
-    statePrograms: ProgramType[]
+    statePrograms: ProgramType[],
+    initiallySubmittedAt?: Date
 ): string | Error => {
     return packageName(
         submission.contractRevision.contract.stateCode,
         submission.contractRevision.contract.stateNumber,
         submission.contractRevision.formData.programIDs,
         statePrograms,
-        submission.contractRevision.contract.contractSubmissionType
+        submission.contractRevision.contract.contractSubmissionType,
+        initiallySubmittedAt
     )
 }
 
@@ -120,6 +122,10 @@ const excludedFieldPaths = new Set<keyof ContractFormData>([
     'stateContacts',
     'supportingDocuments',
     'contractDocuments',
+    // ILOS submission lists are object arrays; ILOS revision diffing is handled in a later ticket.
+    'ilosDocuments',
+    'ilosSupportingDocuments',
+    'ilosExternalRates',
 ])
 
 const diffContractFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
@@ -206,14 +212,23 @@ function buildRevisionDiff(
     olderSubmission: ContractPackageSubmissionType,
     newerSubmission: ContractPackageSubmissionType,
     statePrograms: ProgramType[],
-    linkedRateIDs: Set<string>
+    linkedRateIDs: Set<string>,
+    initiallySubmittedAt?: Date
 ): RevisionDiff | Error {
-    const olderContractName = buildContractName(olderSubmission, statePrograms)
+    const olderContractName = buildContractName(
+        olderSubmission,
+        statePrograms,
+        initiallySubmittedAt
+    )
     if (olderContractName instanceof Error) {
         return olderContractName
     }
 
-    const newerContractName = buildContractName(newerSubmission, statePrograms)
+    const newerContractName = buildContractName(
+        newerSubmission,
+        statePrograms,
+        initiallySubmittedAt
+    )
     if (newerContractName instanceof Error) {
         return newerContractName
     }

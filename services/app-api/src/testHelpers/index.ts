@@ -18,6 +18,13 @@ export {
     mockDraftRate,
 } from './rateDataMocks'
 
+export {
+    mockILOSDocument,
+    mockILOSContractFormData,
+    mockILOSLinkedRate,
+    mockDraftILOSContract,
+} from './ilosDataMocks'
+
 export { testS3Client } from './s3Helpers'
 export { getStateRecord } from './stateHelpers'
 

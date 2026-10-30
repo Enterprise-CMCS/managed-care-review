@@ -3,6 +3,7 @@ import { updateInfoSchema } from './updateInfoType'
 import {
     contractFormDataSchema,
     eqroContractFormDataSchema,
+    ilosContractFormDataSchema,
     rateFormDataSchema,
     strippedRateFormDataSchema,
     strippedContractFormDataSchema,
@@ -10,12 +11,13 @@ import {
 import { contractSubmissionTypeSchema } from './contractSubmissionType'
 
 const contractRevisionSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     contract: z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         stateCode: z.string(),
         stateNumber: z.number().min(1),
         contractSubmissionType: contractSubmissionTypeSchema,
+        initiallySubmittedAt: z.date().optional(),
     }),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
@@ -26,12 +28,13 @@ const contractRevisionSchema = z.object({
 })
 
 const eqroContractRevisionSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     contract: z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
         stateCode: z.string(),
         stateNumber: z.number().min(1),
         contractSubmissionType: z.literal('EQRO'),
+        initiallySubmittedAt: z.date().optional(),
     }),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
@@ -41,9 +44,26 @@ const eqroContractRevisionSchema = z.object({
     formData: eqroContractFormDataSchema,
 })
 
+const ilosContractRevisionSchema = z.object({
+    id: z.uuid(),
+    contract: z.object({
+        id: z.uuid(),
+        stateCode: z.string(),
+        stateNumber: z.number().min(1),
+        contractSubmissionType: z.literal('ILOS'),
+        initiallySubmittedAt: z.date().optional(),
+    }),
+    submitInfo: updateInfoSchema.optional(),
+    unlockInfo: updateInfoSchema.optional(),
+    undoUnlockInfo: updateInfoSchema.optional(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    formData: ilosContractFormDataSchema,
+})
+
 const rateRevisionSchema = z.object({
-    id: z.string().uuid(),
-    rateID: z.string().uuid(),
+    id: z.uuid(),
+    rateID: z.uuid(),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
     undoUnlockInfo: updateInfoSchema.optional(),
@@ -54,7 +74,7 @@ const rateRevisionSchema = z.object({
 
 const strippedRateRevisionSchema = z.object({
     id: z.uuid(),
-    rateID: z.string().uuid(),
+    rateID: z.uuid(),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
     createdAt: z.date(),
@@ -69,6 +89,7 @@ const strippedContractRevisionSchema = z.object({
         stateCode: z.string(),
         stateNumber: z.number().min(1),
         contractSubmissionType: contractSubmissionTypeSchema,
+        initiallySubmittedAt: z.date().optional(),
     }),
     submitInfo: updateInfoSchema.optional(),
     unlockInfo: updateInfoSchema.optional(),
@@ -78,6 +99,7 @@ const strippedContractRevisionSchema = z.object({
 })
 
 type ContractRevisionType = z.infer<typeof contractRevisionSchema>
+type ILOSContractRevisionType = z.infer<typeof ilosContractRevisionSchema>
 type RateRevisionType = z.infer<typeof rateRevisionSchema>
 type StrippedRateRevisionType = z.infer<typeof strippedRateRevisionSchema>
 type StrippedContractRevisionType = z.infer<
@@ -90,10 +112,12 @@ export {
     strippedRateRevisionSchema,
     strippedContractRevisionSchema,
     eqroContractRevisionSchema,
+    ilosContractRevisionSchema,
 }
 
 export type {
     ContractRevisionType,
+    ILOSContractRevisionType,
     RateRevisionType,
     StrippedRateRevisionType,
     StrippedContractRevisionType,

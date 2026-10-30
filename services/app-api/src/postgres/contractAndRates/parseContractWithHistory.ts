@@ -96,12 +96,48 @@ function parseContractWithHistory(
     }
 }
 
+type InitiallySubmittedAtSource = {
+    contractOverrides: ContractTableStrippedPayload['contractOverrides']
+    revisions: { submitInfo: { updatedAt: Date } | null }[]
+}
+
+// resolveInitiallySubmittedAt returns the earliest submit date across revisions,
+// honoring admin overrides. Undefined when the submission has never been submitted.
+function resolveInitiallySubmittedAt(
+    contract: InitiallySubmittedAtSource
+): Date | undefined {
+    const initiallySubmittedAtOverride = mergeScalarFieldOverrides<
+        Date,
+        InitiallySubmittedAtSource['contractOverrides'][number]
+    >({
+        rows: contract.contractOverrides,
+        getOperation: (row) => row.initiallySubmittedAtOp,
+        getValue: (row) => row.initiallySubmittedAt,
+        valueSchema: z.date(),
+        fieldPath: 'ContractOverrides.initiallySubmittedAt',
+    })
+
+    // default to override if there is one.
+    if (initiallySubmittedAtOverride.hasOverride) {
+        return initiallySubmittedAtOverride.value
+    }
+
+    // sort to earliest submission, it should be the initial submission
+    const submitDates = contract.revisions
+        .map((revision) => revision.submitInfo?.updatedAt)
+        .filter((date): date is Date => date !== undefined)
+        .sort((a, b) => a.getTime() - b.getTime())
+
+    return submitDates[0]
+}
+
 function contractRevisionToDomainModel(
-    revision: ContractRevisionTableWithFormData
+    revision: ContractRevisionTableWithFormData,
+    initiallySubmittedAt?: Date
 ): ContractRevisionType {
     return {
         id: revision.id,
-        contract: revision.contract,
+        contract: { ...revision.contract, initiallySubmittedAt },
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
@@ -208,6 +244,7 @@ function contractWithHistoryToDomainModelWithoutRates(
     // between contract revision updates
     const contractRevisions = contract.revisions
     const contractActions = contract.reviewStatusActions
+    const initiallySubmittedAt = resolveInitiallySubmittedAt(contract)
     let draftRevision: ContractRevisionType | undefined = undefined
     const submittedRevisions: ContractRevisionType[] = []
     const reviewStatusActions: ContractReviewActionType[] = []
@@ -244,13 +281,18 @@ function contractWithHistoryToDomainModelWithoutRates(
                 )
             }
 
-            draftRevision = contractRevisionToDomainModel(contractRev)
+            draftRevision = contractRevisionToDomainModel(
+                contractRev,
+                initiallySubmittedAt
+            )
             // skip the rest of the processing
             continue
         }
 
         if (isSubmittedRevision(contractRev)) {
-            submittedRevisions.push(contractRevisionToDomainModel(contractRev))
+            submittedRevisions.push(
+                contractRevisionToDomainModel(contractRev, initiallySubmittedAt)
+            )
         }
     }
 
@@ -261,7 +303,7 @@ function contractWithHistoryToDomainModelWithoutRates(
         for (const submission of revision.relatedSubmisions) {
             // submittedThings
             const submittedContract = submission.submittedContracts.map((c) =>
-                contractRevisionToDomainModel(c)
+                contractRevisionToDomainModel(c, initiallySubmittedAt)
             )
             const submittedRates = submission.submittedRates.map((r) =>
                 rateRevisionToDomainModel(r)
@@ -291,7 +333,10 @@ function contractWithHistoryToDomainModelWithoutRates(
                     updatedReason: submission.updatedReason,
                 },
                 submittedRevisions: submitedRevs,
-                contractRevision: contractRevisionToDomainModel(revision),
+                contractRevision: contractRevisionToDomainModel(
+                    revision,
+                    initiallySubmittedAt
+                ),
                 rateRevisions: rateRevisions,
             })
         }
@@ -313,8 +358,10 @@ function contractWithHistoryToDomainModelWithoutRates(
             // the field resolvers only if the query requests the data.
             undoUnlockPackages.push({
                 undoUnlockInfo,
-                draftContractRevisionSnapshot:
-                    contractRevisionToDomainModel(revision),
+                draftContractRevisionSnapshot: contractRevisionToDomainModel(
+                    revision,
+                    initiallySubmittedAt
+                ),
             })
         }
     }
@@ -335,6 +382,7 @@ function contractWithHistoryToDomainModelWithoutRates(
             (contract as { lastActionDate?: Date | null }).lastActionDate ??
             null,
         mccrsID: contract.mccrsID || undefined,
+        initiallySubmittedAt,
         status,
         reviewStatus,
         consolidatedStatus,
@@ -440,11 +488,12 @@ function strippedContractFormDataToDomainModel(
 }
 
 function strippedContractRevisionToDomainModel(
-    revision: StrippedContractRevisionTableWithFormData
+    revision: StrippedContractRevisionTableWithFormData,
+    initiallySubmittedAt?: Date
 ): StrippedContractRevisionType {
     return {
         id: revision.id,
-        contract: revision.contract,
+        contract: { ...revision.contract, initiallySubmittedAt },
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
@@ -458,6 +507,7 @@ function strippedContractToDomainModel(
 ): StrippedContractType | Error {
     const contractRevisions = contract.revisions
     const contractActions = contract.reviewStatusActions
+    const initiallySubmittedAt = resolveInitiallySubmittedAt(contract)
 
     let draftRevision: StrippedContractRevisionType | undefined = undefined
     const submittedRevisions: StrippedContractRevisionType[] = []
@@ -495,12 +545,18 @@ function strippedContractToDomainModel(
                         contract.id
                 )
             }
-            draftRevision = strippedContractRevisionToDomainModel(contractRev)
+            draftRevision = strippedContractRevisionToDomainModel(
+                contractRev,
+                initiallySubmittedAt
+            )
             continue
         }
         if (isSubmittedRevision(contractRev)) {
             submittedRevisions.push(
-                strippedContractRevisionToDomainModel(contractRev)
+                strippedContractRevisionToDomainModel(
+                    contractRev,
+                    initiallySubmittedAt
+                )
             )
         }
     }
@@ -520,25 +576,6 @@ function strippedContractToDomainModel(
             `PROGRAMMING ERROR: non-draft contract has no submitted revisions. ID: ${contract.id}, consolidatedStatus: ${consolidatedStatus}`
         )
     }
-
-    const initiallySubmittedAtOverride = mergeScalarFieldOverrides<
-        Date,
-        ContractTableStrippedPayload['contractOverrides'][number]
-    >({
-        rows: contract.contractOverrides,
-        getOperation: (row) => row.initiallySubmittedAtOp,
-        getValue: (row) => row.initiallySubmittedAt,
-        valueSchema: z.date(),
-        fieldPath: 'ContractOverrides.initiallySubmittedAt',
-    })
-
-    // Use override or calculate initial contract submission.
-    const initiallySubmittedAt =
-        (initiallySubmittedAtOverride.hasOverride
-            ? initiallySubmittedAtOverride.value
-            : undefined) ||
-        submittedRevisionsDescending[submittedRevisionsDescending.length - 1]
-            ?.submitInfo?.updatedAt
 
     return {
         id: contract.id,

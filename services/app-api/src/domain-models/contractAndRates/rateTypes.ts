@@ -22,7 +22,7 @@ const rateSchema = rateWithoutDraftContractsSchema.extend({
 })
 
 const strippedRateSchema = z.object({
-    id: z.string().uuid(),
+    id: z.uuid(),
     createdAt: z.date(),
     updatedAt: z.date(),
     // Last persisted rate action that should affect display freshness.
@@ -32,7 +32,7 @@ const strippedRateSchema = z.object({
     reviewStatus: rateReviewStatusSchema,
     consolidatedStatus: consolidatedRateStatusSchema,
     stateCode: z.string(),
-    parentContractID: z.string().uuid(),
+    parentContractID: z.uuid(),
     stateNumber: z.number().min(1),
     // If this rate is in a DRAFT or UNLOCKED status, there will be a draftRevision
     draftRevision: strippedRateRevisionSchema.optional(),
