@@ -67,6 +67,16 @@ const documentSchema = z.object({
     s3Key: z.string().optional(),
 })
 
+// A rate outside MC-Review on an ILOS submission. Lives on the ILOS submission revision,
+const ilosExternalRateSchema = z.object({
+    id: z.string().optional(), // absent on a new external rate
+    rateControlName: z.string().optional(), // states may not know it at submission time
+    rateDateStart: z.date().optional(),
+    rateDateEnd: z.date().optional(),
+    // Shares one sequence with the linked rates' ratePosition
+    position: z.number().min(1),
+})
+
 const managedCareEntitiesSchema = z.union([
     z.literal('MCO'),
     z.literal('PIHP'),
@@ -201,6 +211,15 @@ const genericContractFormDataSchema = z.object({
     eqroProvisionMcoEqrOrRelatedActivities: preprocessNulls(
         z.boolean().optional()
     ),
+
+    // ILOS submission fields only. Optional here so health plan and EQRO form
+    // data is unchanged (the keys are simply absent). ilosContractFormDataSchema
+    // fills missing lists with [] on output so ILOS code always reads an array;
+    // callers are never required to send [].
+    isILOSRatesIncluded: preprocessNulls(z.boolean().optional()),
+    ilosDocuments: z.array(documentSchema).optional(),
+    ilosSupportingDocuments: z.array(documentSchema).optional(),
+    ilosExternalRates: z.array(ilosExternalRateSchema).optional(),
 })
 
 // contractFormDataSchema is the normal contractFormData setup for Draft contracts. Most fields are optional and array fields can be empty.
@@ -326,6 +345,81 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     // should always be an empty array to match GQL types
     federalAuthorities:
         genericContractFormDataSchema.shape.federalAuthorities.default([]),
+    // ILOS fields are not applicable to EQRO submissions.
+    isILOSRatesIncluded: preprocessNulls(z.undefined().optional()),
+    ilosDocuments: preprocessNulls(z.undefined().optional()),
+    ilosSupportingDocuments: preprocessNulls(z.undefined().optional()),
+    ilosExternalRates: preprocessNulls(z.undefined().optional()),
+})
+
+// ilosContractFormDataSchema is the draft form data for an ILOS submission. ILOS submissions
+// reuse the contract tables but are not contracts: they keep programs, description, state
+// contacts, and the prefilled submissionType and contractType, add the ILOS fields, and blank
+// every health plan and EQRO field, the way eqroContractFormDataSchema blanks health plan fields.
+const ilosContractFormDataSchema = genericContractFormDataSchema.extend({
+    // Fields not applicable to ILOS submissions should be undefined.
+    populationCovered: preprocessNulls(z.undefined().optional()),
+    riskBasedContract: preprocessNulls(z.undefined().optional()),
+    dsnpContract: preprocessNulls(z.undefined().optional()),
+    contractExecutionStatus: preprocessNulls(z.undefined().optional()),
+    contractDateStart: preprocessNulls(z.undefined().optional()),
+    contractDateEnd: preprocessNulls(z.undefined().optional()),
+    inLieuServicesAndSettings: preprocessNulls(z.undefined().optional()),
+    modifiedBenefitsProvided: preprocessNulls(z.undefined().optional()),
+    modifiedGeoAreaServed: preprocessNulls(z.undefined().optional()),
+    modifiedMedicaidBeneficiaries: preprocessNulls(z.undefined().optional()),
+    modifiedRiskSharingStrategy: preprocessNulls(z.undefined().optional()),
+    modifiedIncentiveArrangements: preprocessNulls(z.undefined().optional()),
+    modifiedWitholdAgreements: preprocessNulls(z.undefined().optional()),
+    modifiedStateDirectedPayments: preprocessNulls(z.undefined().optional()),
+    modifiedPassThroughPayments: preprocessNulls(z.undefined().optional()),
+    modifiedPaymentsForMentalDiseaseInstitutions: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedMedicalLossRatioStandards: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedOtherFinancialPaymentIncentive: preprocessNulls(
+        z.undefined().optional()
+    ),
+    modifiedEnrollmentProcess: preprocessNulls(z.undefined().optional()),
+    modifiedGrevienceAndAppeal: preprocessNulls(z.undefined().optional()),
+    modifiedNetworkAdequacyStandards: preprocessNulls(z.undefined().optional()),
+    modifiedLengthOfContract: preprocessNulls(z.undefined().optional()),
+    modifiedNonRiskPaymentArrangements: preprocessNulls(
+        z.undefined().optional()
+    ),
+    statutoryRegulatoryAttestation: preprocessNulls(z.undefined().optional()),
+    statutoryRegulatoryAttestationDescription: preprocessNulls(
+        z.undefined().optional()
+    ),
+    procurementAttestation: preprocessNulls(z.undefined().optional()),
+    eqroNewContractor: preprocessNulls(z.undefined().optional()),
+    eqroProvisionMcoNewOptionalActivity: preprocessNulls(
+        z.undefined().optional()
+    ),
+    eqroProvisionNewMcoEqrRelatedActivities: preprocessNulls(
+        z.undefined().optional()
+    ),
+    eqroProvisionChipEqrRelatedActivities: preprocessNulls(
+        z.undefined().optional()
+    ),
+    eqroProvisionMcoEqrOrRelatedActivities: preprocessNulls(
+        z.undefined().optional()
+    ),
+    // should always be empty arrays to match GQL types
+    contractDocuments:
+        genericContractFormDataSchema.shape.contractDocuments.default([]),
+    supportingDocuments:
+        genericContractFormDataSchema.shape.supportingDocuments.default([]),
+    managedCareEntities:
+        genericContractFormDataSchema.shape.managedCareEntities.default([]),
+    federalAuthorities:
+        genericContractFormDataSchema.shape.federalAuthorities.default([]),
+    // ILOS fields
+    ilosDocuments: z.array(documentSchema).default([]),
+    ilosSupportingDocuments: z.array(documentSchema).default([]),
+    ilosExternalRates: z.array(ilosExternalRateSchema).default([]),
 })
 
 // submittedFormDataSchema is the schema used during submission validation. Most fields are required and most arrays are nonempty.
@@ -369,6 +463,28 @@ const submittableEQROContractFormDataSchema = eqroContractFormDataSchema.extend(
         contractExecutionStatus:
             genericContractFormDataSchema.shape.contractExecutionStatus,
         submissionType: z.literal('CONTRACT_ONLY'),
+    }
+)
+
+// submittableILOSContractFormDataSchema is the schema used during ILOS submission validation.
+// Rates are optional on an ILOS submission, so ilosExternalRates may be empty, but every
+// external rate present needs both dates, as submittableRateFormDataSchema requires them on a rate.
+// parseILOSContract handles associated rate validation
+const submittableILOSContractFormDataSchema = ilosContractFormDataSchema.extend(
+    {
+        isILOSRatesIncluded: z.boolean(),
+        stateContacts:
+            genericContractFormDataSchema.shape.stateContacts.nonempty(),
+        ilosDocuments: z.array(documentSchema).nonempty(),
+        ilosExternalRates: z.array(
+            ilosExternalRateSchema.extend({
+                rateDateStart: z.date(),
+                rateDateEnd: z.date(),
+            })
+        ),
+        // Prefilled on create. Kept CONTRACT_AND_RATES so the existing rate link and
+        // withdraw paths that skip CONTRACT_ONLY submissions treat ILOS like a health plan.
+        submissionType: z.literal('CONTRACT_AND_RATES'),
     }
 )
 
@@ -488,7 +604,9 @@ type UpdateDraftContractFormDataType = Partial<
 >
 
 type DocumentType = z.infer<typeof documentSchema>
+type ILOSExternalRateType = z.infer<typeof ilosExternalRateSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
+type ILOSContractFormDataType = z.infer<typeof ilosContractFormDataSchema>
 type RateFormDataType = z.infer<typeof rateFormDataSchema>
 type StrippedRateFormDataType = z.infer<typeof strippedRateFormDataSchema>
 type StrippedContractFormDataType = z.infer<
@@ -504,8 +622,11 @@ export {
     submittableActuaryContactSchema,
     submittableContractFormDataSchema,
     submittableEQROContractFormDataSchema,
+    submittableILOSContractFormDataSchema,
     submittableRateFormDataSchema,
     contractFormDataSchema,
+    ilosContractFormDataSchema,
+    ilosExternalRateSchema,
     rateFormDataSchema,
     preprocessNulls,
     documentSchema,
@@ -520,6 +641,8 @@ export {
 
 export type {
     ContractFormDataType,
+    ILOSContractFormDataType,
+    ILOSExternalRateType,
     RateFormDataType,
     DocumentType,
     RateFormEditableType,
