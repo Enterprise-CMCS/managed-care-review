@@ -59,7 +59,7 @@ export const StateSubmissionForm = (): React.ReactElement => {
         return <HealthPlanSubmissionForm />
     }
 
-    if(
+    if (
         contractSubmissionType === ContractSubmissionTypeRecord['ENROLLMENT_BROKER']
     ) {
         return showEBSubmissions ? <EBSubmissionForm /> : <Error404/>
