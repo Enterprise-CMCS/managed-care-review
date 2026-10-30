@@ -1229,3 +1229,78 @@ describe('findContractWithHistory with only contract history', () => {
         )
     })
 })
+
+describe('findContractWithHistory initiallySubmittedAt', () => {
+    it('leaves initiallySubmittedAt undefined for a never-submitted draft', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const draft = must(
+            await insertDraftContract(client, mockInsertContractArgs({}))
+        )
+        const found = must(await findContractWithHistory(client, draft.id))
+
+        expect(found.initiallySubmittedAt).toBeUndefined()
+    })
+
+    it('reports the first submission date after a resubmit', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: 'aang@example.com',
+                role: 'STATE_USER',
+                stateCode: 'NM',
+            },
+        })
+        const cmsUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Zuko',
+                familyName: 'Hotman',
+                email: 'zuko@example.com',
+                role: 'CMS_USER',
+            },
+        })
+
+        const draft = must(
+            await insertDraftContract(client, mockInsertContractArgs({}))
+        )
+        const firstSubmit = must(
+            await submitContract(client, {
+                contractID: draft.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'initial submit',
+            })
+        )
+        const firstSubmitDate =
+            firstSubmit.packageSubmissions[0].submitInfo.updatedAt
+
+        must(
+            await unlockContract(client, {
+                contractID: draft.id,
+                unlockedByUserID: cmsUser.id,
+                unlockReason: 'unlock',
+            })
+        )
+        must(
+            await submitContract(client, {
+                contractID: draft.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'resubmit',
+            })
+        )
+
+        const found = must(await findContractWithHistory(client, draft.id))
+
+        expect(found.packageSubmissions).toHaveLength(2)
+        expect(found.initiallySubmittedAt).toStrictEqual(firstSubmitDate)
+        expect(
+            found.packageSubmissions.map(
+                (sub) => sub.contractRevision.contract.initiallySubmittedAt
+            )
+        ).toStrictEqual([firstSubmitDate, firstSubmitDate])
+    })
+})

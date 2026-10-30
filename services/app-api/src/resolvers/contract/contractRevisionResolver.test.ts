@@ -62,4 +62,48 @@ describe.each([
             )
         ).toBe('MCR-MN-0004-SNBC')
     })
+
+    it('ILOS revisions contract name has the year of the initial submission', async () => {
+        const store = mockStoreThatErrors()
+        store.findStatePrograms = () => mockMNState().programs
+        const resolveName = makeResolver(store)?.contractName
+        if (typeof resolveName !== 'function') {
+            throw new Error('Missing contractName resolver')
+        }
+        const revision =
+            mockEQROContract().packageSubmissions[0].contractRevision
+        revision.contract.contractSubmissionType = 'ILOS'
+        revision.contract.initiallySubmittedAt = new Date('2024-06-15')
+
+        expect(
+            await resolveName(
+                revision,
+                {},
+                defaultContext(),
+                {} as GraphQLResolveInfo
+            )
+        ).toBe('MCR-ILOS-MN-0004-2024')
+    })
+
+    it('Draft ILOS submission names does not include a year', async () => {
+        const store = mockStoreThatErrors()
+        store.findStatePrograms = () => mockMNState().programs
+        const resolveName = makeResolver(store)?.contractName
+        if (typeof resolveName !== 'function') {
+            throw new Error('Missing contractName resolver')
+        }
+        const revision =
+            mockEQROContract().packageSubmissions[0].contractRevision
+        revision.contract.contractSubmissionType = 'ILOS'
+        revision.contract.initiallySubmittedAt = undefined
+
+        expect(
+            await resolveName(
+                revision,
+                {},
+                defaultContext(),
+                {} as GraphQLResolveInfo
+            )
+        ).toBe('MCR-ILOS-MN-0004')
+    })
 })

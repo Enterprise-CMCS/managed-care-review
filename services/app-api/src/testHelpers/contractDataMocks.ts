@@ -171,6 +171,9 @@ const mockContractRevision = (
         eqroProvisionMcoEqrOrRelatedActivities: null,
         eqroProvisionNewMcoEqrRelatedActivities: null,
         isILOSRatesIncluded: null,
+        ilosDocuments: [],
+        ilosSupportingDocuments: [],
+        ilosExternalRates: [],
         ...revision,
     }
 }
