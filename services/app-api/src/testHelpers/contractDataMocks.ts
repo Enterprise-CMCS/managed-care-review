@@ -170,6 +170,7 @@ const mockContractRevision = (
         eqroProvisionMcoNewOptionalActivity: null,
         eqroProvisionMcoEqrOrRelatedActivities: null,
         eqroProvisionNewMcoEqrRelatedActivities: null,
+        isILOSRatesIncluded: null,
         ...revision,
     }
 }
