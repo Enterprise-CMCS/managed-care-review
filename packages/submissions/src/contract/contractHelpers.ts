@@ -172,16 +172,25 @@ function programNames(
     })
 }
 
+// initiallySubmittedAt is only used for ILOS submissions, whose name carries the year of
+// the first submission. Unsubmitted drafts have no year segment.
 function packageName(
     stateCode: string,
     stateNumber: number,
     programIDs: string[],
     statePrograms: ProgramArgType[],
-    submissionType: ContractSubmissionType = 'HEALTH_PLAN'
+    submissionType: ContractSubmissionType = 'HEALTH_PLAN',
+    initiallySubmittedAt?: Date
 ): string {
     const padNumber = stateNumber.toString().padStart(4, '0')
     if (submissionType === 'EQRO') {
         return `MCR-EQRO-${stateCode.toUpperCase()}-${padNumber}`
+    }
+    if (submissionType === 'ILOS') {
+        const ilosName = `MCR-ILOS-${stateCode.toUpperCase()}-${padNumber}`
+        return initiallySubmittedAt
+            ? `${ilosName}-${initiallySubmittedAt.getFullYear()}`
+            : ilosName
     }
     const pNames = programNames(statePrograms, programIDs)
     const formattedProgramNames = pNames
