@@ -170,6 +170,11 @@ const mockContractRevision = (
         eqroProvisionMcoNewOptionalActivity: null,
         eqroProvisionMcoEqrOrRelatedActivities: null,
         eqroProvisionNewMcoEqrRelatedActivities: null,
+        ebNewContractor: null,
+        ebBaseContractInMCReview: null,
+        ebPreviousAmendmentInMCReview: null,
+        ebAmendmentNumber: null,
+        ebStateContractIdentifier: null,
         ...revision,
     }
 }
