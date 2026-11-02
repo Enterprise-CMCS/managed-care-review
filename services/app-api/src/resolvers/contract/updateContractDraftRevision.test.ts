@@ -16,7 +16,11 @@ import {
 } from '../../testHelpers'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { submitTestContract } from '../../testHelpers/gqlContractHelpers'
+import {
+    createAndUpdateTestEBContract,
+    fetchTestContract,
+    submitTestContract,
+} from '../../testHelpers/gqlContractHelpers'
 import { mockGqlContractDraftRevisionFormDataInput } from '../../testHelpers'
 
 describe(`Tests UpdateContractDraftRevision`, () => {
@@ -552,6 +556,71 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 'Error updating form data'
             )
         })
+    })
+
+    describe('Enrollment Broker contract tests', () => {
+        it('updates EB scalar fields in the formData', async () => {
+            const server = await constructTestPostgresServer()
+            const draft = await createAndUpdateTestEBContract(server)
+            const ebFields = {
+                ebNewContractor: false,
+                ebBaseContractInMCReview: true,
+                ebPreviousAmendmentInMCReview: false,
+                ebAmendmentNumber: 'Amendment 3',
+                ebStateContractIdentifier: 'EB-2026-002',
+            }
+
+            const updated = await updateTestContractDraftRevision(
+                server,
+                draft.id,
+                draft.draftRevision?.updatedAt,
+                mockGqlContractDraftRevisionFormDataInput(draft.stateCode, {
+                    contractType: 'AMENDMENT',
+                    ...ebFields,
+                })
+            )
+
+            expect(updated.contractSubmissionType).toBe('ENROLLMENT_BROKER')
+            expect(updated.draftRevision?.formData).toEqual(
+                expect.objectContaining(ebFields)
+            )
+            const fetched = await fetchTestContract(server, draft.id)
+            expect(fetched.draftRevision?.formData).toEqual(
+                expect.objectContaining(ebFields)
+            )
+        })
+
+        it.each([null, undefined])(
+            'clears optional EB fields when updated with %s',
+            async (emptyValue) => {
+                const server = await constructTestPostgresServer()
+                const draft = await createAndUpdateTestEBContract(server)
+
+                const updated = await updateTestContractDraftRevision(
+                    server,
+                    draft.id,
+                    draft.draftRevision?.updatedAt,
+                    mockGqlContractDraftRevisionFormDataInput(draft.stateCode, {
+                        contractType: 'AMENDMENT',
+                        ebNewContractor: emptyValue,
+                        ebBaseContractInMCReview: emptyValue,
+                        ebPreviousAmendmentInMCReview: emptyValue,
+                        ebAmendmentNumber: emptyValue,
+                        ebStateContractIdentifier: emptyValue,
+                    })
+                )
+
+                expect(updated.draftRevision?.formData).toEqual(
+                    expect.objectContaining({
+                        ebNewContractor: null,
+                        ebBaseContractInMCReview: null,
+                        ebPreviousAmendmentInMCReview: null,
+                        ebAmendmentNumber: null,
+                        ebStateContractIdentifier: null,
+                    })
+                )
+            }
+        )
     })
 
     describe('EQRO contract tests', () => {
