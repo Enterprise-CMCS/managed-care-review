@@ -2215,6 +2215,43 @@ describe('ILOS parsing and validation', () => {
             expect(parsedContract).toEqual(contract)
         })
 
+        it('succeeds when a linked rate parent health plan revision is in a package submission', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract()
+            const ilosRevision = contract.draftRevision!
+            // When the health plan contract that owns the linked rate resubmits, its
+            // revision lands in the ILOS package's submittedRevisions.
+            const healthPlanRevision =
+                mockSubmittableHealthPlanContract().draftRevision!
+            const submitInfo = {
+                updatedAt: new Date('2024-06-15'),
+                updatedBy: {
+                    email: 'state@example.com',
+                    role: 'STATE_USER' as const,
+                    givenName: 'State',
+                    familyName: 'User',
+                },
+                updatedReason: 'Initial submission',
+            }
+            contract.packageSubmissions = [
+                {
+                    submitInfo,
+                    submittedRevisions: [healthPlanRevision, ilosRevision],
+                    contractRevision: ilosRevision,
+                    rateRevisions: [],
+                },
+            ]
+
+            const parsedContract = parseILOSContract(
+                contract,
+                'FL',
+                postgresStore
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
+
         it('succeeds with no rates when isILOSRatesIncluded is false', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)

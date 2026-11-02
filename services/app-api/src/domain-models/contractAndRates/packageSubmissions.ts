@@ -36,10 +36,12 @@ const eqroContractUndoUnlockPackageSchema = z.object({
 })
 
 // ILOS submissions carry linked rates in rateRevisions like a health plan package.
+// submittedRevisions uses the generic contract revision schema because a linked
+// rate's parent health plan contract shows up here when it resubmits.
 const ilosContractPackageSubmissionSchema = z.object({
     submitInfo: updateInfoSchema,
     submittedRevisions: z.array(
-        z.union([ilosContractRevisionSchema, rateRevisionSchema])
+        z.union([contractRevisionSchema, rateRevisionSchema])
     ),
     contractRevision: ilosContractRevisionSchema,
     rateRevisions: z.array(rateRevisionSchema),
