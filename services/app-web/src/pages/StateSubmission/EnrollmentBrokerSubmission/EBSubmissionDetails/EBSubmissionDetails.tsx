@@ -110,13 +110,17 @@ export const EBSubmissionDetails = (): React.ReactElement => {
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
-                    showPageErrorMessage={false}
+                    unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
+                    showPageErrorMessage={showPageErrorMessage}
                 />
             </FormNotificationContainer>
             <FormContainer id="SubmissionDetails">
-                <Form
+               <Form
                     className={styles.formContainer}
-                    onSubmit={(e) => e.preventDefault()}
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        void handleContinue()
+                    }}
                 >
                     <fieldset className="usa-fieldset">
                         <legend className="srOnly">Submission details</legend>
