@@ -42,16 +42,14 @@ const normalizeProgramIDs = (programIDs: string[]): string[] =>
  */
 const buildContractName = (
     submission: ContractPackageSubmissionType,
-    statePrograms: ProgramType[],
-    initiallySubmittedAt?: Date
+    statePrograms: ProgramType[]
 ): string | Error => {
     return packageName(
         submission.contractRevision.contract.stateCode,
         submission.contractRevision.contract.stateNumber,
         submission.contractRevision.formData.programIDs,
         statePrograms,
-        submission.contractRevision.contract.contractSubmissionType,
-        initiallySubmittedAt
+        submission.contractRevision.contract.contractSubmissionType
     )
 }
 
@@ -212,23 +210,14 @@ function buildRevisionDiff(
     olderSubmission: ContractPackageSubmissionType,
     newerSubmission: ContractPackageSubmissionType,
     statePrograms: ProgramType[],
-    linkedRateIDs: Set<string>,
-    initiallySubmittedAt?: Date
+    linkedRateIDs: Set<string>
 ): RevisionDiff | Error {
-    const olderContractName = buildContractName(
-        olderSubmission,
-        statePrograms,
-        initiallySubmittedAt
-    )
+    const olderContractName = buildContractName(olderSubmission, statePrograms)
     if (olderContractName instanceof Error) {
         return olderContractName
     }
 
-    const newerContractName = buildContractName(
-        newerSubmission,
-        statePrograms,
-        initiallySubmittedAt
-    )
+    const newerContractName = buildContractName(newerSubmission, statePrograms)
     if (newerContractName instanceof Error) {
         return newerContractName
     }

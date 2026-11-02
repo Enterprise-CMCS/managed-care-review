@@ -197,8 +197,7 @@ async function findRevisionDiffByContractID(
         selectedSubmissions.olderSubmission,
         selectedSubmissions.newerSubmission,
         statePrograms,
-        linkedRateIDs,
-        contractWithHistory.initiallySubmittedAt
+        linkedRateIDs
     )
 }
 

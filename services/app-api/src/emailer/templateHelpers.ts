@@ -444,8 +444,7 @@ const parseEmailDataWithdrawSubmission = (
         contract.stateNumber,
         contract.packageSubmissions[0].contractRevision.formData.programIDs,
         findStatePrograms(contract.stateCode),
-        contract.contractSubmissionType,
-        contract.initiallySubmittedAt
+        contract.contractSubmissionType
     )
 
     const contractSummaryURL = submissionSummaryURL(
@@ -563,8 +562,7 @@ const parseEmailDataUndoUnlockContract = (
         contract.stateNumber,
         formData.programIDs,
         packagePrograms,
-        contract.contractSubmissionType,
-        contract.initiallySubmittedAt
+        contract.contractSubmissionType
     )
 
     const isContractAndRates =

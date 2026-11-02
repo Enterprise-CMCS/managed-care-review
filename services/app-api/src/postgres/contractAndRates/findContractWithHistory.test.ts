@@ -1297,10 +1297,5 @@ describe('findContractWithHistory initiallySubmittedAt', () => {
 
         expect(found.packageSubmissions).toHaveLength(2)
         expect(found.initiallySubmittedAt).toStrictEqual(firstSubmitDate)
-        expect(
-            found.packageSubmissions.map(
-                (sub) => sub.contractRevision.contract.initiallySubmittedAt
-            )
-        ).toStrictEqual([firstSubmitDate, firstSubmitDate])
     })
 })

@@ -132,12 +132,11 @@ function resolveInitiallySubmittedAt(
 }
 
 function contractRevisionToDomainModel(
-    revision: ContractRevisionTableWithFormData,
-    initiallySubmittedAt?: Date
+    revision: ContractRevisionTableWithFormData
 ): ContractRevisionType {
     return {
         id: revision.id,
-        contract: { ...revision.contract, initiallySubmittedAt },
+        contract: revision.contract,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
@@ -281,18 +280,13 @@ function contractWithHistoryToDomainModelWithoutRates(
                 )
             }
 
-            draftRevision = contractRevisionToDomainModel(
-                contractRev,
-                initiallySubmittedAt
-            )
+            draftRevision = contractRevisionToDomainModel(contractRev)
             // skip the rest of the processing
             continue
         }
 
         if (isSubmittedRevision(contractRev)) {
-            submittedRevisions.push(
-                contractRevisionToDomainModel(contractRev, initiallySubmittedAt)
-            )
+            submittedRevisions.push(contractRevisionToDomainModel(contractRev))
         }
     }
 
@@ -303,7 +297,7 @@ function contractWithHistoryToDomainModelWithoutRates(
         for (const submission of revision.relatedSubmisions) {
             // submittedThings
             const submittedContract = submission.submittedContracts.map((c) =>
-                contractRevisionToDomainModel(c, initiallySubmittedAt)
+                contractRevisionToDomainModel(c)
             )
             const submittedRates = submission.submittedRates.map((r) =>
                 rateRevisionToDomainModel(r)
@@ -333,10 +327,7 @@ function contractWithHistoryToDomainModelWithoutRates(
                     updatedReason: submission.updatedReason,
                 },
                 submittedRevisions: submitedRevs,
-                contractRevision: contractRevisionToDomainModel(
-                    revision,
-                    initiallySubmittedAt
-                ),
+                contractRevision: contractRevisionToDomainModel(revision),
                 rateRevisions: rateRevisions,
             })
         }
@@ -358,10 +349,8 @@ function contractWithHistoryToDomainModelWithoutRates(
             // the field resolvers only if the query requests the data.
             undoUnlockPackages.push({
                 undoUnlockInfo,
-                draftContractRevisionSnapshot: contractRevisionToDomainModel(
-                    revision,
-                    initiallySubmittedAt
-                ),
+                draftContractRevisionSnapshot:
+                    contractRevisionToDomainModel(revision),
             })
         }
     }
@@ -488,12 +477,11 @@ function strippedContractFormDataToDomainModel(
 }
 
 function strippedContractRevisionToDomainModel(
-    revision: StrippedContractRevisionTableWithFormData,
-    initiallySubmittedAt?: Date
+    revision: StrippedContractRevisionTableWithFormData
 ): StrippedContractRevisionType {
     return {
         id: revision.id,
-        contract: { ...revision.contract, initiallySubmittedAt },
+        contract: revision.contract,
         createdAt: revision.createdAt,
         updatedAt: revision.updatedAt,
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
@@ -545,18 +533,12 @@ function strippedContractToDomainModel(
                         contract.id
                 )
             }
-            draftRevision = strippedContractRevisionToDomainModel(
-                contractRev,
-                initiallySubmittedAt
-            )
+            draftRevision = strippedContractRevisionToDomainModel(contractRev)
             continue
         }
         if (isSubmittedRevision(contractRev)) {
             submittedRevisions.push(
-                strippedContractRevisionToDomainModel(
-                    contractRev,
-                    initiallySubmittedAt
-                )
+                strippedContractRevisionToDomainModel(contractRev)
             )
         }
     }
