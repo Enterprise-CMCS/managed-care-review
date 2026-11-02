@@ -1,11 +1,17 @@
-import opentelemetry, { ROOT_CONTEXT, SpanStatusCode } from '@opentelemetry/api'
+import opentelemetry, {
+    ROOT_CONTEXT,
+    SpanStatusCode,
+    context,
+    propagation,
+    trace,
+} from '@opentelemetry/api'
 import {
     resourceFromAttributes,
     defaultResource,
 } from '@opentelemetry/resources'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto'
-import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base'
-import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import { BatchSpanProcessor, TracerProvider } from '@opentelemetry/sdk-trace'
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks'
 import { W3CTraceContextPropagator } from '@opentelemetry/core'
 import { PrismaInstrumentation } from '@prisma/instrumentation'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
@@ -16,7 +22,7 @@ import {
 
 const DD_TRACES_URL = 'https://otlp.ddog-gov.com/v1/traces'
 
-let tracerProvider: NodeTracerProvider | undefined
+let tracerProvider: TracerProvider | undefined
 
 function getDDHeaders() {
     if (!process.env.DD_API_KEY) {
@@ -75,14 +81,18 @@ export function initTracer(serviceName: string) {
     )
 
     const exporter = new OTLPTraceExporter(getExporterConfig())
-    const provider = new NodeTracerProvider({
+    const provider = new TracerProvider({
         resource,
-        spanProcessors: [new BatchSpanProcessor(exporter)],
+        spanProcessors: [new BatchSpanProcessor({ exporter })],
     })
 
-    provider.register({
-        propagator: new W3CTraceContextPropagator(),
-    })
+    // SDK 3.x removed NodeTracerProvider.register(); the provider, context
+    // manager, and propagator are registered as API globals explicitly.
+    trace.setGlobalTracerProvider(provider)
+    context.setGlobalContextManager(
+        new AsyncLocalStorageContextManager().enable()
+    )
+    propagation.setGlobalPropagator(new W3CTraceContextPropagator())
 
     // Register Prisma instrumentation to capture database operations
     // Spans will include: prisma:client:*, prisma:engine:*, and prisma:engine:db_query

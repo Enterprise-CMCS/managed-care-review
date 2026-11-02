@@ -2,15 +2,13 @@ import {
     Tracer,
     trace,
     context,
+    propagation,
     Span,
     SpanStatusCode,
     Attributes,
     AttributeValue,
 } from '@opentelemetry/api'
-import {
-    WebTracerProvider,
-    BatchSpanProcessor,
-} from '@opentelemetry/sdk-trace-web'
+import { TracerProvider, BatchSpanProcessor } from '@opentelemetry/sdk-trace'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import {
     resourceFromAttributes,
@@ -50,7 +48,7 @@ function initializeTracer() {
 
     const exporter = new OTLPTraceExporter(collectorOptions)
 
-    const provider = new WebTracerProvider({
+    const provider = new TracerProvider({
         resource: defaultResource().merge(
             resourceFromAttributes({
                 [ATTR_SERVICE_NAME]: serviceName,
@@ -58,13 +56,14 @@ function initializeTracer() {
                     .VITE_APP_STAGE_NAME,
             })
         ),
-        spanProcessors: [new BatchSpanProcessor(exporter)],
+        spanProcessors: [new BatchSpanProcessor({ exporter })],
     })
 
-    provider.register({
-        contextManager: new ZoneContextManager(),
-        propagator: new W3CTraceContextPropagator(),
-    })
+    // SDK 3.x removed WebTracerProvider.register(); the provider, context
+    // manager, and propagator are registered as API globals explicitly.
+    trace.setGlobalTracerProvider(provider)
+    context.setGlobalContextManager(new ZoneContextManager().enable())
+    propagation.setGlobalPropagator(new W3CTraceContextPropagator())
 
     // Get API URL to only propagate trace headers to our backend
     const apiUrl = import.meta.env.VITE_APP_API_URL

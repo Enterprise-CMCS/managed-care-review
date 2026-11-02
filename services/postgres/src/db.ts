@@ -1,25 +1,20 @@
 import { Client, ClientConfig } from 'pg'
 import { SecretDict } from './types'
-import https from 'https'
+import { readFile } from 'node:fs/promises'
 
 export class DatabaseClient {
     private async getRdsCertificate(): Promise<string> {
         try {
-            const certUrl =
-                'https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem'
-
-            return new Promise((resolve, reject) => {
-                https
-                    .get(certUrl, (res) => {
-                        let cert = ''
-                        res.on('data', (chunk) => (cert += chunk))
-                        res.on('end', () => resolve(cert))
-                        res.on('error', reject)
-                    })
-                    .on('error', reject)
-            })
+            // Managed Node.js Lambda runtimes include Amazon's CA bundle.
+            const certPath =
+                process.env.RDS_CA_BUNDLE_PATH ?? '/var/runtime/ca-cert.pem'
+            const cert = await readFile(certPath, 'utf8')
+            if (!cert.trim()) {
+                throw new Error(`RDS CA bundle is empty: ${certPath}`)
+            }
+            return cert
         } catch (error) {
-            console.error('Failed to download RDS certificate:', error)
+            console.error('Failed to read RDS certificate bundle:', error)
             throw error
         }
     }

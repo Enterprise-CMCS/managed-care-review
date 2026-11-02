@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { matchPath, useLocation, useNavigate } from 'react-router-dom'
 import { Form } from '@trussworks/react-uswds'
 import {
@@ -11,19 +11,37 @@ import {
     FormNotificationContainer,
     PageActions,
 } from '../../../../components'
-import { PageBannerAlerts } from '../../SharedSubmissionComponents'
-import { useCurrentRoute } from '../../../../hooks'
+import { ErrorOrLoadingPage, PageBannerAlerts } from '../../SharedSubmissionComponents'
+import { useCurrentRoute, useRouteParams } from '../../../../hooks'
 import { usePage } from '../../../../contexts/PageContext'
 import { useAuth } from '../../../../contexts/AuthContext'
 import styles from '../../StateSubmissionForm.module.scss'
+import { getSubmissionPath } from '../../../../routeHelpers'
+import { useContractForm } from '../../../../hooks/useContractForm'
+import { CreateContractInput } from '@mc-review/helpers/build/gen/gqlClient'
+
+// TODO: replace with real form values when the Submission details form is built.
+// createContract requires these fields, so the placeholder sends fixed values.
+const PLACEHOLDER_CREATE_INPUT: CreateContractInput = {
+    contractSubmissionType: 'ENROLLMENT_BROKER',
+    submissionType: 'CONTRACT_ONLY',
+    contractType: 'BASE',
+    populationCovered: 'MEDICAID',
+    programIDs: [],
+    submissionDescription: 'Placeholder Enrollment Broker submission',
+}
 
 // Placeholder for the Enrollment Broker submission form.
 export const EBSubmissionDetails = (): React.ReactElement => {
     const navigate = useNavigate()
     const location = useLocation()
+    const { id } = useRouteParams()
     const { updateActiveMainContent } = usePage()
     const { currentRoute } = useCurrentRoute()
     const { loggedInUser } = useAuth()
+    const { createDraft, draftSubmission, interimState, showPageErrorMessage } =
+        useContractForm(id)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const isNewSubmission = matchPath(
         RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
@@ -37,6 +55,45 @@ export const EBSubmissionDetails = (): React.ReactElement => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
+    if (interimState) {
+        return <ErrorOrLoadingPage state={interimState} />
+    }
+
+    const handleContinue = async () => {
+        // Existing draft: nothing to save yet, go straight to Contract details
+        if (!isNewSubmission && id) {
+            navigate(
+                getSubmissionPath(
+                    'SUBMISSIONS_CONTRACT_DETAILS',
+                    'ENROLLMENT_BROKER',
+                    id
+                )
+            )
+            return
+        }
+
+        setIsSubmitting(true)
+        const newDraft = await createDraft(PLACEHOLDER_CREATE_INPUT)
+
+        if (newDraft instanceof Error) {
+            // useContractForm sets showPageErrorMessage, which shows the error banner
+            setIsSubmitting(false)
+            console.info(
+                'Log: creating new submission failed with server error',
+                newDraft
+            )
+            return
+        }
+
+        navigate(
+            getSubmissionPath(
+                'SUBMISSIONS_CONTRACT_DETAILS',
+                'ENROLLMENT_BROKER',
+                newDraft.id
+            )
+        )
+    }
+    
     return (
         <div id={activeMainContentId}>
             <FormNotificationContainer>
@@ -77,8 +134,8 @@ export const EBSubmissionDetails = (): React.ReactElement => {
                             navigate(RoutesRecord.DASHBOARD_SUBMISSIONS)
                         }
                         backOnClickUrl={RoutesRecord.DASHBOARD_SUBMISSIONS}
-                        // Placeholder: nothing to save yet
-                        disableContinue
+                        actionInProgress={isSubmitting}
+                        continueOnClickUrl={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
                     />
                 </Form>
             </FormContainer>

@@ -261,6 +261,9 @@ jobs:
         shell: bash
         run: pnpm build:packages
 
+      - name: Postgres unit tests
+        run: pnpm --filter postgres test:once
+
       - name: Packages Unit Tests
         id: packages-unit-tests
         env:
