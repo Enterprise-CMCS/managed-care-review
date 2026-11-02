@@ -662,8 +662,8 @@ importers:
         specifier: ^16.14.2
         version: 16.14.2
       graphql-scalars:
-        specifier: ^2.0.0
-        version: 2.0.0(graphql@16.14.2)
+        specifier: ^2.0.1
+        version: 2.0.1(graphql@16.14.2)
       jsonwebtoken:
         specifier: ^9.0.3
         version: 9.0.3
@@ -7857,8 +7857,8 @@ packages:
       cosmiconfig-toml-loader:
         optional: true
 
-  graphql-scalars@2.0.0:
-    resolution: {integrity: sha512-tCd2ddcxlbz5rG7xsfDbjvIssR9c/5EauDYt272pxfxpUNBjFMpnDwukuA3rm1O/9michQDxFfPPAeoQjZtJVQ==}
+  graphql-scalars@2.0.1:
+    resolution: {integrity: sha512-/BkY0J5/1L9e+mTfCTzmpV78mNh95ZpiJWfAkaIYHE5B7hrvgRpB5//rXVTFD1aaKGcRUCHj/vpNcgtrenwZNA==}
     engines: {node: '>=10'}
     peerDependencies:
       graphql: ^16.0.0 || ^17.0.0
@@ -20005,7 +20005,7 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  graphql-scalars@2.0.0(graphql@16.14.2):
+  graphql-scalars@2.0.1(graphql@16.14.2):
     dependencies:
       graphql: 16.14.2
       tslib: 2.8.1
