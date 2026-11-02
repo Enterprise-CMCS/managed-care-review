@@ -12,6 +12,7 @@ import { EQROSubmissionForm } from './EQROSubmission'
 import { HealthPlanSubmissionForm } from './HealthPlanSubmission/HealthPlanSubmissionForm'
 import { Error404 } from '../Errors/Error404Page'
 import { usePage } from '../../contexts/PageContext'
+import { EBSubmissionForm } from './EnrollmentBrokerSubmission'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { contractSubmissionType } = useRouteParams()
@@ -20,6 +21,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const showEqroSubmissions: boolean = ldClient?.variation(
         featureFlags.EQRO_SUBMISSIONS.flag,
         featureFlags.EQRO_SUBMISSIONS.defaultValue
+    )
+    const showEBSubmissions: boolean = ldClient?.variation(
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.flag,
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
     )
     const { contract } = useOutletContext<SideNavOutletContextType>()
     const stateHeader = useMemoizedStateHeader({
@@ -52,6 +57,12 @@ export const StateSubmissionForm = (): React.ReactElement => {
         contractSubmissionType === ContractSubmissionTypeRecord['HEALTH_PLAN']
     ) {
         return <HealthPlanSubmissionForm />
+    }
+
+    if (
+        contractSubmissionType === ContractSubmissionTypeRecord['ENROLLMENT_BROKER']
+    ) {
+        return showEBSubmissions ? <EBSubmissionForm /> : <Error404/>
     }
 
     return <Error404 />
