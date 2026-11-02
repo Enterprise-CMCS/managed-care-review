@@ -61,13 +61,6 @@ export const EBContractDetails = (): React.ReactElement => {
         >
           <fieldset className="usa-fieldset">
             <legend className="srOnly">EB Contract details</legend>
-			<p
-                            className="margin-0"
-                            data-testid="eb-submission-details-placeholder"
-                        >
-                            The Enrollment Broker contract details form is coming
-                            soon.
-                        </p>
           </fieldset>
           <PageActions
             backOnClick={() => navigate(submissionDetailsPath)}
