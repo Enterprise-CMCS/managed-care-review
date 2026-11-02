@@ -97,6 +97,11 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
+                ebNewContractor: null,
+                ebBaseContractInMCReview: null,
+                ebPreviousAmendmentInMCReview: null,
+                ebAmendmentNumber: null,
+                ebStateContractIdentifier: null,
                 stateContacts: [
                     {
                         name: `${testContact.givenName} ${testContact.familyName}`,
