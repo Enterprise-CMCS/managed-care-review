@@ -26,6 +26,7 @@ import { Error404 } from '../../../Errors/Error404Page'
 import styles from './NewSubmissionForm.module.scss'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
+import { EBSubmissionDetails } from '../../EnrollmentBrokerSubmission'
 
 const newSubmissionFormSchema = Yup.object().shape({
     contractSubmissionType: Yup.string().required(
@@ -44,6 +45,14 @@ const initialNewSubmissionValues: NewSubmissionFormValueType = {
     contractSubmissionType: undefined,
 }
 
+type SubmissionTypeOption = {
+    id: string
+    value: ContractSubmissionTypeParams
+    label: string
+    description: string
+    enabled: boolean
+}
+
 export const NewSubmission = () => {
     const { updateActiveMainContent } = usePage()
     const navigate = useNavigate()
@@ -56,6 +65,10 @@ export const NewSubmission = () => {
     const isSDPEnabled = ldClient?.variation(
         featureFlags.SDP.flag,
         featureFlags.SDP.defaultValue
+    )
+    const isEBEnabled = ldClient?.variation(
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.flag,
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
     )
 
     // Set the active main content to focus when click the Skip to main content button.
@@ -82,6 +95,42 @@ export const NewSubmission = () => {
             )
         }
     }
+
+    const submissionTypeOptions: SubmissionTypeOption[] = [
+        {
+            id: 'healthPlan',
+            value: ContractSubmissionTypeRecord.HEALTH_PLAN,
+            label: 'Health plan',
+            description:
+                'Submit your Medicaid and CHIP managed care plans. This includes base contracts, amendments to base contracts, and rate certifications.',
+            enabled: true,
+        },
+        {
+            id: 'eqro',
+            value: ContractSubmissionTypeRecord.EQRO,
+            label: 'External Quality Review Organization (EQRO)',
+            description:
+                'Submit base contracts and amendments to base contracts between your state and an EQRO.',
+            enabled: !!isEQROenabled,
+        },
+        {
+            id: 'eb',
+            value: ContractSubmissionTypeRecord.ENROLLMENT_BROKER,
+            label: 'Enrollment Broker (EB)',
+            description:
+                'Submit base contracts and amendments to base contracts between your state and an EB.',
+            enabled: !!isEBEnabled,
+        },
+        {
+            id: 'sdp',
+            value: ContractSubmissionTypeRecord.SDP,
+            label: 'State Directed Payment Preprint (SDP)',
+            description:
+                'Submit preprints to get prior approval for state directed payments',
+            enabled: !!isSDPEnabled,
+        },
+    ].filter((option) => option.enabled)
+
 
     return (
         <div className={styles.contractTypeFormContainer}>
@@ -140,54 +189,23 @@ export const NewSubmission = () => {
                                             }
                                         </PoliteErrorMessage>
                                     )}
-                                    <FieldRadio
-                                        id="healthPlan"
-                                        name="contractSubmissionType"
-                                        label="Health plan"
-                                        aria-required
-                                        data-testid="health-plan"
-                                        value="health-plan"
-                                        list_position={1}
-                                        list_options={2}
-                                        parent_component_heading="Submission type"
-                                        radio_button_title="Health plan"
-                                        labelDescription="Submit your Medicaid and CHIP managed care plans. This includes base contracts, amendments to base contracts, and rate certifications."
-                                        tile
-                                    />
-                                    {isEQROenabled && (
+                                    {submissionTypeOptions.map((option, index) => (
                                         <FieldRadio
-                                            id="eqro"
+                                            key={option.id}
+                                            id={option.id}
                                             name="contractSubmissionType"
-                                            label="External Quality Review Organization (EQRO)"
-                                            data-testid="eqro"
+                                            label={option.label}
+                                            data-testid={option.value}
                                             aria-required
-                                            value="eqro"
-                                            list_position={2}
-                                            list_options={isSDPEnabled ? 3 : 2} // adjust options if SDP is enabled
+                                            value={option.value}
+                                            list_position={index + 1}
+                                            list_options={submissionTypeOptions.length}
                                             parent_component_heading="Submission type"
-                                            radio_button_title="External Quality Review Organization (EQRO)"
-                                            labelDescription="Submit base contracts and amendments to base contracts between your state and an EQRO."
+                                            radio_button_title={option.label}
+                                            labelDescription={option.description}
                                             tile
                                         />
-                                    )}
-                                    {isSDPEnabled && (
-                                        <FieldRadio
-                                            id="sdp"
-                                            name="contractSubmissionType"
-                                            label="State Directed Payment Preprint (SDP)"
-                                            data-testid="sdp"
-                                            aria-required
-                                            value="sdp"
-                                            list_position={
-                                                isEQROenabled ? 3 : 2 // adjust position if EQRO is enabled
-                                            }
-                                            list_options={isEQROenabled ? 3 : 2} // adjust options if EQRO is enabled
-                                            parent_component_heading="Submission type"
-                                            radio_button_title="State Directed Payment Preprint (SDP)"
-                                            labelDescription="Submit preprints to get prior approval for state directed payments"
-                                            tile
-                                        />
-                                    )}
+                                    ))}
                                 </Fieldset>
                             </FormGroup>
                         </fieldset>
@@ -253,6 +271,10 @@ export const NewSubmissionForm = (): React.ReactElement => {
 
     if (contractSubmissionType === ContractSubmissionTypeRecord['EQRO']) {
         return <EQROSubmissionDetails />
+    }
+
+    if (contractSubmissionType === ContractSubmissionTypeRecord['ENROLLMENT_BROKER']) {
+        return <EBSubmissionDetails />
     }
 
     return <Error404 />
