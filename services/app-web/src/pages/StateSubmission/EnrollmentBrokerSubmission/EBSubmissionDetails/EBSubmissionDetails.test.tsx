@@ -29,7 +29,7 @@ describe('EBSubmissionDetails', () => {
         expect(screen.getByTestId('SubmissionDetails')).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: 'Save & Continue' })
-        ).toHaveAttribute('aria-disabled', 'false')
+        ).not.toHaveAttribute('aria-disabled')
     })
 
     it('returns to the dashboard on Cancel', async () => {
