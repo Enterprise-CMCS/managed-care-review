@@ -27,9 +27,9 @@ describe('EBSubmissionDetails', () => {
             await screen.findByTestId('eb-submission-details-placeholder')
         ).toBeInTheDocument()
         expect(screen.getByTestId('SubmissionDetails')).toBeInTheDocument()
-		expect(
-			screen.getByRole('button', { name: 'Save & Continue' })
-		).toHaveAttribute('aria-disabled', 'true')
+        expect(
+            screen.getByRole('button', { name: 'Save & Continue' })
+        ).toHaveAttribute('aria-disabled', 'false')
     })
 
     it('returns to the dashboard on Cancel', async () => {

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import { userEvent } from '@testing-library/user-event'
 import { Location, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
@@ -27,7 +27,10 @@ describe('EBContractDetails', () => {
 
         expect(await screen.findByTestId('contractDetails')).toBeInTheDocument()
 
-        const steps = screen.getAllByRole('listitem')
+        const stepIndicator = document.querySelector(
+            '.usa-step-indicator'
+        ) as HTMLElement
+        const steps = within(stepIndicator).getAllByRole('listitem')
         expect(steps).toHaveLength(4)
 
         // Submission details: completed
@@ -41,7 +44,9 @@ describe('EBContractDetails', () => {
 
         // Later steps: not started
         steps.slice(2).forEach((step) => {
-            expect(step).not.toHaveClass('usa-step-indicator__segment--complete')
+            expect(step).not.toHaveClass(
+                'usa-step-indicator__segment--complete'
+            )
             expect(step).not.toHaveClass('usa-step-indicator__segment--current')
         })
     })
@@ -66,7 +71,9 @@ describe('EBContractDetails', () => {
             }
         )
 
-        await userEvent.click(await screen.findByRole('button', { name: 'Back' }))
+        await userEvent.click(
+            await screen.findByRole('button', { name: 'Back' })
+        )
         expect(testLocation?.pathname).toBe(
             '/submissions/eb/test-abc-123/edit/type'
         )

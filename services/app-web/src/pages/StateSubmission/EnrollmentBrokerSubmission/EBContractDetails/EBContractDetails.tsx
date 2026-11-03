@@ -63,8 +63,8 @@ export const EBContractDetails = (): React.ReactElement => {
                             className="margin-0"
                             data-testid="eb-submission-details-placeholder"
                         >
-                            The Enrollment Broker submission form is coming
-                            soon.
+                            The Enrollment Broker contract details form is
+                            coming soon.
                         </p>
                     </fieldset>
                     <PageActions
