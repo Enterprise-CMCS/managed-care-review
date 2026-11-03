@@ -2101,6 +2101,33 @@ describe('ILOS parsing and validation', () => {
             )
         })
 
+        it.each([
+            ['contractDocuments', [mockILOSDocument('contract')]],
+            ['supportingDocuments', [mockILOSDocument('supporting')]],
+            ['managedCareEntities', ['MCO']],
+            ['federalAuthorities', ['STATE_PLAN']],
+        ])(
+            'rejects the health plan list %s when it has entries',
+            (field, value) => {
+                const result = ilosContractFormDataSchema.safeParse({
+                    ...mockILOSContractFormData(),
+                    [field]: value,
+                })
+
+                expect(result.success).toBe(false)
+                if (result.success) {
+                    throw new Error(`Expected ${field} to be rejected`)
+                }
+                expect(result.error.issues).toContainEqual(
+                    expect.objectContaining({
+                        code: 'too_big',
+                        maximum: 0,
+                        path: [field],
+                    })
+                )
+            }
+        )
+
         it('accepts an external rate with no control name or dates in a draft', () => {
             const result = ilosContractFormDataSchema.safeParse({
                 ...mockILOSContractFormData(),

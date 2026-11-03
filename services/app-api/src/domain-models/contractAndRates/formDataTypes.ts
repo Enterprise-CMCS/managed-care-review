@@ -407,15 +407,20 @@ const ilosContractFormDataSchema = genericContractFormDataSchema.extend({
     eqroProvisionMcoEqrOrRelatedActivities: preprocessNulls(
         z.undefined().optional()
     ),
-    // should always be empty arrays to match GQL types
-    contractDocuments:
-        genericContractFormDataSchema.shape.contractDocuments.default([]),
-    supportingDocuments:
-        genericContractFormDataSchema.shape.supportingDocuments.default([]),
-    managedCareEntities:
-        genericContractFormDataSchema.shape.managedCareEntities.default([]),
-    federalAuthorities:
-        genericContractFormDataSchema.shape.federalAuthorities.default([]),
+    // Health plan only lists must be empty. They default to [] to match GQL types
+    // and reject any entries so health plan data cannot ride along on an ILOS submission.
+    contractDocuments: genericContractFormDataSchema.shape.contractDocuments
+        .max(0)
+        .default([]),
+    supportingDocuments: genericContractFormDataSchema.shape.supportingDocuments
+        .max(0)
+        .default([]),
+    managedCareEntities: genericContractFormDataSchema.shape.managedCareEntities
+        .max(0)
+        .default([]),
+    federalAuthorities: genericContractFormDataSchema.shape.federalAuthorities
+        .max(0)
+        .default([]),
     // ILOS fields
     ilosDocuments: z.array(documentSchema).default([]),
     ilosSupportingDocuments: z.array(documentSchema).default([]),
