@@ -16,7 +16,7 @@
     "devDependencies": {
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",
         "@types/node": "26.2.0",
-        "aws-cdk": "^2.1146.1",
+        "aws-cdk": "^2.1147.0",
         "esbuild": "^0.28.2",
         "fs-extra": "^11.4.1",
         "lint-staged": "^17.6.0",
