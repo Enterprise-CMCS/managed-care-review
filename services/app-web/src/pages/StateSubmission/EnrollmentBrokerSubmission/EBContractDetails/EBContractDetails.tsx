@@ -32,7 +32,7 @@ export const EBContractDetails = (): React.ReactElement => {
     }, [activeMainContentId, updateActiveMainContent])
 
     const submissionDetailsPath = getSubmissionPath(
-        'SUBMISSIONS_NEW_SUBMISSION_FORM',
+        'SUBMISSIONS_TYPE', // Submission is now created so go to the "edit" path.
         'ENROLLMENT_BROKER',
         id
     )
