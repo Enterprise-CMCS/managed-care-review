@@ -166,6 +166,13 @@ const StateUserRoutes = ({
         featureFlags.SDP.flag,
         featureFlags.SDP.defaultValue
     )
+    const showEbSubmissions: boolean = ldClient?.variation(
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.flag,
+        featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
+    )
+
+    // The type-selection page is only needed when there's more than one type to choose from
+    const showSubmissionTypeSelection = showEqroSubmissions || showSdpSubmissions || showEbSubmissions
 
     return (
         <AuthenticatedRouteWrapper>
@@ -190,7 +197,7 @@ const StateUserRoutes = ({
                     path={RoutesRecord.SUBMISSIONS}
                     element={<StateDashboard />}
                 />
-                {showEqroSubmissions || showSdpSubmissions ? (
+                {showSubmissionTypeSelection ? (
                     <>
                         <Route
                             path={RoutesRecord.SUBMISSIONS_NEW}
