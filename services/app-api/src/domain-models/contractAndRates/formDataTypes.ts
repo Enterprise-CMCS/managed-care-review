@@ -217,9 +217,10 @@ const genericContractFormDataSchema = z.object({
     // fills missing lists with [] on output so ILOS code always reads an array;
     // callers are never required to send [].
     isILOSRatesIncluded: preprocessNulls(z.boolean().optional()),
-    ilosDocuments: z.array(documentSchema).optional(),
-    ilosSupportingDocuments: z.array(documentSchema).optional(),
-    ilosExternalRates: z.array(ilosExternalRateSchema).optional(),
+    // ILOS lists default to [] for every submission type to match the non-null GQL list
+    // types, the same way federalAuthorities is always an array.
+    ilosDocuments: z.array(documentSchema).default([]),
+    ilosExternalRates: z.array(ilosExternalRateSchema).default([]),
 })
 
 // contractFormDataSchema is the normal contractFormData setup for Draft contracts. Most fields are optional and array fields can be empty.
@@ -345,11 +346,11 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     // should always be an empty array to match GQL types
     federalAuthorities:
         genericContractFormDataSchema.shape.federalAuthorities.default([]),
-    // ILOS fields are not applicable to EQRO submissions.
+    // ILOS fields are not applicable to EQRO submissions. The lists stay [] to match the
+    // non-null GQL list types and reject any entries.
     isILOSRatesIncluded: preprocessNulls(z.undefined().optional()),
-    ilosDocuments: preprocessNulls(z.undefined().optional()),
-    ilosSupportingDocuments: preprocessNulls(z.undefined().optional()),
-    ilosExternalRates: preprocessNulls(z.undefined().optional()),
+    ilosDocuments: z.array(documentSchema).max(0).default([]),
+    ilosExternalRates: z.array(ilosExternalRateSchema).max(0).default([]),
 })
 
 // ilosContractFormDataSchema is the draft form data for an ILOS submission. ILOS submissions
@@ -423,7 +424,6 @@ const ilosContractFormDataSchema = genericContractFormDataSchema.extend({
         .default([]),
     // ILOS fields
     ilosDocuments: z.array(documentSchema).default([]),
-    ilosSupportingDocuments: z.array(documentSchema).default([]),
     ilosExternalRates: z.array(ilosExternalRateSchema).default([]),
 })
 

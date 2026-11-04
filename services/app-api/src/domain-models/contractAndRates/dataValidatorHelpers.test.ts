@@ -66,6 +66,8 @@ describe('Health plan parsing and validation', () => {
                 ...formData,
                 statutoryRegulatoryAttestation: true,
                 statutoryRegulatoryAttestationDescription: undefined,
+                ilosDocuments: [],
+                ilosExternalRates: [],
             }
 
             const validatedFormData = must(
@@ -150,6 +152,8 @@ describe('Health plan parsing and validation', () => {
                 modifiedNonRiskPaymentArrangements: undefined,
                 statutoryRegulatoryAttestation: undefined,
                 statutoryRegulatoryAttestationDescription: undefined,
+                ilosDocuments: [],
+                ilosExternalRates: [],
             }
 
             const validatedFormData = must(
@@ -409,6 +413,8 @@ describe('Health plan parsing and validation', () => {
                     updatedAt: new Date(11 / 27 / 2023),
                     formData: {
                         programIDs: [defaultFloridaProgram().id],
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
@@ -590,6 +596,8 @@ describe('Health plan parsing and validation', () => {
                     updatedAt: new Date(11 / 27 / 2023),
                     formData: {
                         programIDs: ['fake-id'],
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         populationCovered: 'CHIP',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
@@ -810,6 +818,8 @@ describe('Health plan parsing and validation', () => {
                     updatedAt: new Date(11 / 27 / 2023),
                     formData: {
                         programIDs: [defaultFloridaProgram().id],
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
@@ -1196,6 +1206,8 @@ describe('EQRO parsing and validation', () => {
         overrides?: Partial<ContractFormDataType>
     ): ContractFormDataType => ({
         programIDs: [defaultFloridaProgram().id],
+        ilosDocuments: [],
+        ilosExternalRates: [],
         populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real EQRO submission',
@@ -2067,7 +2079,6 @@ describe('ILOS parsing and validation', () => {
                 managedCareEntities: [],
                 federalAuthorities: [],
                 ilosDocuments: [],
-                ilosSupportingDocuments: [],
                 ilosExternalRates: [],
             })
         })
@@ -2137,37 +2148,92 @@ describe('ILOS parsing and validation', () => {
             expect(result.success).toBe(true)
         })
 
-        it('rejects ILOS fields on a health plan and EQRO schema that blanks them', () => {
+        it.each([
+            ['ilosDocuments', [mockILOSDocument('ilosReport1')]],
+            ['ilosExternalRates', [{ position: 1 }]],
+        ])(
+            'EQRO schema rejects the ILOS list %s when it has entries',
+            (field, value) => {
+                const eqroResult = eqroContractFormDataSchema.safeParse({
+                    ...mockSubmittableHealthPlanContract().draftRevision!
+                        .formData,
+                    [field]: value,
+                })
+
+                expect(eqroResult.success).toBe(false)
+                if (eqroResult.success) {
+                    throw new Error(`Expected EQRO to reject ${field}`)
+                }
+                expect(eqroResult.error.issues).toContainEqual(
+                    expect.objectContaining({
+                        code: 'too_big',
+                        maximum: 0,
+                        path: [field],
+                    })
+                )
+            }
+        )
+
+        it('EQRO schema rejects isILOSRatesIncluded when it is set', () => {
             const eqroResult = eqroContractFormDataSchema.safeParse({
                 ...mockSubmittableHealthPlanContract().draftRevision!.formData,
-                ilosDocuments: [mockILOSDocument('ilosReport1')],
+                isILOSRatesIncluded: true,
             })
 
             expect(eqroResult.success).toBe(false)
             if (eqroResult.success) {
-                throw new Error('Expected EQRO to reject ilosDocuments')
+                throw new Error('Expected EQRO to reject isILOSRatesIncluded')
             }
             expect(eqroResult.error.issues).toContainEqual(
                 expect.objectContaining({
                     expected: 'undefined',
                     code: 'invalid_type',
-                    path: ['ilosDocuments'],
+                    path: ['isILOSRatesIncluded'],
                 })
             )
         })
 
-        it('leaves health plan form data unchanged when no ILOS fields are present', () => {
-            const healthPlanFormData =
-                mockSubmittableHealthPlanContract().draftRevision!.formData
+        it.each([
+            ['contractFormDataSchema', contractFormDataSchema],
+            ['eqroContractFormDataSchema', eqroContractFormDataSchema],
+        ])(
+            '%s defaults the ILOS lists to [] when they are omitted',
+            (_name, schema) => {
+                // Minimal form data that both schemas accept, with no ILOS keys.
+                const formDataWithoutILOSLists = {
+                    programIDs: [defaultFloridaProgram().id],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_ONLY',
+                    submissionDescription: 'draft',
+                    contractType: 'BASE',
+                    stateContacts: [],
+                    contractDocuments: [],
+                    supportingDocuments: [],
+                    managedCareEntities: [],
+                    federalAuthorities: [],
+                }
 
-            const result = contractFormDataSchema.safeParse(healthPlanFormData)
+                const result = schema.safeParse(formDataWithoutILOSLists)
 
-            if (!result.success) {
-                throw new Error(z.prettifyError(result.error))
+                if (!result.success) {
+                    throw new Error(z.prettifyError(result.error))
+                }
+                expect(result.data).toEqual({
+                    ...formDataWithoutILOSLists,
+                    ilosDocuments: [],
+                    ilosExternalRates: [],
+                })
+                expect(result.data).not.toHaveProperty('isILOSRatesIncluded')
             }
-            expect(result.data).toEqual(healthPlanFormData)
-            expect(result.data).not.toHaveProperty('ilosDocuments')
-            expect(result.data).not.toHaveProperty('ilosExternalRates')
+        )
+
+        it('health plan schema keeps ILOS list entries so ILOS revisions parse through it', () => {
+            const result = contractFormDataSchema.safeParse({
+                ...mockSubmittableHealthPlanContract().draftRevision!.formData,
+                ilosDocuments: [mockILOSDocument('ilosReport1')],
+            })
+
+            expect(result.success).toBe(true)
         })
     })
 

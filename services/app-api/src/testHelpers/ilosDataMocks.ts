@@ -37,7 +37,6 @@ const mockILOSContractFormData = (
     federalAuthorities: [],
     isILOSRatesIncluded: true,
     ilosDocuments: [mockILOSDocument('ilosReport1')],
-    ilosSupportingDocuments: [mockILOSDocument('ilosSupporting1')],
     ilosExternalRates: [
         {
             id: uuidv4(),

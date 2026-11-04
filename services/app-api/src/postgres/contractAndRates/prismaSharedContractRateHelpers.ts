@@ -83,11 +83,6 @@ const includeContractFormData = {
             position: 'asc',
         },
     },
-    ilosSupportingDocuments: {
-        orderBy: {
-            position: 'asc',
-        },
-    },
     ilosExternalRates: {
         orderBy: {
             position: 'asc',
@@ -789,10 +784,7 @@ type ContractRevisionTableWithFormData =
 
 type ILOSFormDataFields = Pick<
     ContractFormDataType,
-    | 'isILOSRatesIncluded'
-    | 'ilosDocuments'
-    | 'ilosSupportingDocuments'
-    | 'ilosExternalRates'
+    'isILOSRatesIncluded' | 'ilosDocuments' | 'ilosExternalRates'
 >
 
 // Maps the ILOS-only columns and relations of a revision into the domain form data.
@@ -804,9 +796,6 @@ function ilosFormDataToDomainModel(
         isILOSRatesIncluded: contractRevision.isILOSRatesIncluded ?? undefined,
         ilosDocuments: contractRevision.ilosDocuments.map((doc) =>
             documentToDomainModel(doc)
-        ),
-        ilosSupportingDocuments: contractRevision.ilosSupportingDocuments.map(
-            (doc) => documentToDomainModel(doc)
         ),
         ilosExternalRates: contractRevision.ilosExternalRates.map((rate) => ({
             id: rate.id,
@@ -835,7 +824,13 @@ function contractFormDataToDomainModel(
     const isILOS = contractRevision.contract.contractSubmissionType === 'ILOS'
 
     return {
-        ...(isILOS ? ilosFormDataToDomainModel(contractRevision) : {}),
+        // Non-ILOS revisions always carry empty ILOS lists to match the non-null GQL list types.
+        ...(isILOS
+            ? ilosFormDataToDomainModel(contractRevision)
+            : {
+                  ilosDocuments: [],
+                  ilosExternalRates: [],
+              }),
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
         contractType: mergedOverride.contractType.hasOverride

@@ -87,21 +87,6 @@ describe('prismaToDomainModel', () => {
                     contractRevisionID: 'rev',
                 },
             ],
-            ilosSupportingDocuments: [
-                {
-                    id: uuidv4(),
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    position: 0,
-                    name: 'ilos supporting',
-                    s3URL: 's3://bucketname/key/ilossupporting',
-                    s3BucketName: 'bucketname',
-                    s3Key: 'key/ilossupporting',
-                    sha256: 'ilossupportingsha',
-                    dateAdded: new Date('2024-01-15'),
-                    contractRevisionID: 'rev',
-                },
-            ],
             ilosExternalRates: [
                 {
                     id: uuidv4(),
@@ -146,13 +131,6 @@ describe('prismaToDomainModel', () => {
                     dateAdded: undefined,
                 }),
             ])
-            expect(domainFormData.ilosSupportingDocuments).toEqual([
-                expect.objectContaining({
-                    name: 'ilos supporting',
-                    sha256: 'ilossupportingsha',
-                    dateAdded: new Date('2024-01-15'),
-                }),
-            ])
             expect(domainFormData.ilosExternalRates).toEqual([
                 {
                     id: ilosRows.ilosExternalRates[0].id,
@@ -172,7 +150,7 @@ describe('prismaToDomainModel', () => {
         })
 
         it.each(['HEALTH_PLAN', 'EQRO'] as const)(
-            'does not add ILOS keys to a %s revision even when ILOS rows exist',
+            'keeps ILOS lists empty on a %s revision even when ILOS rows exist',
             (contractSubmissionType) => {
                 const contractRevision = mockContractRevision(
                     { contractSubmissionType },
@@ -183,11 +161,8 @@ describe('prismaToDomainModel', () => {
                     contractFormDataToDomainModel(contractRevision)
 
                 expect(domainFormData).not.toHaveProperty('isILOSRatesIncluded')
-                expect(domainFormData).not.toHaveProperty('ilosDocuments')
-                expect(domainFormData).not.toHaveProperty(
-                    'ilosSupportingDocuments'
-                )
-                expect(domainFormData).not.toHaveProperty('ilosExternalRates')
+                expect(domainFormData.ilosDocuments).toEqual([])
+                expect(domainFormData.ilosExternalRates).toEqual([])
             }
         )
     })

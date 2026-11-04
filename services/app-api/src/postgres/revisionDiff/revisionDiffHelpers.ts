@@ -122,7 +122,6 @@ const excludedFieldPaths = new Set<keyof ContractFormData>([
     'contractDocuments',
     // ILOS submission lists are object arrays; ILOS revision diffing is handled in a later ticket.
     'ilosDocuments',
-    'ilosSupportingDocuments',
     'ilosExternalRates',
 ])
 
