@@ -2174,21 +2174,25 @@ describe('ILOS parsing and validation', () => {
             }
         )
 
-        it('EQRO schema rejects isILOSRatesIncluded when it is set', () => {
+        it.each([
+            ['isILOSRatesIncluded', true],
+            ['ilosRateDateStart', new Date('2025-01-01')],
+            ['ilosRateDateEnd', new Date('2025-12-31')],
+        ])('EQRO schema rejects %s when it is set', (field, value) => {
             const eqroResult = eqroContractFormDataSchema.safeParse({
                 ...mockSubmittableHealthPlanContract().draftRevision!.formData,
-                isILOSRatesIncluded: true,
+                [field]: value,
             })
 
             expect(eqroResult.success).toBe(false)
             if (eqroResult.success) {
-                throw new Error('Expected EQRO to reject isILOSRatesIncluded')
+                throw new Error(`Expected EQRO to reject ${field}`)
             }
             expect(eqroResult.error.issues).toContainEqual(
                 expect.objectContaining({
                     expected: 'undefined',
                     code: 'invalid_type',
-                    path: ['isILOSRatesIncluded'],
+                    path: [field],
                 })
             )
         })

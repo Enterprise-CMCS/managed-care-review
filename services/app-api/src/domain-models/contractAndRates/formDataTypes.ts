@@ -217,6 +217,8 @@ const genericContractFormDataSchema = z.object({
     // fills missing lists with [] on output so ILOS code always reads an array;
     // callers are never required to send [].
     isILOSRatesIncluded: preprocessNulls(z.boolean().optional()),
+    ilosRateDateStart: preprocessNulls(z.date().optional()),
+    ilosRateDateEnd: preprocessNulls(z.date().optional()),
     // ILOS lists default to [] for every submission type to match the non-null GQL list
     // types, the same way federalAuthorities is always an array.
     ilosDocuments: z.array(documentSchema).default([]),
@@ -349,6 +351,8 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     // ILOS fields are not applicable to EQRO submissions. The lists stay [] to match the
     // non-null GQL list types and reject any entries.
     isILOSRatesIncluded: preprocessNulls(z.undefined().optional()),
+    ilosRateDateStart: preprocessNulls(z.undefined().optional()),
+    ilosRateDateEnd: preprocessNulls(z.undefined().optional()),
     ilosDocuments: z.array(documentSchema).max(0).default([]),
     ilosExternalRates: z.array(ilosExternalRateSchema).max(0).default([]),
 })

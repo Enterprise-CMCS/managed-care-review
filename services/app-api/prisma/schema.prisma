@@ -284,9 +284,11 @@ model ContractRevisionTable {
   eqroProvisionMcoEqrOrRelatedActivities  Boolean?
 
   // ILOS submission fields only
-  isILOSRatesIncluded     Boolean? // Whether the API should expect rates on this ILOS submission
-  ilosExternalRates       ILOSExternalRate[] // Rates outside MC-Review on this revision
-  ilosDocuments           ILOSDocument[] // ILOS report documents uploaded by the state
+  isILOSRatesIncluded Boolean? // Whether the API should expect rates on this ILOS submission
+  ilosRateDateStart   DateTime?          @db.Date // Rating period start for the ILOS submission
+  ilosRateDateEnd     DateTime?          @db.Date // Rating period end for the ILOS submission
+  ilosExternalRates   ILOSExternalRate[] // Rates outside MC-Review on this revision
+  ilosDocuments       ILOSDocument[] // ILOS report documents uploaded by the state
 
   revisionOverrides ContractRevisionOverrides[]
 }

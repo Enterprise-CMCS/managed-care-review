@@ -72,6 +72,8 @@ describe('prismaToDomainModel', () => {
 
         const ilosRows = {
             isILOSRatesIncluded: true,
+            ilosRateDateStart: new Date('2025-01-01'),
+            ilosRateDateEnd: new Date('2025-12-31'),
             ilosDocuments: [
                 {
                     id: uuidv4(),
@@ -121,6 +123,12 @@ describe('prismaToDomainModel', () => {
                 contractFormDataToDomainModel(contractRevision)
 
             expect(domainFormData.isILOSRatesIncluded).toBe(true)
+            expect(domainFormData.ilosRateDateStart).toEqual(
+                new Date('2025-01-01')
+            )
+            expect(domainFormData.ilosRateDateEnd).toEqual(
+                new Date('2025-12-31')
+            )
             expect(domainFormData.ilosDocuments).toEqual([
                 expect.objectContaining({
                     name: 'ilos report',
@@ -161,6 +169,8 @@ describe('prismaToDomainModel', () => {
                     contractFormDataToDomainModel(contractRevision)
 
                 expect(domainFormData).not.toHaveProperty('isILOSRatesIncluded')
+                expect(domainFormData).not.toHaveProperty('ilosRateDateStart')
+                expect(domainFormData).not.toHaveProperty('ilosRateDateEnd')
                 expect(domainFormData.ilosDocuments).toEqual([])
                 expect(domainFormData.ilosExternalRates).toEqual([])
             }

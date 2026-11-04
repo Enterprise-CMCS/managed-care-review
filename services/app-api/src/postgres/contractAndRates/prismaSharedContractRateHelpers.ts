@@ -784,7 +784,11 @@ type ContractRevisionTableWithFormData =
 
 type ILOSFormDataFields = Pick<
     ContractFormDataType,
-    'isILOSRatesIncluded' | 'ilosDocuments' | 'ilosExternalRates'
+    | 'isILOSRatesIncluded'
+    | 'ilosRateDateStart'
+    | 'ilosRateDateEnd'
+    | 'ilosDocuments'
+    | 'ilosExternalRates'
 >
 
 // Maps the ILOS-only columns and relations of a revision into the domain form data.
@@ -794,6 +798,8 @@ function ilosFormDataToDomainModel(
 ): ILOSFormDataFields {
     return {
         isILOSRatesIncluded: contractRevision.isILOSRatesIncluded ?? undefined,
+        ilosRateDateStart: contractRevision.ilosRateDateStart ?? undefined,
+        ilosRateDateEnd: contractRevision.ilosRateDateEnd ?? undefined,
         ilosDocuments: contractRevision.ilosDocuments.map((doc) =>
             documentToDomainModel(doc)
         ),
