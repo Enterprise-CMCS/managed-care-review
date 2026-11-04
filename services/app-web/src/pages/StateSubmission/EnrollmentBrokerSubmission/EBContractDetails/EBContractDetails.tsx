@@ -37,6 +37,16 @@ export const EBContractDetails = (): React.ReactElement => {
         id
     )
 
+    const contactsPagePath = getSubmissionPath(
+        'SUBMISSIONS_CONTACTS',
+        'ENROLLMENT_BROKER',
+        id
+    )
+
+    const handleContinue = async () => {
+        navigate(contactsPagePath)
+    }
+
     return (
         <div id={activeMainContentId}>
             <FormNotificationContainer>
@@ -55,7 +65,10 @@ export const EBContractDetails = (): React.ReactElement => {
             <FormContainer id="contractDetails">
                 <Form
                     className={styles.formContainer}
-                    onSubmit={(e) => e.preventDefault()}
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        void handleContinue()
+                    }}
                 >
                     <fieldset className="usa-fieldset">
                         <legend className="srOnly">EB Contract details</legend>
@@ -70,8 +83,7 @@ export const EBContractDetails = (): React.ReactElement => {
                     <PageActions
                         backOnClick={() => navigate(submissionDetailsPath)}
                         backOnClickUrl={submissionDetailsPath}
-                        // Empty page: nothing to save yet
-                        disableContinue
+                        continueOnClickUrl={contactsPagePath}
                     />
                 </Form>
             </FormContainer>
