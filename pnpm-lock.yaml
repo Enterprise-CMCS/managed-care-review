@@ -208,7 +208,7 @@ importers:
         version: 1.7.0(axe-core@4.14.0)(cypress@15.20.1)
       danger:
         specifier: ^14.0.7
-        version: 14.0.7(supports-color@8.1.1)(undici@7.29.0)
+        version: 14.0.7(supports-color@8.1.1)(undici@7.30.1)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -10769,12 +10769,8 @@ packages:
   undici-types@8.3.0:
     resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
 
-  undici@7.25.0:
-    resolution: {integrity: sha512-xXnp4kTyor2Zq+J1FfPI6Eq3ew5h6Vl0F/8d9XU5zZQf1tX9s2Su1/3PiMmUANFULpmksxkClamIZcaUqryHsQ==}
-    engines: {node: '>=20.18.1'}
-
-  undici@7.29.0:
-    resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
+  undici@7.30.1:
+    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
     engines: {node: '>=20.18.1'}
 
   unfetch@4.2.0:
@@ -15548,7 +15544,7 @@ snapshots:
       '@octokit/plugin-paginate-rest': 14.0.0(@octokit/core@7.0.6)
       '@octokit/plugin-rest-endpoint-methods': 17.0.0(@octokit/core@7.0.6)
       '@octokit/types': 16.0.0
-      undici: 7.25.0
+      undici: 7.30.1
 
   '@octokit/app@16.1.2':
     dependencies:
@@ -19156,7 +19152,7 @@ snapshots:
     dependencies:
       d3-array: 3.2.4
 
-  danger@14.0.7(supports-color@8.1.1)(undici@7.29.0):
+  danger@14.0.7(supports-color@8.1.1)(undici@7.30.1):
     dependencies:
       '@gitbeaker/rest': 38.12.1
       '@octokit/rest': 20.1.2
@@ -19188,7 +19184,7 @@ snapshots:
       require-from-string: 2.0.2
       supports-hyperlinks: 4.5.0
     optionalDependencies:
-      undici: 7.29.0
+      undici: 7.30.1
     transitivePeerDependencies:
       - supports-color
 
@@ -20684,7 +20680,7 @@ snapshots:
       parse5: 8.0.1
       saxes: 6.0.0
       tough-cookie: 6.0.2
-      undici: 7.29.0
+      undici: 7.30.1
       w3c-xmlserializer: 6.0.0
       webidl-conversions: 8.0.1
       whatwg-mimetype: 5.0.0
@@ -23242,9 +23238,7 @@ snapshots:
 
   undici-types@8.3.0: {}
 
-  undici@7.25.0: {}
-
-  undici@7.29.0: {}
+  undici@7.30.1: {}
 
   unfetch@4.2.0: {}
 
