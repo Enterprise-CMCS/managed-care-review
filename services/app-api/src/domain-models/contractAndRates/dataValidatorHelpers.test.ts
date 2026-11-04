@@ -2417,6 +2417,16 @@ describe('ILOS parsing and validation', () => {
                 path: ['draftRevision', 'formData', 'isILOSRatesIncluded'],
             },
             {
+                description: 'ilosRateDateStart is missing',
+                overrides: { ilosRateDateStart: undefined },
+                path: ['draftRevision', 'formData', 'ilosRateDateStart'],
+            },
+            {
+                description: 'ilosRateDateEnd is missing',
+                overrides: { ilosRateDateEnd: undefined },
+                path: ['draftRevision', 'formData', 'ilosRateDateEnd'],
+            },
+            {
                 description: 'submissionType is CONTRACT_ONLY',
                 overrides: { submissionType: 'CONTRACT_ONLY' as const },
                 path: ['draftRevision', 'formData', 'submissionType'],

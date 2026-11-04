@@ -476,12 +476,14 @@ const submittableEQROContractFormDataSchema = eqroContractFormDataSchema.extend(
 )
 
 // submittableILOSContractFormDataSchema is the schema used during ILOS submission validation.
-// Rates are optional on an ILOS submission, so ilosExternalRates may be empty, but every
+// The ILOS rating period is required. Rates are optional on an ILOS submission, so ilosExternalRates may be empty, but every
 // external rate present needs both dates, as submittableRateFormDataSchema requires them on a rate.
 // parseILOSContract handles associated rate validation
 const submittableILOSContractFormDataSchema = ilosContractFormDataSchema.extend(
     {
         isILOSRatesIncluded: z.boolean(),
+        ilosRateDateStart: z.date(),
+        ilosRateDateEnd: z.date(),
         stateContacts:
             genericContractFormDataSchema.shape.stateContacts.nonempty(),
         ilosDocuments: z.array(documentSchema).nonempty(),
