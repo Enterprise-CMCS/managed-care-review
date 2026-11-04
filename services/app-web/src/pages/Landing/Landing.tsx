@@ -161,7 +161,8 @@ export const Landing = (): React.ReactElement => {
                                     </li>
                                     {enrollmentBrokerFlag && (
                                         <li>
-                                            Enrollment Broker (EB) submissions
+                                            Enrollment Broker (EB) submissions,
+                                            including
                                             <ul>
                                                 <li>
                                                     Base contracts and
