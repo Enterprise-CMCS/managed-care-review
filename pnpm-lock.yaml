@@ -8066,9 +8066,6 @@ packages:
   immer@11.2.9:
     resolution: {integrity: sha512-IQ4UEtXjZjyefyWjtLEDXUSrF6T2hwjKPi6BIJl3bY/2XXW24d6cNGdXJSBOA/+KNnuiXkZY6DR0C3efolhitA==}
 
-  immutable@5.1.5:
-    resolution: {integrity: sha512-t7xcm2siw+hlUM68I+UEOK+z84RzmN59as9DZ7P1l0994DKUWV7UXBMQZVxaoMSRQ+PBZbHCOoBt7a2wxOMt+A==}
-
   immutable@5.1.9:
     resolution: {integrity: sha512-m8nVez3rwrgmWxtLMt1ZYXB2Lv7OKYn/disyxAlSDYAlKSlFoPPfIAmAM/M5xqL4m4C/wAPw7S2/CNaUii1Hxg==}
 
@@ -11422,7 +11419,7 @@ snapshots:
       fbjs: 3.0.5
       glob: 7.2.3
       graphql: 16.14.2
-      immutable: 5.1.5
+      immutable: 5.1.9
       invariant: 2.2.4
       nullthrows: 1.1.1
       relay-runtime: 12.0.0
@@ -11440,7 +11437,7 @@ snapshots:
       chalk: 4.1.2
       fb-watchman: 2.0.2
       graphql: 16.14.2
-      immutable: 5.1.5
+      immutable: 5.1.9
       invariant: 2.2.4
       nullthrows: 1.1.1
       relay-runtime: 12.0.0
@@ -20201,8 +20198,6 @@ snapshots:
       queue: 6.0.2
 
   immer@11.2.9: {}
-
-  immutable@5.1.5: {}
 
   immutable@5.1.9: {}
 
