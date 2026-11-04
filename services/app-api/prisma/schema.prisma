@@ -287,7 +287,6 @@ model ContractRevisionTable {
   isILOSRatesIncluded     Boolean? // Whether the API should expect rates on this ILOS submission
   ilosExternalRates       ILOSExternalRate[] // Rates outside MC-Review on this revision
   ilosDocuments           ILOSDocument[] // ILOS report documents uploaded by the state
-  ilosSupportingDocuments ILOSSupportingDocument[] // ILOS supporting documents uploaded by the state
 
   revisionOverrides ContractRevisionOverrides[]
 }
@@ -295,22 +294,6 @@ model ContractRevisionTable {
 // ILOS report documents, kept separate from ContractDocument so ILOS submissions never
 // share document rows or overrides with contracts. Modeled on ContractDocument.
 model ILOSDocument {
-  id                 String                @id @default(uuid())
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @default(now()) @updatedAt
-  position           Int
-  name               String // Original filename from user upload
-  s3URL              String // DEPRECATED: Use s3BucketName + s3Key instead. Kept so GenericDocument works end to end; drop with the other document tables
-  s3BucketName       String
-  s3Key              String
-  sha256             String
-  dateAdded          DateTime? // Date first submitted to CMS
-  contractRevisionID String
-  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
-}
-
-// ILOS supporting documents, the ILOS counterpart to ContractSupportingDocument.
-model ILOSSupportingDocument {
   id                 String                @id @default(uuid())
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @default(now()) @updatedAt
