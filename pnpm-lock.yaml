@@ -10610,8 +10610,8 @@ packages:
     resolution: {integrity: sha512-GgouD1B+sWwvkaEq8vXC15DjQitxbvs12oIXELpconwm+Tg3zfcEv4jgzq3vtKverDXsg3VI8aRgNL2Nra0Iog==}
     hasBin: true
 
-  tmp@0.2.5:
-    resolution: {integrity: sha512-voyz6MApa1rQGUxT3E+BK7/ROe8itEx7vD8/HEvt4xwXucvQ5G5oeEiHkmHZJuBO21RpOf+YYm9MOivj709jow==}
+  tmp@0.2.7:
+    resolution: {integrity: sha512-e0votIpp4Uo2AJYSzVHV6xCcawuiez3DzqDAbrTc3YxBkplN6e+dM13ZeIcZnDg/QpSuU2zfZ3rzwY8ukEnaXw==}
     engines: {node: '>=14.14'}
 
   tmpl@1.0.5:
@@ -19109,7 +19109,7 @@ snapshots:
       request-progress: 3.0.0
       supports-color: 8.1.1
       systeminformation: 5.33.19
-      tmp: 0.2.5
+      tmp: 0.2.7
       tree-kill: 1.2.2
       untildify: 4.0.0
       yauzl: 3.4.0
@@ -23107,7 +23107,7 @@ snapshots:
     dependencies:
       tldts-core: 7.4.10
 
-  tmp@0.2.5: {}
+  tmp@0.2.7: {}
 
   tmpl@1.0.5: {}
 
