@@ -53,8 +53,9 @@ describe('EBSubmissionForm', () => {
         expect(screen.getByTestId('contractDetails')).toBeInTheDocument()
 
         await waitFor(() => testNavigate('/submissions/eb/12/edit/contacts'))
-        const contactsText = await screen.findAllByText('Contacts')
-        expect(contactsText.length).toBe(2)
+        expect(
+            screen.getByRole('heading', { name: 'State contacts' })
+        ).toBeInTheDocument()
 
         await waitFor(() =>
             testNavigate('/submissions/eb/12/edit/review-and-submit')
