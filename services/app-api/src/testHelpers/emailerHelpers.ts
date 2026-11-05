@@ -177,6 +177,8 @@ const mockContractRev = (
         id: 'test-abc-125',
         formData: {
             programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+            ilosDocuments: [],
+            ilosExternalRates: [],
             populationCovered: 'MEDICAID',
             submissionType: 'CONTRACT_AND_RATES',
             riskBasedContract: false,
@@ -442,6 +444,8 @@ const mockContract = (
                     unlockInfo: undefined,
                     formData: {
                         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
@@ -633,6 +637,8 @@ const mockEQROContract = (
                     unlockInfo: undefined,
                     formData: {
                         programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_ONLY',
                         submissionDescription: 'A EQRO submission',

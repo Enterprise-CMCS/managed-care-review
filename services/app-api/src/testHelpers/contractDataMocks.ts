@@ -171,6 +171,10 @@ const mockContractRevision = (
         eqroProvisionMcoEqrOrRelatedActivities: null,
         eqroProvisionNewMcoEqrRelatedActivities: null,
         isILOSRatesIncluded: null,
+        ilosRateDateStart: null,
+        ilosRateDateEnd: null,
+        ilosDocuments: [],
+        ilosExternalRates: [],
         ...revision,
     }
 }
@@ -220,6 +224,8 @@ const mockSubmittableHealthPlanContract = (opts?: {
             updatedAt: new Date('2023-11-27'),
             formData: {
                 programIDs: opts?.programIDs ?? [activeKYProgram.id],
+                ilosDocuments: [],
+                ilosExternalRates: [],
                 populationCovered: 'MEDICAID',
                 submissionType: 'CONTRACT_AND_RATES',
                 riskBasedContract: true,

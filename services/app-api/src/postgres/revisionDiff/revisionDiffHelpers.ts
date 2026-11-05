@@ -120,6 +120,9 @@ const excludedFieldPaths = new Set<keyof ContractFormData>([
     'stateContacts',
     'supportingDocuments',
     'contractDocuments',
+    // ILOS submission lists are object arrays; ILOS revision diffing is handled in a later ticket.
+    'ilosDocuments',
+    'ilosExternalRates',
 ])
 
 const diffContractFormDataFieldConfigs: DiffFieldConfig[] = Object.entries(
