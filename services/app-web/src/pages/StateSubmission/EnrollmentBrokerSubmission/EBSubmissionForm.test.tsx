@@ -59,7 +59,7 @@ describe('EBSubmissionForm', () => {
 
         await waitFor(() => testNavigate('/submissions/eb/12/edit/contacts'))
         expect(
-            screen.getByRole('heading', { name: 'State contacts' })
+            await screen.findByRole('heading', { name: 'State contacts' })
         ).toBeInTheDocument()
 
         await waitFor(() =>
