@@ -6,6 +6,7 @@ import { Error404 } from '../../Errors/Error404Page'
 import formContainerStyles from '../../../components/FormContainer/FormContainer.module.scss'
 import { EBContractDetails } from './EBContractDetails/EBContractDetails'
 import { Contacts } from '../SharedContactsPage'
+import { EBAssociatedContracts } from './EBAssociatedContracts/EBAssociatedContracts'
 
 // TODO: Get rid of once each page's ticket creates these components.
 const EBPagePlaceholder = ({ title }: { title: string }) => (
@@ -28,6 +29,12 @@ export const EBSubmissionForm = (): React.ReactElement => {
                         'SUBMISSIONS_CONTRACT_DETAILS'
                     )}
                     element={<EBContractDetails />}
+                />
+                <Route
+                    path={getRelativePathFromNestedRoute(
+                        'SUBMISSIONS_ASSOCIATED_CONTRACTS'
+                    )}
+                    element={<EBAssociatedContracts />}
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(

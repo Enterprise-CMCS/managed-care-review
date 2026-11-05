@@ -37,14 +37,14 @@ export const EBContractDetails = (): React.ReactElement => {
         id
     )
 
-    const contactsPagePath = getSubmissionPath(
-        'SUBMISSIONS_CONTACTS',
+    const associatedContractsPagePath = getSubmissionPath(
+        'SUBMISSIONS_ASSOCIATED_CONTRACTS',
         'ENROLLMENT_BROKER',
         id
     )
 
     const handleContinue = async () => {
-        navigate(contactsPagePath)
+        navigate(associatedContractsPagePath)
     }
 
     return (
@@ -83,7 +83,7 @@ export const EBContractDetails = (): React.ReactElement => {
                     <PageActions
                         backOnClick={() => navigate(submissionDetailsPath)}
                         backOnClickUrl={submissionDetailsPath}
-                        continueOnClickUrl={contactsPagePath}
+                        continueOnClickUrl={associatedContractsPagePath}
                     />
                 </Form>
             </FormContainer>
