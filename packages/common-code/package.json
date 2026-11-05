@@ -19,7 +19,7 @@
         "@mc-review/submissions": "workspace:*",
         "typescript": "7.0.2",
         "url-parse": "^1.5.10",
-        "zod": "^4.3.6"
+        "zod": "^4.6.6"
     },
     "devDependencies": {
         "@types/node": "^26.2.0",

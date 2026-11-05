@@ -115,8 +115,7 @@ export const Landing = (): React.ReactElement => {
                                         plan submissions, including
                                         <ul>
                                             <li>
-                                                Base contracts and amendments to
-                                                base contracts
+                                                Base contracts and amendments
                                             </li>
                                             <li>
                                                 Rate certifications and rate
@@ -146,8 +145,7 @@ export const Landing = (): React.ReactElement => {
                                         (EQRO) submissions, including
                                         <ul>
                                             <li>
-                                                Base contracts and amendments to
-                                                base contracts
+                                                Base contracts and amendments
                                             </li>
                                             <li>
                                                 <LinkWithLogging
@@ -163,7 +161,24 @@ export const Landing = (): React.ReactElement => {
                                     </li>
                                     {enrollmentBrokerFlag && (
                                         <li>
-                                            Enrollment Broker (EB) submissions
+                                            Enrollment Broker (EB) submissions,
+                                            including
+                                            <ul>
+                                                <li>
+                                                    Base contracts and
+                                                    amendments
+                                                </li>
+                                                <li>
+                                                    <LinkWithLogging
+                                                        aria-label="Required supporting documents"
+                                                        href={
+                                                            '/resources/help#key-documents'
+                                                        }
+                                                    >
+                                                        Supporting documents
+                                                    </LinkWithLogging>
+                                                </li>
+                                            </ul>
                                         </li>
                                     )}
                                 </ol>
@@ -258,10 +273,7 @@ export const Landing = (): React.ReactElement => {
                                     rates to CMS. This portal accepts:
                                 </p>
                                 <ul className={styles.detailsList}>
-                                    <li>
-                                        Base contracts and amendments to base
-                                        contracts
-                                    </li>
+                                    <li>Base contracts and amendments</li>
                                     <li>
                                         Rate certifications and rate amendments
                                     </li>
