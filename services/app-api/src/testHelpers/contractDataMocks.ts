@@ -49,6 +49,15 @@ const mockInsertContractArgs = ({
     }
 }
 
+// Scalar answers shared by Enrollment Broker API fixtures.
+const mockEBContractFormData = () => ({
+    ebNewContractor: true,
+    ebBaseContractInMCReview: false,
+    ebPreviousAmendmentInMCReview: true,
+    ebAmendmentNumber: 'Amendment 2',
+    ebStateContractIdentifier: 'EB-2026-001',
+})
+
 const mockContractRevision = (
     contract?: Partial<ContractTableFullPayload>,
     revision?: Partial<ContractRevisionTableWithRates>,
@@ -170,6 +179,11 @@ const mockContractRevision = (
         eqroProvisionMcoNewOptionalActivity: null,
         eqroProvisionMcoEqrOrRelatedActivities: null,
         eqroProvisionNewMcoEqrRelatedActivities: null,
+        ebNewContractor: null,
+        ebBaseContractInMCReview: null,
+        ebPreviousAmendmentInMCReview: null,
+        ebAmendmentNumber: null,
+        ebStateContractIdentifier: null,
         ...revision,
     }
 }
@@ -347,5 +361,6 @@ const mockSubmittableHealthPlanContract = (opts?: {
 export {
     mockInsertContractArgs,
     mockContractRevision,
+    mockEBContractFormData,
     mockSubmittableHealthPlanContract,
 }

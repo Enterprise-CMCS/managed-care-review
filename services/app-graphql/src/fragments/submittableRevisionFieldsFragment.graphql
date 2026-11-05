@@ -89,6 +89,13 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             eqroProvisionNewMcoEqrRelatedActivities
             eqroProvisionChipEqrRelatedActivities
             eqroProvisionMcoEqrOrRelatedActivities
+
+            # Enrollment Broker submission fields only
+            ebNewContractor
+            ebBaseContractInMCReview
+            ebPreviousAmendmentInMCReview
+            ebAmendmentNumber
+            ebStateContractIdentifier
         }
     }
     ... on RateRevision {

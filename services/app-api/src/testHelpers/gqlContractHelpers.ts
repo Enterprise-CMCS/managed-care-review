@@ -36,6 +36,7 @@ import type {
     ContractType,
 } from '../domain-models'
 import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
+import { mockEBContractFormData } from './contractDataMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 import { extractGraphQLResponse } from './apolloV4ResponseHelper'
 
@@ -378,6 +379,32 @@ const createTestContract = async (
     }
 
     return result.data.createContract.contract
+}
+
+const createAndUpdateTestEBContract = async (
+    server: ApolloServer,
+    stateCode?: StateCodeType,
+    contractFormDataOverrides?: Partial<ContractDraftRevisionFormDataInput>
+): Promise<Contract> => {
+    const draftContract = await createTestContract(
+        server,
+        stateCode,
+        { contractType: 'AMENDMENT' },
+        'ENROLLMENT_BROKER'
+    )
+
+    return await updateTestContractDraftRevision(
+        server,
+        draftContract.id,
+        draftContract.draftRevision?.updatedAt,
+        mockGqlContractDraftRevisionFormDataInput(stateCode, {
+            contractType: 'AMENDMENT',
+            submissionType: 'CONTRACT_ONLY',
+            submissionDescription: 'A complete Enrollment Broker submission',
+            ...mockEBContractFormData(),
+            ...contractFormDataOverrides,
+        })
+    )
 }
 
 const createAndUpdateTestEQROContract = async (
@@ -803,4 +830,5 @@ export {
     contractHistoryToDescriptions,
     errorUndoWithdrawTestContract,
     createAndUpdateTestEQROContract,
+    createAndUpdateTestEBContract,
 }

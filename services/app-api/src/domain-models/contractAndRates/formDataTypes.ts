@@ -201,6 +201,13 @@ const genericContractFormDataSchema = z.object({
     eqroProvisionMcoEqrOrRelatedActivities: preprocessNulls(
         z.boolean().optional()
     ),
+
+    // Enrollment Broker submission fields only
+    ebNewContractor: preprocessNulls(z.boolean().optional()),
+    ebBaseContractInMCReview: preprocessNulls(z.boolean().optional()),
+    ebPreviousAmendmentInMCReview: preprocessNulls(z.boolean().optional()),
+    ebAmendmentNumber: preprocessNulls(z.string().optional()),
+    ebStateContractIdentifier: preprocessNulls(z.string().optional()),
 })
 
 // contractFormDataSchema is the normal contractFormData setup for Draft contracts. Most fields are optional and array fields can be empty.
@@ -481,6 +488,12 @@ const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     eqroProvisionNewMcoEqrRelatedActivities: z.boolean().optional().nullish(),
     eqroProvisionChipEqrRelatedActivities: z.boolean().optional().nullish(),
     eqroProvisionMcoEqrOrRelatedActivities: z.boolean().optional().nullish(),
+
+    ebNewContractor: z.boolean().optional().nullish(),
+    ebBaseContractInMCReview: z.boolean().optional().nullish(),
+    ebPreviousAmendmentInMCReview: z.boolean().optional().nullish(),
+    ebAmendmentNumber: z.string().optional().nullish(),
+    ebStateContractIdentifier: z.string().optional().nullish(),
 })
 
 type UpdateDraftContractFormDataType = Partial<
