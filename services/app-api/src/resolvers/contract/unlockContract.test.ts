@@ -46,6 +46,7 @@ import { packageName } from '@mc-review/submissions'
 import { NewPostgresStore, NotFoundError, type Store } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { unlockContractResolver } from './unlockContract'
+import { mockEBContractFormData } from '../../testHelpers/contractDataMocks'
 
 describe('unlockContract', () => {
     const mockS3 = testS3Client()
@@ -1117,14 +1118,7 @@ describe('unlockContract', () => {
                         submitted.id,
                         'Correct Enrollment Broker submission'
                     )
-                    const expectedEBFields = {
-                        ebNewContractor: true,
-                        ebBaseContractInMCReview: false,
-                        ebPreviousAmendmentInMCReview: true,
-                        ebAmendmentNumber: 'Amendment 2',
-                        ebStateContractIdentifier: 'EB-2026-001',
-                    }
-
+                    const expectedEBFields = mockEBContractFormData()
                     expect(unlocked.contractSubmissionType).toBe(
                         'ENROLLMENT_BROKER'
                     )

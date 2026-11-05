@@ -51,6 +51,7 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import { NewPostgresStore } from '../../postgres'
 import { dayjs } from '@mc-review/dates'
+import { mockEBContractFormData } from '../../testHelpers/contractDataMocks'
 
 describe('submitContract', () => {
     const mockS3 = testS3Client()
@@ -2825,14 +2826,7 @@ describe('submitContract', () => {
             })
             const draft = await createAndUpdateTestEBContract(server)
             const submitted = await submitTestContract(server, draft.id)
-            const expectedEBFields = {
-                ebNewContractor: true,
-                ebBaseContractInMCReview: false,
-                ebPreviousAmendmentInMCReview: true,
-                ebAmendmentNumber: 'Amendment 2',
-                ebStateContractIdentifier: 'EB-2026-001',
-            }
-
+            const expectedEBFields = mockEBContractFormData()
             expect(submitted.contractSubmissionType).toBe('ENROLLMENT_BROKER')
             expect(submitted.status).toBe('SUBMITTED')
             expect(submitted.draftRevision).toBeNull()

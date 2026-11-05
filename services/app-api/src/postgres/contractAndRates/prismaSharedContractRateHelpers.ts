@@ -867,14 +867,7 @@ function contractFormDataToDomainModel(
         procurementAttestation:
             contractRevision.procurementAttestation ?? undefined,
         eqroNewContractor: contractRevision.eqroNewContractor ?? undefined,
-        ebNewContractor: contractRevision.ebNewContractor ?? undefined,
-        ebBaseContractInMCReview:
-            contractRevision.ebBaseContractInMCReview ?? undefined,
-        ebPreviousAmendmentInMCReview:
-            contractRevision.ebPreviousAmendmentInMCReview ?? undefined,
-        ebAmendmentNumber: contractRevision.ebAmendmentNumber ?? undefined,
-        ebStateContractIdentifier:
-            contractRevision.ebStateContractIdentifier ?? undefined,
+
         eqroProvisionMcoNewOptionalActivity:
             contractRevision.eqroProvisionMcoNewOptionalActivity ?? undefined,
         eqroProvisionNewMcoEqrRelatedActivities:
@@ -885,6 +878,14 @@ function contractFormDataToDomainModel(
         eqroProvisionMcoEqrOrRelatedActivities:
             contractRevision.eqroProvisionMcoEqrOrRelatedActivities ??
             undefined,
+        ebNewContractor: contractRevision.ebNewContractor ?? undefined,
+        ebBaseContractInMCReview:
+            contractRevision.ebBaseContractInMCReview ?? undefined,
+        ebPreviousAmendmentInMCReview:
+            contractRevision.ebPreviousAmendmentInMCReview ?? undefined,
+        ebAmendmentNumber: contractRevision.ebAmendmentNumber ?? undefined,
+        ebStateContractIdentifier:
+            contractRevision.ebStateContractIdentifier ?? undefined,
     }
 }
 
