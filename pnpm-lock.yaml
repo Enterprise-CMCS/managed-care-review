@@ -590,8 +590,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0(graphql@16.14.2)
       '@launchdarkly/node-server-sdk':
-        specifier: 9.12.1
-        version: 9.12.1(supports-color@5.5.0)
+        specifier: 9.16.1
+        version: 9.16.1(supports-color@5.5.0)
       '@luckycatfactory/esbuild-graphql-loader':
         specifier: ^3.8.1
         version: 3.8.1(esbuild@0.28.2)(graphql-tag@2.12.7(graphql@16.14.2))(graphql@16.14.2)
@@ -1197,8 +1197,8 @@ importers:
   services/local-dev-console:
     dependencies:
       '@launchdarkly/node-server-sdk':
-        specifier: 9.12.1
-        version: 9.12.1(supports-color@10.2.2)
+        specifier: 9.16.1
+        version: 9.16.1(supports-color@10.2.2)
       '@mc-review/common-code':
         specifier: workspace:*
         version: link:../../packages/common-code
@@ -3875,14 +3875,17 @@ packages:
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
 
-  '@launchdarkly/js-sdk-common@2.25.1':
-    resolution: {integrity: sha512-erG2RbA8QQMKW+D9Y7Uahez1dU+TzmyTzv9qlB7b0Pr/DS2SmUg5H8pJbkLcRrSxoshczZdB1UqsuE3RAk7UYQ==}
+  '@launchdarkly/eventsource@0.2.2':
+    resolution: {integrity: sha512-HeM/SWPrgHwdLytYXhRMNvDB7XKWYY3xSFeo9nAZB3Ep8GhDKOC7uefKuAAKjlxRHyvtQpnm/UHgw3EBBRxNnA==}
 
-  '@launchdarkly/js-server-sdk-common@2.19.3':
-    resolution: {integrity: sha512-1VTbCagS11S5LCefGTzLNXwgdGwdQBjEkymjh5O/TfdguPADX6yRCFSAjBWtw7Hb9H8C8NAQ6hY/fpadonKgUA==}
+  '@launchdarkly/js-sdk-common@2.32.0':
+    resolution: {integrity: sha512-V2sd9W1ocskNtZNx2gmgym+j4YsmsawZE4kwUj631dO9SE6029SLCNY9wl3csS/8/Pe8qTxZv7pvbxh4mIWJqw==}
 
-  '@launchdarkly/node-server-sdk@9.12.1':
-    resolution: {integrity: sha512-GX33IDZ/e1EvzRTO5Wn0X6samUSqKthJT3P0Y8P2gQ0D1peswJ/QsPcKZoPgu7QMWSC2wkFKQ8jkEAJguHsIow==}
+  '@launchdarkly/js-server-sdk-common@2.26.1':
+    resolution: {integrity: sha512-eYj8wM6KcU1rODRYMkAZJPEtvvUxkMTIYA9mRG821rg8U/X6HXTTs+hnJHjN/FVPfojwXO1DOUKyHa6f91SHOw==}
+
+  '@launchdarkly/node-server-sdk@9.16.1':
+    resolution: {integrity: sha512-zR0JXBWhhzG8iIB5gg8W1D3mEdjQFy8xoBb0JDeVnVcESJUx8nXPMBsFp7s6axmxAFJD9g9ES7hl+yQxip+qHw==}
 
   '@luckycatfactory/esbuild-graphql-loader@3.8.1':
     resolution: {integrity: sha512-ovONIUSW6NAlCpiPMaVw4PpdFoO3Kqi8TGQ2hTtjKTQTdPpSOdekPI1ZRnwciTeUn0yCAQk7M2xdrbIZeTh6pw==}
@@ -8530,10 +8533,6 @@ packages:
 
   known-css-properties@0.37.0:
     resolution: {integrity: sha512-JCDrsP4Z1Sb9JwG0aJ8Eo2r7k4Ou5MwmThS/6lcIe1ICyb7UBJKGRIUUdqc2ASdE/42lgz6zFUnzAIhtXnBVrQ==}
-
-  launchdarkly-eventsource@2.2.0:
-    resolution: {integrity: sha512-u38fYlLSq/m6oFz0MS1/76Sj2xzlYhTKZ+sf/vju6PA86PMc6fPlY5k8CdU79edLXjNwsvIQTDvDNy3llDqB8A==}
-    engines: {node: '>=0.12.0'}
 
   launchdarkly-js-client-sdk@3.9.3:
     resolution: {integrity: sha512-1q+TqfBEBQcaz77EHwPf5F0L1hc22iwoa/S+69O5DSyp7+Txg35SDrvIQJWDcpigYxg0WN9VswAiq3uFci1ZhA==}
@@ -15442,26 +15441,28 @@ snapshots:
 
   '@keyv/serialize@1.1.1': {}
 
-  '@launchdarkly/js-sdk-common@2.25.1': {}
+  '@launchdarkly/eventsource@0.2.2': {}
 
-  '@launchdarkly/js-server-sdk-common@2.19.3':
+  '@launchdarkly/js-sdk-common@2.32.0': {}
+
+  '@launchdarkly/js-server-sdk-common@2.26.1':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.25.1
+      '@launchdarkly/js-sdk-common': 2.32.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.12.1(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.16.1(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.19.3
+      '@launchdarkly/eventsource': 0.2.2
+      '@launchdarkly/js-server-sdk-common': 2.26.1
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
-      launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/node-server-sdk@9.12.1(supports-color@5.5.0)':
+  '@launchdarkly/node-server-sdk@9.16.1(supports-color@5.5.0)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.19.3
+      '@launchdarkly/eventsource': 0.2.2
+      '@launchdarkly/js-server-sdk-common': 2.26.1
       https-proxy-agent: 7.0.6(supports-color@5.5.0)
-      launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
@@ -20689,8 +20690,6 @@ snapshots:
   kleur@3.0.3: {}
 
   known-css-properties@0.37.0: {}
-
-  launchdarkly-eventsource@2.2.0: {}
 
   launchdarkly-js-client-sdk@3.9.3:
     dependencies:
