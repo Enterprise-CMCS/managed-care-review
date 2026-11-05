@@ -106,7 +106,7 @@
         "qs": "^6.17.1",
         "react": "^19.3.1",
         "react-dom": "^19.3.1",
-        "react-error-boundary": "^6.1.0",
+        "react-error-boundary": "^6.1.6",
         "react-idle-timer": "^5.7.3",
         "react-router-dom": "^7.15.1",
         "react-select": "^5.10.2",
