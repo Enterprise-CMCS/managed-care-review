@@ -59,7 +59,7 @@
         "graphql-scalars": "^2.0.1",
         "jsonwebtoken": "^9.0.3",
         "path-to-regexp": "^9.0.0",
-        "pg": "^8.23.0",
+        "pg": "^8.23.1",
         "prisma": "^7.10.0",
         "purify-ts": "^2.1.4",
         "rxjs": "^7.8.1",
