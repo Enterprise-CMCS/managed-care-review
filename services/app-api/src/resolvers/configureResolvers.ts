@@ -81,6 +81,10 @@ import {
 import type { DocumentZipService } from '../zip/generateZip'
 import { fetchDocumentResolver } from './documents/fetchDocument'
 import { generateUploadURLResolver } from './documents/generateUploadURL'
+import {
+    fetchUploadScanStatusResolver,
+    fetchS3DownloadURLResolver,
+} from './documents/sharedS3Objects'
 import { fetchAllStateProgramsResolver } from './statePrograms'
 
 export function configureResolvers(
@@ -98,6 +102,8 @@ export function configureResolvers(
         Query: {
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),
+            fetchUploadScanStatus: fetchUploadScanStatusResolver(s3Client),
+            fetchS3DownloadURL: fetchS3DownloadURLResolver(s3Client),
             indexContracts: indexContractsResolver(store, launchDarkly),
             indexContractsStripped: indexContractsStripped(store),
             indexUsers: indexUsersResolver(store),

@@ -86,7 +86,8 @@ export function generateUploadURLResolver(
                     s3Key,
                     bucketName,
                     contentType,
-                    expiresIn
+                    expiresIn,
+                    input.includeContentDisposition ? fileName : undefined
                 )
 
                 const s3URL = await s3Client.getS3URL(
@@ -103,6 +104,7 @@ export function generateUploadURLResolver(
                     bucket: bucketName,
                     expiresIn,
                     s3URL,
+                    contentType,
                 }
             }
         )

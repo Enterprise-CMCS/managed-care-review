@@ -2,6 +2,7 @@ import {
     S3Client,
     GetObjectCommand,
     PutObjectCommand,
+    type S3ClientConfig,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -16,7 +17,7 @@ export function newLocalS3Client(
     endpoint: string,
     bucketConfig: S3BucketConfigType
 ): S3ClientT {
-    const s3Client = new S3Client({
+    const clientConfig: S3ClientConfig = {
         forcePathStyle: true,
         credentials: {
             accessKeyId: 'test', // LocalStack accepts any credentials in local mode
@@ -26,6 +27,11 @@ export function newLocalS3Client(
         region: 'us-east-1',
         // Disable SSL for local development with LocalStack
         tls: false,
+    }
+    const s3Client = new S3Client(clientConfig)
+    const uploadSigner = new S3Client({
+        ...clientConfig,
+        requestChecksumCalculation: 'WHEN_REQUIRED',
     })
 
     return {
@@ -74,6 +80,8 @@ export function newLocalS3Client(
                 }
             }
         },
+        // LocalStack does not run GuardDuty.
+        getScanStatus: async () => 'CLEAN',
         scanFile: async (
             s3Key: string,
             bucket: BucketShortName
@@ -123,14 +131,18 @@ export function newLocalS3Client(
             key: string,
             bucket: BucketShortName,
             contentType: string,
-            expiresIn: number
+            expiresIn: number,
+            fileName?: string
         ): Promise<string> => {
             const command = new PutObjectCommand({
                 Bucket: bucketConfig[bucket],
                 Key: `allusers/${key}`,
                 ContentType: contentType,
+                ...(fileName && {
+                    ContentDisposition: `attachment; filename=${encodeURIComponent(fileName)}`,
+                }),
             })
-            return getSignedUrl(s3Client, command, { expiresIn })
+            return getSignedUrl(uploadSigner, command, { expiresIn })
         },
         getZipURL: async (
             s3key: string,
