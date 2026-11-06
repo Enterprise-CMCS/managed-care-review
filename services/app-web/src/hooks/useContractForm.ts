@@ -133,6 +133,12 @@ const useContractForm = (contractID?: string): UseContractForm => {
         input: UpdateContractDraftRevisionInput
     ): Promise<Contract | Error> => {
         setShowPageErrorMessage(false)
+        // Form pages spread fetched ContractFormData into this input. ilosExternalRates is
+        // output-only, external rates are managed through updateDraftContractRates, so drop
+        // it before sending the mutation.
+        if ('ilosExternalRates' in input.formData) {
+            delete input.formData.ilosExternalRates
+        }
         if (
             input.formData.contractDocuments &&
             input.formData.contractDocuments.length > 0
