@@ -69,7 +69,7 @@ const documentSchema = z.object({
 
 // A rate outside MC-Review on an ILOS submission. Lives on the ILOS submission revision,
 const ilosExternalRateSchema = z.object({
-    id: z.string().optional(), // absent on a new external rate
+    id: z.uuid(),
     rateControlName: z.string().optional(), // states may not know it at submission time
     rateDateStart: z.date().optional(),
     rateDateEnd: z.date().optional(),
