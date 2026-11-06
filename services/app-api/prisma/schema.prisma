@@ -290,7 +290,45 @@ model ContractRevisionTable {
   ebAmendmentNumber             String?
   ebStateContractIdentifier     String?
 
+  // ILOS submission fields only
+  isILOSRatesIncluded Boolean? // Whether the API should expect rates on this ILOS submission
+  ilosRateDateStart   DateTime?          @db.Date // Rating period start for the ILOS submission
+  ilosRateDateEnd     DateTime?          @db.Date // Rating period end for the ILOS submission
+  ilosExternalRates   ILOSExternalRate[] // Rates outside MC-Review on this revision
+  ilosDocuments       ILOSDocument[] // ILOS report documents uploaded by the state
+
   revisionOverrides ContractRevisionOverrides[]
+}
+
+// ILOS report documents, kept separate from ContractDocument so ILOS submissions never
+// share document rows or overrides with contracts. Modeled on ContractDocument.
+model ILOSDocument {
+  id                 String                @id @default(uuid())
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @default(now()) @updatedAt
+  position           Int
+  name               String // Original filename from user upload
+  s3URL              String // DEPRECATED: Use s3BucketName + s3Key instead. Kept so GenericDocument works end to end; drop with the other document tables
+  s3BucketName       String
+  s3Key              String
+  sha256             String
+  dateAdded          DateTime? // Date first submitted to CMS
+  contractRevisionID String
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
+}
+
+// A rate outside MC-Review on an ILOS submission revision. Shares one position sequence with the linked rates'
+// ratePosition on DraftRateJoinTable and SubmissionPackageJoinTable.
+model ILOSExternalRate {
+  id                 String                @id @default(uuid())
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @default(now()) @updatedAt
+  position           Int
+  rateControlName    String? // Rate control name the state identifies the external rate under
+  rateDateStart      DateTime?             @db.Date // Named as on RateRevisionTable; nullable so an incomplete draft can be saved, required on submit
+  rateDateEnd        DateTime?             @db.Date
+  contractRevisionID String
+  contractRevision   ContractRevisionTable @relation(fields: [contractRevisionID], references: [id])
 }
 
 model RateRevisionTable {
@@ -943,6 +981,7 @@ enum ContractSubmissionType {
   HEALTH_PLAN
   EQRO
   ENROLLMENT_BROKER
+  ILOS
 }
 
 enum OAuthScope {

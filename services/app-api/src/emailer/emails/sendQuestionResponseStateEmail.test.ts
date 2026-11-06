@@ -48,6 +48,8 @@ const currentQuestion = questions[0]
 
 const formData: ContractFormDataType = {
     programIDs: ['abbdf9b0-c49e-4c4c-bb6f-040cb7b51cce'],
+    ilosDocuments: [],
+    ilosExternalRates: [],
     populationCovered: 'CHIP',
     submissionType: 'CONTRACT_AND_RATES',
     riskBasedContract: false,

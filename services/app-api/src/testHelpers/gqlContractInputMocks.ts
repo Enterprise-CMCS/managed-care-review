@@ -1,4 +1,5 @@
 import type { ContractDraftRevisionFormDataInput } from '../gen/gqlServer'
+import type { ContractFormDataType } from '../domain-models'
 import { must } from './assertionHelpers'
 import { findStatePrograms } from '../postgres'
 import { defaultFloridaProgram } from './gqlHelpers'
@@ -7,6 +8,20 @@ const mockGqlContractDraftRevisionFormDataInput = (
     stateCode?: string,
     formDataInput?: Partial<ContractDraftRevisionFormDataInput>
 ): ContractDraftRevisionFormDataInput => {
+    // Tests often spread domain form data into this mock. The domain model always carries the
+    // ILOS fields, but ContractDraftRevisionFormDataInput does not have them yet, so drop them
+    // here rather than at every call site. Remove once the ILOS GraphQL input fields land.
+    const gqlFormDataInput: Partial<ContractDraftRevisionFormDataInput> &
+        Partial<
+            Pick<
+                ContractFormDataType,
+                'isILOSRatesIncluded' | 'ilosDocuments' | 'ilosExternalRates'
+            >
+        > = { ...formDataInput }
+    delete gqlFormDataInput.isILOSRatesIncluded
+    delete gqlFormDataInput.ilosDocuments
+    delete gqlFormDataInput.ilosExternalRates
+    formDataInput = gqlFormDataInput
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
         : [defaultFloridaProgram()]

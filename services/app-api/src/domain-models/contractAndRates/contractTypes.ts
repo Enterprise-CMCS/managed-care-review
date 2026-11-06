@@ -3,6 +3,7 @@ import {
     contractRevisionSchema,
     rateRevisionSchema,
     eqroContractRevisionSchema,
+    ilosContractRevisionSchema,
     strippedContractRevisionSchema,
 } from './revisionTypes'
 import { unlockedContractStatusSchema } from './statusType'
@@ -11,10 +12,12 @@ import {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
     eqroContractDraftSchema,
+    ilosContractDraftSchema,
 } from './baseContractRateTypes'
 import {
     submittableContractFormDataSchema,
     submittableEQROContractFormDataSchema,
+    submittableILOSContractFormDataSchema,
     submittableRateFormDataSchema,
 } from './formDataTypes'
 import {
@@ -35,6 +38,16 @@ const contractSchema = contractWithoutDraftRatesSchema.extend({
 })
 
 const eqroContractSchema = eqroContractDraftSchema.extend({
+    withdrawnRates: z.lazy(() =>
+        z.array(rateWithoutDraftContractsSchema).optional()
+    ),
+    draftRates: z.lazy(() =>
+        z.array(rateWithoutDraftContractsSchema).optional()
+    ),
+})
+
+// ILOS submissions link rates like a health plan, so they carry the same rate structure.
+const ilosContractSchema = ilosContractDraftSchema.extend({
     withdrawnRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
@@ -78,6 +91,16 @@ const submittableEQROContractSchema = eqroContractSchema.extend({
     }),
 })
 
+// submittableILOSContractSchema validates a draft ILOS submission as submittable.
+// Linked rates are always existing submitted rates, so their draftRevision is not
+// required to be complete here; parseILOSContract rejects rates parented to the submission.
+const submittableILOSContractSchema = ilosContractSchema.extend({
+    draftRevision: ilosContractRevisionSchema.extend({
+        formData: submittableILOSContractFormDataSchema,
+    }),
+    draftRates: z.array(rateWithoutDraftContractsSchema),
+})
+
 const strippedContractSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
@@ -101,6 +124,7 @@ const strippedContractSchema = z.object({
 type StrippedContractType = z.infer<typeof strippedContractSchema>
 
 type ContractType = z.infer<typeof contractSchema>
+type ILOSContractType = z.infer<typeof ilosContractSchema>
 type UnlockedContractType = z.infer<typeof unlockedContractSchema>
 type DraftContractType = z.infer<typeof draftContractSchema>
 
@@ -122,11 +146,14 @@ export {
     contractSchema,
     strippedContractSchema,
     submittableEQROContractSchema,
+    ilosContractSchema,
+    submittableILOSContractSchema,
     contractSubmitters,
 }
 
 export type {
     ContractType,
+    ILOSContractType,
     StrippedContractType,
     DraftContractType,
     UnlockedContractType,
