@@ -38,7 +38,7 @@ describe('state user in health plan submission form', () => {
             )
             cy.findByTestId('step-indicator')
                 .findAllByRole('listitem')
-                .should('have.length', 5)
+                .should('have.length', 6)
             cy.findByText('Rate details').should('not.exist')
             cy.findByText('Attestations').should('exist')
 
