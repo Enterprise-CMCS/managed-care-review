@@ -212,6 +212,13 @@ const genericContractFormDataSchema = z.object({
         z.boolean().optional()
     ),
 
+    // Enrollment Broker submission fields only
+    ebNewContractor: preprocessNulls(z.boolean().optional()),
+    ebBaseContractInMCReview: preprocessNulls(z.boolean().optional()),
+    ebPreviousAmendmentInMCReview: preprocessNulls(z.boolean().optional()),
+    ebAmendmentNumber: preprocessNulls(z.string().optional()),
+    ebStateContractIdentifier: preprocessNulls(z.string().optional()),
+
     // ILOS submission fields only. Optional here so health plan and EQRO form
     // data is unchanged (the keys are simply absent). ilosContractFormDataSchema
     // fills missing lists with [] on output so ILOS code always reads an array;
@@ -608,6 +615,12 @@ const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     eqroProvisionNewMcoEqrRelatedActivities: z.boolean().optional().nullish(),
     eqroProvisionChipEqrRelatedActivities: z.boolean().optional().nullish(),
     eqroProvisionMcoEqrOrRelatedActivities: z.boolean().optional().nullish(),
+
+    ebNewContractor: z.boolean().optional().nullish(),
+    ebBaseContractInMCReview: z.boolean().optional().nullish(),
+    ebPreviousAmendmentInMCReview: z.boolean().optional().nullish(),
+    ebAmendmentNumber: z.string().optional().nullish(),
+    ebStateContractIdentifier: z.string().optional().nullish(),
 })
 
 type UpdateDraftContractFormDataType = Partial<

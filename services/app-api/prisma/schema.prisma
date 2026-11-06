@@ -283,6 +283,13 @@ model ContractRevisionTable {
   eqroProvisionChipEqrRelatedActivities   Boolean?
   eqroProvisionMcoEqrOrRelatedActivities  Boolean?
 
+  // Enrollment Broker submission fields only
+  ebNewContractor               Boolean?
+  ebBaseContractInMCReview      Boolean?
+  ebPreviousAmendmentInMCReview Boolean?
+  ebAmendmentNumber             String?
+  ebStateContractIdentifier     String?
+
   // ILOS submission fields only
   isILOSRatesIncluded Boolean? // Whether the API should expect rates on this ILOS submission
   ilosRateDateStart   DateTime?          @db.Date // Rating period start for the ILOS submission
