@@ -8,20 +8,17 @@ const mockGqlContractDraftRevisionFormDataInput = (
     stateCode?: string,
     formDataInput?: Partial<ContractDraftRevisionFormDataInput>
 ): ContractDraftRevisionFormDataInput => {
-    // Tests often spread domain form data into this mock. The domain model always carries the
-    // ILOS fields, but ContractDraftRevisionFormDataInput does not have them yet, so drop them
-    // here rather than at every call site. Remove once the ILOS GraphQL input fields land.
+    // Tests often spread fetched form data into this mock. ilosExternalRates is output-only:
+    // external rates are managed through updateDraftContractRates so they share one position
+    // sequence with linked rates, so drop it here rather than at every call site.
     const gqlFormDataInput: Partial<ContractDraftRevisionFormDataInput> &
-        Partial<
-            Pick<
-                ContractFormDataType,
-                'isILOSRatesIncluded' | 'ilosDocuments' | 'ilosExternalRates'
-            >
-        > = { ...formDataInput }
-    delete gqlFormDataInput.isILOSRatesIncluded
-    delete gqlFormDataInput.ilosDocuments
+        Partial<Pick<ContractFormDataType, 'ilosExternalRates'>> = {
+        ...formDataInput,
+    }
     delete gqlFormDataInput.ilosExternalRates
+
     formDataInput = gqlFormDataInput
+
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
         : [defaultFloridaProgram()]

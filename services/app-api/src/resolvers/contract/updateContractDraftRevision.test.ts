@@ -97,6 +97,11 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
+                isILOSRatesIncluded: null,
+                ilosRateDateStart: null,
+                ilosRateDateEnd: null,
+                ilosDocuments: [],
+                ilosExternalRates: [],
                 stateContacts: [
                     {
                         name: `${testContact.givenName} ${testContact.familyName}`,

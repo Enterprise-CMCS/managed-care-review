@@ -54,7 +54,6 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             contractExecutionStatus
             contractDocuments {
                 ...genericDocumentFragment
-
             }
 
             contractDateStart
@@ -89,6 +88,21 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             eqroProvisionNewMcoEqrRelatedActivities
             eqroProvisionChipEqrRelatedActivities
             eqroProvisionMcoEqrOrRelatedActivities
+
+            #ILOS submission fields only
+            ilosDocuments {
+                ...genericDocumentFragment
+            }
+            ilosRateDateStart
+            ilosRateDateEnd
+            isILOSRatesIncluded
+            ilosExternalRates {
+                id
+                rateControlName
+                rateDateStart
+                rateDateEnd
+                position
+            }
         }
     }
     ... on RateRevision {
@@ -107,11 +121,9 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             rateCapitationType
             rateDocuments {
                 ...genericDocumentFragment
-
             }
             supportingDocuments {
                 ...genericDocumentFragment
-
             }
             rateDateStart
             rateDateEnd
