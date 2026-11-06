@@ -775,7 +775,7 @@ input CreateContractInput {
 
     """
     Type of submission the state is submitting
-    Options are: HEALTH_PLAN, EQRO, ILOS
+    Options are: HEALTH_PLAN, EQRO, EB and ILOS
     """
     contractSubmissionType: ContractSubmissionType!
     """
@@ -1973,7 +1973,19 @@ type ContractFormData {
     "EQR or EQR-related activities are performed on MCOs"
     eqroProvisionMcoEqrOrRelatedActivities: Boolean
 
-    #   ILOS submission fields only
+    # Enrollment Broker submission fields only
+    "If this contract is with a new Enrollment Broker"
+    ebNewContractor: Boolean
+    "If the base contract for this Enrollment Broker has been submitted in MC Review"
+    ebBaseContractInMCReview: Boolean
+    "If the previous amendment was submitted in MC Review"
+    ebPreviousAmendmentInMCReview: Boolean
+    "The amendment number for an Enrollment Broker contract"
+    ebAmendmentNumber: String
+    "The state-assigned Enrollment Broker contract identifier"
+    ebStateContractIdentifier: String
+
+    # ILOS submission fields only
     "ILOS report documents uploaded by the state. Always [] on other submission types"
     ilosDocuments: [GenericDocument!]!
     "Start of the rating period covered by the ILOS submission"
@@ -2708,7 +2720,7 @@ type ContractStripped {
     """
     stateNumber: Int!
 
-    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, or ILOS"
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, EB or ILOS"
     contractSubmissionType: ContractSubmissionType!
 
     "reviewStatusActions are the who/when/why for review status changes on this contract"
@@ -2761,7 +2773,7 @@ type Contract {
     """
     stateNumber: Int!
 
-    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, or ILOS"
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, EB or ILOS"
     contractSubmissionType: ContractSubmissionType!
 
     "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
@@ -2862,7 +2874,7 @@ type UnlockedContract {
     """
     stateNumber: Int!
 
-    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, or ILOS"
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, EB or ILOS"
     contractSubmissionType: ContractSubmissionType!
 
     "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
@@ -3329,6 +3341,18 @@ input ContractDraftRevisionFormDataInput {
     eqroProvisionChipEqrRelatedActivities: Boolean
     "EQR or EQR-related activities are performed on MCOs"
     eqroProvisionMcoEqrOrRelatedActivities: Boolean
+
+    # Enrollment Broker submission fields only
+    "If this contract is with a new Enrollment Broker"
+    ebNewContractor: Boolean
+    "If the base contract for this Enrollment Broker has been submitted in MC Review"
+    ebBaseContractInMCReview: Boolean
+    "If the previous amendment was submitted in MC Review"
+    ebPreviousAmendmentInMCReview: Boolean
+    "The amendment number for an Enrollment Broker contract"
+    ebAmendmentNumber: String
+    "The state-assigned Enrollment Broker contract identifier"
+    ebStateContractIdentifier: String
 
     #   ILOS submission fields only
     "ILOS report documents uploaded by the state"

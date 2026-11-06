@@ -323,6 +323,18 @@ function prismaUpdateContractFormDataFromDomain(
         eqroProvisionMcoEqrOrRelatedActivities: nullify(
             contractFormData.eqroProvisionMcoEqrOrRelatedActivities
         ),
+        // Enrollment Broker submission fields only
+        ebNewContractor: nullify(contractFormData.ebNewContractor),
+        ebBaseContractInMCReview: nullify(
+            contractFormData.ebBaseContractInMCReview
+        ),
+        ebPreviousAmendmentInMCReview: nullify(
+            contractFormData.ebPreviousAmendmentInMCReview
+        ),
+        ebAmendmentNumber: nullify(contractFormData.ebAmendmentNumber),
+        ebStateContractIdentifier: nullify(
+            contractFormData.ebStateContractIdentifier
+        ),
     }
 }
 export {

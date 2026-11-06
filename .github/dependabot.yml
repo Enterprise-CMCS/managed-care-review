@@ -1,15 +1,18 @@
 version: 2
+# Temporarily pause version-update PRs for the client-requested week.
+# To resume, remove the GitHub Actions limit and restore the npm limit to 4.
 updates:
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
+    open-pull-requests-limit: 0
 
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
       interval: 'daily'
-    open-pull-requests-limit: 4
+    open-pull-requests-limit: 0
     ignore:
       - dependency-name: 'prisma'
         update-types: ['version-update:semver-major']

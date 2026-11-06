@@ -81,14 +81,21 @@ fragment contractRevisionFragment on ContractRevision {
         statutoryRegulatoryAttestationDescription
         procurementAttestation
 
-        #       EQRO submission fields only
+        # EQRO submission fields only
         eqroNewContractor
         eqroProvisionMcoNewOptionalActivity
         eqroProvisionNewMcoEqrRelatedActivities
         eqroProvisionChipEqrRelatedActivities
         eqroProvisionMcoEqrOrRelatedActivities
 
-        #       ILOS submission fields only
+        # Enrollment Broker submission fields only
+        ebNewContractor
+        ebBaseContractInMCReview
+        ebPreviousAmendmentInMCReview
+        ebAmendmentNumber
+        ebStateContractIdentifier
+
+        # ILOS submission fields only
         ilosDocuments {
             ...genericDocumentFragment
         }

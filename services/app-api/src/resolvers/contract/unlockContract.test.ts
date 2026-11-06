@@ -24,6 +24,7 @@ import {
     testStateUser,
 } from '../../testHelpers/userHelpers'
 import {
+    createAndUpdateTestEBContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createSubmitAndUnlockTestContract,
@@ -45,6 +46,7 @@ import { packageName } from '@mc-review/submissions'
 import { NewPostgresStore, NotFoundError, type Store } from '../../postgres'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
 import { unlockContractResolver } from './unlockContract'
+import { mockEBContractFormData } from '../../testHelpers/contractDataMocks'
 
 describe('unlockContract', () => {
     const mockS3 = testS3Client()
@@ -1089,6 +1091,65 @@ describe('unlockContract', () => {
                 })
             )
         })
+    })
+
+    describe('Enrollment Broker contract tests', () => {
+        describe.each(iterableCmsUsersMockData)(
+            '$userRole unlockContract tests',
+            ({ mockUser }) => {
+                it('retains EB fields on a new revision after unlocking', async () => {
+                    const stateServer = await constructTestPostgresServer({
+                        s3Client: mockS3,
+                    })
+                    const cmsServer = await constructTestPostgresServer({
+                        context: { user: mockUser() },
+                        s3Client: mockS3,
+                    })
+                    const draft =
+                        await createAndUpdateTestEBContract(stateServer)
+                    const submitted = await submitTestContract(
+                        stateServer,
+                        draft.id
+                    )
+                    const submittedRevision =
+                        submitted.packageSubmissions[0].contractRevision
+                    const unlocked = await unlockTestContract(
+                        cmsServer,
+                        submitted.id,
+                        'Correct Enrollment Broker submission'
+                    )
+                    const expectedEBFields = mockEBContractFormData()
+                    expect(unlocked.contractSubmissionType).toBe(
+                        'ENROLLMENT_BROKER'
+                    )
+                    expect(unlocked.status).toBe('UNLOCKED')
+                    expectToBeDefined(unlocked.draftRevision)
+                    expect(unlocked.draftRevision.id).not.toBe(
+                        submittedRevision.id
+                    )
+                    expect(
+                        unlocked.draftRevision.unlockInfo?.updatedReason
+                    ).toBe('Correct Enrollment Broker submission')
+                    expect(unlocked.draftRevision.formData).toEqual(
+                        expect.objectContaining(expectedEBFields)
+                    )
+                    // Unlock preserves the historical submitted revision as well.
+                    expect(
+                        unlocked.packageSubmissions[0].contractRevision.id
+                    ).toBe(submittedRevision.id)
+                    expect(
+                        unlocked.packageSubmissions[0].contractRevision.formData
+                    ).toEqual(expect.objectContaining(expectedEBFields))
+                    const fetched = await fetchTestContract(
+                        stateServer,
+                        submitted.id
+                    )
+                    expect(fetched.draftRevision?.formData).toEqual(
+                        expect.objectContaining(expectedEBFields)
+                    )
+                })
+            }
+        )
     })
 
     describe('EQRO contract tests', () => {

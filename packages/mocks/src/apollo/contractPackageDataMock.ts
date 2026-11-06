@@ -2889,6 +2889,11 @@ function mockContractFormData(
         statutoryRegulatoryAttestation: true,
         statutoryRegulatoryAttestationDescription:
             'everything meets regulatory attestation',
+        ebNewContractor: null,
+        ebBaseContractInMCReview: null,
+        ebPreviousAmendmentInMCReview: null,
+        ebAmendmentNumber: null,
+        ebStateContractIdentifier: null,
         eqroNewContractor: null,
         eqroProvisionMcoNewOptionalActivity: null,
         eqroProvisionNewMcoEqrRelatedActivities: null,
@@ -2901,6 +2906,28 @@ function mockContractFormData(
         ilosExternalRates: [],
         ...partial,
     }
+}
+
+function mockEBContractPackageDraft(partial?: Partial<Contract>): Contract {
+    return mockContractPackageDraft({
+        contractSubmissionType: 'ENROLLMENT_BROKER',
+        draftRates: [],
+        draftRevision: mockContractRevision(undefined, {
+            submitInfo: null,
+            unlockInfo: null,
+            contractID: partial?.id ?? 'test-abc-123',
+            formData: mockContractFormData({
+                contractType: 'AMENDMENT',
+                submissionType: 'CONTRACT_ONLY',
+                ebNewContractor: true,
+                ebBaseContractInMCReview: false,
+                ebPreviousAmendmentInMCReview: true,
+                ebAmendmentNumber: 'Amendment 2',
+                ebStateContractIdentifier: 'EB-2026-001',
+            }),
+        }),
+        ...partial,
+    })
 }
 
 function mockUpdateContractDraftRevisionInput(
@@ -4476,6 +4503,7 @@ const mockUnlockedContractStripped = (
 export {
     mockContractRevision,
     mockContractPackageDraft,
+    mockEBContractPackageDraft,
     mockContractPackageSubmitted,
     mockContractWithLinkedRateSubmitted,
     mockContractWithLinkedRateDraft,
