@@ -207,8 +207,8 @@ importers:
         specifier: ^1.7.0
         version: 1.7.0(axe-core@4.14.0)(cypress@15.20.1)
       danger:
-        specifier: ^14.0.7
-        version: 14.0.7(supports-color@8.1.1)(undici@7.30.1)
+        specifier: ^14.1.0
+        version: 14.1.0(supports-color@8.1.1)(undici@7.30.1)
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -7103,8 +7103,8 @@ packages:
     resolution: {integrity: sha512-VqKjzBLejbSMT4IgbmVgDjpkYrNWUYJnbCGo874u7MMKIWsILRX+OpX/gTk8MqjpT1A/c6HY2dCA77ZN0lkQ2Q==}
     engines: {node: '>=12'}
 
-  danger@14.0.7:
-    resolution: {integrity: sha512-tOPndifqtQchQxJ0Wfs7cr9s+cCVtt0RSUzaLEoL9quzLi2tDfa1POyqFF1f4bL7DNOgpNOKAIdP9lSlgksLhw==}
+  danger@14.1.0:
+    resolution: {integrity: sha512-t4VuJuRK52l3bReEGN2yaMYuNAw4riJMr9v1NQ24PkN6a9M7V2geqiy8JIjN/LVEIAB0nFslqw5rTSx1hNia2w==}
     engines: {node: '>=18.17'}
     hasBin: true
     peerDependencies:
@@ -19103,7 +19103,7 @@ snapshots:
     dependencies:
       d3-array: 3.2.4
 
-  danger@14.0.7(supports-color@8.1.1)(undici@7.30.1):
+  danger@14.1.0(supports-color@8.1.1)(undici@7.30.1):
     dependencies:
       '@gitbeaker/rest': 38.12.1
       '@octokit/rest': 20.1.2
