@@ -1962,6 +1962,18 @@ type ContractFormData {
     eqroProvisionChipEqrRelatedActivities: Boolean
     "EQR or EQR-related activities are performed on MCOs"
     eqroProvisionMcoEqrOrRelatedActivities: Boolean
+
+    # Enrollment Broker submission fields only
+    "If this contract is with a new Enrollment Broker"
+    ebNewContractor: Boolean
+    "If the base contract for this Enrollment Broker has been submitted in MC Review"
+    ebBaseContractInMCReview: Boolean
+    "If the previous amendment was submitted in MC Review"
+    ebPreviousAmendmentInMCReview: Boolean
+    "The amendment number for an Enrollment Broker contract"
+    ebAmendmentNumber: String
+    "The state-assigned Enrollment Broker contract identifier"
+    ebStateContractIdentifier: String
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
@@ -3270,6 +3282,18 @@ input ContractDraftRevisionFormDataInput {
     eqroProvisionChipEqrRelatedActivities: Boolean
     "EQR or EQR-related activities are performed on MCOs"
     eqroProvisionMcoEqrOrRelatedActivities: Boolean
+
+    # Enrollment Broker submission fields only
+    "If this contract is with a new Enrollment Broker"
+    ebNewContractor: Boolean
+    "If the base contract for this Enrollment Broker has been submitted in MC Review"
+    ebBaseContractInMCReview: Boolean
+    "If the previous amendment was submitted in MC Review"
+    ebPreviousAmendmentInMCReview: Boolean
+    "The amendment number for an Enrollment Broker contract"
+    ebAmendmentNumber: String
+    "The state-assigned Enrollment Broker contract identifier"
+    ebStateContractIdentifier: String
 }
 
 input RateFormDataInput {

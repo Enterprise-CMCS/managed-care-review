@@ -21,6 +21,7 @@ import {
 } from '../../testHelpers/userHelpers'
 import type { ContractRevision, RateRevision } from '../../gen/gqlServer'
 import {
+    createAndUpdateTestEBContract,
     createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
@@ -50,6 +51,7 @@ import {
 } from '../../testHelpers/emailerHelpers'
 import { NewPostgresStore } from '../../postgres'
 import { dayjs } from '@mc-review/dates'
+import { mockEBContractFormData } from '../../testHelpers/contractDataMocks'
 
 describe('submitContract', () => {
     const mockS3 = testS3Client()
@@ -2814,6 +2816,37 @@ describe('submitContract', () => {
 
                 expect(submitResult.errors).toBeUndefined()
             }, 20000)
+        })
+    })
+
+    describe('Enrollment Broker contract tests', () => {
+        it('retains EB fields after submission', async () => {
+            const server = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const draft = await createAndUpdateTestEBContract(server)
+            const submitted = await submitTestContract(server, draft.id)
+            const expectedEBFields = mockEBContractFormData()
+            expect(submitted.contractSubmissionType).toBe('ENROLLMENT_BROKER')
+            expect(submitted.status).toBe('SUBMITTED')
+            expect(submitted.draftRevision).toBeNull()
+            expect(submitted.packageSubmissions).toHaveLength(1)
+            const submission = submitted.packageSubmissions[0]
+            expect(submission.contractRevision.formData).toEqual(
+                expect.objectContaining(expectedEBFields)
+            )
+            expect(submission.submittedRevisions).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        id: submission.contractRevision.id,
+                        formData: expect.objectContaining(expectedEBFields),
+                    }),
+                ])
+            )
+            const fetched = await fetchTestContract(server, draft.id)
+            expect(
+                fetched.packageSubmissions[0].contractRevision.formData
+            ).toEqual(expect.objectContaining(expectedEBFields))
         })
     })
 

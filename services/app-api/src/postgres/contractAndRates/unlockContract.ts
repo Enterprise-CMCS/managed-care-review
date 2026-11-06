@@ -307,6 +307,14 @@ async function unlockContractInsideTransaction(
                 currentRev.eqroProvisionChipEqrRelatedActivities,
             eqroProvisionMcoEqrOrRelatedActivities:
                 currentRev.eqroProvisionMcoEqrOrRelatedActivities,
+
+            // Enrollment Broker submission fields only
+            ebNewContractor: currentRev.ebNewContractor,
+            ebBaseContractInMCReview: currentRev.ebBaseContractInMCReview,
+            ebPreviousAmendmentInMCReview:
+                currentRev.ebPreviousAmendmentInMCReview,
+            ebAmendmentNumber: currentRev.ebAmendmentNumber,
+            ebStateContractIdentifier: currentRev.ebStateContractIdentifier,
         },
     })
 
