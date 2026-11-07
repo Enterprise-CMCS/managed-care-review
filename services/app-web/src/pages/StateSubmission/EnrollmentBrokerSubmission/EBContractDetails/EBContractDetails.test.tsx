@@ -31,7 +31,7 @@ describe('EBContractDetails', () => {
             '.usa-step-indicator'
         ) as HTMLElement
         const steps = within(stepIndicator).getAllByRole('listitem')
-        expect(steps).toHaveLength(4)
+        expect(steps).toHaveLength(5)
 
         // Submission details: completed
         expect(steps[0]).toHaveTextContent('Submission details')

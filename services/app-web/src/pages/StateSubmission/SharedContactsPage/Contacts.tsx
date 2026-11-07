@@ -146,6 +146,8 @@ const Contacts = ({
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
     const isEQROSubmission = draftSubmission.contractSubmissionType === 'EQRO'
+    const isEnrollmentBrokerSubmission =
+        draftSubmission.contractSubmissionType === 'ENROLLMENT_BROKER'
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
     const contractSubmissionType = draftSubmission.contractSubmissionType
 
@@ -159,6 +161,9 @@ const Contacts = ({
             contractType === 'BASE'
         ) {
             return 'SUBMISSIONS_ATTESTATIONS'
+        }
+        if (isEnrollmentBrokerSubmission) {
+            return 'SUBMISSIONS_ASSOCIATED_CONTRACTS'
         }
         if (submissionType === 'CONTRACT_ONLY') {
             return 'SUBMISSIONS_CONTRACT_DETAILS'
