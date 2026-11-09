@@ -775,7 +775,7 @@ input CreateContractInput {
 
     """
     Type of submission the state is submitting
-    Options are: HEALTH_PLAN, EQRO, EB and ILOS
+    Options are: HEALTH_PLAN, EQRO, ENROLLMENT_BROKER and ILOS
     """
     contractSubmissionType: ContractSubmissionType!
     """
