@@ -2142,7 +2142,7 @@ describe('ILOS parsing and validation', () => {
         it('accepts an external rate with no control name or dates in a draft', () => {
             const result = ilosContractFormDataSchema.safeParse({
                 ...mockILOSContractFormData(),
-                ilosExternalRates: [{ position: 1 }],
+                ilosExternalRates: [{ id: uuidv4(), position: 1 }],
             })
 
             expect(result.success).toBe(true)
@@ -2257,7 +2257,11 @@ describe('ILOS parsing and validation', () => {
                     },
                 ],
                 ilosExternalRates: [
-                    { rateControlName: 'FL-RATE-002', position: 1 },
+                    {
+                        id: uuidv4(),
+                        rateControlName: 'FL-RATE-002',
+                        position: 1,
+                    },
                 ],
             }
 
@@ -2436,6 +2440,7 @@ describe('ILOS parsing and validation', () => {
                 overrides: {
                     ilosExternalRates: [
                         {
+                            id: uuidv4(),
                             rateControlName: 'FL-RATE-001',
                             rateDateEnd: new Date('2025-12-31'),
                             position: 1,
@@ -2455,6 +2460,7 @@ describe('ILOS parsing and validation', () => {
                 overrides: {
                     ilosExternalRates: [
                         {
+                            id: uuidv4(),
                             rateControlName: 'FL-RATE-001',
                             rateDateStart: new Date('2025-01-01'),
                             position: 1,
@@ -2493,6 +2499,7 @@ describe('ILOS parsing and validation', () => {
             const contract = mockDraftILOSContract({
                 ilosExternalRates: [
                     {
+                        id: uuidv4(),
                         rateDateStart: new Date('2025-01-01'),
                         rateDateEnd: new Date('2025-12-31'),
                         position: 1,
@@ -2527,6 +2534,7 @@ describe('ILOS parsing and validation', () => {
         })
 
         const externalRate = {
+            id: uuidv4(),
             rateControlName: 'FL-RATE-001',
             rateDateStart: new Date('2025-01-01'),
             rateDateEnd: new Date('2025-12-31'),
@@ -2701,6 +2709,8 @@ describe('eqroValidationAndReviewDetermination', () => {
         eqroProvisionNewMcoEqrRelatedActivities: false,
         eqroProvisionChipEqrRelatedActivities: null,
         eqroProvisionMcoEqrOrRelatedActivities: null,
+        ilosDocuments: [],
+        ilosExternalRates: [],
         ...overrides,
     })
 

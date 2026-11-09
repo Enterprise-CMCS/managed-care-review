@@ -7,7 +7,7 @@ import {
 } from '@apollo/client'
 import {
     RateFormDataInput,
-    ContractFormData,
+    ContractDraftRevisionFormDataInput,
     CreateContractInput,
 } from '../gen/gqlClient'
 import {
@@ -31,9 +31,9 @@ const minnesotaStatePrograms = findStatePrograms('MN')
 const s3DlUrl =
     'https://fake-bucket.s3.amazonaws.com/file.pdf?AWSAccessKeyId=AKIAIOSFODNN7EXAMPLE&Expires=1719564800&Signature=abc123def456ghijk' //pragma: allowlist secret
 
-const contractFormData = (
-    overrides?: Partial<ContractFormData>
-): ContractFormData => ({
+const contractFormDataInput = (
+    overrides?: Partial<ContractDraftRevisionFormDataInput>
+): ContractDraftRevisionFormDataInput => ({
     programIDs: [minnesotaStatePrograms[0].id],
     populationCovered: 'MEDICAID',
     submissionType: 'CONTRACT_ONLY',
@@ -86,9 +86,9 @@ const contractFormData = (
     ...overrides,
 })
 
-const eqroFromData = (
-    overrides?: Partial<ContractFormData>
-): ContractFormData => ({
+const eqroFormDataInput = (
+    overrides?: Partial<ContractDraftRevisionFormDataInput>
+): ContractDraftRevisionFormDataInput => ({
     programIDs: [minnesotaStatePrograms[0].id],
     populationCovered: 'MEDICAID',
     submissionType: 'CONTRACT_ONLY',
@@ -574,7 +574,7 @@ export {
     adminUser,
     stateUser,
     rateFormData,
-    contractFormData,
-    eqroFromData,
+    contractFormDataInput,
+    eqroFormDataInput,
     minnesotaStatePrograms,
 }
