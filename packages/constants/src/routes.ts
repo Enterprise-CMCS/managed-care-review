@@ -34,6 +34,7 @@ const ROUTES = [
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_EDIT_TOP_LEVEL',
     'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_ASSOCIATED_CONTRACTS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
@@ -114,6 +115,8 @@ const RoutesRecord: Record<RouteT, string> = {
     SUBMISSIONS_TYPE: '/submissions/:contractSubmissionType/:id/edit/type',
     SUBMISSIONS_CONTRACT_DETAILS:
         '/submissions/:contractSubmissionType/:id/edit/contract-details',
+    SUBMISSIONS_ASSOCIATED_CONTRACTS:
+        '/submissions/:contractSubmissionType/:id/edit/associated-contracts',
     SUBMISSIONS_RATE_DETAILS:
         '/submissions/:contractSubmissionType/:id/edit/rate-details',
     SUBMISSIONS_CONTACTS:
@@ -185,6 +188,7 @@ const EQRO_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
 const EB_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_ASSOCIATED_CONTRACTS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
@@ -319,6 +323,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_EDIT_TOP_LEVEL: 'Submissions',
     SUBMISSIONS_TYPE: 'Submission type',
     SUBMISSIONS_CONTRACT_DETAILS: 'Contract details',
+    SUBMISSIONS_ASSOCIATED_CONTRACTS: 'Associated contracts',
     SUBMISSIONS_RATE_DETAILS: 'Rate details',
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Supporting documents',
