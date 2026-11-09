@@ -752,8 +752,9 @@ input CreateContractInput {
     """
     The large overarching population of people that the program covers.
     Options are MEDICAID, CHIP, MEDICAID_AND_CHIP
+    Required for every submission type except ILOS
     """
-    populationCovered: PopulationCovered!
+    populationCovered: PopulationCovered
     "An array of managed care program IDs this package covers"
     programIDs: [String!]!
     "Whether or not this contract is risk based"
