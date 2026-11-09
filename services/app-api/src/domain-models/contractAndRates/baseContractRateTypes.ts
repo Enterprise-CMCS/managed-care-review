@@ -3,8 +3,10 @@ import {
     contractPackageSubmissionSchema,
     ratePackageSubmissionSchema,
     eqroContractPackageSubmissionSchema,
+    ilosContractPackageSubmissionSchema,
     contractUndoUnlockPackageSchema,
     eqroContractUndoUnlockPackageSchema,
+    ilosContractUndoUnlockPackageSchema,
     rateUndoUnlockPackageSchema,
 } from './packageSubmissions'
 import { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
@@ -22,7 +24,10 @@ import {
 import { contractReviewActionSchema } from './contractReviewActionType'
 import { rateReviewActionSchema } from './rateReviewActionType'
 import { contractSubmissionTypeSchema } from './contractSubmissionType'
-import { eqroContractRevisionSchema } from './revisionTypes'
+import {
+    eqroContractRevisionSchema,
+    ilosContractRevisionSchema,
+} from './revisionTypes'
 import {
     contractDataOverrideSchema,
     rateDataOverrideSchema,
@@ -35,6 +40,8 @@ const contractWithoutDraftRatesSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    // Date of the first submission, honoring admin overrides. Undefined for unsubmitted drafts.
+    initiallySubmittedAt: z.date().optional(),
     // Last persisted contract action that should affect display freshness.
     lastActionDate: z.date().nullish(),
     status: statusSchema,
@@ -60,6 +67,8 @@ const eqroContractDraftSchema = z.object({
     id: z.uuid(),
     createdAt: z.date(),
     updatedAt: z.date(),
+    // Date of the first submission, honoring admin overrides. Undefined for unsubmitted drafts.
+    initiallySubmittedAt: z.date().optional(),
     status: statusSchema,
     reviewStatus: contractReviewStatusSchema,
     consolidatedStatus: consolidatedContractStatusSchema,
@@ -74,6 +83,33 @@ const eqroContractDraftSchema = z.object({
     revisions: z.array(eqroContractRevisionSchema),
     packageSubmissions: z.array(eqroContractPackageSubmissionSchema),
     undoUnlockPackages: z.array(eqroContractUndoUnlockPackageSchema).optional(),
+    questions: indexContractQuestionsPayload.optional(),
+})
+
+// ILOS submissions are stored in the contract tables but are not contracts. This mirrors
+// contractWithoutDraftRatesSchema with the ILOS revision and package schemas; draftRates
+// and withdrawnRates are added in ilosContractSchema because ILOS links rates like a health plan.
+const ilosContractDraftSchema = z.object({
+    id: z.uuid(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    // Date of the first submission, honoring admin overrides. Undefined for unsubmitted drafts.
+    initiallySubmittedAt: z.date().optional(),
+    lastActionDate: z.date().nullish(),
+    status: statusSchema,
+    reviewStatus: contractReviewStatusSchema,
+    consolidatedStatus: consolidatedContractStatusSchema,
+    stateCode: z.string(),
+    mccrsID: z.string().optional(),
+    stateNumber: z.number().min(1),
+    contractSubmissionType: z.literal('ILOS'),
+    // If this submission is in a DRAFT or UNLOCKED status, there will be a draftRevision
+    draftRevision: ilosContractRevisionSchema.optional(),
+    reviewStatusActions: z.array(contractReviewActionSchema).optional(),
+    // All revisions are submitted and in reverse chronological order
+    revisions: z.array(ilosContractRevisionSchema),
+    packageSubmissions: z.array(ilosContractPackageSubmissionSchema),
+    undoUnlockPackages: z.array(ilosContractUndoUnlockPackageSchema).optional(),
     questions: indexContractQuestionsPayload.optional(),
 })
 
@@ -124,6 +160,7 @@ export {
     rateWithoutDraftContractsSchema,
     contractSubmissionTypeSchema,
     eqroContractDraftSchema,
+    ilosContractDraftSchema,
 }
 
 export type {

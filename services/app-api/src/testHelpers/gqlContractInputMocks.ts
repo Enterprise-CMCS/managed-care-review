@@ -1,4 +1,5 @@
 import type { ContractDraftRevisionFormDataInput } from '../gen/gqlServer'
+import type { ContractFormDataType } from '../domain-models'
 import { must } from './assertionHelpers'
 import { findStatePrograms } from '../postgres'
 import { defaultFloridaProgram } from './gqlHelpers'
@@ -7,6 +8,17 @@ const mockGqlContractDraftRevisionFormDataInput = (
     stateCode?: string,
     formDataInput?: Partial<ContractDraftRevisionFormDataInput>
 ): ContractDraftRevisionFormDataInput => {
+    // Tests often spread fetched form data into this mock. ilosExternalRates is output-only:
+    // external rates are managed through updateDraftContractRates so they share one position
+    // sequence with linked rates, so drop it here rather than at every call site.
+    const gqlFormDataInput: Partial<ContractDraftRevisionFormDataInput> &
+        Partial<Pick<ContractFormDataType, 'ilosExternalRates'>> = {
+        ...formDataInput,
+    }
+    delete gqlFormDataInput.ilosExternalRates
+
+    formDataInput = gqlFormDataInput
+
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
         : [defaultFloridaProgram()]

@@ -69,6 +69,112 @@ describe('prismaToDomainModel', () => {
             expect(domainFormData.contractType).toBe('AMENDMENT')
             expect(domainFormData.dsnpContract).toBe(true)
         })
+
+        const ilosRows = {
+            isILOSRatesIncluded: true,
+            ilosRateDateStart: new Date('2025-01-01'),
+            ilosRateDateEnd: new Date('2025-12-31'),
+            ilosDocuments: [
+                {
+                    id: uuidv4(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    position: 0,
+                    name: 'ilos report',
+                    s3URL: 's3://bucketname/key/ilosreport',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'key/ilosreport',
+                    sha256: 'ilosreportsha',
+                    dateAdded: null,
+                    contractRevisionID: 'rev',
+                },
+            ],
+            ilosExternalRates: [
+                {
+                    id: uuidv4(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    position: 2,
+                    rateControlName: 'FL-RATE-001',
+                    rateDateStart: new Date('2025-01-01'),
+                    rateDateEnd: new Date('2025-12-31'),
+                    contractRevisionID: 'rev',
+                },
+                {
+                    id: uuidv4(),
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    position: 3,
+                    rateControlName: null,
+                    rateDateStart: null,
+                    rateDateEnd: null,
+                    contractRevisionID: 'rev',
+                },
+            ],
+        }
+
+        it('maps ILOS columns and relations for an ILOS submission', () => {
+            const contractRevision = mockContractRevision(
+                { contractSubmissionType: 'ILOS' },
+                ilosRows
+            )
+
+            const domainFormData =
+                contractFormDataToDomainModel(contractRevision)
+
+            expect(domainFormData.isILOSRatesIncluded).toBe(true)
+            expect(domainFormData.ilosRateDateStart).toEqual(
+                new Date('2025-01-01')
+            )
+            expect(domainFormData.ilosRateDateEnd).toEqual(
+                new Date('2025-12-31')
+            )
+            expect(domainFormData.ilosDocuments).toEqual([
+                expect.objectContaining({
+                    name: 'ilos report',
+                    s3URL: 's3://bucketname/key/ilosreport',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'key/ilosreport',
+                    sha256: 'ilosreportsha',
+                    dateAdded: undefined,
+                }),
+            ])
+            expect(domainFormData.ilosExternalRates).toEqual([
+                {
+                    id: ilosRows.ilosExternalRates[0].id,
+                    rateControlName: 'FL-RATE-001',
+                    rateDateStart: new Date('2025-01-01'),
+                    rateDateEnd: new Date('2025-12-31'),
+                    position: 2,
+                },
+                {
+                    id: ilosRows.ilosExternalRates[1].id,
+                    rateControlName: undefined,
+                    rateDateStart: undefined,
+                    rateDateEnd: undefined,
+                    position: 3,
+                },
+            ])
+        })
+
+        it.each(['HEALTH_PLAN', 'EQRO'] as const)(
+            'keeps ILOS lists empty on a %s revision even when ILOS rows exist',
+            (contractSubmissionType) => {
+                const contractRevision = mockContractRevision(
+                    { contractSubmissionType },
+                    ilosRows
+                )
+
+                const domainFormData =
+                    contractFormDataToDomainModel(contractRevision)
+
+                expect(domainFormData).not.toHaveProperty('isILOSRatesIncluded')
+                expect(domainFormData).not.toHaveProperty('ilosRateDateStart')
+                expect(domainFormData).not.toHaveProperty('ilosRateDateEnd')
+                expect(domainFormData.ilosDocuments).toEqual([])
+                expect(domainFormData.ilosExternalRates).toEqual([])
+            }
+        )
     })
 
     describe('rateFormDataToDomainModel', () => {

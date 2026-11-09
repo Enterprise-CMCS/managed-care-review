@@ -106,6 +106,11 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 ebPreviousAmendmentInMCReview: null,
                 ebAmendmentNumber: null,
                 ebStateContractIdentifier: null,
+                isILOSRatesIncluded: null,
+                ilosRateDateStart: null,
+                ilosRateDateEnd: null,
+                ilosDocuments: [],
+                ilosExternalRates: [],
                 stateContacts: [
                     {
                         name: `${testContact.givenName} ${testContact.familyName}`,

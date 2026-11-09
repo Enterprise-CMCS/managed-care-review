@@ -64,6 +64,7 @@ const ContractSubmissionTypeRecord = {
     HEALTH_PLAN: 'health-plan',
     EQRO: 'eqro',
     ENROLLMENT_BROKER: 'eb',
+    ILOS: 'ilos',
     SDP: 'sdp'
 } as const
 type ContractSubmissionTypeRecordKeys =

@@ -775,7 +775,7 @@ input CreateContractInput {
 
     """
     Type of submission the state is submitting
-    Options are: HEALTH_PLAN, EQRO
+    Options are: HEALTH_PLAN, EQRO, ENROLLMENT_BROKER and ILOS
     """
     contractSubmissionType: ContractSubmissionType!
     """
@@ -784,6 +784,16 @@ input CreateContractInput {
     Options are MCO, PIHP, PAHP, and PCCM
     """
     managedCareEntities: [ManagedCareEntity!]
+
+    #   ILOS submission fields only
+    "ILOS report documents uploaded by the state"
+    ilosDocuments: [GenericDocumentInput!]
+    "Start of the rating period covered by the ILOS submission"
+    ilosRateDateStart: Date
+    "End of the rating period covered by the ILOS submission"
+    ilosRateDateEnd: Date
+    "Whether the state is including rates (linked or external) on this ILOS submission"
+    isILOSRatesIncluded: Boolean
 }
 
 type CreateContractPayload {
@@ -1974,6 +1984,37 @@ type ContractFormData {
     ebAmendmentNumber: String
     "The state-assigned Enrollment Broker contract identifier"
     ebStateContractIdentifier: String
+
+    # ILOS submission fields only
+    "ILOS report documents uploaded by the state. Always [] on other submission types"
+    ilosDocuments: [GenericDocument!]!
+    "Start of the rating period covered by the ILOS submission"
+    ilosRateDateStart: Date
+    "End of the rating period covered by the ILOS submission"
+    ilosRateDateEnd: Date
+    "Whether the state is including rates (linked or external) on this ILOS submission"
+    isILOSRatesIncluded: Boolean
+    """
+    Rates outside MC-Review on this ILOS submission, in position order.
+    Read only here; written through updateDraftContractRates with type EXTERNAL.
+    Always [] on other submission types
+    """
+    ilosExternalRates: [ILOSExternalRate!]!
+}
+
+"""
+A rate outside MC-Review on an ILOS submission.
+Shares one position sequence with the linked rates' ratePosition.
+"""
+type ILOSExternalRate {
+    id: ID!
+    "Rate control name the state identifies the external rate under"
+    rateControlName: String
+    "Nullable on a draft; required by submit"
+    rateDateStart: Date
+    rateDateEnd: Date
+    "Place in the ILOS rate list, shared with the linked rates"
+    position: Int!
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
@@ -2246,6 +2287,22 @@ enum UpdateContractRateType {
     UPDATE
     "LINK describes a linked nibling to this contract rate"
     LINK
+    "EXTERNAL is a rate outside MC-Review on an ILOS submission. Rejected on other submission types"
+    EXTERNAL
+}
+
+"""
+ILOSExternalRateInput is an external rate entry for updateDraftContractRates on an ILOS submission.
+Position comes from the entry's place in updatedRates, shared with the LINK entries.
+"""
+input ILOSExternalRateInput {
+    "Omitted for a new external rate; the database generates it. Sent back unchanged to update an existing one"
+    id: ID
+    "Rate control name the state identifies the external rate under"
+    rateControlName: String
+    "Nullable so an incomplete draft can be saved, as RateFormDataInput dates are"
+    rateDateStart: Date
+    rateDateEnd: Date
 }
 
 """
@@ -2256,10 +2313,12 @@ on this input and the API will validate that the two optional parameters are set
 input UpdateContractRateInput {
     "type indicates the relationship of this rate to the contract"
     type: UpdateContractRateType!
-    "rateID is the rateID of the existing rate. This is REQUIRED for LINK and UPDATE types and OMITTED for CREATE"
+    "rateID is the rateID of the existing rate. This is REQUIRED for LINK and UPDATE types and OMITTED for CREATE and EXTERNAL"
     rateID: ID
-    "formData is the rate data for a child rate, REQUIRED for CREATE and UPDATE types, omitted for LINK"
+    "formData is the rate data for a child rate, REQUIRED for CREATE and UPDATE types, omitted for LINK and EXTERNAL"
     formData: RateFormDataInput
+    "externalRate is the external rate data, REQUIRED for EXTERNAL and omitted for the other types"
+    externalRate: ILOSExternalRateInput
 }
 
 input UpdateDraftContractRatesInput {
@@ -2661,7 +2720,7 @@ type ContractStripped {
     """
     stateNumber: Int!
 
-    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN or EQRO"
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, ENROLLMENT_BROKER or ILOS"
     contractSubmissionType: ContractSubmissionType!
 
     "reviewStatusActions are the who/when/why for review status changes on this contract"
@@ -2714,7 +2773,7 @@ type Contract {
     """
     stateNumber: Int!
 
-    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN or EQRO"
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, ENROLLMENT_BROKER or ILOS"
     contractSubmissionType: ContractSubmissionType!
 
     "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
@@ -2815,7 +2874,7 @@ type UnlockedContract {
     """
     stateNumber: Int!
 
-    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN or EQRO"
+    "contractSubmissionType is the type of the submission. It can be HEALTH_PLAN, EQRO, ENROLLMENT_BROKER or ILOS"
     contractSubmissionType: ContractSubmissionType!
 
     "mccrsID is the four digit id in MC-CRS that corresponds to this Contract, if set"
@@ -3294,6 +3353,17 @@ input ContractDraftRevisionFormDataInput {
     ebAmendmentNumber: String
     "The state-assigned Enrollment Broker contract identifier"
     ebStateContractIdentifier: String
+
+    #   ILOS submission fields only
+    "ILOS report documents uploaded by the state"
+    ilosDocuments: [GenericDocumentInput!]
+    "Start of the rating period covered by the ILOS submission"
+    ilosRateDateStart: Date
+    "End of the rating period covered by the ILOS submission"
+    ilosRateDateEnd: Date
+    "Whether the state is including rates (linked or external) on this ILOS submission"
+    isILOSRatesIncluded: Boolean
+    # No ilosExternalRates. External rates are written through updateDraftContractRates.
 }
 
 input RateFormDataInput {
@@ -3599,6 +3669,7 @@ enum ContractSubmissionType {
     HEALTH_PLAN
     EQRO
     ENROLLMENT_BROKER
+    ILOS
 }
 
 enum OAuthScope {

@@ -1,14 +1,20 @@
 import {
     validateContractDraftRevisionInput,
     validateEQROContractDraftRevisionInput,
+    validateILOSContractDraftRevisionInput,
     parseContract,
     parseAndUpdateEqroFields,
     parseAndUpdateChipOnlyFields,
     parseEQROContract,
+    parseILOSContract,
 } from './dataValidatorHelpers'
 import {
     mockGqlContractDraftRevisionFormDataInput,
     mockSubmittableHealthPlanContract,
+    mockILOSDocument,
+    mockILOSContractFormData,
+    mockILOSLinkedRate,
+    mockDraftILOSContract,
     must,
 } from '../../testHelpers'
 import type {
@@ -27,10 +33,12 @@ import { findStatePrograms } from '../../postgres'
 import {
     contractFormDataSchema,
     eqroContractFormDataSchema,
+    ilosContractFormDataSchema,
     type ContractFormDataType,
 } from './formDataTypes'
 import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
 import { z } from 'zod'
+import { v4 as uuidv4 } from 'uuid'
 
 describe('Health plan parsing and validation', () => {
     describe('validateContractDraftRevisionInput', () => {
@@ -58,6 +66,8 @@ describe('Health plan parsing and validation', () => {
                 ...formData,
                 statutoryRegulatoryAttestation: true,
                 statutoryRegulatoryAttestationDescription: undefined,
+                ilosDocuments: [],
+                ilosExternalRates: [],
             }
 
             const validatedFormData = must(
@@ -142,6 +152,8 @@ describe('Health plan parsing and validation', () => {
                 modifiedNonRiskPaymentArrangements: undefined,
                 statutoryRegulatoryAttestation: undefined,
                 statutoryRegulatoryAttestationDescription: undefined,
+                ilosDocuments: [],
+                ilosExternalRates: [],
             }
 
             const validatedFormData = must(
@@ -401,6 +413,8 @@ describe('Health plan parsing and validation', () => {
                     updatedAt: new Date(11 / 27 / 2023),
                     formData: {
                         programIDs: [defaultFloridaProgram().id],
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
@@ -582,6 +596,8 @@ describe('Health plan parsing and validation', () => {
                     updatedAt: new Date(11 / 27 / 2023),
                     formData: {
                         programIDs: ['fake-id'],
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         populationCovered: 'CHIP',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
@@ -802,6 +818,8 @@ describe('Health plan parsing and validation', () => {
                     updatedAt: new Date(11 / 27 / 2023),
                     formData: {
                         programIDs: [defaultFloridaProgram().id],
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         populationCovered: 'MEDICAID',
                         submissionType: 'CONTRACT_AND_RATES',
                         riskBasedContract: true,
@@ -1188,6 +1206,8 @@ describe('EQRO parsing and validation', () => {
         overrides?: Partial<ContractFormDataType>
     ): ContractFormDataType => ({
         programIDs: [defaultFloridaProgram().id],
+        ilosDocuments: [],
+        ilosExternalRates: [],
         populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_ONLY',
         submissionDescription: 'A real EQRO submission',
@@ -2022,6 +2042,634 @@ describe('EQRO parsing and validation', () => {
     })
 })
 
+describe('ILOS parsing and validation', () => {
+    const expectZodError = (result: unknown, label: string): z.ZodError => {
+        if (!(result instanceof z.ZodError)) {
+            throw new Error(`Expected ${label} to return a ZodError`)
+        }
+        return result
+    }
+
+    describe('ilosContractFormDataSchema', () => {
+        it('blanks health plan and EQRO only fields and defaults ILOS lists', () => {
+            const result = ilosContractFormDataSchema.safeParse({
+                programIDs: [defaultFloridaProgram().id],
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'draft',
+                contractType: 'BASE',
+                stateContacts: [],
+                populationCovered: null,
+                contractDateStart: null,
+                eqroNewContractor: null,
+                isILOSRatesIncluded: null,
+            })
+
+            if (!result.success) {
+                throw new Error(z.prettifyError(result.error))
+            }
+
+            expect(result.data).toEqual({
+                programIDs: [defaultFloridaProgram().id],
+                submissionType: 'CONTRACT_AND_RATES',
+                submissionDescription: 'draft',
+                contractType: 'BASE',
+                stateContacts: [],
+                contractDocuments: [],
+                supportingDocuments: [],
+                managedCareEntities: [],
+                federalAuthorities: [],
+                ilosDocuments: [],
+                ilosExternalRates: [],
+            })
+        })
+
+        it.each([
+            ['populationCovered', 'MEDICAID'],
+            ['riskBasedContract', true],
+            ['contractExecutionStatus', 'EXECUTED'],
+            ['contractDateStart', new Date('2025-01-01')],
+            ['modifiedBenefitsProvided', true],
+            ['inLieuServicesAndSettings', true],
+            ['statutoryRegulatoryAttestation', true],
+            ['procurementAttestation', true],
+            ['eqroNewContractor', true],
+        ])('rejects the non-ILOS field %s when it is set', (field, value) => {
+            const result = ilosContractFormDataSchema.safeParse({
+                ...mockILOSContractFormData(),
+                [field]: value,
+            })
+
+            expect(result.success).toBe(false)
+            if (result.success) {
+                throw new Error(`Expected ${field} to be rejected`)
+            }
+            expect(result.error.issues).toContainEqual(
+                expect.objectContaining({
+                    expected: 'undefined',
+                    code: 'invalid_type',
+                    path: [field],
+                })
+            )
+        })
+
+        it.each([
+            ['contractDocuments', [mockILOSDocument('contract')]],
+            ['supportingDocuments', [mockILOSDocument('supporting')]],
+            ['managedCareEntities', ['MCO']],
+            ['federalAuthorities', ['STATE_PLAN']],
+        ])(
+            'rejects the health plan list %s when it has entries',
+            (field, value) => {
+                const result = ilosContractFormDataSchema.safeParse({
+                    ...mockILOSContractFormData(),
+                    [field]: value,
+                })
+
+                expect(result.success).toBe(false)
+                if (result.success) {
+                    throw new Error(`Expected ${field} to be rejected`)
+                }
+                expect(result.error.issues).toContainEqual(
+                    expect.objectContaining({
+                        code: 'too_big',
+                        maximum: 0,
+                        path: [field],
+                    })
+                )
+            }
+        )
+
+        it('accepts an external rate with no control name or dates in a draft', () => {
+            const result = ilosContractFormDataSchema.safeParse({
+                ...mockILOSContractFormData(),
+                ilosExternalRates: [{ id: uuidv4(), position: 1 }],
+            })
+
+            expect(result.success).toBe(true)
+        })
+
+        it.each([
+            ['ilosDocuments', [mockILOSDocument('ilosReport1')]],
+            ['ilosExternalRates', [{ position: 1 }]],
+        ])(
+            'EQRO schema rejects the ILOS list %s when it has entries',
+            (field, value) => {
+                const eqroResult = eqroContractFormDataSchema.safeParse({
+                    ...mockSubmittableHealthPlanContract().draftRevision!
+                        .formData,
+                    [field]: value,
+                })
+
+                expect(eqroResult.success).toBe(false)
+                if (eqroResult.success) {
+                    throw new Error(`Expected EQRO to reject ${field}`)
+                }
+                expect(eqroResult.error.issues).toContainEqual(
+                    expect.objectContaining({
+                        code: 'too_big',
+                        maximum: 0,
+                        path: [field],
+                    })
+                )
+            }
+        )
+
+        it.each([
+            ['isILOSRatesIncluded', true],
+            ['ilosRateDateStart', new Date('2025-01-01')],
+            ['ilosRateDateEnd', new Date('2025-12-31')],
+        ])('EQRO schema rejects %s when it is set', (field, value) => {
+            const eqroResult = eqroContractFormDataSchema.safeParse({
+                ...mockSubmittableHealthPlanContract().draftRevision!.formData,
+                [field]: value,
+            })
+
+            expect(eqroResult.success).toBe(false)
+            if (eqroResult.success) {
+                throw new Error(`Expected EQRO to reject ${field}`)
+            }
+            expect(eqroResult.error.issues).toContainEqual(
+                expect.objectContaining({
+                    expected: 'undefined',
+                    code: 'invalid_type',
+                    path: [field],
+                })
+            )
+        })
+
+        it.each([
+            ['contractFormDataSchema', contractFormDataSchema],
+            ['eqroContractFormDataSchema', eqroContractFormDataSchema],
+        ])(
+            '%s defaults the ILOS lists to [] when they are omitted',
+            (_name, schema) => {
+                // Minimal form data that both schemas accept, with no ILOS keys.
+                const formDataWithoutILOSLists = {
+                    programIDs: [defaultFloridaProgram().id],
+                    populationCovered: 'MEDICAID',
+                    submissionType: 'CONTRACT_ONLY',
+                    submissionDescription: 'draft',
+                    contractType: 'BASE',
+                    stateContacts: [],
+                    contractDocuments: [],
+                    supportingDocuments: [],
+                    managedCareEntities: [],
+                    federalAuthorities: [],
+                }
+
+                const result = schema.safeParse(formDataWithoutILOSLists)
+
+                if (!result.success) {
+                    throw new Error(z.prettifyError(result.error))
+                }
+                expect(result.data).toEqual({
+                    ...formDataWithoutILOSLists,
+                    ilosDocuments: [],
+                    ilosExternalRates: [],
+                })
+                expect(result.data).not.toHaveProperty('isILOSRatesIncluded')
+            }
+        )
+
+        it('health plan schema keeps ILOS list entries so ILOS revisions parse through it', () => {
+            const result = contractFormDataSchema.safeParse({
+                ...mockSubmittableHealthPlanContract().draftRevision!.formData,
+                ilosDocuments: [mockILOSDocument('ilosReport1')],
+            })
+
+            expect(result.success).toBe(true)
+        })
+    })
+
+    describe('validateILOSContractDraftRevisionInput', () => {
+        it('validates incomplete ILOS draft data', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const formData = {
+                ...mockILOSContractFormData(),
+                isILOSRatesIncluded: null,
+                ilosDocuments: [],
+                stateContacts: [
+                    {
+                        name: 'Bill',
+                        titleRole: 'A Title',
+                        email: '', // Accepts empty string because users can save as draft with incomplete data.
+                    },
+                ],
+                ilosExternalRates: [
+                    {
+                        id: uuidv4(),
+                        rateControlName: 'FL-RATE-002',
+                        position: 1,
+                    },
+                ],
+            }
+
+            const validatedFormData = must(
+                validateILOSContractDraftRevisionInput(
+                    formData,
+                    'FL',
+                    postgresStore
+                )
+            )
+
+            expect(validatedFormData).toEqual({
+                ...formData,
+                isILOSRatesIncluded: undefined, // zod parsing preprocess nulls to undefined
+            })
+        })
+
+        it('returns an error for a program that does not belong to the state', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const formData = mockILOSContractFormData({
+                programIDs: ['not-a-real-program'],
+            })
+
+            const result = expectZodError(
+                validateILOSContractDraftRevisionInput(
+                    formData,
+                    'FL',
+                    postgresStore
+                ),
+                'validateILOSContractDraftRevisionInput'
+            )
+
+            expect(result.issues).toContainEqual(
+                expect.objectContaining({ path: ['programIDs'] })
+            )
+        })
+    })
+
+    describe('parseILOSContract', () => {
+        it('succeeds for a complete ILOS submission with a linked rate and an external rate', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract()
+
+            const parsedContract = parseILOSContract(
+                contract,
+                'FL',
+                postgresStore
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
+
+        it('succeeds when a linked rate parent health plan revision is in a package submission', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract()
+            const ilosRevision = contract.draftRevision!
+            // When the health plan contract that owns the linked rate resubmits, its
+            // revision lands in the ILOS package's submittedRevisions.
+            const healthPlanRevision =
+                mockSubmittableHealthPlanContract().draftRevision!
+            const submitInfo = {
+                updatedAt: new Date('2024-06-15'),
+                updatedBy: {
+                    email: 'state@example.com',
+                    role: 'STATE_USER' as const,
+                    givenName: 'State',
+                    familyName: 'User',
+                },
+                updatedReason: 'Initial submission',
+            }
+            contract.packageSubmissions = [
+                {
+                    submitInfo,
+                    submittedRevisions: [healthPlanRevision, ilosRevision],
+                    contractRevision: ilosRevision,
+                    rateRevisions: [],
+                },
+            ]
+
+            const parsedContract = parseILOSContract(
+                contract,
+                'FL',
+                postgresStore
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
+
+        it('succeeds with no rates when isILOSRatesIncluded is false', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract({
+                isILOSRatesIncluded: false,
+                ilosExternalRates: [],
+            })
+            contract.draftRates = []
+
+            const parsedContract = parseILOSContract(
+                contract,
+                'FL',
+                postgresStore
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
+
+        it('only requires complete state contacts when the contact model flag is on', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract()
+            contract.draftRevision!.formData.stateContacts[0].familyName =
+                undefined
+
+            const parsedWithoutFlag = parseILOSContract(
+                contract,
+                'FL',
+                postgresStore
+            )
+            expect(parsedWithoutFlag).toEqual(contract)
+
+            const parsedWithFlag = expectZodError(
+                parseILOSContract(contract, 'FL', postgresStore, {
+                    'contact-data-model-update': true,
+                }),
+                'parseILOSContract'
+            )
+            expect(parsedWithFlag.issues).toContainEqual(
+                expect.objectContaining({
+                    path: [
+                        'draftRevision',
+                        'formData',
+                        'stateContacts',
+                        0,
+                        'familyName',
+                    ],
+                })
+            )
+        })
+
+        it.each([
+            {
+                description: 'ilosDocuments is empty',
+                overrides: { ilosDocuments: [] },
+                path: ['draftRevision', 'formData', 'ilosDocuments'],
+            },
+            {
+                description: 'stateContacts is empty',
+                overrides: { stateContacts: [] },
+                path: ['draftRevision', 'formData', 'stateContacts'],
+            },
+            {
+                description: 'isILOSRatesIncluded is not answered',
+                overrides: { isILOSRatesIncluded: undefined },
+                path: ['draftRevision', 'formData', 'isILOSRatesIncluded'],
+            },
+            {
+                description: 'ilosRateDateStart is missing',
+                overrides: { ilosRateDateStart: undefined },
+                path: ['draftRevision', 'formData', 'ilosRateDateStart'],
+            },
+            {
+                description: 'ilosRateDateEnd is missing',
+                overrides: { ilosRateDateEnd: undefined },
+                path: ['draftRevision', 'formData', 'ilosRateDateEnd'],
+            },
+            {
+                description: 'submissionType is CONTRACT_ONLY',
+                overrides: { submissionType: 'CONTRACT_ONLY' as const },
+                path: ['draftRevision', 'formData', 'submissionType'],
+            },
+            {
+                description: 'an external rate is missing its start date',
+                overrides: {
+                    ilosExternalRates: [
+                        {
+                            id: uuidv4(),
+                            rateControlName: 'FL-RATE-001',
+                            rateDateEnd: new Date('2025-12-31'),
+                            position: 1,
+                        },
+                    ],
+                },
+                path: [
+                    'draftRevision',
+                    'formData',
+                    'ilosExternalRates',
+                    0,
+                    'rateDateStart',
+                ],
+            },
+            {
+                description: 'an external rate is missing its end date',
+                overrides: {
+                    ilosExternalRates: [
+                        {
+                            id: uuidv4(),
+                            rateControlName: 'FL-RATE-001',
+                            rateDateStart: new Date('2025-01-01'),
+                            position: 1,
+                        },
+                    ],
+                },
+                path: [
+                    'draftRevision',
+                    'formData',
+                    'ilosExternalRates',
+                    0,
+                    'rateDateEnd',
+                ],
+            },
+        ])(
+            'returns an error when $description',
+            async ({ overrides, path }) => {
+                const prismaClient = await sharedTestPrismaClient()
+                const postgresStore = NewPostgresStore(prismaClient)
+                const contract = mockDraftILOSContract(overrides)
+
+                const parsedContract = expectZodError(
+                    parseILOSContract(contract, 'FL', postgresStore),
+                    'parseILOSContract'
+                )
+
+                expect(parsedContract.issues).toContainEqual(
+                    expect.objectContaining({ path })
+                )
+            }
+        )
+
+        it('accepts an external rate without a control name', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract({
+                ilosExternalRates: [
+                    {
+                        id: uuidv4(),
+                        rateDateStart: new Date('2025-01-01'),
+                        rateDateEnd: new Date('2025-12-31'),
+                        position: 1,
+                    },
+                ],
+            })
+
+            const parsedContract = parseILOSContract(
+                contract,
+                'FL',
+                postgresStore
+            )
+
+            expect(parsedContract).toEqual(contract)
+        })
+
+        it('returns an error when a rate is parented to the ILOS submission', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract()
+            contract.draftRates = [mockILOSLinkedRate(contract.id)]
+
+            const parsedContract = expectZodError(
+                parseILOSContract(contract, 'FL', postgresStore),
+                'parseILOSContract'
+            )
+
+            const errMessages = parsedContract.issues.map((err) => err.message)
+            expect(errMessages).toContain(
+                'ILOS submission can only link existing rates, it cannot contain its own rates'
+            )
+        })
+
+        const externalRate = {
+            id: uuidv4(),
+            rateControlName: 'FL-RATE-001',
+            rateDateStart: new Date('2025-01-01'),
+            rateDateEnd: new Date('2025-12-31'),
+            position: 1,
+        }
+
+        it.each([
+            {
+                description: 'only a linked rate',
+                externalRates: [],
+                draftRates: [mockILOSLinkedRate(uuidv4())],
+            },
+            {
+                description: 'only an external rate',
+                externalRates: [externalRate],
+                draftRates: [],
+            },
+        ])(
+            'succeeds when isILOSRatesIncluded is true and the submission has $description',
+            async ({ externalRates, draftRates }) => {
+                const prismaClient = await sharedTestPrismaClient()
+                const postgresStore = NewPostgresStore(prismaClient)
+                const contract = mockDraftILOSContract({
+                    isILOSRatesIncluded: true,
+                    ilosExternalRates: externalRates,
+                })
+                contract.draftRates = draftRates
+
+                const parsedContract = parseILOSContract(
+                    contract,
+                    'FL',
+                    postgresStore
+                )
+
+                expect(parsedContract).toEqual(contract)
+            }
+        )
+
+        it('returns an error when isILOSRatesIncluded is true but no rate is associated', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract({
+                isILOSRatesIncluded: true,
+                ilosExternalRates: [],
+            })
+            contract.draftRates = []
+
+            const parsedContract = expectZodError(
+                parseILOSContract(contract, 'FL', postgresStore),
+                'parseILOSContract'
+            )
+
+            const errMessages = parsedContract.issues.map((err) => err.message)
+            expect(errMessages).toContain(
+                'ILOS submission must have at least one linked or external rate when isILOSRatesIncluded is true'
+            )
+        })
+
+        it.each([
+            {
+                description: 'a linked rate',
+                externalRates: [],
+                draftRates: [mockILOSLinkedRate(uuidv4())],
+            },
+            {
+                description: 'an external rate',
+                externalRates: [externalRate],
+                draftRates: [],
+            },
+        ])(
+            'does not check rates when isILOSRatesIncluded is false even if $description is present',
+            async ({ externalRates, draftRates }) => {
+                const prismaClient = await sharedTestPrismaClient()
+                const postgresStore = NewPostgresStore(prismaClient)
+                const contract = mockDraftILOSContract({
+                    isILOSRatesIncluded: false,
+                    ilosExternalRates: externalRates,
+                })
+                contract.draftRates = draftRates
+
+                const parsedContract = parseILOSContract(
+                    contract,
+                    'FL',
+                    postgresStore
+                )
+
+                expect(parsedContract).toEqual(contract)
+            }
+        )
+
+        it('returns an error when a program is deprecated', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const deprecatedProgram = must(findStatePrograms('KY')).find(
+                (program) => program.isDeprecated
+            )
+            if (!deprecatedProgram) {
+                throw new Error(
+                    'Test setup error: expected KY to have at least one deprecated program in statePrograms.json'
+                )
+            }
+            const contract = mockDraftILOSContract({
+                programIDs: [deprecatedProgram.id],
+            })
+
+            const parsedContract = expectZodError(
+                parseILOSContract(contract, 'KY', postgresStore),
+                'parseILOSContract'
+            )
+
+            const errMessages = parsedContract.issues.map((err) => err.message)
+            expect(
+                errMessages.some((m) =>
+                    m.includes('Submission contains deprecated program(s)')
+                )
+            ).toBe(true)
+        })
+
+        it('rejects a health plan contract', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockSubmittableHealthPlanContract()
+
+            const parsedContract = expectZodError(
+                parseILOSContract(contract, 'KY', postgresStore),
+                'parseILOSContract'
+            )
+
+            expect(parsedContract.issues).toContainEqual(
+                expect.objectContaining({ path: ['contractSubmissionType'] })
+            )
+        })
+    })
+})
+
 describe('eqroValidationAndReviewDetermination', () => {
     const defaultFormData = (
         overrides?: Partial<ContractFormData>
@@ -2061,6 +2709,8 @@ describe('eqroValidationAndReviewDetermination', () => {
         eqroProvisionNewMcoEqrRelatedActivities: false,
         eqroProvisionChipEqrRelatedActivities: null,
         eqroProvisionMcoEqrOrRelatedActivities: null,
+        ilosDocuments: [],
+        ilosExternalRates: [],
         ...overrides,
     })
 

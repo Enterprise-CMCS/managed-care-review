@@ -6,4 +6,5 @@ export const contractSubmissionTypeSchema = z.union([
     z.literal('HEALTH_PLAN'),
     z.literal('EQRO'),
     z.literal('ENROLLMENT_BROKER'),
+    z.literal('ILOS'),
 ])

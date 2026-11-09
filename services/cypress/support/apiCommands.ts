@@ -25,10 +25,10 @@ import {
     adminUser,
     newSubmissionInput,
     rateFormData,
-    contractFormData,
+    contractFormDataInput,
     minnesotaStatePrograms,
     CMSUserType,
-    eqroFromData,
+    eqroFormDataInput,
     AdminUserType,
 } from '../utils/apollo-test-utils'
 import { ApolloClient, DocumentNode } from '@apollo/client'
@@ -137,7 +137,7 @@ const createAndSubmitContractOnlyPackage = async (
 
         const draftContract = newContract.data.createContract.contract
         const draftRevision = draftContract.draftRevision
-        const updateFormData = contractFormData({
+        const updateFormData = contractFormDataInput({
             submissionType: 'CONTRACT_ONLY',
             contractDocuments: [contractDoc],
         })
@@ -232,7 +232,7 @@ const createAndSubmitEQROContract = async (
             )
         }
 
-        const updateFormData = eqroFromData({
+        const updateFormData = eqroFormDataInput({
             contractDocuments: [contractDoc],
         })
 
@@ -325,7 +325,7 @@ const createAndSubmitContractWithRates = async (
             )
         }
 
-        const updateFormData = contractFormData({
+        const updateFormData = contractFormDataInput({
             submissionType: 'CONTRACT_AND_RATES',
             contractDocuments: [contractDoc],
         })
@@ -457,9 +457,7 @@ const assignCmsDivision = async (
     })
 }
 
-const fetchUser = async (
-    apolloClient: ApolloClient
-): Promise<User> => {
+const fetchUser = async (apolloClient: ApolloClient): Promise<User> => {
     // To seed, we just need to perform a graphql query and the api will add the user to the db
     const user = await apolloClient.query({
         query: FetchCurrentUserDocument,
@@ -544,7 +542,7 @@ const createOAuthClient = async (
             input: {
                 description: 'Cypress integration test',
                 userID: apiUser.id,
-                scopes: ['CMS_SUBMISSION_ACTIONS']
+                scopes: ['CMS_SUBMISSION_ACTIONS'],
             },
         },
     })

@@ -36,7 +36,7 @@ const documentInputSchema = document.omit({ id: true })
 
 const questionResponseSchema = z.object({
     id: z.uuid(),
-    questionID: z.string().uuid(),
+    questionID: z.uuid(),
     createdAt: z.date(),
     addedBy: stateUserSchema,
     documents: z.array(document),
