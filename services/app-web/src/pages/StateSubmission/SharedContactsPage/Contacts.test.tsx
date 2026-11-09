@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 
 import { Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
@@ -10,6 +10,7 @@ import {
     fetchContractMockSuccess,
     mockContractPackageUnlockedWithUnlockedType,
 } from '@mc-review/mocks'
+import type { Location } from 'react-router-dom'
 
 describe('Contacts', () => {
     it('renders without errors', async () => {
@@ -624,6 +625,86 @@ describe('Contacts', () => {
                     screen.getByText('Review and submit')
                 ).toBeInTheDocument()
             })
+        })
+    })
+
+    describe('Contacts for Enrollment Broker submissions', () => {
+        const baseDraft = mockContractPackageUnlockedWithUnlockedType()
+        const ebDraft = {
+            ...baseDraft,
+            id: '15',
+            contractSubmissionType: 'ENROLLMENT_BROKER' as const,
+            draftRevision: {
+                ...baseDraft.draftRevision!,
+                formData: {
+                    ...baseDraft.draftRevision!.formData,
+                    contractType: 'BASE' as const,
+                    submissionType: 'CONTRACT_ONLY' as const,
+                },
+            },
+        }
+
+        // Flag values that differ from the defaults used locally
+        const deployedLikeFlags = {
+            'contact-data-model-update': true,
+            'procurement-attestation': true,
+            'hide-supporting-docs-page': false,
+        }
+
+        const renderEBContacts = (
+            onLocation?: (location: Location) => Location
+        ) =>
+            renderWithProviders(
+                <Routes>
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS_CONTACTS}
+                        element={<Contacts />}
+                    />
+                </Routes>,
+                {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({ statusCode: 200 }),
+                            fetchContractMockSuccess({ contract: ebDraft }),
+                        ],
+                    },
+                    routerProvider: {
+                        route: '/submissions/eb/15/edit/contacts',
+                    },
+                    featureFlags: deployedLikeFlags,
+                    location: onLocation,
+                }
+            )
+
+        it('shows the EB steps in the step indicator', async () => {
+            renderEBContacts()
+            await screen.findByTestId('state-contacts')
+
+            const stepIndicator = document.querySelector(
+                '.usa-step-indicator'
+            ) as HTMLElement
+            const steps = within(stepIndicator)
+                .getAllByRole('listitem')
+                .map((step) => step.textContent)
+
+            expect(steps).toHaveLength(5)
+            expect(steps[2]).toContain('Associated contracts')
+            expect(steps[3]).toContain('Contacts')
+            expect(steps.join(' ')).not.toMatch(
+                /Attestations|Rate details|Supporting documents/
+            )
+        })
+
+        it('goes back to Associated contracts', async () => {
+            let testLocation: Location | undefined
+            renderEBContacts((location) => (testLocation = location))
+
+            await userEvent.click(
+                await screen.findByRole('button', { name: 'Back' })
+            )
+            expect(testLocation?.pathname).toBe(
+                '/submissions/eb/15/edit/associated-contracts'
+            )
         })
     })
 })

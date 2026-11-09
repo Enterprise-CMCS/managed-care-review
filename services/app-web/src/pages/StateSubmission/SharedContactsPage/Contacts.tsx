@@ -13,13 +13,24 @@ import { useLDClient } from 'launchdarkly-react-client-sdk'
 import styles from '../StateSubmissionForm.module.scss'
 import { recordJSException } from '@mc-review/otel'
 import {
+    ContractFormData,
+    ContractSubmissionType,
     StateContact,
     UpdateContractDraftRevisionInput,
 } from '../../../gen/gqlClient'
 
 import { useFocus } from '../../../hooks'
-import { activeFormPages, type ContractFormPageProps } from '../submissionUtils'
-import { RouteT, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
+import {
+    activeFormPages,
+    getAdjacentFormPages,
+    type ContractFormPageProps,
+} from '../submissionUtils'
+import {
+    RouteT,
+    RouteTWithUnknown,
+    EB_SUBMISSION_FORM_ROUTES,
+    EQRO_SUBMISSION_FORM_ROUTES,
+} from '@mc-review/constants'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -67,6 +78,71 @@ const flattenErrors = (
     }
 
     return flattened
+}
+
+type ContactsPageFlow = {
+    formPages: RouteTWithUnknown[]
+    customPageTitles?: Partial<Record<RouteTWithUnknown, string>>
+    previousPage: RouteT
+    nextPage: RouteT
+}
+
+// TODO: Replace with the shared page flow hook (see the TODO in Contacts below).
+const getContactsPageFlow = ({
+    contractSubmissionType,
+    formData,
+    hideSupportingDocs,
+    showProcurementAttestation,
+}: {
+    contractSubmissionType: ContractSubmissionType
+    formData: ContractFormData
+    hideSupportingDocs: boolean
+    showProcurementAttestation: boolean
+}): ContactsPageFlow => {
+    const getStepList = (): Pick<
+        ContactsPageFlow,
+        'formPages' | 'customPageTitles'
+    > => {
+        switch (contractSubmissionType) {
+            case 'EQRO':
+                return {
+                    formPages: EQRO_SUBMISSION_FORM_ROUTES,
+                    customPageTitles: {
+                        SUBMISSIONS_TYPE: 'Submission details',
+                    },
+                }
+            case 'ENROLLMENT_BROKER':
+                return {
+                    formPages: EB_SUBMISSION_FORM_ROUTES,
+                    customPageTitles: {
+                        SUBMISSIONS_TYPE: 'Submission details',
+                    },
+                }
+            case 'HEALTH_PLAN':
+                // Health plan steps depend on form data and feature flags:
+                // rate details, attestations and supporting docs can each be hidden.
+                return {
+                    formPages: activeFormPages(
+                        formData,
+                        hideSupportingDocs,
+                        showProcurementAttestation
+                    ),
+                }
+        }
+    }
+
+    const stepList = getStepList()
+    const { previousPage, nextPage } = getAdjacentFormPages(
+        stepList.formPages,
+        'SUBMISSIONS_CONTACTS'
+    )
+
+    return {
+        ...stepList,
+        // Contacts is in every step list, so the fallbacks only apply if a list is misconfigured
+        previousPage: previousPage ?? 'SUBMISSIONS_CONTRACT_DETAILS',
+        nextPage: nextPage ?? 'SUBMISSIONS_REVIEW_SUBMIT',
+    }
 }
 
 const Contacts = ({
@@ -145,32 +221,19 @@ const Contacts = ({
     if (interimState || !draftSubmission || !updateDraft)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
-    const isEQROSubmission = draftSubmission.contractSubmissionType === 'EQRO'
-    const isEnrollmentBrokerSubmission =
-        draftSubmission.contractSubmissionType === 'ENROLLMENT_BROKER'
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
     const contractSubmissionType = draftSubmission.contractSubmissionType
 
-    const getPreviousFormPage = (): RouteT => {
-        const { contractType, submissionType } =
-            draftSubmission.draftRevision.formData
-        // Attestations page precedes contacts for base contract submissions
-        if (
-            !isEQROSubmission &&
-            showProcurementAttestation &&
-            contractType === 'BASE'
-        ) {
-            return 'SUBMISSIONS_ATTESTATIONS'
-        }
-        if (isEnrollmentBrokerSubmission) {
-            return 'SUBMISSIONS_ASSOCIATED_CONTRACTS'
-        }
-        if (submissionType === 'CONTRACT_ONLY') {
-            return 'SUBMISSIONS_CONTRACT_DETAILS'
-        }
-        return 'SUBMISSIONS_RATE_DETAILS'
-    }
-    const previousFormPage = getPreviousFormPage()
+    // TODO: Move page flow into a shared hook (e.g. useSubmissionFormFlow) once
+    // more pages need it. Since Contacts is shared by every submission type,
+    // we work out the form's pages, previous and next pages, custom page titles
+    // using this function which branches on submission type.
+    const pageFlow = getContactsPageFlow({
+        contractSubmissionType,
+        formData: draftSubmission.draftRevision.formData,
+        hideSupportingDocs,
+        showProcurementAttestation,
+    })
 
     const emptyStateContact = {
         name: '',
@@ -201,7 +264,6 @@ const Contacts = ({
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             type: 'SAVE_AS_DRAFT' | 'BACK' | 'CONTINUE'
-            redirectPath?: RouteT
         }
     ) => {
         draftSubmission.draftRevision.formData.stateContacts =
@@ -228,33 +290,9 @@ const Contacts = ({
             setDraftSaved(true)
             setSubmitting(false)
         } else {
-            if (isEQROSubmission) {
-                navigate(
-                    getSubmissionPath(
-                        'SUBMISSIONS_REVIEW_SUBMIT',
-                        contractSubmissionType,
-                        id
-                    )
-                )
-            } else if (hideSupportingDocs) {
-                if (options.redirectPath) {
-                    navigate(
-                        getSubmissionPath(
-                            options.redirectPath,
-                            contractSubmissionType,
-                            id
-                        )
-                    )
-                }
-            } else {
-                navigate(
-                    getSubmissionPath(
-                        'SUBMISSIONS_DOCUMENTS',
-                        contractSubmissionType,
-                        id
-                    )
-                )
-            }
+            navigate(
+                getSubmissionPath(pageFlow.nextPage, contractSubmissionType, id)
+            )
         }
     }
 
@@ -293,23 +331,9 @@ const Contacts = ({
         <div id={activeMainContentId}>
             <FormNotificationContainer>
                 <DynamicStepIndicator
-                    formPages={
-                        isEQROSubmission
-                            ? EQRO_SUBMISSION_FORM_ROUTES
-                            : activeFormPages(
-                                  draftSubmission.draftRevision.formData,
-                                  hideSupportingDocs,
-                                  showProcurementAttestation
-                              )
-                    }
+                    formPages={pageFlow.formPages}
                     currentFormPage={currentRoute}
-                    customPageTitles={
-                        isEQROSubmission
-                            ? {
-                                  SUBMISSIONS_TYPE: 'Submission details',
-                              }
-                            : undefined
-                    }
+                    customPageTitles={pageFlow.customPageTitles}
                 />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
@@ -324,7 +348,6 @@ const Contacts = ({
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
                             type: 'CONTINUE',
-                            redirectPath: 'SUBMISSIONS_REVIEW_SUBMIT',
                         })
                     }}
                     validationSchema={contactSchema}
@@ -569,7 +592,7 @@ const Contacts = ({
                                     backOnClick={() => {
                                         navigate(
                                             getSubmissionPath(
-                                                previousFormPage,
+                                                pageFlow.previousPage,
                                                 contractSubmissionType,
                                                 id
                                             )
@@ -585,7 +608,7 @@ const Contacts = ({
                                     }
                                     actionInProgress={isSubmitting}
                                     backOnClickUrl={getSubmissionPath(
-                                        previousFormPage,
+                                        pageFlow.previousPage,
                                         contractSubmissionType,
                                         id
                                     )}

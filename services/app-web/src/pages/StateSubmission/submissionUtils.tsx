@@ -42,6 +42,27 @@ const activeFormPages = (
 }
 
 /**
+ * Finds the pages before and after the current page in a submission form's step list,
+ * so Back and Continue follow the same order the step indicator shows.
+ * Returns undefined for a side with no page, or when the current page isn't in the list.
+ */
+const getAdjacentFormPages = (
+    formPages: RouteTWithUnknown[],
+    currentPage: RouteT
+): { previousPage?: RouteT; nextPage?: RouteT } => {
+    const index = formPages.indexOf(currentPage)
+    if (index === -1) return {}
+
+    const toRoute = (page?: RouteTWithUnknown): RouteT | undefined =>
+        page && page !== 'UNKNOWN_ROUTE' ? page : undefined
+
+    return {
+        previousPage: toRoute(formPages[index - 1]),
+        nextPage: toRoute(formPages[index + 1]),
+    }
+}
+
+/**
  * Generic function that takes in an object and renames a top level key while preserving order
  * @param obj The object that needs to be modified
  * @param oldKey The old key name
@@ -90,6 +111,7 @@ export type { ContractFormPageProps }
 export {
     getRelativePathFromNestedRoute,
     activeFormPages,
+    getAdjacentFormPages,
     renameKey,
     formattedDatePlusOneDay,
     formattedDateMinusOneDay,
