@@ -1,14 +1,95 @@
-import type { MutationResolvers } from '../../gen/gqlServer'
+import type {
+    CreateContractInput,
+    MutationResolvers,
+    State,
+} from '../../gen/gqlServer'
 import type { Store } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import { isStateUser } from '../../domain-models'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
-import type { State } from '../../gen/gqlServer'
 import { pluralize } from '@mc-review/common-code'
 import type { InsertContractArgsType } from '../../postgres'
 import { GraphQLError } from 'graphql/index'
 import { canSyntheticDataWrite, canWrite } from '../../oauth/oauthAuthorization'
+import { parseAndValidateDocuments } from '../documentHelpers'
+import { submittableILOSContractFormDataSchema } from '../../domain-models/contractAndRates'
+
+const sharedInsertArgs = (input: CreateContractInput, stateCode: string) => ({
+    contractSubmissionType: input.contractSubmissionType,
+    stateCode,
+    programIDs: input.programIDs,
+    submissionDescription: input.submissionDescription,
+    submissionType: input.submissionType,
+    contractType: input.contractType,
+})
+
+// Health plan, EQRO and enrollment broker submissions are created with the same fields.
+const healthPlanInsertArgs = (
+    input: CreateContractInput,
+    stateCode: string
+): InsertContractArgsType | GraphQLError => {
+    // populationCovered is nullable on the input only because ILOS does not use it.
+    if (!input.populationCovered) {
+        return createUserInputError(
+            `populationCovered is required for ${input.contractSubmissionType} submissions`,
+            'populationCovered'
+        )
+    }
+
+    return {
+        ...sharedInsertArgs(input, stateCode),
+        populationCovered: input.populationCovered,
+        riskBasedContract: input.riskBasedContract ?? undefined,
+        managedCareEntities: input.managedCareEntities ?? undefined,
+    }
+}
+
+// ILOS submissions only carry the ILOS fields. Health plan fields such as
+// populationCovered are left unset so the ILOS draft validates on update.
+const ilosInsertArgs = (
+    input: CreateContractInput,
+    stateCode: string
+): InsertContractArgsType | GraphQLError => {
+    const ilosDocuments = parseAndValidateDocuments(
+        input.ilosDocuments?.map((d) => ({
+            name: d.name,
+            s3URL: d.s3URL,
+            sha256: d.sha256,
+        })) ?? [],
+        'HEALTH_PLAN_DOCS'
+    ).map((doc) => ({ ...doc, sha256: doc.sha256! }))
+
+    // The first ILOS form page collects every ILOS field, so all of them are
+    // required on create. Later pages save the draft through update, where the
+    // draft schema allows them to be unset. submissionType and contractType are
+    // prefilled by the client and never user-editable, so the pinned literals
+    // are checked here too.
+    const ilosFields = submittableILOSContractFormDataSchema
+        .pick({
+            submissionType: true,
+            contractType: true,
+            isILOSRatesIncluded: true,
+            ilosRateDateStart: true,
+            ilosRateDateEnd: true,
+            ilosDocuments: true,
+        })
+        .safeParse({ ...input, ilosDocuments })
+    if (!ilosFields.success) {
+        const problems = ilosFields.error.issues
+            .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+            .join('; ')
+        return createUserInputError(
+            `Invalid ILOS submission fields. ${problems}`,
+            String(ilosFields.error.issues[0].path[0])
+        )
+    }
+
+    return {
+        ...sharedInsertArgs(input, stateCode),
+        ...ilosFields.data,
+    }
+}
 
 export function createContract(
     store: Store
@@ -70,16 +151,17 @@ export function createContract(
                     )
                 }
 
-                const insertArgs: InsertContractArgsType = {
-                    contractSubmissionType: input.contractSubmissionType,
-                    stateCode: stateFromCurrentUser,
-                    populationCovered: input.populationCovered,
-                    programIDs: input.programIDs,
-                    riskBasedContract: input.riskBasedContract ?? undefined,
-                    submissionDescription: input.submissionDescription,
-                    submissionType: input.submissionType,
-                    contractType: input.contractType,
-                    managedCareEntities: input.managedCareEntities ?? undefined,
+                const insertArgs =
+                    input.contractSubmissionType === 'ILOS'
+                        ? ilosInsertArgs(input, stateFromCurrentUser)
+                        : healthPlanInsertArgs(input, stateFromCurrentUser)
+                if (insertArgs instanceof GraphQLError) {
+                    logResolverError(
+                        'createContract',
+                        insertArgs.message,
+                        context
+                    )
+                    throw insertArgs
                 }
 
                 const contractResult =
