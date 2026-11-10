@@ -120,8 +120,14 @@ deployed security proof. The deployed cases fail on unexpected verdicts, timeout
 network/CORS failures or a download that is not denied. They do not treat generic
 network failure as proof that an infected object is protected.
 
-S3 transfer errors are sanitized before being surfaced as test failures. Treat
-network captures, videos and other test artifacts as potentially containing
+Smoke failures identify the operation (`authentication`, `current-user`,
+`generate-upload`, `put`, `scan`, `download-url`, `get`, or `checksum`) and retain
+only allowlisted error names/GraphQL codes and numeric HTTP status. Raw error
+messages, stacks and causes are not copied, because they may contain bearer URLs
+or credentials. Metadata is captured before the shared Apollo wrapper flattens
+errors. The diagnostic spec tests this redaction separately from storage access.
+
+Treat network captures, videos and other test artifacts as potentially containing
 presigned bearer URLs; command-log suppression is not universal redaction.
 
 The smoke creates unsaved upload objects with unique keys. It does not create
