@@ -9,6 +9,52 @@ describe('insertContract', () => {
         vi.clearAllMocks()
     })
 
+    it('creates a new ILOS draft submission with ILOS fields', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const ilosArgs = mockInsertContractArgs({
+            contractSubmissionType: 'ILOS',
+            submissionType: 'CONTRACT_AND_RATES',
+            populationCovered: undefined,
+            riskBasedContract: undefined,
+            isILOSRatesIncluded: true,
+            ilosRateDateStart: new Date('2025-01-01'),
+            ilosRateDateEnd: new Date('2025-12-31'),
+            ilosDocuments: [
+                {
+                    name: 'ilosReport1.pdf',
+                    s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                    s3BucketName: 'bucketname',
+                    s3Key: 'allusers/key/ilosReport1.pdf',
+                    sha256: 'fakesha',
+                },
+            ],
+        })
+
+        const draftILOS = must(await insertDraftContract(client, ilosArgs))
+
+        expect(draftILOS.contractSubmissionType).toEqual('ILOS')
+        expect(draftILOS.revisions).toHaveLength(0)
+        expect(draftILOS.draftRevision?.formData).toEqual(
+            expect.objectContaining({
+                submissionType: 'CONTRACT_AND_RATES',
+                populationCovered: undefined,
+                riskBasedContract: undefined,
+                isILOSRatesIncluded: true,
+                ilosRateDateStart: new Date('2025-01-01'),
+                ilosRateDateEnd: new Date('2025-12-31'),
+                ilosDocuments: [
+                    expect.objectContaining({
+                        name: 'ilosReport1.pdf',
+                        s3BucketName: 'bucketname',
+                        s3Key: 'allusers/key/ilosReport1.pdf',
+                    }),
+                ],
+                ilosExternalRates: [],
+            })
+        )
+    })
+
     it('creates a new health plan and EQRO draft contracts', async () => {
         const client = await sharedTestPrismaClient()
 

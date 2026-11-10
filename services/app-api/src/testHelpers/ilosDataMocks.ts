@@ -9,6 +9,8 @@ import { defaultFloridaProgram } from './gqlHelpers'
 
 const mockILOSDocument = (name: string) => ({
     s3URL: `s3://bucketname/key/${name}`,
+    s3BucketName: 'bucketname',
+    s3Key: `allusers/key/${name}`,
     sha256: 'fakesha',
     name,
     dateAdded: new Date('01/15/2024'),
