@@ -11,7 +11,9 @@ import {
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
 import {
     createAndUpdateTestEQROContract,
+    createAndUpdateTestILOSContract,
     createTestContract,
+    mockGqlILOSContractDraftRevisionFormDataInput,
     updateTestContractDraftRevision,
 } from '../../testHelpers'
 import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
@@ -561,6 +563,43 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 'Error updating form data'
             )
         })
+
+        it('rejects every ILOS field on a health plan submission', async () => {
+            const server = await constructTestPostgresServer()
+            const draft = await createTestContract(server)
+
+            const result = await executeGraphQLOperation(server, {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draft.draftRevision?.updatedAt,
+                        formData: mockGqlContractDraftRevisionFormDataInput(
+                            draft.stateCode,
+                            {
+                                isILOSRatesIncluded: true,
+                                ilosRateDateStart: '2025-01-01',
+                                ilosRateDateEnd: '2025-12-31',
+                                ilosDocuments: [
+                                    {
+                                        name: 'ilosReport1.pdf',
+                                        s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                                        sha256: 'needs-to-be-there',
+                                    },
+                                ],
+                            }
+                        ),
+                    },
+                },
+            })
+
+            expect(result.errors).toBeDefined()
+            expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+            expect(result.errors?.[0].message).toContain('isILOSRatesIncluded')
+            expect(result.errors?.[0].message).toContain('ilosRateDateStart')
+            expect(result.errors?.[0].message).toContain('ilosRateDateEnd')
+            expect(result.errors?.[0].message).toContain('ilosDocuments')
+        })
     })
 
     describe('Enrollment Broker contract tests', () => {
@@ -626,6 +665,129 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 )
             }
         )
+    })
+
+    describe('ILOS submission tests', () => {
+        it('updates ILOS fields and contacts in the formData', async () => {
+            const server = await constructTestPostgresServer()
+            const draft = await createAndUpdateTestILOSContract(server)
+            const ilosFields = {
+                isILOSRatesIncluded: false,
+                ilosRateDateStart: '2026-01-01',
+                ilosRateDateEnd: '2026-12-31',
+                ilosDocuments: [
+                    {
+                        name: 'ilosReport2.pdf',
+                        s3URL: 's3://bucketname/key/ilosReport2.pdf',
+                        sha256: 'needs-to-be-there',
+                    },
+                ],
+                stateContacts: [
+                    {
+                        givenName: 'Updated',
+                        familyName: 'Contact',
+                        titleRole: 'Director',
+                        email: 'updated@example.com',
+                    },
+                ],
+            }
+
+            const updated = await updateTestContractDraftRevision(
+                server,
+                draft.id,
+                draft.draftRevision?.updatedAt,
+                ilosFields
+            )
+
+            expect(updated.contractSubmissionType).toBe('ILOS')
+            const fetched = await fetchTestContract(server, draft.id)
+            const formData = fetched.draftRevision?.formData
+            expect(formData).toEqual(
+                expect.objectContaining({
+                    isILOSRatesIncluded: false,
+                    ilosRateDateStart: '2026-01-01',
+                    ilosRateDateEnd: '2026-12-31',
+                    ilosDocuments: [
+                        expect.objectContaining(ilosFields.ilosDocuments[0]),
+                    ],
+                    stateContacts: [
+                        expect.objectContaining(ilosFields.stateContacts[0]),
+                    ],
+                })
+            )
+            // Health plan fields stay empty on an ILOS submission
+            expect(formData?.populationCovered).toBeNull()
+            expect(formData?.contractDocuments).toHaveLength(0)
+            expect(formData?.managedCareEntities).toHaveLength(0)
+        })
+
+        // This test asserts that save as draft can function properly as we allow partial updates using it.
+        it('clears ILOS fields when a draft is saved without them', async () => {
+            const server = await constructTestPostgresServer()
+            const draft = await createAndUpdateTestILOSContract(server)
+
+            const updated = await updateTestContractDraftRevision(
+                server,
+                draft.id,
+                draft.draftRevision?.updatedAt,
+                {
+                    isILOSRatesIncluded: null,
+                    ilosRateDateStart: null,
+                    ilosRateDateEnd: null,
+                    ilosDocuments: null,
+                }
+            )
+
+            expect(updated.draftRevision?.formData).toEqual(
+                expect.objectContaining({
+                    isILOSRatesIncluded: null,
+                    ilosRateDateStart: null,
+                    ilosRateDateEnd: null,
+                    ilosDocuments: [],
+                })
+            )
+        })
+
+        it('rejects health plan fields and prefilled value changes on an ILOS submission', async () => {
+            const server = await constructTestPostgresServer()
+            const draft = await createAndUpdateTestILOSContract(server)
+
+            const result = await executeGraphQLOperation(server, {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draft.draftRevision?.updatedAt,
+                        formData: mockGqlILOSContractDraftRevisionFormDataInput(
+                            draft.stateCode,
+                            {
+                                populationCovered: 'MEDICAID',
+                                riskBasedContract: true,
+                                managedCareEntities: ['MCO'],
+                                submissionType: 'CONTRACT_ONLY',
+                                contractType: 'AMENDMENT',
+                                contractDocuments: [
+                                    {
+                                        name: 'contract.pdf',
+                                        s3URL: 's3://bucketname/key/contract.pdf',
+                                        sha256: 'needs-to-be-there',
+                                    },
+                                ],
+                            }
+                        ),
+                    },
+                },
+            })
+
+            expect(result.errors).toBeDefined()
+            expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+            expect(result.errors?.[0].message).toContain('populationCovered')
+            expect(result.errors?.[0].message).toContain('riskBasedContract')
+            expect(result.errors?.[0].message).toContain('managedCareEntities')
+            expect(result.errors?.[0].message).toContain('submissionType')
+            expect(result.errors?.[0].message).toContain('contractType')
+            expect(result.errors?.[0].message).toContain('contractDocuments')
+        })
     })
 
     describe('EQRO contract tests', () => {
