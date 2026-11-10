@@ -82,6 +82,9 @@ model ContractTable {
   revisions           ContractRevisionTable[]
   sharedRateRevisions RateRevisionTable[]     @relation(name: "SharedRateRevisions")
 
+  ebLinkedBaseContractRevisions      ContractRevisionTable[] @relation("ebLinkedBaseContract")
+  ebLinkedPreviousAmendmentRevisions ContractRevisionTable[] @relation("ebLinkedPreviousAmendment")
+
   contractOverrides ContractOverrides[]
 
   @@index([lastActionDate])
@@ -284,6 +287,11 @@ model ContractRevisionTable {
   eqroProvisionMcoEqrOrRelatedActivities  Boolean?
 
   // Enrollment Broker submission fields only
+  ebContractorID                String?
+  ebLinkedBaseContractID        String?
+  ebLinkedPreviousAmendmentID   String?
+  ebLinkedBaseContract          ContractTable? @relation("ebLinkedBaseContract", fields: [ebLinkedBaseContractID], references: [id])
+  ebLinkedPreviousAmendment     ContractTable? @relation("ebLinkedPreviousAmendment", fields: [ebLinkedPreviousAmendmentID], references: [id])
   ebNewContractor               Boolean?
   ebBaseContractInMCReview      Boolean?
   ebPreviousAmendmentInMCReview Boolean?

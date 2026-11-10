@@ -1,4 +1,5 @@
 export * from './StateCodeType'
+export * from './EBContractorType'
 export type {
     StateCodeType,
     StatePrograms,
