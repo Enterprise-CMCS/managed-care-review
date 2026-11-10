@@ -208,6 +208,53 @@ const validateILOSContractDraftRevisionInput = (
     return data
 }
 
+// Validates a draft update against the schema for the contract's submission type
+// and applies that type's post-parse adjustments.
+const parseContractDraftRevisionInput = (
+    contract: ContractType,
+    formData: ContractDraftRevisionFormDataInput,
+    store: Store,
+    featureFlags?: FeatureFlagSettings
+): UpdateDraftContractFormDataType | Error => {
+    const { contractSubmissionType, stateCode } = contract
+
+    switch (contractSubmissionType) {
+        case 'EQRO': {
+            if (!contract.draftRevision) {
+                return new Error('EQRO draft update requires a draft revision')
+            }
+            const parsed = validateEQROContractDraftRevisionInput(
+                formData,
+                stateCode,
+                store
+            )
+            if (parsed instanceof Error) return parsed
+            return parseAndUpdateEqroFields(
+                contract.draftRevision.formData,
+                parsed
+            )
+        }
+        case 'ILOS':
+            // ILOS has no conditional fields, so the parsed form data is written as is.
+            return validateILOSContractDraftRevisionInput(
+                formData,
+                stateCode,
+                store
+            )
+        default: {
+            // Health plan draft schema.
+            const parsed = validateContractDraftRevisionInput(
+                formData,
+                stateCode,
+                store,
+                featureFlags
+            )
+            if (parsed instanceof Error) return parsed
+            return parseAndUpdateChipOnlyFields(parsed, featureFlags)
+        }
+    }
+}
+
 // Validate state contacts for completeness
 const stateContactValidation = (
     stateContacts: ContractFormDataType['stateContacts']
@@ -599,6 +646,7 @@ const parseILOSContract = (
 }
 
 export {
+    parseContractDraftRevisionInput,
     validateContractDraftRevisionInput,
     parseContract,
     parseEQROContract,

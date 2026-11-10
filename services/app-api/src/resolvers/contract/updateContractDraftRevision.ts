@@ -1,22 +1,33 @@
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 import { isStateUser } from '../../domain-models'
-import type { MutationResolvers } from '../../gen/gqlServer'
+import type {
+    GenericDocumentInput,
+    MutationResolvers,
+} from '../../gen/gqlServer'
 import { logResolverError, logResolverSuccess } from '../../logger'
 import type { Store } from '../../postgres'
 import { NotFoundError } from '../../postgres'
 import { withResolverSpan, setResolverDetails } from '../attributeHelper'
 import type { LDService } from '../../launchDarkly/launchDarkly'
 import { GraphQLError } from 'graphql/index'
-import {
-    validateContractDraftRevisionInput,
-    validateEQROContractDraftRevisionInput,
-} from '../../domain-models/contractAndRates'
+import { parseContractDraftRevisionInput } from '../../domain-models/contractAndRates'
 import { canSyntheticDataWrite, canWrite } from '../../oauth/oauthAuthorization'
-import {
-    parseAndUpdateChipOnlyFields,
-    parseAndUpdateEqroFields,
-} from '../../domain-models/contractAndRates/dataValidatorHelpers'
 import { parseAndValidateDocuments } from '../documentHelpers'
+
+// Derives s3BucketName and s3Key for each document from its s3URL and keeps only
+// the fields the draft schemas accept. sha256 is required on GenericDocumentInput,
+// so it is always present after parsing.
+const parseDraftDocuments = (
+    documents: GenericDocumentInput[] | null | undefined
+) =>
+    parseAndValidateDocuments(
+        documents?.map((d) => ({
+            name: d.name,
+            s3URL: d.s3URL,
+            sha256: d.sha256,
+        })) ?? [],
+        'HEALTH_PLAN_DOCS'
+    ).map((doc) => ({ ...doc, sha256: doc.sha256! }))
 
 export function updateContractDraftRevision(
     store: Store,
@@ -131,62 +142,28 @@ export function updateContractDraftRevision(
                     throw createUserInputError(errMessage)
                 }
 
-                const isEQROsubmission =
-                    contractWithHistory.contractSubmissionType === 'EQRO'
-
-                // Parse and validate documents
-                const validatedContractDocuments = parseAndValidateDocuments(
-                    formData.contractDocuments?.map((d) => ({
-                        name: d.name,
-                        s3URL: d.s3URL,
-                        sha256: d.sha256,
-                    })) || [],
-                    'HEALTH_PLAN_DOCS'
-                )
-
-                const validatedSupportingDocuments = parseAndValidateDocuments(
-                    formData.supportingDocuments?.map((d) => ({
-                        name: d.name,
-                        s3URL: d.s3URL,
-                        sha256: d.sha256,
-                    })) || [],
-                    'HEALTH_PLAN_DOCS'
-                )
-
-                // Create formData with validated documents
-                // Note: sha256 is required in GenericDocumentInput, so we assert it's present
+                // parse and validate documents
                 const formDataWithValidatedDocs = {
                     ...formData,
-                    contractDocuments: validatedContractDocuments.map(
-                        (doc) => ({
-                            ...doc,
-                            sha256: doc.sha256!,
-                        })
+                    contractDocuments: parseDraftDocuments(
+                        formData.contractDocuments
                     ),
-                    supportingDocuments: validatedSupportingDocuments.map(
-                        (doc) => ({
-                            ...doc,
-                            sha256: doc.sha256!,
-                        })
+                    supportingDocuments: parseDraftDocuments(
+                        formData.supportingDocuments
                     ),
+                    ilosDocuments: parseDraftDocuments(formData.ilosDocuments),
                 }
 
-                // Using zod to validate and transform graphQL types into domain types.
-                const parsedFormData = isEQROsubmission
-                    ? validateEQROContractDraftRevisionInput(
-                          formDataWithValidatedDocs,
-                          contractWithHistory.stateCode,
-                          store
-                      )
-                    : validateContractDraftRevisionInput(
-                          formDataWithValidatedDocs,
-                          contractWithHistory.stateCode,
-                          store,
-                          featureFlags
-                      )
+                // Using zod to validate and transform GQL types into domain types
+                const editableFormData = parseContractDraftRevisionInput(
+                    contractWithHistory,
+                    formDataWithValidatedDocs,
+                    store,
+                    featureFlags
+                )
 
-                if (parsedFormData instanceof Error) {
-                    const errMessage = parsedFormData.message
+                if (editableFormData instanceof Error) {
+                    const errMessage = editableFormData.message
                     logResolverError(
                         'updateContractDraftRevision',
                         errMessage,
@@ -194,14 +171,6 @@ export function updateContractDraftRevision(
                     )
                     throw createUserInputError(errMessage)
                 }
-
-                // Parse EQRO fields
-                const editableFormData = isEQROsubmission
-                    ? parseAndUpdateEqroFields(
-                          contractWithHistory.draftRevision.formData,
-                          parsedFormData
-                      )
-                    : parseAndUpdateChipOnlyFields(parsedFormData, featureFlags)
 
                 // Update contract draft revision
                 const updateResult = await store.updateDraftContract({
