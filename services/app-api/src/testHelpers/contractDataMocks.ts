@@ -49,13 +49,19 @@ const mockInsertContractArgs = ({
     }
 }
 
-// Scalar answers shared by Enrollment Broker API fixtures.
+// Answers shared by Enrollment Broker API fixtures.
+// Linked ebLinkedBaseContractID and  ebLinkedPreviousAmendmentID
+// must reference existing contracts in the test environment,
+// so tests supply them through form-data overrides.
 const mockEBContractFormData = () => ({
     ebNewContractor: true,
     ebBaseContractInMCReview: false,
     ebPreviousAmendmentInMCReview: true,
     ebAmendmentNumber: 'Amendment 2',
     ebStateContractIdentifier: 'EB-2026-001',
+    ebContractorID: '161a7110-e8fc-43d3-b859-8c75f4680a3b',
+    ebLinkedBaseContractID: null,
+    ebLinkedPreviousAmendmentID: null,
 })
 
 const mockContractRevision = (

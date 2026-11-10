@@ -22,6 +22,7 @@ import {
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { mockGqlContractDraftRevisionFormDataInput } from '../../testHelpers'
+import type { ApolloServer } from '@apollo/server'
 
 describe(`Tests UpdateContractDraftRevision`, () => {
     const cmsUser = testCMSUser()
@@ -101,6 +102,9 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
+                ebContractorID: null,
+                ebLinkedBaseContractID: null,
+                ebLinkedPreviousAmendmentID: null,
                 ebNewContractor: null,
                 ebBaseContractInMCReview: null,
                 ebPreviousAmendmentInMCReview: null,
@@ -559,10 +563,26 @@ describe(`Tests UpdateContractDraftRevision`, () => {
     })
 
     describe('Enrollment Broker contract tests', () => {
-        it('updates EB scalar fields in the formData', async () => {
+        const createEBLinkedContractFields = async (server: ApolloServer) => {
+            const base = await createAndUpdateTestEBContract(server, 'FL', {
+                contractType: 'BASE',
+            })
+            await submitTestContract(server, base.id)
+            const amendment = await createAndUpdateTestEBContract(server, 'FL')
+            await submitTestContract(server, amendment.id)
+
+            return {
+                ebLinkedBaseContractID: base.id,
+                ebLinkedPreviousAmendmentID: amendment.id,
+            }
+        }
+
+        it('updates EB scalar fields and linked contract IDs in the formData', async () => {
             const server = await constructTestPostgresServer()
             const draft = await createAndUpdateTestEBContract(server)
             const ebFields = {
+                ebContractorID: '4c70e567-819b-4d6f-b005-d6ae966246cb',
+                ...(await createEBLinkedContractFields(server)),
                 ebNewContractor: false,
                 ebBaseContractInMCReview: true,
                 ebPreviousAmendmentInMCReview: false,
@@ -594,7 +614,15 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             'clears optional EB fields when updated with %s',
             async (emptyValue) => {
                 const server = await constructTestPostgresServer()
-                const draft = await createAndUpdateTestEBContract(server)
+                const linkedFields = await createEBLinkedContractFields(server)
+                const draft = await createAndUpdateTestEBContract(
+                    server,
+                    'FL',
+                    linkedFields
+                )
+                expect(draft.draftRevision?.formData).toEqual(
+                    expect.objectContaining(linkedFields)
+                )
 
                 const updated = await updateTestContractDraftRevision(
                     server,
@@ -607,6 +635,9 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                         ebPreviousAmendmentInMCReview: emptyValue,
                         ebAmendmentNumber: emptyValue,
                         ebStateContractIdentifier: emptyValue,
+                        ebContractorID: emptyValue,
+                        ebLinkedBaseContractID: emptyValue,
+                        ebLinkedPreviousAmendmentID: emptyValue,
                     })
                 )
 
@@ -617,6 +648,9 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                         ebPreviousAmendmentInMCReview: null,
                         ebAmendmentNumber: null,
                         ebStateContractIdentifier: null,
+                        ebContractorID: null,
+                        ebLinkedBaseContractID: null,
+                        ebLinkedPreviousAmendmentID: null,
                     })
                 )
             }
