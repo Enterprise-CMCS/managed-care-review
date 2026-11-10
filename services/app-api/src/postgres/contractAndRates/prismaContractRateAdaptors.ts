@@ -1,4 +1,8 @@
-import type { RateFormEditableType } from '../../domain-models/contractAndRates'
+import type {
+    ActuaryContactType,
+    RateFormEditableType,
+    StateContactType,
+} from '../../domain-models/contractAndRates'
 import type { GenericDocumentInput } from '../../gen/gqlServer'
 import { emptify, nullify } from '../prismaDomainAdaptors'
 import type { UpdateDraftContractFormDataType } from '../../domain-models/contractAndRates/formDataTypes'
@@ -7,7 +11,7 @@ import type { UpdateDraftContractFormDataType } from '../../domain-models/contra
 // contractTableFullPayload - contractTableCreateArgs / contract
 
 // Generic helpers
-const formatDocsForPrisma = (docs: GenericDocumentInput[]) => {
+const formatDocsForPrisma = <T extends GenericDocumentInput>(docs: T[]) => {
     return docs.map((d, idx) => {
         delete d['dateAdded']
         delete d['downloadURL']
@@ -18,7 +22,19 @@ const formatDocsForPrisma = (docs: GenericDocumentInput[]) => {
     })
 }
 
-function formatOrderedListForPrisma<T>(list: T[]): T[] {
+/**
+ * Numbers the items of an ordered contact list for a Prisma nested create.
+ *
+ * Only for contact lists written to a child table that has a `position` column
+ * and is read back ordered by it: `StateContact` and `ActuaryContact`. The array
+ * index becomes the row's `position`. Documents use `formatDocsForPrisma`.
+ *
+ * @param list Contacts from parsed form data, in display order.
+ * @returns The same contacts with `position` set to each item's index in `list`.
+ */
+function formatOrderedListForPrisma<
+    T extends StateContactType | ActuaryContactType,
+>(list: T[]): (T & { position: number })[] {
     return list.map((item, idx) => ({
         position: idx,
         ...item,
@@ -335,9 +351,22 @@ function prismaUpdateContractFormDataFromDomain(
         ebStateContractIdentifier: nullify(
             contractFormData.ebStateContractIdentifier
         ),
+        // ILOS submission fields only. ilosExternalRates are managed by
+        // updateDraftContractRates, so they are intentionally left alone here.
+        isILOSRatesIncluded: nullify(contractFormData.isILOSRatesIncluded),
+        ilosRateDateStart: nullify(contractFormData.ilosRateDateStart),
+        ilosRateDateEnd: nullify(contractFormData.ilosRateDateEnd),
+        ilosDocuments: {
+            deleteMany: {},
+            create:
+                contractFormData.ilosDocuments &&
+                formatDocsForPrisma(contractFormData.ilosDocuments),
+        },
     }
 }
 export {
+    formatDocsForPrisma,
+    formatOrderedListForPrisma,
     prismaRateCreateFormDataFromDomain,
     prismaUpdateRateFormDataFromDomain,
     prismaUpdateContractFormDataFromDomain,

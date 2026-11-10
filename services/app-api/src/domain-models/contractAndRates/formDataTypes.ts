@@ -67,6 +67,13 @@ const documentSchema = z.object({
     s3Key: z.string().optional(),
 })
 
+// ILOS report documents. ILOSDocument stores s3BucketName and s3Key as required columns,
+// so they are required here too; the resolvers fill them from s3URL before validation.
+const ilosDocumentSchema = documentSchema.extend({
+    s3BucketName: z.string(),
+    s3Key: z.string(),
+})
+
 // A rate outside MC-Review on an ILOS submission. Lives on the ILOS submission revision,
 const ilosExternalRateSchema = z.object({
     id: z.uuid(),
@@ -228,7 +235,7 @@ const genericContractFormDataSchema = z.object({
     ilosRateDateEnd: preprocessNulls(z.date().optional()),
     // ILOS lists default to [] for every submission type to match the non-null GQL list
     // types, the same way federalAuthorities is always an array.
-    ilosDocuments: z.array(documentSchema).default([]),
+    ilosDocuments: z.array(ilosDocumentSchema).default([]),
     ilosExternalRates: z.array(ilosExternalRateSchema).default([]),
 })
 
@@ -360,7 +367,7 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
     isILOSRatesIncluded: preprocessNulls(z.undefined().optional()),
     ilosRateDateStart: preprocessNulls(z.undefined().optional()),
     ilosRateDateEnd: preprocessNulls(z.undefined().optional()),
-    ilosDocuments: z.array(documentSchema).max(0).default([]),
+    ilosDocuments: z.array(ilosDocumentSchema).max(0).default([]),
     ilosExternalRates: z.array(ilosExternalRateSchema).max(0).default([]),
 })
 
@@ -369,6 +376,12 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
 // contacts, and the prefilled submissionType and contractType, add the ILOS fields, and blank
 // every health plan and EQRO field, the way eqroContractFormDataSchema blanks health plan fields.
 const ilosContractFormDataSchema = genericContractFormDataSchema.extend({
+    // Prefilled by the client on create and never user-editable. Pinned here so a
+    // client cannot send another value on create or update. submissionType stays
+    // CONTRACT_AND_RATES so the existing rate link and withdraw paths that skip
+    // CONTRACT_ONLY submissions treat ILOS like a health plan.
+    submissionType: z.literal('CONTRACT_AND_RATES'),
+    contractType: z.literal('BASE'),
     // Fields not applicable to ILOS submissions should be undefined.
     populationCovered: preprocessNulls(z.undefined().optional()),
     riskBasedContract: preprocessNulls(z.undefined().optional()),
@@ -434,7 +447,7 @@ const ilosContractFormDataSchema = genericContractFormDataSchema.extend({
         .max(0)
         .default([]),
     // ILOS fields
-    ilosDocuments: z.array(documentSchema).default([]),
+    ilosDocuments: z.array(ilosDocumentSchema).default([]),
     ilosExternalRates: z.array(ilosExternalRateSchema).default([]),
 })
 
@@ -493,16 +506,13 @@ const submittableILOSContractFormDataSchema = ilosContractFormDataSchema.extend(
         ilosRateDateEnd: z.date(),
         stateContacts:
             genericContractFormDataSchema.shape.stateContacts.nonempty(),
-        ilosDocuments: z.array(documentSchema).nonempty(),
+        ilosDocuments: z.array(ilosDocumentSchema).nonempty(),
         ilosExternalRates: z.array(
             ilosExternalRateSchema.extend({
                 rateDateStart: z.date(),
                 rateDateEnd: z.date(),
             })
         ),
-        // Prefilled on create. Kept CONTRACT_AND_RATES so the existing rate link and
-        // withdraw paths that skip CONTRACT_ONLY submissions treat ILOS like a health plan.
-        submissionType: z.literal('CONTRACT_AND_RATES'),
     }
 )
 
@@ -607,7 +617,7 @@ const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
         genericRateFormDataSchema.shape.certifyingActuaryContacts.nonempty(),
 })
 
-const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
+const draftContractFormDataBaseSchema = contractFormDataSchema.extend({
     contractType: preprocessNulls(contractTypeSchema.optional()),
     submissionDescription: preprocessNulls(z.string().optional()),
     eqroNewContractor: z.boolean().optional().nullish(),
@@ -623,11 +633,27 @@ const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     ebStateContractIdentifier: z.string().optional().nullish(),
 })
 
+// The store write type for a draft update of any submission type. It is derived from the
+// base so the per-type draft schemas (health plan below, eqroContractFormDataSchema,
+// ilosContractFormDataSchema) can each narrow the fields the other types do not carry.
 type UpdateDraftContractFormDataType = Partial<
-    z.infer<typeof updateDraftContractFormDataSchema>
+    z.infer<typeof draftContractFormDataBaseSchema>
 >
 
+// Draft form data for health plan and enrollment broker submissions.
+const updateDraftContractFormDataSchema =
+    draftContractFormDataBaseSchema.extend({
+        // ILOS fields are not applicable to health plan or enrollment broker
+        // submissions. Pinned like the EQRO schema so a client cannot write them.
+        isILOSRatesIncluded: preprocessNulls(z.undefined().optional()),
+        ilosRateDateStart: preprocessNulls(z.undefined().optional()),
+        ilosRateDateEnd: preprocessNulls(z.undefined().optional()),
+        ilosDocuments: z.array(ilosDocumentSchema).max(0).default([]),
+        ilosExternalRates: z.array(ilosExternalRateSchema).max(0).default([]),
+    })
+
 type DocumentType = z.infer<typeof documentSchema>
+type ILOSDocumentType = z.infer<typeof ilosDocumentSchema>
 type ILOSExternalRateType = z.infer<typeof ilosExternalRateSchema>
 type ContractFormDataType = z.infer<typeof contractFormDataSchema>
 type ILOSContractFormDataType = z.infer<typeof ilosContractFormDataSchema>
@@ -650,6 +676,7 @@ export {
     submittableRateFormDataSchema,
     contractFormDataSchema,
     ilosContractFormDataSchema,
+    ilosDocumentSchema,
     ilosExternalRateSchema,
     rateFormDataSchema,
     preprocessNulls,
@@ -669,6 +696,7 @@ export type {
     ILOSExternalRateType,
     RateFormDataType,
     DocumentType,
+    ILOSDocumentType,
     RateFormEditableType,
     StateContactType,
     ActuaryContactType,

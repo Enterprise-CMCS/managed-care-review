@@ -47,6 +47,7 @@ export {
     createTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestEQROContract,
+    createAndUpdateTestILOSContract,
 } from './gqlContractHelpers'
 
 export {
@@ -55,4 +56,7 @@ export {
     clearMetadataFromRateFormData,
 } from './documentHelpers'
 
-export { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
+export {
+    mockGqlContractDraftRevisionFormDataInput,
+    mockGqlILOSContractDraftRevisionFormDataInput,
+} from './gqlContractInputMocks'
