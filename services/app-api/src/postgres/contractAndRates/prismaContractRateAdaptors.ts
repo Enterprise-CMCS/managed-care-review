@@ -335,6 +335,13 @@ function prismaUpdateContractFormDataFromDomain(
         ebStateContractIdentifier: nullify(
             contractFormData.ebStateContractIdentifier
         ),
+        ebContractorID: nullify(contractFormData.ebContractorID),
+        ebLinkedBaseContractID: nullify(
+            contractFormData.ebLinkedBaseContractID
+        ),
+        ebLinkedPreviousAmendmentID: nullify(
+            contractFormData.ebLinkedPreviousAmendmentID
+        ),
     }
 }
 export {
