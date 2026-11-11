@@ -81,7 +81,8 @@ VITE_APP_AUTH_MODE=LOCAL AWS_EC2_METADATA_DISABLED=true pnpm --filter app-api te
   src/resolvers/documents/generateUploadURL.test.ts \
   src/resolvers/documents/sharedS3Objects.test.ts \
   src/s3/s3Deployed.test.ts src/s3/s3Presigning.test.ts \
-  src/oauth/oauthAuthorization.test.ts
+  src/oauth/oauthAuthorization.test.ts src/cors/configureCorsHelpers.test.ts
+pnpm --filter mcr-infra-cdk exec tsc --noEmit
 pnpm --filter app-api build
 pnpm --filter app-web exec tsc --noEmit
 ```
@@ -110,10 +111,17 @@ pnpm exec cypress run \
 The spec executes actual S3 PUT/GET using the application-origin window's fetch,
 so success exercises browser CORS rather than only a Node HTTP client. It checks:
 
+- Deployed API OPTIONS explicitly permits each browser-set SigV4 request header,
+  including `x-amz-content-sha256`.
 - Nonempty clean PDF round trips and SHA-256 equality in both buckets.
 - Default upload requests and opt-in attachment headers in both buckets.
 - Real scan completion with bounded polling.
 - Deployed-only EICAR detection and actual S3 GET denial in both buckets.
+
+The signed GraphQL helper adds `x-amz-content-sha256`. API Gateway preflight,
+gateway error responses and Lambda CORS headers allow that header; IAM
+authorization and allowed application origins are unchanged. A missing preflight
+header blocks the browser before GraphQL and can appear as a `TypeError`.
 
 Local mode excludes the EICAR cases because its scan adapter is a stub; it is not
 deployed security proof. The deployed cases fail on unexpected verdicts, timeouts,

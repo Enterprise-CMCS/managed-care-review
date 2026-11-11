@@ -172,6 +172,7 @@ export class AppApiStack extends BaseStack {
                     'x-amz-date',
                     'x-api-key',
                     'x-amz-security-token',
+                    'x-amz-content-sha256',
                     'traceparent',
                     'tracestate',
                 ],
@@ -184,7 +185,7 @@ export class AppApiStack extends BaseStack {
             responseHeaders: {
                 'Access-Control-Allow-Origin': "'*'",
                 'Access-Control-Allow-Headers':
-                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token,traceparent,tracestate'",
+                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token,x-amz-content-sha256,traceparent,tracestate'",
                 'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
             },
         })
@@ -194,7 +195,7 @@ export class AppApiStack extends BaseStack {
             responseHeaders: {
                 'Access-Control-Allow-Origin': "'*'",
                 'Access-Control-Allow-Headers':
-                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token,traceparent,tracestate'",
+                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token,x-amz-content-sha256,traceparent,tracestate'",
                 'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
             },
         })
@@ -204,7 +205,7 @@ export class AppApiStack extends BaseStack {
             responseHeaders: {
                 'Access-Control-Allow-Origin': "'*'",
                 'Access-Control-Allow-Headers':
-                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token,traceparent,tracestate'",
+                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token,x-amz-content-sha256,traceparent,tracestate'",
                 'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
             },
         })
@@ -214,7 +215,7 @@ export class AppApiStack extends BaseStack {
             responseHeaders: {
                 'Access-Control-Allow-Origin': "'*'",
                 'Access-Control-Allow-Headers':
-                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token,traceparent,tracestate'",
+                    "'Content-Type,Authorization,x-amzn-trace-id,x-amzn-requestid,x-amz-date,x-api-key,x-amz-security-token,x-amz-content-sha256,traceparent,tracestate'",
                 'Access-Control-Allow-Methods': "'GET,POST,PUT,DELETE,OPTIONS'",
             },
         })

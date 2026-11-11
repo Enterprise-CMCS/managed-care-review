@@ -224,6 +224,43 @@ describe('API storage transport', () => {
         }
     }
 
+    if (mode === 'AWS_COGNITO') {
+        it('allows signed GraphQL request headers in CORS preflight', () => {
+            const signedHeaders = [
+                'authorization',
+                'content-type',
+                'x-amz-date',
+                'x-amz-security-token',
+                'x-amz-content-sha256',
+            ]
+            // Inspect the real OPTIONS policy, not a cy.intercept CORS bypass.
+            cy.request({
+                method: 'OPTIONS',
+                url: `${Cypress.env('API_URL').replace(/\/$/, '')}/graphql`,
+                headers: {
+                    Origin: new URL(Cypress.config('baseUrl')!).origin,
+                    'Access-Control-Request-Method': 'POST',
+                    'Access-Control-Request-Headers': signedHeaders.join(','),
+                },
+                log: false,
+            }).then(({ headers, status }) => {
+                expect(status, 'API preflight status').to.be.within(200, 299)
+                const allowedHeaders = String(
+                    headers['access-control-allow-headers'] ?? ''
+                )
+                    .toLowerCase()
+                    .split(',')
+                    .map((header) => header.trim())
+                for (const header of signedHeaders) {
+                    expect(
+                        allowedHeaders,
+                        'API preflight allowed headers'
+                    ).to.include(header)
+                }
+            })
+        })
+    }
+
     for (const bucket of buckets) {
         for (const attachment of [false, true]) {
             it(`uploads and downloads clean bytes in ${bucket} (attachment: ${attachment})`, () => {
