@@ -61,25 +61,16 @@ describe('State user can view submissions', () => {
 
         cy.findByRole('heading', { level: 2, name: /Review and submit/ })
 
-        // Submit, sent to dashboard
+        // Submit, sent to submission summary
         cy.submitStateSubmissionForm()
 
         // View submission summary
-        cy.location().then((loc) => {
-            expect(loc.search).to.match(/.*justSubmitted=*/)
+        cy.findByTestId('submission-id').then(($el) => {
+            const submissionName = $el
+                .text()
+                .replace(/^Submission ID\s*\|\s*/, '')
+                .trim()
 
-            const urlParams = new URLSearchParams(loc.search)
-            const submissionName = urlParams.get('justSubmitted')
-
-            if (submissionName === null || submissionName === undefined) {
-                throw new Error('No submission name found' + loc.search)
-            }
-
-            cy.findByText(`${submissionName} was sent to CMS`).should('exist')
-            cy.get('table')
-                .findByRole('link', { name: submissionName })
-                .should('exist')
-                .click()
             cy.url({ timeout: 10_000 }).should('contain', submissionId)
             cy.findByTestId('submission-summary').should('exist')
             cy.findByRole('heading', {
