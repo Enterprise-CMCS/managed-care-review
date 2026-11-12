@@ -5,13 +5,15 @@ import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 
 /**
- * Mirrors the existing Cognito browser role's authenticated allusers/ access.
- * Never expose the Lambda role's broader access to private/ or arbitrary paths.
- * This also works before an upload has a saved document row. Machine clients
- * retain the existing document APIs; ZIPs retain package-level authorization.
+ * Raw-key scan/download access mirrors Cognito's shared allusers/ scope, not
+ * document ownership or state assignments. It works before a document row exists.
+ * OAuth upload authorization is separate; these queries exclude OAuth clients.
+ * ZIPs use package-authorized downloads. Never expose the Lambda role's broader
+ * private/path access through these queries.
  */
 function sharedKey(key: string): string {
     const fileKey = key.startsWith('allusers/') ? key.slice(9) : key
+    // S3 limits the full UTF-8 key, including the prefix, to 1024 bytes.
     if (
         fileKey.length > 0 &&
         Buffer.byteLength(`allusers/${fileKey}`, 'utf8') <= 1024 &&

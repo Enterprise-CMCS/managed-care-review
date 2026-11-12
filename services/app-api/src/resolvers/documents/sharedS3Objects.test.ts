@@ -95,6 +95,7 @@ describe('shared browser S3 queries', () => {
         }
     )
 
+    // Role compatibility only: shared-key access does not check document/state ownership.
     const identity = {
         id: 'human-user',
         email: 'human@example.com',
@@ -177,6 +178,7 @@ describe('shared browser S3 queries', () => {
         expect(sign).not.toHaveBeenCalled()
     })
 
+    // Upload-write scopes do not grant raw-key scan/download access.
     it.each([
         { grants: [], scopes: [], isDelegatedUser: false },
         { grants: ['client_credentials'], scopes: [], isDelegatedUser: false },

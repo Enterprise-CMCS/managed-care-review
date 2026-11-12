@@ -173,6 +173,7 @@ export class AppApiStack extends BaseStack {
                     'x-amz-date',
                     'x-api-key',
                     'x-amz-security-token',
+                    // SigV4 adds this payload hash header; browsers need it in preflight.
                     'x-amz-content-sha256',
                     'traceparent',
                     'tracestate',

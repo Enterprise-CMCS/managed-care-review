@@ -82,6 +82,7 @@ export function generateUploadURLResolver(
 
                 const s3Key = `${uuidv4()}.${extension}`
 
+                // Attachment signing is opt-in: callers must send the matching PUT header.
                 const uploadURL = await s3Client.getUploadURL(
                     s3Key,
                     bucketName,

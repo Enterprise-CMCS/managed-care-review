@@ -8,6 +8,7 @@ export type S3ClientT = {
         bucket: BucketShortName
     ) => Promise<string | S3Error>
     scanFile: (key: string, bucket: BucketShortName) => Promise<void | S3Error>
+    /** Deployed status comes from GuardDuty tags; local mode simulates CLEAN. */
     getScanStatus: (
         key: string,
         bucket: BucketShortName
