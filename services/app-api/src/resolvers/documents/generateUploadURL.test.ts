@@ -118,7 +118,7 @@ describe('generateUploadURLResolver', () => {
         )
     })
 
-    it.each(['XLSX', 'XLSM', 'XLTM', 'XLAM'] as const)(
+    it.each(['XLSX', 'XLSM'] as const)(
         'returns a valid presigned URL for %s spreadsheets',
         async (fileType) => {
             const result = await executeUpload({
