@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { matchPath, useLocation, useNavigate } from 'react-router-dom'
 import { Form } from '@trussworks/react-uswds'
-import {
-    EB_SUBMISSION_FORM_ROUTES,
-    RoutesRecord,
-} from '@mc-review/constants'
+import { RoutesRecord } from '@mc-review/constants'
 import {
     DynamicStepIndicator,
     FormContainer,
     FormNotificationContainer,
     PageActions,
 } from '../../../../components'
-import { ErrorOrLoadingPage, PageBannerAlerts } from '../../SharedSubmissionComponents'
-import { useCurrentRoute, useRouteParams } from '../../../../hooks'
+import {
+    ErrorOrLoadingPage,
+    PageBannerAlerts,
+} from '../../SharedSubmissionComponents'
+import { useFormFlow, useRouteParams } from '../../../../hooks'
 import { usePage } from '../../../../contexts/PageContext'
 import { useAuth } from '../../../../contexts/AuthContext'
 import styles from '../../StateSubmissionForm.module.scss'
@@ -37,7 +37,8 @@ export const EBSubmissionDetails = (): React.ReactElement => {
     const location = useLocation()
     const { id } = useRouteParams()
     const { updateActiveMainContent } = usePage()
-    const { currentRoute } = useCurrentRoute()
+    // Also used for the new submission route, which maps to the first step
+    const { stepIndicatorProps } = useFormFlow('SUBMISSIONS_TYPE')
     const { loggedInUser } = useAuth()
     const { createDraft, draftSubmission, interimState, showPageErrorMessage } =
         useContractForm(id)
@@ -93,21 +94,11 @@ export const EBSubmissionDetails = (): React.ReactElement => {
             )
         )
     }
-    
+
     return (
         <div id={activeMainContentId}>
             <FormNotificationContainer>
-                <DynamicStepIndicator
-                    formPages={EB_SUBMISSION_FORM_ROUTES}
-                    currentFormPage={
-                        currentRoute === 'SUBMISSIONS_NEW_SUBMISSION_FORM'
-                            ? 'SUBMISSIONS_TYPE' // Map new submission route to first step
-                            : currentRoute
-                    }
-                    customPageTitles={{
-                        SUBMISSIONS_TYPE: 'Submission details',
-                    }}
-                />
+                <DynamicStepIndicator {...stepIndicatorProps} />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission?.draftRevision.unlockInfo}
@@ -115,7 +106,7 @@ export const EBSubmissionDetails = (): React.ReactElement => {
                 />
             </FormNotificationContainer>
             <FormContainer id="SubmissionDetails">
-               <Form
+                <Form
                     className={styles.formContainer}
                     onSubmit={(e) => {
                         e.preventDefault()
@@ -139,7 +130,9 @@ export const EBSubmissionDetails = (): React.ReactElement => {
                         }
                         backOnClickUrl={RoutesRecord.DASHBOARD_SUBMISSIONS}
                         actionInProgress={isSubmitting}
-                        continueOnClickUrl={RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS}
+                        continueOnClickUrl={
+                            RoutesRecord.SUBMISSIONS_CONTRACT_DETAILS
+                        }
                     />
                 </Form>
             </FormContainer>
