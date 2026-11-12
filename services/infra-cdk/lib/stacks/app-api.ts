@@ -173,7 +173,9 @@ export class AppApiStack extends BaseStack {
                     'x-amz-date',
                     'x-api-key',
                     'x-amz-security-token',
-                    // SigV4 adds this payload hash header; browsers need it in preflight.
+                    // AWS Signature Version 4 adds this request-body hash header.
+                    // Browsers block the GraphQL POST if OPTIONS does not allow it,
+                    // even when the caller has valid credentials and IAM permissions.
                     'x-amz-content-sha256',
                     'traceparent',
                     'tracestate',

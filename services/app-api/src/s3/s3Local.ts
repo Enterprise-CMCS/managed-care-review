@@ -29,7 +29,8 @@ export function newLocalS3Client(
         tls: false,
     }
     const s3Client = new S3Client(clientConfig)
-    // Match deployed signing without changing checksum behavior for actual uploads.
+    // Match the deployed URL signer: the browser supplies bytes later, so the SDK
+    // must not add a checksum calculated from an empty request body.
     const uploadSigner = new S3Client({
         ...clientConfig,
         requestChecksumCalculation: 'WHEN_REQUIRED',
@@ -81,7 +82,8 @@ export function newLocalS3Client(
                 }
             }
         },
-        // Development stub only: LocalStack does not run GuardDuty or prove scan safety.
+        // LocalStack does not run GuardDuty. Return CLEAN so local development can
+        // continue, but do not treat this simulated result as evidence of file safety.
         getScanStatus: async () => 'CLEAN',
         scanFile: async (
             s3Key: string,
