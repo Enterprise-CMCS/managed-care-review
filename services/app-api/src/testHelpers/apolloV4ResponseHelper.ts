@@ -1,5 +1,5 @@
 import type { DocumentNode, GraphQLFormattedError } from 'graphql'
-import type { ApolloServer } from '@apollo/server'
+import type { ApolloServer, BaseContext } from '@apollo/server'
 
 export type TestGraphQLResponse<T = any> = {
     data?: T
@@ -29,18 +29,29 @@ export function extractGraphQLResponse<T = any>(
     }
 }
 
-export async function executeGraphQLOperation<TData = any, TVariables = any>(
-    server: ApolloServer,
+export async function executeGraphQLOperation<
+    TData = any,
+    TVariables = any,
+    TContext extends BaseContext = any,
+>(
+    server: ApolloServer<TContext>,
     options: {
-        query: DocumentNode
+        query: DocumentNode | string
         variables?: TVariables
-        contextValue?: any
+        contextValue?: TContext
     }
 ): Promise<TestGraphQLResponse<TData>> {
-    const response = await server.executeOperation({
+    const request = {
         query: options.query,
         variables: options.variables as any,
-    })
+    }
+    // Preserve default-context injection in server wrappers when no context is given.
+    const response =
+        options.contextValue === undefined
+            ? await server.executeOperation(request)
+            : await server.executeOperation(request, {
+                  contextValue: options.contextValue,
+              })
 
     return extractGraphQLResponse<TData>(response)
 }
