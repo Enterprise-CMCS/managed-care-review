@@ -6,7 +6,10 @@ const buckets = {
     QUESTION_ANSWER_DOCS: 'questions',
 }
 
-// Real SDK signing, no network: command mocks cannot catch empty-body checksums.
+// Generate URLs with the real SDK and fake credentials; no S3 request is sent.
+// The browser supplies file bytes later. If the SDK signs a checksum of the absent
+// body, it describes an empty file and S3 rejects the later nonempty upload.
+// A mocked signer returning a fake URL would hide this SDK behavior.
 describe.each([
     {
         name: 'deployed',
