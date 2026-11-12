@@ -1,16 +1,24 @@
 # Browser storage API transport
 
-This additive backend change prepares browser file transfers to work without
-Cognito identity-pool S3 credentials. It does not change browser login, select a
-new frontend storage adapter, replace REST/WAF, or change external API contracts.
+The storage API issues presigned S3 URLs for uploads and downloads and exposes
+malware-scan status through GraphQL. File bytes travel directly between the
+browser and S3, not through GraphQL. Clients using these URLs do not need Cognito
+identity-pool S3 credentials.
+
+GraphQL authenticates and authorizes requests for URLs and scan status. S3
+independently validates presigned requests and enforces the bucket's clean-scan
+download policy. A valid download URL is not proof that an object is safe to read.
 
 ## Contracts
 
 ### Uploads
 
-Reuse `generateUploadURL` with the existing filename, file type and bucket inputs.
-The response additionally provides `contentType`. Existing operations do not need
-to select that field and their existing PUT requests remain valid.
+`generateUploadURL` accepts `fileName`, `fileType` and `bucketName` and returns an
+upload URL, object key, bucket, expiry, S3 URL and `contentType`. The filename
+extension must match the requested file type. The server generates a unique
+object key and derives the MIME type from the file type.
+
+Send the returned `contentType` as the PUT's `Content-Type` header.
 
 `includeContentDisposition` is optional and defaults to false. When true, send
 these headers on the presigned PUT:
@@ -20,10 +28,10 @@ Content-Type: <returned contentType>
 Content-Disposition: attachment; filename=<encodeURIComponent(original fileName)>
 ```
 
-Only the opt-in request signs the attachment header. Presigned URLs expire after
-300 seconds. File bytes travel directly between the browser and S3, not through
-GraphQL. The local and deployed upload signers do not sign a checksum for unknown
-upload bytes; ordinary SDK uploads retain their existing checksum configuration.
+Only the opt-in request signs the attachment header. Upload URLs expire after
+300 seconds. The local and deployed upload signers do not sign a checksum for
+unknown upload bytes; ordinary SDK uploads use the SDK's default checksum
+configuration.
 
 ### Scan status
 
@@ -52,21 +60,36 @@ actual GET unless the object is clean. Signing does not bypass the bucket policy
 
 ## Access boundary
 
-Both new queries are for authenticated human/browser request contexts. All OAuth
-client contexts, including delegated and scoped clients, are denied. Machine
-clients retain the existing `fetchDocument` and upload authorization contracts.
+`fetchUploadScanStatus` and `fetchS3DownloadURL` require authenticated human/browser
+request contexts. All OAuth client contexts, including delegated and scoped
+clients, are denied. Machine clients use `fetchDocument` for document access;
+`generateUploadURL` applies its OAuth write and synthetic-data authorization rules
+independently.
 
-Keys are limited to flat objects in the existing authenticated shared
+Keys are limited to flat objects in the authenticated shared
 `allusers/` scope. Callers may pass a bare key or one `allusers/` prefix. Private,
 nested, traversal, control-character and ZIP paths are rejected. The complete
 S3 key, including the prefix, must fit S3's 1024-byte UTF-8 key limit.
 
-This preserves shared-object browser access; it does **not** introduce package
-ownership checks or stronger content/size validation. ZIP downloads continue to
-use `DocumentZipPackage.downloadUrl` from an authorized package fetch. Do not
-route raw ZIP keys through the new query.
+These raw-key queries provide shared-object access, **not** package-level
+ownership checks. Key validation is not content or file-size validation. ZIP
+downloads use `DocumentZipPackage.downloadUrl` from an authorized package fetch;
+do not route raw ZIP keys through `fetchS3DownloadURL`.
 
-## Pre-merge validation
+## Implementation locations
+
+- `services/app-graphql/src/schema.graphql`: operation inputs, response types and
+  scan-status values.
+- `services/app-api/src/resolvers/documents/generateUploadURL.ts`: upload
+  authorization, filename/type validation and object-key generation.
+- `services/app-api/src/resolvers/documents/sharedS3Objects.ts`: human-only scan
+  and download queries and shared-key validation.
+- `services/app-api/src/s3/s3Deployed.ts` and `s3Local.ts`: URL signing and scan-tag
+  adapters.
+- `services/infra-cdk/lib/stacks/app-api.ts` and
+  `services/app-api/src/cors/configureCorsHelpers.ts`: API CORS configuration.
+
+## Testing and maintenance
 
 ### Offline checks
 
@@ -91,21 +114,21 @@ The query tests exercise the actual schema and `configureResolvers` registration
 without connecting to a database. Real-SDK presigning tests use fake credentials
 and no network. They do not prove deployed CORS, permissions or scanning.
 
-### Deployed review smoke
+### Deployed browser smoke
 
-`services/cypress/integration/smokeTest/apiStorage.spec.ts` is discovered by the
-existing review workflow. It uses current human Cognito test auth, not OIDC or a
-storage rollout flag. It requires the usual isolated review deployment, test
-password, Cognito IDs/region, API URL and temporary CI AWS credentials already
-provided by that workflow. No extra direct S3 test credentials are introduced.
+`services/cypress/integration/smokeTest/apiStorage.spec.ts` runs in the review CI
+workflow against an isolated AWS deployment. Its authentication helper uses human
+Cognito test users and requires the test password, Cognito IDs/region, API URL
+and temporary CI AWS credentials configured by that workflow. S3 transfers use
+presigned URLs rather than direct S3 test credentials.
 
-For a targeted run from `services/cypress`, inject those approved test settings
-and set `VITE_APP_AUTH_MODE=AWS_COGNITO`, then run:
+For a targeted run from `services/cypress`, supply those settings through the
+approved environment configuration and set `VITE_APP_AUTH_MODE=AWS_COGNITO`:
 
 ```sh
 pnpm exec cypress run \
   --spec integration/smokeTest/apiStorage.spec.ts \
-  --config baseUrl=https://YOUR-ISOLATED-REVIEW-HOST
+  --config baseUrl=https://YOUR-ISOLATED-TEST-HOST
 ```
 
 The spec executes actual S3 PUT/GET using the application-origin window's fetch,
@@ -118,15 +141,24 @@ so success exercises browser CORS rather than only a Node HTTP client. It checks
 - Real scan completion with bounded polling.
 - Deployed-only EICAR detection and actual S3 GET denial in both buckets.
 
-The signed GraphQL helper adds `x-amz-content-sha256`. API Gateway preflight,
-gateway error responses and Lambda CORS headers allow that header; IAM
-authorization and allowed application origins are unchanged. A missing preflight
-header blocks the browser before GraphQL and can appear as a `TypeError`.
+Local mode excludes the EICAR cases because its scan adapter is a stub; it does
+not validate malware enforcement. The deployed cases fail on unexpected verdicts,
+timeouts, network/CORS failures or a download that is not denied. A generic
+network failure is not proof that an infected object is protected.
 
-Local mode excludes the EICAR cases because its scan adapter is a stub; it is not
-deployed security proof. The deployed cases fail on unexpected verdicts, timeouts,
-network/CORS failures or a download that is not denied. They do not treat generic
-network failure as proof that an infected object is protected.
+When using local browser doubles, serve the application, GraphQL API and S3 from
+separate origins. A same-origin GraphQL double does not exercise API preflight,
+even if the S3 double is cross-origin. Doubles do not validate AWS IAM, actual
+presigning or GuardDuty.
+
+### Troubleshooting and safe diagnostics
+
+The Cypress signed GraphQL helper adds `x-amz-content-sha256`. API Gateway
+preflight, gateway error responses and Lambda CORS headers must allow that
+header. Header allowlists do not replace IAM authorization or origin validation.
+A missing preflight header blocks the browser before GraphQL and can appear as a
+`TypeError`. For failures at `current-user`, inspect API preflight before
+investigating S3 permissions or scanning.
 
 Smoke failures identify the operation (`authentication`, `current-user`,
 `generate-upload`, `put`, `scan`, `download-url`, `get`, or `checksum`) and retain
@@ -140,14 +172,12 @@ presigned bearer URLs; command-log suppression is not universal redaction.
 
 The smoke creates unsaved upload objects with unique keys. It does not create
 contracts, change bucket policy or forge scan tags. No delete-object API exists
-in this test path: use the established review bucket lifecycle/operator cleanup.
+in this test path: use the test bucket's lifecycle or approved operator cleanup.
 
-### Remaining release evidence
+### Related regression coverage
 
-Before merge, record the exact tested commit and deployed review results. Also
-exercise existing saved-document/Q&A and authorized package ZIP downloads on the
-candidate. Verify absent/nonclean/unknown tag denial using approved stable
-fixtures where required; mocked mapping tests are not live IAM evidence.
-
-Code deployment and later frontend enrollment remain separate. Merge immediately
-promotes to production: do not rely on first testing this in Val after merge.
+Changes to storage behavior also require exercising saved-document/Q&A downloads
+and authorized package ZIP downloads in an isolated AWS environment. Verify
+absent/nonclean/unknown tag denial using approved stable fixtures where required;
+mocked tag-mapping tests do not validate bucket-policy enforcement. Record the
+tested revision and environment with the results so failures can be reproduced.
