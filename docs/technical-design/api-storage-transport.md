@@ -7,8 +7,7 @@ identity-pool S3 credentials for the transfers.
 The upload and download flows are separate:
 
 - **Upload:** request an upload URL → PUT the file to S3 → wait for the scan result.
-- **Download:** request a download URL → GET the file from S3. This is only needed
-  when retrieving a file, not as part of completing an upload.
+- **Download:** request a download URL → GET the file from S3. 
 
 GraphQL controls access to these operations, while S3 validates the signed
 requests and enforces the clean-scan download policy.
