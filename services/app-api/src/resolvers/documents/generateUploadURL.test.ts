@@ -8,6 +8,7 @@ import { testS3Client } from '../../testHelpers/s3Helpers'
 import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
 import { generateUploadURLResolver } from './generateUploadURL'
+import LegacyGenerateUploadUrlDocument from './fixtures/legacyGenerateUploadURL.graphql'
 
 describe('generateUploadURLResolver', () => {
     const user: Context['user'] = {
@@ -50,13 +51,7 @@ describe('generateUploadURLResolver', () => {
         const response = extractGraphQLResponse(
             await server.executeOperation(
                 {
-                    query: `
-                mutation LegacyGenerateUploadURL($input: GenerateUploadURLInput!) {
-                    generateUploadURL(input: $input) {
-                        uploadURL s3Key bucket expiresIn s3URL
-                    }
-                }
-            `,
+                    query: LegacyGenerateUploadUrlDocument,
                     variables: {
                         input: {
                             fileName: 'legacy.pdf',
