@@ -34,7 +34,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="SUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -64,7 +63,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="SUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -95,12 +93,8 @@ describe('UnlockSubmitModal', () => {
             )
 
             await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
-            )
-
-            await waitFor(() =>
-                expect(testLocation.search).toBe(
-                    `?justSubmitted=Test-Submission&contractType=HEALTH_PLAN&id=${mockContractPackageDraft().id}`
+                expect(testLocation.pathname).toBe(
+                    `/submissions/health-plan/${mockContractPackageDraft().id}`
                 )
             )
         })
@@ -112,7 +106,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="SUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -147,11 +140,8 @@ describe('UnlockSubmitModal', () => {
             )
 
             await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
-            )
-            await waitFor(() =>
-                expect(testLocation.search).toBe(
-                    `?justSubmitted=Test-Submission`
+                expect(testLocation.pathname).toBe(
+                    `/submissions/health-plan/${mockContractPackageDraft().id}`
                 )
             )
         })
@@ -162,7 +152,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="SUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -207,7 +196,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="SUBMIT_CHIP_ONLY"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -236,7 +224,7 @@ describe('UnlockSubmitModal', () => {
             ).toHaveTextContent('Submit')
         })
 
-        it('redirects to dashboard if CHIP-only submission succeeds', async () => {
+        it('redirects to submission summary if CHIP-only submission succeeds', async () => {
             let testLocation: Location
             const modalRef = createRef<ModalRef>()
             const handleOpen = () =>
@@ -244,7 +232,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="SUBMIT_CHIP_ONLY"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -275,12 +262,8 @@ describe('UnlockSubmitModal', () => {
             )
 
             await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
-            )
-
-            await waitFor(() =>
-                expect(testLocation.search).toBe(
-                    `?justSubmitted=Test-Submission&contractType=HEALTH_PLAN&id=${mockContractPackageDraft().id}`
+                expect(testLocation.pathname).toBe(
+                    `/submissions/health-plan/${mockContractPackageDraft().id}`
                 )
             )
         })
@@ -294,7 +277,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="RESUBMIT_CHIP_ONLY"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -329,7 +311,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="RESUBMIT_CHIP_ONLY"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -598,7 +579,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="RESUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -635,7 +615,6 @@ describe('UnlockSubmitModal', () => {
                     submissionData={mockContractPackageDraft({
                         contractSubmissionType: 'EQRO',
                     })}
-                    submissionName="Test-Submission"
                     modalType="RESUBMIT_EQRO_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -669,7 +648,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="RESUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -697,7 +675,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="RESUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -774,7 +751,6 @@ describe('UnlockSubmitModal', () => {
             renderWithProviders(
                 <UnlockSubmitModal
                     submissionData={mockContractPackageDraft()}
-                    submissionName="Test-Submission"
                     modalType="RESUBMIT_CONTRACT"
                     modalRef={modalRef}
                     setIsSubmitting={mockSetIsSubmitting}
@@ -818,12 +794,8 @@ describe('UnlockSubmitModal', () => {
             )
 
             await waitFor(() =>
-                expect(testLocation.pathname).toBe(`/dashboard/submissions`)
-            )
-
-            await waitFor(() =>
-                expect(testLocation.search).toBe(
-                    `?justSubmitted=Test-Submission&contractType=HEALTH_PLAN&id=${mockContractPackageDraft().id}`
+                expect(testLocation.pathname).toBe(
+                    `/submissions/health-plan/${mockContractPackageDraft().id}`
                 )
             )
         })

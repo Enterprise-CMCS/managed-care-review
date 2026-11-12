@@ -1,13 +1,9 @@
 import { GridContainer } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { useAuth } from '../../contexts/AuthContext'
-import {
-    ContractSubmissionType,
-    IndexContractsStrippedDocument,
-} from '../../gen/gqlClient'
+import { IndexContractsStrippedDocument } from '../../gen/gqlClient'
 import { useQuery } from '@apollo/client/react'
 import styles from './StateDashboard.module.scss'
 import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
@@ -21,7 +17,6 @@ import {
 import { ErrorOrLoadingPage } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
 import { usePage } from '../../contexts/PageContext'
 import { recordJSException } from '@mc-review/otel'
-import { SubmissionSuccessBanner } from '../../components/Banner'
 
 /**
  * We only pull a subset of data out of the submission and revisions for display in Dashboard
@@ -30,7 +25,6 @@ import { SubmissionSuccessBanner } from '../../components/Banner'
 const DASHBOARD_ATTRIBUTE = 'state-dashboard-page'
 export const StateDashboard = (): React.ReactElement => {
     const { loggedInUser } = useAuth()
-    const location = useLocation()
     const { updateActiveMainContent } = usePage()
     const ldClient = useLDClient()
     const useStoredContractActionDates = ldClient?.variation(
@@ -142,16 +136,6 @@ export const StateDashboard = (): React.ReactElement => {
             }
         })
 
-    const justSubmittedSubmissionName = new URLSearchParams(
-        location.search
-    ).get('justSubmitted')
-
-    const submissionId = new URLSearchParams(location.search).get('id')
-
-    const contractType = new URLSearchParams(location.search).get(
-        'contractType'
-    ) as ContractSubmissionType | null
-
     return (
         <div className={styles.stateDashboard}>
             <div
@@ -162,14 +146,6 @@ export const StateDashboard = (): React.ReactElement => {
                 <GridContainer className={styles.container}>
                     {programs.length ? (
                         <section className={styles.panel}>
-                            {justSubmittedSubmissionName && (
-                                <SubmissionSuccessBanner
-                                    submissionName={justSubmittedSubmissionName}
-                                    submissionId={submissionId || undefined}
-                                    contractType={contractType || undefined}
-                                />
-                            )}
-
                             <div className={styles.panelHeader}>
                                 <h1>Dashboard</h1>
                                 <div>
