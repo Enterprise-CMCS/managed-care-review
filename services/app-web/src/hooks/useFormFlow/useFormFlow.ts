@@ -7,11 +7,8 @@ import {
     type RouteT,
 } from '@mc-review/constants'
 import { recordJSException } from '@mc-review/otel'
-import type {
-    ContractFormData,
-    ContractSubmissionType,
-} from '../../gen/gqlClient'
 import { FORM_FLOWS, getFormFlow, type FormFlow } from './FormFlow'
+import { ContractFormData, ContractSubmissionType } from '../../gen/gqlClient'
 import { getSubmissionPath } from '../../routeHelpers'
 import { useRouteParams } from '../useRouteParams'
 
@@ -24,8 +21,10 @@ type UseFormFlowOptions = {
     contractSubmissionType?: ContractSubmissionType
 }
 
-type UseFormFlow = FormFlow & {
+type UseFormFlow = {
     contractSubmissionType?: ContractSubmissionType
+    previous?: RouteT
+    next?: RouteT
     // Ready to pass to navigate(); undefined when there is no such page or no submission id yet
     previousPath?: string
     nextPath?: string
@@ -51,7 +50,7 @@ const submissionTypeFromParam = (
  *
  *   const { previous, next } = useFormFlow('SUBMISSIONS_CONTACTS')
  *
- * Flows are defined once per submission type in FORM_FLOWS (hooks/FormFlow.ts).
+ * Flows are defined once per submission type in FORM_FLOWS (./FormFlow.ts).
  */
 const useFormFlow = (
     currentPage: RouteT,
@@ -63,41 +62,37 @@ const useFormFlow = (
     const { id, contractSubmissionType: submissionTypeParam } = useRouteParams()
     const ldClient = useLDClient()
 
-    const hideSupportingDocs: boolean = ldClient?.variation(
-        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
-        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+    const hideSupportingDocs = Boolean(
+        ldClient?.variation(
+            featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
+            featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
+        )
     )
-    const showProcurementAttestation: boolean = ldClient?.variation(
-        featureFlags.PROCUREMENT_ATTESTATION.flag,
-        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
+    const showProcurementAttestation = Boolean(
+        ldClient?.variation(
+            featureFlags.PROCUREMENT_ATTESTATION.flag,
+            featureFlags.PROCUREMENT_ATTESTATION.defaultValue
+        )
     )
 
     const contractSubmissionType =
         submissionTypeOverride ?? submissionTypeFromParam(submissionTypeParam)
 
     return useMemo(() => {
-        if (!contractSubmissionType) {
-            // Routes outside a submission form (e.g. standalone rate edit) have no flow
-            return {
-                formPages: [],
-                currentPage,
-                stepIndicatorProps: {
-                    formPages: [],
-                    currentFormPage: currentPage,
-                },
-            }
-        }
-
-        const flow = getFormFlow(contractSubmissionType, currentPage, {
-            formData,
-            hideSupportingDocs: Boolean(hideSupportingDocs),
-            showProcurementAttestation: Boolean(showProcurementAttestation),
-        })
+        // Routes outside a submission form (e.g. standalone rate edit) have no flow
+        const flow: FormFlow = contractSubmissionType
+            ? getFormFlow(contractSubmissionType, currentPage, {
+                  formData,
+                  hideSupportingDocs,
+                  showProcurementAttestation,
+              })
+            : { formPages: [] }
 
         // A page asking for a flow it isn't part of means FORM_FLOWS is out of date.
         // Skip while a conditional flow is still waiting on form data.
         const canCheck =
-            formData || !FORM_FLOWS[contractSubmissionType].isPageActive
+            contractSubmissionType &&
+            (formData || !FORM_FLOWS[contractSubmissionType].isPageActive)
         if (canCheck && !flow.formPages.includes(currentPage)) {
             recordJSException(
                 `useFormFlow: ${currentPage} is not an active page in the ${contractSubmissionType} form flow`
@@ -105,18 +100,19 @@ const useFormFlow = (
         }
 
         const toPath = (route?: RouteT) =>
-            route && id
+            route && id && contractSubmissionType
                 ? getSubmissionPath(route, contractSubmissionType, id)
                 : undefined
 
         return {
-            ...flow,
             contractSubmissionType,
+            previous: flow.previous,
+            next: flow.next,
             previousPath: toPath(flow.previous),
             nextPath: toPath(flow.next),
             stepIndicatorProps: {
                 formPages: flow.formPages,
-                currentFormPage: flow.currentPage,
+                currentFormPage: currentPage,
                 customPageTitles: flow.customPageTitles,
             },
         }

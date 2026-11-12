@@ -5,11 +5,11 @@ import {
     type RouteT,
     type RouteTWithUnknown,
 } from '@mc-review/constants'
-import { activeFormPages } from '../../pages/StateSubmission/submissionUtils'
 import type {
     ContractFormData,
     ContractSubmissionType,
 } from '../../gen/gqlClient'
+import { activeFormPages } from '../../pages/StateSubmission'
 
 /**
  * Everything a form flow may need to decide which of its pages are shown.
@@ -57,7 +57,8 @@ const isHealthPlanPageActive = (
  * The single source of truth for each submission type's form flow.
  *
  * Keyed by the GraphQL ContractSubmissionType enum, so adding a new submission
- * type fails type checking until its flow is defined here.
+ * type fails type checking until its flow is defined here. Pages then get their
+ * step list, previous and next pages from useFormFlow instead of hard-coding them.
  */
 const FORM_FLOWS: Record<ContractSubmissionType, FormFlowDefinition> = {
     HEALTH_PLAN: {
@@ -88,14 +89,10 @@ const getActiveFormPages = (
 type FormFlow = {
     formPages: RouteTWithUnknown[]
     customPageTitles?: CustomPageTitles
-    currentPage: RouteT
-    // Undefined on the first and last pages, or when currentPage is not in the flow
+    // Undefined on the first and last pages, or when the current page is not in the flow
     previous?: RouteT
     next?: RouteT
 }
-
-const toRoute = (page?: RouteTWithUnknown): RouteT | undefined =>
-    page && page !== 'UNKNOWN_ROUTE' ? page : undefined
 
 /**
  * Works out the step list and the pages before and after the current page,
@@ -109,12 +106,18 @@ const getFormFlow = (
     const formPages = getActiveFormPages(contractSubmissionType, context)
     const index = formPages.indexOf(currentPage)
 
+    // The page `offset` steps from the current one, if there is one
+    const pageAt = (offset: number): RouteT | undefined => {
+        if (index === -1) return undefined
+        const page = formPages[index + offset]
+        return page && page !== 'UNKNOWN_ROUTE' ? page : undefined
+    }
+
     return {
         formPages,
         customPageTitles: FORM_FLOWS[contractSubmissionType].customPageTitles,
-        currentPage,
-        previous: index === -1 ? undefined : toRoute(formPages[index - 1]),
-        next: index === -1 ? undefined : toRoute(formPages[index + 1]),
+        previous: pageAt(-1),
+        next: pageAt(1),
     }
 }
 
