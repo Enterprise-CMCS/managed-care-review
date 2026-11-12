@@ -4,9 +4,14 @@ GraphQL provides upload/download URLs and malware-scan status. The browser sends
 file bytes directly to S3 using those presigned URLs; it does not need Cognito
 identity-pool S3 credentials for the transfers.
 
-The normal flow is: **request upload URL → PUT file → wait for scan → request
-download URL → GET file**. GraphQL controls access to these operations, while S3
-validates the signed requests and enforces the clean-scan download policy.
+The upload and download flows are separate:
+
+- **Upload:** request an upload URL → PUT the file to S3 → wait for the scan result.
+- **Download:** request a download URL → GET the file from S3. This is only needed
+  when retrieving a file, not as part of completing an upload.
+
+GraphQL controls access to these operations, while S3 validates the signed
+requests and enforces the clean-scan download policy.
 
 ## API contracts
 
@@ -82,7 +87,8 @@ These tests do not verify deployed permissions, CORS or GuardDuty.
 
 `services/cypress/integration/smokeTest/apiStorage.spec.ts` tests those deployed
 connections using human Cognito test auth and the review CI environment settings.
-It checks both buckets, attachment headers, clean-file SHA-256 equality, and
+It deliberately combines upload and download into a test round trip to compare
+clean-file SHA-256 hashes. It also checks both buckets, attachment headers, and
 EICAR detection followed by an actual denied GET. S3 transfers use the application
 window's fetch so browser CORS rules apply. It does not test the React upload UI
 or per-document authorization.
