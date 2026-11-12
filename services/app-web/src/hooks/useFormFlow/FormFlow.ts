@@ -9,7 +9,7 @@ import type {
     ContractFormData,
     ContractSubmissionType,
 } from '../../gen/gqlClient'
-import { activeFormPages } from '../../pages/StateSubmission'
+import { activeFormPages } from '../../pages/StateSubmission/submissionUtils'
 
 /**
  * Everything a form flow may need to decide which of its pages are shown.
