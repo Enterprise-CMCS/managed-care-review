@@ -22,7 +22,8 @@ export function newDeployedS3Client(
     region: string
 ): S3ClientT {
     const s3Client = new S3Client({ region })
-    // Only presigned PUTs have unknown bytes. Preserve SDK checksums on real uploads.
+    // Presigned PUTs have no Body yet; do not bind them to an empty-body checksum.
+    // Keep SDK checksum defaults for actual uploads on the separate s3Client.
     const uploadSigner = new S3Client({
         region,
         requestChecksumCalculation: 'WHEN_REQUIRED',
@@ -104,6 +105,7 @@ export function newDeployedS3Client(
             const fullKey = key.startsWith('allusers/')
                 ? key
                 : `allusers/${key}`
+            // Propagate lookup failures; a missing object is not a pending scan.
             const result = await withS3Span(
                 {
                     operation: 'GetObjectTagging',
@@ -121,6 +123,7 @@ export function newDeployedS3Client(
             const status = result.TagSet?.find(
                 (tag) => tag.Key === 'GuardDutyMalwareScanStatus'
             )?.Value
+            // Only the explicit clean verdict is safe; missing tags are not clean.
             if (status === undefined) return 'PENDING'
             if (status === 'NO_THREATS_FOUND') return 'CLEAN'
             if (status === 'THREATS_FOUND') return 'INFECTED'

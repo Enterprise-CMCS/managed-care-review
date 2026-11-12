@@ -13,8 +13,8 @@ import {
     type StorageSmokeStep,
 } from '../../utils/storageSmokeDiagnostics'
 
-// Existing human Cognito auth: no OIDC registration or browser storage flag.
-// S3 fetch runs on the AUT origin, not cy.request or the Cypress runner origin.
+// Exercise the API-to-S3 browser contract, independently of the React upload UI.
+// Uses existing human auth; file transfers are authorized by presigned URLs.
 describe('API storage transport', () => {
     const mode = Cypress.env('AUTH_MODE')
     const buckets: UploadBucketName[] = [
@@ -46,6 +46,7 @@ describe('API storage transport', () => {
     beforeEach(() => {
         cy.visit('/', {
             onBeforeLoad(win) {
+                // Use the app window's fetch so S3 requests exercise browser CORS.
                 browserFetch = win.fetch.bind(win)
                 browserCrypto = win.crypto
             },
@@ -62,6 +63,7 @@ describe('API storage transport', () => {
         key: string,
         bucketName: UploadBucketName
     ) {
+        // Scanning is asynchronous; bound polling rather than waiting indefinitely.
         const deadline = Date.now() + 180_000
         while (Date.now() < deadline) {
             const { data } = await client.query({
@@ -103,6 +105,7 @@ describe('API storage transport', () => {
                 stateUser(),
                 async (client) => {
                     try {
+                        // EICAR is a harmless antivirus test signature; clean cases use a PDF.
                         advance('fixture')
                         const fixture =
                             fixtures[
@@ -119,6 +122,7 @@ describe('API storage transport', () => {
                         if (!user.data?.fetchCurrentUser)
                             throw new Error('No authenticated user')
                         const fileName = `storage smoke ${Date.now()}.pdf`
+                        // Request a signed PUT, optionally including attachment metadata.
                         advance('generate-upload')
                         const { data } = await client.mutate({
                             mutation: GenerateUploadUrlDocument,
@@ -146,6 +150,7 @@ describe('API storage transport', () => {
                         if (attachment)
                             headers['Content-Disposition'] =
                                 `attachment; filename=${encodeURIComponent(fileName)}`
+                        // Upload directly to S3, without creating a submission/document record.
                         advance('put')
                         const put = await browserFetch(upload.uploadURL, {
                             method: 'PUT',
@@ -175,7 +180,7 @@ describe('API storage transport', () => {
                         })
                         const url = download.data?.fetchS3DownloadURL
                         if (!url) throw new Error('No download URL')
-                        // Signing alone grants no access: S3 must still reject infected GETs.
+                        // A signed URL must not bypass S3's deny policy for infected objects.
                         advance('get')
                         const get = await browserFetch(url, {
                             mode: 'cors',
@@ -191,6 +196,7 @@ describe('API storage transport', () => {
                         } else {
                             if (!get.ok)
                                 throw new Error('Clean download denied')
+                            // Success status alone is insufficient: verify the bytes match.
                             advance('checksum')
                             expect(
                                 await digest(await get.arrayBuffer()),
@@ -198,7 +204,7 @@ describe('API storage transport', () => {
                             ).to.equal(await digest(bytes.buffer))
                         }
                     } catch (error) {
-                        // The shared Apollo wrapper flattens errors, so classify first.
+                        // Classify before Apollo flattens errors, without exposing URLs/tokens.
                         failure = storageSmokeFailure(
                             bucketName,
                             infected,
@@ -211,6 +217,7 @@ describe('API storage transport', () => {
                 }
             )
         } catch (error) {
+            // Sign-in can fail before the callback; preserve its safe diagnostics too.
             throw (
                 failure ??
                 storageSmokeFailure(
@@ -233,7 +240,7 @@ describe('API storage transport', () => {
                 'x-amz-security-token',
                 'x-amz-content-sha256',
             ]
-            // Inspect the real OPTIONS policy, not a cy.intercept CORS bypass.
+            // Inspect API preflight headers; S3 transfers still use browser fetch.
             cy.request({
                 method: 'OPTIONS',
                 url: `${Cypress.env('API_URL').replace(/\/$/, '')}/graphql`,
@@ -261,6 +268,7 @@ describe('API storage transport', () => {
         })
     }
 
+    // Cover both bucket policies and both upload-header contracts.
     for (const bucket of buckets) {
         for (const attachment of [false, true]) {
             it(`uploads and downloads clean bytes in ${bucket} (attachment: ${attachment})`, () => {
