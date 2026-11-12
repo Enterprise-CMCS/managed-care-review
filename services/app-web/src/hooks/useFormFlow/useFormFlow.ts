@@ -7,14 +7,13 @@ import {
     type RouteT,
 } from '@mc-review/constants'
 import { recordJSException } from '@mc-review/otel'
-import type { ContractFormData, ContractSubmissionType } from '../gen/gqlClient'
-import {
-    FORM_FLOWS,
-    getFormFlow,
-    type FormFlow,
-} from '../pages/StateSubmission/FormFlow'
-import { getSubmissionPath } from '../routeHelpers'
-import { useRouteParams } from './useRouteParams'
+import type {
+    ContractFormData,
+    ContractSubmissionType,
+} from '../../gen/gqlClient'
+import { FORM_FLOWS, getFormFlow, type FormFlow } from './FormFlow'
+import { getSubmissionPath } from '../../routeHelpers'
+import { useRouteParams } from '../useRouteParams'
 
 type UseFormFlowOptions = {
     // Needed by flows with pages that depend on the draft (health plan).
@@ -52,7 +51,7 @@ const submissionTypeFromParam = (
  *
  *   const { previous, next } = useFormFlow('SUBMISSIONS_CONTACTS')
  *
- * Flows are defined once per submission type in FORM_FLOWS (pages/StateSubmission/formFlow.ts).
+ * Flows are defined once per submission type in FORM_FLOWS (hooks/FormFlow.ts).
  */
 const useFormFlow = (
     currentPage: RouteT,

@@ -5,7 +5,7 @@ import {
     type RouteT,
     type RouteTWithUnknown,
 } from '@mc-review/constants'
-import { activeFormPages } from './submissionUtils'
+import { activeFormPages } from '../../pages/StateSubmission/submissionUtils'
 import type {
     ContractFormData,
     ContractSubmissionType,
@@ -57,8 +57,7 @@ const isHealthPlanPageActive = (
  * The single source of truth for each submission type's form flow.
  *
  * Keyed by the GraphQL ContractSubmissionType enum, so adding a new submission
- * type fails type checking until its flow is defined here. Pages then get their
- * step list, previous and next pages from useFormFlow instead of hard-coding them.
+ * type fails type checking until its flow is defined here.
  */
 const FORM_FLOWS: Record<ContractSubmissionType, FormFlowDefinition> = {
     HEALTH_PLAN: {
