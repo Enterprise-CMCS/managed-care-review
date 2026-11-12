@@ -5,15 +5,18 @@ import { setResolverDetails, withResolverSpan } from '../attributeHelper'
 import { createForbiddenError, createUserInputError } from '../errorUtils'
 
 /**
- * Raw-key scan/download access mirrors Cognito's shared allusers/ scope, not
- * document ownership or state assignments. It works before a document row exists.
- * OAuth upload authorization is separate; these queries exclude OAuth clients.
- * ZIPs use package-authorized downloads. Never expose the Lambda role's broader
- * private/path access through these queries.
+ * Accept a filename or allusers/<filename>, even before a document record exists.
+ * All authenticated human roles share this access; it does not check document
+ * ownership or state assignments. OAuth upload permissions are handled separately
+ * and do not grant access to these scan and download queries.
+ *
+ * Lambda can access more S3 paths than callers should. Reject private and nested
+ * paths here; ZIP downloads must go through an authorized package fetch.
  */
 function sharedKey(key: string): string {
     const fileKey = key.startsWith('allusers/') ? key.slice(9) : key
-    // S3 limits the full UTF-8 key, including the prefix, to 1024 bytes.
+    // S3 counts UTF-8 bytes, not JavaScript characters. Include allusers/ in the
+    // 1024-byte limit because the S3 adapter adds that prefix to bare filenames.
     if (
         fileKey.length > 0 &&
         Buffer.byteLength(`allusers/${fileKey}`, 'utf8') <= 1024 &&
@@ -63,7 +66,8 @@ export function fetchS3DownloadURLResolver(
                     )
                 }
                 const key = sharedKey(input.key)
-                // Signing does not bypass S3's clean-scan GetObject deny policy.
+                // A URL can be issued before scanning finishes. S3 checks the scan tag
+                // when the file is downloaded and denies access unless it is clean.
                 return s3Client.getURL(key, input.bucketName, 3600)
             }
         )

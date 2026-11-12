@@ -20,7 +20,8 @@ describe('generateUploadURLResolver', () => {
         stateAssignments: [],
     }
     const mockS3 = testS3Client()
-    // This endpoint does not use the store; exercise its real schema without a database.
+    // Construct Apollo directly to check GraphQL inputs and responses. This
+    // resolver does not use the database, so no store setup or user seeding is needed.
     const server = new ApolloServer<Context>({
         typeDefs,
         resolvers: {

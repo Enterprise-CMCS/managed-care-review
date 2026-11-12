@@ -13,8 +13,9 @@ import {
     type StorageSmokeStep,
 } from '../../utils/storageSmokeDiagnostics'
 
-// Exercise the API-to-S3 browser contract, independently of the React upload UI.
-// Uses existing human auth; file transfers are authorized by presigned URLs.
+// Ask GraphQL for upload and download URLs, then transfer real bytes from a browser.
+// This checks signing, cross-origin access and malware handling without driving the
+// React upload form. GraphQL uses human authentication; S3 uses the signed URLs.
 describe('API storage transport', () => {
     const mode = Cypress.env('AUTH_MODE')
     const buckets: UploadBucketName[] = [
@@ -46,7 +47,8 @@ describe('API storage transport', () => {
     beforeEach(() => {
         cy.visit('/', {
             onBeforeLoad(win) {
-                // Use the app window's fetch so S3 requests exercise browser CORS.
+                // cy.request bypasses the browser's cross-origin (CORS) checks. Use
+                // the app window's fetch so uploads fail if a real browser would fail.
                 browserFetch = win.fetch.bind(win)
                 browserCrypto = win.crypto
             },
@@ -63,7 +65,8 @@ describe('API storage transport', () => {
         key: string,
         bucketName: UploadBucketName
     ) {
-        // Scanning is asynchronous; bound polling rather than waiting indefinitely.
+        // A successful upload does not mean the malware scan has finished. Poll
+        // pending results until this deadline so a stalled scan fails instead of hanging.
         const deadline = Date.now() + 180_000
         while (Date.now() < deadline) {
             const { data } = await client.query({
@@ -122,7 +125,8 @@ describe('API storage transport', () => {
                         if (!user.data?.fetchCurrentUser)
                             throw new Error('No authenticated user')
                         const fileName = `storage smoke ${Date.now()}.pdf`
-                        // Request a signed PUT, optionally including attachment metadata.
+                        // Ask the API to authorize a PUT. The attachment case also
+                        // signs a filename header that the upload must send unchanged.
                         advance('generate-upload')
                         const { data } = await client.mutate({
                             mutation: GenerateUploadUrlDocument,
@@ -150,7 +154,7 @@ describe('API storage transport', () => {
                         if (attachment)
                             headers['Content-Disposition'] =
                                 `attachment; filename=${encodeURIComponent(fileName)}`
-                        // Upload directly to S3, without creating a submission/document record.
+                        // Upload directly to S3 without creating a submission or document record.
                         advance('put')
                         const put = await browserFetch(upload.uploadURL, {
                             method: 'PUT',
@@ -180,7 +184,9 @@ describe('API storage transport', () => {
                         })
                         const url = download.data?.fetchS3DownloadURL
                         if (!url) throw new Error('No download URL')
-                        // A signed URL must not bypass S3's deny policy for infected objects.
+                        // The API can issue a URL for either verdict. S3 must still
+                        // reject the infected file: its bucket policy, not URL signing,
+                        // is what enforces the requirement for a clean scan.
                         advance('get')
                         const get = await browserFetch(url, {
                             mode: 'cors',
@@ -196,7 +202,8 @@ describe('API storage transport', () => {
                         } else {
                             if (!get.ok)
                                 throw new Error('Clean download denied')
-                            // Success status alone is insufficient: verify the bytes match.
+                            // A successful HTTP response could contain the wrong file.
+                            // Compare SHA-256 hashes to verify the original bytes came back.
                             advance('checksum')
                             expect(
                                 await digest(await get.arrayBuffer()),
@@ -204,7 +211,9 @@ describe('API storage transport', () => {
                             ).to.equal(await digest(bytes.buffer))
                         }
                     } catch (error) {
-                        // Classify before Apollo flattens errors, without exposing URLs/tokens.
+                        // The shared helper rethrows callback errors as plain Error
+                        // objects, losing GraphQL codes. Capture safe details here first;
+                        // raw messages may contain signed URLs or credentials.
                         failure = storageSmokeFailure(
                             bucketName,
                             infected,
@@ -217,7 +226,8 @@ describe('API storage transport', () => {
                 }
             )
         } catch (error) {
-            // Sign-in can fail before the callback; preserve its safe diagnostics too.
+            // Authentication can fail before the callback starts. Handle those errors
+            // here, but keep the already-sanitized failure for errors from the callback.
             throw (
                 failure ??
                 storageSmokeFailure(
@@ -240,7 +250,9 @@ describe('API storage transport', () => {
                 'x-amz-security-token',
                 'x-amz-content-sha256',
             ]
-            // Inspect API preflight headers; S3 transfers still use browser fetch.
+            // Inspect the headers the API returns for the browser's permission check.
+            // cy.request does not itself prove browser CORS works; the file transfers
+            // below use browser fetch so those requests are subject to CORS rules.
             cy.request({
                 method: 'OPTIONS',
                 url: `${Cypress.env('API_URL').replace(/\/$/, '')}/graphql`,
@@ -268,7 +280,8 @@ describe('API storage transport', () => {
         })
     }
 
-    // Cover both bucket policies and both upload-header contracts.
+    // Run clean round trips in both buckets. Check ordinary uploads and uploads
+    // with a signed filename header, since the required PUT headers differ.
     for (const bucket of buckets) {
         for (const attachment of [false, true]) {
             it(`uploads and downloads clean bytes in ${bucket} (attachment: ${attachment})`, () => {
@@ -277,7 +290,8 @@ describe('API storage transport', () => {
                 )
             })
         }
-        // LocalStack always reports CLEAN; deployed review CI must run these cases.
+        // The local adapter always reports CLEAN and cannot demonstrate malware
+        // protection. Run EICAR cases against AWS to check scanning and S3's GET denial.
         if (mode === 'AWS_COGNITO') {
             it(`denies an infected object download in ${bucket}`, () => {
                 cy.then({ timeout: 240_000 }, () => roundTrip(bucket, true))

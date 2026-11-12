@@ -36,7 +36,11 @@ const graphQLCodes = new Set([
     'NOT_FOUND',
 ])
 
-/** Preserve useful failure location without copying bearer URLs or raw SDK errors. */
+/**
+ * SDK errors can contain credentials or presigned URLs that grant file access to
+ * anyone holding them. Report the failed step and known error names and status codes,
+ * rather than copying the original error into CI logs.
+ */
 export function storageSmokeFailure(
     bucket: UploadBucketName,
     infected: boolean,
@@ -76,7 +80,7 @@ export function storageSmokeFailure(
     const graphql = codes.length
         ? `; GraphQL ${[...new Set(codes)].join(',')}`
         : ''
-    // No raw message, stack or cause: they can contain request URLs and credentials.
+    // Build a new error so the original message, stack and cause cannot leak secrets.
     return new Error(
         `API storage ${infected ? 'malware' : 'clean'} smoke failed for ${bucket} at ${step} (${kind}${http}${graphql}); inspect approved server-side diagnostics`
     )

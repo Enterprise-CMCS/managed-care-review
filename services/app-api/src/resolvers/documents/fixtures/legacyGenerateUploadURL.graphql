@@ -1,5 +1,6 @@
-# Frozen compatibility operation: keep contentType out of this selection.
-# Do not replace this fixture with the current client upload document.
+# Model a client that does not request contentType in the response.
+# Keep this separate from the current upload operation so changes to that operation
+# cannot silently change what this older-client compatibility test covers.
 mutation LegacyGenerateUploadURL($input: GenerateUploadURLInput!) {
     generateUploadURL(input: $input) {
         uploadURL

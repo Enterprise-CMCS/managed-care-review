@@ -25,7 +25,9 @@ const context: Context = {
     },
 }
 
-// Exercise the real schema AND registration without a database or network calls.
+// Use the real schema and configureResolvers so missing query registration or
+// invalid GraphQL inputs fail the tests. These operations do not use the database;
+// the other resolver dependencies are placeholders that must remain unused.
 const s3 = testS3Client()
 const server = new ApolloServer<Context>({
     typeDefs,
@@ -95,7 +97,9 @@ describe('shared browser S3 queries', () => {
         }
     )
 
-    // Role compatibility only: shared-key access does not check document/state ownership.
+    // Every authenticated human role can access the same shared object key.
+    // This checks that roles remain supported, not that users are prevented from
+    // downloading documents belonging to another state or package.
     const identity = {
         id: 'human-user',
         email: 'human@example.com',
@@ -178,7 +182,8 @@ describe('shared browser S3 queries', () => {
         expect(sign).not.toHaveBeenCalled()
     })
 
-    // Upload-write scopes do not grant raw-key scan/download access.
+    // These permissions can authorize uploads elsewhere. They must not also
+    // unlock these separate queries for scanning or downloading arbitrary keys.
     it.each([
         { grants: [], scopes: [], isDelegatedUser: false },
         { grants: ['client_credentials'], scopes: [], isDelegatedUser: false },

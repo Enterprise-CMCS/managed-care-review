@@ -8,7 +8,10 @@ export type S3ClientT = {
         bucket: BucketShortName
     ) => Promise<string | S3Error>
     scanFile: (key: string, bucket: BucketShortName) => Promise<void | S3Error>
-    /** Deployed status comes from GuardDuty tags; local mode simulates CLEAN. */
+    /**
+     * Read GuardDuty's verdict in AWS. The local adapter returns CLEAN without
+     * scanning, so local results cannot be used to verify malware protection.
+     */
     getScanStatus: (
         key: string,
         bucket: BucketShortName
