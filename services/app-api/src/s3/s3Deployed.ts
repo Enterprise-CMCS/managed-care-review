@@ -2,6 +2,7 @@ import {
     S3Client,
     GetObjectCommand,
     PutObjectCommand,
+    GetObjectTaggingCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
@@ -21,6 +22,14 @@ export function newDeployedS3Client(
     region: string
 ): S3ClientT {
     const s3Client = new S3Client({ region })
+    // The browser sends file bytes later, but the SDK can checksum an absent Body
+    // as an empty file. S3 would reject the later upload because its bytes differ.
+    // Use a separate signer to avoid that checksum without disabling checksums
+    // for uploads whose bytes are already available to the normal s3Client.
+    const uploadSigner = new S3Client({
+        region,
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+    })
 
     return {
         uploadFile: async (
@@ -81,14 +90,48 @@ export function newDeployedS3Client(
             key: string,
             bucket: BucketShortName,
             contentType: string,
-            expiresIn: number
+            expiresIn: number,
+            fileName?: string
         ): Promise<string> => {
             const command = new PutObjectCommand({
                 Bucket: bucketConfig[bucket],
                 Key: `allusers/${key}`,
                 ContentType: contentType,
+                ...(fileName && {
+                    ContentDisposition: `attachment; filename=${encodeURIComponent(fileName)}`,
+                }),
             })
-            return getSignedUrl(s3Client, command, { expiresIn })
+            return getSignedUrl(uploadSigner, command, { expiresIn })
+        },
+        getScanStatus: async (key, bucket) => {
+            const fullKey = key.startsWith('allusers/')
+                ? key
+                : `allusers/${key}`
+            // Let S3 lookup errors reach the caller. A missing object or denied tag
+            // read is a failed request, not evidence that scanning is still pending.
+            const result = await withS3Span(
+                {
+                    operation: 'GetObjectTagging',
+                    bucket: bucketConfig[bucket],
+                    key: fullKey,
+                },
+                () =>
+                    s3Client.send(
+                        new GetObjectTaggingCommand({
+                            Bucket: bucketConfig[bucket],
+                            Key: fullKey,
+                        })
+                    )
+            )
+            const status = result.TagSet?.find(
+                (tag) => tag.Key === 'GuardDutyMalwareScanStatus'
+            )?.Value
+            // No tag means GuardDuty has not reported a result. Only NO_THREATS_FOUND
+            // means clean; failed or unfamiliar verdicts must not be treated as safe.
+            if (status === undefined) return 'PENDING'
+            if (status === 'NO_THREATS_FOUND') return 'CLEAN'
+            if (status === 'THREATS_FOUND') return 'INFECTED'
+            return 'ERROR'
         },
         scanFile: async (
             s3Key: string,
