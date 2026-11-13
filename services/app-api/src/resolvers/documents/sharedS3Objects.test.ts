@@ -12,17 +12,19 @@ import type { DocumentZipService } from '../../zip/generateZip'
 import { configureResolvers } from '../configureResolvers'
 import { testS3Client } from '../../testHelpers/s3Helpers'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
+import { executeGraphQLOperation } from '../../testHelpers/apolloV4ResponseHelper'
+import {
+    testAdminUser,
+    testBusinessOwnerUser,
+    testCMSApproverUser,
+    testCMSUser,
+    testHelpdeskUser,
+    testReadOnlyUser,
+    testStateUser,
+} from '../../testHelpers/userFactories'
 
 const context: Context = {
-    user: {
-        id: 'cms-user',
-        role: 'CMS_USER',
-        email: 'cms@example.com',
-        givenName: 'CMS',
-        familyName: 'User',
-        stateAssignments: [],
-    },
+    user: testCMSUser(),
 }
 
 // Use the real schema and configureResolvers so missing query registration or
@@ -42,20 +44,19 @@ const server = new ApolloServer<Context>({
 })
 const operations = [FetchUploadScanStatusDocument, FetchS3DownloadUrlDocument]
 const input = { key: 'allusers/upload.pdf', bucketName: 'QUESTION_ANSWER_DOCS' }
-const execute = async (
+const execute = (
     query: DocumentNode,
     objectInput: unknown = input,
     requestContext = context
 ) =>
-    extractGraphQLResponse<{
+    executeGraphQLOperation<{
         fetchUploadScanStatus?: string
         fetchS3DownloadURL?: string
-    }>(
-        await server.executeOperation(
-            { query, variables: { input: objectInput } },
-            { contextValue: requestContext }
-        )
-    )
+    }>(server, {
+        query,
+        variables: { input: objectInput },
+        contextValue: requestContext,
+    })
 
 beforeEach(() => vi.restoreAllMocks())
 afterAll(() => server.stop())
@@ -100,20 +101,14 @@ describe('shared browser S3 queries', () => {
     // Every authenticated human role can access the same shared object key.
     // This checks that roles remain supported, not that users are prevented from
     // downloading documents belonging to another state or package.
-    const identity = {
-        id: 'human-user',
-        email: 'human@example.com',
-        givenName: 'Human',
-        familyName: 'User',
-    }
     const humanUsers: Context['user'][] = [
-        { ...identity, role: 'STATE_USER', stateCode: 'VA' },
-        { ...identity, role: 'CMS_USER', stateAssignments: [] },
-        { ...identity, role: 'CMS_APPROVER_USER', stateAssignments: [] },
-        { ...identity, role: 'ADMIN_USER' },
-        { ...identity, role: 'HELPDESK_USER' },
-        { ...identity, role: 'BUSINESSOWNER_USER' },
-        { ...identity, role: 'READONLY_USER' },
+        testStateUser({ stateCode: 'VA' }),
+        testCMSUser(),
+        testCMSApproverUser(),
+        testAdminUser(),
+        testHelpdeskUser(),
+        testBusinessOwnerUser(),
+        testReadOnlyUser(),
     ]
     it.each(humanUsers)(
         'preserves authenticated $role shared-object access',
