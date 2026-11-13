@@ -610,6 +610,100 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             )
         })
 
+        describe.each([
+            'ebLinkedBaseContractID',
+            'ebLinkedPreviousAmendmentID',
+        ] as const)('%s validation', (field) => {
+            it.each(['', '   ', '00000000-0000-4000-8000-000000000000'])(
+                'rejects an empty or nonexistent linked ID (%j) without updating the draft',
+                async (linkedID) => {
+                    const server = await constructTestPostgresServer()
+                    const draft = await createAndUpdateTestEBContract(server)
+                    const result = await executeGraphQLOperation(server, {
+                        query: UpdateContractDraftRevisionDocument,
+                        variables: {
+                            input: {
+                                contractID: draft.id,
+                                lastSeenUpdatedAt:
+                                    draft.draftRevision!.updatedAt,
+                                formData:
+                                    mockGqlContractDraftRevisionFormDataInput(
+                                        draft.stateCode,
+                                        {
+                                            contractType: 'AMENDMENT',
+                                            submissionDescription:
+                                                'Must not be saved',
+                                            [field]: linkedID,
+                                        }
+                                    ),
+                            },
+                        },
+                    })
+
+                    expect(result.errors).toHaveLength(1)
+                    expect(result.errors?.[0]).toEqual(
+                        expect.objectContaining({
+                            message: `${field} must reference an existing contract`,
+                            extensions: expect.objectContaining({
+                                code: 'BAD_USER_INPUT',
+                                argumentName: field,
+                            }),
+                        })
+                    )
+                    const fetched = await fetchTestContract(server, draft.id)
+                    expect(fetched.draftRevision?.formData).toEqual(
+                        draft.draftRevision?.formData
+                    )
+                    expect(fetched.draftRevision?.updatedAt).toEqual(
+                        draft.draftRevision?.updatedAt
+                    )
+                }
+            )
+            it('returns a server error when the linked-contract lookup fails', async () => {
+                const postgresStore = NewPostgresStore(
+                    await sharedTestPrismaClient()
+                )
+                const failedID = '00000000-0000-4000-8000-000000000001'
+                const updateDraftContract = vi.fn(
+                    postgresStore.updateDraftContract
+                )
+                const server = await constructTestPostgresServer({
+                    store: {
+                        updateDraftContract,
+                        findContractWithHistory: async (id) =>
+                            id === failedID
+                                ? new Error('Database unavailable')
+                                : postgresStore.findContractWithHistory(id),
+                    },
+                })
+                const draft = await createAndUpdateTestEBContract(server)
+                updateDraftContract.mockClear()
+
+                const result = await executeGraphQLOperation(server, {
+                    query: UpdateContractDraftRevisionDocument,
+                    variables: {
+                        input: {
+                            contractID: draft.id,
+                            lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                            formData: mockGqlContractDraftRevisionFormDataInput(
+                                draft.stateCode,
+                                { [field]: failedID }
+                            ),
+                        },
+                    },
+                })
+
+                expect(result.errors).toHaveLength(1)
+                expect(result.errors?.[0].extensions).toEqual(
+                    expect.objectContaining({
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    })
+                )
+                expect(updateDraftContract).not.toHaveBeenCalled()
+            })
+        })
+
         it.each([null, undefined])(
             'clears optional EB fields when updated with %s',
             async (emptyValue) => {
