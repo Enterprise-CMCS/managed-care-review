@@ -5,20 +5,14 @@ import type { GenerateUploadUrlInput } from '../../gen/gqlServer'
 import type { Context } from '../../handlers/apollo_gql'
 import type { Store } from '../../postgres'
 import { testS3Client } from '../../testHelpers/s3Helpers'
-import { extractGraphQLResponse } from '../../testHelpers/apolloV4ResponseHelper'
+import { executeGraphQLOperation } from '../../testHelpers/apolloV4ResponseHelper'
 import { testLDService } from '../../testHelpers/launchDarklyHelpers'
+import { testCMSUser } from '../../testHelpers/userFactories'
 import { generateUploadURLResolver } from './generateUploadURL'
 import LegacyGenerateUploadUrlDocument from './fixtures/legacyGenerateUploadURL.graphql'
 
 describe('generateUploadURLResolver', () => {
-    const user: Context['user'] = {
-        id: 'cms-user',
-        role: 'CMS_USER',
-        email: 'cms@example.com',
-        givenName: 'CMS',
-        familyName: 'User',
-        stateAssignments: [],
-    }
+    const user = testCMSUser()
     const mockS3 = testS3Client()
     // Construct Apollo directly to check GraphQL inputs and responses. This
     // resolver does not use the database, so no store setup or user seeding is needed.
@@ -34,36 +28,28 @@ describe('generateUploadURLResolver', () => {
             },
         },
     })
-    const executeUpload = async (input: GenerateUploadUrlInput) =>
-        extractGraphQLResponse(
-            await server.executeOperation(
-                {
-                    query: GenerateUploadUrlDocument,
-                    variables: { input },
-                },
-                { contextValue: { user } }
-            )
-        )
+    const executeUpload = (input: GenerateUploadUrlInput) =>
+        executeGraphQLOperation(server, {
+            query: GenerateUploadUrlDocument,
+            variables: { input },
+            contextValue: { user },
+        })
     beforeEach(() => vi.restoreAllMocks())
     afterAll(() => server.stop())
 
     it('preserves the legacy operation without attachment input or contentType selection', async () => {
         const signing = vi.spyOn(mockS3, 'getUploadURL')
-        const response = extractGraphQLResponse(
-            await server.executeOperation(
-                {
-                    query: LegacyGenerateUploadUrlDocument,
-                    variables: {
-                        input: {
-                            fileName: 'legacy.pdf',
-                            fileType: 'PDF',
-                            bucketName: 'HEALTH_PLAN_DOCS',
-                        },
-                    },
+        const response = await executeGraphQLOperation(server, {
+            query: LegacyGenerateUploadUrlDocument,
+            variables: {
+                input: {
+                    fileName: 'legacy.pdf',
+                    fileType: 'PDF',
+                    bucketName: 'HEALTH_PLAN_DOCS',
                 },
-                { contextValue: { user } }
-            )
-        )
+            },
+            contextValue: { user },
+        })
         expect(response.errors).toBeUndefined()
         expect(response.data?.generateUploadURL.contentType).toBeUndefined()
         expect(response.data?.generateUploadURL.expiresIn).toBe(300)
