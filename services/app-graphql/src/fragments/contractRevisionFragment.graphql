@@ -94,6 +94,9 @@ fragment contractRevisionFragment on ContractRevision {
         ebPreviousAmendmentInMCReview
         ebAmendmentNumber
         ebStateContractIdentifier
+        ebContractorID
+        ebLinkedBaseContractID
+        ebLinkedPreviousAmendmentID
     }
 
     documentZipPackages {

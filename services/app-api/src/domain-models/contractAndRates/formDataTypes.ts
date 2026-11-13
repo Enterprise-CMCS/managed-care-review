@@ -208,6 +208,9 @@ const genericContractFormDataSchema = z.object({
     ebPreviousAmendmentInMCReview: preprocessNulls(z.boolean().optional()),
     ebAmendmentNumber: preprocessNulls(z.string().optional()),
     ebStateContractIdentifier: preprocessNulls(z.string().optional()),
+    ebContractorID: preprocessNulls(z.string().optional()),
+    ebLinkedBaseContractID: preprocessNulls(z.string().optional()),
+    ebLinkedPreviousAmendmentID: preprocessNulls(z.string().optional()),
 })
 
 // contractFormDataSchema is the normal contractFormData setup for Draft contracts. Most fields are optional and array fields can be empty.
@@ -494,6 +497,9 @@ const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
     ebPreviousAmendmentInMCReview: z.boolean().optional().nullish(),
     ebAmendmentNumber: z.string().optional().nullish(),
     ebStateContractIdentifier: z.string().optional().nullish(),
+    ebContractorID: z.string().optional().nullish(),
+    ebLinkedBaseContractID: z.string().optional().nullish(),
+    ebLinkedPreviousAmendmentID: z.string().optional().nullish(),
 })
 
 type UpdateDraftContractFormDataType = Partial<
