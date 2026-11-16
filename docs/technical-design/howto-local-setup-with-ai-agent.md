@@ -130,20 +130,18 @@ Why the developer should run it, not you:
 
 ### Phase 6: Check that the app works
 
-The services listen on `127.0.0.1`, not `::1`. If you send a request to `localhost`, it can fail because it goes over IPv6, so use `127.0.0.1`:
+Use `127.0.0.1` for the web app and API checks to avoid IPv6 resolution issues with `localhost`. The console binds to the hostname in `LOCAL_DEV_SERVICE_URL`, which defaults to `http://localhost:3031` in `.envrc`, so check it using that URL:
 
-```bash
-curl -s -o /dev/null -w "web %{http_code}\n"     http://127.0.0.1:3000
-curl -s -o /dev/null -w "api %{http_code}\n"     http://127.0.0.1:3030/local/health_check
-curl -s -o /dev/null -w "console %{http_code}\n" http://127.0.0.1:3031
-docker ps --format '{{.Names}} {{.Status}}'   # mcr-postgres, mcr-localstack, mcr-jaeger
-```
+    curl -s -o /dev/null -w "web %{http_code}\n"     http://127.0.0.1:3000
+    curl -s -o /dev/null -w "api %{http_code}\n"     http://127.0.0.1:3030/local/health_check
+    curl -s -o /dev/null -w "console %{http_code}\n" "${LOCAL_DEV_SERVICE_URL:-http://localhost:3031}"
+    docker ps --format '{{.Names}} {{.Status}}'   # mcr-postgres, mcr-localstack, mcr-jaeger
 
 | Service                                        | URL                                      |
 | ---------------------------------------------- | ---------------------------------------- |
 | Web app                                        | http://127.0.0.1:3000                    |
 | API health check                               | http://127.0.0.1:3030/local/health_check |
-| Local dev console (feature flags, email inbox) | http://127.0.0.1:3031                    |
+| Local dev console (feature flags, email inbox) | http://localhost:3031 (or `LOCAL_DEV_SERVICE_URL` if overridden) |
 | Jaeger (traces)                                | http://localhost:16686                   |
 
 ### Phase 7: Known problems
