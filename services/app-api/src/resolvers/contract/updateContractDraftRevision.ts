@@ -242,6 +242,15 @@ export function updateContractDraftRevision(
                             },
                         })
                     }
+                    if (
+                        linkedContract.stateCode !==
+                        contractWithHistory.stateCode
+                    ) {
+                        throw createUserInputError(
+                            `${field} must reference a contract from the same state`,
+                            field
+                        )
+                    }
                 }
 
                 // Update contract draft revision

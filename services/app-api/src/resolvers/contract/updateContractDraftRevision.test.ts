@@ -614,6 +614,67 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             'ebLinkedBaseContractID',
             'ebLinkedPreviousAmendmentID',
         ] as const)('%s validation', (field) => {
+            it('rejects a contract from another state without updating the draft', async () => {
+                const postgresStore = NewPostgresStore(
+                    await sharedTestPrismaClient()
+                )
+                const updateDraftContract = vi.fn(
+                    postgresStore.updateDraftContract
+                )
+                const server = await constructTestPostgresServer({
+                    store: { updateDraftContract },
+                })
+                const draft = await createAndUpdateTestEBContract(server)
+                const otherStateServer = await constructTestPostgresServer({
+                    context: {
+                        user: testStateUser({
+                            stateCode: 'VA',
+                            email: 'va-eb-links@example.com',
+                        }),
+                    },
+                })
+                const target = await createAndUpdateTestEBContract(
+                    otherStateServer,
+                    'VA',
+                    {
+                        contractType:
+                            field === 'ebLinkedBaseContractID'
+                                ? 'BASE'
+                                : 'AMENDMENT',
+                    }
+                )
+                await submitTestContract(otherStateServer, target.id)
+                updateDraftContract.mockClear()
+
+                const result = await executeGraphQLOperation(server, {
+                    query: UpdateContractDraftRevisionDocument,
+                    variables: {
+                        input: {
+                            contractID: draft.id,
+                            lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                            formData: mockGqlContractDraftRevisionFormDataInput(
+                                draft.stateCode,
+                                { [field]: target.id }
+                            ),
+                        },
+                    },
+                })
+
+                expect(result.errors).toHaveLength(1)
+                expect(result.errors?.[0]).toEqual(
+                    expect.objectContaining({
+                        message: `${field} must reference a contract from the same state`,
+                        extensions: expect.objectContaining({
+                            code: 'BAD_USER_INPUT',
+                            argumentName: field,
+                        }),
+                    })
+                )
+                expect(updateDraftContract).not.toHaveBeenCalled()
+                const fetched = await fetchTestContract(server, draft.id)
+                expect(fetched.draftRevision).toEqual(draft.draftRevision)
+            })
+
             it.each(['', '   ', '00000000-0000-4000-8000-000000000000'])(
                 'rejects an empty or nonexistent linked ID (%j) without updating the draft',
                 async (linkedID) => {
