@@ -10,6 +10,7 @@ export {
 export {
     contractFormDataSchema,
     ilosContractFormDataSchema,
+    submittableILOSContractFormDataSchema,
     rateFormDataSchema,
 } from './formDataTypes'
 
@@ -51,6 +52,7 @@ export type { PackageStatusType, UpdateInfoType } from './updateInfoType'
 export type {
     ContractFormDataType,
     ILOSContractFormDataType,
+    ILOSDocumentType,
     ILOSExternalRateType,
     RateFormDataType,
     DocumentType,
@@ -116,4 +118,5 @@ export {
     validateContractDraftRevisionInput,
     validateEQROContractDraftRevisionInput,
     validateILOSContractDraftRevisionInput,
+    parseContractDraftRevisionInput,
 } from './dataValidatorHelpers'

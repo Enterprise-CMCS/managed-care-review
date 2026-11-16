@@ -8,6 +8,7 @@ import type {
     UpdateInfoType,
     ConsolidatedContractStatusType,
     DocumentType,
+    ILOSDocumentType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
 import { packageName } from '@mc-review/submissions'
@@ -606,6 +607,21 @@ const documentToDomainModel = (doc: DocumentWithCommonFields): DocumentType => {
     }
 }
 
+// Same as documentToDomainModel for document tables that store s3BucketName and
+// s3Key as required columns. ILOSDocument is the first; the other document tables
+// move to this once s3URL is dropped, and documentToDomainModel goes away with it.
+const documentWithS3LocationToDomainModel = (
+    doc: Omit<DocumentWithCommonFields, 's3BucketName' | 's3Key'> & {
+        s3BucketName: string
+        s3Key: string
+    }
+): ILOSDocumentType => {
+    return {
+        ...doc,
+        dateAdded: doc.dateAdded ?? undefined,
+    }
+}
+
 // Builds the backward-compatible full `name` for a state/actuary contact.
 // External systems still read `name`, so we construct it from givenName +
 // familyName (first and last name only, no suffix) and fall back to the
@@ -800,8 +816,8 @@ function ilosFormDataToDomainModel(
         isILOSRatesIncluded: contractRevision.isILOSRatesIncluded ?? undefined,
         ilosRateDateStart: contractRevision.ilosRateDateStart ?? undefined,
         ilosRateDateEnd: contractRevision.ilosRateDateEnd ?? undefined,
-        ilosDocuments: contractRevision.ilosDocuments.map((doc) =>
-            documentToDomainModel(doc)
+        ilosDocuments: contractRevision.ilosDocuments.map(
+            documentWithS3LocationToDomainModel
         ),
         ilosExternalRates: contractRevision.ilosExternalRates.map((rate) => ({
             id: rate.id,

@@ -12,6 +12,7 @@ import {
     approveTestContract,
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestILOSContract,
     createAndUpdateTestContractWithRate,
     createTestContract,
     fetchTestContract,
@@ -72,6 +73,32 @@ describe('fetchContract', () => {
             fetchedContract.packageSubmissions[0].contractRevision.formData
                 .procurementAttestation
         ).toBe(true)
+    })
+
+    it('returns ILOS fields and document locations for ILOS submissions', async () => {
+        const stateServer = await constructTestPostgresServer()
+        const contract = await createAndUpdateTestILOSContract(stateServer)
+
+        const fetchedContract = await fetchTestContract(
+            stateServer,
+            contract.id
+        )
+
+        expect(fetchedContract.contractSubmissionType).toBe('ILOS')
+        expect(fetchedContract.draftRevision?.formData).toEqual(
+            expect.objectContaining({
+                isILOSRatesIncluded: true,
+                ilosRateDateStart: '2025-01-01',
+                ilosRateDateEnd: '2025-12-31',
+                ilosDocuments: [
+                    expect.objectContaining({
+                        name: 'ilosReport1.pdf',
+                        s3BucketName: 'bucketname',
+                        s3Key: 'allusers/key',
+                    }),
+                ],
+            })
+        )
     })
 
     it('fetches the draft contract and a new child rate', async () => {

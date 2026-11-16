@@ -30,12 +30,11 @@ import type {
 } from '../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import type {
-    ContractFormDataType,
-    ContractSubmissionType,
-    ContractType,
-} from '../domain-models'
-import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
+import type { ContractSubmissionType, ContractType } from '../domain-models'
+import {
+    mockGqlContractDraftRevisionFormDataInput,
+    mockGqlILOSContractDraftRevisionFormDataInput,
+} from './gqlContractInputMocks'
 import { mockEBContractFormData } from './contractDataMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 import { extractGraphQLResponse } from './apolloV4ResponseHelper'
@@ -345,7 +344,7 @@ const fetchTestContractWithQuestions = async (
 const createTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    formData?: Partial<ContractFormDataType>,
+    formData?: Partial<CreateContractInput>,
     contractSubmissionType?: ContractSubmissionType
 ): Promise<Contract> => {
     const programs = stateCode
@@ -404,6 +403,44 @@ const createAndUpdateTestEBContract = async (
             ...mockEBContractFormData(),
             ...contractFormDataOverrides,
         })
+    )
+}
+
+// Creates an ILOS submission draft with every ILOS field, then saves it with
+// the default ILOS draft form data plus any overrides.
+const createAndUpdateTestILOSContract = async (
+    server: ApolloServer,
+    stateCode?: StateCodeType,
+    contractFormDataOverrides?: Partial<ContractDraftRevisionFormDataInput>
+): Promise<Contract> => {
+    const draftContract = await createTestContract(
+        server,
+        stateCode,
+        {
+            populationCovered: undefined,
+            riskBasedContract: undefined,
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An ILOS actuarial report',
+            contractType: 'BASE',
+            isILOSRatesIncluded: true,
+            ilosRateDateStart: '2025-01-01',
+            ilosRateDateEnd: '2025-12-31',
+            ilosDocuments: [
+                {
+                    name: 'ilosReport1.pdf',
+                    s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                    sha256: 'needs-to-be-there',
+                },
+            ],
+        },
+        'ILOS'
+    )
+
+    return await updateTestContractDraftRevision(
+        server,
+        draftContract.id,
+        draftContract.draftRevision?.updatedAt,
+        contractFormDataOverrides
     )
 }
 
@@ -671,10 +708,17 @@ const updateTestContractDraftRevision = async (
         )
     }
 
-    const updatedFormData = mockGqlContractDraftRevisionFormDataInput(
-        draftContract.stateCode as StateCodeType,
-        formData
-    )
+    // ILOS drafts reject health plan fields, so they get their own base mock.
+    const updatedFormData =
+        draftContract.contractSubmissionType === 'ILOS'
+            ? mockGqlILOSContractDraftRevisionFormDataInput(
+                  draftContract.stateCode as StateCodeType,
+                  formData
+              )
+            : mockGqlContractDraftRevisionFormDataInput(
+                  draftContract.stateCode as StateCodeType,
+                  formData
+              )
 
     const updateResult = await executeGraphQLOperation(server, {
         query: UpdateContractDraftRevisionDocument,
@@ -830,5 +874,6 @@ export {
     contractHistoryToDescriptions,
     errorUndoWithdrawTestContract,
     createAndUpdateTestEQROContract,
+    createAndUpdateTestILOSContract,
     createAndUpdateTestEBContract,
 }

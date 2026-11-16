@@ -117,4 +117,50 @@ const mockGqlContractDraftRevisionFormDataInput = (
     }
 }
 
-export { mockGqlContractDraftRevisionFormDataInput }
+// Draft form data input for an ILOS submission. Only the fields an ILOS
+// submission carries are set: ilosContractFormDataSchema rejects health plan
+// fields, so this mock is separate from the health plan one above.
+const mockGqlILOSContractDraftRevisionFormDataInput = (
+    stateCode?: string,
+    formDataInput?: Partial<ContractDraftRevisionFormDataInput>
+): ContractDraftRevisionFormDataInput => {
+    const programs = stateCode
+        ? [must(findStatePrograms(stateCode))[0]]
+        : [defaultFloridaProgram()]
+
+    return {
+        programIDs: [programs[0].id],
+        submissionType: 'CONTRACT_AND_RATES',
+        submissionDescription: 'An ILOS actuarial report',
+        contractType: 'BASE',
+        // Health plan lists are non-null on the input type; ILOS keeps them empty.
+        contractDocuments: [],
+        supportingDocuments: [],
+        managedCareEntities: [],
+        federalAuthorities: [],
+        stateContacts: [
+            {
+                givenName: 'state',
+                familyName: 'contact',
+                titleRole: 'thestatestofcontacts',
+                email: 'statemcstate@examepl.com',
+            },
+        ],
+        isILOSRatesIncluded: true,
+        ilosRateDateStart: '2025-01-01',
+        ilosRateDateEnd: '2025-12-31',
+        ilosDocuments: [
+            {
+                name: 'ilosReport1.pdf',
+                s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                sha256: 'needs-to-be-there',
+            },
+        ],
+        ...formDataInput,
+    }
+}
+
+export {
+    mockGqlContractDraftRevisionFormDataInput,
+    mockGqlILOSContractDraftRevisionFormDataInput,
+}

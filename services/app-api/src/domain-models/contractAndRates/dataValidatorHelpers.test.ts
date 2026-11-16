@@ -34,6 +34,7 @@ import {
     contractFormDataSchema,
     eqroContractFormDataSchema,
     ilosContractFormDataSchema,
+    updateDraftContractFormDataSchema,
     type ContractFormDataType,
 } from './formDataTypes'
 import { eqroValidationAndReviewDetermination } from '@mc-review/submissions'
@@ -2139,6 +2140,31 @@ describe('ILOS parsing and validation', () => {
             }
         )
 
+        it.each([
+            ['submissionType', 'CONTRACT_ONLY', 'CONTRACT_AND_RATES'],
+            ['contractType', 'AMENDMENT', 'BASE'],
+        ])(
+            'rejects %s when it is not the prefilled ILOS value',
+            (field, value, expected) => {
+                const result = ilosContractFormDataSchema.safeParse({
+                    ...mockILOSContractFormData(),
+                    [field]: value,
+                })
+
+                expect(result.success).toBe(false)
+                if (result.success) {
+                    throw new Error(`Expected ${field} to be rejected`)
+                }
+                expect(result.error.issues).toContainEqual(
+                    expect.objectContaining({
+                        code: 'invalid_value',
+                        values: [expected],
+                        path: [field],
+                    })
+                )
+            }
+        )
+
         it('accepts an external rate with no control name or dates in a draft', () => {
             const result = ilosContractFormDataSchema.safeParse({
                 ...mockILOSContractFormData(),
@@ -2147,6 +2173,33 @@ describe('ILOS parsing and validation', () => {
 
             expect(result.success).toBe(true)
         })
+
+        it.each([
+            ['isILOSRatesIncluded', true, 'invalid_type'],
+            ['ilosRateDateStart', new Date('2025-01-01'), 'invalid_type'],
+            ['ilosRateDateEnd', new Date('2025-12-31'), 'invalid_type'],
+            ['ilosDocuments', [mockILOSDocument('ilosReport1')], 'too_big'],
+            ['ilosExternalRates', [{ position: 1 }], 'too_big'],
+        ])(
+            'health plan update schema rejects the ILOS field %s when set',
+            (field, value, code) => {
+                const result = updateDraftContractFormDataSchema.safeParse({
+                    ...mockSubmittableHealthPlanContract().draftRevision!
+                        .formData,
+                    [field]: value,
+                })
+
+                expect(result.success).toBe(false)
+                if (result.success) {
+                    throw new Error(
+                        `Expected health plan update schema to reject ${field}`
+                    )
+                }
+                expect(result.error.issues).toContainEqual(
+                    expect.objectContaining({ code, path: [field] })
+                )
+            }
+        )
 
         it.each([
             ['ilosDocuments', [mockILOSDocument('ilosReport1')]],

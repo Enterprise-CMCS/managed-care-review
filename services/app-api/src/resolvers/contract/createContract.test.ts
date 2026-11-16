@@ -5,7 +5,11 @@ import {
     defaultContext,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
-import type { CreateContractInput, Contract } from '../../gen/gqlServer'
+import type {
+    Contract,
+    ContractSubmissionType,
+    CreateContractInput,
+} from '../../gen/gqlServer'
 import { CreateContractDocument } from '../../gen/gqlClient'
 import { testCMSUser } from '../../testHelpers/userHelpers'
 import type { Context } from '../../handlers/apollo_gql'
@@ -59,6 +63,108 @@ describe('createContract', () => {
         expect(draftData.contractDateStart).toBeNull()
         expect(draftData.contractDateEnd).toBeNull()
     })
+
+    it('creates an ILOS submission with ILOS fields and no health plan fields', async () => {
+        const server = await constructTestPostgresServer()
+
+        const input: CreateContractInput = {
+            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An ILOS actuarial report',
+            contractType: 'BASE',
+            contractSubmissionType: 'ILOS',
+            isILOSRatesIncluded: true,
+            ilosRateDateStart: '2025-01-01',
+            ilosRateDateEnd: '2025-12-31',
+            ilosDocuments: [
+                {
+                    name: 'ilosReport1.pdf',
+                    s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                    sha256: 'needs-to-be-there',
+                },
+            ],
+        }
+        const res = await executeGraphQLOperation(server, {
+            query: CreateContractDocument,
+            variables: { input },
+        })
+
+        expect(res.errors).toBeUndefined()
+
+        const contract: Contract = res.data?.createContract.contract
+        const draftData = contract.draftRevision?.formData
+
+        if (!draftData) {
+            throw new Error(`Unexpected error: draftRevision was undefined.`)
+        }
+
+        expect(contract.contractSubmissionType).toBe('ILOS')
+        expect(draftData.submissionType).toBe('CONTRACT_AND_RATES')
+        expect(draftData.isILOSRatesIncluded).toBe(true)
+        expect(draftData.ilosRateDateStart).toBe('2025-01-01')
+        expect(draftData.ilosRateDateEnd).toBe('2025-12-31')
+        expect(draftData.ilosDocuments).toEqual([
+            expect.objectContaining({
+                name: 'ilosReport1.pdf',
+                s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                sha256: 'needs-to-be-there',
+            }),
+        ])
+        expect(draftData.ilosExternalRates).toHaveLength(0)
+        expect(draftData.populationCovered).toBeNull()
+        expect(draftData.riskBasedContract).toBeNull()
+        expect(draftData.contractDocuments).toHaveLength(0)
+        expect(draftData.managedCareEntities).toHaveLength(0)
+    })
+
+    it('returns an error naming every missing ILOS field on create', async () => {
+        const server = await constructTestPostgresServer()
+
+        const input: CreateContractInput = {
+            programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An ILOS actuarial report',
+            contractType: 'BASE',
+            contractSubmissionType: 'ILOS',
+            ilosDocuments: [],
+        }
+        const res = await executeGraphQLOperation(server, {
+            query: CreateContractDocument,
+            variables: { input },
+        })
+
+        expect(res.errors).toBeDefined()
+        expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(res.errors?.[0].message).toContain('isILOSRatesIncluded')
+        expect(res.errors?.[0].message).toContain('ilosRateDateStart')
+        expect(res.errors?.[0].message).toContain('ilosRateDateEnd')
+        expect(res.errors?.[0].message).toContain('ilosDocuments')
+    })
+
+    it.each<ContractSubmissionType>(['HEALTH_PLAN', 'EQRO'])(
+        'still requires populationCovered for %s submissions',
+        async (contractSubmissionType) => {
+            const server = await constructTestPostgresServer()
+
+            const input: CreateContractInput = {
+                programIDs: ['5c10fe9f-bec9-416f-a20c-718b152ad633'],
+                submissionType: 'CONTRACT_ONLY',
+                submissionDescription: 'A real submission',
+                contractType: 'BASE',
+                contractSubmissionType,
+            }
+            const res = await executeGraphQLOperation(server, {
+                query: CreateContractDocument,
+                variables: { input },
+            })
+
+            expect(res.errors).toBeDefined()
+            expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+            expect(res.errors?.[0].extensions?.argumentName).toBe(
+                'populationCovered'
+            )
+        }
+    )
 
     it('allows the synthetic OAuth client in its exact review stage', async () => {
         vi.stubEnv('stage', 'synth-review')
