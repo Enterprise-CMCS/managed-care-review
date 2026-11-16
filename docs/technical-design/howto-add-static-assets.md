@@ -21,7 +21,7 @@ We do not upload these files to S3 by hand. Vite copies everything in `services/
 
 ### Things to keep in mind
 - **Files are public.** Anyone who has the URL can open them, logged in or not. Never put anything sensitive or internal in `public/`.
-- **Files are permanent in git history.** Each binary stays in the repo history and in every deploy, even after you delete it. A few megabytes per file is fine. Ask the team before adding large files (for example, video). Those may belong somewhere else, such as YouTube or medicaid.gov.
+- **Files are permanent in git history.** Deleting a binary removes it from future frontend builds, but its previous versions remain in repository history and contribute to clone size. A few megabytes per file is fine. Ask the team before adding large files (for example, video). Those may belong somewhere else, such as YouTube or medicaid.gov.
 - **Get approval first.** Product or stakeholders approve these documents. Use the exact file attached to the ticket.
 
 ## Steps
