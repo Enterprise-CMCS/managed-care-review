@@ -106,7 +106,7 @@ done
 
 Known problems:
 
-- When the LaunchDarkly extension installs, it can remove the `launchdarkly.project` and `launchdarkly.env` lines from `.vscode/settings.json`. If `git status` shows that file as modified, run `git checkout .vscode/settings.json` so the change does not go into a PR.
+- When the LaunchDarkly extension installs, it can remove the `launchdarkly.project` and `launchdarkly.env` lines from `.vscode/settings.json`. Inspect the file's diff and restore only the entries removed by the extension, preserving any unrelated developer changes. Do not revert the entire file.
 - The debug configurations in `.vscode/launch.json` are old. They point at `react-scripts` and `jest`, but the repo uses Vitest. Tell the developer to debug tests with the Vitest extension.
 
 ### Phase 5: Start the app
