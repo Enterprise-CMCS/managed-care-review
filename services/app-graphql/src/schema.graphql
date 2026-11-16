@@ -747,7 +747,9 @@ type Mutation {
     updateOauthClient(input: UpdateOauthClientInput!): UpdateOauthClientPayload!
 
     """
-    generateUploadURL will create a valid, presigned s3 upload URL for the given file name and content type
+    generateUploadURL will create a valid, presigned s3 upload URL for the given file name and content type.
+    The PUT must include If-None-Match: * and the returned Content-Type. Uploads are create-only;
+    request a new URL/key for a replacement rather than overwriting an existing document.
 
     Errors:
     - ForbiddenError:
@@ -3624,6 +3626,8 @@ enum UploadFileType {
     XLS
     XLSX
     XLSM
+    XLTM
+    XLAM
     CSV
 }
 

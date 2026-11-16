@@ -105,9 +105,17 @@ describe('generateUploadURLResolver', () => {
         )
     })
 
-    it.each(['XLSX', 'XLSM'] as const)(
+    it.each([
+        [
+            'XLSX',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ],
+        ['XLSM', 'application/vnd.ms-excel.sheet.macroEnabled.12'],
+        ['XLTM', 'application/vnd.ms-excel.template.macroEnabled.12'],
+        ['XLAM', 'application/vnd.ms-excel.addin.macroEnabled.12'],
+    ] as const)(
         'returns a valid presigned URL for %s spreadsheets',
-        async (fileType) => {
+        async (fileType, contentType) => {
             const result = await executeUpload({
                 fileName: `test-sheet.${fileType.toLowerCase()}`,
                 fileType,
@@ -118,6 +126,7 @@ describe('generateUploadURLResolver', () => {
             const payload = result.data?.generateUploadURL
             expect(payload).toBeDefined()
             expect(payload?.uploadURL).toContain(`.${fileType.toLowerCase()}`)
+            expect(payload?.contentType).toBe(contentType)
             expect(payload?.expiresIn).toBeDefined()
             expect(payload?.s3URL).toBeDefined()
         }

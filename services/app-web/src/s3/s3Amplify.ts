@@ -1,6 +1,10 @@
 import { parseKey, parseErrorToError } from '@mc-review/helpers'
 import { Storage } from 'aws-amplify'
-import { v4 as uuidv4 } from 'uuid'
+import type { ApolloClient } from '@apollo/client'
+import {
+    GenerateUploadUrlDocument,
+    type UploadFileType,
+} from '../gen/gqlClient'
 import type { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 import {
@@ -14,19 +18,9 @@ type s3PutError = {
     message: string
 }
 
-type s3PutResponse = {
-    key: string
-}
-
 type BucketShortName = 'HEALTH_PLAN_DOCS' | 'QUESTION_ANSWER_DOCS'
 type S3BucketConfigType = {
     [K in BucketShortName]: string
-}
-
-function assertIsS3PutResponse(val: unknown): asserts val is s3PutResponse {
-    if (typeof val === 'object' && val && !('key' in val)) {
-        throw new Error('We dont have a key in this response')
-    }
 }
 
 function assertIsS3PutError(val: unknown): asserts val is s3PutError {
@@ -42,28 +36,60 @@ function assertIsS3PutError(val: unknown): asserts val is s3PutError {
 
 // MAIN
 // TODO clarify what gets3URL versus getURL are doing
-function newAmplifyS3Client(bucketConfig: S3BucketConfigType): S3ClientT {
+function newAmplifyS3Client(
+    bucketConfig: S3BucketConfigType,
+    apolloClient: ApolloClient
+): S3ClientT {
     return {
         uploadFile: async (
             file: File,
             bucket: BucketShortName
         ): Promise<string | S3Error> => {
-            const uuid = uuidv4()
-            const ext = file.name.split('.').pop()?.toLowerCase() || ''
-            //encode file names and decoding done in bulk_downloads.ts
-            const fileName = encodeURIComponent(file.name)
+            const ext = file.name.split('.').pop()?.toUpperCase() || ''
             try {
-                const stored = await Storage.put(`${uuid}.${ext}`, file, {
-                    bucket: bucketConfig[bucket],
-                    contentType: file.type,
-                    contentDisposition: `attachment; filename=${fileName}`,
+                const { data } = await apolloClient.mutate({
+                    mutation: GenerateUploadUrlDocument,
+                    variables: {
+                        input: {
+                            fileName: file.name,
+                            fileType: ext as UploadFileType,
+                            bucketName: bucket,
+                            includeContentDisposition: true,
+                        },
+                    },
                 })
-                assertIsS3PutResponse(stored)
-                return stored.key
+                const upload = data?.generateUploadURL
+                if (!upload) throw new Error('Missing upload contract')
+                // Upload bytes directly using the backend's exact-key capability,
+                // not browser AWS credentials. A retry cannot replace this key.
+                const response = await fetch(upload.uploadURL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': upload.contentType,
+                        'Content-Disposition': `attachment; filename=${encodeURIComponent(file.name)}`,
+                        'If-None-Match': '*',
+                    },
+                    body: file,
+                    credentials: 'omit',
+                })
+                if (!response.ok) {
+                    throw new Error(`File upload failed (${response.status})`)
+                }
+                return upload.s3Key
             } catch (err) {
                 recordJSException(parseErrorToError(err))
                 assertIsS3PutError(err)
-                if (err.name === 'Error' && err.message === 'Network Error') {
+                if (
+                    err.name === 'NetworkingError' ||
+                    err.name === 'TimeoutError' ||
+                    [
+                        'Network Error',
+                        'Failed to fetch',
+                        'fetch failed',
+                        'NetworkError when attempting to fetch resource.',
+                        'Load failed',
+                    ].includes(err.message)
+                ) {
                     console.info('Error uploading file', err)
                     return {
                         code: 'NETWORK_ERROR',

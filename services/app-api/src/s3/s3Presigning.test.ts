@@ -48,6 +48,9 @@ describe.each([
                 expect(url.pathname.endsWith('/allusers/id.pdf')).toBe(true)
                 expect(url.searchParams.get('X-Amz-Expires')).toBe('300')
                 expect(
+                    url.searchParams.get('X-Amz-SignedHeaders')?.split(';')
+                ).toContain('if-none-match')
+                expect(
                     [...url.searchParams.keys()].some((key) =>
                         key.toLowerCase().includes('checksum')
                     )

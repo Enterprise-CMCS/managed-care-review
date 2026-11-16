@@ -150,6 +150,7 @@ describe('API storage transport', () => {
                             throw new Error('Missing upload contract')
                         const headers: Record<string, string> = {
                             'Content-Type': upload.contentType,
+                            'If-None-Match': '*',
                         }
                         if (attachment)
                             headers['Content-Disposition'] =
@@ -166,6 +167,26 @@ describe('API storage transport', () => {
                         })
                         responseStatus = put.status
                         if (!put.ok) throw new Error('Presigned PUT denied')
+                        if (!infected) {
+                            // The same signed URL must not replace an existing
+                            // object, even before its malware scan finishes.
+                            const replay = await browserFetch(
+                                upload.uploadURL,
+                                {
+                                    method: 'PUT',
+                                    headers,
+                                    body: bytes,
+                                    mode: 'cors',
+                                    credentials: 'omit',
+                                    signal: AbortSignal.timeout(30_000),
+                                }
+                            )
+                            responseStatus = replay.status
+                            expect(
+                                replay.status,
+                                'replayed PUT is create-only'
+                            ).to.equal(412)
+                        }
                         advance('scan')
                         const status = await scanStatus(
                             client,

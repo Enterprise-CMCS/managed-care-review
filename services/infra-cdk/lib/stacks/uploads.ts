@@ -9,6 +9,8 @@ import {
     ServicePrincipal,
 } from 'aws-cdk-lib/aws-iam'
 import { CfnOutput } from 'aws-cdk-lib'
+import { ResourceNames } from '../config/shared'
+import { BROWSER_S3_OBJECT_ACTIONS } from '../constructs/storage/browser-s3-permissions'
 
 export interface UploadsProps extends BaseStackProps {
     // Uploads is independent - just needs basic config
@@ -92,6 +94,11 @@ export class Uploads extends BaseStack {
         this.addFileTypeRestrictions(uploadsBucketInstance)
         this.addFileTypeRestrictions(qaBucketInstance)
 
+        // Resource-policy denies also cover imported dev/Val/Prod identity
+        // roles, whose legacy grants are managed outside this CDK stack.
+        this.addUploadIntegrityPolicies(uploadsBucketInstance)
+        this.addUploadIntegrityPolicies(qaBucketInstance)
+
         // Add GuardDuty malware protection permissions
         this.addGuardDutyMalwareProtectionAccess(uploadsBucketInstance)
         this.addGuardDutyMalwareProtectionAccess(qaBucketInstance)
@@ -111,8 +118,131 @@ export class Uploads extends BaseStack {
         }
     }
 
+    private getScannerRoleArn(): string {
+        // Same deterministic name as VirusScanning; no cross-stack import or
+        // deployment-order dependency on the scanner or Cognito stacks.
+        return this.formatArn({
+            service: 'iam',
+            region: '',
+            resource: 'role',
+            resourceName: ResourceNames.guardDutyMalwareProtectionRoleName(
+                this.stage
+            ),
+        })
+    }
+
+    private addUploadIntegrityPolicies(bucket: IBucket): void {
+        // Cognito retains this key in both enhanced and classic Identity Pool
+        // sessions. Its presence selects browser credentials without relying on
+        // role names or importing the externally managed Val identity role.
+        const browserSession = {
+            'cognito-identity.amazonaws.com:sub': 'false',
+        }
+        const objects = [`${bucket.bucketArn}/*`]
+
+        bucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'DenyBrowserObjectManagement',
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
+                notActions: [...BROWSER_S3_OBJECT_ACTIONS],
+                resources: objects,
+                conditions: { Null: browserSession },
+            })
+        )
+        bucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'DenyBrowserUploadsOutsideApprovedPrefixes',
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
+                actions: ['s3:PutObject'],
+                notResources: [
+                    `${bucket.bucketArn}/allusers/*`,
+                    `${bucket.bucketArn}/private/\${cognito-identity.amazonaws.com:sub}/*`,
+                ],
+                conditions: { Null: browserSession },
+            })
+        )
+        bucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'DenyBrowserObjectCopies',
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
+                actions: ['s3:PutObject'],
+                resources: objects,
+                conditions: {
+                    Null: {
+                        ...browserSession,
+                        's3:x-amz-copy-source': 'false',
+                    },
+                },
+            })
+        )
+        bucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'DenyUnconditionalDocumentUploads',
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
+                actions: ['s3:PutObject'],
+                // Apply to presigned API uploads too, not just Cognito sessions.
+                // Deterministic backend ZIPs live outside these namespaces.
+                resources: [
+                    `${bucket.bucketArn}/allusers/*`,
+                    `${bucket.bucketArn}/private/*`,
+                ],
+                conditions: {
+                    // Initiation and parts cannot carry the precondition;
+                    // PutObject and CompleteMultipartUpload must both carry it.
+                    Bool: { 's3:ObjectCreationOperation': 'true' },
+                    StringNotEquals: { 's3:if-none-match': '*' },
+                },
+            })
+        )
+        // PutObjectTagging replaces the whole tag set, so filtering only the
+        // requested tag key would allow its removal via an empty replacement.
+        bucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'OnlyScannerCanChangeObjectTags',
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
+                actions: [
+                    's3:PutObjectTagging',
+                    's3:PutObjectVersionTagging',
+                    's3:DeleteObjectTagging',
+                    's3:DeleteObjectVersionTagging',
+                ],
+                resources: objects,
+                conditions: {
+                    ArnNotEquals: {
+                        'aws:PrincipalArn': this.getScannerRoleArn(),
+                    },
+                },
+            })
+        )
+        bucket.addToResourcePolicy(
+            new PolicyStatement({
+                sid: 'OnlyScannerCanSetInitialScanTags',
+                effect: Effect.DENY,
+                principals: [new AnyPrincipal()],
+                actions: ['s3:PutObject'],
+                resources: objects,
+                conditions: {
+                    'ForAnyValue:StringEquals': {
+                        's3:RequestObjectTagKeys': [
+                            'GuardDutyMalwareScanStatus',
+                        ],
+                    },
+                    ArnNotEquals: {
+                        'aws:PrincipalArn': this.getScannerRoleArn(),
+                    },
+                },
+            })
+        )
+    }
+
     /**
      * Add file type restrictions matching serverless bucket policies
+     * The scanner needs to create its extensionless validation object.
      */
     private addFileTypeRestrictions(bucket: IBucket): void {
         bucket.addToResourcePolicy(
@@ -134,6 +264,11 @@ export class Uploads extends BaseStack {
                     `${bucket.bucketArn}/*.xltm`,
                     `${bucket.bucketArn}/*.xlam`,
                 ],
+                conditions: {
+                    ArnNotEquals: {
+                        'aws:PrincipalArn': this.getScannerRoleArn(),
+                    },
+                },
             })
         )
     }
@@ -186,40 +321,47 @@ export class Uploads extends BaseStack {
     /**
      * Add virus scan download blocking policies
      * Blocks downloads of files that don't have GuardDutyMalwareScanStatus=NO_THREATS_FOUND
+     * Only the scanner can read objects before a clean verdict exists.
      */
     private addVirusScanDownloadBlockingPolicies(
         uploadsBucket: IBucket,
         qaBucket: IBucket
     ): void {
-        // Require a clean scan verdict for document downloads.
+        // The scanner must be able to read unscanned documents.
         uploadsBucket.addToResourcePolicy(
             new PolicyStatement({
                 sid: 'DenyInfectedFileAccess',
                 effect: Effect.DENY,
                 principals: [new AnyPrincipal()],
-                actions: ['s3:GetObject'],
+                actions: ['s3:GetObject', 's3:GetObjectVersion'],
                 resources: [`${uploadsBucket.bucketArn}/*`],
                 conditions: {
                     StringNotEquals: {
                         's3:ExistingObjectTag/GuardDutyMalwareScanStatus':
                             'NO_THREATS_FOUND',
                     },
+                    ArnNotEquals: {
+                        'aws:PrincipalArn': this.getScannerRoleArn(),
+                    },
                 },
             })
         )
 
-        // Apply the same scan requirement to Q&A downloads.
+        // Apply the same clean-scan gate to Q&A documents.
         qaBucket.addToResourcePolicy(
             new PolicyStatement({
                 sid: 'DenyInfectedFileAccess',
                 effect: Effect.DENY,
                 principals: [new AnyPrincipal()],
-                actions: ['s3:GetObject'],
+                actions: ['s3:GetObject', 's3:GetObjectVersion'],
                 resources: [`${qaBucket.bucketArn}/*`],
                 conditions: {
                     StringNotEquals: {
                         's3:ExistingObjectTag/GuardDutyMalwareScanStatus':
                             'NO_THREATS_FOUND',
+                    },
+                    ArnNotEquals: {
+                        'aws:PrincipalArn': this.getScannerRoleArn(),
                     },
                 },
             })

@@ -141,6 +141,7 @@ export function newLocalS3Client(
                 Bucket: bucketConfig[bucket],
                 Key: `allusers/${key}`,
                 ContentType: contentType,
+                IfNoneMatch: '*',
                 ...(fileName && {
                     ContentDisposition: `attachment; filename=${encodeURIComponent(fileName)}`,
                 }),

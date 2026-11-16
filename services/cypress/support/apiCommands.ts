@@ -81,6 +81,7 @@ const uploadFile = async (
         method: 'PUT',
         headers: {
             'Content-Type': 'application/pdf',
+            'If-None-Match': '*',
         },
         body: fileBytes,
     }).then((res) => {

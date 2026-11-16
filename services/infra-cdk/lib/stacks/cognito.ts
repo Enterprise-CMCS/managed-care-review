@@ -18,6 +18,8 @@ import {
 } from 'aws-cdk-lib/aws-iam'
 import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { CfnOutput, Fn, RemovalPolicy } from 'aws-cdk-lib'
+import { ResourceNames } from '../config/shared'
+import { BROWSER_S3_OBJECT_ACTIONS } from '../constructs/storage/browser-s3-permissions'
 
 /**
  * Cognito stack - User Pool and Identity Pool for authentication
@@ -213,14 +215,28 @@ export class CognitoStack extends BaseStack {
                 })
             )
 
-            // S3 permissions for uploads
+            // No cross-bucket wildcard, delete, ACL, or tag permissions. The
+            // uploads bucket policies additionally require create-only writes.
+            const uploadBucketArns = ['uploads-documents', 'uploads-qa'].map(
+                (name) =>
+                    this.formatArn({
+                        service: 's3',
+                        region: '',
+                        account: '',
+                        resource: ResourceNames.resourceName(
+                            name,
+                            'bucket',
+                            this.stage
+                        ),
+                    })
+            )
             this.authRole.addToPolicy(
                 new PolicyStatement({
                     effect: Effect.ALLOW,
-                    actions: ['s3:*'],
+                    actions: [...BROWSER_S3_OBJECT_ACTIONS],
                     resources: [
-                        'arn:aws:s3:::*/allusers/*',
-                        `arn:aws:s3:::*/private/\${cognito-identity.amazonaws.com:sub}/*`,
+                        ...uploadBucketArns.map((arn) => `${arn}/allusers/*`),
+                        `${uploadBucketArns[0]}/private/\${cognito-identity.amazonaws.com:sub}/*`,
                     ],
                 })
             )

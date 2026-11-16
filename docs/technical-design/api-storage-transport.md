@@ -7,7 +7,7 @@ identity-pool S3 credentials for the transfers.
 The upload and download flows are separate:
 
 - **Upload:** request an upload URL → PUT the file to S3 → wait for the scan result.
-- **Download:** request a download URL → GET the file from S3. 
+- **Download:** request a download URL → GET the file from S3.
 
 GraphQL controls access to these operations, while S3 validates the signed
 requests and enforces the clean-scan download policy.
@@ -20,8 +20,10 @@ requests and enforces the clean-scan download policy.
 five-minute PUT URL, a generated object key and `contentType`. The filename
 extension must match the requested file type.
 
-Always send the returned `contentType` as `Content-Type`. If
-`includeContentDisposition: true` was requested, also send the matching header:
+Always send the returned `contentType` as `Content-Type` and `If-None-Match: *`.
+The precondition is signed and bucket-enforced: a repeated PUT must return 412,
+not replace an existing document. Request a fresh URL/key for a replacement.
+If `includeContentDisposition: true` was requested, also send the matching header:
 
 ```text
 Content-Disposition: attachment; filename=<encodeURIComponent(fileName)>
@@ -30,6 +32,11 @@ Content-Disposition: attachment; filename=<encodeURIComponent(fileName)>
 That option defaults to false, so other callers can omit the attachment header.
 The URL signer must not add a checksum calculated from an empty body: the browser
 supplies the actual bytes later. Ordinary SDK uploads keep their default checksums.
+
+The React upload adapter uses this API and preserves attachment metadata; it no
+longer uses `Storage.put`. Its existing Amplify downloads and scan polling remain
+unchanged for now. No new browser AWS SDK dependency is required. This API uses a
+single PUT, not multipart uploads; files must fit S3's single-PUT limit (5 GB).
 
 ### Scan status
 
@@ -77,6 +84,19 @@ is clean**. Possessing a signed URL does not bypass that policy.
 - `services/infra-cdk/lib/stacks/app-api.ts` and
   `services/app-api/src/cors/configureCorsHelpers.ts`: API CORS configuration.
 
+## Security rollout
+
+The S3 integrity policies and operational prerequisites are documented in
+[s3-upload-security.md](s3-upload-security.md). Deploy compatible API and upload
+consumers before enforcing the bucket policy on an existing environment; old
+browser tabs and external clients missing the precondition fail closed. The normal
+all-stack workflow deploys uploads early, so use a coordinated staged rollout or
+maintenance window rather than assuming an uninterrupted live cutover.
+
+Backend scan-status reads (`GetObjectTagging`) still work. Only the scanner can
+change verdict tags, and API-signed downloads do not bypass the clean-scan gate.
+These controls do not add ownership/state authorization to the shared-object APIs.
+
 ## Testing and troubleshooting
 
 The API tests beside the resolvers and S3 adapters cover schema validation,
@@ -87,7 +107,7 @@ These tests do not verify deployed permissions, CORS or GuardDuty.
 `services/cypress/integration/smokeTest/apiStorage.spec.ts` tests those deployed
 connections using human Cognito test auth and the review CI environment settings.
 It deliberately combines upload and download into a test round trip to compare
-clean-file SHA-256 hashes. It also checks both buckets, attachment headers, and
+clean-file SHA-256 hashes. It also checks replayed PUT rejection (412), both buckets, attachment headers, and
 EICAR detection followed by an actual denied GET. S3 transfers use the application
 window's fetch so browser CORS rules apply. It does not test the React upload UI
 or per-document authorization.

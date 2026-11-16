@@ -33,6 +33,7 @@ import { StringParameter } from 'aws-cdk-lib/aws-ssm'
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager'
 import { LogGroup } from 'aws-cdk-lib/aws-logs'
 import { ResourceNames } from '../config/shared'
+import { BROWSER_S3_OBJECT_ACTIONS } from '../constructs/storage/browser-s3-permissions'
 import { isReviewEnvironment } from '../config/environments'
 import { Architecture, Runtime } from 'aws-cdk-lib/aws-lambda'
 import { CfnWebACL, CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2'
@@ -1104,12 +1105,11 @@ export class AppApiStack extends BaseStack {
                         ),
                     },
                     {
-                        // Match the legacy per-environment Cognito role policy.
-                        // Amplify Storage maps public objects to allusers/ and
-                        // can use the identity-scoped private documents path.
+                        // QA shares Val's identity role, but must not add back
+                        // wildcard writes, deletes, or scanner-tag permissions.
                         Sid: 'AccessQaUploadObjects',
                         Effect: 'Allow',
-                        Action: 's3:*',
+                        Action: [...BROWSER_S3_OBJECT_ACTIONS],
                         Resource: [
                             `${documentUploadsBucketArn}/allusers/*`,
                             `${qaUploadsBucketArn}/allusers/*`,

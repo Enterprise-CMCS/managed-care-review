@@ -97,6 +97,8 @@ export function newDeployedS3Client(
                 Bucket: bucketConfig[bucket],
                 Key: `allusers/${key}`,
                 ContentType: contentType,
+                // Bind the URL to a create-only write, including URL replays.
+                IfNoneMatch: '*',
                 ...(fileName && {
                     ContentDisposition: `attachment; filename=${encodeURIComponent(fileName)}`,
                 }),

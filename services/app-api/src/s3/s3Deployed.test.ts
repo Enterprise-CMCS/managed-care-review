@@ -262,6 +262,7 @@ describe('newDeployedS3Client', () => {
             expect(callArgs.Key).toBe('allusers/uuid-123.pdf')
             expect(callArgs.Bucket).toBe('test-docs-bucket')
             expect(callArgs.ContentType).toBe('application/pdf')
+            expect(callArgs.IfNoneMatch).toBe('*')
             expect(callArgs.ContentDisposition).toBe(
                 'attachment; filename=report%20name.pdf'
             )
