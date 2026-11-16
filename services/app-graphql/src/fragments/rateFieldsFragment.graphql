@@ -6,6 +6,7 @@ fragment rateFieldsFragment on Rate {
     stateCode
     stateNumber
     parentContractID
+    ratePosition
     state {
         code
         name

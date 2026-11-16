@@ -2362,6 +2362,11 @@ type RateRevision {
     Pre-generated zip packages containing document collections for this revision
     """
     documentZipPackages: [DocumentZipPackage!]
+    """
+    Order of this rate in the contract submission it was read through, starting at 1.
+    Only set on packageSubmissions.rateRevisions. Null everywhere else.
+    """
+    ratePosition: Int
 }
 
 """
@@ -2434,6 +2439,11 @@ type Rate {
     stateNumber: Int!
     "parentContractID is the ID of the contract that last submitted this rate"
     parentContractID: ID!
+    """
+    Order of this rate on the draft contract it was read through, starting at 1.
+    Only set on Contract.draftRates. Null everywhere else.
+    """
+    ratePosition: Int
 
     "Contracts this withdrawn rates was the child or linked to"
     withdrawnFromContracts: [Contract!]
