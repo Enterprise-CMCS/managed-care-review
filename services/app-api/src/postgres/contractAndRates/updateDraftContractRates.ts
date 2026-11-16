@@ -11,6 +11,7 @@ import {
     prismaUpdateRateFormDataFromDomain,
 } from './prismaContractRateAdaptors'
 import { runTransactionWithRowLock } from '../prismaHelpers'
+import { nullify } from '../prismaDomainAdaptors'
 
 interface UpdatedRatesType {
     create: {
@@ -31,6 +32,15 @@ interface UpdatedRatesType {
     }[]
     delete: {
         rateID: string
+    }[]
+    // ILOS submissions only. The full list of external rates on the draft;
+    // rows not in it are deleted. Health plan callers leave it undefined.
+    external?: {
+        id?: string
+        rateControlName?: string
+        rateDateStart?: Date
+        rateDateEnd?: Date
+        position: number
     }[]
 }
 
@@ -152,7 +162,12 @@ async function updateDraftContractRatesInsideTransaction(
     ]
 
     // Check our work, these should be an incrementing list of ratePositions.
-    const ratePositions = links.map((l) => l.ratePosition).sort()
+    // External rates share the sequence with the linked rates.
+    const externalRates = args.rateUpdates.external ?? []
+    const ratePositions = [
+        ...links.map((l) => l.ratePosition),
+        ...externalRates.map((er) => er.position),
+    ].sort((a, b) => a - b)
     let lastPosition = 0
     for (const ratePosition of ratePositions) {
         if (ratePosition !== lastPosition + 1) {
@@ -178,6 +193,38 @@ async function updateDraftContractRatesInsideTransaction(
     })
 
     // end new R+C Contract Linking Tables
+
+    // ILOS external rates: drop the ones left out of the list, then update by
+    // id or create the ones without one.
+    if (args.rateUpdates.external) {
+        await tx.iLOSExternalRate.deleteMany({
+            where: {
+                contractRevisionID: draftRevision.id,
+                id: {
+                    notIn: externalRates.flatMap((er) => er.id ?? []),
+                },
+            },
+        })
+
+        for (const er of externalRates) {
+            const data = {
+                rateControlName: nullify(er.rateControlName),
+                rateDateStart: nullify(er.rateDateStart),
+                rateDateEnd: nullify(er.rateDateEnd),
+                position: er.position,
+            }
+            if (er.id) {
+                await tx.iLOSExternalRate.update({
+                    where: { id: er.id, contractRevisionID: draftRevision.id },
+                    data,
+                })
+            } else {
+                await tx.iLOSExternalRate.create({
+                    data: { ...data, contractRevisionID: draftRevision.id },
+                })
+            }
+        }
+    }
 
     // update existing rates
     for (const ru of args.rateUpdates.update) {
