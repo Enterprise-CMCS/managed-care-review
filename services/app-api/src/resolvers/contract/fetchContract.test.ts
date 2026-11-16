@@ -23,6 +23,7 @@ import {
 import {
     addLinkedRateToTestContract,
     addNewRateToTestContract,
+    fetchTestRateById,
     overrideTestRateData,
 } from '../../testHelpers/gqlRateHelpers'
 import {
@@ -126,6 +127,42 @@ describe('fetchContract', () => {
 
         // validate correct contract submission
         expect(fetchedContract.contractSubmissionType).toBe('HEALTH_PLAN')
+    })
+
+    it('returns ratePosition on draft rates and submitted rate revisions', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const otherPackage =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const linkedRateID =
+            otherPackage.packageSubmissions[0].rateRevisions[0].rateID
+
+        const draftWithChild =
+            await createAndUpdateTestContractWithRate(stateServer)
+        const draftWithLink = await addLinkedRateToTestContract(
+            stateServer,
+            draftWithChild,
+            linkedRateID
+        )
+
+        const draftRates = draftWithLink.draftRates ?? []
+        expect(draftRates.map((r) => r.ratePosition)).toEqual([1, 2])
+        expect(draftRates[1].id).toBe(linkedRateID)
+
+        const submitted = await submitTestContract(
+            stateServer,
+            draftWithLink.id
+        )
+        const rateRevisions = submitted.packageSubmissions[0].rateRevisions
+        expect(rateRevisions.map((r) => r.ratePosition)).toEqual([1, 2])
+        expect(rateRevisions[1].rateID).toBe(linkedRateID)
+
+        // the position belongs to the contract, so a rate on its own has none
+        const linkedRate = await fetchTestRateById(stateServer, linkedRateID)
+        expect(linkedRate.ratePosition).toBeNull()
+        expect(linkedRate.revisions[0].ratePosition).toBeNull()
     })
 
     it('returns merged rate overrides when fetching a linked contract submission', async () => {
