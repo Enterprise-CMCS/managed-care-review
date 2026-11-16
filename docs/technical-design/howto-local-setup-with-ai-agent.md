@@ -37,7 +37,7 @@ grep packageManager package.json   # required pnpm version
 ### Phase 2: Install tools
 
 ```bash
-brew install pnpm direnv entr shellcheck detect-secrets opentofu nvm
+brew install pnpm direnv entr shellcheck detect-secrets opentofu nvm awscli
 mkdir -p ~/.nvm
 ```
 
