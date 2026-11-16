@@ -15,32 +15,49 @@ import { parseAndValidateDocuments } from '../documentHelpers'
 import { getStatePrograms } from '../helpers'
 
 // Zod schemas to parse the updatedRates param since the types are not fully defined in GQL
-// CREATE / UPDATE / LINK
+// CREATE / UPDATE / LINK / EXTERNAL
 // CREATE: rateID: NO, formData YES
 // UPDATE rateID: YES, formData YES,
 // LINK: rateID: YES, formData: NO
+// EXTERNAL: rateID: NO, formData: NO, externalRate: YES (ILOS submissions only)
 const rateCreateSchema = z.object({
     type: z.literal('CREATE'),
     rateID: z.undefined().optional(),
     formData: rateFormDataSchema,
+    externalRate: z.undefined().optional(),
 })
 
 const rateUpdateSchema = z.object({
     type: z.literal('UPDATE'),
     rateID: z.string(),
     formData: rateFormDataSchema,
+    externalRate: z.undefined().optional(),
 })
 
 const rateLinkSchema = z.object({
     type: z.literal('LINK'),
     rateID: z.string(),
     formData: z.undefined().optional(),
+    externalRate: z.undefined().optional(),
+})
+
+const rateExternalSchema = z.object({
+    type: z.literal('EXTERNAL'),
+    rateID: z.undefined().optional(),
+    formData: z.undefined().optional(),
+    externalRate: z.object({
+        id: z.string().nullish(),
+        rateControlName: z.string().nullish(),
+        rateDateStart: z.date().nullish(),
+        rateDateEnd: z.date().nullish(),
+    }),
 })
 
 const updatedRateUnion = z.discriminatedUnion('type', [
     rateCreateSchema,
     rateUpdateSchema,
     rateLinkSchema,
+    rateExternalSchema,
 ])
 
 const updatedRatesSchema = z.array(updatedRateUnion)
@@ -85,6 +102,7 @@ function updateDraftContractRates(
                         // Only CREATE and UPDATE operations have formData
                         if (
                             rateUpdate.type === 'LINK' ||
+                            rateUpdate.type === 'EXTERNAL' ||
                             !rateUpdate.formData
                         ) {
                             return rateUpdate
@@ -237,6 +255,10 @@ function updateDraftContractRates(
                 // Deal with new rates, matching to old rates
                 const draftRates = contract.draftRates || []
 
+                // ILOS submissions can also carry external rates, which live on
+                // their own table but share the position sequence with linked
+                // rates. The store only touches that table when `external` is
+                // a list, so it stays undefined for every other submission type.
                 const rateUpdates: UpdateDraftContractRatesArgsType['rateUpdates'] =
                     {
                         create: [],
@@ -244,11 +266,22 @@ function updateDraftContractRates(
                         link: [],
                         unlink: [],
                         delete: [],
+                        external:
+                            contract.contractSubmissionType === 'ILOS'
+                                ? []
+                                : undefined,
                     }
 
                 // walk through the new rate list one by one
                 // any rates that aren't in this list are unlinked (or deleted?)
                 const knownRateIDs = draftRates.map((r) => r.id)
+                // External rates already on the draft. An EXTERNAL entry with an
+                // id must match one of these; any of these left out of the list
+                // are deleted by the store, like an omitted LINK is unlinked.
+                const knownExternalRateIDs =
+                    contract.draftRevision.formData.ilosExternalRates.map(
+                        (r) => r.id
+                    )
                 let thisPosition = 1
                 for (const rateUpdate of parsedUpdates) {
                     if (rateUpdate.type === 'CREATE') {
@@ -405,6 +438,56 @@ function updateDraftContractRates(
                                 ratePosition: thisPosition,
                             })
                         }
+                    }
+
+                    if (rateUpdate.type === 'EXTERNAL') {
+                        // only ILOS submissions have an external list to add to
+                        if (!rateUpdates.external) {
+                            const errmsg =
+                                'Attempted to add an external rate to a submission that is not ILOS'
+                            logResolverError(
+                                'updateDraftContractRates',
+                                errmsg,
+                                context
+                            )
+                            throw createUserInputError(errmsg)
+                        }
+
+                        // An id is sent back to update an existing external rate,
+                        // so it must be one already on this draft. Each id is
+                        // removed as it is seen so a repeat is rejected too.
+                        // Entries without an id are new and skip this check.
+                        const externalRate = rateUpdate.externalRate
+                        if (externalRate.id) {
+                            const knownExternalIDX =
+                                knownExternalRateIDs.indexOf(externalRate.id)
+                            if (knownExternalIDX === -1) {
+                                const errmsg =
+                                    'Attempted to update an external rate not associated with this contract: ' +
+                                    externalRate.id
+                                logResolverError(
+                                    'updateDraftContractRates',
+                                    errmsg,
+                                    context
+                                )
+                                throw createUserInputError(errmsg)
+                            }
+                            knownExternalRateIDs.splice(knownExternalIDX, 1)
+                        }
+
+                        // position comes from the entry's place in updatedRates,
+                        // the same counter the linked rates use
+                        // nulls from GraphQL become undefined, which the store
+                        // writes as null to clear the column
+                        rateUpdates.external.push({
+                            id: externalRate.id ?? undefined,
+                            rateControlName:
+                                externalRate.rateControlName ?? undefined,
+                            rateDateStart:
+                                externalRate.rateDateStart ?? undefined,
+                            rateDateEnd: externalRate.rateDateEnd ?? undefined,
+                            position: thisPosition,
+                        })
                     }
 
                     thisPosition++
