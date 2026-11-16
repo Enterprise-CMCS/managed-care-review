@@ -76,7 +76,7 @@ describe('AppRoutes and routing configuration', () => {
             })
         ).toHaveAttribute(
             'href',
-            '/resources/State-User-Manual-MC-Review-October-2026.pdf'
+            '/resources/MC-Review-State-User-Manual-November-2026.pdf'
         )
 
         expect(

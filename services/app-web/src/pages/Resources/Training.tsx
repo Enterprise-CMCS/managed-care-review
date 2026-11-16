@@ -23,7 +23,7 @@ export const Training = (): React.ReactElement => {
                 <ul className={styles.resourceList}>
                     <li>
                         <a
-                            href="/resources/State-User-Manual-MC-Review-October-2026.pdf"
+                            href="/resources/MC-Review-State-User-Manual-November-2026.pdf"
                             target="_blank"
                             rel="noreferrer"
                             aria-label="State user manual (opens in new window)"
