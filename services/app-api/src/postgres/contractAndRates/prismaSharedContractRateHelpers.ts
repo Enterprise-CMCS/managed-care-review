@@ -777,20 +777,6 @@ function ratesRevisionsToDomainModel(
     return domainRevisions
 }
 
-function unsortedRatesRevisionsToDomainModel(
-    rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] {
-    const domainRevisions: RateRevisionType[] = []
-
-    for (const revision of rateRevisions) {
-        const domainRevision = rateRevisionToDomainModel(revision)
-
-        domainRevisions.push(domainRevision)
-    }
-
-    return domainRevisions
-}
-
 // ------
 
 type ContractRevisionTableWithFormData =
@@ -987,7 +973,6 @@ export {
     rateFormDataToDomainModel,
     rateRevisionToDomainModel,
     ratesRevisionsToDomainModel,
-    unsortedRatesRevisionsToDomainModel,
     getRateReviewStatus,
     getParentContractID,
     getRelatedContracts,
