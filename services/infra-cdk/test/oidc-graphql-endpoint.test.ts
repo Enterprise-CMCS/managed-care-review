@@ -131,9 +131,13 @@ void describe('deny-all OIDC REST foundation', () => {
         )) {
             assert.ok(!JSON.stringify(policy.Properties.Roles).includes(roleId))
         }
-        template.hasResourceProperties('AWS::Logs::LogGroup', {
-            LogGroupName: '/aws/lambda/app-api-test-cdk-oidc-authorizer',
-            RetentionInDays: 3,
+        template.hasResource('AWS::Logs::LogGroup', {
+            Properties: {
+                LogGroupName: '/aws/lambda/app-api-test-cdk-oidc-authorizer',
+                RetentionInDays: 3,
+            },
+            DeletionPolicy: 'Delete',
+            UpdateReplacePolicy: 'Delete',
         })
         template.resourceCountIs('AWS::SecretsManager::Secret', 0)
         template.resourceCountIs('AWS::SSM::Parameter', 0)
@@ -278,6 +282,15 @@ void describe('AppApiStack compatibility', () => {
                     }
                 )
             }
+            const logRemovalPolicy =
+                stage === 'oidc-review' ? 'Delete' : 'Retain'
+            template.hasResource('AWS::Logs::LogGroup', {
+                Properties: {
+                    LogGroupName: `/aws/lambda/app-api-${stage}-cdk-oidc-authorizer`,
+                },
+                DeletionPolicy: logRemovalPolicy,
+                UpdateReplacePolicy: logRemovalPolicy,
+            })
             template.hasResourceProperties('AWS::Lambda::Function', {
                 FunctionName: `app-api-${stage}-cdk-oidc-authorizer`,
                 Environment: Match.absent(),

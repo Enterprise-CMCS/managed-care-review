@@ -1,4 +1,4 @@
-import { Duration } from 'aws-cdk-lib'
+import { Duration, RemovalPolicy } from 'aws-cdk-lib'
 import {
     AuthorizationType,
     TokenAuthorizer,
@@ -10,6 +10,7 @@ import { LogGroup, type RetentionDays } from 'aws-cdk-lib/aws-logs'
 import { Construct } from 'constructs'
 import path from 'path'
 import { ResourceNames } from '../../config/shared'
+import { isReviewEnvironment } from '../../config/environments'
 import { ApiEndpoint } from './api-endpoint'
 
 export interface OidcGraphqlEndpointProps {
@@ -33,6 +34,9 @@ export class OidcGraphqlEndpoint extends Construct {
         const logGroup = new LogGroup(this, 'AuthorizerLogs', {
             logGroupName: `/aws/lambda/${functionName}`,
             retention: props.logRetentionDays,
+            removalPolicy: isReviewEnvironment(props.stage)
+                ? RemovalPolicy.DESTROY
+                : RemovalPolicy.RETAIN,
         })
         const handler = new NodejsFunction(this, 'AuthorizerFunction', {
             functionName,
