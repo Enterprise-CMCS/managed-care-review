@@ -77,7 +77,6 @@ export class AppApiStack extends BaseStack {
     public readonly migrateS3UrlsFunction: NodejsFunction
     public readonly backfillLastActionDateFunction: NodejsFunction
     public readonly migrateContactsFunction: NodejsFunction
-    public readonly restoreIAToStandardFunction: NodejsFunction
 
     public readonly syntheticDataBootstrapFunction?: NodejsFunction
     public readonly syntheticDataStateCredentialsSecret?: Secret
@@ -571,65 +570,6 @@ export class AppApiStack extends BaseStack {
                         this.getPrismaCleanupCommands(),
                     ]),
                 },
-            }
-        )
-
-        /**
-         * Create the restore IA to Standard function with dedicated role
-         * Restores Infrequent Access files to S3 Standard storage
-         * NOTE: Cannot handle Glacier files - use AWS S3 Batch Operations for those
-         */
-        const restoreIAToStandardRole = new Role(
-            this,
-            'RestoreIAToStandardRole',
-            {
-                assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-                managedPolicies: [
-                    ManagedPolicy.fromAwsManagedPolicyName(
-                        'service-role/AWSLambdaBasicExecutionRole'
-                    ),
-                ],
-            }
-        )
-
-        // Grant S3 permissions (scoped to specific buckets)
-        restoreIAToStandardRole.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: ['s3:ListBucket'],
-                resources: [
-                    `arn:aws:s3:::${environment.VITE_APP_S3_DOCUMENTS_BUCKET}`,
-                    `arn:aws:s3:::${environment.VITE_APP_S3_QA_BUCKET}`,
-                ],
-            })
-        )
-
-        restoreIAToStandardRole.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: [
-                    's3:GetObject',
-                    's3:PutObject',
-                    's3:GetObjectAttributes',
-                    's3:GetObjectTagging',
-                    's3:PutObjectTagging',
-                ],
-                resources: [
-                    `arn:aws:s3:::${environment.VITE_APP_S3_DOCUMENTS_BUCKET}/*`,
-                    `arn:aws:s3:::${environment.VITE_APP_S3_QA_BUCKET}/*`,
-                ],
-            })
-        )
-
-        this.restoreIAToStandardFunction = this.createLambdaFunction(
-            'restore-ia-to-standard',
-            'restore_ia_to_standard',
-            'main',
-            {
-                timeout: Duration.minutes(15), // Extended timeout for processing many files
-                memorySize: 1024,
-                environment,
-                role: restoreIAToStandardRole,
             }
         )
 
