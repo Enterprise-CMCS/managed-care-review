@@ -41,6 +41,7 @@ import { Match, Rule, Schedule } from 'aws-cdk-lib/aws-events'
 import { LambdaFunction } from 'aws-cdk-lib/aws-events-targets'
 import { Trigger, InvocationType } from 'aws-cdk-lib/triggers'
 import { ApiEndpoint } from '../constructs/api/api-endpoint'
+import { OidcGraphqlEndpoint } from '../constructs/api/oidc-graphql-endpoint'
 import path from 'path'
 import type { BundlingOptions } from 'aws-cdk-lib/aws-lambda-nodejs'
 import type { IVpc, ISecurityGroup } from 'aws-cdk-lib/aws-ec2'
@@ -1247,6 +1248,14 @@ export class AppApiStack extends BaseStack {
             method: 'GET',
             handler: this.graphqlFunction,
             authorizationType: AuthorizationType.IAM,
+        })
+
+        // Add a closed OIDC path without changing either existing auth scheme.
+        new OidcGraphqlEndpoint(this, 'OidcGraphqlEndpoint', {
+            graphqlResource,
+            graphqlHandler: this.graphqlFunction,
+            stage: this.stage,
+            logRetentionDays: this.stageConfig.monitoring.logRetentionDays,
         })
 
         // External GraphQL with custom authorizer
