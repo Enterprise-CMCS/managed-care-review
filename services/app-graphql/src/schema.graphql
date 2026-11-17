@@ -793,8 +793,6 @@ input CreateContractInput {
     ilosRateDateStart: Date
     "End of the rating period covered by the ILOS submission"
     ilosRateDateEnd: Date
-    "Whether the state is including rates (linked or external) on this ILOS submission"
-    isILOSRatesIncluded: Boolean
 }
 
 type CreateContractPayload {
@@ -1993,8 +1991,6 @@ type ContractFormData {
     ilosRateDateStart: Date
     "End of the rating period covered by the ILOS submission"
     ilosRateDateEnd: Date
-    "Whether the state is including rates (linked or external) on this ILOS submission"
-    isILOSRatesIncluded: Boolean
     """
     Rates outside MC-Review on this ILOS submission, in position order.
     Read only here; written through updateDraftContractRates with type EXTERNAL.
@@ -3372,8 +3368,6 @@ input ContractDraftRevisionFormDataInput {
     ilosRateDateStart: Date
     "End of the rating period covered by the ILOS submission"
     ilosRateDateEnd: Date
-    "Whether the state is including rates (linked or external) on this ILOS submission"
-    isILOSRatesIncluded: Boolean
     # No ilosExternalRates. External rates are written through updateDraftContractRates.
 }
 

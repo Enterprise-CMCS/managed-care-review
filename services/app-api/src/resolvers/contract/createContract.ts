@@ -69,7 +69,6 @@ const ilosInsertArgs = (
         .pick({
             submissionType: true,
             contractType: true,
-            isILOSRatesIncluded: true,
             ilosRateDateStart: true,
             ilosRateDateEnd: true,
             ilosDocuments: true,

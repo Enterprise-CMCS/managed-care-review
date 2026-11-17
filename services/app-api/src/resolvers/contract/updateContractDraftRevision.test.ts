@@ -108,7 +108,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 ebPreviousAmendmentInMCReview: null,
                 ebAmendmentNumber: null,
                 ebStateContractIdentifier: null,
-                isILOSRatesIncluded: null,
                 ilosRateDateStart: null,
                 ilosRateDateEnd: null,
                 ilosDocuments: [],
@@ -577,7 +576,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                         formData: mockGqlContractDraftRevisionFormDataInput(
                             draft.stateCode,
                             {
-                                isILOSRatesIncluded: true,
                                 ilosRateDateStart: '2025-01-01',
                                 ilosRateDateEnd: '2025-12-31',
                                 ilosDocuments: [
@@ -595,7 +593,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
 
             expect(result.errors).toBeDefined()
             expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
-            expect(result.errors?.[0].message).toContain('isILOSRatesIncluded')
             expect(result.errors?.[0].message).toContain('ilosRateDateStart')
             expect(result.errors?.[0].message).toContain('ilosRateDateEnd')
             expect(result.errors?.[0].message).toContain('ilosDocuments')
@@ -672,7 +669,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             const server = await constructTestPostgresServer()
             const draft = await createAndUpdateTestILOSContract(server)
             const ilosFields = {
-                isILOSRatesIncluded: false,
                 ilosRateDateStart: '2026-01-01',
                 ilosRateDateEnd: '2026-12-31',
                 ilosDocuments: [
@@ -704,7 +700,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             const formData = fetched.draftRevision?.formData
             expect(formData).toEqual(
                 expect.objectContaining({
-                    isILOSRatesIncluded: false,
                     ilosRateDateStart: '2026-01-01',
                     ilosRateDateEnd: '2026-12-31',
                     ilosDocuments: [
@@ -731,7 +726,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 draft.id,
                 draft.draftRevision?.updatedAt,
                 {
-                    isILOSRatesIncluded: null,
                     ilosRateDateStart: null,
                     ilosRateDateEnd: null,
                     ilosDocuments: null,
@@ -740,7 +734,6 @@ describe(`Tests UpdateContractDraftRevision`, () => {
 
             expect(updated.draftRevision?.formData).toEqual(
                 expect.objectContaining({
-                    isILOSRatesIncluded: null,
                     ilosRateDateStart: null,
                     ilosRateDateEnd: null,
                     ilosDocuments: [],

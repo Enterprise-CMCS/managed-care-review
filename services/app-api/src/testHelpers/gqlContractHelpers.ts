@@ -422,7 +422,6 @@ const createAndUpdateTestILOSContract = async (
             submissionType: 'CONTRACT_AND_RATES',
             submissionDescription: 'An ILOS actuarial report',
             contractType: 'BASE',
-            isILOSRatesIncluded: true,
             ilosRateDateStart: '2025-01-01',
             ilosRateDateEnd: '2025-12-31',
             ilosDocuments: [

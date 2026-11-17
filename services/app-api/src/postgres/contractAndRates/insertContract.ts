@@ -59,7 +59,6 @@ async function insertDraftContract(
         modifiedLengthOfContract,
         modifiedNonRiskPaymentArrangements,
         inLieuServicesAndSettings,
-        isILOSRatesIncluded,
         ilosRateDateStart,
         ilosRateDateEnd,
         ilosDocuments,
@@ -128,7 +127,6 @@ async function insertDraftContract(
                             modifiedNonRiskPaymentArrangements,
                             inLieuServicesAndSettings,
                             // ILOS submission fields only
-                            isILOSRatesIncluded,
                             ilosRateDateStart,
                             ilosRateDateEnd,
                             ilosDocuments: {

@@ -146,7 +146,6 @@ const mockGqlILOSContractDraftRevisionFormDataInput = (
                 email: 'statemcstate@examepl.com',
             },
         ],
-        isILOSRatesIncluded: true,
         ilosRateDateStart: '2025-01-01',
         ilosRateDateEnd: '2025-12-31',
         ilosDocuments: [

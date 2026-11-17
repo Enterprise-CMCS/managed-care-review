@@ -786,7 +786,6 @@ type ContractRevisionTableWithFormData =
 
 type ILOSFormDataFields = Pick<
     ContractFormDataType,
-    | 'isILOSRatesIncluded'
     | 'ilosRateDateStart'
     | 'ilosRateDateEnd'
     | 'ilosDocuments'
@@ -799,7 +798,6 @@ function ilosFormDataToDomainModel(
     contractRevision: ContractRevisionTableWithFormData
 ): ILOSFormDataFields {
     return {
-        isILOSRatesIncluded: contractRevision.isILOSRatesIncluded ?? undefined,
         ilosRateDateStart: contractRevision.ilosRateDateStart ?? undefined,
         ilosRateDateEnd: contractRevision.ilosRateDateEnd ?? undefined,
         ilosDocuments: contractRevision.ilosDocuments.map(

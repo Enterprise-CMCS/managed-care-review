@@ -291,7 +291,6 @@ model ContractRevisionTable {
   ebStateContractIdentifier     String?
 
   // ILOS submission fields only
-  isILOSRatesIncluded Boolean? // Whether the API should expect rates on this ILOS submission
   ilosRateDateStart   DateTime?          @db.Date // Rating period start for the ILOS submission
   ilosRateDateEnd     DateTime?          @db.Date // Rating period end for the ILOS submission
   ilosExternalRates   ILOSExternalRate[] // Rates outside MC-Review on this revision

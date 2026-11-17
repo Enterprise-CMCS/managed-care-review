@@ -88,7 +88,6 @@ describe('fetchContract', () => {
         expect(fetchedContract.contractSubmissionType).toBe('ILOS')
         expect(fetchedContract.draftRevision?.formData).toEqual(
             expect.objectContaining({
-                isILOSRatesIncluded: true,
                 ilosRateDateStart: '2025-01-01',
                 ilosRateDateEnd: '2025-12-31',
                 ilosDocuments: [
