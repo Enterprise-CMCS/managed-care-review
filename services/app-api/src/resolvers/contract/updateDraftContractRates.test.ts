@@ -1049,6 +1049,10 @@ describe('updateDraftContractRates', () => {
             stateServer,
             ilosContract.id
         )
+        // Saving external rates edits the draft, so its updatedAt moves
+        expect(firstContract.draftRevision!.updatedAt).not.toEqual(
+            ilosContract.draftRevision!.updatedAt
+        )
         expect(firstContract.draftRates).toHaveLength(1)
         expect(firstContract.draftRates![0].id).toBe(linkedRateID)
 
@@ -1105,6 +1109,22 @@ describe('updateDraftContractRates', () => {
         expect(fetched.draftRates).toHaveLength(1)
         expect(fetched.draftRates![0].id).toBe(linkedRateID)
         expect(fetched.draftRates![0].ratePosition).toBe(2)
+
+        // The timestamp from before the second save is now stale
+        const staleResult = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: ilosContract.id,
+                    lastSeenUpdatedAt: firstContract.draftRevision!.updatedAt,
+                    updatedRates: [],
+                },
+            },
+        })
+        expect(staleResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(staleResult.errors?.[0].message).toContain(
+            'Concurrent update error'
+        )
     })
 
     it('rejects an external rate on a health plan submission', async () => {

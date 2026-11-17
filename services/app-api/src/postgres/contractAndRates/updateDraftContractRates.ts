@@ -224,6 +224,14 @@ async function updateDraftContractRatesInsideTransaction(
                 })
             }
         }
+
+        // External rates are part of the draft's form data, so saving them
+        // counts as editing the draft. Bump updatedAt so lastSeenUpdatedAt
+        // checks catch a stale client.
+        await tx.contractRevisionTable.update({
+            where: { id: draftRevision.id },
+            data: { updatedAt: new Date() },
+        })
     }
 
     // update existing rates
