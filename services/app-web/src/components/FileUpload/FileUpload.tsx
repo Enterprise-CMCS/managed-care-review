@@ -243,6 +243,8 @@ export const FileUpload = ({
                     )
                 )
             } finally {
+                // A retry may already own a new controller for this item. A
+                // late completion must not remove that replacement's cancellation.
                 if (operations.current.get(fileItem.id) === controller) {
                     operations.current.delete(fileItem.id)
                 }
@@ -260,6 +262,7 @@ export const FileUpload = ({
             return
         }
 
+        // Retry this item only; distinct items can reference the same File.
         setFileItems((prevItems) => {
             const newItems = [...prevItems]
             return newItems.map((i) => {
