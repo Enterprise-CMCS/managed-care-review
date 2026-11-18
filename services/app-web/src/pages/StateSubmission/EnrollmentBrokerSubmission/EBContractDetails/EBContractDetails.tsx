@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Form } from '@trussworks/react-uswds'
-import { EB_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
 import {
     DynamicStepIndicator,
     FormContainer,
@@ -9,19 +8,16 @@ import {
     PageActions,
 } from '../../../../components'
 import { PageBannerAlerts } from '../../SharedSubmissionComponents'
-import { useCurrentRoute, useRouteParams } from '../../../../hooks'
+import { useFormFlow } from '../../../../hooks'
 import { usePage } from '../../../../contexts/PageContext'
 import { useAuth } from '../../../../contexts/AuthContext'
 import styles from '../../StateSubmissionForm.module.scss'
-import { getSubmissionPath } from '../../../../routeHelpers'
 
 // Empty Contract details page for the Enrollment Broker submission form.
 // TODO: add form fields come in a follow-up ticket.
 export const EBContractDetails = (): React.ReactElement => {
     const navigate = useNavigate()
-    const { id } = useRouteParams()
     const { updateActiveMainContent } = usePage()
-    const { currentRoute } = useCurrentRoute()
     const { loggedInUser } = useAuth()
 
     const activeMainContentId = 'contractDetailsPageMainContent'
@@ -31,32 +27,19 @@ export const EBContractDetails = (): React.ReactElement => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
-    const submissionDetailsPath = getSubmissionPath(
-        'SUBMISSIONS_TYPE', // Submission is now created so go to the "edit" path.
-        'ENROLLMENT_BROKER',
-        id
+    // Pages before and after this one come from the EB form flow
+    const { previousPath, nextPath, stepIndicatorProps } = useFormFlow(
+        'SUBMISSIONS_CONTRACT_DETAILS'
     )
 
-    const associatedContractsPagePath = getSubmissionPath(
-        'SUBMISSIONS_ASSOCIATED_CONTRACTS',
-        'ENROLLMENT_BROKER',
-        id
-    )
-
-    const handleContinue = async () => {
-        navigate(associatedContractsPagePath)
+    const handleContinue = () => {
+        if (nextPath) navigate(nextPath)
     }
 
     return (
         <div id={activeMainContentId}>
             <FormNotificationContainer>
-                <DynamicStepIndicator
-                    formPages={EB_SUBMISSION_FORM_ROUTES}
-                    currentFormPage={currentRoute}
-                    customPageTitles={{
-                        SUBMISSIONS_TYPE: 'Submission details',
-                    }}
-                />
+                <DynamicStepIndicator {...stepIndicatorProps} />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     showPageErrorMessage={false}
@@ -67,7 +50,7 @@ export const EBContractDetails = (): React.ReactElement => {
                     className={styles.formContainer}
                     onSubmit={(e) => {
                         e.preventDefault()
-                        void handleContinue()
+                        handleContinue()
                     }}
                 >
                     <fieldset className="usa-fieldset">
@@ -81,9 +64,11 @@ export const EBContractDetails = (): React.ReactElement => {
                         </p>
                     </fieldset>
                     <PageActions
-                        backOnClick={() => navigate(submissionDetailsPath)}
-                        backOnClickUrl={submissionDetailsPath}
-                        continueOnClickUrl={associatedContractsPagePath}
+                        backOnClick={() => {
+                            if (previousPath) navigate(previousPath)
+                        }}
+                        backOnClickUrl={previousPath}
+                        continueOnClickUrl={nextPath}
                     />
                 </Form>
             </FormContainer>

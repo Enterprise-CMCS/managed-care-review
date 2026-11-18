@@ -547,6 +547,8 @@ jobs:
           VPC_ID: ${{ secrets.DEV_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.DEV_INTERNAL_ALLOWED_ORIGINS }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.DEV_CERTIFICATE_ARN }}
+          API_DOMAIN_NAME: api.mc-review-dev.onemac.cms.gov
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-dev-cdk \
@@ -849,6 +851,8 @@ jobs:
           VPC_ID: ${{ secrets.VAL_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.VAL_INTERNAL_ALLOWED_ORIGINS }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.VAL_CERTIFICATE_ARN }}
+          API_DOMAIN_NAME: api.mc-review-val.onemac.cms.gov
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-val-cdk \
@@ -1600,6 +1604,8 @@ jobs:
           VPC_ID: ${{ secrets.PROD_VPC_ID }}
           INTERNAL_ALLOWED_ORIGINS: ${{ secrets.PROD_INTERNAL_ALLOWED_ORIGINS }}
           DD_API_KEY: ${{ secrets.DD_API_KEY }}
+          CLOUDFRONT_CERT_ARN: ${{ secrets.PROD_CERTIFICATE_ARN }}
+          API_DOMAIN_NAME: api.mc-review.onemac.cms.gov
         run: |
           echo "=== Deploying AppApi stack ==="
           pnpm cdk deploy app-api-prod-cdk \
