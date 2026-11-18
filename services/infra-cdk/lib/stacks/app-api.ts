@@ -74,10 +74,8 @@ export class AppApiStack extends BaseStack {
     public readonly cleanupFunction: NodejsFunction
     public readonly migrateFunction: NodejsFunction
     public readonly regenerateZipsFunction: NodejsFunction
-    public readonly migrateS3UrlsFunction: NodejsFunction
     public readonly backfillLastActionDateFunction: NodejsFunction
     public readonly migrateContactsFunction: NodejsFunction
-    public readonly restoreIAToStandardFunction: NodejsFunction
 
     public readonly syntheticDataBootstrapFunction?: NodejsFunction
     public readonly syntheticDataStateCredentialsSecret?: Secret
@@ -490,34 +488,6 @@ export class AppApiStack extends BaseStack {
         )
 
         /**
-         * Create the migrate S3 URLs function with VPC and Prisma engine layer
-         * Used to migrate malformed s3URL fields to separate s3BucketName and s3Key columns
-         */
-        this.migrateS3UrlsFunction = this.createLambdaFunction(
-            'migrateS3Urls',
-            'migrate_s3_urls',
-            'main',
-            {
-                timeout: Duration.minutes(15), // Extended timeout for processing many documents
-                memorySize: 1024,
-                environment,
-                role,
-                vpc: this.vpc,
-                vpcSubnets: {
-                    subnetType: SubnetType.PRIVATE_WITH_EGRESS,
-                },
-                securityGroups,
-                bundling: {
-                    format: OutputFormat.ESM,
-                    banner: AppApiStack.ESM_BANNER,
-                    ...this.createBundling('migrate-s3-urls', [
-                        this.getPrismaCleanupCommands(),
-                    ]),
-                },
-            }
-        )
-
-        /**
          * This is a migration to backfill lastActionDate for existing
          * contract/rate rows after adding ContractTable.lastActionDate and
          * RateTable.lastActionDate.
@@ -571,65 +541,6 @@ export class AppApiStack extends BaseStack {
                         this.getPrismaCleanupCommands(),
                     ]),
                 },
-            }
-        )
-
-        /**
-         * Create the restore IA to Standard function with dedicated role
-         * Restores Infrequent Access files to S3 Standard storage
-         * NOTE: Cannot handle Glacier files - use AWS S3 Batch Operations for those
-         */
-        const restoreIAToStandardRole = new Role(
-            this,
-            'RestoreIAToStandardRole',
-            {
-                assumedBy: new ServicePrincipal('lambda.amazonaws.com'),
-                managedPolicies: [
-                    ManagedPolicy.fromAwsManagedPolicyName(
-                        'service-role/AWSLambdaBasicExecutionRole'
-                    ),
-                ],
-            }
-        )
-
-        // Grant S3 permissions (scoped to specific buckets)
-        restoreIAToStandardRole.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: ['s3:ListBucket'],
-                resources: [
-                    `arn:aws:s3:::${environment.VITE_APP_S3_DOCUMENTS_BUCKET}`,
-                    `arn:aws:s3:::${environment.VITE_APP_S3_QA_BUCKET}`,
-                ],
-            })
-        )
-
-        restoreIAToStandardRole.addToPolicy(
-            new PolicyStatement({
-                effect: Effect.ALLOW,
-                actions: [
-                    's3:GetObject',
-                    's3:PutObject',
-                    's3:GetObjectAttributes',
-                    's3:GetObjectTagging',
-                    's3:PutObjectTagging',
-                ],
-                resources: [
-                    `arn:aws:s3:::${environment.VITE_APP_S3_DOCUMENTS_BUCKET}/*`,
-                    `arn:aws:s3:::${environment.VITE_APP_S3_QA_BUCKET}/*`,
-                ],
-            })
-        )
-
-        this.restoreIAToStandardFunction = this.createLambdaFunction(
-            'restore-ia-to-standard',
-            'restore_ia_to_standard',
-            'main',
-            {
-                timeout: Duration.minutes(15), // Extended timeout for processing many files
-                memorySize: 1024,
-                environment,
-                role: restoreIAToStandardRole,
             }
         )
 
@@ -1401,7 +1312,6 @@ export class AppApiStack extends BaseStack {
             this.oauthTokenFunction,
             this.migrateFunction,
             this.regenerateZipsFunction,
-            this.migrateS3UrlsFunction,
             this.backfillLastActionDateFunction,
             this.migrateContactsFunction,
             this.graphqlFunction,
@@ -1528,12 +1438,6 @@ export class AppApiStack extends BaseStack {
             value: this.regenerateZipsFunction.functionName,
             exportName: this.exportName('RegenerateZipsFunctionName'),
             description: 'Regenerate zips Lambda function name',
-        })
-
-        new CfnOutput(this, 'MigrateS3UrlsFunctionName', {
-            value: this.migrateS3UrlsFunction.functionName,
-            exportName: this.exportName('MigrateS3UrlsFunctionName'),
-            description: 'Migrate S3 URLs Lambda function name',
         })
 
         new CfnOutput(this, 'BackfillLastActionDateFunctionName', {
