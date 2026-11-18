@@ -14,12 +14,21 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    indexContracts returns all of the contracts the current user can see.
+    indexContracts returns all of the health plan and EQRO contracts the current user can see.
+    ILOS submissions are not included, use indexIlosSubmissions instead.
 
     StateUsers can find all the contracts for their state
     CMSUsers can find all the contracts that do not have the DRAFT status
     """
     indexContracts(input: IndexContractsInput): IndexContractsPayload!
+    """
+    indexIlosSubmissions returns all of the ILOS submissions the current user can see.
+    ILOS submissions are excluded from indexContracts.
+
+    StateUsers can find all the ILOS submissions for their state
+    CMSUsers can find all the ILOS submissions that do not have the DRAFT status
+    """
+    indexIlosSubmissions(input: IndexContractsInput): IndexContractsPayload!
     """
     indexContractsStripped returns abbreviated contract data
     Intended for use with CMS dashboards, initially minimal contract query

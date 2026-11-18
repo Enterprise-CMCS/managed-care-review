@@ -1,0 +1,83 @@
+query indexIlosSubmissionsForDashboard($input: IndexContractsInput) {
+    indexIlosSubmissions(input: $input) {
+        totalCount
+        edges {
+            node {
+                id
+                status
+                reviewStatus
+                consolidatedStatus
+                createdAt
+                updatedAt
+                initiallySubmittedAt
+                lastUpdatedForDisplay
+                stateCode
+                contractSubmissionType
+                reviewStatusActions {
+                    updatedAt
+                    actionType
+                }
+                state {
+                    code
+                    name
+                    programs {
+                        id
+                        name
+                        fullName
+                        isRateProgram
+                        isDeprecated
+                        deprecatedByProgramId
+                    }
+                }
+                stateNumber
+
+                draftRevision {
+                    id
+                    createdAt
+                    updatedAt
+                    contractName
+
+                    submitInfo {
+                        updatedAt
+                    }
+
+                    unlockInfo {
+                        updatedAt
+                    }
+
+                    formData {
+                        programIDs
+                        submissionType
+                    }
+                }
+
+                packageSubmissions {
+                    cause
+                    submitInfo {
+                        updatedAt
+                    }
+
+                    contractRevision {
+                        id
+                        createdAt
+                        updatedAt
+                        contractName
+
+                        submitInfo {
+                            updatedAt
+                        }
+
+                        unlockInfo {
+                            updatedAt
+                        }
+
+                        formData {
+                            programIDs
+                            submissionType
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
