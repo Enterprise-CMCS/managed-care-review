@@ -18,8 +18,7 @@ import {
 } from '../../../gen/gqlClient'
 
 import { useFocus } from '../../../hooks'
-import { activeFormPages, type ContractFormPageProps } from '../submissionUtils'
-import { RouteT, EQRO_SUBMISSION_FORM_ROUTES } from '@mc-review/constants'
+import { type ContractFormPageProps } from '../submissionUtils'
 import {
     ButtonWithLogging,
     DynamicStepIndicator,
@@ -30,7 +29,7 @@ import {
     FieldTextInput,
     PageActions,
 } from '../../../components'
-import { useCurrentRoute, useRouteParams, useTealium } from '../../../hooks'
+import { useFormFlow, useRouteParams, useTealium } from '../../../hooks'
 import { useContractForm } from '../../../hooks/useContractForm'
 import { useAuth } from '../../../contexts/AuthContext'
 import { ErrorOrLoadingPage } from '../SharedSubmissionComponents'
@@ -39,7 +38,6 @@ import { useErrorSummary } from '../../../hooks/useErrorSummary'
 import { featureFlags } from '@mc-review/common-code'
 import { useFocusOnRender } from '../../../hooks/useFocusOnRender'
 import { usePage } from '../../../contexts/PageContext'
-import { getSubmissionPath } from '../../../routeHelpers'
 import { emailAddressRegex } from '../../../formHelpers'
 
 export interface ContactsFormValues {
@@ -83,27 +81,21 @@ const Contacts = ({
     const { logButtonEvent } = useTealium()
 
     const { loggedInUser } = useAuth()
-    const { currentRoute } = useCurrentRoute()
     const { id } = useRouteParams()
     const { updateActiveMainContent } = usePage()
     const { draftSubmission, interimState, updateDraft, showPageErrorMessage } =
         useContractForm(id)
+    // Contacts is shared by every submission type; the flow knows which pages surround it
+    const { previousPath, nextPath, stepIndicatorProps } = useFormFlow(
+        'SUBMISSIONS_CONTACTS',
+        { formData: draftSubmission?.draftRevision.formData }
+    )
     const newStateContactNameRef = React.useRef<HTMLInputElement | null>(null) // This ref.current is reset to the newest contact name field each time new contact is added
     const [newStateContactButtonRef, setNewStateContactButtonFocus] = useFocus() // This ref.current is always the same element
 
     const newActuaryContactNameRef = React.useRef<HTMLInputElement | null>(null)
 
     const navigate = useNavigate()
-
-    const hideSupportingDocs = ldClient?.variation(
-        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.flag,
-        featureFlags.HIDE_SUPPORTING_DOCS_PAGE.defaultValue
-    )
-
-    const showProcurementAttestation = ldClient?.variation(
-        featureFlags.PROCUREMENT_ATTESTATION.flag,
-        featureFlags.PROCUREMENT_ATTESTATION.defaultValue
-    )
 
     // Collect first/last name (required) plus an optional suffix, rather than
     // a single required full name.
@@ -145,32 +137,7 @@ const Contacts = ({
     if (interimState || !draftSubmission || !updateDraft)
         return <ErrorOrLoadingPage state={interimState || 'GENERIC_ERROR'} />
 
-    const isEQROSubmission = draftSubmission.contractSubmissionType === 'EQRO'
-    const isEnrollmentBrokerSubmission =
-        draftSubmission.contractSubmissionType === 'ENROLLMENT_BROKER'
     const stateContacts = draftSubmission.draftRevision.formData.stateContacts
-    const contractSubmissionType = draftSubmission.contractSubmissionType
-
-    const getPreviousFormPage = (): RouteT => {
-        const { contractType, submissionType } =
-            draftSubmission.draftRevision.formData
-        // Attestations page precedes contacts for base contract submissions
-        if (
-            !isEQROSubmission &&
-            showProcurementAttestation &&
-            contractType === 'BASE'
-        ) {
-            return 'SUBMISSIONS_ATTESTATIONS'
-        }
-        if (isEnrollmentBrokerSubmission) {
-            return 'SUBMISSIONS_ASSOCIATED_CONTRACTS'
-        }
-        if (submissionType === 'CONTRACT_ONLY') {
-            return 'SUBMISSIONS_CONTRACT_DETAILS'
-        }
-        return 'SUBMISSIONS_RATE_DETAILS'
-    }
-    const previousFormPage = getPreviousFormPage()
 
     const emptyStateContact = {
         name: '',
@@ -201,7 +168,6 @@ const Contacts = ({
         setSubmitting: (isSubmitting: boolean) => void, // formik setSubmitting
         options: {
             type: 'SAVE_AS_DRAFT' | 'BACK' | 'CONTINUE'
-            redirectPath?: RouteT
         }
     ) => {
         draftSubmission.draftRevision.formData.stateContacts =
@@ -228,33 +194,7 @@ const Contacts = ({
             setDraftSaved(true)
             setSubmitting(false)
         } else {
-            if (isEQROSubmission) {
-                navigate(
-                    getSubmissionPath(
-                        'SUBMISSIONS_REVIEW_SUBMIT',
-                        contractSubmissionType,
-                        id
-                    )
-                )
-            } else if (hideSupportingDocs) {
-                if (options.redirectPath) {
-                    navigate(
-                        getSubmissionPath(
-                            options.redirectPath,
-                            contractSubmissionType,
-                            id
-                        )
-                    )
-                }
-            } else {
-                navigate(
-                    getSubmissionPath(
-                        'SUBMISSIONS_DOCUMENTS',
-                        contractSubmissionType,
-                        id
-                    )
-                )
-            }
+            if (nextPath) await navigate(nextPath)
         }
     }
 
@@ -292,25 +232,7 @@ const Contacts = ({
     return (
         <div id={activeMainContentId}>
             <FormNotificationContainer>
-                <DynamicStepIndicator
-                    formPages={
-                        isEQROSubmission
-                            ? EQRO_SUBMISSION_FORM_ROUTES
-                            : activeFormPages(
-                                  draftSubmission.draftRevision.formData,
-                                  hideSupportingDocs,
-                                  showProcurementAttestation
-                              )
-                    }
-                    currentFormPage={currentRoute}
-                    customPageTitles={
-                        isEQROSubmission
-                            ? {
-                                  SUBMISSIONS_TYPE: 'Submission details',
-                              }
-                            : undefined
-                    }
-                />
+                <DynamicStepIndicator {...stepIndicatorProps} />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     unlockedInfo={draftSubmission.draftRevision.unlockInfo}
@@ -324,7 +246,6 @@ const Contacts = ({
                     onSubmit={(values, { setSubmitting }) => {
                         return handleFormSubmit(values, setSubmitting, {
                             type: 'CONTINUE',
-                            redirectPath: 'SUBMISSIONS_REVIEW_SUBMIT',
                         })
                     }}
                     validationSchema={contactSchema}
@@ -567,13 +488,7 @@ const Contacts = ({
                                         )
                                     }}
                                     backOnClick={() => {
-                                        navigate(
-                                            getSubmissionPath(
-                                                previousFormPage,
-                                                contractSubmissionType,
-                                                id
-                                            )
-                                        )
+                                        if (previousPath) navigate(previousPath)
                                     }}
                                     continueOnClick={() => {
                                         setShouldValidate(true)
@@ -584,16 +499,8 @@ const Contacts = ({
                                         !!Object.keys(errors).length
                                     }
                                     actionInProgress={isSubmitting}
-                                    backOnClickUrl={getSubmissionPath(
-                                        previousFormPage,
-                                        contractSubmissionType,
-                                        id
-                                    )}
-                                    continueOnClickUrl={getSubmissionPath(
-                                        'SUBMISSIONS_REVIEW_SUBMIT',
-                                        contractSubmissionType,
-                                        id
-                                    )}
+                                    backOnClickUrl={previousPath}
+                                    continueOnClickUrl={nextPath}
                                 />
                             </UswdsForm>
                         </>
