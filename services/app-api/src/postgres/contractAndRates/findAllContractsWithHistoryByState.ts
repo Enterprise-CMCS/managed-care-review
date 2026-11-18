@@ -22,6 +22,8 @@ async function findAllContractsWithHistoryByState(
                 stateCode: {
                     equals: stateCode,
                 },
+                // ILOS submissions are served by indexIlosSubmissionsStripped
+                contractSubmissionType: { not: 'ILOS' },
             },
             include: includeFullContract,
         })

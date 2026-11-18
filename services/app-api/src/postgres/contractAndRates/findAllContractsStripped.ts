@@ -16,6 +16,12 @@ type FindAllContractsStrippedType = {
     stateCode?: string
     contractIDs?: string[]
     includeDrafts?: boolean
+    /**
+     * Selects which of the two submission groups to return.
+     * - false (default): health plan, EQRO and EB contracts, used by indexContractsStripped
+     * - true: ILOS submissions only, used by indexIlosSubmissionsStripped
+     */
+    ilosOnly?: boolean
 }
 
 async function findAllContractsStrippedInTransaction(
@@ -25,6 +31,7 @@ async function findAllContractsStrippedInTransaction(
     const stateCode = args?.stateCode
     const contractIDs = args?.contractIDs
     const includeDrafts = args?.includeDrafts ?? false
+    const ilosOnly = args?.ilosOnly ?? false
 
     const whereClause: any = {
         id: contractIDs
@@ -32,6 +39,7 @@ async function findAllContractsStrippedInTransaction(
                   in: contractIDs,
               }
             : undefined,
+        contractSubmissionType: ilosOnly ? 'ILOS' : { not: 'ILOS' },
     }
 
     if (!includeDrafts) {

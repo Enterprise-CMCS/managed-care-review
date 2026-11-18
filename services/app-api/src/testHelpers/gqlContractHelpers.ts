@@ -443,6 +443,42 @@ const createAndUpdateTestILOSContract = async (
     )
 }
 
+// Creates an ILOS submission with one external rate and submits it.
+const createAndSubmitTestILOSContract = async (
+    server: ApolloServer,
+    stateCode?: StateCodeType
+): Promise<Contract> => {
+    const draft = await createAndUpdateTestILOSContract(server, stateCode)
+
+    const rateResult = await executeGraphQLOperation(server, {
+        query: UpdateDraftContractRatesDocument,
+        variables: {
+            input: {
+                contractID: draft.id,
+                lastSeenUpdatedAt: draft.draftRevision?.updatedAt,
+                updatedRates: [
+                    {
+                        type: 'EXTERNAL',
+                        externalRate: {
+                            rateControlName: 'EXT-1',
+                            rateDateStart: '2025-01-01',
+                            rateDateEnd: '2025-12-31',
+                        },
+                    },
+                ],
+            },
+        },
+    })
+
+    if (rateResult.errors) {
+        throw new Error(
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(rateResult.errors)}`
+        )
+    }
+
+    return await submitTestContract(server, draft.id)
+}
+
 const createAndUpdateTestEQROContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
@@ -874,5 +910,6 @@ export {
     errorUndoWithdrawTestContract,
     createAndUpdateTestEQROContract,
     createAndUpdateTestILOSContract,
+    createAndSubmitTestILOSContract,
     createAndUpdateTestEBContract,
 }

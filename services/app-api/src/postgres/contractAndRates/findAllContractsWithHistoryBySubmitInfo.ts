@@ -32,6 +32,8 @@ async function findAllContractsWithHistoryBySubmitInfoInsideTransaction(
     try {
         const whereClause: any = {
             revisions: { some: { submitInfoID: { not: null } } },
+            // ILOS submissions are served by indexIlosSubmissionsStripped
+            contractSubmissionType: { not: 'ILOS' },
         }
 
         if (process.env.stage === 'prod') {
