@@ -44,6 +44,19 @@ for (const stage of [reviewStage, 'dev', 'val', 'qa', 'prod']) {
         assert.equal(policies.length, 2)
         for (const policy of policies) {
             const statements = policy.Properties.PolicyDocument.Statement
+            // Keep the Cognito identity ID as a private-path variable, not a
+            // direct Condition key; select sessions with a supported global key.
+            for (const statement of statements) {
+                for (const operator of Object.keys(statement.Condition ?? {})) {
+                    assert.ok(
+                        !Object.hasOwn(
+                            statement.Condition[operator],
+                            'cognito-identity.amazonaws.com:sub'
+                        ),
+                        'Use S3/global condition keys, not a direct Cognito claim'
+                    )
+                }
+            }
             assert.doesNotMatch(
                 JSON.stringify(statements),
                 /RestoreIAToStandard/
@@ -63,7 +76,9 @@ for (const stage of [reviewStage, 'dev', 'val', 'qa', 'prod']) {
             const management = statement('DenyBrowserObjectManagement')
             assert.deepEqual(management.NotAction, browserActions)
             assert.deepEqual(management.Condition, {
-                Null: { 'cognito-identity.amazonaws.com:sub': 'false' },
+                StringEquals: {
+                    'aws:FederatedProvider': 'cognito-identity.amazonaws.com',
+                },
             })
             const prefixes = statement(
                 'DenyBrowserUploadsOutsideApprovedPrefixes'
@@ -76,9 +91,9 @@ for (const stage of [reviewStage, 'dev', 'val', 'qa', 'prod']) {
             assert.deepEqual(prefixes.Condition, management.Condition)
 
             const copies = statement('DenyBrowserObjectCopies')
-            assert.deepEqual(copies.Condition.Null, {
-                'cognito-identity.amazonaws.com:sub': 'false',
-                's3:x-amz-copy-source': 'false',
+            assert.deepEqual(copies.Condition, {
+                StringEquals: management.Condition.StringEquals,
+                Null: { 's3:x-amz-copy-source': 'false' },
             })
             const conditional = statement('DenyUnconditionalDocumentUploads')
             assert.equal(conditional.Action, 's3:PutObject')

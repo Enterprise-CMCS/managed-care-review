@@ -109,9 +109,11 @@ managed by this stack.
 - **Browser credentials have a narrower boundary.** Cognito identity-pool sessions
   may read objects, upload to `allusers/` or their own private prefix, list
   multipart parts and abort multipart uploads. Object management, server-side
-  copies and tagging are denied. The policy identifies these sessions using
-  `cognito-identity.amazonaws.com:sub`, the identity-pool identity ID—not the
-  user-pool user ID.
+  copies and tagging are denied. The policy identifies Cognito-issued role
+  sessions with the global [`aws:FederatedProvider`](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-federatedprovider)
+  key set to `cognito-identity.amazonaws.com`. Private paths still use the
+  `cognito-identity.amazonaws.com:sub` policy variable: the identity-pool identity
+  ID, not the user-pool user ID.
 - **GuardDuty owns scan verdicts.** Only the stage's
   `GuardDutyMalwareProtectionPassRole-<stage>` role may replace or delete object
   tags, including version tags. Other writers cannot supply

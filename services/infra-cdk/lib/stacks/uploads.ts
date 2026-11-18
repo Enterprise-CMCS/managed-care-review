@@ -132,11 +132,13 @@ export class Uploads extends BaseStack {
     }
 
     private addUploadIntegrityPolicies(bucket: IBucket): void {
-        // Cognito retains this key in both enhanced and classic Identity Pool
-        // sessions. Its presence selects browser credentials without relying on
-        // role names or importing the externally managed Val identity role.
+        // Select Cognito-issued role sessions with AWS's global IdP key, not
+        // a provider-specific claim as a direct S3 Condition key. This avoids
+        // role/session-name assumptions in enhanced and classic Identity Pool
+        // flows. The retained identity ID still scopes private paths below.
+        // https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_condition-keys.html#condition-keys-federatedprovider
         const browserSession = {
-            'cognito-identity.amazonaws.com:sub': 'false',
+            'aws:FederatedProvider': 'cognito-identity.amazonaws.com',
         }
         const objects = [`${bucket.bucketArn}/*`]
 
@@ -147,7 +149,7 @@ export class Uploads extends BaseStack {
                 principals: [new AnyPrincipal()],
                 notActions: [...BROWSER_S3_OBJECT_ACTIONS],
                 resources: objects,
-                conditions: { Null: browserSession },
+                conditions: { StringEquals: browserSession },
             })
         )
         bucket.addToResourcePolicy(
@@ -160,7 +162,7 @@ export class Uploads extends BaseStack {
                     `${bucket.bucketArn}/allusers/*`,
                     `${bucket.bucketArn}/private/\${cognito-identity.amazonaws.com:sub}/*`,
                 ],
-                conditions: { Null: browserSession },
+                conditions: { StringEquals: browserSession },
             })
         )
         bucket.addToResourcePolicy(
@@ -171,10 +173,8 @@ export class Uploads extends BaseStack {
                 actions: ['s3:PutObject'],
                 resources: objects,
                 conditions: {
-                    Null: {
-                        ...browserSession,
-                        's3:x-amz-copy-source': 'false',
-                    },
+                    StringEquals: browserSession,
+                    Null: { 's3:x-amz-copy-source': 'false' },
                 },
             })
         )
