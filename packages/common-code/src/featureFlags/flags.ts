@@ -92,7 +92,7 @@ const featureFlags = {
         defaultValue: false
     },
     /**
-     * Enables In Lieu of Services (ILOS) actuarial report submissions
+     * Feature flag toggles ILOS report submissions.
      */
     ILOS_SUBMISSIONS: {
         flag: 'ilos-submissions',

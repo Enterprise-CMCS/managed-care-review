@@ -3,6 +3,7 @@ import {
     contractRevisionSchema,
     rateRevisionSchema,
     eqroContractRevisionSchema,
+    ilosContractRevisionSchema,
     strippedContractRevisionSchema,
 } from './revisionTypes'
 import { unlockedContractStatusSchema } from './statusType'
@@ -11,10 +12,12 @@ import {
     contractWithoutDraftRatesSchema,
     rateWithoutDraftContractsSchema,
     eqroContractDraftSchema,
+    ilosContractDraftSchema,
 } from './baseContractRateTypes'
 import {
     submittableContractFormDataSchema,
     submittableEQROContractFormDataSchema,
+    submittableILOSContractFormDataSchema,
     submittableRateFormDataSchema,
 } from './formDataTypes'
 import {
@@ -25,29 +28,41 @@ import {
 import { contractReviewActionSchema } from './contractReviewActionType'
 import { contractSubmissionTypeSchema } from './contractSubmissionType'
 
+// A rate read through a contract's draftRates carries its order on that
+// contract. A rate fetched on its own has no position, so it is not on
+// rateWithoutDraftContractsSchema. Optional because mocks and undoWithdrawRate
+// build draftRates without it.
+const draftRateSchema = rateWithoutDraftContractsSchema.extend({
+    ratePosition: z.number().optional(),
+})
+
 const contractSchema = contractWithoutDraftRatesSchema.extend({
     withdrawnRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
-    draftRates: z.lazy(() =>
-        z.array(rateWithoutDraftContractsSchema).optional()
-    ),
+    draftRates: z.lazy(() => z.array(draftRateSchema).optional()),
 })
 
 const eqroContractSchema = eqroContractDraftSchema.extend({
     withdrawnRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
-    draftRates: z.lazy(() =>
+    draftRates: z.lazy(() => z.array(draftRateSchema).optional()),
+})
+
+// ILOS submissions link rates like a health plan, so they carry the same rate structure.
+const ilosContractSchema = ilosContractDraftSchema.extend({
+    withdrawnRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
+    draftRates: z.lazy(() => z.array(draftRateSchema).optional()),
 })
 
 const unlockedContractSchema = contractSchema.extend({
     status: unlockedContractStatusSchema,
     // Since this is a contract in UNLOCKED status, there will be a draftRevision and draftRates
     draftRevision: z.lazy(() => contractRevisionSchema),
-    draftRates: z.lazy(() => z.array(rateWithoutDraftContractsSchema)),
+    draftRates: z.lazy(() => z.array(draftRateSchema)),
 })
 
 const draftContractSchema = contractSchema.extend({
@@ -64,7 +79,7 @@ const submittableContractSchema = contractSchema.extend({
         formData: submittableContractFormDataSchema,
     }),
     draftRates: z.array(
-        rateWithoutDraftContractsSchema.extend({
+        draftRateSchema.extend({
             draftRevision: rateRevisionSchema.extend({
                 formData: submittableRateFormDataSchema,
             }),
@@ -76,6 +91,16 @@ const submittableEQROContractSchema = eqroContractSchema.extend({
     draftRevision: eqroContractRevisionSchema.extend({
         formData: submittableEQROContractFormDataSchema,
     }),
+})
+
+// submittableILOSContractSchema validates a draft ILOS submission as submittable.
+// Linked rates are always existing submitted rates, so their draftRevision is not
+// required to be complete here; parseILOSContract rejects rates parented to the submission.
+const submittableILOSContractSchema = ilosContractSchema.extend({
+    draftRevision: ilosContractRevisionSchema.extend({
+        formData: submittableILOSContractFormDataSchema,
+    }),
+    draftRates: z.array(draftRateSchema),
 })
 
 const strippedContractSchema = z.object({
@@ -101,6 +126,7 @@ const strippedContractSchema = z.object({
 type StrippedContractType = z.infer<typeof strippedContractSchema>
 
 type ContractType = z.infer<typeof contractSchema>
+type ILOSContractType = z.infer<typeof ilosContractSchema>
 type UnlockedContractType = z.infer<typeof unlockedContractSchema>
 type DraftContractType = z.infer<typeof draftContractSchema>
 
@@ -122,11 +148,14 @@ export {
     contractSchema,
     strippedContractSchema,
     submittableEQROContractSchema,
+    ilosContractSchema,
+    submittableILOSContractSchema,
     contractSubmitters,
 }
 
 export type {
     ContractType,
+    ILOSContractType,
     StrippedContractType,
     DraftContractType,
     UnlockedContractType,

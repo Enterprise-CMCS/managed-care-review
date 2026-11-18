@@ -7,7 +7,12 @@ export {
     contractSubmitters,
 } from './contractTypes'
 
-export { contractFormDataSchema, rateFormDataSchema } from './formDataTypes'
+export {
+    contractFormDataSchema,
+    ilosContractFormDataSchema,
+    submittableILOSContractFormDataSchema,
+    rateFormDataSchema,
+} from './formDataTypes'
 
 export { contractRevisionSchema, rateRevisionSchema } from './revisionTypes'
 
@@ -32,6 +37,7 @@ export {
 } from './helpers'
 export type {
     ContractType,
+    ILOSContractType,
     StrippedContractType,
     UnlockedContractType,
 } from './contractTypes'
@@ -45,6 +51,9 @@ export type { PackageStatusType, UpdateInfoType } from './updateInfoType'
 
 export type {
     ContractFormDataType,
+    ILOSContractFormDataType,
+    ILOSDocumentType,
+    ILOSExternalRateType,
     RateFormDataType,
     DocumentType,
     RateFormEditableType,
@@ -56,6 +65,7 @@ export type {
 
 export type {
     ContractRevisionType,
+    ILOSContractRevisionType,
     RateRevisionType,
     StrippedRateRevisionType,
     StrippedContractRevisionType,
@@ -107,4 +117,6 @@ export type {
 export {
     validateContractDraftRevisionInput,
     validateEQROContractDraftRevisionInput,
+    validateILOSContractDraftRevisionInput,
+    parseContractDraftRevisionInput,
 } from './dataValidatorHelpers'

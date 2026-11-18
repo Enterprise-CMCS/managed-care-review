@@ -55,7 +55,9 @@ describe('EBSubmissionForm', () => {
         await waitFor(() =>
             testNavigate('/submissions/eb/12/edit/associated-contracts')
         )
-        expect(screen.getByTestId('associatedContracts')).toBeInTheDocument()
+        expect(
+            await screen.findByTestId('associatedContracts')
+        ).toBeInTheDocument()
 
         await waitFor(() => testNavigate('/submissions/eb/12/edit/contacts'))
         expect(

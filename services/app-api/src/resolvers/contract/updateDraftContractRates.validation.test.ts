@@ -18,13 +18,17 @@ function mockRateFormDataInput() {
     }
 }
 
-function setupResolver() {
+function setupResolver(contractSubmissionType = 'HEALTH_PLAN') {
     const updatedAt = new Date('2026-01-01T00:00:00.000Z')
     const contract = {
         id: 'test-contract',
         stateCode: 'MN',
+        contractSubmissionType,
         consolidatedStatus: 'DRAFT',
-        draftRevision: { updatedAt },
+        draftRevision: {
+            updatedAt,
+            formData: { ilosExternalRates: [{ id: 'existing-external' }] },
+        },
         draftRates: [],
     }
     const store = {
@@ -81,8 +85,61 @@ describe('updateDraftContractRates input validation', () => {
                 link: [{ rateID: 'linked-rate', ratePosition: 2 }],
                 unlink: [],
                 delete: [],
+                external: undefined,
             },
         })
+    })
+
+    it('numbers external and linked rates on an ILOS submission by their place in the list', async () => {
+        const { run, store, contract } = setupResolver('ILOS')
+
+        await run([
+            {
+                type: 'EXTERNAL',
+                externalRate: { rateControlName: 'new external' },
+            },
+            { type: 'LINK', rateID: 'linked-rate' },
+            {
+                type: 'EXTERNAL',
+                externalRate: {
+                    id: 'existing-external',
+                    rateControlName: 'kept external',
+                },
+            },
+        ])
+
+        expect(store.updateDraftContractRates).toHaveBeenCalledWith({
+            contractID: contract.id,
+            rateUpdates: {
+                create: [],
+                update: [],
+                link: [{ rateID: 'linked-rate', ratePosition: 2 }],
+                unlink: [],
+                delete: [],
+                external: [
+                    { rateControlName: 'new external', position: 1 },
+                    {
+                        id: 'existing-external',
+                        rateControlName: 'kept external',
+                        position: 3,
+                    },
+                ],
+            },
+        })
+    })
+
+    it('rejects the same external rate id twice in one list', async () => {
+        const { run, store } = setupResolver('ILOS')
+
+        await expect(
+            run([
+                { type: 'EXTERNAL', externalRate: { id: 'existing-external' } },
+                { type: 'EXTERNAL', externalRate: { id: 'existing-external' } },
+            ])
+        ).rejects.toMatchObject({
+            extensions: { code: 'BAD_USER_INPUT' },
+        })
+        expect(store.updateDraftContractRates).not.toHaveBeenCalled()
     })
 
     it.each<{ name: string; input: UpdateContractRateInput }>([
@@ -129,6 +186,26 @@ describe('updateDraftContractRates input validation', () => {
         {
             name: 'UPDATE without formData',
             input: { type: 'UPDATE', rateID: 'updated-rate' },
+        },
+        {
+            name: 'LINK with externalRate',
+            input: {
+                type: 'LINK',
+                rateID: 'linked-rate',
+                externalRate: { rateControlName: 'ext' },
+            },
+        },
+        {
+            name: 'EXTERNAL without externalRate',
+            input: { type: 'EXTERNAL' },
+        },
+        {
+            name: 'EXTERNAL with rateID',
+            input: {
+                type: 'EXTERNAL',
+                rateID: 'linked-rate',
+                externalRate: { rateControlName: 'ext' },
+            },
         },
     ])('rejects $name before accessing the store', async ({ input }) => {
         const { run, store } = setupResolver()

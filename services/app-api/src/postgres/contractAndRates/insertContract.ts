@@ -6,6 +6,10 @@ import type {
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
+import {
+    formatDocsForPrisma,
+    formatOrderedListForPrisma,
+} from './prismaContractRateAdaptors'
 import { parseErrorToError } from '@mc-review/helpers'
 
 type InsertContractArgsType = Partial<ContractFormDataType> & {
@@ -55,6 +59,9 @@ async function insertDraftContract(
         modifiedLengthOfContract,
         modifiedNonRiskPaymentArrangements,
         inLieuServicesAndSettings,
+        ilosRateDateStart,
+        ilosRateDateEnd,
+        ilosDocuments,
     } = args
     try {
         return await client.$transaction(async (tx) => {
@@ -86,26 +93,17 @@ async function insertDraftContract(
                             contractDocuments: {
                                 create:
                                     contractDocuments &&
-                                    contractDocuments.map((d, idx) => ({
-                                        position: idx,
-                                        ...d,
-                                    })),
+                                    formatDocsForPrisma(contractDocuments),
                             },
                             supportingDocuments: {
                                 create:
                                     supportingDocuments &&
-                                    supportingDocuments.map((d, idx) => ({
-                                        position: idx,
-                                        ...d,
-                                    })),
+                                    formatDocsForPrisma(supportingDocuments),
                             },
                             stateContacts: {
                                 create:
                                     stateContacts &&
-                                    stateContacts.map((c, idx) => ({
-                                        position: idx,
-                                        ...c,
-                                    })),
+                                    formatOrderedListForPrisma(stateContacts),
                             },
                             contractDateStart,
                             contractDateEnd,
@@ -128,6 +126,14 @@ async function insertDraftContract(
                             modifiedLengthOfContract,
                             modifiedNonRiskPaymentArrangements,
                             inLieuServicesAndSettings,
+                            // ILOS submission fields only
+                            ilosRateDateStart,
+                            ilosRateDateEnd,
+                            ilosDocuments: {
+                                create:
+                                    ilosDocuments &&
+                                    formatDocsForPrisma(ilosDocuments),
+                            },
                         },
                     },
                 },

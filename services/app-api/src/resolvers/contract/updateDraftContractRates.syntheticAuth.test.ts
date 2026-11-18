@@ -21,7 +21,7 @@ it('allows the synthetic state actor to update rates in its exact review stage',
         stateCode: 'MN',
         status: 'DRAFT',
         consolidatedStatus: 'DRAFT',
-        draftRevision: { updatedAt },
+        draftRevision: { updatedAt, formData: { ilosExternalRates: [] } },
         draftRates: [],
     }
     const updateRates = vi.fn().mockResolvedValue(contract)
