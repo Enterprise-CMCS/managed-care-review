@@ -1,6 +1,8 @@
 import React from 'react'
 import { InlineDocumentWarning } from '../DocumentWarning'
-import { LinkWithLogging } from '../../components'
+import { DownloadLink } from '../DownloadLink/DownloadLink'
+import { useApolloClient } from '@apollo/client/react'
+import { renewZipDownload } from '../../helpers/renewZipDownload'
 import { Icon } from '@trussworks/react-uswds'
 import {
     getContractZipDownloadUrl,
@@ -22,6 +24,12 @@ export const ZipDownloadLink = ({
     documentCount,
     onDocumentError,
 }: ZipDownloadLinkProps): React.ReactElement => {
+    const client = useApolloClient()
+    const zipPackage = documentZipPackages?.find(
+        (pkg) =>
+            pkg.documentType ===
+            (type === 'CONTRACT' ? 'CONTRACT_DOCUMENTS' : 'RATE_DOCUMENTS')
+    )
     const contractOrRate = type === 'CONTRACT' ? 'contract' : 'rate'
     const zippedFilesURL =
         type === 'CONTRACT'
@@ -40,8 +48,10 @@ export const ZipDownloadLink = ({
     }
 
     return (
-        <LinkWithLogging
+        <DownloadLink
             href={zippedFilesURL}
+            resourceKey={`zip:${zipPackage!.id}`}
+            renew={() => renewZipDownload(client, zipPackage!.id)}
             target="_blank"
             className={styles.downloadLink}
         >
@@ -51,6 +61,6 @@ export const ZipDownloadLink = ({
                 {documentCount &&
                     `(${documentCount} file${documentCount > 1 ? 's' : ''})`}
             </span>
-        </LinkWithLogging>
+        </DownloadLink>
     )
 }

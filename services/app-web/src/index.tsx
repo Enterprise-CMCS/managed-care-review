@@ -7,7 +7,7 @@ import App from './pages/App/App'
 import reportWebVitals from './reportWebVitals'
 import { localGQLFetch, fakeAmplifyFetch } from './api'
 import { assertIsAuthMode } from '@mc-review/common-code'
-import { S3ClientT, newAmplifyS3Client, newLocalS3Client } from './s3'
+import { S3ClientT, newApiS3Client, newLocalS3Client } from './s3'
 import { asyncWithLDProvider } from 'launchdarkly-react-client-sdk'
 import type { S3BucketConfigType } from './s3'
 
@@ -31,14 +31,6 @@ Amplify.configure({
             redirectSignOut: import.meta.env.VITE_APP_APPLICATION_ENDPOINT,
             scope: ['email', 'openid'],
             responseType: 'token',
-        },
-    },
-    Storage: {
-        region: import.meta.env.VITE_APP_S3_REGION,
-        bucket: import.meta.env.VITE_APP_S3_DOCUMENTS_BUCKET,
-        identityPoolId: import.meta.env.VITE_APP_COGNITO_ID_POOL_ID,
-        customPrefix: {
-            public: 'allusers/',
         },
     },
     API: {
@@ -118,7 +110,7 @@ const S3_BUCKETS_CONFIG: S3BucketConfigType = {
     QUESTION_ANSWER_DOCS: s3QABucket,
 }
 if (s3Region) {
-    s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG, apolloClient)
+    s3Client = newApiS3Client(S3_BUCKETS_CONFIG, apolloClient)
 } else if (s3LocalURL) {
     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
 } else {
