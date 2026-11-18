@@ -170,9 +170,17 @@ const StateUserRoutes = ({
         featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.flag,
         featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
     )
+    const showIlosSubmissions: boolean = ldClient?.variation(
+        featureFlags.ILOS_SUBMISSIONS.flag,
+        featureFlags.ILOS_SUBMISSIONS.defaultValue
+    )
 
     // The type-selection page is only needed when there's more than one type to choose from
-    const showSubmissionTypeSelection = showEqroSubmissions || showSdpSubmissions || showEbSubmissions
+    const showSubmissionTypeSelection =
+        showEqroSubmissions ||
+        showSdpSubmissions ||
+        showEbSubmissions ||
+        showIlosSubmissions
 
     return (
         <AuthenticatedRouteWrapper>
