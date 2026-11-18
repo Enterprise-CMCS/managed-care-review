@@ -1,8 +1,9 @@
 # Browser storage API transport
 
-GraphQL provides upload/download URLs and malware-scan status. The browser sends
-file bytes directly to S3 using those presigned URLs; it does not need Cognito
-identity-pool S3 credentials for the transfers.
+GraphQL provides upload/download URLs and malware-scan status. File bytes travel
+directly between the browser and S3; the API does not proxy them. For API-backed
+transfers, the presigned URL carries S3 authorization instead of the browser's
+Cognito identity-pool credentials.
 
 The upload and download flows are separate:
 
@@ -10,7 +11,24 @@ The upload and download flows are separate:
 - **Download:** request a download URL → GET the file from S3.
 
 GraphQL controls access to these operations, while S3 validates the signed
-requests and enforces the clean-scan download policy.
+requests and enforces the clean-scan download policy. GraphQL requests retain
+the application's existing authentication; a presigned URL authorizes a specific
+S3 operation, not an application session.
+
+## Storage layout
+
+`HEALTH_PLAN_DOCS` and `QUESTION_ANSWER_DOCS` select the stage's document and Q&A
+buckets. The API generates a key such as `<uuid>.pdf`; the deployed S3 adapter
+stores it at `allusers/<uuid>.pdf`. The shared scan/download APIs accept that flat
+key with or without the `allusers/` prefix.
+
+The stored `s3://<bucket>/<key>/<original filename>` reference is legacy document
+metadata, not the physical object path or a fetchable URL. Use the key parser or
+the document's stored key rather than treating the entire reference as an S3 key.
+
+Package ZIPs live under `zips/` and use package-authorized resolvers. The buckets
+also support identity-private prefixes for Cognito storage, but those paths are
+not exposed by the shared scan/download APIs.
 
 ## API contracts
 
@@ -35,8 +53,10 @@ supplies the actual bytes later. Ordinary SDK uploads keep their default checksu
 
 The React upload adapter uses this API and preserves attachment metadata; it no
 longer uses `Storage.put`. Its existing Amplify downloads and scan polling remain
-unchanged for now. No new browser AWS SDK dependency is required. This API uses a
+unchanged. No new browser AWS SDK dependency is required. This API uses a
 single PUT, not multipart uploads; files must fit S3's single-PUT limit (5 GB).
+
+Supported file types are PDF, DOC, DOCX, XLS, XLSX, XLSM, XLTM, XLAM and CSV.
 
 ### Scan status
 
@@ -62,7 +82,7 @@ is clean**. Possessing a signed URL does not bypass that policy.
 
 ## Access boundaries
 
-- The scan and download queries allow all authenticated human roles. They provide
+- The scan and download queries allow all authenticated user roles. They provide
   **shared-object access, not document ownership or state-assignment checks**.
 - OAuth clients, including delegated clients, cannot use those two queries.
   OAuth uploads through `generateUploadURL` have separate write-permission rules;
@@ -74,6 +94,41 @@ is clean**. Possessing a signed URL does not bypass that policy.
 - Key validation is not content or file-size validation. ZIP downloads use
   `DocumentZipPackage.downloadUrl` through an authorized package fetch.
 
+## S3 enforcement
+
+Both buckets enforce integrity through resource-policy denies, so the controls
+also apply when a principal's IAM role has broader permissions. This matters in
+persistent environments where the Cognito identity role is imported rather than
+managed by this stack.
+
+- **Document writes are create-only.** All writers, including API-presigned
+  requests, must send `If-None-Match: *` when creating objects under `allusers/`
+  or `private/`. Reusing a key cannot replace bytes associated with a scan verdict.
+  Multipart completion has the same requirement; initiation and part uploads do
+  not carry the precondition. The browser API itself uses a single PUT.
+- **Browser credentials have a narrower boundary.** Cognito identity-pool sessions
+  may read objects, upload to `allusers/` or their own private prefix, list
+  multipart parts and abort multipart uploads. Object management, server-side
+  copies and tagging are denied. The policy identifies these sessions using
+  `cognito-identity.amazonaws.com:sub`, the identity-pool identity ID—not the
+  user-pool user ID.
+- **GuardDuty owns scan verdicts.** Only the stage's
+  `GuardDutyMalwareProtectionPassRole-<stage>` role may replace or delete object
+  tags, including version tags. Other writers cannot supply
+  `GuardDutyMalwareScanStatus` during object creation. The exception matches the
+  IAM role ARN through `aws:PrincipalArn`, not an STS session ARN.
+- **Downloads require a clean verdict.** Current and versioned object reads are
+  denied unless the tag is `NO_THREATS_FOUND`. The scanner role is exempt so it
+  can read new objects and perform bucket validation. Backend scan-status tag
+  reads remain available; signing a GET does not bypass the download policy.
+- **ZIP generation is separate from document creation.** Backend ZIPs under
+  `zips/` can be regenerated at deterministic keys; they are outside the
+  create-only document prefixes. Their downloads still require a clean scan.
+
+These policies protect stored bytes and scan tags. Application access rules,
+including the shared-object versus package authorization boundary, remain the
+responsibility of the GraphQL resolvers.
+
 ## Where to find the implementation
 
 - `services/app-graphql/src/schema.graphql`: inputs, response types and scan states.
@@ -81,21 +136,37 @@ is clean**. Possessing a signed URL does not bypass that policy.
   uploads; `sharedS3Objects.ts` handles scan/download access and key validation.
 - `services/app-api/src/s3/`: `s3Deployed.ts` signs URLs and reads scan tags;
   `s3Local.ts` supplies the development adapter.
+- `services/app-web/src/s3/`: browser storage integration and direct file transfers.
+- `services/infra-cdk/lib/stacks/uploads.ts`: bucket policies, object prefixes,
+  file-type restrictions and S3 CORS configuration.
+- `services/infra-cdk/lib/stacks/virus-scanning.ts`: GuardDuty plans, scanner role
+  and scan-result tagging.
+- `services/infra-cdk/lib/stacks/cognito.ts`: browser identity-role permissions.
 - `services/infra-cdk/lib/stacks/app-api.ts` and
   `services/app-api/src/cors/configureCorsHelpers.ts`: API CORS configuration.
 
-## Security rollout
+## Deployment constraints
 
-The S3 integrity policies and operational prerequisites are documented in
-[s3-upload-security.md](s3-upload-security.md). Deploy compatible API and upload
-consumers before enforcing the bucket policy on an existing environment; old
-browser tabs and external clients missing the precondition fail closed. The normal
-all-stack workflow deploys uploads early, so use a coordinated staged rollout or
-maintenance window rather than assuming an uninterrupted live cutover.
+The upload contract and bucket policies must agree. Deploy compatible API and
+upload consumers before enforcing the create-only policy on an existing
+environment; old browser tabs, external clients and previously signed PUT URLs
+missing the precondition fail closed. The normal all-stack workflow deploys
+uploads early, so use a coordinated staged rollout or maintenance window rather
+than assuming an uninterrupted live cutover.
 
-Backend scan-status reads (`GetObjectTagging`) still work. Only the scanner can
-change verdict tags, and API-signed downloads do not bypass the clean-scan gate.
-These controls do not add ownership/state authorization to the shared-object APIs.
+Before enforcing these policies in an existing environment:
+
+- Confirm both GuardDuty plans use the expected stage scanner role and have
+  scan-result tagging enabled. The bucket exceptions depend on that exact role;
+  verify its trust and permissions as well as the plan configuration.
+- Account for existing objects and in-flight multipart uploads. A policy change
+  does not rescan existing bytes or establish the provenance of older scan tags.
+  Any rescan, multipart abort or cleanup needs an approved operational plan.
+- Check the synthesized infrastructure diff for unintended bucket or role
+  replacement, and verify external consumers send the signed upload headers.
+- Validate deployed CORS, conditional PUT rejection, scanner access, clean-only
+  downloads and ZIP regeneration. Offline tests cannot establish these behaviors
+  in an AWS environment.
 
 ## Testing and troubleshooting
 
@@ -105,7 +176,7 @@ with fake credentials and no S3 requests to catch SDK-added checksum behavior.
 These tests do not verify deployed permissions, CORS or GuardDuty.
 
 `services/cypress/integration/smokeTest/apiStorage.spec.ts` tests those deployed
-connections using human Cognito test auth and the review CI environment settings.
+connections using Cognito test users and the review CI environment settings.
 It deliberately combines upload and download into a test round trip to compare
 clean-file SHA-256 hashes. It also checks replayed PUT rejection (412), both buckets, attachment headers, and
 EICAR detection followed by an actual denied GET. S3 transfers use the application
