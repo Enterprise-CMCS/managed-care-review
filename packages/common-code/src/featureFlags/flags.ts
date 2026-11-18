@@ -92,6 +92,13 @@ const featureFlags = {
         defaultValue: false
     },
     /**
+     * Enables In Lieu of Services (ILOS) actuarial report submissions
+     */
+    ILOS_SUBMISSIONS: {
+        flag: 'ilos-submissions',
+        defaultValue: false,
+    },
+    /**
      * This flag toggles CHIP only health plan submission review automation.
      */
     CHIP_SUBMISSION_AUTOMATION: {

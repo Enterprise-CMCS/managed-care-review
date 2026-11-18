@@ -274,11 +274,6 @@ export const NewSubmission = () => {
 export const NewSubmissionForm = (): React.ReactElement => {
     const { contractSubmissionType } = useRouteParams()
     const { updateHeading } = usePage()
-    const ldClient = useLDClient()
-    const isILOSEnabled = ldClient?.variation(
-        featureFlags.ILOS_SUBMISSIONS.flag,
-        featureFlags.ILOS_SUBMISSIONS.defaultValue
-    )
 
     const heading = useMemoizedNewSubmissionHeader({
         contractType: contractSubmissionType,
@@ -306,7 +301,7 @@ export const NewSubmissionForm = (): React.ReactElement => {
     }
 
     if (contractSubmissionType === ContractSubmissionTypeRecord['ILOS']) {
-        return isILOSEnabled ? <ILOSSubmissionDetails /> : <Error404 />
+        return <ILOSSubmissionDetails />
     }
 
     return <Error404 />
