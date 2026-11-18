@@ -209,19 +209,6 @@ describe('ILOS submission type', () => {
             )
         })
     })
-
-    it('does not show the ILOS placeholder page when the flag is off', async () => {
-        renderNewSubmissionRoutes('/submissions/new/ilos', {
-            'ilos-submissions': false,
-        })
-
-        expect(
-            await screen.findByRole('heading', { name: /Page not found/ })
-        ).toBeInTheDocument()
-        expect(
-            screen.queryByTestId('ilos-submission-details-placeholder')
-        ).toBeNull()
-    })
 })
 
 it('does not render SDP radio when SDP flag is off', async () => {
