@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Form } from '@trussworks/react-uswds'
-import { RoutesRecord } from '@mc-review/constants'
+import { ILOS_SUBMISSION_FORM_ROUTES, RoutesRecord } from '@mc-review/constants'
 import {
+    DynamicStepIndicator,
     FormContainer,
     FormNotificationContainer,
     PageActions,
@@ -11,6 +12,11 @@ import { PageBannerAlerts } from '../../SharedSubmissionComponents'
 import { usePage } from '../../../../contexts/PageContext'
 import { useAuth } from '../../../../contexts/AuthContext'
 import styles from '../../StateSubmissionForm.module.scss'
+
+const ILOS_STEP_TITLES = {
+    SUBMISSIONS_TYPE: 'ILOS actuarial report',
+    SUBMISSIONS_RATE_DETAILS: 'Associated rate certifications',
+}
 
 // Placeholder for the first page of the ILOS actuarial report submission form.
 export const ILOSSubmissionDetails = (): React.ReactElement => {
@@ -28,6 +34,11 @@ export const ILOSSubmissionDetails = (): React.ReactElement => {
     return (
         <div id={activeMainContentId}>
             <FormNotificationContainer>
+                <DynamicStepIndicator
+                    formPages={ILOS_SUBMISSION_FORM_ROUTES}
+                    currentFormPage="SUBMISSIONS_TYPE"
+                    customPageTitles={ILOS_STEP_TITLES}
+                />
                 <PageBannerAlerts
                     loggedInUser={loggedInUser}
                     showPageErrorMessage={false}
