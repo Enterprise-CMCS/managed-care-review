@@ -230,7 +230,6 @@ const genericContractFormDataSchema = z.object({
     // data is unchanged (the keys are simply absent). ilosContractFormDataSchema
     // fills missing lists with [] on output so ILOS code always reads an array;
     // callers are never required to send [].
-    isILOSRatesIncluded: preprocessNulls(z.boolean().optional()),
     ilosRateDateStart: preprocessNulls(z.date().optional()),
     ilosRateDateEnd: preprocessNulls(z.date().optional()),
     // ILOS lists default to [] for every submission type to match the non-null GQL list
@@ -364,7 +363,6 @@ const eqroContractFormDataSchema = genericContractFormDataSchema.extend({
         genericContractFormDataSchema.shape.federalAuthorities.default([]),
     // ILOS fields are not applicable to EQRO submissions. The lists stay [] to match the
     // non-null GQL list types and reject any entries.
-    isILOSRatesIncluded: preprocessNulls(z.undefined().optional()),
     ilosRateDateStart: preprocessNulls(z.undefined().optional()),
     ilosRateDateEnd: preprocessNulls(z.undefined().optional()),
     ilosDocuments: z.array(ilosDocumentSchema).max(0).default([]),
@@ -496,12 +494,11 @@ const submittableEQROContractFormDataSchema = eqroContractFormDataSchema.extend(
 )
 
 // submittableILOSContractFormDataSchema is the schema used during ILOS submission validation.
-// The ILOS rating period is required. Rates are optional on an ILOS submission, so ilosExternalRates may be empty, but every
-// external rate present needs both dates, as submittableRateFormDataSchema requires them on a rate.
-// parseILOSContract handles associated rate validation
+// The ILOS rating period is required. Every external rate present needs both dates, as
+// submittableRateFormDataSchema requires them on a rate. parseILOSContract checks that the
+// submission has at least one linked or external rate.
 const submittableILOSContractFormDataSchema = ilosContractFormDataSchema.extend(
     {
-        isILOSRatesIncluded: z.boolean(),
         ilosRateDateStart: z.date(),
         ilosRateDateEnd: z.date(),
         stateContacts:
@@ -645,7 +642,6 @@ const updateDraftContractFormDataSchema =
     draftContractFormDataBaseSchema.extend({
         // ILOS fields are not applicable to health plan or enrollment broker
         // submissions. Pinned like the EQRO schema so a client cannot write them.
-        isILOSRatesIncluded: preprocessNulls(z.undefined().optional()),
         ilosRateDateStart: preprocessNulls(z.undefined().optional()),
         ilosRateDateEnd: preprocessNulls(z.undefined().optional()),
         ilosDocuments: z.array(ilosDocumentSchema).max(0).default([]),

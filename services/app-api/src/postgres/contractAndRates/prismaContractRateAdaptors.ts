@@ -353,7 +353,6 @@ function prismaUpdateContractFormDataFromDomain(
         ),
         // ILOS submission fields only. ilosExternalRates are managed by
         // updateDraftContractRates, so they are intentionally left alone here.
-        isILOSRatesIncluded: nullify(contractFormData.isILOSRatesIncluded),
         ilosRateDateStart: nullify(contractFormData.ilosRateDateStart),
         ilosRateDateEnd: nullify(contractFormData.ilosRateDateEnd),
         ilosDocuments: {

@@ -7,13 +7,19 @@ import {
 } from './revisionTypes'
 import { updateInfoSchema } from './updateInfoType'
 
+// A rate revision in a contract's package carries its order in that
+// submission. Elsewhere a rate revision has no position.
+const submittedRateRevisionSchema = rateRevisionSchema.extend({
+    ratePosition: z.number().optional(),
+})
+
 const contractPackageSubmissionSchema = z.object({
     submitInfo: updateInfoSchema,
     submittedRevisions: z.array(
         z.union([contractRevisionSchema, rateRevisionSchema])
     ),
     contractRevision: contractRevisionSchema,
-    rateRevisions: z.array(rateRevisionSchema),
+    rateRevisions: z.array(submittedRateRevisionSchema),
 })
 
 const contractUndoUnlockPackageSchema = z.object({
@@ -27,7 +33,7 @@ const eqroContractPackageSubmissionSchema = z.object({
         z.union([eqroContractRevisionSchema, rateRevisionSchema])
     ),
     contractRevision: eqroContractRevisionSchema,
-    rateRevisions: z.array(rateRevisionSchema),
+    rateRevisions: z.array(submittedRateRevisionSchema),
 })
 
 const eqroContractUndoUnlockPackageSchema = z.object({
@@ -44,7 +50,7 @@ const ilosContractPackageSubmissionSchema = z.object({
         z.union([contractRevisionSchema, rateRevisionSchema])
     ),
     contractRevision: ilosContractRevisionSchema,
-    rateRevisions: z.array(rateRevisionSchema),
+    rateRevisions: z.array(submittedRateRevisionSchema),
 })
 
 const ilosContractUndoUnlockPackageSchema = z.object({

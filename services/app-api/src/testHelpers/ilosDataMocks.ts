@@ -37,7 +37,6 @@ const mockILOSContractFormData = (
     supportingDocuments: [],
     managedCareEntities: [],
     federalAuthorities: [],
-    isILOSRatesIncluded: true,
     ilosRateDateStart: new Date('2025-01-01'),
     ilosRateDateEnd: new Date('2025-12-31'),
     ilosDocuments: [mockILOSDocument('ilosReport1')],

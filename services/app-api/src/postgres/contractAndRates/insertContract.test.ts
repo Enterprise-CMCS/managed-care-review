@@ -17,7 +17,6 @@ describe('insertContract', () => {
             submissionType: 'CONTRACT_AND_RATES',
             populationCovered: undefined,
             riskBasedContract: undefined,
-            isILOSRatesIncluded: true,
             ilosRateDateStart: new Date('2025-01-01'),
             ilosRateDateEnd: new Date('2025-12-31'),
             ilosDocuments: [
@@ -40,7 +39,6 @@ describe('insertContract', () => {
                 submissionType: 'CONTRACT_AND_RATES',
                 populationCovered: undefined,
                 riskBasedContract: undefined,
-                isILOSRatesIncluded: true,
                 ilosRateDateStart: new Date('2025-01-01'),
                 ilosRateDateEnd: new Date('2025-12-31'),
                 ilosDocuments: [

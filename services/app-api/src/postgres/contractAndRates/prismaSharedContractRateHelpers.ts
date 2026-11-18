@@ -777,20 +777,6 @@ function ratesRevisionsToDomainModel(
     return domainRevisions
 }
 
-function unsortedRatesRevisionsToDomainModel(
-    rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] {
-    const domainRevisions: RateRevisionType[] = []
-
-    for (const revision of rateRevisions) {
-        const domainRevision = rateRevisionToDomainModel(revision)
-
-        domainRevisions.push(domainRevision)
-    }
-
-    return domainRevisions
-}
-
 // ------
 
 type ContractRevisionTableWithFormData =
@@ -800,7 +786,6 @@ type ContractRevisionTableWithFormData =
 
 type ILOSFormDataFields = Pick<
     ContractFormDataType,
-    | 'isILOSRatesIncluded'
     | 'ilosRateDateStart'
     | 'ilosRateDateEnd'
     | 'ilosDocuments'
@@ -813,7 +798,6 @@ function ilosFormDataToDomainModel(
     contractRevision: ContractRevisionTableWithFormData
 ): ILOSFormDataFields {
     return {
-        isILOSRatesIncluded: contractRevision.isILOSRatesIncluded ?? undefined,
         ilosRateDateStart: contractRevision.ilosRateDateStart ?? undefined,
         ilosRateDateEnd: contractRevision.ilosRateDateEnd ?? undefined,
         ilosDocuments: contractRevision.ilosDocuments.map(
@@ -987,7 +971,6 @@ export {
     rateFormDataToDomainModel,
     rateRevisionToDomainModel,
     ratesRevisionsToDomainModel,
-    unsortedRatesRevisionsToDomainModel,
     getRateReviewStatus,
     getParentContractID,
     getRelatedContracts,

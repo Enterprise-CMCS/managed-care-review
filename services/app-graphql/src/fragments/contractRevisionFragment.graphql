@@ -101,7 +101,6 @@ fragment contractRevisionFragment on ContractRevision {
         }
         ilosRateDateStart
         ilosRateDateEnd
-        isILOSRatesIncluded
         ilosExternalRates {
             id
             rateControlName

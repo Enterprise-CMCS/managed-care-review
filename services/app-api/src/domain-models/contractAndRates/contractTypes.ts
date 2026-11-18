@@ -28,22 +28,26 @@ import {
 import { contractReviewActionSchema } from './contractReviewActionType'
 import { contractSubmissionTypeSchema } from './contractSubmissionType'
 
+// A rate read through a contract's draftRates carries its order on that
+// contract. A rate fetched on its own has no position, so it is not on
+// rateWithoutDraftContractsSchema. Optional because mocks and undoWithdrawRate
+// build draftRates without it.
+const draftRateSchema = rateWithoutDraftContractsSchema.extend({
+    ratePosition: z.number().optional(),
+})
+
 const contractSchema = contractWithoutDraftRatesSchema.extend({
     withdrawnRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
-    draftRates: z.lazy(() =>
-        z.array(rateWithoutDraftContractsSchema).optional()
-    ),
+    draftRates: z.lazy(() => z.array(draftRateSchema).optional()),
 })
 
 const eqroContractSchema = eqroContractDraftSchema.extend({
     withdrawnRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
-    draftRates: z.lazy(() =>
-        z.array(rateWithoutDraftContractsSchema).optional()
-    ),
+    draftRates: z.lazy(() => z.array(draftRateSchema).optional()),
 })
 
 // ILOS submissions link rates like a health plan, so they carry the same rate structure.
@@ -51,16 +55,14 @@ const ilosContractSchema = ilosContractDraftSchema.extend({
     withdrawnRates: z.lazy(() =>
         z.array(rateWithoutDraftContractsSchema).optional()
     ),
-    draftRates: z.lazy(() =>
-        z.array(rateWithoutDraftContractsSchema).optional()
-    ),
+    draftRates: z.lazy(() => z.array(draftRateSchema).optional()),
 })
 
 const unlockedContractSchema = contractSchema.extend({
     status: unlockedContractStatusSchema,
     // Since this is a contract in UNLOCKED status, there will be a draftRevision and draftRates
     draftRevision: z.lazy(() => contractRevisionSchema),
-    draftRates: z.lazy(() => z.array(rateWithoutDraftContractsSchema)),
+    draftRates: z.lazy(() => z.array(draftRateSchema)),
 })
 
 const draftContractSchema = contractSchema.extend({
@@ -77,7 +79,7 @@ const submittableContractSchema = contractSchema.extend({
         formData: submittableContractFormDataSchema,
     }),
     draftRates: z.array(
-        rateWithoutDraftContractsSchema.extend({
+        draftRateSchema.extend({
             draftRevision: rateRevisionSchema.extend({
                 formData: submittableRateFormDataSchema,
             }),
@@ -98,7 +100,7 @@ const submittableILOSContractSchema = ilosContractSchema.extend({
     draftRevision: ilosContractRevisionSchema.extend({
         formData: submittableILOSContractFormDataSchema,
     }),
-    draftRates: z.array(rateWithoutDraftContractsSchema),
+    draftRates: z.array(draftRateSchema),
 })
 
 const strippedContractSchema = z.object({

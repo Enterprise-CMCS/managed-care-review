@@ -184,7 +184,6 @@ const mockContractRevision = (
         ebPreviousAmendmentInMCReview: null,
         ebAmendmentNumber: null,
         ebStateContractIdentifier: null,
-        isILOSRatesIncluded: null,
         ilosRateDateStart: null,
         ilosRateDateEnd: null,
         ilosDocuments: [],

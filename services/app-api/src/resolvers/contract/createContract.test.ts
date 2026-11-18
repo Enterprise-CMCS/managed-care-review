@@ -73,7 +73,6 @@ describe('createContract', () => {
             submissionDescription: 'An ILOS actuarial report',
             contractType: 'BASE',
             contractSubmissionType: 'ILOS',
-            isILOSRatesIncluded: true,
             ilosRateDateStart: '2025-01-01',
             ilosRateDateEnd: '2025-12-31',
             ilosDocuments: [
@@ -100,7 +99,6 @@ describe('createContract', () => {
 
         expect(contract.contractSubmissionType).toBe('ILOS')
         expect(draftData.submissionType).toBe('CONTRACT_AND_RATES')
-        expect(draftData.isILOSRatesIncluded).toBe(true)
         expect(draftData.ilosRateDateStart).toBe('2025-01-01')
         expect(draftData.ilosRateDateEnd).toBe('2025-12-31')
         expect(draftData.ilosDocuments).toEqual([
@@ -135,7 +133,6 @@ describe('createContract', () => {
 
         expect(res.errors).toBeDefined()
         expect(res.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
-        expect(res.errors?.[0].message).toContain('isILOSRatesIncluded')
         expect(res.errors?.[0].message).toContain('ilosRateDateStart')
         expect(res.errors?.[0].message).toContain('ilosRateDateEnd')
         expect(res.errors?.[0].message).toContain('ilosDocuments')

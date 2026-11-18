@@ -7,9 +7,12 @@ import {
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
 import {
+    addLinkedRateToTestContract,
     createTestDraftRateOnContract,
     fetchTestRateById,
+    updateRatesInputFromDraftContract,
     updateTestDraftRateOnContract,
+    updateTestDraftRatesOnContract,
     withdrawTestRate,
 } from '../../testHelpers/gqlRateHelpers'
 import { testCMSUser, testStateUser } from '../../testHelpers/userHelpers'
@@ -19,7 +22,9 @@ import {
     createAndSubmitTestContractWithRate,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
+    createAndUpdateTestILOSContract,
     createTestContract,
+    fetchTestContract,
     unlockTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { must, testS3Client } from '../../testHelpers'
@@ -958,6 +963,229 @@ describe('updateDraftContractRates', () => {
         expect(rateFormData.rateDocuments[0].name).toBe('ratedoc1.doc')
     })
 
+    it('numbers child and linked rates by their place in the list', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const otherPackage =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const linkedRateID =
+            otherPackage.packageSubmissions[0].rateRevisions[0].rateID
+
+        const draftWithChild =
+            await createAndUpdateTestContractWithRate(stateServer)
+        const childRateID = draftWithChild.draftRates![0].id
+
+        // child first, then the link
+        const linked = await addLinkedRateToTestContract(
+            stateServer,
+            draftWithChild,
+            linkedRateID
+        )
+        expect(linked.draftRates!.map((r) => [r.id, r.ratePosition])).toEqual([
+            [childRateID, 1],
+            [linkedRateID, 2],
+        ])
+
+        // send the same two rates in the other order
+        const input = updateRatesInputFromDraftContract(linked)
+        const reordered = await updateTestDraftRatesOnContract(stateServer, {
+            ...input,
+            updatedRates: [...input.updatedRates].reverse(),
+        })
+        expect(
+            reordered.draftRates!.map((r) => [r.id, r.ratePosition])
+        ).toEqual([
+            [linkedRateID, 1],
+            [childRateID, 2],
+        ])
+    })
+
+    it('saves linked and external rates on an ILOS submission in one position sequence', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const otherPackage =
+            await createAndSubmitTestContractWithRate(stateServer)
+        const linkedRateID =
+            otherPackage.packageSubmissions[0].rateRevisions[0].rateID
+
+        const ilosContract = await createAndUpdateTestILOSContract(stateServer)
+
+        // A linked rate between two external rates
+        const firstResult = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: ilosContract.id,
+                    lastSeenUpdatedAt: ilosContract.draftRevision!.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'EXTERNAL',
+                            externalRate: {
+                                rateControlName: 'EXT-1',
+                                rateDateStart: '2025-01-01',
+                                rateDateEnd: '2025-12-31',
+                            },
+                        },
+                        { type: 'LINK', rateID: linkedRateID },
+                        {
+                            type: 'EXTERNAL',
+                            externalRate: {
+                                rateControlName: 'EXT-2',
+                                rateDateStart: '2025-01-01',
+                                rateDateEnd: '2025-12-31',
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(firstResult.errors).toBeUndefined()
+        const firstContract = await fetchTestContract(
+            stateServer,
+            ilosContract.id
+        )
+        // Saving external rates edits the draft, so its updatedAt moves
+        expect(firstContract.draftRevision!.updatedAt).not.toEqual(
+            ilosContract.draftRevision!.updatedAt
+        )
+        expect(firstContract.draftRates).toHaveLength(1)
+        expect(firstContract.draftRates![0].id).toBe(linkedRateID)
+
+        const savedExternalRates =
+            firstContract.draftRevision!.formData.ilosExternalRates
+        expect(savedExternalRates).toMatchObject([
+            {
+                rateControlName: 'EXT-1',
+                rateDateStart: '2025-01-01',
+                rateDateEnd: '2025-12-31',
+                position: 1,
+            },
+            { rateControlName: 'EXT-2', position: 3 },
+        ])
+
+        // Keep the second external rate, rename it, clear its dates and move
+        // it ahead of the linked rate. The first one is left out and deleted.
+        const keptExternalRate = savedExternalRates[1]
+        const secondResult = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: ilosContract.id,
+                    lastSeenUpdatedAt: firstContract.draftRevision!.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'EXTERNAL',
+                            externalRate: {
+                                id: keptExternalRate.id,
+                                rateControlName: 'EXT-2 renamed',
+                                rateDateStart: null,
+                                rateDateEnd: null,
+                            },
+                        },
+                        { type: 'LINK', rateID: linkedRateID },
+                    ],
+                },
+            },
+        })
+
+        expect(secondResult.errors).toBeUndefined()
+
+        const fetched = await fetchTestContract(stateServer, ilosContract.id)
+        expect(fetched.draftRevision!.formData.ilosExternalRates).toEqual([
+            {
+                id: keptExternalRate.id,
+                rateControlName: 'EXT-2 renamed',
+                rateDateStart: null,
+                rateDateEnd: null,
+                position: 1,
+            },
+        ])
+
+        expect(fetched.draftRates).toHaveLength(1)
+        expect(fetched.draftRates![0].id).toBe(linkedRateID)
+        expect(fetched.draftRates![0].ratePosition).toBe(2)
+
+        // The timestamp from before the second save is now stale
+        const staleResult = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: ilosContract.id,
+                    lastSeenUpdatedAt: firstContract.draftRevision!.updatedAt,
+                    updatedRates: [],
+                },
+            },
+        })
+        expect(staleResult.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(staleResult.errors?.[0].message).toContain(
+            'Concurrent update error'
+        )
+    })
+
+    it('rejects an external rate on a health plan submission', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const draft = await createTestContract(stateServer)
+
+        const result = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: draft.id,
+                    lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'EXTERNAL',
+                            externalRate: { rateControlName: 'EXT-1' },
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(result.errors?.[0].message).toContain('not ILOS')
+    })
+
+    it('rejects an external rate id that is not on the ILOS submission', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const ilosContract = await createAndUpdateTestILOSContract(stateServer)
+
+        const result = await executeGraphQLOperation(stateServer, {
+            query: UpdateDraftContractRatesDocument,
+            variables: {
+                input: {
+                    contractID: ilosContract.id,
+                    lastSeenUpdatedAt: ilosContract.draftRevision!.updatedAt,
+                    updatedRates: [
+                        {
+                            type: 'EXTERNAL',
+                            externalRate: {
+                                id: 'not-on-this-contract',
+                                rateControlName: 'EXT-1',
+                            },
+                        },
+                    ],
+                },
+            },
+        })
+
+        expect(result.errors).toBeDefined()
+        expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(result.errors?.[0].message).toContain('not-on-this-contract')
+    })
+
     it('doesnt allow updating a linked rate', async () => {
         const stateServer = await constructTestPostgresServer({
             s3Client: mockS3,
@@ -1409,6 +1637,4 @@ describe('updateDraftContractRates', () => {
             'NOT_FOUND'
         )
     })
-
-    it.todo('allows updating a child unlocked rate')
 })

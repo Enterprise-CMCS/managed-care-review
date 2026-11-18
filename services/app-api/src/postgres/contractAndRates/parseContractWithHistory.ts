@@ -27,7 +27,6 @@ import {
     isReversedUnlockedRevision,
     isSubmittedRevision,
     rateRevisionToDomainModel,
-    unsortedRatesRevisionsToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import {
     mergeScalarFieldOverrides,
@@ -312,13 +311,13 @@ function contractWithHistoryToDomainModelWithoutRates(
                 submitedRevs.push(rateRev)
             }
 
-            const relatedRateRevisions = submission.submissionPackages
+            const rateRevisions = submission.submissionPackages
                 .filter((p) => p.contractRevisionID === revision.id)
                 .sort((a, b) => a.ratePosition - b.ratePosition)
-                .map((p) => p.rateRevision)
-
-            const rateRevisions =
-                unsortedRatesRevisionsToDomainModel(relatedRateRevisions)
+                .map((p) => ({
+                    ...rateRevisionToDomainModel(p.rateRevision),
+                    ratePosition: p.ratePosition,
+                }))
 
             packageSubmissions.push({
                 submitInfo: {
@@ -420,9 +419,13 @@ function contractWithHistoryToDomainModel(
     }
 
     // since we have a draft revision, we should also hold onto any set draftRates for later
-    const draftRatesOrErrors = contract.draftRates.map((dr) =>
-        rateWithoutDraftContractsToDomainModel(dr.rate)
-    )
+    const draftRatesOrErrors = contract.draftRates.map((dr) => {
+        const draftRate = rateWithoutDraftContractsToDomainModel(dr.rate)
+        if (draftRate instanceof Error) {
+            return draftRate
+        }
+        return { ...draftRate, ratePosition: dr.ratePosition }
+    })
 
     const draftRatesOrError = arrayOrFirstError(draftRatesOrErrors)
     if (draftRatesOrError instanceof Error) {

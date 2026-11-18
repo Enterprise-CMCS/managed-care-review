@@ -2062,7 +2062,6 @@ describe('ILOS parsing and validation', () => {
                 populationCovered: null,
                 contractDateStart: null,
                 eqroNewContractor: null,
-                isILOSRatesIncluded: null,
             })
 
             if (!result.success) {
@@ -2175,7 +2174,6 @@ describe('ILOS parsing and validation', () => {
         })
 
         it.each([
-            ['isILOSRatesIncluded', true, 'invalid_type'],
             ['ilosRateDateStart', new Date('2025-01-01'), 'invalid_type'],
             ['ilosRateDateEnd', new Date('2025-12-31'), 'invalid_type'],
             ['ilosDocuments', [mockILOSDocument('ilosReport1')], 'too_big'],
@@ -2228,7 +2226,6 @@ describe('ILOS parsing and validation', () => {
         )
 
         it.each([
-            ['isILOSRatesIncluded', true],
             ['ilosRateDateStart', new Date('2025-01-01')],
             ['ilosRateDateEnd', new Date('2025-12-31')],
         ])('EQRO schema rejects %s when it is set', (field, value) => {
@@ -2280,7 +2277,6 @@ describe('ILOS parsing and validation', () => {
                     ilosDocuments: [],
                     ilosExternalRates: [],
                 })
-                expect(result.data).not.toHaveProperty('isILOSRatesIncluded')
             }
         )
 
@@ -2300,7 +2296,6 @@ describe('ILOS parsing and validation', () => {
             const postgresStore = NewPostgresStore(prismaClient)
             const formData = {
                 ...mockILOSContractFormData(),
-                isILOSRatesIncluded: null,
                 ilosDocuments: [],
                 stateContacts: [
                     {
@@ -2328,7 +2323,6 @@ describe('ILOS parsing and validation', () => {
 
             expect(validatedFormData).toEqual({
                 ...formData,
-                isILOSRatesIncluded: undefined, // zod parsing preprocess nulls to undefined
             })
         })
 
@@ -2406,24 +2400,6 @@ describe('ILOS parsing and validation', () => {
             expect(parsedContract).toEqual(contract)
         })
 
-        it('succeeds with no rates when isILOSRatesIncluded is false', async () => {
-            const prismaClient = await sharedTestPrismaClient()
-            const postgresStore = NewPostgresStore(prismaClient)
-            const contract = mockDraftILOSContract({
-                isILOSRatesIncluded: false,
-                ilosExternalRates: [],
-            })
-            contract.draftRates = []
-
-            const parsedContract = parseILOSContract(
-                contract,
-                'FL',
-                postgresStore
-            )
-
-            expect(parsedContract).toEqual(contract)
-        })
-
         it('only requires complete state contacts when the contact model flag is on', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
@@ -2467,11 +2443,6 @@ describe('ILOS parsing and validation', () => {
                 description: 'stateContacts is empty',
                 overrides: { stateContacts: [] },
                 path: ['draftRevision', 'formData', 'stateContacts'],
-            },
-            {
-                description: 'isILOSRatesIncluded is not answered',
-                overrides: { isILOSRatesIncluded: undefined },
-                path: ['draftRevision', 'formData', 'isILOSRatesIncluded'],
             },
             {
                 description: 'ilosRateDateStart is missing',
@@ -2606,12 +2577,11 @@ describe('ILOS parsing and validation', () => {
                 draftRates: [],
             },
         ])(
-            'succeeds when isILOSRatesIncluded is true and the submission has $description',
+            'succeeds when the submission has $description',
             async ({ externalRates, draftRates }) => {
                 const prismaClient = await sharedTestPrismaClient()
                 const postgresStore = NewPostgresStore(prismaClient)
                 const contract = mockDraftILOSContract({
-                    isILOSRatesIncluded: true,
                     ilosExternalRates: externalRates,
                 })
                 contract.draftRates = draftRates
@@ -2626,11 +2596,10 @@ describe('ILOS parsing and validation', () => {
             }
         )
 
-        it('returns an error when isILOSRatesIncluded is true but no rate is associated', async () => {
+        it('returns an error when no rate is associated', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
             const contract = mockDraftILOSContract({
-                isILOSRatesIncluded: true,
                 ilosExternalRates: [],
             })
             contract.draftRates = []
@@ -2642,41 +2611,9 @@ describe('ILOS parsing and validation', () => {
 
             const errMessages = parsedContract.issues.map((err) => err.message)
             expect(errMessages).toContain(
-                'ILOS submission must have at least one linked or external rate when isILOSRatesIncluded is true'
+                'ILOS submission must have at least one linked or external rate'
             )
         })
-
-        it.each([
-            {
-                description: 'a linked rate',
-                externalRates: [],
-                draftRates: [mockILOSLinkedRate(uuidv4())],
-            },
-            {
-                description: 'an external rate',
-                externalRates: [externalRate],
-                draftRates: [],
-            },
-        ])(
-            'does not check rates when isILOSRatesIncluded is false even if $description is present',
-            async ({ externalRates, draftRates }) => {
-                const prismaClient = await sharedTestPrismaClient()
-                const postgresStore = NewPostgresStore(prismaClient)
-                const contract = mockDraftILOSContract({
-                    isILOSRatesIncluded: false,
-                    ilosExternalRates: externalRates,
-                })
-                contract.draftRates = draftRates
-
-                const parsedContract = parseILOSContract(
-                    contract,
-                    'FL',
-                    postgresStore
-                )
-
-                expect(parsedContract).toEqual(contract)
-            }
-        )
 
         it('returns an error when a program is deprecated', async () => {
             const prismaClient = await sharedTestPrismaClient()

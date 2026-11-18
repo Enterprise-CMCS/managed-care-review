@@ -102,7 +102,6 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             }
             ilosRateDateStart
             ilosRateDateEnd
-            isILOSRatesIncluded
             ilosExternalRates {
                 id
                 rateControlName

@@ -793,8 +793,6 @@ input CreateContractInput {
     ilosRateDateStart: Date
     "End of the rating period covered by the ILOS submission"
     ilosRateDateEnd: Date
-    "Whether the state is including rates (linked or external) on this ILOS submission"
-    isILOSRatesIncluded: Boolean
 }
 
 type CreateContractPayload {
@@ -1993,8 +1991,6 @@ type ContractFormData {
     ilosRateDateStart: Date
     "End of the rating period covered by the ILOS submission"
     ilosRateDateEnd: Date
-    "Whether the state is including rates (linked or external) on this ILOS submission"
-    isILOSRatesIncluded: Boolean
     """
     Rates outside MC-Review on this ILOS submission, in position order.
     Read only here; written through updateDraftContractRates with type EXTERNAL.
@@ -2362,6 +2358,11 @@ type RateRevision {
     Pre-generated zip packages containing document collections for this revision
     """
     documentZipPackages: [DocumentZipPackage!]
+    """
+    Order of this rate in the contract submission it was read through, starting at 1.
+    Only set on packageSubmissions.rateRevisions. Null everywhere else.
+    """
+    ratePosition: Int
 }
 
 """
@@ -2434,6 +2435,11 @@ type Rate {
     stateNumber: Int!
     "parentContractID is the ID of the contract that last submitted this rate"
     parentContractID: ID!
+    """
+    Order of this rate on the draft contract it was read through, starting at 1.
+    Only set on Contract.draftRates. Null everywhere else.
+    """
+    ratePosition: Int
 
     "Contracts this withdrawn rates was the child or linked to"
     withdrawnFromContracts: [Contract!]
@@ -3362,8 +3368,6 @@ input ContractDraftRevisionFormDataInput {
     ilosRateDateStart: Date
     "End of the rating period covered by the ILOS submission"
     ilosRateDateEnd: Date
-    "Whether the state is including rates (linked or external) on this ILOS submission"
-    isILOSRatesIncluded: Boolean
     # No ilosExternalRates. External rates are written through updateDraftContractRates.
 }
 

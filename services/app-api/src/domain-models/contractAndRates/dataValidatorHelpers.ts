@@ -621,16 +621,15 @@ const parseILOSContract = (
                 })
             }
 
-            // When the state says rates are included, the submission needs at least one
-            // associated rate, linked or external. When it says no, rates are not checked.
-            const { isILOSRatesIncluded, ilosExternalRates } = formData
+            // Every ILOS submission needs at least one associated rate, linked or external.
             const hasAssociatedRate =
-                contract.draftRates.length > 0 || ilosExternalRates.length > 0
-            if (isILOSRatesIncluded && !hasAssociatedRate) {
+                contract.draftRates.length > 0 ||
+                formData.ilosExternalRates.length > 0
+            if (!hasAssociatedRate) {
                 ctx.addIssue({
                     code: 'custom',
                     message:
-                        'ILOS submission must have at least one linked or external rate when isILOSRatesIncluded is true',
+                        'ILOS submission must have at least one linked or external rate',
                 })
             }
         }
