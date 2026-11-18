@@ -137,7 +137,18 @@ Used in dev/val/qa/prod to configure HTTPS certificates and hostnames.
 
 ### `API_DOMAIN_NAME`
 
-Optionally configures a custom public domain for the App API. QA uses this with `CLOUDFRONT_CERT_ARN` to expose its external GraphQL endpoint through `api.mc-review-qa.onemac.cms.gov`.
+When set with `CLOUDFRONT_CERT_ARN` on the AppApi deploy step, this creates an edge-optimized API Gateway custom domain with a root mapping to the existing REST stage. The stage's WAF association, raw API URL, and frontend configuration are unchanged. The ACM certificate must be in `us-east-1` and cover the API hostname.
+
+| Stage | API hostname | Certificate secret |
+| --- | --- | --- |
+| Dev | `api.mc-review-dev.onemac.cms.gov` | `DEV_CERTIFICATE_ARN` |
+| Val | `api.mc-review-val.onemac.cms.gov` | `VAL_CERTIFICATE_ARN` |
+| QA | `api.mc-review-qa.onemac.cms.gov` | `QA_CERTIFICATE_ARN` |
+| Prod | `api.mc-review.onemac.cms.gov` | `PROD_CERTIFICATE_ARN` |
+
+CMS Cloud Ops manages the public DNS records in Akamai. Each API hostname uses a traffic CNAME to the `*.cloudfront.net` target that API Gateway creates for the custom domain. The `app-api-<stage>-cdk` stack exposes that target as `ApiGatewayCustomDomainTarget`. The separate ACM validation CNAME proves ownership of the hostname; it does not route API traffic.
+
+The root mapping routes requests to the stage without a stage prefix in the public URL. On each API hostname, `/health_check` identifies the mapped stage, and `/v1/graphql/external` serves integrations using the existing machine OAuth authorizer.
 
 ### `FULL_IAM_PERMISSIONS_BOUNDARY_POLICY`
 
