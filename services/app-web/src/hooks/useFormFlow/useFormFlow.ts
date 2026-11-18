@@ -92,7 +92,8 @@ const useFormFlow = (
         // Skip while a conditional flow is still waiting on form data.
         const canCheck =
             contractSubmissionType &&
-            (formData || !FORM_FLOWS[contractSubmissionType].isPageActive)
+            (formData ||
+                typeof FORM_FLOWS[contractSubmissionType].pages !== 'function')
         if (canCheck && !flow.formPages.includes(currentPage)) {
             recordJSException(
                 `useFormFlow: ${currentPage} is not an active page in the ${contractSubmissionType} form flow`

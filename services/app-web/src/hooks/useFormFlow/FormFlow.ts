@@ -1,7 +1,6 @@
 import {
     EB_SUBMISSION_FORM_ROUTES,
     EQRO_SUBMISSION_FORM_ROUTES,
-    STATE_SUBMISSION_FORM_ROUTES,
     type RouteT,
     type RouteTWithUnknown,
 } from '@mc-review/constants'
@@ -25,33 +24,23 @@ type FormFlowContext = {
 type CustomPageTitles = Partial<Record<RouteTWithUnknown, string>>
 
 type FormFlowDefinition = {
-    // Every page the flow can have, in order
-    pages: RouteTWithUnknown[]
+    // The flow's pages, in order. Use a function when the pages depend on the
+    // submission or feature flags; it returns only the pages that are shown.
+    pages:
+        | RouteTWithUnknown[]
+        | ((context: FormFlowContext) => RouteTWithUnknown[])
     // Step indicator titles that differ from the default page titles
     customPageTitles?: CustomPageTitles
-    // Optional filter for pages that only show for some submissions or flags.
-    // Leave it out when the flow has no conditional pages.
-    isPageActive?: (
-        page: RouteTWithUnknown,
-        context: FormFlowContext
-    ) => boolean
 }
 
 // Health plan pages depend on form data and feature flags; activeFormPages holds those rules.
 // TODO: move the rules here when the health plan pages switch to useFormFlow.
-const isHealthPlanPageActive = (
-    page: RouteTWithUnknown,
-    {
-        formData,
-        hideSupportingDocs,
-        showProcurementAttestation,
-    }: FormFlowContext
-): boolean =>
-    activeFormPages(
-        formData,
-        hideSupportingDocs,
-        showProcurementAttestation
-    ).includes(page)
+const getHealthPlanPages = ({
+    formData,
+    hideSupportingDocs,
+    showProcurementAttestation,
+}: FormFlowContext): RouteTWithUnknown[] =>
+    activeFormPages(formData, hideSupportingDocs, showProcurementAttestation)
 
 /**
  * The single source of truth for each submission type's form flow.
@@ -62,8 +51,7 @@ const isHealthPlanPageActive = (
  */
 const FORM_FLOWS: Record<ContractSubmissionType, FormFlowDefinition> = {
     HEALTH_PLAN: {
-        pages: STATE_SUBMISSION_FORM_ROUTES,
-        isPageActive: isHealthPlanPageActive,
+        pages: getHealthPlanPages,
     },
     EQRO: {
         pages: EQRO_SUBMISSION_FORM_ROUTES,
@@ -80,10 +68,8 @@ const getActiveFormPages = (
     contractSubmissionType: ContractSubmissionType,
     context: FormFlowContext
 ): RouteTWithUnknown[] => {
-    const { pages, isPageActive } = FORM_FLOWS[contractSubmissionType]
-    return isPageActive
-        ? pages.filter((page) => isPageActive(page, context))
-        : pages
+    const { pages } = FORM_FLOWS[contractSubmissionType]
+    return typeof pages === 'function' ? pages(context) : pages
 }
 
 type FormFlow = {
