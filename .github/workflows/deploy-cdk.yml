@@ -273,6 +273,9 @@ jobs:
           pnpm --filter "./packages/**" test:coverage
           exit $?
 
+      - name: CDK infrastructure tests
+        run: pnpm --filter mcr-infra-cdk test
+
       - name: Synthetic data checks
         run: |
           pnpm --filter @mc-review/synthetic-data build
