@@ -1,5 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { StrippedContractType } from '../../domain-models/contractAndRates/contractTypes'
+import type { StrippedContractType } from '../../domain-models'
 import { parseStrippedContractWithHistory } from './parseContractWithHistory'
 import { includeStrippedContractWithoutDraftRates } from './prismaSubmittedContractHelpers'
 import type { ExtendedPrismaClient } from '../prismaClient'
@@ -63,13 +63,10 @@ async function findAllContractsStrippedInTransaction(
         include: includeStrippedContractWithoutDraftRates,
     })
 
-    const parsedContractsOrErrors: StrippedContractOrErrorArrayType =
-        contracts.map((contract) => ({
-            contractID: contract.id,
-            contract: parseStrippedContractWithHistory(contract),
-        }))
-
-    return parsedContractsOrErrors
+    return contracts.map((contract) => ({
+        contractID: contract.id,
+        contract: parseStrippedContractWithHistory(contract),
+    }))
 }
 
 async function findAllContractsStripped(
