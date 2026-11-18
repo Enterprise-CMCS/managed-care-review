@@ -77,6 +77,106 @@ describe('DownloadLink', () => {
         }
     )
 
+    it.each(['HEALTH_PLAN_DOCS', 'QUESTION_ANSWER_DOCS'] as const)(
+        'prefers the canonical key over conflicting legacy metadata in %s',
+        async (bucket) => {
+            render(
+                <DocumentDownloadLink
+                    href={expired}
+                    s3Key="allusers/canonical.pdf"
+                    s3URL="s3://bucket/legacy.pdf/report.pdf"
+                    bucket={bucket}
+                >
+                    Document
+                </DocumentDownloadLink>
+            )
+            fireEvent.click(screen.getByRole('link'))
+            await waitFor(() => expect(replace).toHaveBeenCalledWith(valid))
+            expect(getURL).toHaveBeenCalledWith(
+                'allusers/canonical.pdf',
+                bucket
+            )
+            expect(getKey).not.toHaveBeenCalled()
+            expect(screen.getByRole('link')).not.toHaveAttribute('s3key')
+        }
+    )
+
+    it.each([undefined, null, ''])(
+        'renews a canonical object when the legacy reference is %s',
+        async (s3URL) => {
+            render(
+                <DocumentDownloadLink
+                    href={expired}
+                    s3Key="allusers/canonical.pdf"
+                    s3URL={s3URL}
+                    bucket="HEALTH_PLAN_DOCS"
+                >
+                    Document
+                </DocumentDownloadLink>
+            )
+            fireEvent.click(screen.getByRole('link'))
+            await waitFor(() => expect(replace).toHaveBeenCalledWith(valid))
+            expect(getURL).toHaveBeenCalledWith(
+                'allusers/canonical.pdf',
+                'HEALTH_PLAN_DOCS'
+            )
+            expect(getKey).not.toHaveBeenCalled()
+        }
+    )
+
+    it.each([null, ''])(
+        'uses legacy metadata when the canonical key is %s',
+        async (s3Key) => {
+            render(
+                <DocumentDownloadLink
+                    href={expired}
+                    s3Key={s3Key}
+                    s3URL="s3://legacy/document"
+                    bucket="HEALTH_PLAN_DOCS"
+                >
+                    Document
+                </DocumentDownloadLink>
+            )
+            fireEvent.click(screen.getByRole('link'))
+            await waitFor(() => expect(replace).toHaveBeenCalledWith(valid))
+            expect(getURL).toHaveBeenCalledWith(
+                'document-key',
+                'HEALTH_PLAN_DOCS'
+            )
+        }
+    )
+
+    it('fails safely when neither a canonical key nor legacy reference exists', async () => {
+        render(
+            <DocumentDownloadLink href={expired} bucket="HEALTH_PLAN_DOCS">
+                Document
+            </DocumentDownloadLink>
+        )
+        fireEvent.click(screen.getByRole('link'))
+        expect(await screen.findByRole('alert')).toBeInTheDocument()
+        expect(getURL).not.toHaveBeenCalled()
+        expect(close).toHaveBeenCalled()
+    })
+
+    it('does not fall back to a different legacy object when canonical renewal fails', async () => {
+        getURL.mockRejectedValue(new Error('Download unavailable'))
+        render(
+            <DocumentDownloadLink
+                href={expired}
+                s3Key="allusers/canonical.pdf"
+                s3URL="s3://bucket/legacy.pdf/report.pdf"
+                bucket="HEALTH_PLAN_DOCS"
+            >
+                Document
+            </DocumentDownloadLink>
+        )
+        fireEvent.click(screen.getByRole('link'))
+        expect(await screen.findByRole('alert')).toBeInTheDocument()
+        expect(getURL).toHaveBeenCalledTimes(1)
+        expect(getKey).not.toHaveBeenCalled()
+        expect(close).toHaveBeenCalled()
+    })
+
     it('handles middle-click renewal', async () => {
         const renew = vi.fn().mockResolvedValue(valid)
         render(
@@ -135,6 +235,9 @@ describe('DownloadLink', () => {
     })
 
     it('allows a different document to renew while the old response is pending', async () => {
+        getKey.mockImplementation((url: string) =>
+            url.includes('first.pdf') ? 'first.pdf' : 'second.pdf'
+        )
         const first = deferred<string>()
         const secondTab = {
             opener: {},
@@ -176,6 +279,87 @@ describe('DownloadLink', () => {
         expect(replace).not.toHaveBeenCalled()
         expect(screen.getByRole('link')).toHaveAttribute('href', valid)
         expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    })
+
+    it.each([
+        ['canonical-key change', 'allusers/second.pdf', 'HEALTH_PLAN_DOCS'],
+        ['bucket change', 'allusers/first.pdf', 'QUESTION_ANSWER_DOCS'],
+    ] as const)(
+        'cancels stale renewal after a %s even when legacy metadata is unchanged',
+        async (_change, s3Key, bucket) => {
+            const first = deferred<string>()
+            const secondTab = {
+                opener: null,
+                location: { replace: vi.fn() },
+                close: vi.fn(),
+            }
+            vi.mocked(window.open)
+                .mockReturnValueOnce(tab as unknown as Window)
+                .mockReturnValueOnce(secondTab as unknown as Window)
+            getURL
+                .mockReturnValueOnce(first.promise)
+                .mockResolvedValueOnce(valid)
+            const { rerender } = render(
+                <DocumentDownloadLink
+                    href={expired}
+                    s3Key="allusers/first.pdf"
+                    s3URL="s3://bucket/legacy.pdf/report.pdf"
+                    bucket="HEALTH_PLAN_DOCS"
+                >
+                    Document
+                </DocumentDownloadLink>
+            )
+            fireEvent.click(screen.getByRole('link'))
+            rerender(
+                <DocumentDownloadLink
+                    href={expired}
+                    s3Key={s3Key}
+                    s3URL="s3://bucket/legacy.pdf/report.pdf"
+                    bucket={bucket}
+                >
+                    Document
+                </DocumentDownloadLink>
+            )
+            expect(close).toHaveBeenCalled()
+            fireEvent.click(screen.getByRole('link'))
+            await waitFor(() =>
+                expect(secondTab.location.replace).toHaveBeenCalledWith(valid)
+            )
+            await act(async () => first.resolve(`${valid}&old=true`))
+            expect(getURL).toHaveBeenLastCalledWith(s3Key, bucket)
+            expect(replace).not.toHaveBeenCalled()
+            expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+        }
+    )
+
+    it('keeps the same canonical renewal active when legacy metadata changes', async () => {
+        const first = deferred<string>()
+        getURL.mockReturnValue(first.promise)
+        const { rerender } = render(
+            <DocumentDownloadLink
+                href={expired}
+                s3Key="allusers/canonical.pdf"
+                s3URL="s3://bucket/old.pdf/report.pdf"
+                bucket="HEALTH_PLAN_DOCS"
+            >
+                Document
+            </DocumentDownloadLink>
+        )
+        fireEvent.click(screen.getByRole('link'))
+        rerender(
+            <DocumentDownloadLink
+                href={valid}
+                s3Key="allusers/canonical.pdf"
+                s3URL="s3://bucket/corrected.pdf/report.pdf"
+                bucket="HEALTH_PLAN_DOCS"
+            >
+                Document
+            </DocumentDownloadLink>
+        )
+        expect(close).not.toHaveBeenCalled()
+        await act(async () => first.resolve(valid))
+        expect(replace).toHaveBeenCalledWith(valid)
+        expect(getURL).toHaveBeenCalledTimes(1)
     })
 
     it('does not show an old renewal failure against a different resource', async () => {

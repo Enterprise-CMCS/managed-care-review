@@ -4,8 +4,7 @@ import { useS3 } from '../contexts/S3Context'
 import { BucketShortName } from '../s3'
 
 type ParsedDocumentWithLinkType =
-    | ({ url: string | null } & Document)
-    | GenericDocument
+    ({ url: string | null } & Document) | GenericDocument
 
 const useDocument = () => {
     const { getKey, getURL } = useS3()
@@ -16,7 +15,9 @@ const useDocument = () => {
         ): Promise<Array<T & ParsedDocumentWithLinkType>> => {
             return await Promise.all(
                 documents.map(async (doc) => {
-                    const key = getKey(doc.s3URL)
+                    // Match the backend's precedence; legacy references can point
+                    // somewhere different from the canonical stored object.
+                    const key = doc.s3Key || getKey(doc.s3URL)
                     if (!key)
                         return {
                             ...doc,

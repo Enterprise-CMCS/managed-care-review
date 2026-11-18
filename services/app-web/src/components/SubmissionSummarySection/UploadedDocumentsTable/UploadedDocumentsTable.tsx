@@ -50,7 +50,7 @@ export const UploadedDocumentsTable = ({
     const initialDocState = documents.map((doc) => ({
         ...doc,
         url: null,
-        s3Key: null,
+        s3Key: doc.s3Key || null,
     }))
     const { loggedInUser } = useAuth()
     const isStateUser = loggedInUser?.__typename === 'StateUser'
@@ -220,6 +220,7 @@ export const UploadedDocumentsTable = ({
                                         aria-label={`${doc.name} (opens in new window)`}
                                         href={doc.url}
                                         s3URL={doc.s3URL}
+                                        s3Key={doc.s3Key}
                                         bucket="HEALTH_PLAN_DOCS"
                                         target="_blank"
                                     >

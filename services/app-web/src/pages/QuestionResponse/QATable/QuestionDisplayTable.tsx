@@ -56,6 +56,7 @@ export const QuestionDisplayTable = ({
                                     aria-label={`${doc.name} (opens in new window)`}
                                     href={doc.downloadURL}
                                     s3URL={doc.s3URL}
+                                    s3Key={doc.s3Key}
                                     bucket="QUESTION_ANSWER_DOCS"
                                     target="_blank"
                                 >

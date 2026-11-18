@@ -154,20 +154,24 @@ export function DownloadLink({
 
 /** Ordinary documents renew by key/bucket; ZIPs supply their own parent-query renewer. */
 export function DocumentDownloadLink({
+    s3Key,
     s3URL,
     bucket,
     ...props
 }: Omit<DownloadLinkProps, 'renew'> & {
-    s3URL: string
+    s3Key?: string | null
+    s3URL?: string | null
     bucket: BucketShortName
 }) {
     const { getURL, getKey } = useS3()
+    // Use the same object as the server's initial URL, even if legacy metadata
+    // differs. Key and bucket also scope cancellation to the actual resource.
+    const key = s3Key || (s3URL ? getKey(s3URL) : null)
     return (
         <DownloadLink
             {...props}
-            resourceKey={`${bucket}:${s3URL}`}
+            resourceKey={`${bucket}:${key || s3URL || ''}`}
             renew={async () => {
-                const key = getKey(s3URL)
                 if (!key) throw new Error('Download unavailable')
                 return getURL(key, bucket)
             }}

@@ -75,7 +75,9 @@ The browser waits three seconds before the first status query, then polls with
 exponential backoff capped at 15 seconds and a one-minute total deadline. Each
 query bypasses Apollo's cache. Only `CLEAN` completes the upload; other terminal
 results, missing results, lookup errors and timeouts produce a scan error.
-Document rows are saved after the upload and scan complete.
+Document rows are saved after the upload and scan complete. Both Q&A saves and
+the shared contract/EQRO/rate formatter exclude incomplete uploads, including
+draft saves made while a scan is pending.
 
 Removing or replacing a file, or leaving the upload component, cancels its work.
 The legacy GraphQL transport can finish an already-issued request, but its result
@@ -90,7 +92,9 @@ is clean**. Possessing a signed URL does not bypass that policy.
 
 The browser requests fresh URLs without caching them. Saved-document links use
 the URL supplied by their parent query; activating an expired or nearly expired
-link requests a replacement by key and bucket. Q&A links use the Q&A bucket.
+link requests a replacement by key and bucket. The stored `s3Key` is preferred,
+matching the server's initial URL; parsing the legacy `s3URL` is only a fallback
+for records without a canonical key. Q&A links use the Q&A bucket.
 ZIP links renew by refetching the active authorized parent query containing the
 same ZIP package ID, rather than requesting a shared-object URL for a ZIP key.
 
