@@ -621,6 +621,15 @@ const parseILOSContract = (
                 })
             }
 
+            contract.draftRates
+                .filter((rate) => rate.consolidatedStatus === 'WITHDRAWN')
+                .forEach((rate) => {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: `ILOS submission cannot link a withdrawn rate. Rate id: ${rate.id}`,
+                    })
+                })
+
             // Every ILOS submission needs at least one associated rate, linked or external.
             const hasAssociatedRate =
                 contract.draftRates.length > 0 ||

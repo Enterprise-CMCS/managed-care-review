@@ -2596,6 +2596,25 @@ describe('ILOS parsing and validation', () => {
             }
         )
 
+        it('returns an error when a linked rate is withdrawn', async () => {
+            const prismaClient = await sharedTestPrismaClient()
+            const postgresStore = NewPostgresStore(prismaClient)
+            const contract = mockDraftILOSContract()
+            const withdrawnRate = mockILOSLinkedRate(uuidv4())
+            withdrawnRate.consolidatedStatus = 'WITHDRAWN'
+            contract.draftRates = [withdrawnRate]
+
+            const parsedContract = expectZodError(
+                parseILOSContract(contract, 'FL', postgresStore),
+                'parseILOSContract'
+            )
+
+            const errMessages = parsedContract.issues.map((err) => err.message)
+            expect(errMessages).toContain(
+                `ILOS submission cannot link a withdrawn rate. Rate id: ${withdrawnRate.id}`
+            )
+        })
+
         it('returns an error when no rate is associated', async () => {
             const prismaClient = await sharedTestPrismaClient()
             const postgresStore = NewPostgresStore(prismaClient)
