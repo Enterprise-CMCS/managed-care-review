@@ -166,7 +166,7 @@ These take `serviceName` as the tracer scope; the Datadog service tag still come
 
 ## Lambda / handler tracer setup
 
-Any Lambda that should emit spans must initialize and flush the tracer itself. Follow the established handler shape (`apollo_gql.ts`, `audit_s3.ts`, `regenerate_zips.ts`):
+Any Lambda that should emit spans must initialize and flush the tracer itself. Follow the established handler shape (`apollo_gql.ts`, `regenerate_zips.ts`):
 
 1. **`initTracer('app-api-' + stage)` early — before creating the Prisma client.** OTEL registers the Prisma instrumentation during setup, so the client must be created *after* `initTracer` or its db spans won't be captured/nested.
 2. **Use `app-api-<stage>` as the service name** if you want the Lambda's spans caught by the existing `service:app-api-<env>` monitors. A different service name (e.g. `audit-s3`) routes spans to a different service and those monitors won't see them.
