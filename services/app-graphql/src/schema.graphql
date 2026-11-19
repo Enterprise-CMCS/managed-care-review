@@ -5,7 +5,16 @@ schema {
 
 scalar JSON
 
+type EBContractor {
+    id: ID!
+    name: String!
+    isDeprecated: Boolean!
+}
+
 type Query {
+    "All Enrollment Broker contractors, including deprecated entries for existing selections."
+    fetchEBContractors: [EBContractor!]!
+
     """
     fetchCurrentUser returns user information for the currently logged in User
 
@@ -1976,6 +1985,8 @@ type ContractFormData {
     ebStateContractIdentifier: String
     "The ID of the selected Enrollment Broker contractor"
     ebContractorID: String
+    "The selected contractor, loaded from the EBContractors table."
+    ebContractor: EBContractor
     "The ContractTable ID of the linked Enrollment Broker base contract"
     ebLinkedBaseContractID: String
     "The ContractTable ID of the linked previous Enrollment Broker amendment"

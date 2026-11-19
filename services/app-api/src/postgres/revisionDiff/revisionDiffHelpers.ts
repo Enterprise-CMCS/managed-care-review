@@ -117,6 +117,9 @@ const fieldConfigOverrides: Partial<
 }
 
 const excludedFieldPaths = new Set<keyof ContractFormData>([
+    // Contractor details are live reference data; selection changes are tracked
+    // through ebContractorID rather than changes to the related contractor object.
+    'ebContractor',
     'stateContacts',
     'supportingDocuments',
     'contractDocuments',

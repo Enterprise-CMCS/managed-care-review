@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { ebContractorSchema } from '../EBContractorType'
 import { statusSchema } from './statusType'
 
 const populationCoveredSchema = z.union([
@@ -208,6 +209,7 @@ const genericContractFormDataSchema = z.object({
     ebPreviousAmendmentInMCReview: preprocessNulls(z.boolean().optional()),
     ebAmendmentNumber: preprocessNulls(z.string().optional()),
     ebStateContractIdentifier: preprocessNulls(z.string().optional()),
+    ebContractor: preprocessNulls(ebContractorSchema.optional()),
     ebContractorID: preprocessNulls(z.string().optional()),
     ebLinkedBaseContractID: preprocessNulls(z.string().optional()),
     ebLinkedPreviousAmendmentID: preprocessNulls(z.string().optional()),

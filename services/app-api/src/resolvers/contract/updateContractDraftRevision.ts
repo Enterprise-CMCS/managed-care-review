@@ -203,6 +203,40 @@ export function updateContractDraftRevision(
                       )
                     : parseAndUpdateChipOnlyFields(parsedFormData, featureFlags)
 
+                const contractorID = editableFormData.ebContractorID
+                if (contractorID != null) {
+                    if (contractorID.trim().length === 0) {
+                        throw createUserInputError(
+                            'ebContractorID must reference an existing EB contractor',
+                            'ebContractorID'
+                        )
+                    }
+                    const contractor =
+                        await store.findEBContractorByID(contractorID)
+                    if (contractor instanceof NotFoundError) {
+                        throw createUserInputError(
+                            'ebContractorID must reference an existing EB contractor',
+                            'ebContractorID'
+                        )
+                    }
+                    if (contractor instanceof Error) {
+                        logResolverError(
+                            'updateContractDraftRevision',
+                            contractor.message,
+                            context
+                        )
+                        throw new GraphQLError(
+                            'Error validating ebContractorID',
+                            {
+                                extensions: {
+                                    code: 'INTERNAL_SERVER_ERROR',
+                                    cause: 'DB_ERROR',
+                                },
+                            }
+                        )
+                    }
+                }
+
                 // Null and omitted IDs clear links; populated IDs must reference
                 // existing contracts before the write reaches foreign-key checks.
                 for (const field of [

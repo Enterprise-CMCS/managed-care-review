@@ -35,6 +35,7 @@ import {
     mergeContractRevisionOverrides,
     mergeRateRevisionOverrides,
 } from '../prismaOverrideMergeHelpers'
+import { selectEBContractor } from '../ebContractors'
 
 const subincludeUpdateInfo = {
     updatedBy: true,
@@ -57,6 +58,7 @@ interface RevisionStatusInfo {
 const DRAFT_PARENT_PLACEHOLDER = 'DRAFT_PARENT_REPLACE_ME'
 
 const includeContractFormData = {
+    ebContractor: { select: selectEBContractor },
     unlockInfo: includeUpdateInfo,
     undoUnlockInfo: includeUpdateInfo,
     submitInfo: includeUpdateInfo,
@@ -887,6 +889,7 @@ function contractFormDataToDomainModel(
         ebAmendmentNumber: contractRevision.ebAmendmentNumber ?? undefined,
         ebStateContractIdentifier:
             contractRevision.ebStateContractIdentifier ?? undefined,
+        ebContractor: contractRevision.ebContractor ?? undefined,
         ebContractorID: contractRevision.ebContractorID ?? undefined,
         ebLinkedBaseContractID:
             contractRevision.ebLinkedBaseContractID ?? undefined,

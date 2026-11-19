@@ -2841,6 +2841,7 @@ function mockContractFormData(
         ebPreviousAmendmentInMCReview: null,
         ebAmendmentNumber: null,
         ebStateContractIdentifier: null,
+        ebContractor: null,
         ebContractorID: null,
         ebLinkedBaseContractID: null,
         ebLinkedPreviousAmendmentID: null,
@@ -2869,6 +2870,11 @@ function mockEBContractPackageDraft(partial?: Partial<Contract>): Contract {
                 ebPreviousAmendmentInMCReview: true,
                 ebAmendmentNumber: 'Amendment 2',
                 ebStateContractIdentifier: 'EB-2026-001',
+                ebContractor: {
+                    id: '161a7110-e8fc-43d3-b859-8c75f4680a3b',
+                    name: 'ALIGHT SOLUTIONS CARIBE Inc.',
+                    isDeprecated: false,
+                },
                 ebContractorID: '161a7110-e8fc-43d3-b859-8c75f4680a3b',
                 ebLinkedBaseContractID: '1a680cb4-12cb-4a93-bbae-0fc68732b6f1',
                 ebLinkedPreviousAmendmentID:
