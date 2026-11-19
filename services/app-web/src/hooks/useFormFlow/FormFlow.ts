@@ -61,6 +61,10 @@ const FORM_FLOWS: Record<ContractSubmissionType, FormFlowDefinition> = {
         pages: EB_SUBMISSION_FORM_ROUTES,
         customPageTitles: { SUBMISSIONS_TYPE: 'Submission details' },
     },
+    // ILOS form pages are not built yet. Fill this in with the ILOS frontend work.
+    ILOS: {
+        pages: [],
+    },
 }
 
 /** The pages shown for this submission, in order. */
