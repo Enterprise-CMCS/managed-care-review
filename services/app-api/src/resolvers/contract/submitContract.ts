@@ -68,15 +68,16 @@ const validateStatusAndUpdateInfo = (
     }
 }
 
-// A health plan submitted as CONTRACT_ONLY may still have rates attached.
+// A submission sent as CONTRACT_ONLY may still have rates attached: a health plan
+// switched from contract and rates, or an EQRO with a linked rate.
 // Prune them at submission time so the submission is clean.
-const removeRatesFromContractOnlyHealthPlan = async (
+// ILOS is always CONTRACT_AND_RATES, so it never reaches this.
+const removeRatesFromContractOnlySubmission = async (
     parsedContract: ContractType,
     store: Store,
     context: Context
 ) => {
     if (
-        parsedContract.contractSubmissionType !== 'HEALTH_PLAN' ||
         parsedContract.draftRevision?.formData.submissionType !==
             'CONTRACT_ONLY' ||
         !parsedContract.draftRates ||
@@ -454,7 +455,7 @@ export function submitContract(
                 // add all rates (including any linked rates) back in
                 parsedContract.draftRates = contractWithHistory.draftRates
 
-                await removeRatesFromContractOnlyHealthPlan(
+                await removeRatesFromContractOnlySubmission(
                     parsedContract,
                     store,
                     context
