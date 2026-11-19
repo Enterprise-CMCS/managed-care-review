@@ -96,8 +96,6 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             ebAmendmentNumber
             ebStateContractIdentifier
             ebContractorID
-            ebLinkedBaseContractID
-            ebLinkedPreviousAmendmentID
         }
     }
     ... on RateRevision {

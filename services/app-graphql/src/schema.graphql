@@ -1985,10 +1985,6 @@ type ContractFormData {
     ebStateContractIdentifier: String
     "The ID of the selected Enrollment Broker contractor"
     ebContractorID: String
-    "The ContractTable ID of the linked Enrollment Broker base contract"
-    ebLinkedBaseContractID: String
-    "The ContractTable ID of the linked previous Enrollment Broker amendment"
-    ebLinkedPreviousAmendmentID: String
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
@@ -3311,10 +3307,6 @@ input ContractDraftRevisionFormDataInput {
     ebStateContractIdentifier: String
     "The ID of the selected Enrollment Broker contractor"
     ebContractorID: String
-    "The ContractTable ID of the linked Enrollment Broker base contract"
-    ebLinkedBaseContractID: String
-    "The ContractTable ID of the linked previous Enrollment Broker amendment"
-    ebLinkedPreviousAmendmentID: String
 }
 
 input RateFormDataInput {

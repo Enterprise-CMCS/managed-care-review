@@ -2824,19 +2824,7 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
-            const base = await createAndUpdateTestEBContract(server, 'FL', {
-                contractType: 'BASE',
-            })
-            await submitTestContract(server, base.id)
-            const amendment = await createAndUpdateTestEBContract(server, 'FL')
-            await submitTestContract(server, amendment.id)
-
-            const expectedEBFields = {
-                ...mockEBContractFormData(),
-                ebBaseContractInMCReview: true,
-                ebLinkedBaseContractID: base.id,
-                ebLinkedPreviousAmendmentID: amendment.id,
-            }
+            const expectedEBFields = mockEBContractFormData()
             const draft = await createAndUpdateTestEBContract(
                 server,
                 'FL',

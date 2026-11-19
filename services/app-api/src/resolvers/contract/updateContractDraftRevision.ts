@@ -237,56 +237,6 @@ export function updateContractDraftRevision(
                     }
                 }
 
-                // Null and omitted IDs clear links; populated IDs must reference
-                // existing contracts before the write reaches foreign-key checks.
-                for (const field of [
-                    'ebLinkedBaseContractID',
-                    'ebLinkedPreviousAmendmentID',
-                ] as const) {
-                    const linkedContractID = editableFormData[field]
-                    if (linkedContractID == null) {
-                        continue
-                    }
-
-                    if (linkedContractID.trim().length === 0) {
-                        throw createUserInputError(
-                            `${field} must reference an existing contract`,
-                            field
-                        )
-                    }
-
-                    const linkedContract =
-                        await store.findContractWithHistory(linkedContractID)
-                    if (linkedContract instanceof NotFoundError) {
-                        throw createUserInputError(
-                            `${field} must reference an existing contract`,
-                            field
-                        )
-                    }
-                    if (linkedContract instanceof Error) {
-                        logResolverError(
-                            'updateContractDraftRevision',
-                            `Error validating ${field}: ${linkedContract.message}`,
-                            context
-                        )
-                        throw new GraphQLError(`Error validating ${field}`, {
-                            extensions: {
-                                code: 'INTERNAL_SERVER_ERROR',
-                                cause: 'DB_ERROR',
-                            },
-                        })
-                    }
-                    if (
-                        linkedContract.stateCode !==
-                        contractWithHistory.stateCode
-                    ) {
-                        throw createUserInputError(
-                            `${field} must reference a contract from the same state`,
-                            field
-                        )
-                    }
-                }
-
                 // Update contract draft revision
                 const updateResult = await store.updateDraftContract({
                     contractID,

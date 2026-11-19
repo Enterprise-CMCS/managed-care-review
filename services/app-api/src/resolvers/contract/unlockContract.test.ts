@@ -1105,23 +1105,7 @@ describe('unlockContract', () => {
                         context: { user: mockUser() },
                         s3Client: mockS3,
                     })
-                    const base = await createAndUpdateTestEBContract(
-                        stateServer,
-                        'FL',
-                        { contractType: 'BASE' }
-                    )
-                    await submitTestContract(stateServer, base.id)
-                    const amendment = await createAndUpdateTestEBContract(
-                        stateServer,
-                        'FL'
-                    )
-                    await submitTestContract(stateServer, amendment.id)
-                    const expectedEBFields = {
-                        ...mockEBContractFormData(),
-                        ebBaseContractInMCReview: true,
-                        ebLinkedBaseContractID: base.id,
-                        ebLinkedPreviousAmendmentID: amendment.id,
-                    }
+                    const expectedEBFields = mockEBContractFormData()
                     const draft = await createAndUpdateTestEBContract(
                         stateServer,
                         'FL',
