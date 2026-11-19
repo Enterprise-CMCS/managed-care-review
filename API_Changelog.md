@@ -1,6 +1,22 @@
 # Managed Care Review - API Changelog
 ## This document highlights API changes that have been introduced since May 2025. See the full [GraphQL schema](services/app-graphql/src/schema.graphql).
 
+### November 19, 2026
+#### Added
+- New query `fetchEBContractors(includeDeprecated: Boolean = false)` returns Enrollment Broker contractors from the database.
+    - Returns a non-null list of `EBContractor` objects with `id: ID!`, `name: String!`, and `isDeprecated: Boolean!`.
+    - Deprecated contractors are excluded by default. Pass `includeDeprecated: true` to include them.
+    - Results are ordered by name, then ID.
+    - Available to authenticated users, including State users, and OAuth clients with the `client_credentials` grant.
+    - Returns `FORBIDDEN` for OAuth clients without read access and `INTERNAL_SERVER_ERROR` if the database lookup fails.
+- Nullable `ebContractorID` String field added to `ContractFormData` and `ContractDraftRevisionFormDataInput` to store the selected Enrollment Broker contractor ID.
+    - Returned in contract revision form data and preserved through submission, unlock, and resubmission.
+
+#### Updated
+- `updateContractDraftRevision` validates non-null `ebContractorID` values against the contractor table.
+    - Blank or unknown IDs return `BAD_USER_INPUT` with `argumentName: "ebContractorID"`; lookup failures return `INTERNAL_SERVER_ERROR` with cause `DB_ERROR`.
+    - Deprecated contractor IDs remain valid. Null or omitted values clear the selection, following existing form-update behavior.
+
 ### September 11, 2026
 #### Added
 - Nullable `procurementAttestation` Boolean field added to `ContractFormData` and `ContractDraftRevisionFormDataInput` for health-plan contracts.
