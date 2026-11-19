@@ -315,7 +315,9 @@ async function unlockContractInsideTransaction(
                 currentRev.ebPreviousAmendmentInMCReview,
             ebAmendmentNumber: currentRev.ebAmendmentNumber,
             ebStateContractIdentifier: currentRev.ebStateContractIdentifier,
-            ebContractorID: currentRev.ebContractorID,
+            ebContractor: currentRev.ebContractorID
+                ? { connect: { id: currentRev.ebContractorID } }
+                : undefined,
             ebLinkedBaseContract: currentRev.ebLinkedBaseContractID
                 ? { connect: { id: currentRev.ebLinkedBaseContractID } }
                 : undefined,

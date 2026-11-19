@@ -60,6 +60,16 @@ model HealthPlanRevisionTable {
   deprecated      Boolean                @default(true)
 }
 
+model EBContractors {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  name         String
+  isDeprecated Boolean
+
+  contractRevisions ContractRevisionTable[]
+}
+
 model ContractTable {
   id             String    @id @default(uuid())
   createdAt      DateTime  @default(now())
@@ -288,6 +298,7 @@ model ContractRevisionTable {
 
   // Enrollment Broker submission fields only
   ebContractorID                String?
+  ebContractor                  EBContractors? @relation(fields: [ebContractorID], references: [id], onDelete: Restrict)
   ebLinkedBaseContractID        String?
   ebLinkedPreviousAmendmentID   String?
   ebLinkedBaseContract          ContractTable? @relation("ebLinkedBaseContract", fields: [ebLinkedBaseContractID], references: [id])
