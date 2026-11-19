@@ -127,20 +127,20 @@ export const NewSubmission = () => {
             enabled: !!isEBEnabled,
         },
         {
-            id: 'ilos',
-            value: ContractSubmissionTypeRecord.ILOS,
-            label: 'In Lieu of Services actuarial report (ILOS)',
-            description:
-                'Submit your final ILOS cost percentage report (ILOS actuarial report).',
-            enabled: !!isILOSEnabled,
-        },
-        {
             id: 'sdp',
             value: ContractSubmissionTypeRecord.SDP,
             label: 'State Directed Payment Preprint (SDP)',
             description:
                 'Submit preprints to get prior approval for state directed payments',
             enabled: !!isSDPEnabled,
+        },
+        {
+            id: 'ilos',
+            value: ContractSubmissionTypeRecord.ILOS,
+            label: 'In Lieu of Services actuarial report (ILOS)',
+            description:
+                'Submit your final ILOS cost percentage report (ILOS actuarial report).',
+            enabled: !!isILOSEnabled,
         },
     ].filter((option) => option.enabled)
 
