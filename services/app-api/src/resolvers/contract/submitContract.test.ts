@@ -3297,6 +3297,12 @@ describe('submitContract', () => {
                 { rateControlName: 'EXT-2', position: 3 },
             ])
 
+            // ILOS documents get their first submitted date
+            const ilosDocuments =
+                sub.contractRevision.formData.ilosDocuments ?? []
+            expect(ilosDocuments).toHaveLength(1)
+            expect(ilosDocuments[0].dateAdded).toEqual(sub.submitInfo.updatedAt)
+
             // ILOS is always under review
             expect(contract.consolidatedStatus).toBe('SUBMITTED')
             const latestAction = contract.reviewStatusActions?.[0]

@@ -22,6 +22,11 @@ const includeContractRevWithOnlyDocs = {
             position: 'asc',
         },
     },
+    ilosDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
     revisionOverrides: {
         orderBy: {
             createdAt: 'desc',
@@ -117,6 +122,11 @@ async function submitContractAndOrRates(
                         (override) => override.supportingDocuments
                     ),
                 },
+                {
+                    // ILOS documents have no revision overrides.
+                    docs: rev.ilosDocuments,
+                    overrides: [],
+                },
             ]
             for (const { docs, overrides } of docKinds) {
                 // Contract docs and supporting docs are separate arrays, so
@@ -165,6 +175,19 @@ async function submitContractAndOrRates(
                 },
                 supportingDocuments: {
                     updateMany: submittedContractRev.supportingDocuments.map(
+                        (doc) => ({
+                            where: {
+                                id: doc.id,
+                            },
+                            data: {
+                                dateAdded:
+                                    prevDocs[doc.sha256] ?? currentDateTime,
+                            },
+                        })
+                    ),
+                },
+                ilosDocuments: {
+                    updateMany: submittedContractRev.ilosDocuments.map(
                         (doc) => ({
                             where: {
                                 id: doc.id,
