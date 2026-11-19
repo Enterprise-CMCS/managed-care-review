@@ -1,5 +1,5 @@
 import type { PrismaTransactionType } from '../prismaTypes'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models'
 import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
@@ -22,6 +22,8 @@ async function findAllContractsWithHistoryByState(
                 stateCode: {
                     equals: stateCode,
                 },
+                // ILOS submissions are served by indexIlosSubmissionsStripped
+                contractSubmissionType: { not: 'ILOS' },
             },
             include: includeFullContract,
         })
@@ -32,14 +34,10 @@ async function findAllContractsWithHistoryByState(
             return new NotFoundError(err)
         }
 
-        const parsedContractsOrErrors: ContractOrErrorArrayType = contracts.map(
-            (contract) => ({
-                contractID: contract.id,
-                contract: parseContractWithHistory(contract),
-            })
-        )
-
-        return parsedContractsOrErrors
+        return contracts.map((contract) => ({
+            contractID: contract.id,
+            contract: parseContractWithHistory(contract),
+        }))
     } catch (err) {
         console.error('PRISMA ERROR', err)
         return parseErrorToError(err)

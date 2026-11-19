@@ -13,7 +13,9 @@ import {
 import {
     approveTestContract,
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContract,
     createAndUpdateTestContractWithoutRates,
+    createAndUpdateTestILOSContract,
     createTestContract,
     overrideTestContractData,
     submitTestContract,
@@ -695,6 +697,57 @@ describe(`indexContracts`, () => {
 
             expect(resultIDs).toContain(recentContract.id)
             expect(resultIDs).not.toContain(oldContract.id)
+        })
+    })
+
+    describe('ILOS submissions', () => {
+        it('excludes ILOS submissions for state users', async () => {
+            const stateServer = await constructTestPostgresServer()
+
+            const healthPlanDraft =
+                await createAndUpdateTestContractWithoutRates(stateServer)
+            const ilosDraft = await createAndUpdateTestILOSContract(stateServer)
+
+            const result = await executeGraphQLOperation(stateServer, {
+                query: IndexContractsForDashboardDocument,
+            })
+            expect(result.errors).toBeUndefined()
+
+            const contractIDs = result.data?.indexContracts.edges.map(
+                (edge: ContractEdge) => edge.node.id
+            )
+            expect(contractIDs).toContain(healthPlanDraft.id)
+            expect(contractIDs).not.toContain(ilosDraft.id)
+            expect(
+                result.data?.indexContracts.edges.every(
+                    (edge: ContractEdge) =>
+                        edge.node.contractSubmissionType !== 'ILOS'
+                )
+            ).toBe(true)
+        })
+
+        it('excludes submitted ILOS submissions for CMS users', async () => {
+            const stateServer = await constructTestPostgresServer()
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                },
+            })
+
+            const healthPlan =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const ilos = await createAndSubmitTestILOSContract(stateServer)
+
+            const result = await executeGraphQLOperation(cmsServer, {
+                query: IndexContractsForDashboardDocument,
+            })
+            expect(result.errors).toBeUndefined()
+
+            const contractIDs = result.data?.indexContracts.edges.map(
+                (edge: ContractEdge) => edge.node.id
+            )
+            expect(contractIDs).toContain(healthPlan.id)
+            expect(contractIDs).not.toContain(ilos.id)
         })
     })
 })

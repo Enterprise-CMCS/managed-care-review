@@ -14,7 +14,8 @@ type Query {
     fetchCurrentUser: User!
 
     """
-    indexContracts returns all of the contracts the current user can see.
+    indexContracts returns all of the health plan and EQRO contracts the current user can see.
+    ILOS submissions are not included, use indexIlosSubmissionsStripped instead.
 
     StateUsers can find all the contracts for their state
     CMSUsers can find all the contracts that do not have the DRAFT status
@@ -22,13 +23,29 @@ type Query {
     indexContracts(input: IndexContractsInput): IndexContractsPayload!
     """
     indexContractsStripped returns abbreviated contract data
-    Intended for use with CMS dashboards, initially minimal contract query
+    Intended for use with CMS dashboards, initially minimal contract query.
+    ILOS submissions are not included, use indexIlosSubmissionsStripped instead.
 
       Errors:
     - ForbiddenError: User must be a CMS, Admin, or State type user
     - NotFoundError: No submitted contracts found
     """
     indexContractsStripped(
+        input: IndexContractsStrippedInput
+    ): IndexContractsStrippedPayload!
+
+    """
+    indexIlosSubmissionsStripped returns abbreviated ILOS submission data
+    Intended for use with the ILOS dashboards. ILOS submissions are excluded
+    from indexContracts and indexContractsStripped.
+
+    StateUsers can find all the ILOS submissions for their state
+    CMSUsers can find all the ILOS submissions that do not have the DRAFT status
+
+      Errors:
+    - ForbiddenError: User must be a CMS, Admin, or State type user
+    """
+    indexIlosSubmissionsStripped(
         input: IndexContractsStrippedInput
     ): IndexContractsStrippedPayload!
 
