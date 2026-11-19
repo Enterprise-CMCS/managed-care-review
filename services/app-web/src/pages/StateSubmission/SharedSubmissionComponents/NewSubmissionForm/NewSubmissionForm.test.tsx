@@ -110,6 +110,107 @@ it('routes to new EQRO url', async () => {
     })
 })
 
+const renderNewSubmissionRoutes = (
+    route: string,
+    featureFlags?: { 'ilos-submissions': boolean },
+    onLocation?: (location: Location) => Location
+) =>
+    renderWithProviders(
+        <Routes>
+            <Route
+                path={RoutesRecord.SUBMISSIONS_NEW}
+                element={<NewSubmission />}
+            />
+            <Route
+                path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
+                element={<NewSubmissionForm />}
+            />
+            <Route
+                path={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                element={<div>Dashboard page</div>}
+            />
+        </Routes>,
+        {
+            routerProvider: { route },
+            location: onLocation,
+            featureFlags,
+        }
+    )
+
+describe('ILOS submission type', () => {
+    const ilosRadioName = /In Lieu of Services actuarial report \(ILOS\)/
+
+    it('does not render the ILOS radio when the flag is off', async () => {
+        renderNewSubmissionRoutes('/submissions/new')
+
+        await screen.findByRole('heading', { name: 'New submission' })
+
+        expect(screen.queryByRole('radio', { name: ilosRadioName })).toBeNull()
+    })
+
+    it('renders the ILOS radio with its copy when the flag is on', async () => {
+        renderNewSubmissionRoutes('/submissions/new', {
+            'ilos-submissions': true,
+        })
+
+        expect(
+            await screen.findByRole('radio', { name: ilosRadioName })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(
+                'Submit your final ILOS cost percentage report (ILOS actuarial report).'
+            )
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Cancel' })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('button', { name: 'Start' })
+        ).toBeInTheDocument()
+    })
+
+    it('routes to the ILOS placeholder page on Start', async () => {
+        let testLocation: Location | undefined
+        renderNewSubmissionRoutes(
+            '/submissions/new',
+            { 'ilos-submissions': true },
+            (location) => (testLocation = location)
+        )
+
+        await userEvent.click(
+            await screen.findByRole('radio', { name: ilosRadioName })
+        )
+        await userEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+        expect(
+            await screen.findByTestId('ilos-submission-details-placeholder')
+        ).toBeInTheDocument()
+        expect(testLocation?.pathname).toBe(
+            generatePath(RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM, {
+                contractSubmissionType: 'ilos',
+            })
+        )
+    })
+
+    it('returns to the dashboard on Cancel', async () => {
+        let testLocation: Location | undefined
+        renderNewSubmissionRoutes(
+            '/submissions/new',
+            { 'ilos-submissions': true },
+            (location) => (testLocation = location)
+        )
+
+        await screen.findByRole('radio', { name: ilosRadioName })
+        await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+        await waitFor(() => {
+            expect(testLocation?.pathname).toBe(
+                RoutesRecord.DASHBOARD_SUBMISSIONS
+            )
+        })
+    })
+})
+
 it('does not render SDP radio when SDP flag is off', async () => {
     renderWithProviders(
         <Routes>
