@@ -1,5 +1,8 @@
 import { NewPostgresStore } from '../../postgres'
-import { UpdateContractDraftRevisionDocument } from '../../gen/gqlClient'
+import {
+    UpdateContractDraftRevisionDocument,
+    FetchEbContractorsDocument,
+} from '../../gen/gqlClient'
 import {
     mockStoreThatErrors,
     sharedTestPrismaClient,
@@ -22,6 +25,7 @@ import {
     submitTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { mockGqlContractDraftRevisionFormDataInput } from '../../testHelpers'
+import type { ApolloServer } from '@apollo/server'
 
 describe(`Tests UpdateContractDraftRevision`, () => {
     const cmsUser = testCMSUser()
@@ -101,6 +105,9 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
+                ebContractorID: null,
+                ebLinkedBaseContractID: null,
+                ebLinkedPreviousAmendmentID: null,
                 ebNewContractor: null,
                 ebBaseContractInMCReview: null,
                 ebPreviousAmendmentInMCReview: null,
@@ -559,10 +566,167 @@ describe(`Tests UpdateContractDraftRevision`, () => {
     })
 
     describe('Enrollment Broker contract tests', () => {
-        it('updates EB scalar fields in the formData', async () => {
+        it.each([false, true])(
+            'accepts a contractor from the database (deprecated: %s) and reads its details through the contractor list',
+            async (isDeprecated) => {
+                const client = await sharedTestPrismaClient()
+                const contractor = await client.eBContractors.create({
+                    data: { name: 'Database-only EB contractor', isDeprecated },
+                })
+                const server = await constructTestPostgresServer()
+                const draft = await createAndUpdateTestEBContract(
+                    server,
+                    'FL',
+                    {
+                        ebContractorID: contractor.id,
+                    }
+                )
+                const expected = {
+                    id: contractor.id,
+                    name: contractor.name,
+                    isDeprecated,
+                }
+                const list = await executeGraphQLOperation(server, {
+                    query: FetchEbContractorsDocument,
+                    variables: { includeDeprecated: true },
+                })
+                expect(list.errors).toBeUndefined()
+                expect(list.data?.fetchEBContractors).toEqual(
+                    expect.arrayContaining([expected])
+                )
+                const activeList = await executeGraphQLOperation(server, {
+                    query: FetchEbContractorsDocument,
+                })
+                expect(activeList.errors).toBeUndefined()
+                if (isDeprecated) {
+                    expect(activeList.data?.fetchEBContractors).not.toEqual(
+                        expect.arrayContaining([expected])
+                    )
+                } else {
+                    expect(activeList.data?.fetchEBContractors).toEqual(
+                        expect.arrayContaining([expected])
+                    )
+                }
+                expect(draft.draftRevision?.formData.ebContractorID).toBe(
+                    contractor.id
+                )
+                expect(draft.draftRevision).not.toHaveProperty('ebContractor')
+                expect(draft.draftRevision?.formData).not.toHaveProperty(
+                    'ebContractor'
+                )
+                const fetched = await fetchTestContract(server, draft.id)
+                expect(fetched.draftRevision?.formData.ebContractorID).toBe(
+                    contractor.id
+                )
+                expect(fetched.draftRevision).not.toHaveProperty('ebContractor')
+                expect(fetched.draftRevision?.formData).not.toHaveProperty(
+                    'ebContractor'
+                )
+
+                const submitted = await submitTestContract(server, draft.id)
+                expect(
+                    submitted.packageSubmissions[0].contractRevision.formData
+                        .ebContractorID
+                ).toBe(contractor.id)
+                expect(
+                    submitted.packageSubmissions[0].contractRevision
+                ).not.toHaveProperty('ebContractor')
+                expect(
+                    submitted.packageSubmissions[0].contractRevision.formData
+                ).not.toHaveProperty('ebContractor')
+            }
+        )
+
+        it.each(['', '   ', '00000000-0000-4000-8000-000000000000'])(
+            'rejects an invalid contractor ID (%j) without updating the draft',
+            async (contractorID) => {
+                const server = await constructTestPostgresServer()
+                const draft = await createAndUpdateTestEBContract(server)
+                const result = await executeGraphQLOperation(server, {
+                    query: UpdateContractDraftRevisionDocument,
+                    variables: {
+                        input: {
+                            contractID: draft.id,
+                            lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                            formData: mockGqlContractDraftRevisionFormDataInput(
+                                draft.stateCode,
+                                { ebContractorID: contractorID }
+                            ),
+                        },
+                    },
+                })
+                expect(result.errors).toHaveLength(1)
+                expect(result.errors?.[0].extensions).toEqual(
+                    expect.objectContaining({
+                        code: 'BAD_USER_INPUT',
+                        argumentName: 'ebContractorID',
+                    })
+                )
+                const fetched = await fetchTestContract(server, draft.id)
+                expect(fetched.draftRevision).toEqual(draft.draftRevision)
+            }
+        )
+
+        it('reports contractor lookup failures as server errors without writing', async () => {
+            const store = NewPostgresStore(await sharedTestPrismaClient())
+            const updateDraftContract = vi.fn(store.updateDraftContract)
+            const server = await constructTestPostgresServer({
+                store: {
+                    updateDraftContract,
+                    findEBContractorByID: async () =>
+                        new Error('Database unavailable'),
+                },
+            })
+            const draft = await createAndUpdateTestEBContract(server, 'FL', {
+                ebContractorID: null,
+            })
+            updateDraftContract.mockClear()
+            const result = await executeGraphQLOperation(server, {
+                query: UpdateContractDraftRevisionDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                        formData: mockGqlContractDraftRevisionFormDataInput(
+                            draft.stateCode,
+                            {
+                                ebContractorID:
+                                    '161a7110-e8fc-43d3-b859-8c75f4680a3b',
+                            }
+                        ),
+                    },
+                },
+            })
+            expect(result.errors).toHaveLength(1)
+            expect(result.errors?.[0].extensions).toEqual(
+                expect.objectContaining({
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                })
+            )
+            expect(updateDraftContract).not.toHaveBeenCalled()
+        })
+
+        const createEBLinkedContractFields = async (server: ApolloServer) => {
+            const base = await createAndUpdateTestEBContract(server, 'FL', {
+                contractType: 'BASE',
+            })
+            await submitTestContract(server, base.id)
+            const amendment = await createAndUpdateTestEBContract(server, 'FL')
+            await submitTestContract(server, amendment.id)
+
+            return {
+                ebLinkedBaseContractID: base.id,
+                ebLinkedPreviousAmendmentID: amendment.id,
+            }
+        }
+
+        it('updates EB scalar fields and linked contract IDs in the formData', async () => {
             const server = await constructTestPostgresServer()
             const draft = await createAndUpdateTestEBContract(server)
             const ebFields = {
+                ebContractorID: '4c70e567-819b-4d6f-b005-d6ae966246cb',
+                ...(await createEBLinkedContractFields(server)),
                 ebNewContractor: false,
                 ebBaseContractInMCReview: true,
                 ebPreviousAmendmentInMCReview: false,
@@ -590,11 +754,174 @@ describe(`Tests UpdateContractDraftRevision`, () => {
             )
         })
 
+        describe.each([
+            'ebLinkedBaseContractID',
+            'ebLinkedPreviousAmendmentID',
+        ] as const)('%s validation', (field) => {
+            it('rejects a contract from another state without updating the draft', async () => {
+                const postgresStore = NewPostgresStore(
+                    await sharedTestPrismaClient()
+                )
+                const updateDraftContract = vi.fn(
+                    postgresStore.updateDraftContract
+                )
+                const server = await constructTestPostgresServer({
+                    store: { updateDraftContract },
+                })
+                const draft = await createAndUpdateTestEBContract(server)
+                const otherStateServer = await constructTestPostgresServer({
+                    context: {
+                        user: testStateUser({
+                            stateCode: 'VA',
+                            email: 'va-eb-links@example.com',
+                        }),
+                    },
+                })
+                const target = await createAndUpdateTestEBContract(
+                    otherStateServer,
+                    'VA',
+                    {
+                        contractType:
+                            field === 'ebLinkedBaseContractID'
+                                ? 'BASE'
+                                : 'AMENDMENT',
+                    }
+                )
+                await submitTestContract(otherStateServer, target.id)
+                updateDraftContract.mockClear()
+
+                const result = await executeGraphQLOperation(server, {
+                    query: UpdateContractDraftRevisionDocument,
+                    variables: {
+                        input: {
+                            contractID: draft.id,
+                            lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                            formData: mockGqlContractDraftRevisionFormDataInput(
+                                draft.stateCode,
+                                { [field]: target.id }
+                            ),
+                        },
+                    },
+                })
+
+                expect(result.errors).toHaveLength(1)
+                expect(result.errors?.[0]).toEqual(
+                    expect.objectContaining({
+                        message: `${field} must reference a contract from the same state`,
+                        extensions: expect.objectContaining({
+                            code: 'BAD_USER_INPUT',
+                            argumentName: field,
+                        }),
+                    })
+                )
+                expect(updateDraftContract).not.toHaveBeenCalled()
+                const fetched = await fetchTestContract(server, draft.id)
+                expect(fetched.draftRevision).toEqual(draft.draftRevision)
+            })
+
+            it.each(['', '   ', '00000000-0000-4000-8000-000000000000'])(
+                'rejects an empty or nonexistent linked ID (%j) without updating the draft',
+                async (linkedID) => {
+                    const server = await constructTestPostgresServer()
+                    const draft = await createAndUpdateTestEBContract(server)
+                    const result = await executeGraphQLOperation(server, {
+                        query: UpdateContractDraftRevisionDocument,
+                        variables: {
+                            input: {
+                                contractID: draft.id,
+                                lastSeenUpdatedAt:
+                                    draft.draftRevision!.updatedAt,
+                                formData:
+                                    mockGqlContractDraftRevisionFormDataInput(
+                                        draft.stateCode,
+                                        {
+                                            contractType: 'AMENDMENT',
+                                            submissionDescription:
+                                                'Must not be saved',
+                                            [field]: linkedID,
+                                        }
+                                    ),
+                            },
+                        },
+                    })
+
+                    expect(result.errors).toHaveLength(1)
+                    expect(result.errors?.[0]).toEqual(
+                        expect.objectContaining({
+                            message: `${field} must reference an existing contract`,
+                            extensions: expect.objectContaining({
+                                code: 'BAD_USER_INPUT',
+                                argumentName: field,
+                            }),
+                        })
+                    )
+                    const fetched = await fetchTestContract(server, draft.id)
+                    expect(fetched.draftRevision?.formData).toEqual(
+                        draft.draftRevision?.formData
+                    )
+                    expect(fetched.draftRevision?.updatedAt).toEqual(
+                        draft.draftRevision?.updatedAt
+                    )
+                }
+            )
+            it('returns a server error when the linked-contract lookup fails', async () => {
+                const postgresStore = NewPostgresStore(
+                    await sharedTestPrismaClient()
+                )
+                const failedID = '00000000-0000-4000-8000-000000000001'
+                const updateDraftContract = vi.fn(
+                    postgresStore.updateDraftContract
+                )
+                const server = await constructTestPostgresServer({
+                    store: {
+                        updateDraftContract,
+                        findContractWithHistory: async (id) =>
+                            id === failedID
+                                ? new Error('Database unavailable')
+                                : postgresStore.findContractWithHistory(id),
+                    },
+                })
+                const draft = await createAndUpdateTestEBContract(server)
+                updateDraftContract.mockClear()
+
+                const result = await executeGraphQLOperation(server, {
+                    query: UpdateContractDraftRevisionDocument,
+                    variables: {
+                        input: {
+                            contractID: draft.id,
+                            lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                            formData: mockGqlContractDraftRevisionFormDataInput(
+                                draft.stateCode,
+                                { [field]: failedID }
+                            ),
+                        },
+                    },
+                })
+
+                expect(result.errors).toHaveLength(1)
+                expect(result.errors?.[0].extensions).toEqual(
+                    expect.objectContaining({
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    })
+                )
+                expect(updateDraftContract).not.toHaveBeenCalled()
+            })
+        })
+
         it.each([null, undefined])(
             'clears optional EB fields when updated with %s',
             async (emptyValue) => {
                 const server = await constructTestPostgresServer()
-                const draft = await createAndUpdateTestEBContract(server)
+                const linkedFields = await createEBLinkedContractFields(server)
+                const draft = await createAndUpdateTestEBContract(
+                    server,
+                    'FL',
+                    linkedFields
+                )
+                expect(draft.draftRevision?.formData).toEqual(
+                    expect.objectContaining(linkedFields)
+                )
 
                 const updated = await updateTestContractDraftRevision(
                     server,
@@ -607,6 +934,9 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                         ebPreviousAmendmentInMCReview: emptyValue,
                         ebAmendmentNumber: emptyValue,
                         ebStateContractIdentifier: emptyValue,
+                        ebContractorID: emptyValue,
+                        ebLinkedBaseContractID: emptyValue,
+                        ebLinkedPreviousAmendmentID: emptyValue,
                     })
                 )
 
@@ -617,6 +947,9 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                         ebPreviousAmendmentInMCReview: null,
                         ebAmendmentNumber: null,
                         ebStateContractIdentifier: null,
+                        ebContractorID: null,
+                        ebLinkedBaseContractID: null,
+                        ebLinkedPreviousAmendmentID: null,
                     })
                 )
             }

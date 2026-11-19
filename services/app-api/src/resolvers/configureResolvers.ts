@@ -82,6 +82,7 @@ import type { DocumentZipService } from '../zip/generateZip'
 import { fetchDocumentResolver } from './documents/fetchDocument'
 import { generateUploadURLResolver } from './documents/generateUploadURL'
 import { fetchAllStateProgramsResolver } from './statePrograms'
+import { fetchEBContractorsResolver } from './ebContractors/fetchEBContractors'
 
 export function configureResolvers(
     store: Store,
@@ -96,6 +97,7 @@ export function configureResolvers(
         DateTime: GraphQLDateTime,
         JSON: GraphQLJSON,
         Query: {
+            fetchEBContractors: fetchEBContractorsResolver(store),
             fetchCurrentUser: fetchCurrentUserResolver(),
             fetchDocument: fetchDocumentResolver(store, s3Client),
             indexContracts: indexContractsResolver(store, launchDarkly),

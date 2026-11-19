@@ -107,7 +107,6 @@ function contractRevisionToDomainModel(
         submitInfo: convertUpdateInfoToDomainModel(revision.submitInfo),
         unlockInfo: convertUpdateInfoToDomainModel(revision.unlockInfo),
         undoUnlockInfo: convertUpdateInfoToDomainModel(revision.undoUnlockInfo),
-
         formData: contractFormDataToDomainModel(revision),
     }
 }

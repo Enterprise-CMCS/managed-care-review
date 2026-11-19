@@ -1,0 +1,7 @@
+query fetchEBContractors($includeDeprecated: Boolean = false) {
+    fetchEBContractors(includeDeprecated: $includeDeprecated) {
+        id
+        name
+        isDeprecated
+    }
+}

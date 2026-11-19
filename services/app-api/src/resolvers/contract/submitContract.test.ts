@@ -2824,9 +2824,28 @@ describe('submitContract', () => {
             const server = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
-            const draft = await createAndUpdateTestEBContract(server)
+            const base = await createAndUpdateTestEBContract(server, 'FL', {
+                contractType: 'BASE',
+            })
+            await submitTestContract(server, base.id)
+            const amendment = await createAndUpdateTestEBContract(server, 'FL')
+            await submitTestContract(server, amendment.id)
+
+            const expectedEBFields = {
+                ...mockEBContractFormData(),
+                ebBaseContractInMCReview: true,
+                ebLinkedBaseContractID: base.id,
+                ebLinkedPreviousAmendmentID: amendment.id,
+            }
+            const draft = await createAndUpdateTestEBContract(
+                server,
+                'FL',
+                expectedEBFields
+            )
+            expect(draft.draftRevision?.formData).toEqual(
+                expect.objectContaining(expectedEBFields)
+            )
             const submitted = await submitTestContract(server, draft.id)
-            const expectedEBFields = mockEBContractFormData()
             expect(submitted.contractSubmissionType).toBe('ENROLLMENT_BROKER')
             expect(submitted.status).toBe('SUBMITTED')
             expect(submitted.draftRevision).toBeNull()
