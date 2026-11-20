@@ -236,6 +236,8 @@ describe('Change History', () => {
                             statutoryRegulatoryAttestation: true,
                             statutoryRegulatoryAttestationDescription:
                                 'everything meets regulatory attestation',
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                         },
                     },
                     rateRevisions: [],

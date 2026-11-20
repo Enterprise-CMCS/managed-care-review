@@ -26,6 +26,7 @@ import {
 import {
     createAndUpdateTestEBContract,
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContract,
     createAndUpdateTestContractWithoutRates,
     createSubmitAndUnlockTestContract,
     fetchTestContract,
@@ -134,6 +135,43 @@ describe('unlockContract', () => {
             'Attempted to unlock contract with wrong status: WITHDRAWN'
         )
         expect(unlockContract).not.toHaveBeenCalled()
+    })
+
+    it('returns an error when unlocking an ILOS submission', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+            s3Client: mockS3,
+        })
+
+        const ilosSubmission =
+            await createAndSubmitTestILOSContract(stateServer)
+
+        const unlockResult = await executeGraphQLOperation(cmsServer, {
+            query: UnlockContractDocument,
+            variables: {
+                input: {
+                    contractID: ilosSubmission.id,
+                    unlockedReason: 'unlock ILOS submission',
+                },
+            },
+        })
+
+        expectToBeDefined(unlockResult.errors)
+        expect(unlockResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(unlockResult.errors[0].message).toBe(
+            'ILOS submissions cannot be unlocked'
+        )
+
+        const fetchedILOS = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+        expect(fetchedILOS.consolidatedStatus).toBe('SUBMITTED')
     })
 
     describe('Health plan contract tests', () => {

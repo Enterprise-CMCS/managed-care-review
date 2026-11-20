@@ -27,7 +27,6 @@ import {
     isReversedUnlockedRevision,
     isSubmittedRevision,
     rateRevisionToDomainModel,
-    unsortedRatesRevisionsToDomainModel,
 } from './prismaSharedContractRateHelpers'
 import {
     mergeScalarFieldOverrides,
@@ -94,6 +93,41 @@ function parseContractWithHistory(
     } else {
         return contractWithHistory
     }
+}
+
+type InitiallySubmittedAtSource = {
+    contractOverrides: ContractTableStrippedPayload['contractOverrides']
+    revisions: { submitInfo: { updatedAt: Date } | null }[]
+}
+
+// resolveInitiallySubmittedAt returns the earliest submit date across revisions,
+// honoring admin overrides. Undefined when the submission has never been submitted.
+function resolveInitiallySubmittedAt(
+    contract: InitiallySubmittedAtSource
+): Date | undefined {
+    const initiallySubmittedAtOverride = mergeScalarFieldOverrides<
+        Date,
+        InitiallySubmittedAtSource['contractOverrides'][number]
+    >({
+        rows: contract.contractOverrides,
+        getOperation: (row) => row.initiallySubmittedAtOp,
+        getValue: (row) => row.initiallySubmittedAt,
+        valueSchema: z.date(),
+        fieldPath: 'ContractOverrides.initiallySubmittedAt',
+    })
+
+    // default to override if there is one.
+    if (initiallySubmittedAtOverride.hasOverride) {
+        return initiallySubmittedAtOverride.value
+    }
+
+    // sort to earliest submission, it should be the initial submission
+    const submitDates = contract.revisions
+        .map((revision) => revision.submitInfo?.updatedAt)
+        .filter((date): date is Date => date !== undefined)
+        .sort((a, b) => a.getTime() - b.getTime())
+
+    return submitDates[0]
 }
 
 function contractRevisionToDomainModel(
@@ -208,6 +242,7 @@ function contractWithHistoryToDomainModelWithoutRates(
     // between contract revision updates
     const contractRevisions = contract.revisions
     const contractActions = contract.reviewStatusActions
+    const initiallySubmittedAt = resolveInitiallySubmittedAt(contract)
     let draftRevision: ContractRevisionType | undefined = undefined
     const submittedRevisions: ContractRevisionType[] = []
     const reviewStatusActions: ContractReviewActionType[] = []
@@ -276,13 +311,13 @@ function contractWithHistoryToDomainModelWithoutRates(
                 submitedRevs.push(rateRev)
             }
 
-            const relatedRateRevisions = submission.submissionPackages
+            const rateRevisions = submission.submissionPackages
                 .filter((p) => p.contractRevisionID === revision.id)
                 .sort((a, b) => a.ratePosition - b.ratePosition)
-                .map((p) => p.rateRevision)
-
-            const rateRevisions =
-                unsortedRatesRevisionsToDomainModel(relatedRateRevisions)
+                .map((p) => ({
+                    ...rateRevisionToDomainModel(p.rateRevision),
+                    ratePosition: p.ratePosition,
+                }))
 
             packageSubmissions.push({
                 submitInfo: {
@@ -335,6 +370,7 @@ function contractWithHistoryToDomainModelWithoutRates(
             (contract as { lastActionDate?: Date | null }).lastActionDate ??
             null,
         mccrsID: contract.mccrsID || undefined,
+        initiallySubmittedAt,
         status,
         reviewStatus,
         consolidatedStatus,
@@ -383,9 +419,13 @@ function contractWithHistoryToDomainModel(
     }
 
     // since we have a draft revision, we should also hold onto any set draftRates for later
-    const draftRatesOrErrors = contract.draftRates.map((dr) =>
-        rateWithoutDraftContractsToDomainModel(dr.rate)
-    )
+    const draftRatesOrErrors = contract.draftRates.map((dr) => {
+        const draftRate = rateWithoutDraftContractsToDomainModel(dr.rate)
+        if (draftRate instanceof Error) {
+            return draftRate
+        }
+        return { ...draftRate, ratePosition: dr.ratePosition }
+    })
 
     const draftRatesOrError = arrayOrFirstError(draftRatesOrErrors)
     if (draftRatesOrError instanceof Error) {
@@ -458,6 +498,7 @@ function strippedContractToDomainModel(
 ): StrippedContractType | Error {
     const contractRevisions = contract.revisions
     const contractActions = contract.reviewStatusActions
+    const initiallySubmittedAt = resolveInitiallySubmittedAt(contract)
 
     let draftRevision: StrippedContractRevisionType | undefined = undefined
     const submittedRevisions: StrippedContractRevisionType[] = []
@@ -520,25 +561,6 @@ function strippedContractToDomainModel(
             `PROGRAMMING ERROR: non-draft contract has no submitted revisions. ID: ${contract.id}, consolidatedStatus: ${consolidatedStatus}`
         )
     }
-
-    const initiallySubmittedAtOverride = mergeScalarFieldOverrides<
-        Date,
-        ContractTableStrippedPayload['contractOverrides'][number]
-    >({
-        rows: contract.contractOverrides,
-        getOperation: (row) => row.initiallySubmittedAtOp,
-        getValue: (row) => row.initiallySubmittedAt,
-        valueSchema: z.date(),
-        fieldPath: 'ContractOverrides.initiallySubmittedAt',
-    })
-
-    // Use override or calculate initial contract submission.
-    const initiallySubmittedAt =
-        (initiallySubmittedAtOverride.hasOverride
-            ? initiallySubmittedAtOverride.value
-            : undefined) ||
-        submittedRevisionsDescending[submittedRevisionsDescending.length - 1]
-            ?.submitInfo?.updatedAt
 
     return {
         id: contract.id,

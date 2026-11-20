@@ -23,6 +23,7 @@ import {
     updateTestContractDraftRevision,
     resubmitTestContract,
     createAndUpdateTestEQROContract,
+    createAndUpdateTestILOSContract,
     withdrawTestContract,
     approveTestContract,
     overrideTestContractData,
@@ -463,5 +464,26 @@ describe('indexContractsStripped', () => {
             )
 
         expect(virginiaStateCodes.every((code) => code === 'VA')).toBe(true)
+    })
+
+    it('does not return ILOS submissions', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const healthPlanDraft =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        const ilosDraft = await createAndUpdateTestILOSContract(stateServer)
+
+        const result = await executeGraphQLOperation(stateServer, {
+            query: IndexContractsStrippedDocument,
+        })
+        expect(result.errors).toBeUndefined()
+
+        const contractIDs = result.data?.indexContractsStripped.edges.map(
+            (edge: ContractStrippedEdge) => edge.node.id
+        )
+        expect(contractIDs).toContain(healthPlanDraft.id)
+        expect(contractIDs).not.toContain(ilosDraft.id)
     })
 })

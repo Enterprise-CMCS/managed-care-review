@@ -8,6 +8,7 @@ import type {
     UpdateInfoType,
     ConsolidatedContractStatusType,
     DocumentType,
+    ILOSDocumentType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
 import { packageName } from '@mc-review/submissions'
@@ -73,6 +74,17 @@ const includeContractFormData = {
         },
     },
     supportingDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    // ILOS submission relations. Empty for health plan and EQRO revisions.
+    ilosDocuments: {
+        orderBy: {
+            position: 'asc',
+        },
+    },
+    ilosExternalRates: {
         orderBy: {
             position: 'asc',
         },
@@ -399,6 +411,15 @@ const getNewParentContract = (
             continue
         }
 
+        // Only health plan contracts can be a rate parent. An ILOS submission
+        // links rates but never owns them.
+        if (
+            pkg.contractRevision.contract.contractSubmissionType !==
+            'HEALTH_PLAN'
+        ) {
+            continue
+        }
+
         // These next few conditionals are ordered by preferred contract status
         if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
             // contract with consolidated status of submitted is our preferred contract, break the loop if we find it.
@@ -595,6 +616,21 @@ const documentToDomainModel = (doc: DocumentWithCommonFields): DocumentType => {
     }
 }
 
+// Same as documentToDomainModel for document tables that store s3BucketName and
+// s3Key as required columns. ILOSDocument is the first; the other document tables
+// move to this once s3URL is dropped, and documentToDomainModel goes away with it.
+const documentWithS3LocationToDomainModel = (
+    doc: Omit<DocumentWithCommonFields, 's3BucketName' | 's3Key'> & {
+        s3BucketName: string
+        s3Key: string
+    }
+): ILOSDocumentType => {
+    return {
+        ...doc,
+        dateAdded: doc.dateAdded ?? undefined,
+    }
+}
+
 // Builds the backward-compatible full `name` for a state/actuary contact.
 // External systems still read `name`, so we construct it from givenName +
 // familyName (first and last name only, no suffix) and fall back to the
@@ -750,26 +786,41 @@ function ratesRevisionsToDomainModel(
     return domainRevisions
 }
 
-function unsortedRatesRevisionsToDomainModel(
-    rateRevisions: RateRevisionTableWithFormData[]
-): RateRevisionType[] {
-    const domainRevisions: RateRevisionType[] = []
-
-    for (const revision of rateRevisions) {
-        const domainRevision = rateRevisionToDomainModel(revision)
-
-        domainRevisions.push(domainRevision)
-    }
-
-    return domainRevisions
-}
-
 // ------
 
 type ContractRevisionTableWithFormData =
     Prisma.ContractRevisionTableGetPayload<{
         include: typeof includeContractFormData
     }>
+
+type ILOSFormDataFields = Pick<
+    ContractFormDataType,
+    | 'ilosRateDateStart'
+    | 'ilosRateDateEnd'
+    | 'ilosDocuments'
+    | 'ilosExternalRates'
+>
+
+// Maps the ILOS-only columns and relations of a revision into the domain form data.
+// Only called for ILOS submissions so health plan and EQRO parsing is unchanged.
+function ilosFormDataToDomainModel(
+    contractRevision: ContractRevisionTableWithFormData
+): ILOSFormDataFields {
+    return {
+        ilosRateDateStart: contractRevision.ilosRateDateStart ?? undefined,
+        ilosRateDateEnd: contractRevision.ilosRateDateEnd ?? undefined,
+        ilosDocuments: contractRevision.ilosDocuments.map(
+            documentWithS3LocationToDomainModel
+        ),
+        ilosExternalRates: contractRevision.ilosExternalRates.map((rate) => ({
+            id: rate.id,
+            rateControlName: rate.rateControlName ?? undefined,
+            rateDateStart: rate.rateDateStart ?? undefined,
+            rateDateEnd: rate.rateDateEnd ?? undefined,
+            position: rate.position,
+        })),
+    }
+}
 
 function contractFormDataToDomainModel(
     contractRevision: ContractRevisionTableWithFormData
@@ -785,7 +836,16 @@ function contractFormDataToDomainModel(
         contractRevision,
     })
 
+    const isILOS = contractRevision.contract.contractSubmissionType === 'ILOS'
+
     return {
+        // Non-ILOS revisions always carry empty ILOS lists to match the non-null GQL list types.
+        ...(isILOS
+            ? ilosFormDataToDomainModel(contractRevision)
+            : {
+                  ilosDocuments: [],
+                  ilosExternalRates: [],
+              }),
         submissionType: contractRevision.submissionType,
         submissionDescription: contractRevision.submissionDescription,
         contractType: mergedOverride.contractType.hasOverride
@@ -907,6 +967,7 @@ export {
     includeRateFormData,
     includeStrippedRateFormData,
     includeStrippedContractFormData,
+    ilosFormDataToDomainModel,
     getContractRateStatus,
     getContractReviewStatus,
     getLatestActiveRevision,
@@ -919,7 +980,6 @@ export {
     rateFormDataToDomainModel,
     rateRevisionToDomainModel,
     ratesRevisionsToDomainModel,
-    unsortedRatesRevisionsToDomainModel,
     getRateReviewStatus,
     getParentContractID,
     getRelatedContracts,

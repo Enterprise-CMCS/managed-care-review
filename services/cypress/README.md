@@ -332,7 +332,7 @@ We can use the `apiCreateAndSubmitContractOnlySubmission` cypress command as an 
     
         const draftContract = newContract.data.createContract.contract
         const draftRevision = draftContract.draftRevision
-        const updateFormData = contractFormData({
+        const updateFormData = contractFormDataInput({
             submissionType: 'CONTRACT_ONLY'
         })
     

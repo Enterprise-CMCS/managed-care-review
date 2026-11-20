@@ -200,6 +200,47 @@ async function healthPlanContractReviewDeterminationAction(
     return updatedContract
 }
 
+// ILOS submissions are always under review, so there is no determination to make.
+async function ilosContractReviewAction(
+    tx: PrismaTransactionType,
+    contract: ContractType
+): Promise<ContractType | Error> {
+    if (contract.contractSubmissionType !== 'ILOS') {
+        return new Error('Cannot record review on non-ILOS contracts')
+    }
+
+    const canRecordReview =
+        ['SUBMITTED', 'RESUBMITTED'].includes(contract.status) &&
+        !['APPROVED', 'WITHDRAWN'].includes(contract.reviewStatus)
+
+    if (!canRecordReview) {
+        return new Error(
+            `Cannot record review on contract with status ${contract.consolidatedStatus}`
+        )
+    }
+
+    const reviewAction = await tx.contractActionTable.create({
+        data: {
+            updatedByID: undefined,
+            actionType: 'UNDER_REVIEW',
+            contractID: contract.id,
+        },
+    })
+
+    // Review action is created after the submit event and becomes the
+    // latest visible action for this contract.
+    await tx.contractTable.update({
+        where: {
+            id: contract.id,
+        },
+        data: {
+            lastActionDate: reviewAction.updatedAt,
+        },
+    })
+
+    return findContractWithHistory(tx, contract.id)
+}
+
 type SubmitContractArgsType = {
     contractID: string // revision ID
     submittedByUserID: string
@@ -256,6 +297,19 @@ async function submitContract(
                 return eqroReviewUpdate
             }
 
+            if (result.contractSubmissionType === 'ILOS') {
+                const ilosReviewUpdate = await ilosContractReviewAction(
+                    tx,
+                    result
+                )
+
+                if (ilosReviewUpdate instanceof Error) {
+                    throw ilosReviewUpdate
+                }
+
+                return ilosReviewUpdate
+            }
+
             if (
                 chipSubmissionAutomationFlag &&
                 result.contractSubmissionType === 'HEALTH_PLAN'
@@ -283,6 +337,7 @@ export {
     submitContractInsideTransaction,
     eqroContractReviewDeterminationAction,
     healthPlanContractReviewDeterminationAction,
+    ilosContractReviewAction,
 }
 
 export type { SubmitContractArgsType }

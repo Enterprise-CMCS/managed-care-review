@@ -91,6 +91,23 @@ describe('SubmissionType', () => {
         ).toBeDefined()
     })
 
+    it('displays new submission form on the parameterized route regardless of submission type flags', async () => {
+        renderWithProviders(<SubmissionType />, {
+            apolloProvider: {
+                mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+            },
+            routerProvider: { route: '/submissions/new/health-plan' },
+            featureFlags: {
+                'eqro-submissions': false,
+                sdp: false,
+            },
+        })
+
+        expect(
+            screen.getByRole('form', { name: 'New Submission Form' })
+        ).toBeInTheDocument()
+    })
+
     it('displays population coverage question', async () => {
         renderWithProviders(<SubmissionType />, {
             apolloProvider: {

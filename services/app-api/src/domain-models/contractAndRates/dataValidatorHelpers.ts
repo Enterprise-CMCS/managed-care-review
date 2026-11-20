@@ -7,6 +7,7 @@ import type { ContractDraftRevisionFormDataInput } from '../../gen/gqlServer'
 import type { ContractFormDataType } from './formDataTypes'
 import {
     eqroContractFormDataSchema,
+    ilosContractFormDataSchema,
     submittableActuaryContactSchema,
     submittableStateContactSchema,
 } from './formDataTypes'
@@ -21,8 +22,9 @@ import type { Store } from '../../postgres'
 import {
     submittableContractSchema,
     submittableEQROContractSchema,
+    submittableILOSContractSchema,
 } from './contractTypes'
-import type { ContractType } from './contractTypes'
+import type { ContractType, ILOSContractType } from './contractTypes'
 
 const validateStatutoryRegulatoryAttestation = (
     formData: ContractDraftRevisionFormDataInput,
@@ -185,6 +187,72 @@ const validateEQROContractDraftRevisionInput = (
     }
 
     return data
+}
+
+const validateILOSContractDraftRevisionInput = (
+    formData: ContractDraftRevisionFormDataInput,
+    stateCode: string,
+    store: Store
+): UpdateDraftContractFormDataType | z.ZodError => {
+    // Validate against schema
+    const { data, error } = ilosContractFormDataSchema
+        .extend({
+            programIDs: validateProgramIDs(stateCode, store),
+        })
+        .safeParse(formData)
+
+    if (error) {
+        return error
+    }
+
+    return data
+}
+
+// Validates a draft update against the schema for the contract's submission type
+// and applies that type's post-parse adjustments.
+const parseContractDraftRevisionInput = (
+    contract: ContractType,
+    formData: ContractDraftRevisionFormDataInput,
+    store: Store,
+    featureFlags?: FeatureFlagSettings
+): UpdateDraftContractFormDataType | Error => {
+    const { contractSubmissionType, stateCode } = contract
+
+    switch (contractSubmissionType) {
+        case 'EQRO': {
+            if (!contract.draftRevision) {
+                return new Error('EQRO draft update requires a draft revision')
+            }
+            const parsed = validateEQROContractDraftRevisionInput(
+                formData,
+                stateCode,
+                store
+            )
+            if (parsed instanceof Error) return parsed
+            return parseAndUpdateEqroFields(
+                contract.draftRevision.formData,
+                parsed
+            )
+        }
+        case 'ILOS':
+            // ILOS has no conditional fields, so the parsed form data is written as is.
+            return validateILOSContractDraftRevisionInput(
+                formData,
+                stateCode,
+                store
+            )
+        default: {
+            // Health plan draft schema.
+            const parsed = validateContractDraftRevisionInput(
+                formData,
+                stateCode,
+                store,
+                featureFlags
+            )
+            if (parsed instanceof Error) return parsed
+            return parseAndUpdateChipOnlyFields(parsed, featureFlags)
+        }
+    }
 }
 
 // Validate state contacts for completeness
@@ -496,11 +564,103 @@ const parseEQROContract = (
     return parsedData.data
 }
 
+// parseILOSContract validates an ILOS submission as submittable. ILOS rates are only
+// ever linked (existing submitted rates) or external, never child rates of the submission.
+const parseILOSContract = (
+    contract: ContractType,
+    stateCode: string,
+    store: Store,
+    featureFlags?: FeatureFlagSettings
+): ILOSContractType | z.ZodError => {
+    const ilosContractParser = submittableILOSContractSchema.superRefine(
+        (contract, ctx) => {
+            const formData = contract.draftRevision.formData
+
+            if (featureFlags?.['contact-data-model-update']) {
+                stateContactValidation(formData.stateContacts).forEach(
+                    (issue) => ctx.addIssue(issue)
+                )
+            }
+
+            //Validating programs
+            const contractProgramsIDs = new Set(formData.programIDs)
+
+            const findResult = store.findPrograms(stateCode, [
+                ...contractProgramsIDs,
+            ])
+            if (findResult instanceof Error) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message: findResult.message,
+                })
+            } else {
+                // Reject ILOS submission if any selected program has been deprecated in statePrograms.json
+                const deprecatedMatches = findResult.filter(
+                    (program) => program.isDeprecated
+                )
+                if (deprecatedMatches.length > 0) {
+                    const names = deprecatedMatches
+                        .map((p) => `${p.name} (${p.id})`)
+                        .join(', ')
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: `Submission contains deprecated program(s): ${names}`,
+                    })
+                }
+            }
+
+            //Validating rates
+            const childRates = contract.draftRates.filter(
+                (rate) => rate.parentContractID === contract.id
+            )
+            if (childRates.length > 0) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message:
+                        'ILOS submission can only link existing rates, it cannot contain its own rates',
+                })
+            }
+
+            contract.draftRates
+                .filter((rate) => rate.consolidatedStatus === 'WITHDRAWN')
+                .forEach((rate) => {
+                    ctx.addIssue({
+                        code: 'custom',
+                        message: `ILOS submission cannot link a withdrawn rate. Rate id: ${rate.id}`,
+                    })
+                })
+
+            // Every ILOS submission needs at least one associated rate, linked or external.
+            const hasAssociatedRate =
+                contract.draftRates.length > 0 ||
+                formData.ilosExternalRates.length > 0
+            if (!hasAssociatedRate) {
+                ctx.addIssue({
+                    code: 'custom',
+                    message:
+                        'ILOS submission must have at least one linked or external rate',
+                })
+            }
+        }
+    )
+
+    const parsedData = ilosContractParser.safeParse(contract)
+
+    if (parsedData.error) {
+        return parsedData.error
+    }
+
+    return parsedData.data
+}
+
 export {
+    parseContractDraftRevisionInput,
     validateContractDraftRevisionInput,
     parseContract,
     parseEQROContract,
+    parseILOSContract,
     parseAndUpdateEqroFields,
     parseAndUpdateChipOnlyFields,
     validateEQROContractDraftRevisionInput,
+    validateILOSContractDraftRevisionInput,
 }

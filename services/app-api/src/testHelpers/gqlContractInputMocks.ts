@@ -1,4 +1,5 @@
 import type { ContractDraftRevisionFormDataInput } from '../gen/gqlServer'
+import type { ContractFormDataType } from '../domain-models'
 import { must } from './assertionHelpers'
 import { findStatePrograms } from '../postgres'
 import { defaultFloridaProgram } from './gqlHelpers'
@@ -7,6 +8,17 @@ const mockGqlContractDraftRevisionFormDataInput = (
     stateCode?: string,
     formDataInput?: Partial<ContractDraftRevisionFormDataInput>
 ): ContractDraftRevisionFormDataInput => {
+    // Tests often spread fetched form data into this mock. ilosExternalRates is output-only:
+    // external rates are managed through updateDraftContractRates so they share one position
+    // sequence with linked rates, so drop it here rather than at every call site.
+    const gqlFormDataInput: Partial<ContractDraftRevisionFormDataInput> &
+        Partial<Pick<ContractFormDataType, 'ilosExternalRates'>> = {
+        ...formDataInput,
+    }
+    delete gqlFormDataInput.ilosExternalRates
+
+    formDataInput = gqlFormDataInput
+
     const programs = stateCode
         ? [must(findStatePrograms(stateCode))[0]]
         : [defaultFloridaProgram()]
@@ -105,4 +117,49 @@ const mockGqlContractDraftRevisionFormDataInput = (
     }
 }
 
-export { mockGqlContractDraftRevisionFormDataInput }
+// Draft form data input for an ILOS submission. Only the fields an ILOS
+// submission carries are set: ilosContractFormDataSchema rejects health plan
+// fields, so this mock is separate from the health plan one above.
+const mockGqlILOSContractDraftRevisionFormDataInput = (
+    stateCode?: string,
+    formDataInput?: Partial<ContractDraftRevisionFormDataInput>
+): ContractDraftRevisionFormDataInput => {
+    const programs = stateCode
+        ? [must(findStatePrograms(stateCode))[0]]
+        : [defaultFloridaProgram()]
+
+    return {
+        programIDs: [programs[0].id],
+        submissionType: 'CONTRACT_AND_RATES',
+        submissionDescription: 'An ILOS actuarial report',
+        contractType: 'BASE',
+        // Health plan lists are non-null on the input type; ILOS keeps them empty.
+        contractDocuments: [],
+        supportingDocuments: [],
+        managedCareEntities: [],
+        federalAuthorities: [],
+        stateContacts: [
+            {
+                givenName: 'state',
+                familyName: 'contact',
+                titleRole: 'thestatestofcontacts',
+                email: 'statemcstate@examepl.com',
+            },
+        ],
+        ilosRateDateStart: '2025-01-01',
+        ilosRateDateEnd: '2025-12-31',
+        ilosDocuments: [
+            {
+                name: 'ilosReport1.pdf',
+                s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                sha256: 'needs-to-be-there',
+            },
+        ],
+        ...formDataInput,
+    }
+}
+
+export {
+    mockGqlContractDraftRevisionFormDataInput,
+    mockGqlILOSContractDraftRevisionFormDataInput,
+}

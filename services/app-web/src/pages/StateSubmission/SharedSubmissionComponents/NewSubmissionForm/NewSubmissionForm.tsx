@@ -27,6 +27,7 @@ import styles from './NewSubmissionForm.module.scss'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { EBSubmissionDetails } from '../../EnrollmentBrokerSubmission'
+import { ILOSSubmissionDetails } from '../../ILOSSubmission'
 
 const newSubmissionFormSchema = Yup.object().shape({
     contractSubmissionType: Yup.string().required(
@@ -69,6 +70,10 @@ export const NewSubmission = () => {
     const isEBEnabled = ldClient?.variation(
         featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.flag,
         featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
+    )
+    const isILOSEnabled = ldClient?.variation(
+        featureFlags.ILOS_SUBMISSIONS.flag,
+        featureFlags.ILOS_SUBMISSIONS.defaultValue
     )
 
     // Set the active main content to focus when click the Skip to main content button.
@@ -129,8 +134,15 @@ export const NewSubmission = () => {
                 'Submit preprints to get prior approval for state directed payments',
             enabled: !!isSDPEnabled,
         },
+        {
+            id: 'ilos',
+            value: ContractSubmissionTypeRecord.ILOS,
+            label: 'In Lieu of Services actuarial report (ILOS)',
+            description:
+                'Submit your final ILOS cost percentage report (ILOS actuarial report).',
+            enabled: !!isILOSEnabled,
+        },
     ].filter((option) => option.enabled)
-
 
     return (
         <div className={styles.contractTypeFormContainer}>
@@ -189,23 +201,31 @@ export const NewSubmission = () => {
                                             }
                                         </PoliteErrorMessage>
                                     )}
-                                    {submissionTypeOptions.map((option, index) => (
-                                        <FieldRadio
-                                            key={option.id}
-                                            id={option.id}
-                                            name="contractSubmissionType"
-                                            label={option.label}
-                                            data-testid={option.value}
-                                            aria-required
-                                            value={option.value}
-                                            list_position={index + 1}
-                                            list_options={submissionTypeOptions.length}
-                                            parent_component_heading="Submission type"
-                                            radio_button_title={option.label}
-                                            labelDescription={option.description}
-                                            tile
-                                        />
-                                    ))}
+                                    {submissionTypeOptions.map(
+                                        (option, index) => (
+                                            <FieldRadio
+                                                key={option.id}
+                                                id={option.id}
+                                                name="contractSubmissionType"
+                                                label={option.label}
+                                                data-testid={option.value}
+                                                aria-required
+                                                value={option.value}
+                                                list_position={index + 1}
+                                                list_options={
+                                                    submissionTypeOptions.length
+                                                }
+                                                parent_component_heading="Submission type"
+                                                radio_button_title={
+                                                    option.label
+                                                }
+                                                labelDescription={
+                                                    option.description
+                                                }
+                                                tile
+                                            />
+                                        )
+                                    )}
                                 </Fieldset>
                             </FormGroup>
                         </fieldset>
@@ -273,8 +293,15 @@ export const NewSubmissionForm = (): React.ReactElement => {
         return <EQROSubmissionDetails />
     }
 
-    if (contractSubmissionType === ContractSubmissionTypeRecord['ENROLLMENT_BROKER']) {
+    if (
+        contractSubmissionType ===
+        ContractSubmissionTypeRecord['ENROLLMENT_BROKER']
+    ) {
         return <EBSubmissionDetails />
+    }
+
+    if (contractSubmissionType === ContractSubmissionTypeRecord['ILOS']) {
+        return <ILOSSubmissionDetails />
     }
 
     return <Error404 />

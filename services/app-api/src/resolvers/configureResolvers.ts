@@ -45,6 +45,7 @@ import { updateContract } from './contract/updateContract'
 import { overrideContractData } from './contract/overrideContractData'
 import { indexContractsResolver } from './contract/indexContracts'
 import { indexContractsStripped } from './contract/indexContractsStripped'
+import { indexIlosSubmissionsStripped } from './contract/indexIlosSubmissionsStripped'
 import { unlockContractResolver } from './contract/unlockContract'
 import { updateDraftContractRates } from './contract/updateDraftContractRates'
 import {
@@ -100,6 +101,7 @@ export function configureResolvers(
             fetchDocument: fetchDocumentResolver(store, s3Client),
             indexContracts: indexContractsResolver(store, launchDarkly),
             indexContractsStripped: indexContractsStripped(store),
+            indexIlosSubmissionsStripped: indexIlosSubmissionsStripped(store),
             indexUsers: indexUsersResolver(store),
             fetchStateUser: fetchStateUserResolver(store),
             fetchAllStatePrograms: fetchAllStateProgramsResolver(store),

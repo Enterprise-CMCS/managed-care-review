@@ -62,4 +62,25 @@ describe.each([
             )
         ).toBe('MCR-MN-0004-SNBC')
     })
+
+    it('names ILOS submissions', async () => {
+        const store = mockStoreThatErrors()
+        store.findStatePrograms = () => mockMNState().programs
+        const resolveName = makeResolver(store)?.contractName
+        if (typeof resolveName !== 'function') {
+            throw new Error('Missing contractName resolver')
+        }
+        const revision =
+            mockEQROContract().packageSubmissions[0].contractRevision
+        revision.contract.contractSubmissionType = 'ILOS'
+
+        expect(
+            await resolveName(
+                revision,
+                {},
+                defaultContext(),
+                {} as GraphQLResolveInfo
+            )
+        ).toBe('MCR-ILOS-MN-0004')
+    })
 })

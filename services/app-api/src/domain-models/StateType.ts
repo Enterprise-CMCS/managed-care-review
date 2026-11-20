@@ -6,7 +6,7 @@ const stateType = z.object({
     name: z.string(),
     assignedCMSUsers: z.array(
         z.object({
-            id: z.string().uuid(),
+            id: z.uuid(),
             role: z.union([
                 z.literal('CMS_USER'),
                 z.literal('CMS_APPROVER_USER'),

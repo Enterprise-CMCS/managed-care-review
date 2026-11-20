@@ -612,6 +612,8 @@ function mockRateSubmittedWithQuestions(
                             statutoryRegulatoryAttestation: true,
                             statutoryRegulatoryAttestationDescription:
                                 'everything meets regulatory attestation',
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                         },
                     },
                 ],

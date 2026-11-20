@@ -30,12 +30,11 @@ import type {
 } from '../gen/gqlServer'
 import type { StateCodeType } from '@mc-review/submissions'
 import { addNewRateToTestContract } from './gqlRateHelpers'
-import type {
-    ContractFormDataType,
-    ContractSubmissionType,
-    ContractType,
-} from '../domain-models'
-import { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
+import type { ContractSubmissionType, ContractType } from '../domain-models'
+import {
+    mockGqlContractDraftRevisionFormDataInput,
+    mockGqlILOSContractDraftRevisionFormDataInput,
+} from './gqlContractInputMocks'
 import { mockEBContractFormData } from './contractDataMocks'
 import type { GraphQLFormattedError } from 'graphql/index'
 import { extractGraphQLResponse } from './apolloV4ResponseHelper'
@@ -345,7 +344,7 @@ const fetchTestContractWithQuestions = async (
 const createTestContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
-    formData?: Partial<ContractFormDataType>,
+    formData?: Partial<CreateContractInput>,
     contractSubmissionType?: ContractSubmissionType
 ): Promise<Contract> => {
     const programs = stateCode
@@ -405,6 +404,124 @@ const createAndUpdateTestEBContract = async (
             ...contractFormDataOverrides,
         })
     )
+}
+
+// Creates an ILOS submission draft with every ILOS field, then saves it with
+// the default ILOS draft form data plus any overrides.
+const createAndUpdateTestILOSContract = async (
+    server: ApolloServer,
+    stateCode?: StateCodeType,
+    contractFormDataOverrides?: Partial<ContractDraftRevisionFormDataInput>
+): Promise<Contract> => {
+    const draftContract = await createTestContract(
+        server,
+        stateCode,
+        {
+            populationCovered: undefined,
+            riskBasedContract: undefined,
+            submissionType: 'CONTRACT_AND_RATES',
+            submissionDescription: 'An ILOS actuarial report',
+            contractType: 'BASE',
+            ilosRateDateStart: '2025-01-01',
+            ilosRateDateEnd: '2025-12-31',
+            ilosDocuments: [
+                {
+                    name: 'ilosReport1.pdf',
+                    s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                    sha256: 'needs-to-be-there',
+                },
+            ],
+        },
+        'ILOS'
+    )
+
+    return await updateTestContractDraftRevision(
+        server,
+        draftContract.id,
+        draftContract.draftRevision?.updatedAt,
+        contractFormDataOverrides
+    )
+}
+
+// Creates an ILOS submission with one external rate and submits it.
+const createAndSubmitTestILOSContract = async (
+    server: ApolloServer,
+    stateCode?: StateCodeType
+): Promise<Contract> => {
+    const draft = await createAndUpdateTestILOSContract(server, stateCode)
+
+    const rateResult = await executeGraphQLOperation(server, {
+        query: UpdateDraftContractRatesDocument,
+        variables: {
+            input: {
+                contractID: draft.id,
+                lastSeenUpdatedAt: draft.draftRevision?.updatedAt,
+                updatedRates: [
+                    {
+                        type: 'EXTERNAL',
+                        externalRate: {
+                            rateControlName: 'EXT-1',
+                            rateDateStart: '2025-01-01',
+                            rateDateEnd: '2025-12-31',
+                        },
+                    },
+                ],
+            },
+        },
+    })
+
+    if (rateResult.errors) {
+        throw new Error(
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(rateResult.errors)}`
+        )
+    }
+
+    return await submitTestContract(server, draft.id)
+}
+
+// Creates and submits an ILOS submission whose rates are, in order: external
+// rate EXT-1, the first linked rate, external rate EXT-2, then any other linked
+// rates. The linked rates must already be submitted.
+const createAndSubmitTestILOSContractWithLinkedRates = async (
+    server: ApolloServer,
+    linkedRateIDs: string[],
+    stateCode?: StateCodeType
+): Promise<Contract> => {
+    const draft = await createAndUpdateTestILOSContract(server, stateCode)
+    const [firstLinkedRateID, ...otherLinkedRateIDs] = linkedRateIDs
+    const externalRate = (rateControlName: string) => ({
+        type: 'EXTERNAL' as const,
+        externalRate: {
+            rateControlName,
+            rateDateStart: '2025-01-01',
+            rateDateEnd: '2025-12-31',
+        },
+    })
+    const linkedRate = (rateID: string) => ({ type: 'LINK' as const, rateID })
+
+    const rateResult = await executeGraphQLOperation(server, {
+        query: UpdateDraftContractRatesDocument,
+        variables: {
+            input: {
+                contractID: draft.id,
+                lastSeenUpdatedAt: draft.draftRevision?.updatedAt,
+                updatedRates: [
+                    externalRate('EXT-1'),
+                    linkedRate(firstLinkedRateID),
+                    externalRate('EXT-2'),
+                    ...otherLinkedRateIDs.map(linkedRate),
+                ],
+            },
+        },
+    })
+
+    if (rateResult.errors) {
+        throw new Error(
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(rateResult.errors)}`
+        )
+    }
+
+    return await submitTestContract(server, draft.id)
 }
 
 const createAndUpdateTestEQROContract = async (
@@ -671,10 +788,17 @@ const updateTestContractDraftRevision = async (
         )
     }
 
-    const updatedFormData = mockGqlContractDraftRevisionFormDataInput(
-        draftContract.stateCode as StateCodeType,
-        formData
-    )
+    // ILOS drafts reject health plan fields, so they get their own base mock.
+    const updatedFormData =
+        draftContract.contractSubmissionType === 'ILOS'
+            ? mockGqlILOSContractDraftRevisionFormDataInput(
+                  draftContract.stateCode as StateCodeType,
+                  formData
+              )
+            : mockGqlContractDraftRevisionFormDataInput(
+                  draftContract.stateCode as StateCodeType,
+                  formData
+              )
 
     const updateResult = await executeGraphQLOperation(server, {
         query: UpdateContractDraftRevisionDocument,
@@ -830,5 +954,8 @@ export {
     contractHistoryToDescriptions,
     errorUndoWithdrawTestContract,
     createAndUpdateTestEQROContract,
+    createAndUpdateTestILOSContract,
+    createAndSubmitTestILOSContract,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestEBContract,
 }
