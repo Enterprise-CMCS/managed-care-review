@@ -469,6 +469,8 @@ function strippedContractFormDataToDomainModel(
             ? (mergedOverride.contractType.value ??
               contractRevision.contractType)
             : contractRevision.contractType,
+        contractDateStart: contractRevision.contractDateStart ?? undefined,
+        contractDateEnd: contractRevision.contractDateEnd ?? undefined,
         managedCareEntities: contractRevision.managedCareEntities ?? undefined,
         ilosRateDateStart: contractRevision.ilosRateDateStart ?? undefined,
         ilosRateDateEnd: contractRevision.ilosRateDateEnd ?? undefined,

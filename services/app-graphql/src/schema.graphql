@@ -2669,6 +2669,10 @@ type ContractFormDataStripped {
     Options are: BASE, AMENDMENT
     """
     contractType: ContractType
+    "Start date of the contract"
+    contractDateStart: Date
+    "End date of the contract"
+    contractDateEnd: Date
     """
     The type of organization the state is contracting with
     in order to deliver managed care services

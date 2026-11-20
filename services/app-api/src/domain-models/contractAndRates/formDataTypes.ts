@@ -599,6 +599,8 @@ const strippedContractFormDataSchema = contractFormDataSchema.pick({
     populationCovered: true,
     submissionType: true,
     contractType: true,
+    contractDateStart: true,
+    contractDateEnd: true,
     managedCareEntities: true,
     ilosRateDateStart: true,
     ilosRateDateEnd: true,
