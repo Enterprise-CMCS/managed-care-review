@@ -11,6 +11,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     fetchTestContractWithQuestions,
@@ -1647,6 +1648,104 @@ describe('withdrawRate', () => {
                     })
                 )
             )
+        )
+    })
+
+    it('withdraws a rate linked to an ILOS submission and repositions its other rates', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+        const contractB = await createAndSubmitTestContractWithRate(stateServer)
+        const otherRateID =
+            contractB.packageSubmissions[0].rateRevisions[0].rateID
+
+        // EXT-1 at 1, the rate to withdraw at 2, EXT-2 at 3, the other rate at 4
+        const ilosSubmission =
+            await createAndSubmitTestILOSContractWithLinkedRates(stateServer, [
+                rateID,
+                otherRateID,
+            ])
+        const firstSubmission = ilosSubmission.packageSubmissions[0]
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(2)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ id: contractA.id }),
+                expect.objectContaining({ id: ilosSubmission.id }),
+            ])
+        )
+
+        const ilosWithWithdrawnRate = await fetchTestContractWithQuestions(
+            stateServer,
+            ilosSubmission.id
+        )
+
+        // the rate moves to the ILOS submission's withdrawn rates
+        expect(ilosWithWithdrawnRate.withdrawnRates).toHaveLength(1)
+        expect(ilosWithWithdrawnRate.withdrawnRates?.[0].id).toBe(rateID)
+
+        // the ILOS submission is resubmitted without it and the rates after it move up
+        expect(ilosWithWithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
+        expect(ilosWithWithdrawnRate.packageSubmissions).toHaveLength(2)
+        const latestSubmission = ilosWithWithdrawnRate.packageSubmissions[0]
+        expect(latestSubmission.rateRevisions).toHaveLength(1)
+        expect(latestSubmission.rateRevisions[0].rateID).toBe(otherRateID)
+        expect(latestSubmission.rateRevisions[0].ratePosition).toBe(3)
+
+        const formData = latestSubmission.contractRevision.formData
+        expect(formData.ilosExternalRates).toMatchObject([
+            { rateControlName: 'EXT-1', position: 1 },
+            { rateControlName: 'EXT-2', position: 2 },
+        ])
+
+        // the rest of the ILOS data is carried onto the new revision
+        const firstFormData = firstSubmission.contractRevision.formData
+        expect(formData.ilosRateDateStart).toEqual(
+            firstFormData.ilosRateDateStart
+        )
+        expect(formData.ilosRateDateEnd).toEqual(firstFormData.ilosRateDateEnd)
+        expect(formData.ilosDocuments).toHaveLength(1)
+        expect(formData.ilosDocuments?.[0]).toMatchObject({
+            name: firstFormData.ilosDocuments?.[0].name,
+            sha256: firstFormData.ilosDocuments?.[0].sha256,
+            dateAdded: firstSubmission.submitInfo.updatedAt,
+        })
+
+        // ILOS is always under review, so the resubmit records that action
+        const ilosTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: ilosSubmission.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(ilosTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(ilosTableRow?.lastActionDate).toEqual(
+            ilosTableRow?.reviewStatusActions[0].updatedAt
         )
     })
 })
