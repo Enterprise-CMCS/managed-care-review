@@ -63,7 +63,7 @@ describe('CMS user', () => {
                 ''
             )
 
-            // Submit, sent to dashboard
+            // Submit, sent to submission summary
             cy.submitStateSubmissionForm()
 
             // Login as CMS User
@@ -136,23 +136,11 @@ describe('CMS user', () => {
                     resubmission: true,
                 })
 
-                cy.get('table')
-                    .should('exist')
-                    .findByText(submissionName)
-                    .parent()
-                    .siblings('[data-testid="submission-status"]')
-                    .should('have.text', 'Submitted')
+                // Lands on resubmitted submission summary with submission updated banner
 
-                cy.get('table')
-                    .findByText(submissionName)
-                    .should('have.attr', 'href')
-                    .and('not.include', 'review-and-submit')
+                cy.url({ timeout: 10_000 }).should('not.include', 'review-and-submit')
 
-                // Navigate to resubmitted submission and check for submission updated banner
-                cy.get('table')
-                    .findByRole('link', { name: submissionName })
-                    .should('exist')
-                    .click()
+                cy.findByTestId('submission-summary').should('exist')
 
                 cy.findByTestId('updatedSubmissionBanner').should('exist')
 
@@ -312,7 +300,7 @@ describe('CMS user', () => {
                     ''
                 )
 
-                // Submit, sent to dashboard
+                // Submit, sent to submission summary
                 cy.submitStateSubmissionForm()
 
                 // Login as CMS User
@@ -385,23 +373,11 @@ describe('CMS user', () => {
                         resubmission: true,
                     })
 
-                    cy.get('table')
-                        .should('exist')
-                        .findByText(submissionName)
-                        .parent()
-                        .siblings('[data-testid="submission-status"]')
-                        .should('have.text', 'Submitted')
+                    // Lands on resubmitted submission summary with submission updated banner
 
-                    cy.get('table')
-                        .findByText(submissionName)
-                        .should('have.attr', 'href')
-                        .and('not.include', 'review-and-submit')
+                    cy.url({ timeout: 10_000 }).should('not.include', 'review-and-submit')
 
-                    // Navigate to resubmitted submission and check for submission updated banner
-                    cy.get('table')
-                        .findByRole('link', { name: submissionName })
-                        .should('exist')
-                        .click()
+                    cy.findByTestId('submission-summary').should('exist')
 
                     cy.findByTestId('updatedSubmissionBanner').should('exist')
 

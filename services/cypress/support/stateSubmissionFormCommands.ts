@@ -765,8 +765,7 @@ Cypress.Commands.add(
         cy.wait('@submitContractMutation', { timeout: 50_000 })
 
         if (success) {
-            cy.findByTestId('state-dashboard-page').should('exist')
-            cy.findByRole('heading', { name: 'Dashboard' }).should('exist')
+            cy.findByTestId('submission-summary').should('exist')
         }
     }
 )

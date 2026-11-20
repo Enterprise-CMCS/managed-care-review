@@ -204,7 +204,6 @@ export const ReviewSubmit = (): React.ReactElement => {
 
                 <UnlockSubmitModal
                     submissionData={contract}
-                    submissionName={submissionName}
                     modalType={
                         chipSubmissionAutomation &&
                         contractFormData.populationCovered === 'CHIP'
