@@ -196,8 +196,6 @@ const EB_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
 
-// Every page an ILOS submission can show, in order. Associated rate
-// certifications is conditional; FORM_FLOWS in app-web decides when it shows.
 const ILOS_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_ASSOCIATED_RATE_CERTIFICATIONS',

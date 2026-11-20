@@ -40,7 +40,7 @@ const PLACEHOLDER_CREATE_INPUT: CreateContractInput = {
 }
 
 // Placeholder for the first page of the ILOS actuarial report submission form.
-export const ILOSSubmissionDetails = (): React.ReactElement => {
+export const ILOSActuarialReport = (): React.ReactElement => {
     const navigate = useNavigate()
     const location = useLocation()
     const { updateActiveMainContent } = usePage()

@@ -4,7 +4,7 @@ import { getRelativePathFromNestedRoute } from '../submissionUtils'
 import { Error404 } from '../../Errors/Error404Page'
 import formContainerStyles from '../../../components/FormContainer/FormContainer.module.scss'
 import { Contacts } from '../SharedContactsPage'
-import { ILOSSubmissionDetails } from './ILOSSubmissionDetails'
+import { ILOSActuarialReport } from './ILOSActuarialReport'
 import { ILOSAssociatedRateCertifications } from './ILOSAssociatedRateCertifications'
 import { ILOSReviewSubmit } from './ILOSReviewSubmit'
 
@@ -19,7 +19,7 @@ export const ILOSSubmissionForm = (): React.ReactElement => {
             <Routes>
                 <Route
                     path={getRelativePathFromNestedRoute('SUBMISSIONS_TYPE')}
-                    element={<ILOSSubmissionDetails />}
+                    element={<ILOSActuarialReport />}
                 />
                 <Route
                     path={getRelativePathFromNestedRoute(
