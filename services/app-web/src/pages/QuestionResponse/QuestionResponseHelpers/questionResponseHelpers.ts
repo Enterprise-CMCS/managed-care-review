@@ -29,6 +29,7 @@ type QuestionDisplayDocument = {
     downloadURL: string | null
     name: string
     s3URL: string
+    s3Key?: string | null
     // Set only for documents that belong to a response. Question (CMS) documents
     // leave these undefined. The admin Q&A view uses them to build the
     // delete-response link in QuestionDisplayTable; other consumers ignore them.
@@ -49,12 +50,10 @@ type QuestionDocumentWithLink = {
 }
 
 type IndexQuestionType =
-    | IndexContractQuestionsPayload
-    | IndexRateQuestionsPayload
+    IndexContractQuestionsPayload | IndexRateQuestionsPayload
 
 type QuestionType =
-    | Omit<RateQuestion, 'rateID'>
-    | Omit<ContractQuestion, 'contractID'>
+    Omit<RateQuestion, 'rateID'> | Omit<ContractQuestion, 'contractID'>
 
 const divisionFullNames = {
     DMCO: 'Division of Managed Care Operations (DMCO)',

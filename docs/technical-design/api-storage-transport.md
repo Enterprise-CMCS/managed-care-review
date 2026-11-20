@@ -51,10 +51,11 @@ That option defaults to false, so other callers can omit the attachment header.
 The URL signer must not add a checksum calculated from an empty body: the browser
 supplies the actual bytes later. Ordinary SDK uploads keep their default checksums.
 
-The React upload adapter uses this API and preserves attachment metadata; it no
-longer uses `Storage.put`. Its existing Amplify downloads and scan polling remain
-unchanged. No new browser AWS SDK dependency is required. This API uses a
-single PUT, not multipart uploads; files must fit S3's single-PUT limit (5 GB).
+The React storage adapter uses these GraphQL APIs for upload contracts, scan
+status and download URLs. Apollo requests use the application's Cognito/IAM API
+transport; file bytes travel directly between the browser and S3. Attachment
+metadata and the create-only precondition are preserved. This API uses a single
+PUT, not multipart uploads; files must fit S3's single-PUT limit (5 GB).
 
 Supported file types are PDF, DOC, DOCX, XLS, XLSX, XLSM, XLTM, XLAM and CSV.
 
@@ -70,15 +71,38 @@ saved. It reads the object's GuardDuty scan tag:
 | `THREATS_FOUND`                        | `INFECTED` |
 | Failed, unsupported or unknown verdict | `ERROR`    |
 
-Clients must limit polling and handle failures. An S3 lookup failure is a GraphQL
-error, not `PENDING`; a successful PUT does not mean scanning is complete.
-LocalStack does not run GuardDuty, so the local adapter simulates `CLEAN`.
+The browser waits three seconds before the first status query, then polls with
+exponential backoff capped at 15 seconds and a one-minute total deadline. Each
+query bypasses Apollo's cache. Only `CLEAN` completes the upload; other terminal
+results, missing results, lookup errors and timeouts produce a scan error.
+Document rows are saved after the upload and scan complete. Both Q&A saves and
+the shared contract/EQRO/rate formatter exclude incomplete uploads, including
+draft saves made while a scan is pending.
+
+Removing or replacing a file, or leaving the upload component, cancels its work.
+The legacy GraphQL transport can finish an already-issued request, but its result
+is ignored after cancellation and no further polls start. LocalStack does not run
+GuardDuty; the local adapter simulates scan completion.
 
 ### Download
 
 `fetchS3DownloadURL(input: { key, bucketName })` returns a one-hour GET URL. It can be
 issued before scanning finishes, but **S3 denies the download unless the object
 is clean**. Possessing a signed URL does not bypass that policy.
+
+The browser requests fresh URLs without caching them. Saved-document links use
+the URL supplied by their parent query; activating an expired or nearly expired
+link requests a replacement by key and bucket. The stored `s3Key` is preferred,
+matching the server's initial URL; parsing the legacy `s3URL` is only a fallback
+for records without a canonical key. Q&A links use the Q&A bucket.
+ZIP links renew by refetching the active authorized parent query containing the
+same ZIP package ID, rather than requesting a shared-object URL for a ZIP key.
+
+Valid links retain normal navigation. Renewal opens an isolated blank tab during
+the click and navigates it after a fresh URL arrives; failure or a 30-second
+renewal timeout closes the tab and displays an accessible error. Signed URLs are
+not sent to link analytics. Keyboard and middle-click activation use the same
+renewal path; context-menu actions use the link's current URL.
 
 ## Access boundaries
 
@@ -138,7 +162,12 @@ responsibility of the GraphQL resolvers.
   uploads; `sharedS3Objects.ts` handles scan/download access and key validation.
 - `services/app-api/src/s3/`: `s3Deployed.ts` signs URLs and reads scan tags;
   `s3Local.ts` supplies the development adapter.
-- `services/app-web/src/s3/`: browser storage integration and direct file transfers.
+- `services/app-web/src/s3/s3Api.ts`: API-backed browser storage and bounded scan
+  polling. `s3Local.ts` retains the local storage implementation.
+- `services/app-web/src/components/DownloadLink/` and
+  `services/app-web/src/helpers/renewZipDownload.ts`: activation-time renewal.
+- `services/app-web/src/components/FileUpload/`: per-file cancellation and scan
+  state. `hooks/useFileUpload.ts` filters incomplete/error documents before save.
 - `services/infra-cdk/lib/stacks/uploads.ts`: bucket policies, object prefixes,
   file-type restrictions and S3 CORS configuration.
 - `services/infra-cdk/lib/stacks/virus-scanning.ts`: GuardDuty plans, scanner role

@@ -1,6 +1,7 @@
+import { DocumentDownloadLink } from '../../../components/DownloadLink/DownloadLink'
 import styles from './QATable.module.scss'
 import { User } from '../../../gen/gqlClient'
-import { LinkWithLogging, NavLinkWithLogging } from '../../../components'
+import { NavLinkWithLogging } from '../../../components'
 import { formatCalendarDate } from '@mc-review/dates'
 import { getAddedByName } from '../QuestionResponseHelpers'
 import { QuestionDisplayDocument } from '../QuestionResponseHelpers/questionResponseHelpers'
@@ -50,14 +51,17 @@ export const QuestionDisplayTable = ({
                     <tr key={doc.name + index}>
                         <th scope="row">
                             {doc.downloadURL ? (
-                                <LinkWithLogging
+                                <DocumentDownloadLink
                                     className={styles.inlineLink}
                                     aria-label={`${doc.name} (opens in new window)`}
                                     href={doc.downloadURL}
+                                    s3URL={doc.s3URL}
+                                    s3Key={doc.s3Key}
+                                    bucket="QUESTION_ANSWER_DOCS"
                                     target="_blank"
                                 >
                                     {doc.name}
-                                </LinkWithLogging>
+                                </DocumentDownloadLink>
                             ) : (
                                 doc.name
                             )}

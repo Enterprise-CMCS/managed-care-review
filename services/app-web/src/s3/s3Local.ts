@@ -6,7 +6,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 
 import { parseKey, parseErrorToError } from '@mc-review/helpers'
-import { BucketShortName, S3BucketConfigType } from './s3Amplify'
+import type { BucketShortName, S3BucketConfigType } from './s3Client'
 import { S3ClientT } from './s3Client'
 import type { S3Error } from './s3Error'
 import { isS3Error } from './s3Error'
@@ -101,18 +101,6 @@ export function newLocalS3Client(
             return `s3://${bucketConfig[bucket]}/${s3key}/${filename}`
         },
         getURL: async (
-            s3key: string,
-            bucket: BucketShortName
-        ): Promise<string> => {
-            const command = new GetObjectCommand({
-                Bucket: bucketConfig[bucket],
-                Key: s3key,
-            })
-            // Create the presigned URL.
-            const signedUrl = await getSignedUrl(s3Client, command)
-            return signedUrl
-        },
-        getZipURL: async (
             s3key: string,
             bucket: BucketShortName
         ): Promise<string> => {
