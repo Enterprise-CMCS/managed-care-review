@@ -12,7 +12,10 @@ import {
     ilosContractReviewAction,
     submitContractInsideTransaction,
 } from './submitContract'
-import { runTransactionWithRowLock } from '../prismaHelpers'
+import {
+    runTransactionWithRowLock,
+    lockTableRowForUpdate,
+} from '../prismaHelpers'
 import { repositionDraftRates } from './repositionDraftRates'
 
 type UndoWithdrawRateArgsType = {
@@ -40,6 +43,19 @@ const undoWithdrawRateInsideTransaction = async (
     args: UndoWithdrawRateArgsType
 ): Promise<RateType | Error> => {
     const { rateID, updatedByID, updatedReason } = args
+
+    // Lock each contract the rate was withdrawn from before reading it, so a
+    // concurrent undo withdraw that changes the same contract waits for this
+    // one to commit.
+    const withdrawnFromContractIDs = await tx.withdrawnRatesJoinTable.findMany({
+        where: { rateID },
+        select: { contractID: true },
+        orderBy: { contractID: 'asc' },
+    })
+
+    for (const { contractID } of withdrawnFromContractIDs) {
+        await lockTableRowForUpdate(tx, 'ContractTable', contractID)
+    }
 
     // Unlock rate
     const rateUnlockInfo = await tx.updateInfoTable.create({
