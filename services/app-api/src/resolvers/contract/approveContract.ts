@@ -81,6 +81,13 @@ export function approveContract(
                     })
                 }
 
+                // Users cannot approve an ILOS submission.
+                if (contractWithHistory.contractSubmissionType === 'ILOS') {
+                    const errMessage = 'ILOS submissions cannot be approved'
+                    logResolverError('approveContract', errMessage, context)
+                    throw createUserInputError(errMessage, 'contractID')
+                }
+
                 const allowedStatus = ['SUBMITTED', 'RESUBMITTED'].includes(
                     contractWithHistory.consolidatedStatus
                 )

@@ -80,6 +80,13 @@ export function withdrawContract(
                     })
                 }
 
+                // Users cannot withdraw an ILOS submission.
+                if (contractWithHistory.contractSubmissionType === 'ILOS') {
+                    const errMessage = 'ILOS submissions cannot be withdrawn'
+                    logResolverError('withdrawContract', errMessage, context)
+                    throw createUserInputError(errMessage, 'contractID')
+                }
+
                 if (
                     ![
                         'SUBMITTED',

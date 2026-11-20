@@ -3,13 +3,23 @@ import type { RateForDisplayType } from '../../emailer/templateHelpers'
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { unlockContractInsideTransaction } from './unlockContract'
-import { submitContractInsideTransaction } from './submitContract'
+import {
+    ilosContractReviewAction,
+    submitContractInsideTransaction,
+} from './submitContract'
 import { findContractWithHistory } from './findContractWithHistory'
 import {
     eqroValidationAndReviewDetermination,
     healthPlanReviewDetermination,
 } from '@mc-review/submissions'
-import { runTransactionWithRowLock } from '../prismaHelpers'
+import {
+    runTransactionWithRowLock,
+    lockTableRowForUpdate,
+} from '../prismaHelpers'
+import { includeFullContract } from './prismaFullContractRateHelpers'
+import { parseContractWithHistory } from './parseContractWithHistory'
+import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
+import { repositionDraftRates } from './repositionDraftRates'
 
 export type UndoWithdrawContractArgsType = {
     contract: ContractType
@@ -20,6 +30,185 @@ export type UndoWithdrawContractArgsType = {
 export type UndoWithdrawContractReturnType = {
     contract: ContractType
     ratesForDisplay: RateForDisplayType[]
+}
+
+/**
+ * Links rates back to the ILOS submissions they were removed from when their parent contract was withdrawn.
+ *
+ * For each ILOS submission that has any of the rates in its withdrawn rates, this function:
+ * 1. Unlocks the ILOS submission if it is submitted
+ * 2. Adds the rates back after every linked and external rate already on it
+ * 3. Removes the rates from the ILOS submission's withdrawn rates
+ * 4. Resubmits the ILOS submission if it was unlocked here
+ *
+ * @param tx - The Prisma transaction object used for database operations
+ * @param args.rates - The child rates restored with the contract
+ * @param args.parentContractID - ID of the contract the rates are child rates of
+ * @param args.updatedByID - ID of the user performing undo withdrawal
+ * @param args.updatedReason - The reason for undoing withdrawal
+ */
+const undoWithdrawRatesFromILOSInTransaction = async (
+    tx: PrismaTransactionType,
+    args: {
+        rates: RateForDisplayType[]
+        parentContractID: string
+        updatedByID: string
+        updatedReason: string
+    }
+): Promise<void> => {
+    const { rates, parentContractID, updatedByID, updatedReason } = args
+
+    // ILOS submissions that have any of the rates in their withdrawn rates.
+    const ilosSubmissionIDs = await tx.contractTable.findMany({
+        where: {
+            contractSubmissionType: 'ILOS',
+            withdrawnRates: {
+                some: { rateID: { in: rates.map((rate) => rate.id) } },
+            },
+        },
+        select: { id: true },
+        orderBy: { id: 'asc' },
+    })
+
+    // Lock each ILOS submission before reading it, so a concurrent undo
+    // withdraw that changes the same ILOS submission waits for this one to
+    // commit.
+    for (const { id } of ilosSubmissionIDs) {
+        await lockTableRowForUpdate(tx, 'ContractTable', id)
+    }
+
+    const ilosSubmissions = await tx.contractTable.findMany({
+        where: { id: { in: ilosSubmissionIDs.map((c) => c.id) } },
+        include: {
+            ...includeFullContract,
+        },
+    })
+
+    // Each ILOS submission is unlocked and resubmitted once, with every
+    // rate withdrawn from it added back together.
+    for (const ilosSubmission of ilosSubmissions) {
+        const parsedILOSSubmission = parseContractWithHistory(ilosSubmission)
+
+        if (parsedILOSSubmission instanceof Error) {
+            throw parsedILOSSubmission
+        }
+
+        // Used to track original status of the ILOS submission
+        const ilosStatus = parsedILOSSubmission.consolidatedStatus
+        const wasLocked = ['SUBMITTED', 'RESUBMITTED', 'WITHDRAWN'].includes(
+            ilosStatus
+        )
+
+        // Throw error if the ILOS submission is approved
+        if (ilosStatus === 'APPROVED') {
+            throw new Error(
+                `Rate was withdrawn from an APPROVED ILOS submission with ID: ${ilosSubmission.id}`
+            )
+        }
+
+        // The rates that were withdrawn from this ILOS submission.
+        const ratesToAddBack = rates.filter((rate) =>
+            ilosSubmission.withdrawnRates.some((wr) => wr.rateID === rate.id)
+        )
+        const rateNames = ratesToAddBack
+            .map((rate) => rate.rateCertificationName)
+            .join(', ')
+
+        let draftILOSSubmission = parsedILOSSubmission
+
+        // Unlock the ILOS submission to add the rates back in
+        if (wasLocked) {
+            const unlockedILOSSubmission =
+                await unlockContractInsideTransaction(tx, {
+                    contractID: ilosSubmission.id,
+                    unlockedByUserID: updatedByID,
+                    unlockReason: `Undo withdrawal of rate(s) ${rateNames} from this submission. ${updatedReason}`,
+                })
+
+            if (unlockedILOSSubmission instanceof Error) {
+                throw new Error(
+                    `Cannot unlock ILOS submission with id ${ilosSubmission.id}. ${unlockedILOSSubmission.message}`
+                )
+            }
+
+            draftILOSSubmission = unlockedILOSSubmission
+        }
+
+        if (!draftILOSSubmission.draftRevision) {
+            throw new Error(
+                `ILOS submission ${ilosSubmission.id} is missing draft revision`
+            )
+        }
+
+        const repositionedRates = repositionDraftRates(
+            ilosSubmission.id,
+            [
+                ...(draftILOSSubmission.draftRates ?? []),
+                ...ratesToAddBack.map((rate) => ({
+                    id: rate.id,
+                    parentContractID,
+                })),
+            ],
+            draftILOSSubmission.draftRevision.formData.ilosExternalRates
+        )
+
+        // update the ILOS submission to add the rates back. They have no
+        // position yet, so they go after every linked and external rate.
+        const updateResult = await updateDraftContractRatesInsideTransaction(
+            tx,
+            {
+                contractID: ilosSubmission.id,
+                rateUpdates: {
+                    create: [],
+                    delete: [],
+                    unlink: [],
+                    update: repositionedRates.update,
+                    link: repositionedRates.link,
+                    external: repositionedRates.external,
+                },
+            }
+        )
+
+        if (updateResult instanceof Error) {
+            throw new Error(
+                `Cannot add rate to ILOS submission with id ${ilosSubmission.id}. ${updateResult.message}`
+            )
+        }
+
+        await tx.withdrawnRatesJoinTable.deleteMany({
+            where: {
+                contractID: ilosSubmission.id,
+                rateID: { in: ratesToAddBack.map((rate) => rate.id) },
+            },
+        })
+
+        // Resubmit the ILOS submission if it was unlocked in this loop.
+        if (wasLocked) {
+            const resubmitResult = await submitContractInsideTransaction(tx, {
+                contractID: ilosSubmission.id,
+                submittedByUserID: updatedByID,
+                submittedReason: `CMS has changed the status of rate(s) ${rateNames} to submitted. ${updatedReason}`,
+            })
+
+            if (resubmitResult instanceof Error) {
+                throw resubmitResult
+            }
+
+            // Record the same review action as a normal ILOS submit. Skip
+            // a withdrawn ILOS submission because the review helper
+            // rejects withdrawn review status.
+            if (['SUBMITTED', 'RESUBMITTED'].includes(ilosStatus)) {
+                const reviewAction = await ilosContractReviewAction(
+                    tx,
+                    resubmitResult
+                )
+
+                if (reviewAction instanceof Error) {
+                    throw reviewAction
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -165,6 +354,16 @@ const undoWithdrawContractInsideTransaction = async (
         data: {
             lastActionDate: contractReviewAction.updatedAt,
         },
+    })
+
+    // Withdrawing the contract removed its child rates from the ILOS
+    // submissions that linked them. Link them back now that the rates are
+    // resubmitted with this contract.
+    await undoWithdrawRatesFromILOSInTransaction(tx, {
+        rates: ratesForDisplay,
+        parentContractID: contract.id,
+        updatedByID,
+        updatedReason,
     })
 
     for (const rate of ratesForDisplay) {

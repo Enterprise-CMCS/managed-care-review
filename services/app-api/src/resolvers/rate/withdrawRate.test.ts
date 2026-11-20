@@ -11,6 +11,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     fetchTestContractWithQuestions,
@@ -919,6 +920,226 @@ describe('withdrawRate', () => {
         )
     })
 
+    it('withdraws a rate after a contract that linked it was resubmitted without it', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // link rate to contract B and give it a child rate
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id
+        )
+        const contractBChildRate =
+            submittedContractB.packageSubmissions[0].rateRevisions.find(
+                (rev) => rev.rateID !== rateID
+            )
+        if (!contractBChildRate) {
+            throw new Error('Expected contract B child rate to be defined')
+        }
+
+        // unlock contract B, remove the linked rate, and resubmit
+        const unlockedContractB = await unlockTestContract(
+            cmsServer,
+            contractB.id,
+            'unlock to remove linked rate'
+        )
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt:
+                            unlockedContractB.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: contractBChildRate.rateID,
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+        await submitTestContract(
+            stateServer,
+            contractB.id,
+            'resubmit without linked rate'
+        )
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        // expect rate to be withdrawn from contract A only
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(1)
+        expect(withdrawnRate.withdrawnFromContracts?.[0].id).toBe(contractA.id)
+
+        // expect contract B to be left as it was last resubmitted
+        const contractBAfterWithdraw = await fetchTestContractWithQuestions(
+            stateServer,
+            contractB.id
+        )
+        expect(contractBAfterWithdraw.consolidatedStatus).toBe('RESUBMITTED')
+        expect(contractBAfterWithdraw.withdrawnRates).toHaveLength(0)
+        expect(contractBAfterWithdraw.packageSubmissions).toHaveLength(2)
+        expect(
+            contractBAfterWithdraw.packageSubmissions[0].rateRevisions
+        ).toHaveLength(1)
+        expect(
+            contractBAfterWithdraw.packageSubmissions[0].rateRevisions[0].rateID
+        ).toBe(contractBChildRate.rateID)
+    })
+
+    it('withdraws a rate after an unlocked contract removed it from its draft', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // link rate to contract B and give it a child rate
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id
+        )
+        const contractBChildRate =
+            submittedContractB.packageSubmissions[0].rateRevisions.find(
+                (rev) => rev.rateID !== rateID
+            )
+        if (!contractBChildRate) {
+            throw new Error('Expected contract B child rate to be defined')
+        }
+
+        // unlock contract B and remove the linked rate, without resubmitting
+        const unlockedContractB = await unlockTestContract(
+            cmsServer,
+            contractB.id,
+            'unlock to remove linked rate'
+        )
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt:
+                            unlockedContractB.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: contractBChildRate.rateID,
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        // expect rate to be withdrawn from contract A only
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(1)
+        expect(withdrawnRate.withdrawnFromContracts?.[0].id).toBe(contractA.id)
+
+        // expect contract B to still be unlocked with only its child rate
+        const contractBAfterWithdraw = await fetchTestContractWithQuestions(
+            stateServer,
+            contractB.id
+        )
+        expect(contractBAfterWithdraw.consolidatedStatus).toBe('UNLOCKED')
+        expect(contractBAfterWithdraw.withdrawnRates).toHaveLength(0)
+        expect(contractBAfterWithdraw.draftRates).toHaveLength(1)
+        expect(contractBAfterWithdraw.draftRates?.[0].id).toBe(
+            contractBChildRate.rateID
+        )
+    })
+
     it('withdraws rate when linked to withdrawn contract', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
@@ -1647,6 +1868,104 @@ describe('withdrawRate', () => {
                     })
                 )
             )
+        )
+    })
+
+    it('withdraws a rate linked to an ILOS submission and repositions its other rates', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+        const contractB = await createAndSubmitTestContractWithRate(stateServer)
+        const otherRateID =
+            contractB.packageSubmissions[0].rateRevisions[0].rateID
+
+        // EXT-1 at 1, the rate to withdraw at 2, EXT-2 at 3, the other rate at 4
+        const ilosSubmission =
+            await createAndSubmitTestILOSContractWithLinkedRates(stateServer, [
+                rateID,
+                otherRateID,
+            ])
+        const firstSubmission = ilosSubmission.packageSubmissions[0]
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(2)
+        expect(withdrawnRate.withdrawnFromContracts).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({ id: contractA.id }),
+                expect.objectContaining({ id: ilosSubmission.id }),
+            ])
+        )
+
+        const ilosWithWithdrawnRate = await fetchTestContractWithQuestions(
+            stateServer,
+            ilosSubmission.id
+        )
+
+        // the rate moves to the ILOS submission's withdrawn rates
+        expect(ilosWithWithdrawnRate.withdrawnRates).toHaveLength(1)
+        expect(ilosWithWithdrawnRate.withdrawnRates?.[0].id).toBe(rateID)
+
+        // the ILOS submission is resubmitted without it and the rates after it move up
+        expect(ilosWithWithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
+        expect(ilosWithWithdrawnRate.packageSubmissions).toHaveLength(2)
+        const latestSubmission = ilosWithWithdrawnRate.packageSubmissions[0]
+        expect(latestSubmission.rateRevisions).toHaveLength(1)
+        expect(latestSubmission.rateRevisions[0].rateID).toBe(otherRateID)
+        expect(latestSubmission.rateRevisions[0].ratePosition).toBe(3)
+
+        const formData = latestSubmission.contractRevision.formData
+        expect(formData.ilosExternalRates).toMatchObject([
+            { rateControlName: 'EXT-1', position: 1 },
+            { rateControlName: 'EXT-2', position: 2 },
+        ])
+
+        // the rest of the ILOS data is carried onto the new revision
+        const firstFormData = firstSubmission.contractRevision.formData
+        expect(formData.ilosRateDateStart).toEqual(
+            firstFormData.ilosRateDateStart
+        )
+        expect(formData.ilosRateDateEnd).toEqual(firstFormData.ilosRateDateEnd)
+        expect(formData.ilosDocuments).toHaveLength(1)
+        expect(formData.ilosDocuments?.[0]).toMatchObject({
+            name: firstFormData.ilosDocuments?.[0].name,
+            sha256: firstFormData.ilosDocuments?.[0].sha256,
+            dateAdded: firstSubmission.submitInfo.updatedAt,
+        })
+
+        // ILOS is always under review, so the resubmit records that action
+        const ilosTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: ilosSubmission.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(ilosTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(ilosTableRow?.lastActionDate).toEqual(
+            ilosTableRow?.reviewStatusActions[0].updatedAt
         )
     })
 })

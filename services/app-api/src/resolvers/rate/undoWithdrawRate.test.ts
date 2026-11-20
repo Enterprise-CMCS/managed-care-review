@@ -6,6 +6,7 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import {
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     fetchTestContract,
@@ -788,6 +789,87 @@ describe('undoWithdrawRate', () => {
             })
         )
     }, 55000)
+
+    it('restores a withdrawn rate on an ILOS submission after its other rates', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+        const contractB = await createAndSubmitTestContractWithRate(stateServer)
+        const otherRateID =
+            contractB.packageSubmissions[0].rateRevisions[0].rateID
+
+        // EXT-1 at 1, the rate to withdraw at 2, EXT-2 at 3, the other rate at 4
+        const ilosSubmission =
+            await createAndSubmitTestILOSContractWithLinkedRates(stateServer, [
+                rateID,
+                otherRateID,
+            ])
+
+        await withdrawTestRate(cmsServer, rateID, 'Withdraw invalid rate')
+
+        const unwithdrawnRate = await undoWithdrawTestRate(
+            cmsServer,
+            rateID,
+            'Undo withdraw rate'
+        )
+
+        expect(unwithdrawnRate.consolidatedStatus).toBe('RESUBMITTED')
+        expect(unwithdrawnRate.parentContractID).toBe(contractA.id)
+        expect(unwithdrawnRate.withdrawnFromContracts).toHaveLength(0)
+
+        const restoredILOS = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+
+        // the rate is no longer one of the ILOS submission's withdrawn rates
+        expect(restoredILOS.withdrawnRates).toHaveLength(0)
+
+        // the rate is back on the ILOS submission, after the rates already on it
+        expect(restoredILOS.consolidatedStatus).toBe('RESUBMITTED')
+        const latestSubmission = restoredILOS.packageSubmissions[0]
+        expect(latestSubmission.rateRevisions).toHaveLength(2)
+        expect(latestSubmission.rateRevisions[0].rateID).toBe(otherRateID)
+        expect(latestSubmission.rateRevisions[0].ratePosition).toBe(3)
+        expect(latestSubmission.rateRevisions[1].rateID).toBe(rateID)
+        expect(latestSubmission.rateRevisions[1].ratePosition).toBe(4)
+        expect(
+            latestSubmission.contractRevision.formData.ilosExternalRates
+        ).toMatchObject([
+            { rateControlName: 'EXT-1', position: 1 },
+            { rateControlName: 'EXT-2', position: 2 },
+        ])
+
+        // ILOS is always under review, so the resubmit records that action
+        const ilosTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: ilosSubmission.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(ilosTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(ilosTableRow?.lastActionDate).toEqual(
+            ilosTableRow?.reviewStatusActions[0].updatedAt
+        )
+    })
 })
 
 describe('undo withdraw rate error handling', async () => {
