@@ -1,6 +1,7 @@
 import {
     EB_SUBMISSION_FORM_ROUTES,
     EQRO_SUBMISSION_FORM_ROUTES,
+    ILOS_SUBMISSION_FORM_ROUTES,
     type RouteT,
     type RouteTWithUnknown,
 } from '@mc-review/constants'
@@ -61,9 +62,9 @@ const FORM_FLOWS: Record<ContractSubmissionType, FormFlowDefinition> = {
         pages: EB_SUBMISSION_FORM_ROUTES,
         customPageTitles: { SUBMISSIONS_TYPE: 'Submission details' },
     },
-    // ILOS form pages are not built yet. Fill this in with the ILOS frontend work.
     ILOS: {
-        pages: [],
+        pages: ILOS_SUBMISSION_FORM_ROUTES,
+        customPageTitles: { SUBMISSIONS_TYPE: 'Submission details' },
     },
 }
 
