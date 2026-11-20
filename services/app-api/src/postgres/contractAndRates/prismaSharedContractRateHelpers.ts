@@ -411,6 +411,15 @@ const getNewParentContract = (
             continue
         }
 
+        // Only health plan contracts can be a rate parent. An ILOS submission
+        // links rates but never owns them.
+        if (
+            pkg.contractRevision.contract.contractSubmissionType !==
+            'HEALTH_PLAN'
+        ) {
+            continue
+        }
+
         // These next few conditionals are ordered by preferred contract status
         if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
             // contract with consolidated status of submitted is our preferred contract, break the loop if we find it.

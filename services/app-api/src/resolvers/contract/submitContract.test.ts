@@ -3323,12 +3323,7 @@ describe('submitContract', () => {
             const stateServer = await constructTestPostgresServer({
                 s3Client: mockS3,
             })
-            const cmsServer = await constructTestPostgresServer({
-                context: {
-                    user: testCMSUser(),
-                },
-                s3Client: mockS3,
-            })
+            const [cmsUser] = await createDBUsersWithFullData([testCMSUser()])
 
             const otherPackage =
                 await createAndSubmitTestContractWithRate(stateServer)
@@ -3344,11 +3339,17 @@ describe('submitContract', () => {
             const firstSubmission = submitted.packageSubmissions[0]
             const firstFormData = firstSubmission.contractRevision.formData
 
-            const unlocked = await unlockTestContract(
-                cmsServer,
-                submitted.id,
-                'unlock ILOS submission'
+            // Users cannot unlock an ILOS submission, so unlock it with the
+            // store function, the way withdrawing a linked rate does.
+            const store = NewPostgresStore(await sharedTestPrismaClient())
+            must(
+                await store.unlockContract({
+                    contractID: submitted.id,
+                    unlockedByUserID: cmsUser.id,
+                    unlockReason: 'unlock ILOS submission',
+                })
             )
+            const unlocked = await fetchTestContract(stateServer, submitted.id)
 
             // unlock copies the ILOS data to the draft and keeps every rate's position
             expect(unlocked.status).toBe('UNLOCKED')
