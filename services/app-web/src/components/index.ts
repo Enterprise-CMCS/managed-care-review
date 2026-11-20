@@ -56,6 +56,8 @@ export { ExpandableText } from './ExpandableText'
 export { ProgramSelect, PackageSelect } from './Select'
 
 export { ContractTable } from './ContractTable'
+export { ILOSTable } from './ILOSTable'
+export type { ILOSSubmissionInDashboardType } from './ILOSTable'
 
 export type {
     ContractInDashboardType,

@@ -1,17 +1,51 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { GraphQLError } from 'graphql'
 
 import { StateDashboard } from './StateDashboard'
 import {
     fetchCurrentUserMock,
     indexContractsStrippedMockSuccess,
+    indexIlosSubmissionsStrippedMockSuccess,
     mockContractStripped,
+    mockILOSContractStripped,
     mockUnlockedContractStripped,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
+import { StateSubmissionsDashboard } from './StateSubmissionsDashboard'
+import { ILOSDashboard } from '../ILOSDashboard'
+import { IndexContractsStrippedDocument } from '../../gen/gqlClient'
+import {
+    Navigate,
+    type NavigateFunction,
+    Route,
+    Routes,
+} from 'react-router-dom'
+import { RoutesRecord } from '@mc-review/constants'
+
+// copy paste from AppRoutes - this is to allow testing of the react router Outlet
+const StateDashboardNestedRoutes = () => (
+    <Routes>
+        <Route
+            path={RoutesRecord.ROOT}
+            element={<Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />}
+        />
+        <Route element={<StateDashboard />}>
+            <Route
+                path={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                element={<StateSubmissionsDashboard />}
+            />
+            <Route
+                path={RoutesRecord.DASHBOARD_ILOS}
+                element={<ILOSDashboard />}
+            />
+        </Route>
+    </Routes>
+)
 
 describe('StateDashboard', () => {
     it('displays dashboard heading', async () => {
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
@@ -31,7 +65,7 @@ describe('StateDashboard', () => {
     })
 
     it('displays new submission link', async () => {
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
@@ -50,7 +84,7 @@ describe('StateDashboard', () => {
     })
 
     it('displays texts "sent to CMS", "you can view your review decision", and link "view submission summary" if submission type is EQRO', async () => {
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
@@ -85,7 +119,7 @@ describe('StateDashboard', () => {
     })
 
     it('displays texts "sent to CMS", "you can view your review decision", and link "view submission summary" if submission type is HEALTH_PLAN', async () => {
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
@@ -181,8 +215,6 @@ describe('StateDashboard', () => {
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
                     contractType: 'BASE',
-                    contractDateStart: new Date('2024-01-01'),
-                    contractDateEnd: new Date('2025-01-01'),
                     managedCareEntities: ['MCO'],
                 },
             },
@@ -201,7 +233,7 @@ describe('StateDashboard', () => {
 
         const submissions = [draft, submitted, unlocked]
 
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
@@ -300,7 +332,7 @@ describe('StateDashboard', () => {
 
         const submissions = [approved, submitted, unlocked]
 
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
@@ -384,8 +416,6 @@ describe('StateDashboard', () => {
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
                     contractType: 'BASE',
-                    contractDateStart: new Date('2024-01-01'),
-                    contractDateEnd: new Date('2025-01-01'),
                     managedCareEntities: ['MCO'],
                 },
             },
@@ -404,7 +434,7 @@ describe('StateDashboard', () => {
 
         const submissions = [draft, submitted, unlocked]
 
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200, user: mockUser }),
@@ -450,15 +480,13 @@ describe('StateDashboard', () => {
                     populationCovered: 'MEDICAID',
                     submissionType: 'CONTRACT_AND_RATES',
                     contractType: 'BASE',
-                    contractDateStart: new Date('2024-01-01'),
-                    contractDateEnd: new Date('2025-01-01'),
                     managedCareEntities: ['MCO'],
                 },
             },
             latestSubmittedRevision: null,
         })
 
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
@@ -497,7 +525,7 @@ describe('StateDashboard', () => {
             lastUpdatedForDisplay: new Date('2020-01-01'),
         })
 
-        renderWithProviders(<StateDashboard />, {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
             apolloProvider: {
                 mocks: [
                     fetchCurrentUserMock({ statusCode: 200 }),
@@ -517,5 +545,356 @@ describe('StateDashboard', () => {
         expect(
             screen.queryByTestId('submissionType-filter')
         ).not.toBeInTheDocument()
+    })
+
+    it('displays a loading indicator below the dashboard heading while the submissions load', async () => {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    {
+                        request: { query: IndexContractsStrippedDocument },
+                        result: indexContractsStrippedMockSuccess([]).result,
+                        delay: Infinity,
+                    },
+                ],
+            },
+        })
+
+        expect(
+            await screen.findByRole('heading', { level: 1, name: 'Dashboard' })
+        ).toBeInTheDocument()
+        // The loading indicator only shows after a short delay.
+        expect(
+            await screen.findByRole(
+                'heading',
+                { name: 'Loading' },
+                { timeout: 2000 }
+            )
+        ).toBeInTheDocument()
+        expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    })
+
+    it('displays an error banner below the dashboard heading when the submissions query fails', async () => {
+        renderWithProviders(<StateDashboardNestedRoutes />, {
+            apolloProvider: {
+                mocks: [
+                    fetchCurrentUserMock({ statusCode: 200 }),
+                    {
+                        request: { query: IndexContractsStrippedDocument },
+                        result: {
+                            errors: [
+                                new GraphQLError('Submissions index failed'),
+                            ],
+                        },
+                    },
+                ],
+            },
+        })
+
+        expect(
+            await screen.findByRole('heading', { name: /System error/ })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByRole('heading', { level: 1, name: 'Dashboard' })
+        ).toBeInTheDocument()
+        expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    })
+
+    describe('ILOS tab', () => {
+        it('does not display tabs when the ilos-submissions flag is off', async () => {
+            renderWithProviders(<StateDashboardNestedRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexContractsStrippedMockSuccess([
+                            mockContractStripped({ id: 'test-abc-submitted' }),
+                        ]),
+                    ],
+                },
+                featureFlags: { 'ilos-submissions': false },
+            })
+
+            expect(
+                await screen.findByTestId('row-test-abc-submitted')
+            ).toBeInTheDocument()
+            expect(screen.queryByTestId('tabs')).not.toBeInTheDocument()
+            expect(
+                screen.queryByRole('tab', { name: 'ILOS' })
+            ).not.toBeInTheDocument()
+        })
+
+        it('displays the All submissions and ILOS tabs when the flag is on', async () => {
+            renderWithProviders(<StateDashboardNestedRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexContractsStrippedMockSuccess([
+                            mockContractStripped({ id: 'test-abc-submitted' }),
+                        ]),
+                        indexIlosSubmissionsStrippedMockSuccess(),
+                    ],
+                },
+                routerProvider: { route: '/dashboard/submissions' },
+                featureFlags: { 'ilos-submissions': true },
+            })
+
+            expect(
+                await screen.findByRole('tab', { name: 'All submissions' })
+            ).toHaveAttribute('aria-selected', 'true')
+            expect(screen.getByRole('tab', { name: 'ILOS' })).toHaveAttribute(
+                'aria-selected',
+                'false'
+            )
+            expect(screen.getByRole('tabpanel')).toHaveAttribute(
+                'data-tabname',
+                'All submissions'
+            )
+            expect(
+                screen.getByTestId('row-test-abc-submitted')
+            ).toBeInTheDocument()
+        })
+
+        it('loads on the ILOS tab with the ILOS table on the ILOS dashboard route', async () => {
+            renderWithProviders(<StateDashboardNestedRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexContractsStrippedMockSuccess([
+                            mockContractStripped({ id: 'test-abc-submitted' }),
+                        ]),
+                        indexIlosSubmissionsStrippedMockSuccess([
+                            mockILOSContractStripped({
+                                id: 'test-ilos-submitted',
+                            }),
+                        ]),
+                    ],
+                },
+                routerProvider: { route: '/dashboard/ilos' },
+                featureFlags: { 'ilos-submissions': true },
+            })
+
+            expect(
+                await screen.findByRole('heading', {
+                    level: 2,
+                    name: 'ILOS actuarial reports',
+                })
+            ).toBeInTheDocument()
+            expect(screen.getByRole('tab', { name: 'ILOS' })).toHaveAttribute(
+                'aria-selected',
+                'true'
+            )
+            expect(
+                await screen.findByRole('link', { name: 'MCR-ILOS-MN-0005' })
+            ).toHaveAttribute('href', '/submissions/ilos/test-ilos-submitted')
+            expect(
+                screen.queryByTestId('row-test-abc-submitted')
+            ).not.toBeInTheDocument()
+            expect(
+                screen.getByRole('link', { name: 'Start new submission' })
+            ).toBeInTheDocument()
+        })
+
+        it('fetches only the ILOS submissions on the ILOS tab', async () => {
+            const submissionsMock = indexContractsStrippedMockSuccess([
+                mockContractStripped({ id: 'test-abc-submitted' }),
+            ])
+            const submissionsResult = vi.fn(() => ({
+                data: {
+                    indexContractsStripped: {
+                        totalCount: 0,
+                        edges: [],
+                    },
+                },
+            }))
+            renderWithProviders(<StateDashboardNestedRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        {
+                            request: submissionsMock.request,
+                            result: submissionsResult,
+                        },
+                        indexIlosSubmissionsStrippedMockSuccess([
+                            mockILOSContractStripped({
+                                id: 'test-ilos-submitted',
+                            }),
+                        ]),
+                    ],
+                },
+                routerProvider: { route: '/dashboard/ilos' },
+                featureFlags: { 'ilos-submissions': true },
+            })
+
+            expect(
+                await screen.findByTestId('row-test-ilos-submitted')
+            ).toBeInTheDocument()
+            expect(screen.getByRole('tab', { name: 'ILOS' })).toHaveAttribute(
+                'aria-selected',
+                'true'
+            )
+            expect(submissionsResult).not.toHaveBeenCalled()
+        })
+
+        it('fetches only the submissions on the All submissions tab', async () => {
+            const ilosMock = indexIlosSubmissionsStrippedMockSuccess([
+                mockILOSContractStripped({ id: 'test-ilos-submitted' }),
+            ])
+            const ilosResult = vi.fn(() => ({
+                data: {
+                    indexIlosSubmissionsStripped: {
+                        totalCount: 0,
+                        edges: [],
+                    },
+                },
+            }))
+            renderWithProviders(<StateDashboardNestedRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        indexContractsStrippedMockSuccess([
+                            mockContractStripped({ id: 'test-abc-submitted' }),
+                        ]),
+                        { request: ilosMock.request, result: ilosResult },
+                    ],
+                },
+                routerProvider: { route: '/dashboard/submissions' },
+                featureFlags: { 'ilos-submissions': true },
+            })
+
+            expect(
+                await screen.findByTestId('row-test-abc-submitted')
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByTestId('ilos-dashboard-heading')
+            ).not.toBeInTheDocument()
+            expect(ilosResult).not.toHaveBeenCalled()
+        })
+
+        it('switches between the All submissions and ILOS tables when a tab is clicked', async () => {
+            const user = userEvent.setup()
+            renderWithProviders(<StateDashboardNestedRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        // Each tab fetches when it opens, so All submissions is asked for twice.
+                        indexContractsStrippedMockSuccess([
+                            mockContractStripped({ id: 'test-abc-submitted' }),
+                        ]),
+                        indexContractsStrippedMockSuccess([
+                            mockContractStripped({ id: 'test-abc-submitted' }),
+                        ]),
+                        indexIlosSubmissionsStrippedMockSuccess([
+                            mockILOSContractStripped({
+                                id: 'test-ilos-submitted',
+                            }),
+                        ]),
+                    ],
+                },
+                routerProvider: { route: '/dashboard/submissions' },
+                featureFlags: { 'ilos-submissions': true },
+            })
+
+            await user.click(await screen.findByRole('tab', { name: 'ILOS' }))
+
+            expect(
+                await screen.findByTestId('row-test-ilos-submitted')
+            ).toBeInTheDocument()
+            expect(screen.getByRole('tabpanel')).toHaveAttribute(
+                'data-tabname',
+                'ILOS'
+            )
+            expect(
+                screen.queryByTestId('row-test-abc-submitted')
+            ).not.toBeInTheDocument()
+
+            await user.click(
+                screen.getByRole('tab', { name: 'All submissions' })
+            )
+
+            expect(
+                await screen.findByTestId('row-test-abc-submitted')
+            ).toBeInTheDocument()
+            expect(
+                screen.queryByTestId('row-test-ilos-submitted')
+            ).not.toBeInTheDocument()
+        })
+
+        it('selects the tab in the URL after browser back and forward', async () => {
+            const user = userEvent.setup()
+            let testNavigate: NavigateFunction
+            renderWithProviders(<StateDashboardNestedRoutes />, {
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        // Each tab fetches when it opens, and each tab is opened twice.
+                        indexContractsStrippedMockSuccess([
+                            mockContractStripped({ id: 'test-abc-submitted' }),
+                        ]),
+                        indexContractsStrippedMockSuccess([
+                            mockContractStripped({ id: 'test-abc-submitted' }),
+                        ]),
+                        indexIlosSubmissionsStrippedMockSuccess([
+                            mockILOSContractStripped({
+                                id: 'test-ilos-submitted',
+                            }),
+                        ]),
+                        indexIlosSubmissionsStrippedMockSuccess([
+                            mockILOSContractStripped({
+                                id: 'test-ilos-submitted',
+                            }),
+                        ]),
+                    ],
+                },
+                routerProvider: { route: '/dashboard/submissions' },
+                navigate: (nav) => (testNavigate = nav),
+                featureFlags: { 'ilos-submissions': true },
+            })
+
+            await user.click(await screen.findByRole('tab', { name: 'ILOS' }))
+            expect(
+                await screen.findByTestId('row-test-ilos-submitted')
+            ).toBeInTheDocument()
+
+            // Back
+            act(() => {
+                void testNavigate(-1)
+            })
+
+            expect(
+                await screen.findByTestId('row-test-abc-submitted')
+            ).toBeInTheDocument()
+            expect(
+                screen.getByRole('tab', { name: 'All submissions' })
+            ).toHaveAttribute('aria-selected', 'true')
+            expect(screen.getByRole('tab', { name: 'ILOS' })).toHaveAttribute(
+                'aria-selected',
+                'false'
+            )
+            expect(screen.getByRole('tabpanel')).toHaveAttribute(
+                'data-tabname',
+                'All submissions'
+            )
+
+            // Forward
+            act(() => {
+                void testNavigate(1)
+            })
+
+            expect(
+                await screen.findByTestId('row-test-ilos-submitted')
+            ).toBeInTheDocument()
+            expect(screen.getByRole('tab', { name: 'ILOS' })).toHaveAttribute(
+                'aria-selected',
+                'true'
+            )
+            expect(
+                screen.getByRole('tab', { name: 'All submissions' })
+            ).toHaveAttribute('aria-selected', 'false')
+            expect(screen.getByRole('tabpanel')).toHaveAttribute(
+                'data-tabname',
+                'ILOS'
+            )
+        })
     })
 })
