@@ -479,6 +479,51 @@ const createAndSubmitTestILOSContract = async (
     return await submitTestContract(server, draft.id)
 }
 
+// Creates and submits an ILOS submission whose rates are, in order: external
+// rate EXT-1, the first linked rate, external rate EXT-2, then any other linked
+// rates. The linked rates must already be submitted.
+const createAndSubmitTestILOSContractWithLinkedRates = async (
+    server: ApolloServer,
+    linkedRateIDs: string[],
+    stateCode?: StateCodeType
+): Promise<Contract> => {
+    const draft = await createAndUpdateTestILOSContract(server, stateCode)
+    const [firstLinkedRateID, ...otherLinkedRateIDs] = linkedRateIDs
+    const externalRate = (rateControlName: string) => ({
+        type: 'EXTERNAL' as const,
+        externalRate: {
+            rateControlName,
+            rateDateStart: '2025-01-01',
+            rateDateEnd: '2025-12-31',
+        },
+    })
+    const linkedRate = (rateID: string) => ({ type: 'LINK' as const, rateID })
+
+    const rateResult = await executeGraphQLOperation(server, {
+        query: UpdateDraftContractRatesDocument,
+        variables: {
+            input: {
+                contractID: draft.id,
+                lastSeenUpdatedAt: draft.draftRevision?.updatedAt,
+                updatedRates: [
+                    externalRate('EXT-1'),
+                    linkedRate(firstLinkedRateID),
+                    externalRate('EXT-2'),
+                    ...otherLinkedRateIDs.map(linkedRate),
+                ],
+            },
+        },
+    })
+
+    if (rateResult.errors) {
+        throw new Error(
+            `updateDraftContractRates mutation failed with errors ${JSON.stringify(rateResult.errors)}`
+        )
+    }
+
+    return await submitTestContract(server, draft.id)
+}
+
 const createAndUpdateTestEQROContract = async (
     server: ApolloServer,
     stateCode?: StateCodeType,
@@ -911,5 +956,6 @@ export {
     createAndUpdateTestEQROContract,
     createAndUpdateTestILOSContract,
     createAndSubmitTestILOSContract,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestEBContract,
 }

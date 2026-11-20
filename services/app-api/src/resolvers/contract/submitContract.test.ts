@@ -28,6 +28,7 @@ import {
     createAndUpdateTestEBContract,
     createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createSubmitAndUnlockTestContract,
@@ -3315,6 +3316,89 @@ describe('submitContract', () => {
                 })
             expect(contractTableRow.lastActionDate).toEqual(
                 latestAction?.updatedAt
+            )
+        })
+
+        it('resubmits an unlocked ILOS submission with its ILOS data and rate positions', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const cmsServer = await constructTestPostgresServer({
+                context: {
+                    user: testCMSUser(),
+                },
+                s3Client: mockS3,
+            })
+
+            const otherPackage =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const linkedRateID =
+                otherPackage.packageSubmissions[0].rateRevisions[0].rateID
+
+            // EXT-1 at 1, the linked rate at 2, EXT-2 at 3
+            const submitted =
+                await createAndSubmitTestILOSContractWithLinkedRates(
+                    stateServer,
+                    [linkedRateID]
+                )
+            const firstSubmission = submitted.packageSubmissions[0]
+            const firstFormData = firstSubmission.contractRevision.formData
+
+            const unlocked = await unlockTestContract(
+                cmsServer,
+                submitted.id,
+                'unlock ILOS submission'
+            )
+
+            // unlock copies the ILOS data to the draft and keeps every rate's position
+            expect(unlocked.status).toBe('UNLOCKED')
+            const draftFormData = unlocked.draftRevision?.formData
+            expect(draftFormData?.ilosRateDateStart).toEqual(
+                firstFormData.ilosRateDateStart
+            )
+            expect(draftFormData?.ilosRateDateEnd).toEqual(
+                firstFormData.ilosRateDateEnd
+            )
+            expect(draftFormData?.ilosDocuments).toHaveLength(1)
+            expect(draftFormData?.ilosDocuments?.[0]).toMatchObject({
+                name: firstFormData.ilosDocuments?.[0].name,
+                sha256: firstFormData.ilosDocuments?.[0].sha256,
+            })
+            expect(draftFormData?.ilosExternalRates).toMatchObject([
+                { rateControlName: 'EXT-1', position: 1 },
+                { rateControlName: 'EXT-2', position: 3 },
+            ])
+            expect(unlocked.draftRates).toHaveLength(1)
+            expect(unlocked.draftRates?.[0].id).toBe(linkedRateID)
+            expect(unlocked.draftRates?.[0].ratePosition).toBe(2)
+
+            const resubmitted = await submitTestContract(
+                stateServer,
+                submitted.id,
+                'resubmit ILOS submission'
+            )
+
+            expect(resubmitted.status).toBe('RESUBMITTED')
+            expect(resubmitted.packageSubmissions).toHaveLength(2)
+            const latestSubmission = resubmitted.packageSubmissions[0]
+            expect(latestSubmission.rateRevisions).toHaveLength(1)
+            expect(latestSubmission.rateRevisions[0].rateID).toBe(linkedRateID)
+            expect(latestSubmission.rateRevisions[0].ratePosition).toBe(2)
+
+            const latestFormData = latestSubmission.contractRevision.formData
+            expect(latestFormData.ilosExternalRates).toMatchObject([
+                { rateControlName: 'EXT-1', position: 1 },
+                { rateControlName: 'EXT-2', position: 3 },
+            ])
+
+            // the ILOS document keeps the date it was first submitted
+            expect(latestFormData.ilosDocuments).toHaveLength(1)
+            expect(latestFormData.ilosDocuments?.[0].dateAdded).toEqual(
+                firstSubmission.submitInfo.updatedAt
+            )
+
+            expect(resubmitted.reviewStatusActions?.[0]?.actionType).toBe(
+                'UNDER_REVIEW'
             )
         })
 
