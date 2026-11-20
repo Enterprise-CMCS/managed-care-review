@@ -89,6 +89,18 @@ export function undoWithdrawContract(
                     })
                 }
 
+                // Users cannot undo the withdrawal of an ILOS submission.
+                if (contractWithHistory.contractSubmissionType === 'ILOS') {
+                    const errMessage =
+                        'ILOS submission withdrawals cannot be undone'
+                    logResolverError(
+                        'undoWithdrawContract',
+                        errMessage,
+                        context
+                    )
+                    throw createUserInputError(errMessage, 'contractID')
+                }
+
                 if (contractWithHistory.consolidatedStatus !== 'WITHDRAWN') {
                     const errMessage = `Attempted to undo a submission withdrawal with invalid contract status of ${contractWithHistory.consolidatedStatus}`
                     logResolverError(

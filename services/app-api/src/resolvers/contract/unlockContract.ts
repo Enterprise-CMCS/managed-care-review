@@ -76,6 +76,14 @@ export function unlockContractResolver(
                     })
                 }
 
+                // Users cannot unlock an ILOS submission. The store function
+                // still unlocks one when a rate it links is withdrawn.
+                if (contractResult.contractSubmissionType === 'ILOS') {
+                    const errMessage = 'ILOS submissions cannot be unlocked'
+                    logResolverError('unlockContract', errMessage, context)
+                    throw createUserInputError(errMessage, 'contractID')
+                }
+
                 const { consolidatedStatus } = contractResult
                 const hasUnlockableStatus =
                     consolidatedStatus === 'SUBMITTED' ||

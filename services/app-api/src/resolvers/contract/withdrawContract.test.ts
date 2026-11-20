@@ -10,7 +10,11 @@ import {
 } from '../../testHelpers/gqlHelpers'
 import {
     approveTestContract,
+    createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContract,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestContractWithoutRates,
+    fetchTestContract,
     createAndUpdateTestContractWithRate,
     createAndUpdateTestEQROContract,
     undoUnlockTestContract,
@@ -25,6 +29,7 @@ import type { RateFormDataInput, RateStrippedEdge } from '../../gen/gqlClient'
 import {
     SubmitContractDocument,
     UpdateDraftContractRatesDocument,
+    WithdrawContractDocument,
 } from '../../gen/gqlClient'
 import {
     addNewRateToTestContract,
@@ -1756,5 +1761,267 @@ describe('withdrawContract', () => {
                 'CMS withdrew the submission from review. withdraw EQRO submission',
             ])
         )
+    })
+
+    it('does not reassign a child rate to a linked ILOS submission when a health plan contract also links it', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        // contract B links the rate and is submitted before the ILOS submission
+        const draftContractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draftContractB.id,
+                        lastSeenUpdatedAt:
+                            draftContractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID,
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+        const contractB = await submitTestContract(
+            stateServer,
+            draftContractB.id
+        )
+
+        // The ILOS submission is the latest submission with the rate: EXT-1 at 1, the rate at 2, EXT-2 at 3
+        const ilosSubmission =
+            await createAndSubmitTestILOSContractWithLinkedRates(stateServer, [
+                rateID,
+            ])
+
+        const withdrawnContractA = await withdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'withdraw contract A'
+        )
+        expect(withdrawnContractA.consolidatedStatus).toBe('WITHDRAWN')
+
+        // the health plan contract becomes the parent, not the ILOS submission
+        const rate = await fetchTestRateById(cmsServer, rateID)
+        expect(rate.parentContractID).toBe(contractB.id)
+        expect(rate.consolidatedStatus).not.toBe('WITHDRAWN')
+
+        // the ILOS submission keeps the rate where it was
+        const ilosAfterWithdraw = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+        expect(ilosAfterWithdraw.withdrawnRates).toHaveLength(0)
+        const latestSubmission = ilosAfterWithdraw.packageSubmissions[0]
+        expect(latestSubmission.rateRevisions).toHaveLength(1)
+        expect(latestSubmission.rateRevisions[0].rateID).toBe(rateID)
+        expect(latestSubmission.rateRevisions[0].ratePosition).toBe(2)
+    })
+
+    it('withdraws a child rate linked only to an ILOS submission and moves it to the ILOS withdrawn rates', async () => {
+        const prismaClient = await sharedTestPrismaClient()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+        const contractB = await createAndSubmitTestContractWithRate(stateServer)
+        const otherRateID =
+            contractB.packageSubmissions[0].rateRevisions[0].rateID
+
+        // EXT-1 at 1, contract A's rate at 2, EXT-2 at 3, the other rate at 4
+        const ilosSubmission =
+            await createAndSubmitTestILOSContractWithLinkedRates(stateServer, [
+                rateID,
+                otherRateID,
+            ])
+
+        const withdrawnContractA = await withdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'withdraw contract A'
+        )
+        expect(withdrawnContractA.consolidatedStatus).toBe('WITHDRAWN')
+
+        // the ILOS submission cannot be the parent, so the rate is withdrawn with contract A
+        const rate = await fetchTestRateById(cmsServer, rateID)
+        expect(rate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(rate.parentContractID).toBe(contractA.id)
+
+        const ilosAfterWithdraw = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+
+        // the rate moves to the ILOS submission's withdrawn rates
+        expect(ilosAfterWithdraw.withdrawnRates).toHaveLength(1)
+        expect(ilosAfterWithdraw.withdrawnRates?.[0].id).toBe(rateID)
+
+        // the ILOS submission is resubmitted without it and the rates after it move up
+        expect(ilosAfterWithdraw.consolidatedStatus).toBe('RESUBMITTED')
+        const latestSubmission = ilosAfterWithdraw.packageSubmissions[0]
+        expect(latestSubmission.rateRevisions).toHaveLength(1)
+        expect(latestSubmission.rateRevisions[0].rateID).toBe(otherRateID)
+        expect(latestSubmission.rateRevisions[0].ratePosition).toBe(3)
+        expect(
+            latestSubmission.contractRevision.formData.ilosExternalRates
+        ).toMatchObject([
+            { rateControlName: 'EXT-1', position: 1 },
+            { rateControlName: 'EXT-2', position: 2 },
+        ])
+
+        // ILOS is always under review, so the resubmit records that action
+        const ilosTableRow = await prismaClient.contractTable.findUnique({
+            where: { id: ilosSubmission.id },
+            select: {
+                lastActionDate: true,
+                reviewStatusActions: {
+                    orderBy: { updatedAt: 'desc' },
+                    take: 1,
+                    select: { updatedAt: true, actionType: true },
+                },
+            },
+        })
+        expect(ilosTableRow?.reviewStatusActions[0].actionType).toBe(
+            'UNDER_REVIEW'
+        )
+        expect(ilosTableRow?.lastActionDate).toEqual(
+            ilosTableRow?.reviewStatusActions[0].updatedAt
+        )
+    })
+
+    it('resubmits an ILOS submission once when it links several withdrawn child rates', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        // contract A has two child rates
+        const draftContractA =
+            await createAndUpdateTestContractWithRate(stateServer)
+        await addNewRateToTestContract(stateServer, draftContractA)
+        const contractA = await submitTestContract(
+            stateServer,
+            draftContractA.id
+        )
+        const rateOneID =
+            contractA.packageSubmissions[0].rateRevisions[0].rateID
+        const rateTwoID =
+            contractA.packageSubmissions[0].rateRevisions[1].rateID
+        const contractB = await createAndSubmitTestContractWithRate(stateServer)
+        const otherRateID =
+            contractB.packageSubmissions[0].rateRevisions[0].rateID
+
+        // EXT-1 at 1, rate one at 2, EXT-2 at 3, rate two at 4, the other rate at 5
+        const ilosSubmission =
+            await createAndSubmitTestILOSContractWithLinkedRates(stateServer, [
+                rateOneID,
+                rateTwoID,
+                otherRateID,
+            ])
+
+        const withdrawnContractA = await withdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'withdraw contract A'
+        )
+        expect(withdrawnContractA.consolidatedStatus).toBe('WITHDRAWN')
+
+        const ilosAfterWithdraw = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+
+        // both rates move to the ILOS submission's withdrawn rates
+        expect(
+            ilosAfterWithdraw.withdrawnRates?.map((rate) => rate.id)
+        ).toEqual(expect.arrayContaining([rateOneID, rateTwoID]))
+        expect(ilosAfterWithdraw.withdrawnRates).toHaveLength(2)
+
+        // the ILOS submission is resubmitted one time without them
+        expect(ilosAfterWithdraw.consolidatedStatus).toBe('RESUBMITTED')
+        expect(ilosAfterWithdraw.packageSubmissions).toHaveLength(2)
+        const latestSubmission = ilosAfterWithdraw.packageSubmissions[0]
+        expect(latestSubmission.rateRevisions).toHaveLength(1)
+        expect(latestSubmission.rateRevisions[0].rateID).toBe(otherRateID)
+        expect(latestSubmission.rateRevisions[0].ratePosition).toBe(3)
+        expect(
+            latestSubmission.contractRevision.formData.ilosExternalRates
+        ).toMatchObject([
+            { rateControlName: 'EXT-1', position: 1 },
+            { rateControlName: 'EXT-2', position: 2 },
+        ])
+    })
+
+    it('returns an error when withdrawing an ILOS submission', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const ilosSubmission =
+            await createAndSubmitTestILOSContract(stateServer)
+
+        const withdrawResult = await executeGraphQLOperation(cmsServer, {
+            query: WithdrawContractDocument,
+            variables: {
+                input: {
+                    contractID: ilosSubmission.id,
+                    updatedReason: 'withdraw ILOS submission',
+                },
+            },
+        })
+
+        expect(withdrawResult.errors).toBeDefined()
+        if (withdrawResult.errors === undefined) {
+            throw new Error('type narrow')
+        }
+
+        expect(withdrawResult.errors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(withdrawResult.errors[0].message).toBe(
+            'ILOS submissions cannot be withdrawn'
+        )
+
+        const fetchedILOS = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+        expect(fetchedILOS.consolidatedStatus).toBe('SUBMITTED')
     })
 })
