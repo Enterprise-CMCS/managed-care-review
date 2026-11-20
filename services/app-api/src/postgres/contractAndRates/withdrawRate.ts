@@ -2,12 +2,14 @@ import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models'
 import type { ILOSExternalRateType } from '../../domain-models/contractAndRates'
 import { findRateWithHistory } from './findRateWithHistory'
+import { includeRateRevisionWithRelatedSubmissionContracts } from './prismaSubmittedRateHelpers'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import {
     getConsolidatedContractStatus,
     getLatestActiveRevision,
     getContractRateStatus,
     getContractReviewStatus,
+    getRelatedContracts,
 } from './prismaSharedContractRateHelpers'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
@@ -67,16 +69,8 @@ const withdrawRateInsideTransaction = async (
                 orderBy: {
                     createdAt: 'desc',
                 },
-                include: {
-                    relatedSubmissions: {
-                        orderBy: {
-                            updatedAt: 'desc',
-                        },
-                        include: {
-                            submittedContracts: true,
-                        },
-                    },
-                },
+                // needed by getRelatedContracts
+                include: includeRateRevisionWithRelatedSubmissionContracts,
             },
             reviewStatusActions: {
                 orderBy: {
@@ -105,12 +99,11 @@ const withdrawRateInsideTransaction = async (
         throw new Error(`Could not find active revision for rate ${rateID}`)
     }
 
-    // collect all contracts submitted with this rate
-    const submittedContractsIds = latestRateRev.relatedSubmissions
-        .map((sub) =>
-            sub.submittedContracts.map((contract) => contract.contractID)
-        )
-        .flat()
+    // collect the contracts last submitted with this rate. A contract that
+    // linked the rate and was later resubmitted without it is not one of them.
+    const submittedContractsIds = getRelatedContracts(rate).map(
+        (contract) => contract.id
+    )
 
     // collect all draft contracts linked to this rate
     const draftContractsIds = rate.draftContracts.map(
@@ -190,6 +183,16 @@ const withdrawRateInsideTransaction = async (
                 throw new Error(
                     `Contract ${contract.id} is missing draft rates`
                 )
+            }
+
+            // The contract was last submitted with the rate, but it is
+            // unlocked and the rate is already removed from its draft. There
+            // is nothing to remove and it is not a withdrawn rate on the contract.
+            const draftHasRate = parsedContract.draftRates.some(
+                (draftRate) => draftRate.id === rateID
+            )
+            if (!draftHasRate) {
+                continue
             }
 
             const lastRecentSubmission = parsedContract.packageSubmissions[0]

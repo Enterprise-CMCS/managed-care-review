@@ -920,6 +920,226 @@ describe('withdrawRate', () => {
         )
     })
 
+    it('withdraws a rate after a contract that linked it was resubmitted without it', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // link rate to contract B and give it a child rate
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id
+        )
+        const contractBChildRate =
+            submittedContractB.packageSubmissions[0].rateRevisions.find(
+                (rev) => rev.rateID !== rateID
+            )
+        if (!contractBChildRate) {
+            throw new Error('Expected contract B child rate to be defined')
+        }
+
+        // unlock contract B, remove the linked rate, and resubmit
+        const unlockedContractB = await unlockTestContract(
+            cmsServer,
+            contractB.id,
+            'unlock to remove linked rate'
+        )
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt:
+                            unlockedContractB.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: contractBChildRate.rateID,
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+        await submitTestContract(
+            stateServer,
+            contractB.id,
+            'resubmit without linked rate'
+        )
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        // expect rate to be withdrawn from contract A only
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(1)
+        expect(withdrawnRate.withdrawnFromContracts?.[0].id).toBe(contractA.id)
+
+        // expect contract B to be left as it was last resubmitted
+        const contractBAfterWithdraw = await fetchTestContractWithQuestions(
+            stateServer,
+            contractB.id
+        )
+        expect(contractBAfterWithdraw.consolidatedStatus).toBe('RESUBMITTED')
+        expect(contractBAfterWithdraw.withdrawnRates).toHaveLength(0)
+        expect(contractBAfterWithdraw.packageSubmissions).toHaveLength(2)
+        expect(
+            contractBAfterWithdraw.packageSubmissions[0].rateRevisions
+        ).toHaveLength(1)
+        expect(
+            contractBAfterWithdraw.packageSubmissions[0].rateRevisions[0].rateID
+        ).toBe(contractBChildRate.rateID)
+    })
+
+    it('withdraws a rate after an unlocked contract removed it from its draft', async () => {
+        const stateUser = testStateUser()
+        const cmsUser = testCMSUser()
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+
+        const contractB =
+            await createAndUpdateTestContractWithoutRates(stateServer)
+
+        // link rate to contract B and give it a child rate
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt: contractB.draftRevision?.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'LINK',
+                                rateID: rateID,
+                            },
+                            {
+                                type: 'CREATE',
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const submittedContractB = await submitTestContract(
+            stateServer,
+            contractB.id
+        )
+        const contractBChildRate =
+            submittedContractB.packageSubmissions[0].rateRevisions.find(
+                (rev) => rev.rateID !== rateID
+            )
+        if (!contractBChildRate) {
+            throw new Error('Expected contract B child rate to be defined')
+        }
+
+        // unlock contract B and remove the linked rate, without resubmitting
+        const unlockedContractB = await unlockTestContract(
+            cmsServer,
+            contractB.id,
+            'unlock to remove linked rate'
+        )
+        must(
+            await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: contractB.id,
+                        lastSeenUpdatedAt:
+                            unlockedContractB.draftRevision.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'UPDATE',
+                                rateID: contractBChildRate.rateID,
+                                formData: testRateFormInputData(),
+                            },
+                        ],
+                    },
+                },
+            })
+        )
+
+        const withdrawnRate = await withdrawTestRate(
+            cmsServer,
+            rateID,
+            'Withdraw invalid rate'
+        )
+
+        // expect rate to be withdrawn from contract A only
+        expect(withdrawnRate.consolidatedStatus).toBe('WITHDRAWN')
+        expect(withdrawnRate.withdrawnFromContracts).toHaveLength(1)
+        expect(withdrawnRate.withdrawnFromContracts?.[0].id).toBe(contractA.id)
+
+        // expect contract B to still be unlocked with only its child rate
+        const contractBAfterWithdraw = await fetchTestContractWithQuestions(
+            stateServer,
+            contractB.id
+        )
+        expect(contractBAfterWithdraw.consolidatedStatus).toBe('UNLOCKED')
+        expect(contractBAfterWithdraw.withdrawnRates).toHaveLength(0)
+        expect(contractBAfterWithdraw.draftRates).toHaveLength(1)
+        expect(contractBAfterWithdraw.draftRates?.[0].id).toBe(
+            contractBChildRate.rateID
+        )
+    })
+
     it('withdraws rate when linked to withdrawn contract', async () => {
         const stateUser = testStateUser()
         const cmsUser = testCMSUser()
