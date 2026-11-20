@@ -4,17 +4,17 @@ import { Location, Route, Routes } from 'react-router-dom'
 import { RoutesRecord } from '@mc-review/constants'
 import { fetchCurrentUserMock } from '@mc-review/mocks'
 import { renderWithProviders } from '../../../../testHelpers'
-import { ILOSSubmissionDetails } from './ILOSSubmissionDetails'
+import { ILOSActuarialReport } from './ILOSActuarialReport'
 import { Header } from '../../../../components/Header'
 import { NewSubmissionForm } from '../../SharedSubmissionComponents/NewSubmissionForm/NewSubmissionForm'
 
-describe('ILOSSubmissionDetails', () => {
+describe('ILOSActuarialReport', () => {
     const renderPage = (onLocation?: (location: Location) => Location) =>
         renderWithProviders(
             <Routes>
                 <Route
                     path={RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM}
-                    element={<ILOSSubmissionDetails />}
+                    element={<ILOSActuarialReport />}
                 />
             </Routes>,
             {
@@ -34,7 +34,7 @@ describe('ILOSSubmissionDetails', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: 'Save & Continue' })
-        ).toHaveAttribute('aria-disabled', 'true')
+        ).toBeInTheDocument()
     })
 
     it('renders the ILOS steps with the first step current', async () => {

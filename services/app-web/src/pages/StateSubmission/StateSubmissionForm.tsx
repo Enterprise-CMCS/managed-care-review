@@ -13,6 +13,7 @@ import { HealthPlanSubmissionForm } from './HealthPlanSubmission/HealthPlanSubmi
 import { Error404 } from '../Errors/Error404Page'
 import { usePage } from '../../contexts/PageContext'
 import { EBSubmissionForm } from './EnrollmentBrokerSubmission'
+import { ILOSSubmissionForm } from './ILOSSubmission'
 
 export const StateSubmissionForm = (): React.ReactElement => {
     const { contractSubmissionType } = useRouteParams()
@@ -25,6 +26,10 @@ export const StateSubmissionForm = (): React.ReactElement => {
     const showEBSubmissions: boolean = ldClient?.variation(
         featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.flag,
         featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
+    )
+    const showILOSSubmissions: boolean = ldClient?.variation(
+        featureFlags.ILOS_SUBMISSIONS.flag,
+        featureFlags.ILOS_SUBMISSIONS.defaultValue
     )
     const { contract } = useOutletContext<SideNavOutletContextType>()
     const stateHeader = useMemoizedStateHeader({
@@ -60,9 +65,14 @@ export const StateSubmissionForm = (): React.ReactElement => {
     }
 
     if (
-        contractSubmissionType === ContractSubmissionTypeRecord['ENROLLMENT_BROKER']
+        contractSubmissionType ===
+        ContractSubmissionTypeRecord['ENROLLMENT_BROKER']
     ) {
-        return showEBSubmissions ? <EBSubmissionForm /> : <Error404/>
+        return showEBSubmissions ? <EBSubmissionForm /> : <Error404 />
+    }
+
+    if (contractSubmissionType === ContractSubmissionTypeRecord['ILOS']) {
+        return showILOSSubmissions ? <ILOSSubmissionForm /> : <Error404 />
     }
 
     return <Error404 />

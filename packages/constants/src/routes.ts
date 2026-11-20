@@ -35,6 +35,7 @@ const ROUTES = [
     'SUBMISSIONS_EDIT_TOP_LEVEL',
     'SUBMISSIONS_CONTRACT_DETAILS',
     'SUBMISSIONS_ASSOCIATED_CONTRACTS',
+    'SUBMISSIONS_ASSOCIATED_RATE_CERTIFICATIONS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
@@ -117,6 +118,8 @@ const RoutesRecord: Record<RouteT, string> = {
         '/submissions/:contractSubmissionType/:id/edit/contract-details',
     SUBMISSIONS_ASSOCIATED_CONTRACTS:
         '/submissions/:contractSubmissionType/:id/edit/associated-contracts',
+    SUBMISSIONS_ASSOCIATED_RATE_CERTIFICATIONS:
+        '/submissions/:contractSubmissionType/:id/edit/associated-rate-certifications',
     SUBMISSIONS_RATE_DETAILS:
         '/submissions/:contractSubmissionType/:id/edit/rate-details',
     SUBMISSIONS_CONTACTS:
@@ -195,7 +198,7 @@ const EB_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
 
 const ILOS_SUBMISSION_FORM_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_TYPE',
-    'SUBMISSIONS_RATE_DETAILS',
+    'SUBMISSIONS_ASSOCIATED_RATE_CERTIFICATIONS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_REVIEW_SUBMIT',
 ]
@@ -220,6 +223,7 @@ const QUESTION_RESPONSE_SHOW_SIDEBAR_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS_SUMMARY',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_ASSOCIATED_RATE_CERTIFICATIONS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
@@ -260,6 +264,7 @@ const SUBMISSION_PAGE_HEADING_ROUTES: RouteTWithUnknown[] = [
     'SUBMISSIONS',
     'SUBMISSIONS_TYPE',
     'SUBMISSIONS_CONTRACT_DETAILS',
+    'SUBMISSIONS_ASSOCIATED_RATE_CERTIFICATIONS',
     'SUBMISSIONS_RATE_DETAILS',
     'SUBMISSIONS_CONTACTS',
     'SUBMISSIONS_DOCUMENTS',
@@ -331,6 +336,8 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     SUBMISSIONS_TYPE: 'Submission type',
     SUBMISSIONS_CONTRACT_DETAILS: 'Contract details',
     SUBMISSIONS_ASSOCIATED_CONTRACTS: 'Associated contracts',
+    SUBMISSIONS_ASSOCIATED_RATE_CERTIFICATIONS:
+        'Associated rate certifications',
     SUBMISSIONS_RATE_DETAILS: 'Rate details',
     SUBMISSIONS_CONTACTS: 'Contacts',
     SUBMISSIONS_DOCUMENTS: 'Supporting documents',

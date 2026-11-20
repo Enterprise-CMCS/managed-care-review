@@ -27,7 +27,7 @@ import styles from './NewSubmissionForm.module.scss'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
 import { EBSubmissionDetails } from '../../EnrollmentBrokerSubmission'
-import { ILOSSubmissionDetails } from '../../ILOSSubmission'
+import { ILOSActuarialReport } from '../../ILOSSubmission'
 
 const newSubmissionFormSchema = Yup.object().shape({
     contractSubmissionType: Yup.string().required(
@@ -301,7 +301,7 @@ export const NewSubmissionForm = (): React.ReactElement => {
     }
 
     if (contractSubmissionType === ContractSubmissionTypeRecord['ILOS']) {
-        return <ILOSSubmissionDetails />
+        return <ILOSActuarialReport />
     }
 
     return <Error404 />
