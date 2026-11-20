@@ -2669,16 +2669,16 @@ type ContractFormDataStripped {
     Options are: BASE, AMENDMENT
     """
     contractType: ContractType
-    "Start date of the contract"
-    contractDateStart: Date
-    "End date of the contract"
-    contractDateEnd: Date
     """
     The type of organization the state is contracting with
     in order to deliver managed care services
     Options are MCO, PIHP, PAHP, and PCCM
     """
     managedCareEntities: [ManagedCareEntity!]!
+    "Start of the rating period covered by the ILOS submission. Only set on ILOS submissions"
+    ilosRateDateStart: Date
+    "End of the rating period covered by the ILOS submission. Only set on ILOS submissions"
+    ilosRateDateEnd: Date
 }
 
 """

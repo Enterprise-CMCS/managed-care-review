@@ -17,6 +17,8 @@ import {
     IndexContractsForDashboardQuery,
     IndexContractsStrippedDocument,
     IndexContractsStrippedQuery,
+    IndexIlosSubmissionsStrippedDocument,
+    IndexIlosSubmissionsStrippedQuery,
     UnlockContractMutation,
     UnlockContractDocument,
 } from '../gen/gqlClient'
@@ -30,6 +32,7 @@ import {
     mockUpdateContractDraftRevisionInput,
     mockContractStripped,
     mockEQROContractStripped,
+    mockILOSContractStripped,
     mockUnlockedContractStripped,
 } from './contractPackageDataMock'
 import {
@@ -487,6 +490,27 @@ const indexContractsStrippedMockSuccess = (
     }
 }
 
+const indexIlosSubmissionsStrippedMockSuccess = (
+    ilosSubmissions: ContractStripped[] = [mockILOSContractStripped()]
+): MockLink.MockedResponse<IndexIlosSubmissionsStrippedQuery> => {
+    const edges = ilosSubmissions.map((ilosSubmission) => ({
+        node: ilosSubmission,
+    }))
+    return {
+        request: {
+            query: IndexIlosSubmissionsStrippedDocument,
+        },
+        result: {
+            data: {
+                indexIlosSubmissionsStripped: {
+                    totalCount: edges.length,
+                    edges,
+                },
+            },
+        },
+    }
+}
+
 type unlockContractMockSuccessProps = {
     contract?: Contract
     id: string
@@ -571,6 +595,7 @@ export {
     createContractMockSuccess,
     indexContractsMockSuccess,
     indexContractsStrippedMockSuccess,
+    indexIlosSubmissionsStrippedMockSuccess,
     unlockContractMockError,
     unlockContractMockSuccess,
 }
