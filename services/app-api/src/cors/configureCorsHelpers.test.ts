@@ -396,7 +396,7 @@ describe('configureCorsHeaders', () => {
                 'existing-header': 'value',
                 'Access-Control-Allow-Origin': 'https://test.salesforce.com',
                 'Access-Control-Allow-Headers':
-                    'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
+                    'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Amz-Content-Sha256',
                 'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
                 'Access-Control-Allow-Credentials': 'true',
                 'X-Content-Type-Options': 'nosniff',

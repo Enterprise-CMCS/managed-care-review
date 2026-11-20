@@ -62,7 +62,10 @@ describe('UploadClient', () => {
         expect(uploadFetch.mock.calls[1][1]).toEqual(
             expect.objectContaining({
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/pdf' },
+                headers: {
+                    'Content-Type': 'application/pdf',
+                    'If-None-Match': '*',
+                },
             })
         )
     })

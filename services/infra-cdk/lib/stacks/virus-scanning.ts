@@ -14,6 +14,7 @@ import {
     Effect,
 } from 'aws-cdk-lib/aws-iam'
 import { Bucket } from 'aws-cdk-lib/aws-s3'
+import { ResourceNames } from '../config/shared'
 
 export interface VirusScanningProps extends BaseStackProps {
     // Simple - just needs basic config
@@ -61,7 +62,9 @@ export class VirusScanning extends BaseStack {
             this,
             'GuardDutyMalwareProtectionPassRole',
             {
-                roleName: `GuardDutyMalwareProtectionPassRole-${this.stage}`,
+                roleName: ResourceNames.guardDutyMalwareProtectionRoleName(
+                    this.stage
+                ),
                 assumedBy: new ServicePrincipal(
                     'malware-protection-plan.guardduty.amazonaws.com'
                 ), // Note: different from service-linked role!
