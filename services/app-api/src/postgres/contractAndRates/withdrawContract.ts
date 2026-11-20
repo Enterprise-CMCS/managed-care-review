@@ -17,7 +17,10 @@ import {
 import type { RatesToReassign } from './reassignParentContract'
 import { reassignParentContractInTransaction } from './reassignParentContract'
 import type { RateForDisplayType } from '../../emailer/templateHelpers'
-import { runTransactionWithRowLock } from '../prismaHelpers'
+import {
+    runTransactionWithRowLock,
+    lockTableRowForUpdate,
+} from '../prismaHelpers'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
@@ -70,7 +73,7 @@ const withdrawRatesFromILOSInTransaction = async (
 
     // ILOS submissions that have ever had any of the rates. The loop below only
     // changes the ones that still have them, on their draft or latest submission.
-    const ilosSubmissions = await tx.contractTable.findMany({
+    const ilosSubmissionIDs = await tx.contractTable.findMany({
         where: {
             contractSubmissionType: 'ILOS',
             OR: [
@@ -90,6 +93,18 @@ const withdrawRatesFromILOSInTransaction = async (
                 },
             ],
         },
+        select: { id: true },
+        orderBy: { id: 'asc' },
+    })
+
+    // Lock each ILOS submission before reading it, so a concurrent withdraw
+    // that changes the same ILOS submission waits for this one to commit.
+    for (const { id } of ilosSubmissionIDs) {
+        await lockTableRowForUpdate(tx, 'ContractTable', id)
+    }
+
+    const ilosSubmissions = await tx.contractTable.findMany({
+        where: { id: { in: ilosSubmissionIDs.map((c) => c.id) } },
         include: {
             ...includeFullContract,
         },
@@ -403,6 +418,13 @@ const withdrawContractInsideTransaction = async (
 
             ratesToWithdraw.push(rate)
         }
+    }
+
+    // Lock each new parent contract before changing it, so a concurrent
+    // withdraw that reassigns a rate to the same contract waits for this one
+    // to commit.
+    for (const id of Object.keys(reassignParentContracts).sort()) {
+        await lockTableRowForUpdate(tx, 'ContractTable', id)
     }
 
     // A child rate with no new parent is withdrawn with the contract. ILOS

@@ -12,7 +12,10 @@ import {
     eqroValidationAndReviewDetermination,
     healthPlanReviewDetermination,
 } from '@mc-review/submissions'
-import { runTransactionWithRowLock } from '../prismaHelpers'
+import {
+    runTransactionWithRowLock,
+    lockTableRowForUpdate,
+} from '../prismaHelpers'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { updateDraftContractRatesInsideTransaction } from './updateDraftContractRates'
@@ -56,13 +59,26 @@ const undoWithdrawRatesFromILOSInTransaction = async (
     const { rates, parentContractID, updatedByID, updatedReason } = args
 
     // ILOS submissions that have any of the rates in their withdrawn rates.
-    const ilosSubmissions = await tx.contractTable.findMany({
+    const ilosSubmissionIDs = await tx.contractTable.findMany({
         where: {
             contractSubmissionType: 'ILOS',
             withdrawnRates: {
                 some: { rateID: { in: rates.map((rate) => rate.id) } },
             },
         },
+        select: { id: true },
+        orderBy: { id: 'asc' },
+    })
+
+    // Lock each ILOS submission before reading it, so a concurrent undo
+    // withdraw that changes the same ILOS submission waits for this one to
+    // commit.
+    for (const { id } of ilosSubmissionIDs) {
+        await lockTableRowForUpdate(tx, 'ContractTable', id)
+    }
+
+    const ilosSubmissions = await tx.contractTable.findMany({
+        where: { id: { in: ilosSubmissionIDs.map((c) => c.id) } },
         include: {
             ...includeFullContract,
         },

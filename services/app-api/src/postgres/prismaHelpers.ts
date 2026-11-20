@@ -5,10 +5,7 @@ import { Prisma } from '../generated/client'
 import type { PrismaTransactionType } from './prismaTypes'
 
 type LockableTables =
-    | 'ContractTable'
-    | 'RateTable'
-    | 'ContractQuestion'
-    | 'RateQuestion'
+    'ContractTable' | 'RateTable' | 'ContractQuestion' | 'RateQuestion'
 
 type RunTransactionWithRowLockArgs<T> = {
     client: ExtendedPrismaClient
@@ -107,4 +104,4 @@ async function lockTableRowForUpdate(
     }
 }
 
-export { runTransactionWithRowLock }
+export { runTransactionWithRowLock, lockTableRowForUpdate }
