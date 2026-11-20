@@ -7,6 +7,7 @@ const TEALIUM_CONTENT_TYPE_BY_ROUTE: Record<RouteT | 'UNKNOWN_ROUTE', string> =
         DASHBOARD: 'table',
         DASHBOARD_SUBMISSIONS: 'table',
         DASHBOARD_RATES: 'table',
+        DASHBOARD_ILOS: 'table',
         RESOURCES: 'glossary',
         HELP: 'glossary',
         CONTACT_US: 'glossary',

@@ -22,7 +22,8 @@ import {
     SubmissionsDashboard,
     RateReviewsDashboard,
 } from '../CMSDashboard'
-import { StateDashboard } from '../StateDashboard/StateDashboard'
+import { StateDashboard, StateSubmissionsDashboard } from '../StateDashboard'
+import { ILOSDashboard } from '../ILOSDashboard'
 import { Settings } from '../Settings/Settings'
 import { AuthenticatedRouteWrapper } from '../Wrapper/AuthenticatedRouteWrapper'
 import { Error404 } from '../Errors/Error404Page'
@@ -197,14 +198,22 @@ const StateUserRoutes = ({
                         <Navigate to={RoutesRecord.DASHBOARD_SUBMISSIONS} />
                     }
                 />
-                <Route
-                    path={RoutesRecord.DASHBOARD_SUBMISSIONS}
-                    element={<StateDashboard />}
-                />
-                <Route
-                    path={RoutesRecord.SUBMISSIONS}
-                    element={<StateDashboard />}
-                />
+                <Route element={<StateDashboard />}>
+                    <Route
+                        path={RoutesRecord.DASHBOARD_SUBMISSIONS}
+                        element={<StateSubmissionsDashboard />}
+                    />
+                    <Route
+                        path={RoutesRecord.SUBMISSIONS}
+                        element={<StateSubmissionsDashboard />}
+                    />
+                    {showIlosSubmissions && (
+                        <Route
+                            path={RoutesRecord.DASHBOARD_ILOS}
+                            element={<ILOSDashboard />}
+                        />
+                    )}
+                </Route>
                 {showSubmissionTypeSelection ? (
                     <>
                         <Route
@@ -323,6 +332,10 @@ const CMSUserRoutes = ({
         featureFlags.CMS_USER_UNDO_UNLOCK.flag,
         featureFlags.CMS_USER_UNDO_UNLOCK.defaultValue
     )
+    const showIlosSubmissions: boolean = ldClient?.variation(
+        featureFlags.ILOS_SUBMISSIONS.flag,
+        featureFlags.ILOS_SUBMISSIONS.defaultValue
+    )
 
     const isAdminUser = loggedInUser.__typename === 'AdminUser'
     const isCMSUser = hasCMSUserPermissions(loggedInUser)
@@ -351,6 +364,9 @@ const CMSUserRoutes = ({
                         path={'rate-reviews'}
                         element={<RateReviewsDashboard />}
                     />
+                    {showIlosSubmissions && (
+                        <Route path={'ilos'} element={<ILOSDashboard />} />
+                    )}
                 </Route>
 
                 <Route element={<SubmissionSideNav />}>

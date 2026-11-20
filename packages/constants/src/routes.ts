@@ -8,6 +8,7 @@ const ROUTES = [
     'DASHBOARD',
     'DASHBOARD_SUBMISSIONS',
     'DASHBOARD_RATES',
+    'DASHBOARD_ILOS',
     'GRAPHQL_EXPLORER',
     'HELP',
     'CONTACT_US',
@@ -84,6 +85,7 @@ const RoutesRecord: Record<RouteT, string> = {
     DASHBOARD: '/dashboard',
     DASHBOARD_SUBMISSIONS: '/dashboard/submissions',
     DASHBOARD_RATES: '/dashboard/rate-reviews',
+    DASHBOARD_ILOS: '/dashboard/ilos',
     GRAPHQL_EXPLORER: '/dev/graphql-explorer',
     RESOURCES: '/resources',
     HELP: '/resources/help',
@@ -165,6 +167,7 @@ const RoutesRecord: Record<RouteT, string> = {
 // Constants for releated descendant routes
 const DASHBOARD_ROUTES: RouteTWithUnknown[] = [
     'DASHBOARD_RATES',
+    'DASHBOARD_ILOS',
     'DASHBOARD_SUBMISSIONS',
 ]
 
@@ -317,6 +320,7 @@ const PageTitlesRecord: Record<RouteT | 'UNKNOWN_ROUTE', string> = {
     CREATE_OAUTH_CLIENT: 'Create OAuth client',
     DASHBOARD: 'Dashboard',
     DASHBOARD_RATES: 'Rate review dashboard',
+    DASHBOARD_ILOS: 'ILOS dashboard',
     DASHBOARD_SUBMISSIONS: 'Dashboard',
     RATES_SUMMARY: 'Rate summary',
     RATES_SUMMARY_QUESTIONS_AND_ANSWERS: 'Q&A',
@@ -368,6 +372,7 @@ const PageHeadingsRecord: Partial<Record<RouteTWithUnknown, string>> = {
     ROOT: 'Submissions dashboard',
     DASHBOARD_SUBMISSIONS: '',
     DASHBOARD_RATES: '',
+    DASHBOARD_ILOS: '',
     SUBMISSIONS_NEW: '',
     SUBMISSIONS_NEW_SUBMISSION_FORM: '',
     MCR_SETTINGS: PageTitlesRecord.MCR_SETTINGS,
