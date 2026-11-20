@@ -151,8 +151,6 @@ describe('indexContractsStripped', () => {
                     submissionType: 'CONTRACT_AND_RATES',
                     contractType: 'BASE',
                     populationCovered: 'MEDICAID',
-                    contractDateStart: expect.any(String),
-                    contractDateEnd: expect.any(String),
                 },
             },
         })
@@ -196,8 +194,6 @@ describe('indexContractsStripped', () => {
                     submissionType: 'CONTRACT_AND_RATES',
                     contractType: 'BASE',
                     populationCovered: 'MEDICAID',
-                    contractDateStart: expect.any(String),
-                    contractDateEnd: expect.any(String),
                 },
             },
         })
@@ -237,8 +233,6 @@ describe('indexContractsStripped', () => {
                     submissionType: 'CONTRACT_AND_RATES',
                     contractType: 'BASE',
                     populationCovered: 'MEDICAID',
-                    contractDateStart: expect.any(String),
-                    contractDateEnd: expect.any(String),
                 },
             },
         })
@@ -278,8 +272,6 @@ describe('indexContractsStripped', () => {
                     submissionType: 'CONTRACT_ONLY',
                     contractType: 'BASE',
                     populationCovered: 'MEDICAID_AND_CHIP',
-                    contractDateStart: expect.any(String),
-                    contractDateEnd: expect.any(String),
                 },
             },
         })

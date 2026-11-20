@@ -465,17 +465,15 @@ function strippedContractFormDataToDomainModel(
         programIDs: contractRevision.programIDs ?? [],
         populationCovered: contractRevision.populationCovered ?? undefined,
         submissionType: contractRevision.submissionType,
-        submissionDescription: contractRevision.submissionDescription,
         contractType: mergedOverride.contractType.hasOverride
             ? (mergedOverride.contractType.value ??
               contractRevision.contractType)
             : contractRevision.contractType,
-        contractExecutionStatus:
-            contractRevision.contractExecutionStatus ?? undefined,
         contractDateStart: contractRevision.contractDateStart ?? undefined,
         contractDateEnd: contractRevision.contractDateEnd ?? undefined,
         managedCareEntities: contractRevision.managedCareEntities ?? undefined,
-        federalAuthorities: contractRevision.federalAuthorities ?? undefined,
+        ilosRateDateStart: contractRevision.ilosRateDateStart ?? undefined,
+        ilosRateDateEnd: contractRevision.ilosRateDateEnd ?? undefined,
     }
 }
 

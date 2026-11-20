@@ -1,0 +1,17 @@
+fragment strippedIlosRevisionFragment on ContractRevisionStripped {
+    id
+    contractID
+    createdAt
+    updatedAt
+    unlockInfo {
+        ...updateInformationFields
+    }
+    submitInfo {
+        ...updateInformationFields
+    }
+    contractName
+    formData {
+        ilosRateDateStart
+        ilosRateDateEnd
+    }
+}

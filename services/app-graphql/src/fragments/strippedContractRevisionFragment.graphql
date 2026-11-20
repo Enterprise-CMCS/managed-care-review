@@ -15,8 +15,6 @@ fragment strippedContractRevisionFragment on ContractRevisionStripped {
         populationCovered
         submissionType
         contractType
-        contractDateStart
-        contractDateEnd
         managedCareEntities
     }
 }

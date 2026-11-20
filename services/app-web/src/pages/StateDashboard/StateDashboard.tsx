@@ -1,47 +1,39 @@
 import { GridContainer } from '@trussworks/react-uswds'
 import React, { useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
+import { RoutesRecord } from '@mc-review/constants'
 import { useAuth } from '../../contexts/AuthContext'
-import {
-    ContractSubmissionType,
-    IndexContractsStrippedDocument,
-} from '../../gen/gqlClient'
-import { useQuery } from '@apollo/client/react'
+import { ContractSubmissionType } from '../../gen/gqlClient'
 import styles from './StateDashboard.module.scss'
-import { handleApolloError, isLikelyUserAuthError } from '@mc-review/helpers'
-import {
-    ErrorAlertSignIn,
-    ContractTable,
-    ContractInDashboardType,
-    GenericApiErrorBanner,
-    NavLinkWithLogging,
-} from '../../components'
-import { ErrorOrLoadingPage } from '../StateSubmission/SharedSubmissionComponents/ErrorOrLoadingPage'
+import { NavLinkWithLogging, Tabs, TabPanel } from '../../components'
+import { ErrorOrLoadingPage } from '../StateSubmission'
 import { usePage } from '../../contexts/PageContext'
-import { recordJSException } from '@mc-review/otel'
 import { SubmissionSuccessBanner } from '../../components/Banner'
 
-/**
- * We only pull a subset of data out of the submission and revisions for display in Dashboard
- */
-
 const DASHBOARD_ATTRIBUTE = 'state-dashboard-page'
+const TAB_NAMES = {
+    SUBMISSIONS: 'All submissions',
+    ILOS: 'ILOS',
+}
+
+/**
+ * The frame of the state dashboard: heading, new submission link and tabs.
+ * Each tab is a nested route rendered in the Outlet and fetches its own data, as on the CMS dashboard.
+ */
 export const StateDashboard = (): React.ReactElement => {
-    const { loggedInUser } = useAuth()
+    const { loggedInUser, loginStatus } = useAuth()
     const location = useLocation()
     const { updateActiveMainContent } = usePage()
     const ldClient = useLDClient()
-    const useStoredContractActionDates = ldClient?.variation(
-        featureFlags.USE_STORED_CONTRACT_ACTION_DATES.flag,
-        featureFlags.USE_STORED_CONTRACT_ACTION_DATES.defaultValue
+    const showIlosSubmissions: boolean = ldClient?.variation(
+        featureFlags.ILOS_SUBMISSIONS.flag,
+        featureFlags.ILOS_SUBMISSIONS.defaultValue
     )
 
-    const { loading, data, error } = useQuery(IndexContractsStrippedDocument, {
-        fetchPolicy: 'cache-and-network',
-        pollInterval: 120000,
-    })
+    const isIlosTab =
+        showIlosSubmissions && location.pathname === RoutesRecord.DASHBOARD_ILOS
 
     const activeMainContentId = DASHBOARD_ATTRIBUTE
 
@@ -50,22 +42,9 @@ export const StateDashboard = (): React.ReactElement => {
         updateActiveMainContent(activeMainContentId)
     }, [activeMainContentId, updateActiveMainContent])
 
-    if (!data && loading) {
+    if (loginStatus === 'LOADING') {
         return <ErrorOrLoadingPage state="LOADING" />
-    } else if (!data && error) {
-        handleApolloError(error, true)
-        return (
-            <div id={DASHBOARD_ATTRIBUTE} className={styles.wrapper}>
-                <GridContainer className={styles.container}>
-                    {isLikelyUserAuthError(error, true) ? (
-                        <ErrorAlertSignIn />
-                    ) : (
-                        <GenericApiErrorBanner />
-                    )}
-                </GridContainer>
-            </div>
-        )
-    } else if (!data || !loggedInUser) {
+    } else if (!loggedInUser) {
         return <ErrorOrLoadingPage state="GENERIC_ERROR" />
     }
 
@@ -80,67 +59,6 @@ export const StateDashboard = (): React.ReactElement => {
     const programs = loggedInUser.state.programs.filter(
         (program) => !program.isRateProgram
     )
-    const submissionRows: ContractInDashboardType[] = []
-
-    data.indexContractsStripped.edges
-        .map((edge) => edge.node)
-        .forEach((sub) => {
-            const subReviewActions =
-                sub.reviewStatusActions && sub.reviewStatusActions[0]
-
-            if (sub.status === 'SUBMITTED' || sub.status === 'RESUBMITTED') {
-                const currentRevision = sub.latestSubmittedRevision
-
-                if (!currentRevision) {
-                    recordJSException(
-                        `Unexpected error: Submitted Contract with ID ${sub.id} did not contain a latestSubmittedRevision`
-                    )
-                    return
-                }
-                submissionRows.push({
-                    id: sub.id,
-                    name: currentRevision.contractName,
-                    programs: programs.filter((program) => {
-                        return currentRevision.formData.programIDs.includes(
-                            program.id
-                        )
-                    }),
-                    submittedAt: sub.initiallySubmittedAt,
-                    status: sub.consolidatedStatus,
-                    updatedAt: useStoredContractActionDates
-                        ? new Date(sub.lastUpdatedForDisplay)
-                        : subReviewActions
-                          ? subReviewActions.updatedAt
-                          : currentRevision.updatedAt,
-                    contractSubmissionType: sub.contractSubmissionType,
-                })
-            } else {
-                const currentRevision = sub.draftRevision
-
-                if (!currentRevision) {
-                    recordJSException(
-                        `Unexpected error: Contract with ID ${sub.id} did not contain a draftRevision`
-                    )
-                    return
-                }
-
-                submissionRows.push({
-                    id: sub.id,
-                    name: currentRevision.contractName,
-                    programs: programs.filter((program) => {
-                        return currentRevision.formData.programIDs.includes(
-                            program.id
-                        )
-                    }),
-                    submittedAt: sub.initiallySubmittedAt,
-                    status: sub.consolidatedStatus,
-                    updatedAt: useStoredContractActionDates
-                        ? new Date(sub.lastUpdatedForDisplay)
-                        : currentRevision.updatedAt,
-                    contractSubmissionType: sub.contractSubmissionType,
-                })
-            }
-        })
 
     const justSubmittedSubmissionName = new URLSearchParams(
         location.search
@@ -151,6 +69,8 @@ export const StateDashboard = (): React.ReactElement => {
     const contractType = new URLSearchParams(location.search).get(
         'contractType'
     ) as ContractSubmissionType | null
+
+    const activeTab = isIlosTab ? TAB_NAMES.ILOS : TAB_NAMES.SUBMISSIONS
 
     return (
         <div className={styles.stateDashboard}>
@@ -184,11 +104,35 @@ export const StateDashboard = (): React.ReactElement => {
                                     </NavLinkWithLogging>
                                 </div>
                             </div>
-                            <ContractTable
-                                tableData={submissionRows}
-                                user={loggedInUser}
-                                showFilters
-                            />
+                            {showIlosSubmissions ? (
+                                // Keyed by the tab in the URL so the selected tab follows browser back and forward.
+                                <Tabs
+                                    key={activeTab}
+                                    defaultActiveTab={activeTab}
+                                    className={styles.tabs}
+                                >
+                                    <TabPanel
+                                        id="submissions"
+                                        nestedRoute={
+                                            RoutesRecord.DASHBOARD_SUBMISSIONS
+                                        }
+                                        tabName={TAB_NAMES.SUBMISSIONS}
+                                    >
+                                        <Outlet />
+                                    </TabPanel>
+                                    <TabPanel
+                                        id="ilos"
+                                        nestedRoute={
+                                            RoutesRecord.DASHBOARD_ILOS
+                                        }
+                                        tabName={TAB_NAMES.ILOS}
+                                    >
+                                        <Outlet />
+                                    </TabPanel>
+                                </Tabs>
+                            ) : (
+                                <Outlet />
+                            )}
                         </section>
                     ) : (
                         <p>No programs exist</p>
