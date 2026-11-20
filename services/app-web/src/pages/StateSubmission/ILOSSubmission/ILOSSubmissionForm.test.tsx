@@ -36,6 +36,8 @@ describe('ILOSSubmissionForm', () => {
                         fetchContractWithQuestionsMockSuccess({
                             contract: mockContract,
                         }),
+                        // The ILOS actuarial report page and Contacts each fetch the draft
+                        fetchContractMockSuccess({ contract: mockContract }),
                         fetchContractMockSuccess({ contract: mockContract }),
                     ],
                 },
@@ -71,7 +73,9 @@ describe('ILOSSubmissionForm', () => {
         await waitFor(() =>
             testNavigate('/submissions/ilos/12/edit/review-and-submit')
         )
-        expect(await screen.findByText('Review and submit')).toBeInTheDocument()
+        expect(
+            await screen.findByTestId('ilos-review-submit')
+        ).toBeInTheDocument()
     })
 
     it('shows a 404 for ILOS form pages when the ILOS flag is off', async () => {

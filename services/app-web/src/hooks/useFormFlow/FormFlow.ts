@@ -64,7 +64,7 @@ const FORM_FLOWS: Record<ContractSubmissionType, FormFlowDefinition> = {
     },
     ILOS: {
         pages: ILOS_SUBMISSION_FORM_ROUTES,
-        customPageTitles: { SUBMISSIONS_TYPE: 'Submission details' },
+        customPageTitles: { SUBMISSIONS_TYPE: 'ILOS actuarial report' },
     },
 }
 

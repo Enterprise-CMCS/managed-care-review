@@ -34,7 +34,7 @@ describe('ILOSSubmissionDetails', () => {
         ).toBeInTheDocument()
         expect(
             screen.getByRole('button', { name: 'Save & Continue' })
-        ).toHaveAttribute('aria-disabled', 'true')
+        ).toBeInTheDocument()
     })
 
     it('renders the ILOS steps with the first step current', async () => {

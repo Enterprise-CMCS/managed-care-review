@@ -6,11 +6,7 @@ import formContainerStyles from '../../../components/FormContainer/FormContainer
 import { Contacts } from '../SharedContactsPage'
 import { ILOSSubmissionDetails } from './ILOSSubmissionDetails'
 import { ILOSAssociatedRateCertifications } from './ILOSAssociatedRateCertifications'
-
-// TODO: Get rid of once each page's ticket creates these components.
-const ILOSPagePlaceholder = ({ title }: { title: string }) => (
-    <h2 data-testid="ilos-page-placeholder">{title}</h2>
-)
+import { ILOSReviewSubmit } from './ILOSReviewSubmit'
 
 // Page order lives in FORM_FLOWS (hooks/useFormFlow/FormFlow.ts). Every ILOS
 // page has a route here, including conditional ones.
@@ -41,7 +37,7 @@ export const ILOSSubmissionForm = (): React.ReactElement => {
                     path={getRelativePathFromNestedRoute(
                         'SUBMISSIONS_REVIEW_SUBMIT'
                     )}
-                    element={<ILOSPagePlaceholder title="Review and submit" />}
+                    element={<ILOSReviewSubmit />}
                 />
                 <Route path="*" element={<Error404 />} />
             </Routes>
