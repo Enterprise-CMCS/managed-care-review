@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import {
+    Cell,
+    Row,
     ColumnFiltersState,
     createColumnHelper,
     flexRender,
@@ -245,6 +247,34 @@ type TableVariantConfig = {
     tableName: string
     rowIDName: string
 }
+type RateReviewsTableRowProps = {
+    row: Row<RateInDashboardType>
+    visibleCells: Cell<RateInDashboardType, unknown>[]
+}
+
+/**
+ * One row of the table. Memoized so a state update in RateReviewsTable, like the caption
+ * or the filter analytics, does not render every row again.
+ */
+const RateReviewsTableRow = React.memo(function RateReviewsTableRow({
+    row,
+    visibleCells,
+}: RateReviewsTableRowProps): React.ReactElement {
+    return (
+        <tr data-testid={`row-${row.original.id}`}>
+            {visibleCells.map((cell) => (
+                <RowCellElement
+                    key={cell.id}
+                    className={getColumnClassName(cell.column.id)}
+                    element={cell.column.id === 'Rate review' ? 'th' : 'td'}
+                >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </RowCellElement>
+            ))}
+        </tr>
+    )
+})
+
 export const RateReviewsTable = ({
     caption,
     tableData,
@@ -735,29 +765,11 @@ export const RateReviewsTable = ({
                         </thead>
                         <tbody>
                             {filteredRows.map((row) => (
-                                <tr
+                                <RateReviewsTableRow
                                     key={row.id}
-                                    data-testid={`row-${row.original.id}`}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <RowCellElement
-                                            key={cell.id}
-                                            className={getColumnClassName(
-                                                cell.column.id
-                                            )}
-                                            element={
-                                                cell.column.id === 'Rate review'
-                                                    ? 'th'
-                                                    : 'td'
-                                            }
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </RowCellElement>
-                                    ))}
-                                </tr>
+                                    row={row}
+                                    visibleCells={row.getVisibleCells()}
+                                />
                             ))}
                         </tbody>
                         {tableCaption}

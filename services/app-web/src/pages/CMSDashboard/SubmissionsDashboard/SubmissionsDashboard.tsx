@@ -44,6 +44,104 @@ const SubmissionsDashboard = (): React.ReactElement => {
         },
     })
 
+    // Memoized so the table rows keep their identity when the dashboard renders again with the same data.
+    const submissionRows = React.useMemo(() => {
+        const rows: ContractInDashboardType[] = []
+        const edges = data?.indexContractsStripped.edges ?? []
+        edges
+            .map((edge) => edge.node)
+            .forEach((sub) => {
+                // Errors - data handling
+                if (sub.consolidatedStatus === 'DRAFT') {
+                    recordJSException(
+                        `indexContractsQuery: should not return draft submissions for CMS user. ID: ${sub.id}`
+                    )
+                    return
+                }
+                const currentRevision = sub.latestSubmittedRevision
+
+                if (!currentRevision) {
+                    recordJSException(
+                        `Unexpected error: Contract with ID ${sub.id} did not contain a latestSubmittedRevision`
+                    )
+                    return
+                }
+                const currentFormData = currentRevision.formData
+
+                if (
+                    currentRevision?.submitInfo?.updatedAt === undefined &&
+                    currentRevision?.unlockInfo?.updatedAt === undefined
+                ) {
+                    recordJSException(
+                        `indexContractsQuery: Error finding submit and unlock dates for submissions in CMSDashboard. ID: ${sub.id}`
+                    )
+                }
+
+                // Set package display data
+                let displayRateFormData = currentFormData
+                const subReviewActions =
+                    sub.reviewStatusActions && sub.reviewStatusActions[0]
+
+                let lastUpdated = mostRecentDate([
+                    currentRevision?.submitInfo?.updatedAt,
+                    currentRevision?.unlockInfo?.updatedAt,
+                    subReviewActions?.updatedAt,
+                ])
+
+                if (sub.status === 'UNLOCKED') {
+                    // Errors - data handling
+
+                    const draftRevision = sub.draftRevision!
+
+                    if (
+                        draftRevision?.submitInfo?.updatedAt === undefined &&
+                        draftRevision?.unlockInfo?.updatedAt === undefined
+                    ) {
+                        recordJSException(
+                            `indexContractsQuery: Error finding submit and unlock dates of an unlocked submission. ID: ${sub.id}`
+                        )
+                    }
+
+                    //last updated date, including the date submission was unlocked
+                    lastUpdated = mostRecentDate([
+                        currentRevision?.submitInfo?.updatedAt,
+                        currentRevision?.unlockInfo?.updatedAt,
+                        draftRevision?.submitInfo?.updatedAt,
+                        draftRevision?.unlockInfo?.updatedAt,
+                        subReviewActions?.updatedAt,
+                    ])
+                }
+
+                if (!lastUpdated) {
+                    recordJSException(
+                        `CMSDashboard: Cannot find valid last updated date from submit and unlock info. Falling back to current revision's last edit timestamp. ID: ${sub.id}`
+                    )
+                    lastUpdated = new Date(currentRevision.updatedAt)
+                }
+                const programs = sub.state.programs
+
+                rows.push({
+                    id: sub.id,
+                    name: currentRevision.contractName,
+                    programs: programs.filter((program) =>
+                        displayRateFormData.programIDs.includes(program.id)
+                    ),
+                    submittedAt: sub.initiallySubmittedAt,
+                    status: sub.consolidatedStatus,
+                    updatedAt: useStoredContractActionDates
+                        ? new Date(sub.lastUpdatedForDisplay)
+                        : lastUpdated,
+                    submissionType:
+                        SubmissionTypeRecord[
+                            displayRateFormData.submissionType
+                        ],
+                    stateName: sub.state.name,
+                    contractSubmissionType: sub.contractSubmissionType,
+                })
+            })
+        return rows
+    }, [data, useStoredContractActionDates])
+
     if (!data && loading) {
         return <Loading />
     } else if (!data && error) {
@@ -56,97 +154,6 @@ const SubmissionsDashboard = (): React.ReactElement => {
     } else if (!data || !loggedInUser) {
         return <GenericErrorPage />
     }
-
-    const submissionRows: ContractInDashboardType[] = []
-    data.indexContractsStripped.edges
-        .map((edge) => edge.node)
-        .forEach((sub) => {
-            // Errors - data handling
-            if (sub.consolidatedStatus === 'DRAFT') {
-                recordJSException(
-                    `indexContractsQuery: should not return draft submissions for CMS user. ID: ${sub.id}`
-                )
-                return
-            }
-            const currentRevision = sub.latestSubmittedRevision
-
-            if (!currentRevision) {
-                recordJSException(
-                    `Unexpected error: Contract with ID ${sub.id} did not contain a latestSubmittedRevision`
-                )
-                return
-            }
-            const currentFormData = currentRevision.formData
-
-            if (
-                currentRevision?.submitInfo?.updatedAt === undefined &&
-                currentRevision?.unlockInfo?.updatedAt === undefined
-            ) {
-                recordJSException(
-                    `indexContractsQuery: Error finding submit and unlock dates for submissions in CMSDashboard. ID: ${sub.id}`
-                )
-            }
-
-            // Set package display data
-            let displayRateFormData = currentFormData
-            const subReviewActions =
-                sub.reviewStatusActions && sub.reviewStatusActions[0]
-
-            let lastUpdated = mostRecentDate([
-                currentRevision?.submitInfo?.updatedAt,
-                currentRevision?.unlockInfo?.updatedAt,
-                subReviewActions?.updatedAt,
-            ])
-
-            if (sub.status === 'UNLOCKED') {
-                // Errors - data handling
-
-                const draftRevision = sub.draftRevision!
-
-                if (
-                    draftRevision?.submitInfo?.updatedAt === undefined &&
-                    draftRevision?.unlockInfo?.updatedAt === undefined
-                ) {
-                    recordJSException(
-                        `indexContractsQuery: Error finding submit and unlock dates of an unlocked submission. ID: ${sub.id}`
-                    )
-                }
-
-                //last updated date, including the date submission was unlocked
-                lastUpdated = mostRecentDate([
-                    currentRevision?.submitInfo?.updatedAt,
-                    currentRevision?.unlockInfo?.updatedAt,
-                    draftRevision?.submitInfo?.updatedAt,
-                    draftRevision?.unlockInfo?.updatedAt,
-                    subReviewActions?.updatedAt,
-                ])
-            }
-
-            if (!lastUpdated) {
-                recordJSException(
-                    `CMSDashboard: Cannot find valid last updated date from submit and unlock info. Falling back to current revision's last edit timestamp. ID: ${sub.id}`
-                )
-                lastUpdated = new Date(currentRevision.updatedAt)
-            }
-            const programs = sub.state.programs
-
-            submissionRows.push({
-                id: sub.id,
-                name: currentRevision.contractName,
-                programs: programs.filter((program) =>
-                    displayRateFormData.programIDs.includes(program.id)
-                ),
-                submittedAt: sub.initiallySubmittedAt,
-                status: sub.consolidatedStatus,
-                updatedAt: useStoredContractActionDates
-                    ? new Date(sub.lastUpdatedForDisplay)
-                    : lastUpdated,
-                submissionType:
-                    SubmissionTypeRecord[displayRateFormData.submissionType],
-                stateName: sub.state.name,
-                contractSubmissionType: sub.contractSubmissionType,
-            })
-        })
 
     return (
         <section className={styles.panel}>
