@@ -164,6 +164,7 @@ import {
     findDocumentZipPackagesByRateRevision,
     saveRegeneratedDocumentZipPackage,
 } from './documents'
+import { findEBContractors, findEBContractorByID } from './ebContractors'
 import type { DocumentTypes } from '../domain-models/DocumentType'
 
 type Store = {
@@ -179,6 +180,12 @@ type Store = {
     findStatePrograms: (stateCode: string) => ProgramType[] | Error
     findAllStatePrograms: () => Promise<StateProgramType[] | Error>
     findAllSupportedStates: () => Promise<StateType[] | Error>
+    findEBContractors: (
+        includeDeprecated?: boolean
+    ) => ReturnType<typeof findEBContractors>
+    findEBContractorByID: (
+        id: string
+    ) => ReturnType<typeof findEBContractorByID>
 
     /** User functions **/
     insertUser: (user: InsertUserArgsType) => Promise<UserType | Error>
@@ -400,6 +407,9 @@ function NewPostgresStore(client: ExtendedPrismaClient): Store {
         findStatePrograms: findStatePrograms,
         findAllStatePrograms: findAllStatePrograms,
         findAllSupportedStates: () => findAllSupportedStates(client),
+        findEBContractors: (includeDeprecated) =>
+            findEBContractors(client, includeDeprecated),
+        findEBContractorByID: (id) => findEBContractorByID(client, id),
 
         /** User functions **/
         insertUser: (args) => insertUser(client, args),

@@ -208,6 +208,9 @@ const genericContractFormDataSchema = z.object({
     ebPreviousAmendmentInMCReview: preprocessNulls(z.boolean().optional()),
     ebAmendmentNumber: preprocessNulls(z.string().optional()),
     ebStateContractIdentifier: preprocessNulls(z.string().optional()),
+    ebContractorID: preprocessNulls(z.string().optional()),
+    ebLinkedBaseContractID: preprocessNulls(z.string().optional()),
+    ebLinkedPreviousAmendmentID: preprocessNulls(z.string().optional()),
 })
 
 // contractFormDataSchema is the normal contractFormData setup for Draft contracts. Most fields are optional and array fields can be empty.
@@ -480,21 +483,33 @@ const submittableRateFormDataSchema = genericRateFormDataSchema.extend({
         genericRateFormDataSchema.shape.certifyingActuaryContacts.nonempty(),
 })
 
-const updateDraftContractFormDataSchema = contractFormDataSchema.extend({
-    contractType: preprocessNulls(contractTypeSchema.optional()),
-    submissionDescription: preprocessNulls(z.string().optional()),
-    eqroNewContractor: z.boolean().optional().nullish(),
-    eqroProvisionMcoNewOptionalActivity: z.boolean().optional().nullish(),
-    eqroProvisionNewMcoEqrRelatedActivities: z.boolean().optional().nullish(),
-    eqroProvisionChipEqrRelatedActivities: z.boolean().optional().nullish(),
-    eqroProvisionMcoEqrOrRelatedActivities: z.boolean().optional().nullish(),
+const updateDraftContractFormDataSchema = contractFormDataSchema
+    .omit({
+        ebLinkedBaseContractID: true,
+        ebLinkedPreviousAmendmentID: true,
+    })
+    .extend({
+        contractType: preprocessNulls(contractTypeSchema.optional()),
+        submissionDescription: preprocessNulls(z.string().optional()),
+        eqroNewContractor: z.boolean().optional().nullish(),
+        eqroProvisionMcoNewOptionalActivity: z.boolean().optional().nullish(),
+        eqroProvisionNewMcoEqrRelatedActivities: z
+            .boolean()
+            .optional()
+            .nullish(),
+        eqroProvisionChipEqrRelatedActivities: z.boolean().optional().nullish(),
+        eqroProvisionMcoEqrOrRelatedActivities: z
+            .boolean()
+            .optional()
+            .nullish(),
 
-    ebNewContractor: z.boolean().optional().nullish(),
-    ebBaseContractInMCReview: z.boolean().optional().nullish(),
-    ebPreviousAmendmentInMCReview: z.boolean().optional().nullish(),
-    ebAmendmentNumber: z.string().optional().nullish(),
-    ebStateContractIdentifier: z.string().optional().nullish(),
-})
+        ebNewContractor: z.boolean().optional().nullish(),
+        ebBaseContractInMCReview: z.boolean().optional().nullish(),
+        ebPreviousAmendmentInMCReview: z.boolean().optional().nullish(),
+        ebAmendmentNumber: z.string().optional().nullish(),
+        ebStateContractIdentifier: z.string().optional().nullish(),
+        ebContractorID: z.string().optional().nullish(),
+    })
 
 type UpdateDraftContractFormDataType = Partial<
     z.infer<typeof updateDraftContractFormDataSchema>

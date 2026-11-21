@@ -878,6 +878,7 @@ function contractFormDataToDomainModel(
         eqroProvisionMcoEqrOrRelatedActivities:
             contractRevision.eqroProvisionMcoEqrOrRelatedActivities ??
             undefined,
+
         ebNewContractor: contractRevision.ebNewContractor ?? undefined,
         ebBaseContractInMCReview:
             contractRevision.ebBaseContractInMCReview ?? undefined,
@@ -886,6 +887,11 @@ function contractFormDataToDomainModel(
         ebAmendmentNumber: contractRevision.ebAmendmentNumber ?? undefined,
         ebStateContractIdentifier:
             contractRevision.ebStateContractIdentifier ?? undefined,
+        ebContractorID: contractRevision.ebContractorID ?? undefined,
+        ebLinkedBaseContractID:
+            contractRevision.ebLinkedBaseContractID ?? undefined,
+        ebLinkedPreviousAmendmentID:
+            contractRevision.ebLinkedPreviousAmendmentID ?? undefined,
     }
 }
 

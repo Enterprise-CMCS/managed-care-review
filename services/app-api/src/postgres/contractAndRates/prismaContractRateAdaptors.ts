@@ -335,6 +335,8 @@ function prismaUpdateContractFormDataFromDomain(
         ebStateContractIdentifier: nullify(
             contractFormData.ebStateContractIdentifier
         ),
+        ebContractorID: nullify(contractFormData.ebContractorID),
+        // Preserve database-only contract links during ordinary form saves.
     }
 }
 export {

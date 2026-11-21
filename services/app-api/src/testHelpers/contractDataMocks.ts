@@ -49,13 +49,14 @@ const mockInsertContractArgs = ({
     }
 }
 
-// Scalar answers shared by Enrollment Broker API fixtures.
+// Editable answers shared by Enrollment Broker API fixtures.
 const mockEBContractFormData = () => ({
     ebNewContractor: true,
     ebBaseContractInMCReview: false,
     ebPreviousAmendmentInMCReview: true,
     ebAmendmentNumber: 'Amendment 2',
     ebStateContractIdentifier: 'EB-2026-001',
+    ebContractorID: '161a7110-e8fc-43d3-b859-8c75f4680a3b',
 })
 
 const mockContractRevision = (
@@ -179,6 +180,9 @@ const mockContractRevision = (
         eqroProvisionMcoNewOptionalActivity: null,
         eqroProvisionMcoEqrOrRelatedActivities: null,
         eqroProvisionNewMcoEqrRelatedActivities: null,
+        ebContractorID: null,
+        ebLinkedBaseContractID: null,
+        ebLinkedPreviousAmendmentID: null,
         ebNewContractor: null,
         ebBaseContractInMCReview: null,
         ebPreviousAmendmentInMCReview: null,

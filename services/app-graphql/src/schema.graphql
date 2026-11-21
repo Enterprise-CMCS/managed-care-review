@@ -5,7 +5,16 @@ schema {
 
 scalar JSON
 
+type EBContractor {
+    id: ID!
+    name: String!
+    isDeprecated: Boolean!
+}
+
 type Query {
+    "Enrollment Broker contractors; deprecated entries are excluded unless explicitly requested."
+    fetchEBContractors(includeDeprecated: Boolean = false): [EBContractor!]!
+
     """
     fetchCurrentUser returns user information for the currently logged in User
 
@@ -1974,6 +1983,8 @@ type ContractFormData {
     ebAmendmentNumber: String
     "The state-assigned Enrollment Broker contract identifier"
     ebStateContractIdentifier: String
+    "The ID of the selected Enrollment Broker contractor"
+    ebContractorID: String
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"
@@ -3294,6 +3305,8 @@ input ContractDraftRevisionFormDataInput {
     ebAmendmentNumber: String
     "The state-assigned Enrollment Broker contract identifier"
     ebStateContractIdentifier: String
+    "The ID of the selected Enrollment Broker contractor"
+    ebContractorID: String
 }
 
 input RateFormDataInput {

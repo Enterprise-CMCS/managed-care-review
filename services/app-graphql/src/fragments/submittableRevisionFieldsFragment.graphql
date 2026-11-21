@@ -54,7 +54,6 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             contractExecutionStatus
             contractDocuments {
                 ...genericDocumentFragment
-
             }
 
             contractDateStart
@@ -96,6 +95,7 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             ebPreviousAmendmentInMCReview
             ebAmendmentNumber
             ebStateContractIdentifier
+            ebContractorID
         }
     }
     ... on RateRevision {
@@ -114,11 +114,9 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             rateCapitationType
             rateDocuments {
                 ...genericDocumentFragment
-
             }
             supportingDocuments {
                 ...genericDocumentFragment
-
             }
             rateDateStart
             rateDateEnd

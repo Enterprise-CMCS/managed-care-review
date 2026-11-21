@@ -60,6 +60,16 @@ model HealthPlanRevisionTable {
   deprecated      Boolean                @default(true)
 }
 
+model EBContractors {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now()) @updatedAt
+  name         String
+  isDeprecated Boolean
+
+  contractRevisions ContractRevisionTable[]
+}
+
 model ContractTable {
   id             String    @id @default(uuid())
   createdAt      DateTime  @default(now())
@@ -81,6 +91,9 @@ model ContractTable {
 
   revisions           ContractRevisionTable[]
   sharedRateRevisions RateRevisionTable[]     @relation(name: "SharedRateRevisions")
+
+  ebLinkedBaseContractRevisions      ContractRevisionTable[] @relation("ebLinkedBaseContract")
+  ebLinkedPreviousAmendmentRevisions ContractRevisionTable[] @relation("ebLinkedPreviousAmendment")
 
   contractOverrides ContractOverrides[]
 
@@ -284,6 +297,12 @@ model ContractRevisionTable {
   eqroProvisionMcoEqrOrRelatedActivities  Boolean?
 
   // Enrollment Broker submission fields only
+  ebContractorID                String?
+  ebContractor                  EBContractors? @relation(fields: [ebContractorID], references: [id], onDelete: Restrict)
+  ebLinkedBaseContractID        String?
+  ebLinkedBaseContract          ContractTable? @relation("ebLinkedBaseContract", fields: [ebLinkedBaseContractID], references: [id])
+  ebLinkedPreviousAmendmentID   String?
+  ebLinkedPreviousAmendment     ContractTable? @relation("ebLinkedPreviousAmendment", fields: [ebLinkedPreviousAmendmentID], references: [id])
   ebNewContractor               Boolean?
   ebBaseContractInMCReview      Boolean?
   ebPreviousAmendmentInMCReview Boolean?
