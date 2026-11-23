@@ -1248,21 +1248,12 @@ importers:
       '@aws-sdk/client-cloudformation':
         specifier: ^3.1161.0
         version: 3.1161.0
-      '@aws-sdk/client-s3':
-        specifier: ^3.1161.0
-        version: 3.1161.0
       '@aws-sdk/client-secrets-manager':
         specifier: ^3.1161.0
         version: 3.1161.0
-      '@prisma/client':
-        specifier: ^7.10.1
-        version: 7.10.1(prisma@7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.3)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2))(typescript@7.0.2)
       pg:
         specifier: ^8.23.1
         version: 8.23.1
-      prisma:
-        specifier: ^7.10.0
-        version: 7.10.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(magicast@0.5.3)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(typescript@7.0.2)
     devDependencies:
       '@aws-sdk/types':
         specifier: ^3.975.0
@@ -1270,9 +1261,6 @@ importers:
       '@types/pg':
         specifier: ^8.23.1
         version: 8.23.1
-      fs-extra:
-        specifier: ^11.4.1
-        version: 11.4.1
       typescript:
         specifier: 7.0.2
         version: 7.0.2
