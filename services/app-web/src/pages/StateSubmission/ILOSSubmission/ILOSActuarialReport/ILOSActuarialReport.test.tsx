@@ -26,7 +26,7 @@ describe('ILOSActuarialReport', () => {
             }
         )
 
-    it('renders the placeholder with continue disabled', async () => {
+    it('renders the placeholder with continue button', async () => {
         renderPage()
 
         expect(
