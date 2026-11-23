@@ -22,6 +22,7 @@ import {
     unlockMutationWrapper,
 } from '@mc-review/helpers'
 import { useTealium } from '../../hooks'
+import { getSubmissionPath } from '../../routeHelpers'
 import {
     ChipOnlyModalDescription,
     EQROModalDescription,
@@ -43,7 +44,6 @@ type ModalTypes =
 type UnlockSubmitModalProps = {
     submissionData: Rate | Contract
     modalType: ModalTypes
-    submissionName?: string
     modalRef: React.RefObject<ModalRef | null>
     setIsSubmitting?: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -150,7 +150,6 @@ const modalValueDictionary: Record<ModalTypes, ModalValueType> = {
 
 export const UnlockSubmitModal = ({
     submissionData,
-    submissionName,
     modalType,
     modalRef,
     setIsSubmitting,
@@ -269,14 +268,22 @@ export const UnlockSubmitModal = ({
                 break
         }
 
+        // After submit, land on the summary page so the user sees the review determination banner
+        const summaryPath =
+            submissionData.__typename === 'Contract'
+                ? getSubmissionPath(
+                      'SUBMISSIONS_SUMMARY',
+                      submissionData.contractSubmissionType,
+                      submissionData.id
+                  )
+                : undefined
+
         //Allow submitting/unlocking to continue on EMAIL_ERROR.
         if (result instanceof Error && result.cause === 'EMAIL_ERROR') {
             modalRef.current?.toggleModal(undefined, false)
 
-            if (modalType !== 'UNLOCK_CONTRACT' && submissionName) {
-                await navigate(
-                    `/dashboard/submissions?justSubmitted=${submissionName}`
-                )
+            if (modalType !== 'UNLOCK_CONTRACT' && summaryPath) {
+                await navigate(summaryPath)
             } else {
                 await client.refetchQueries({
                     include: [FetchContractWithQuestionsDocument],
@@ -301,15 +308,12 @@ export const UnlockSubmitModal = ({
                     'SUBMIT_CHIP_ONLY',
                     'SUBMIT_EQRO_CONTRACT',
                 ].includes(modalType) &&
-                submissionName &&
-                submissionData.__typename === 'Contract'
+                summaryPath
             ) {
                 await client.refetchQueries({
                     include: [IndexContractsStrippedDocument],
                 })
-                await navigate(
-                    `/dashboard/submissions?justSubmitted=${submissionName}&contractType=${submissionData.contractSubmissionType}&id=${submissionData.id}`
-                )
+                await navigate(summaryPath)
             } else {
                 await client.refetchQueries({
                     include: [FetchContractWithQuestionsDocument],

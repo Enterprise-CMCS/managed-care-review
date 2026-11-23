@@ -44,6 +44,7 @@ import { tealiumTestClient } from './tealiumHelpers'
 import type { TealiumClientType } from '../tealium'
 
 import { vi } from 'vitest'
+import { ApolloCache, DocumentNode, OperationVariables } from '@apollo/client'
 import { MockTraceProvider } from '../contexts/TraceContext'
 import { TracingInitializer } from '../pages/App/App'
 
@@ -287,6 +288,43 @@ const TEST_PNG_FILE = new File(['Test PNG Image'], 'testFile.png', {
     type: 'image/png',
 })
 
+// Seeds the cache so later reads are cache hits. Shared mocks leave out some
+// queried fields, which makes cache reads incomplete, so those are set to null.
+type MissingTree = { [key: string]: string | MissingTree }
+const fillMissing = (target: Record<string, unknown>, missing: MissingTree) =>
+    Object.entries(missing).forEach(([key, value]) => {
+        if (typeof value === 'string') target[key] = null
+        else fillMissing(target[key] as Record<string, unknown>, value)
+    })
+
+const writeCompleteQuery = (
+    cache: ApolloCache,
+    {
+        query,
+        variables,
+        data,
+    }: {
+        query: DocumentNode
+        variables?: OperationVariables
+        data: Record<string, unknown>
+    }
+) => {
+    const filled = structuredClone(data)
+    // Each diff reports one more level of missing fields
+    for (let depth = 0; depth < 20; depth++) {
+        cache.writeQuery({ query, variables, data: filled })
+        const diff = cache.diff({
+            query,
+            variables,
+            optimistic: false,
+            returnPartialData: true,
+        })
+        if (diff.complete) return
+        fillMissing(filled, diff.missing?.missing as MissingTree)
+    }
+    throw new Error('writeCompleteQuery: cache read still incomplete')
+}
+
 export {
     fakeRequest,
     dragAndDrop,
@@ -296,6 +334,7 @@ export {
     userClickByTestId,
     userClickSignIn,
     selectYesNoRadio,
+    writeCompleteQuery,
     TEST_DOC_FILE,
     TEST_DOCX_FILE,
     TEST_PDF_FILE,

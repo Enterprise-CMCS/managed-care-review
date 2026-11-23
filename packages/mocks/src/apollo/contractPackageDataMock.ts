@@ -618,6 +618,7 @@ function mockContractPackageSubmittedWithQuestions(
                 },
                 submittedRevisions: [],
                 contractRevision: {
+                    __typename: 'ContractRevision',
                     contractName: 'MCR-MN-0005-SNBC',
                     createdAt: new Date('01/01/2024'),
                     updatedAt: '2024-12-18T16:54:39.173Z',
@@ -708,6 +709,7 @@ function mockContractPackageSubmittedWithQuestions(
                 },
                 rateRevisions: [
                     {
+                        __typename: 'RateRevision',
                         id: '1234',
                         rateID: '123',
                         createdAt: new Date('01/01/2023'),
@@ -1083,6 +1085,7 @@ function mockContractWithLinkedRateSubmitted(
                 },
                 submittedRevisions: [],
                 contractRevision: {
+                    __typename: 'ContractRevision',
                     contractName: 'MCR-MN-0005-SNBC',
                     createdAt: new Date('01/01/2024'),
                     updatedAt: new Date('12/31/2024'),
@@ -1168,6 +1171,7 @@ function mockContractWithLinkedRateSubmitted(
                 },
                 rateRevisions: [
                     {
+                        __typename: 'RateRevision',
                         id: '123',
                         rateID: 'rate-123',
                         createdAt: new Date('12/18/2023'),

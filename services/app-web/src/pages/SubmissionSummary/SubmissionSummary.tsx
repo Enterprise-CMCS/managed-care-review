@@ -208,6 +208,10 @@ export const SubmissionSummary = (): React.ReactElement => {
     const statePrograms = contract.state.programs
 
     if (!isSubmitted && isStateUser) {
+        // Cached status can be stale right after submit, wait for fresh data before redirecting
+        if (loading) {
+            return <ErrorOrLoadingPage state="LOADING" />
+        }
         if (submissionStatus === 'DRAFT') {
             return (
                 <Navigate

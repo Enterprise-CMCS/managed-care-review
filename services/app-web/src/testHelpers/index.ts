@@ -7,6 +7,7 @@ export {
     fakeRequest,
     dragAndDrop,
     renderWithProviders,
+    writeCompleteQuery,
     prettyDebug,
     userClickByRole,
     userClickByTestId,

@@ -48,15 +48,11 @@ describe('CMS user can view submission', () => {
         cy.submitStateSubmissionForm()
 
         // store submission name for later
-        cy.location().then((loc) => {
-            expect(loc.search).to.match(/.*justSubmitted=*/)
-
-            const urlParams = new URLSearchParams(loc.search)
-            const submissionName = urlParams.get('justSubmitted')
-
-            if (submissionName === undefined || submissionName === null) {
-                throw new Error('No submission name found' + loc.search)
-            }
+        cy.findByTestId('submission-id').then(($el) => {
+            const submissionName = $el
+                .text()
+                .replace(/^Submission ID\s*\|\s*/, '')
+                .trim()
 
             // sign out state user
             cy.logOut()
@@ -216,15 +212,11 @@ describe('CMS user can view submission', () => {
         cy.submitStateSubmissionForm()
 
         // store submission name for later
-        cy.location().then((loc) => {
-            expect(loc.search).to.match(/.*justSubmitted=*/)
-
-            const urlParams = new URLSearchParams(loc.search)
-            const submissionName = urlParams.get('justSubmitted')
-
-            if (submissionName === undefined || submissionName === null) {
-                throw new Error('No submission name found' + loc.search)
-            }
+        cy.findByTestId('submission-id').then(($el) => {
+            const submissionName = $el
+                .text()
+                .replace(/^Submission ID\s*\|\s*/, '')
+                .trim()
 
             // sign out state user
             cy.logOut()
