@@ -6,6 +6,10 @@ This service deploys a postgres database in Amazon Aurora Serverless. It also de
 
 None. The database is configured and built in the [`app-api`](../app-api) service.
 
+## Lower-environment data
+
+Use the [synthetic data workflow](../synthetic-data/README.md) to seed QA and review environments instead of importing a production database dump. The synthetic data tooling still uses the mock documents in `files/`.
+
 ## RDS TLS certificates
 
 `DatabaseClient` reads `/var/runtime/ca-cert.pem`, the Amazon CA bundle supplied by the managed Node.js Lambda runtime. It does not download certificates at runtime. The bundle is passed directly to the PostgreSQL client with `rejectUnauthorized: true`; no `NODE_EXTRA_CA_CERTS` setting or bundling changes are needed.

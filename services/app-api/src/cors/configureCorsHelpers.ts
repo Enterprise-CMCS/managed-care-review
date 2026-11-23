@@ -63,7 +63,7 @@ export const configureCorsHeaders = (
             ...response.headers,
             'Access-Control-Allow-Origin': requestOrigin,
             'Access-Control-Allow-Headers':
-                'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token',
+                'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Amz-Content-Sha256',
             'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
             'Access-Control-Allow-Credentials': 'true',
             'X-Content-Type-Options': 'nosniff',

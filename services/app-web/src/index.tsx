@@ -118,7 +118,7 @@ const S3_BUCKETS_CONFIG: S3BucketConfigType = {
     QUESTION_ANSWER_DOCS: s3QABucket,
 }
 if (s3Region) {
-    s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG)
+    s3Client = newAmplifyS3Client(S3_BUCKETS_CONFIG, apolloClient)
 } else if (s3LocalURL) {
     s3Client = newLocalS3Client(s3LocalURL, S3_BUCKETS_CONFIG)
 } else {

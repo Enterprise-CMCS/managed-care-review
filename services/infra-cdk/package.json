@@ -5,14 +5,14 @@
     "private": true,
     "scripts": {
         "precommit": "lint-staged",
+        "test": "tsx --test test/*.test.ts tests/*.test.ts",
         "cdk": "cdk",
         "synth": "cdk synth",
         "diff": "cdk diff",
         "deploy": "cdk deploy",
         "destroy": "cdk destroy",
         "bootstrap": "cdk bootstrap",
-        "lint": "oxlint .",
-        "test": "tsx --test test/*.test.ts"
+        "lint": "oxlint ."
     },
     "devDependencies": {
         "@luckycatfactory/esbuild-graphql-loader": "^3.8.1",

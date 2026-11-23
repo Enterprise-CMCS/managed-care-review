@@ -74,6 +74,7 @@ export class UploadClient {
                 method: 'PUT',
                 headers: {
                     'Content-Type': input.contentType,
+                    'If-None-Match': '*',
                 },
                 body: Uint8Array.from(input.bytes),
             },

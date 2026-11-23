@@ -1,0 +1,12 @@
+# Model a client that does not request contentType in the response.
+# Keep this separate from the current upload operation so changes to that operation
+# cannot silently change what this older-client compatibility test covers.
+mutation LegacyGenerateUploadURL($input: GenerateUploadURLInput!) {
+    generateUploadURL(input: $input) {
+        uploadURL
+        s3Key
+        bucket
+        expiresIn
+        s3URL
+    }
+}

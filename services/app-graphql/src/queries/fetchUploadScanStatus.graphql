@@ -1,0 +1,3 @@
+query fetchUploadScanStatus($input: S3ObjectInput!) {
+    fetchUploadScanStatus(input: $input)
+}
