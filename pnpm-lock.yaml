@@ -620,8 +620,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/core':
-        specifier: ^3.0.0
-        version: 3.0.0(@opentelemetry/api@1.10.0)
+        specifier: ^3.1.1
+        version: 3.1.1(@opentelemetry/api@1.10.0)
       '@opentelemetry/exporter-trace-otlp-proto':
         specifier: ^0.300.0
         version: 0.300.0(@opentelemetry/api@1.10.0)
@@ -629,8 +629,8 @@ importers:
         specifier: ^0.301.2
         version: 0.301.2(@opentelemetry/api@1.10.0)(supports-color@5.5.0)
       '@opentelemetry/resources':
-        specifier: ^3.0.0
-        version: 3.0.0(@opentelemetry/api@1.10.0)
+        specifier: ^3.1.1
+        version: 3.1.1(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-trace':
         specifier: ^3.0.0
         version: 3.0.0(@opentelemetry/api@1.10.0)
@@ -814,8 +814,8 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0(@opentelemetry/api@1.10.0)
       '@opentelemetry/core':
-        specifier: ^3.0.0
-        version: 3.0.0(@opentelemetry/api@1.10.0)
+        specifier: ^3.1.1
+        version: 3.1.1(@opentelemetry/api@1.10.0)
       '@opentelemetry/exporter-trace-otlp-http':
         specifier: ^0.300.0
         version: 0.300.0(@opentelemetry/api@1.10.0)
@@ -826,8 +826,8 @@ importers:
         specifier: ^0.300.0
         version: 0.300.0(@opentelemetry/api@1.10.0)(supports-color@10.2.2)
       '@opentelemetry/resources':
-        specifier: ^3.0.0
-        version: 3.0.0(@opentelemetry/api@1.10.0)
+        specifier: ^3.1.1
+        version: 3.1.1(@opentelemetry/api@1.10.0)
       '@opentelemetry/sdk-trace':
         specifier: ^3.0.0
         version: 3.0.0(@opentelemetry/api@1.10.0)
@@ -4141,6 +4141,12 @@ packages:
     peerDependencies:
       '@opentelemetry/api': '>=1.10.0 <1.11.0'
 
+  '@opentelemetry/core@3.1.1':
+    resolution: {integrity: sha512-6wc9r0zrTsAVOd/5UrZBsrHhXWNfwisolgWxd8o3Eu1HKIz8cAxQjOdGrrJB406ceFiGV+ckTcLdXzB+y/QVTA==}
+    engines: {node: '>=22.15.0'}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.10.0 <1.11.0'
+
   '@opentelemetry/exporter-trace-otlp-http@0.300.0':
     resolution: {integrity: sha512-Dwdagba93cdhROlFGbkU4yK4hvd3l0k7WV9nvTWIoN6KwxFP+HCvy9EkgIpyfN11fVdIWxY3XqOwWOq83OPfcA==}
     engines: {node: '>=22.15.0'}
@@ -4210,6 +4216,12 @@ packages:
 
   '@opentelemetry/resources@3.0.0':
     resolution: {integrity: sha512-4762KVmlDroRIt+4Ra8AnwcQqdXlkAR55jDrhzna8bzhJx1mUzvHW/Lh/OemFuY9+ouM4xaDc6CbUmoJmM6BFg==}
+    engines: {node: '>=22.15.0'}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.10.0 <1.11.0'
+
+  '@opentelemetry/resources@3.1.1':
+    resolution: {integrity: sha512-dSd0FI1rfl+WHeaZxCTCEvwv6vcmUqkOHHTGWMkmyHg+PyL/wLbCqgsGKgI0wOwT0KGy9IMPAvY85hT8IPwApA==}
     engines: {node: '>=22.15.0'}
     peerDependencies:
       '@opentelemetry/api': '>=1.10.0 <1.11.0'
@@ -15793,6 +15805,11 @@ snapshots:
       '@opentelemetry/api': 1.10.0
       '@opentelemetry/semantic-conventions': 1.43.0
 
+  '@opentelemetry/core@3.1.1(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/semantic-conventions': 1.43.0
+
   '@opentelemetry/exporter-trace-otlp-http@0.300.0(@opentelemetry/api@1.10.0)':
     dependencies:
       '@opentelemetry/api': 1.10.0
@@ -15810,7 +15827,7 @@ snapshots:
   '@opentelemetry/instrumentation-document-load@0.69.0(@opentelemetry/api@1.10.0)(supports-color@10.2.2)':
     dependencies:
       '@opentelemetry/api': 1.10.0
-      '@opentelemetry/core': 3.0.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/core': 3.1.1(@opentelemetry/api@1.10.0)
       '@opentelemetry/instrumentation': 0.300.0(@opentelemetry/api@1.10.0)(supports-color@10.2.2)
       '@opentelemetry/semantic-conventions': 1.43.0
       '@opentelemetry/web-common': 0.300.0(@opentelemetry/api@1.10.0)
@@ -15830,7 +15847,7 @@ snapshots:
   '@opentelemetry/instrumentation-user-interaction@0.68.0(@opentelemetry/api@1.10.0)(supports-color@10.2.2)(zone.js@0.14.7)':
     dependencies:
       '@opentelemetry/api': 1.10.0
-      '@opentelemetry/core': 3.0.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/core': 3.1.1(@opentelemetry/api@1.10.0)
       '@opentelemetry/instrumentation': 0.300.0(@opentelemetry/api@1.10.0)(supports-color@10.2.2)
       '@opentelemetry/web-common': 0.300.0(@opentelemetry/api@1.10.0)
       zone.js: 0.14.7
@@ -15899,6 +15916,12 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.10.0
       '@opentelemetry/core': 3.0.0(@opentelemetry/api@1.10.0)
+      '@opentelemetry/semantic-conventions': 1.43.0
+
+  '@opentelemetry/resources@3.1.1(@opentelemetry/api@1.10.0)':
+    dependencies:
+      '@opentelemetry/api': 1.10.0
+      '@opentelemetry/core': 3.1.1(@opentelemetry/api@1.10.0)
       '@opentelemetry/semantic-conventions': 1.43.0
 
   '@opentelemetry/sdk-logs@3.0.0(@opentelemetry/api@1.10.0)':
