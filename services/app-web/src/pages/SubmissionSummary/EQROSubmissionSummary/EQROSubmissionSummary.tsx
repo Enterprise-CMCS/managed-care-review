@@ -172,6 +172,10 @@ export const EQROSubmissionSummary = (): React.ReactElement => {
     const isUnlocked = submissionStatus === 'UNLOCKED'
 
     if (!isSubmitted && isStateUser) {
+        // Cached status can be stale right after submit, wait for fresh data before redirecting
+        if (loading) {
+            return <ErrorOrLoadingPage state="LOADING" />
+        }
         if (submissionStatus === 'DRAFT') {
             return (
                 <Navigate

@@ -1,3 +1,4 @@
+import { InMemoryCache } from '@apollo/client'
 import { screen, waitFor, within } from '@testing-library/react'
 import { RoutesRecord } from '@mc-review/constants'
 import {
@@ -12,7 +13,7 @@ import {
     mockContractPackageApproved,
     iterableAdminUsersMockData,
 } from '@mc-review/mocks'
-import { renderWithProviders } from '../../testHelpers'
+import { renderWithProviders, writeCompleteQuery } from '../../testHelpers'
 import { SubmissionSummary } from './SubmissionSummary'
 import { FetchContractRevisionDiffDocument } from '../../gen/gqlClient'
 import { SubmissionSideNav } from '../SubmissionSideNav'
@@ -3002,5 +3003,78 @@ describe('SubmissionSummary', () => {
         expect(
             screen.queryByRole('heading', { name: 'Attestations' })
         ).not.toBeInTheDocument()
+    })
+})
+
+describe('SubmissionSummary - stale cached status after submit', () => {
+    it('waits for fresh data instead of redirecting a state user with a cached DRAFT contract', async () => {
+        const submitted =
+            mockContractPackageSubmittedWithQuestions('test-abc-123')
+        const freshMock = fetchContractWithQuestionsMockSuccess({
+            contract: submitted,
+        })
+        // Seed the cache with the pre-submit contract the form left behind
+        const cache = new InMemoryCache()
+        writeCompleteQuery(cache, {
+            query: freshMock.request.query,
+            variables: freshMock.request.variables,
+            data: {
+                fetchContract: {
+                    contract: { ...submitted, status: 'DRAFT' },
+                },
+            },
+        })
+
+        // Guard: the stale contract must be a cache hit for this test to mean anything
+        expect(
+            cache.readQuery({
+                query: freshMock.request.query,
+                variables: freshMock.request.variables,
+            })
+        ).toMatchObject({ fetchContract: { contract: { status: 'DRAFT' } } })
+
+        renderWithProviders(
+            <Routes>
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_SUMMARY}
+                    element={<SubmissionSummary />}
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_TYPE}
+                    element={<div>submission form</div>}
+                />
+                <Route
+                    path={RoutesRecord.SUBMISSIONS_REVIEW_SUBMIT}
+                    element={<div>submission form</div>}
+                />
+            </Routes>,
+            {
+                apolloProvider: {
+                    cache,
+                    mocks: [
+                        fetchCurrentUserMock({
+                            user: mockValidStateUser(),
+                            statusCode: 200,
+                        }),
+                        // Logged in user resolves first, like in the app, while the contract fetch is in flight
+                        { ...freshMock, delay: 500 },
+                    ],
+                },
+                routerProvider: {
+                    route: '/submissions/health-plan/test-abc-123',
+                },
+            }
+        )
+
+        // Check the final screen once the fresh contract lands in the cache
+        await waitFor(() =>
+            expect(cache.extract()['Contract:test-abc-123']?.status).toBe(
+                'SUBMITTED'
+            )
+        )
+        expect(
+            await screen.findByTestId('submission-summary')
+        ).toBeInTheDocument()
+        expect(screen.queryByText('submission form')).not.toBeInTheDocument()
     })
 })
