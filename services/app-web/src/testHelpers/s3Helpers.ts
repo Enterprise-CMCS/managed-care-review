@@ -21,8 +21,5 @@ export const testS3Client: () => S3ClientT = () => {
         getURL: async (s3key: string): Promise<string> => {
             return `https://fakes3.com/${s3key}?sekret=deadbeef`
         },
-        getZipURL: async (s3key: string): Promise<string> => {
-            return `http://fakes3.com/fake-uploads/zips/contracts/${s3key}/contract-documents.zip`
-        },
     }
 }

@@ -253,16 +253,18 @@ const AdminUploadResponseForm = ({
                                         </span>
                                     }
                                     accept={ACCEPTED_SUBMISSION_FILE_TYPES}
-                                    uploadFile={(file) =>
+                                    uploadFile={(file, signal) =>
                                         handleUploadFile(
                                             file,
-                                            'QUESTION_ANSWER_DOCS'
+                                            'QUESTION_ANSWER_DOCS',
+                                            signal
                                         )
                                     }
-                                    scanFile={(key) =>
+                                    scanFile={(key, signal) =>
                                         handleScanFile(
                                             key,
-                                            'QUESTION_ANSWER_DOCS'
+                                            'QUESTION_ANSWER_DOCS',
+                                            signal
                                         )
                                     }
                                     onFileItemsUpdate={onFileItemsUpdate}

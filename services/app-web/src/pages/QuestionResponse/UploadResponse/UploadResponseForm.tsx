@@ -151,11 +151,15 @@ const UploadResponseForm = ({
                         error={showFileUploadError ? fileUploadError : ''}
                         hint={fileUploadHint}
                         accept={ACCEPTED_SUBMISSION_FILE_TYPES}
-                        uploadFile={(file) =>
-                            handleUploadFile(file, 'QUESTION_ANSWER_DOCS')
+                        uploadFile={(file, signal) =>
+                            handleUploadFile(
+                                file,
+                                'QUESTION_ANSWER_DOCS',
+                                signal
+                            )
                         }
-                        scanFile={(key) =>
-                            handleScanFile(key, 'QUESTION_ANSWER_DOCS')
+                        scanFile={(key, signal) =>
+                            handleScanFile(key, 'QUESTION_ANSWER_DOCS', signal)
                         }
                         onFileItemsUpdate={onFileItemsUpdate}
                     />

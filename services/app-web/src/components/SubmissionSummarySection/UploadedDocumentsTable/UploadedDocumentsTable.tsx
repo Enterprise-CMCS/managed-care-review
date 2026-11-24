@@ -1,3 +1,4 @@
+import { DocumentDownloadLink } from '../../DownloadLink/DownloadLink'
 import React, { useEffect, useState } from 'react'
 import { dayjs } from '@mc-review/dates'
 import styles from './UploadedDocumentsTable.module.scss'
@@ -6,7 +7,7 @@ import { useDocument } from '../../../hooks'
 import { useAuth } from '../../../contexts/AuthContext'
 import { DataDetailMissingField } from '../../DataDetail'
 import { GenericDocument } from '../../../gen/gqlClient'
-import { LinkWithLogging, NavLinkWithLogging } from '../../TealiumLogging'
+import { NavLinkWithLogging } from '../../TealiumLogging'
 import { hasCMSUserPermissions } from '@mc-review/helpers'
 import { useLDClient } from 'launchdarkly-react-client-sdk'
 import { featureFlags } from '@mc-review/common-code'
@@ -49,7 +50,7 @@ export const UploadedDocumentsTable = ({
     const initialDocState = documents.map((doc) => ({
         ...doc,
         url: null,
-        s3Key: null,
+        s3Key: doc.s3Key || null,
     }))
     const { loggedInUser } = useAuth()
     const isStateUser = loggedInUser?.__typename === 'StateUser'
@@ -214,14 +215,17 @@ export const UploadedDocumentsTable = ({
                                         }
                                         isShared={showLegacySharedRatesAcross}
                                     />
-                                    <LinkWithLogging
+                                    <DocumentDownloadLink
                                         className={styles.inlineLink}
                                         aria-label={`${doc.name} (opens in new window)`}
                                         href={doc.url}
+                                        s3URL={doc.s3URL}
+                                        s3Key={doc.s3Key}
+                                        bucket="HEALTH_PLAN_DOCS"
                                         target="_blank"
                                     >
                                         {doc.name}
-                                    </LinkWithLogging>
+                                    </DocumentDownloadLink>
                                 </th>
                             ) : (
                                 <th scope="row">

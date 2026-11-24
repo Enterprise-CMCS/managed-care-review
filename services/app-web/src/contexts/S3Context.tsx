@@ -2,18 +2,20 @@ import * as React from 'react'
 import { isS3Error } from '../s3'
 import { S3FileData } from '../components'
 import type { S3ClientT } from '../s3'
-import { BucketShortName } from '../s3/s3Amplify'
+import type { BucketShortName } from '../s3'
 import { recordJSException } from '@mc-review/otel'
 import { useAuth } from './AuthContext'
 
 type S3ContextT = {
     handleUploadFile: (
         file: File,
-        bucket: BucketShortName
+        bucket: BucketShortName,
+        signal?: AbortSignal
     ) => Promise<S3FileData>
     handleScanFile: (
         key: string,
-        bucket: BucketShortName
+        bucket: BucketShortName,
+        signal?: AbortSignal
     ) => Promise<void | Error>
 } & S3ClientT
 
@@ -41,10 +43,11 @@ const useS3 = (): S3ContextT => {
 
     const handleUploadFile = async (
         file: File,
-        bucket: BucketShortName
+        bucket: BucketShortName,
+        signal?: AbortSignal
     ): Promise<S3FileData> => {
         try {
-            const s3Key = await uploadFile(file, bucket)
+            const s3Key = await uploadFile(file, bucket, signal)
 
             if (isS3Error(s3Key)) {
                 const error = new Error(`Error in S3: ${file.name}`)
@@ -60,6 +63,7 @@ const useS3 = (): S3ContextT => {
             const s3URL = await getS3URL(s3Key, file.name, bucket)
             return { key: s3Key, s3URL: s3URL }
         } catch (err) {
+            if (signal?.aborted) throw err
             console.error(`uploadFile error ${err}`)
             throw err
         }
@@ -67,10 +71,11 @@ const useS3 = (): S3ContextT => {
 
     const handleScanFile = async (
         key: string,
-        bucket: BucketShortName
+        bucket: BucketShortName,
+        signal?: AbortSignal
     ): Promise<void | Error> => {
         try {
-            const s3Key = await scanFile(key, bucket)
+            const s3Key = await scanFile(key, bucket, signal)
             if (isS3Error(s3Key)) {
                 const error = Error(`Error in S3: ${key}`)
                 recordJSException(error)
@@ -84,6 +89,7 @@ const useS3 = (): S3ContextT => {
                 return error
             }
         } catch (e) {
+            if (signal?.aborted) throw e
             const error = new Error(`handleScanFile error: ${e}`)
             console.error(error)
             throw error

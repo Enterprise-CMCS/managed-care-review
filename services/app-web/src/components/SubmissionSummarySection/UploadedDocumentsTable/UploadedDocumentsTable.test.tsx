@@ -1,4 +1,5 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { testS3Client } from '../../../testHelpers/s3Helpers'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { renderWithProviders } from '../../../testHelpers/jestHelpers'
 import { UploadedDocumentsTable } from './UploadedDocumentsTable'
 import {
@@ -12,6 +13,62 @@ describe('UploadedDocumentsTable', () => {
     afterEach(() => {
         vi.clearAllMocks()
     })
+    it.each([undefined, 'allusers/canonical.pdf'])(
+        'renews expired contract/rate links on activation with stored key %s',
+        async (s3Key) => {
+            const expired =
+                'https://example.com/doc?X-Amz-Date=20200101T000000Z&X-Amz-Expires=900&X-Amz-Signature=secret'
+            const getURL = vi
+                .fn()
+                .mockResolvedValue('https://example.com/fresh')
+            const replace = vi.fn()
+            const open = vi.spyOn(window, 'open').mockReturnValue({
+                opener: null,
+                location: { replace },
+                close: vi.fn(),
+            } as unknown as Window)
+            renderWithProviders(
+                <UploadedDocumentsTable
+                    documents={[
+                        {
+                            name: 'Contract document',
+                            s3URL: 's3://bucket/document-key/file.pdf',
+                            s3Key,
+                            sha256: 'hash',
+                            dateAdded: new Date(),
+                            downloadURL: expired,
+                        },
+                    ]}
+                    caption="Contract"
+                    previousSubmissionDate={null}
+                    hideDynamicFeedback={true}
+                />,
+                {
+                    s3Provider: { ...testS3Client(), getURL },
+                    apolloProvider: {
+                        mocks: [fetchCurrentUserMock({ statusCode: 200 })],
+                    },
+                }
+            )
+            const link = await screen.findByRole('link', {
+                name: 'Contract document (opens in new window)',
+            })
+            expect(link).toHaveAttribute('href', expired)
+            expect(getURL).not.toHaveBeenCalled()
+            fireEvent.click(link)
+            await waitFor(() =>
+                expect(replace).toHaveBeenCalledWith(
+                    'https://example.com/fresh'
+                )
+            )
+            expect(getURL).toHaveBeenCalledWith(
+                s3Key || 'document-key',
+                'HEALTH_PLAN_DOCS'
+            )
+            open.mockRestore()
+        }
+    )
+
     it('renders documents without errors', async () => {
         const testDocuments = [
             {

@@ -1,4 +1,4 @@
-import { waitFor, screen } from '@testing-library/react'
+import { act, waitFor, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import { FileUpload, FileUploadProps, S3FileData } from './FileUpload'
@@ -223,6 +223,173 @@ describe('FileUpload component', () => {
         })
     })
 
+    it('treats a resolved scan Error as a failure, not a completed upload', async () => {
+        const onFileItemsUpdate = vi.fn()
+        renderWithProviders(
+            <FileUpload
+                {...testProps}
+                uploadFile={vi.fn().mockResolvedValue({
+                    key: 'scan-error.pdf',
+                    s3URL: 's3://bucket/scan-error.pdf/report.pdf',
+                })}
+                scanFile={vi
+                    .fn()
+                    .mockResolvedValue(new Error('Scan request failed'))}
+                onFileItemsUpdate={onFileItemsUpdate}
+                accept=".pdf"
+            />
+        )
+        await userEvent.upload(screen.getByTestId('file-input-input'), [
+            TEST_PDF_FILE,
+        ])
+        await screen.findByText('Failed security scan, please remove')
+        await waitFor(() =>
+            expect(
+                onFileItemsUpdate.mock.lastCall?.[0].fileItems[0].status
+            ).toBe('SCANNING_ERROR')
+        )
+        expect(
+            onFileItemsUpdate.mock.lastCall?.[0].fileItems[0].s3URL
+        ).toBeUndefined()
+    })
+
+    it('completes an upload when no scan callback is configured', async () => {
+        const onFileItemsUpdate = vi.fn()
+        renderWithProviders(
+            <FileUpload
+                {...testProps}
+                scanFile={undefined}
+                onFileItemsUpdate={onFileItemsUpdate}
+                accept=".pdf"
+            />
+        )
+        await userEvent.upload(screen.getByTestId('file-input-input'), [
+            TEST_PDF_FILE,
+        ])
+        await waitFor(() =>
+            expect(
+                onFileItemsUpdate.mock.lastCall?.[0].fileItems[0].status
+            ).toBe('UPLOAD_COMPLETE')
+        )
+    })
+
+    it('aborts a removed upload and ignores a late response', async () => {
+        let finish!: (value: S3FileData) => void
+        const pending = new Promise<S3FileData>((resolve) => {
+            finish = resolve
+        })
+        const uploadFile = vi.fn().mockReturnValue(pending)
+        const scanFile = vi.fn()
+        renderWithProviders(
+            <FileUpload
+                {...testProps}
+                uploadFile={uploadFile}
+                scanFile={scanFile}
+                accept=".pdf"
+            />
+        )
+        await userEvent.upload(screen.getByTestId('file-input-input'), [
+            TEST_PDF_FILE,
+        ])
+        await waitFor(() => expect(uploadFile).toHaveBeenCalledTimes(1))
+        const signal = uploadFile.mock.calls[0][1] as AbortSignal
+        await userClickByRole(screen, 'button', {
+            name: `Remove ${TEST_PDF_FILE.name} document`,
+        })
+        expect(signal.aborted).toBe(true)
+        await act(async () => {
+            finish({
+                key: 'late.pdf',
+                s3URL: 's3://bucket/late.pdf/report.pdf',
+            })
+        })
+        expect(screen.queryByText(TEST_PDF_FILE.name)).not.toBeInTheDocument()
+        expect(scanFile).not.toHaveBeenCalled()
+    })
+
+    it('aborts polling when a scanning file is removed', async () => {
+        let finish!: () => void
+        const scanFile = vi.fn().mockReturnValue(
+            new Promise<void>((resolve) => {
+                finish = resolve
+            })
+        )
+        renderWithProviders(
+            <FileUpload {...testProps} scanFile={scanFile} accept=".pdf" />
+        )
+        await userEvent.upload(screen.getByTestId('file-input-input'), [
+            TEST_PDF_FILE,
+        ])
+        await waitFor(() => expect(scanFile).toHaveBeenCalledTimes(1))
+        const signal = scanFile.mock.calls[0][1] as AbortSignal
+        await userClickByRole(screen, 'button', {
+            name: `Remove ${TEST_PDF_FILE.name} document`,
+        })
+        expect(signal.aborted).toBe(true)
+        await act(async () => {
+            finish()
+        })
+        expect(screen.queryByText(TEST_PDF_FILE.name)).not.toBeInTheDocument()
+    })
+
+    it('aborts active polling on unmount', async () => {
+        const scanFile = vi.fn().mockReturnValue(new Promise<void>(() => {}))
+        const { unmount } = renderWithProviders(
+            <FileUpload {...testProps} scanFile={scanFile} accept=".pdf" />
+        )
+        await userEvent.upload(screen.getByTestId('file-input-input'), [
+            TEST_PDF_FILE,
+        ])
+        await waitFor(() => expect(scanFile).toHaveBeenCalledTimes(1))
+        const signal = scanFile.mock.calls[0][1] as AbortSignal
+        unmount()
+        expect(signal.aborted).toBe(true)
+    })
+
+    it('aborts a replaced single-file upload without affecting its replacement', async () => {
+        let finish!: (value: S3FileData) => void
+        const first = new Promise<S3FileData>((resolve) => {
+            finish = resolve
+        })
+        const uploadFile = vi
+            .fn()
+            .mockReturnValueOnce(first)
+            .mockResolvedValue({
+                key: 'replacement.pdf',
+                s3URL: 's3://bucket/replacement.pdf/report.pdf',
+            })
+        const onFileItemsUpdate = vi.fn()
+        renderWithProviders(
+            <FileUpload
+                {...testProps}
+                uploadFile={uploadFile}
+                scanFile={undefined}
+                allowMultipleUploads={false}
+                onFileItemsUpdate={onFileItemsUpdate}
+                accept=".pdf,.doc"
+            />
+        )
+        const input = screen.getByTestId('file-input-input')
+        await userEvent.upload(input, [TEST_PDF_FILE])
+        await waitFor(() => expect(uploadFile).toHaveBeenCalledTimes(1))
+        const signal = uploadFile.mock.calls[0][1] as AbortSignal
+        await userEvent.upload(input, [TEST_DOC_FILE])
+        await waitFor(() => expect(uploadFile).toHaveBeenCalledTimes(2))
+        expect(signal.aborted).toBe(true)
+        await act(async () => {
+            finish({ key: 'old.pdf', s3URL: 's3://bucket/old.pdf/report.pdf' })
+        })
+        await waitFor(() =>
+            expect(
+                onFileItemsUpdate.mock.lastCall?.[0].fileItems[0].status
+            ).toBe('UPLOAD_COMPLETE')
+        )
+        expect(onFileItemsUpdate.mock.lastCall?.[0].fileItems[0].key).toBe(
+            'replacement.pdf'
+        )
+        expect(screen.queryByText(TEST_PDF_FILE.name)).not.toBeInTheDocument()
+    })
+
     it('calls uploadFile, scanFile and onFileItemsUpdate when file is successfully added', async () => {
         const props: FileUploadProps = {
             id: 'Default',
@@ -269,6 +436,43 @@ describe('FileUpload component', () => {
             expect(props.scanFile).toHaveBeenCalled()
             expect(props.onFileItemsUpdate).toHaveBeenCalled()
         })
+    })
+
+    it('retries only the selected item when two items share the same File', async () => {
+        const uploadFile = vi
+            .fn()
+            .mockRejectedValueOnce(new Error('First failed'))
+            .mockRejectedValueOnce(new Error('Second failed'))
+            .mockReturnValue(new Promise<S3FileData>(() => {}))
+        const onFileItemsUpdate = vi.fn()
+        renderWithProviders(
+            <FileUpload
+                {...testProps}
+                uploadFile={uploadFile}
+                onFileItemsUpdate={onFileItemsUpdate}
+                accept=".pdf"
+            />
+        )
+        const input = screen.getByTestId('file-input-input')
+        await userEvent.upload(input, [TEST_PDF_FILE])
+        await waitFor(() => expect(uploadFile).toHaveBeenCalledTimes(1))
+        await userEvent.upload(input, [TEST_PDF_FILE])
+        await waitFor(() =>
+            expect(
+                onFileItemsUpdate.mock.lastCall?.[0].fileItems.map(
+                    (item: FileItemT) => item.status
+                )
+            ).toEqual(['UPLOAD_ERROR', 'UPLOAD_ERROR'])
+        )
+        await userEvent.click(
+            screen.getAllByRole('button', { name: /Retry upload/ })[0]
+        )
+        await waitFor(() => expect(uploadFile).toHaveBeenCalledTimes(3))
+        expect(
+            onFileItemsUpdate.mock.lastCall?.[0].fileItems.map(
+                (item: FileItemT) => item.status
+            )
+        ).toEqual(['PENDING', 'UPLOAD_ERROR'])
     })
 
     it('calls uploadFile again when failed scan is retried', async () => {

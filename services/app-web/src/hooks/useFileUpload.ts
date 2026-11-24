@@ -61,6 +61,10 @@ const useFileUpload = (shouldValidate = false) => {
                 console.info(
                     'Attempting to save files that are duplicate names, discarding duplicate'
                 )
+            } else if (fileItem.status !== 'UPLOAD_COMPLETE') {
+                console.info(
+                    'Discarding a document whose upload or scan is incomplete'
+                )
             } else if (!fileItem.s3URL)
                 console.info(
                     'Attempting to save a seemingly valid file item is not yet uploaded to S3, this should not happen on form submit. Discarding file.'
