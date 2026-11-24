@@ -1,5 +1,6 @@
 import {
     EB_SUBMISSION_FORM_ROUTES,
+    ILOS_SUBMISSION_FORM_ROUTES,
     STATE_SUBMISSION_SUMMARY_ROUTES,
 } from '@mc-review/constants'
 import {
@@ -25,6 +26,8 @@ const shouldUseFormPageStyles = (
             routeName !== 'SUBMISSIONS_REVIEW_SUBMIT') ||
         CMS_WORKFLOW_FORM_ROUTES.includes(routeName) ||
         EB_SUBMISSION_FORM_ROUTES.includes(routeName) ||
+        (ILOS_SUBMISSION_FORM_ROUTES.includes(routeName) &&
+            routeName !== 'SUBMISSIONS_REVIEW_SUBMIT') ||
         QUESTION_RESPONSE_FORM_ROUTES.includes(routeName) ||
         (STATE_SUBMISSION_SUMMARY_ROUTES.includes(routeName) &&
             isStateUser &&

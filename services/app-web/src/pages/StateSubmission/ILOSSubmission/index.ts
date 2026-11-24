@@ -1,1 +1,2 @@
-export { ILOSSubmissionDetails } from './ILOSSubmissionDetails'
+export { ILOSSubmissionForm } from './ILOSSubmissionForm'
+export { ILOSActuarialReport } from './ILOSActuarialReport'

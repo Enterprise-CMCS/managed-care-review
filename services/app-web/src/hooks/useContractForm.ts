@@ -85,6 +85,9 @@ const useContractForm = (contractID?: string): UseContractForm => {
             contractType,
             contractSubmissionType,
             managedCareEntities,
+            ilosRateDateStart,
+            ilosRateDateEnd,
+            ilosDocuments,
         } = input
         try {
             const createResult = await createFormData({
@@ -98,6 +101,10 @@ const useContractForm = (contractID?: string): UseContractForm => {
                         contractType,
                         contractSubmissionType,
                         managedCareEntities,
+                        // ILOS only; the API requires these on create for ILOS
+                        ilosRateDateStart,
+                        ilosRateDateEnd,
+                        ilosDocuments,
                     },
                 },
             })
@@ -153,6 +160,14 @@ const useContractForm = (contractID?: string): UseContractForm => {
         ) {
             input.formData.supportingDocuments = documentsInput(
                 input.formData.supportingDocuments
+            )
+        }
+        if (
+            input.formData.ilosDocuments &&
+            input.formData.ilosDocuments.length > 0
+        ) {
+            input.formData.ilosDocuments = documentsInput(
+                input.formData.ilosDocuments
             )
         }
         if (
