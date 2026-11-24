@@ -18,6 +18,13 @@ export {
     mockDraftRate,
 } from './rateDataMocks'
 
+export {
+    mockILOSDocument,
+    mockILOSContractFormData,
+    mockILOSLinkedRate,
+    mockDraftILOSContract,
+} from './ilosDataMocks'
+
 export { testS3Client } from './s3Helpers'
 export { getStateRecord } from './stateHelpers'
 
@@ -40,6 +47,7 @@ export {
     createTestContract,
     fetchTestContractWithQuestions,
     createAndUpdateTestEQROContract,
+    createAndUpdateTestILOSContract,
 } from './gqlContractHelpers'
 
 export {
@@ -48,4 +56,7 @@ export {
     clearMetadataFromRateFormData,
 } from './documentHelpers'
 
-export { mockGqlContractDraftRevisionFormDataInput } from './gqlContractInputMocks'
+export {
+    mockGqlContractDraftRevisionFormDataInput,
+    mockGqlILOSContractDraftRevisionFormDataInput,
+} from './gqlContractInputMocks'

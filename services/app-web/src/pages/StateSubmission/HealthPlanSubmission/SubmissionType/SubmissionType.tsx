@@ -109,23 +109,15 @@ export const SubmissionType = ({
         featureFlags.PROCUREMENT_ATTESTATION.flag,
         featureFlags.PROCUREMENT_ATTESTATION.defaultValue
     )
-    const showEqroSubmissions: boolean = ldClient?.variation(
-        featureFlags.EQRO_SUBMISSIONS.flag,
-        featureFlags.EQRO_SUBMISSIONS.defaultValue
-    )
-    const showSDPSubmissions: boolean = ldClient?.variation(
-        featureFlags.SDP.flag,
-        featureFlags.SDP.defaultValue
-    )
 
-    //Toggle isNewSubmission condition based if either EQRO or SDP feature flags are on
-    const isNewSubmission =
-        showEqroSubmissions || showSDPSubmissions
-            ? matchPath(
-                  RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
-                  location.pathname
-              )
-            : location.pathname === '/submissions/new'
+    // Which new submission route is in use depends on feature flags, so recognize both
+    const isNewSubmission = Boolean(
+        matchPath(RoutesRecord.SUBMISSIONS_NEW, location.pathname) ||
+        matchPath(
+            RoutesRecord.SUBMISSIONS_NEW_SUBMISSION_FORM,
+            location.pathname
+        )
+    )
 
     const {
         draftSubmission,

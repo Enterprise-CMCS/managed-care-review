@@ -182,8 +182,7 @@ describe('findAllContractsWithHistoryBySubmitInfo - with query params', () => {
         expect(found?.contract instanceof Error).toBe(false)
 
         const latest = (found!.contract as any).latestQuestionCreatedAt as
-            | Date
-            | undefined
+            Date | undefined
         expect(latest).toBeDefined()
         expect(new Date(latest!).getTime()).toEqual(createdAt.getTime())
     })
@@ -326,8 +325,7 @@ describe('findAllContractsWithHistoryBySubmitInfo - with query params', () => {
         expect(found?.contract instanceof Error).toBe(false)
 
         const latest = (found!.contract as any).latestRateQuestionCreatedAt as
-            | Date
-            | undefined
+            Date | undefined
         expect(latest).toBeDefined()
         expect(new Date(latest!).getTime()).toEqual(rqCreatedAt.getTime())
     })
@@ -621,5 +619,73 @@ describe('findAllContractsWithHistoryBySubmitInfo - with query params', () => {
 
         expect(resultIDs).toContain(recentContract.id)
         expect(resultIDs).not.toContain(oldContract.id)
+    })
+
+    it('excludes ILOS submissions', async () => {
+        const client = await sharedTestPrismaClient()
+
+        const stateUser = await client.user.create({
+            data: {
+                id: uuidv4(),
+                givenName: 'Aang',
+                familyName: 'Avatar',
+                email: `aang-${uuidv4()}@example.com`,
+                role: 'STATE_USER',
+                stateCode: 'MN',
+            },
+        })
+
+        const healthPlanDraft = must(
+            await insertDraftContract(client, mockInsertContractArgs({}))
+        )
+        const ilosDraft = must(
+            await insertDraftContract(
+                client,
+                mockInsertContractArgs({
+                    contractSubmissionType: 'ILOS',
+                    populationCovered: undefined,
+                    riskBasedContract: undefined,
+                    ilosRateDateStart: new Date('2025-01-01'),
+                    ilosRateDateEnd: new Date('2025-12-31'),
+                    ilosDocuments: [
+                        {
+                            name: 'ilosReport1.pdf',
+                            s3URL: 's3://bucketname/key/ilosReport1.pdf',
+                            s3BucketName: 'bucketname',
+                            s3Key: 'allusers/key/ilosReport1.pdf',
+                            sha256: 'fakesha',
+                        },
+                    ],
+                })
+            )
+        )
+
+        const healthPlan = must(
+            await submitContract(client, {
+                contractID: healthPlanDraft.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'submit health plan',
+            })
+        )
+        const ilos = must(
+            await submitContract(client, {
+                contractID: ilosDraft.id,
+                submittedByUserID: stateUser.id,
+                submittedReason: 'submit ILOS',
+            })
+        )
+        const contracts = must(
+            await findAllContractsWithHistoryBySubmitInfo(client, true, true)
+        )
+        const contractIDs = contracts.map((r) => r.contractID)
+        expect(contractIDs).toContain(healthPlan.id)
+        expect(contractIDs).not.toContain(ilos.id)
+        expect(
+            contracts.every(
+                (r) =>
+                    !(r.contract instanceof Error) &&
+                    r.contract.contractSubmissionType !== 'ILOS'
+            )
+        ).toBe(true)
     })
 })

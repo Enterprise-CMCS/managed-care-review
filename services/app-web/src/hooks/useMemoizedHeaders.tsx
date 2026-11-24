@@ -20,6 +20,7 @@ const parseContractType = (
     if (contractType === 'HEALTH_PLAN' || contractType === 'health-plan')
         return 'Health plan'
     if (contractType === 'ENROLLMENT_BROKER') return 'EB'
+    if (contractType === 'ilos') return 'ILOS'
 
     return undefined
 }

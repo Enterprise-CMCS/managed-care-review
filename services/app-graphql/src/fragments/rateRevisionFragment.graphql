@@ -1,6 +1,7 @@
 fragment rateRevisionFragment on RateRevision {
     id
     rateID
+    ratePosition
     createdAt
     updatedAt
     unlockInfo {

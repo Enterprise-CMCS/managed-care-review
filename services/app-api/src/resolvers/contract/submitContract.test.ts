@@ -4,10 +4,14 @@ import {
     updateTestStateAssignments,
     executeGraphQLOperation,
 } from '../../testHelpers/gqlHelpers'
-import { SubmitContractDocument } from '../../gen/gqlClient'
+import {
+    SubmitContractDocument,
+    UpdateDraftContractRatesDocument,
+} from '../../gen/gqlClient'
 import {
     clearMetadataFromContractFormData,
     createAndUpdateTestEQROContract,
+    createAndUpdateTestILOSContract,
     mockGqlContractDraftRevisionFormDataInput,
     must,
     testS3Client,
@@ -24,6 +28,7 @@ import {
     createAndUpdateTestEBContract,
     createAndSubmitTestContract,
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestContractWithoutRates,
     createAndUpdateTestContractWithRate,
     createSubmitAndUnlockTestContract,
@@ -3227,6 +3232,229 @@ describe('submitContract', () => {
             resubmitted.reviewStatusActions?.forEach((a) => {
                 expect(a.actionType).toBe('NOT_SUBJECT_TO_REVIEW')
             })
+        })
+    })
+
+    describe('ILOS submission tests', () => {
+        it('submits an ILOS submission with linked and external rates and records UNDER_REVIEW', async () => {
+            const client = await sharedTestPrismaClient()
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+
+            const otherPackage =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const linkedRateID =
+                otherPackage.packageSubmissions[0].rateRevisions[0].rateID
+
+            const draft = await createAndUpdateTestILOSContract(stateServer)
+
+            const rateResult = await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                        updatedRates: [
+                            {
+                                type: 'EXTERNAL',
+                                externalRate: {
+                                    rateControlName: 'EXT-1',
+                                    rateDateStart: '2025-01-01',
+                                    rateDateEnd: '2025-12-31',
+                                },
+                            },
+                            { type: 'LINK', rateID: linkedRateID },
+                            {
+                                type: 'EXTERNAL',
+                                externalRate: {
+                                    rateControlName: 'EXT-2',
+                                    rateDateStart: '2025-01-01',
+                                    rateDateEnd: '2025-12-31',
+                                },
+                            },
+                        ],
+                    },
+                },
+            })
+            expect(rateResult.errors).toBeUndefined()
+
+            const contract = await submitTestContract(stateServer, draft.id)
+
+            expect(contract.contractSubmissionType).toBe('ILOS')
+            expect(contract.status).toBe('SUBMITTED')
+            expect(contract.draftRevision).toBeNull()
+            expect(contract.packageSubmissions).toHaveLength(1)
+
+            // Linked rate moves to the package and keeps its slot between the external rates
+            const sub = contract.packageSubmissions[0]
+            expect(sub.rateRevisions).toHaveLength(1)
+            expect(sub.rateRevisions[0].rateID).toBe(linkedRateID)
+            expect(sub.rateRevisions[0].ratePosition).toBe(2)
+            expect(
+                sub.contractRevision.formData.ilosExternalRates
+            ).toMatchObject([
+                { rateControlName: 'EXT-1', position: 1 },
+                { rateControlName: 'EXT-2', position: 3 },
+            ])
+
+            // ILOS documents get their first submitted date
+            const ilosDocuments =
+                sub.contractRevision.formData.ilosDocuments ?? []
+            expect(ilosDocuments).toHaveLength(1)
+            expect(ilosDocuments[0].dateAdded).toEqual(sub.submitInfo.updatedAt)
+
+            // ILOS is always under review
+            expect(contract.consolidatedStatus).toBe('SUBMITTED')
+            const latestAction = contract.reviewStatusActions?.[0]
+            expect(latestAction?.actionType).toBe('UNDER_REVIEW')
+
+            const contractTableRow =
+                await client.contractTable.findUniqueOrThrow({
+                    where: { id: contract.id },
+                    select: { lastActionDate: true },
+                })
+            expect(contractTableRow.lastActionDate).toEqual(
+                latestAction?.updatedAt
+            )
+        })
+
+        it('resubmits an unlocked ILOS submission with its ILOS data and rate positions', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+            const [cmsUser] = await createDBUsersWithFullData([testCMSUser()])
+
+            const otherPackage =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const linkedRateID =
+                otherPackage.packageSubmissions[0].rateRevisions[0].rateID
+
+            // EXT-1 at 1, the linked rate at 2, EXT-2 at 3
+            const submitted =
+                await createAndSubmitTestILOSContractWithLinkedRates(
+                    stateServer,
+                    [linkedRateID]
+                )
+            const firstSubmission = submitted.packageSubmissions[0]
+            const firstFormData = firstSubmission.contractRevision.formData
+
+            // Users cannot unlock an ILOS submission, so unlock it with the
+            // store function, the way withdrawing a linked rate does.
+            const store = NewPostgresStore(await sharedTestPrismaClient())
+            must(
+                await store.unlockContract({
+                    contractID: submitted.id,
+                    unlockedByUserID: cmsUser.id,
+                    unlockReason: 'unlock ILOS submission',
+                })
+            )
+            const unlocked = await fetchTestContract(stateServer, submitted.id)
+
+            // unlock copies the ILOS data to the draft and keeps every rate's position
+            expect(unlocked.status).toBe('UNLOCKED')
+            const draftFormData = unlocked.draftRevision?.formData
+            expect(draftFormData?.ilosRateDateStart).toEqual(
+                firstFormData.ilosRateDateStart
+            )
+            expect(draftFormData?.ilosRateDateEnd).toEqual(
+                firstFormData.ilosRateDateEnd
+            )
+            expect(draftFormData?.ilosDocuments).toHaveLength(1)
+            expect(draftFormData?.ilosDocuments?.[0]).toMatchObject({
+                name: firstFormData.ilosDocuments?.[0].name,
+                sha256: firstFormData.ilosDocuments?.[0].sha256,
+            })
+            expect(draftFormData?.ilosExternalRates).toMatchObject([
+                { rateControlName: 'EXT-1', position: 1 },
+                { rateControlName: 'EXT-2', position: 3 },
+            ])
+            expect(unlocked.draftRates).toHaveLength(1)
+            expect(unlocked.draftRates?.[0].id).toBe(linkedRateID)
+            expect(unlocked.draftRates?.[0].ratePosition).toBe(2)
+
+            const resubmitted = await submitTestContract(
+                stateServer,
+                submitted.id,
+                'resubmit ILOS submission'
+            )
+
+            expect(resubmitted.status).toBe('RESUBMITTED')
+            expect(resubmitted.packageSubmissions).toHaveLength(2)
+            const latestSubmission = resubmitted.packageSubmissions[0]
+            expect(latestSubmission.rateRevisions).toHaveLength(1)
+            expect(latestSubmission.rateRevisions[0].rateID).toBe(linkedRateID)
+            expect(latestSubmission.rateRevisions[0].ratePosition).toBe(2)
+
+            const latestFormData = latestSubmission.contractRevision.formData
+            expect(latestFormData.ilosExternalRates).toMatchObject([
+                { rateControlName: 'EXT-1', position: 1 },
+                { rateControlName: 'EXT-2', position: 3 },
+            ])
+
+            // the ILOS document keeps the date it was first submitted
+            expect(latestFormData.ilosDocuments).toHaveLength(1)
+            expect(latestFormData.ilosDocuments?.[0].dateAdded).toEqual(
+                firstSubmission.submitInfo.updatedAt
+            )
+
+            expect(resubmitted.reviewStatusActions?.[0]?.actionType).toBe(
+                'UNDER_REVIEW'
+            )
+        })
+
+        it('submits an ILOS submission with only a linked rate', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+
+            const otherPackage =
+                await createAndSubmitTestContractWithRate(stateServer)
+            const linkedRateID =
+                otherPackage.packageSubmissions[0].rateRevisions[0].rateID
+
+            const draft = await createAndUpdateTestILOSContract(stateServer)
+
+            const rateResult = await executeGraphQLOperation(stateServer, {
+                query: UpdateDraftContractRatesDocument,
+                variables: {
+                    input: {
+                        contractID: draft.id,
+                        lastSeenUpdatedAt: draft.draftRevision!.updatedAt,
+                        updatedRates: [{ type: 'LINK', rateID: linkedRateID }],
+                    },
+                },
+            })
+            expect(rateResult.errors).toBeUndefined()
+
+            const contract = await submitTestContract(stateServer, draft.id)
+
+            expect(contract.status).toBe('SUBMITTED')
+            const sub = contract.packageSubmissions[0]
+            expect(sub.rateRevisions).toHaveLength(1)
+            expect(sub.rateRevisions[0].rateID).toBe(linkedRateID)
+            expect(sub.contractRevision.formData.ilosExternalRates).toEqual([])
+        })
+
+        it('returns an error when an ILOS submission has no linked or external rates', async () => {
+            const stateServer = await constructTestPostgresServer({
+                s3Client: mockS3,
+            })
+
+            const draft = await createAndUpdateTestILOSContract(stateServer)
+
+            const result = await executeGraphQLOperation(stateServer, {
+                query: SubmitContractDocument,
+                variables: {
+                    input: { contractID: draft.id },
+                },
+            })
+
+            expect(result.errors).toBeDefined()
+            expect(result.errors?.[0].extensions?.code).toBe('BAD_USER_INPUT')
+            expect(result.errors?.[0].message).toContain(
+                'ILOS submission must have at least one linked or external rate'
+            )
         })
     })
 })

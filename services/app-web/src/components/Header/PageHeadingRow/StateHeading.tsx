@@ -10,7 +10,8 @@ import {
 } from '@mc-review/constants'
 import { StateUser } from '../../../gen/gqlClient'
 
-export type ContractSubmissionDisplayType = 'EQRO' | 'Health plan'| 'EB'| undefined
+export type ContractSubmissionDisplayType =
+    'EQRO' | 'Health plan' | 'EB' | 'ILOS' | undefined
 
 const getSubHeaderTitle = (route?: RouteTWithUnknown): string | undefined => {
     if (route) {

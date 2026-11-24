@@ -1,6 +1,7 @@
 import {
     EB_SUBMISSION_FORM_ROUTES,
     EQRO_SUBMISSION_FORM_ROUTES,
+    ILOS_SUBMISSION_FORM_ROUTES,
     type RouteT,
     type RouteTWithUnknown,
 } from '@mc-review/constants'
@@ -59,6 +60,10 @@ const FORM_FLOWS: Record<ContractSubmissionType, FormFlowDefinition> = {
     },
     ENROLLMENT_BROKER: {
         pages: EB_SUBMISSION_FORM_ROUTES,
+        customPageTitles: { SUBMISSIONS_TYPE: 'Submission details' },
+    },
+    ILOS: {
+        pages: ILOS_SUBMISSION_FORM_ROUTES,
         customPageTitles: { SUBMISSIONS_TYPE: 'Submission details' },
     },
 }

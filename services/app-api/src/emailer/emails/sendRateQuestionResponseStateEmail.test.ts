@@ -95,6 +95,8 @@ describe('sendRateQuestionResponseStateEmail', () => {
                         updatedAt: new Date('2024-04-12'),
                         formData: {
                             programIDs: [defaultFloridaProgram().id],
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                             submissionDescription: 'submission description',
                             submissionType: 'CONTRACT_AND_RATES',
                             contractType: 'BASE',
@@ -144,6 +146,8 @@ describe('sendRateQuestionResponseStateEmail', () => {
                         updatedAt: new Date('2024-04-12'),
                         formData: {
                             programIDs: [defaultFloridaProgram().id],
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                             submissionDescription: 'submission description',
                             submissionType: 'CONTRACT_AND_RATES',
                             contractType: 'BASE',

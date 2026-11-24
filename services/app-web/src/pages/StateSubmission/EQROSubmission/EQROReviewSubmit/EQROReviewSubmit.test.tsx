@@ -25,6 +25,10 @@ const mockEQROFormData = (
         eqroProvisionNewMcoEqrRelatedActivities: false,
         eqroProvisionChipEqrRelatedActivities: true,
         eqroProvisionMcoEqrOrRelatedActivities: null,
+        ilosRateDateStart: null,
+        ilosRateDateEnd: null,
+        ilosDocuments: [],
+        ilosExternalRates: [],
         ...overrides,
     })
 }

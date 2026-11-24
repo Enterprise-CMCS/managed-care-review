@@ -198,9 +198,9 @@ const reassignParentContractInTransaction = async (
         )
     }
 
-    if (resubmittedContract.contractSubmissionType === 'EQRO') {
+    if (resubmittedContract.contractSubmissionType !== 'HEALTH_PLAN') {
         throw new Error(
-            `Unable to reassign rate(s) ${rateNames.join(', ')}, EQRO contract ${contractID} cannot be a rate parent.`
+            `Unable to reassign rate(s) ${rateNames.join(', ')}, ${resubmittedContract.contractSubmissionType} contract ${contractID} cannot be a rate parent.`
         )
     }
 
@@ -208,8 +208,8 @@ const reassignParentContractInTransaction = async (
     // package writer, so it bypasses submitContract's review determination.
     // Add the same health plan review action here so the parent contract's
     // action history and lastActionDate match a normal contract submit.
-    // Reparenting only applies to rates, so EQRO submissions cannot be the new
-    // parent.
+    // Reparenting only applies to rates, so only health plan contracts can be
+    // the new parent.
     if (
         ['SUBMITTED', 'RESUBMITTED'].includes(
             resubmittedContract.consolidatedStatus

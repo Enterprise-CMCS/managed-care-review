@@ -1,7 +1,13 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { Location } from 'react-router-dom'
 
 import { renderWithProviders } from '../../testHelpers/jestHelpers'
 import { AppRoutes } from './AppRoutes'
+import {
+    CreateContractDocument,
+    CreateContractMutationVariables,
+} from '../../gen/gqlClient'
 import {
     fetchCurrentUserMock,
     fetchContractWithQuestionsMockSuccess,
@@ -9,8 +15,11 @@ import {
     fetchRateWithQuestionsMockSuccess,
     mockValidCMSUser,
     mockValidCMSApproverUser,
+    mockContractPackageDraft,
     mockContractPackageUnlockedWithUnlockedType,
     indexContractsStrippedMockSuccess,
+    indexIlosSubmissionsStrippedMockSuccess,
+    mockValidStateUser,
 } from '@mc-review/mocks'
 
 // Routing and routes configuration tested here, best layer for testing behaviors that cross several pages
@@ -749,5 +758,176 @@ describe('AppRoutes and routing configuration', () => {
                 })
             }
         )
+    })
+
+    describe('/dashboard/ilos', () => {
+        const ilosDashboardUsers = [
+            {
+                userType: 'state user',
+                mockUser: mockValidStateUser,
+                dashboardTestID: 'state-dashboard-page',
+            },
+            {
+                userType: 'CMS user',
+                mockUser: mockValidCMSUser,
+                dashboardTestID: 'cms-dashboard-page',
+            },
+        ]
+
+        it.each(ilosDashboardUsers)(
+            'shows the ILOS tab of the dashboard to a $userType when the ilos-submissions flag is on',
+            async ({ mockUser, dashboardTestID }) => {
+                renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockUser(),
+                            }),
+                            indexContractsStrippedMockSuccess(),
+                            indexIlosSubmissionsStrippedMockSuccess(),
+                        ],
+                    },
+                    routerProvider: { route: '/dashboard/ilos' },
+                    featureFlags: {
+                        'session-expiring-modal': false,
+                        'ilos-submissions': true,
+                    },
+                })
+
+                expect(
+                    await screen.findByRole('heading', {
+                        level: 2,
+                        name: 'ILOS actuarial reports',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.getByTestId(dashboardTestID)).toBeInTheDocument()
+                expect(
+                    screen.getByRole('tab', { name: 'ILOS' })
+                ).toHaveAttribute('aria-selected', 'true')
+                expect(
+                    await screen.findByRole('link', {
+                        name: 'MCR-ILOS-MN-0005',
+                    })
+                ).toBeInTheDocument()
+            }
+        )
+
+        it.each(ilosDashboardUsers)(
+            'shows the 404 page to a $userType when the ilos-submissions flag is off',
+            async ({ mockUser }) => {
+                renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockUser(),
+                            }),
+                            indexContractsStrippedMockSuccess(),
+                        ],
+                    },
+                    routerProvider: { route: '/dashboard/ilos' },
+                    featureFlags: {
+                        'session-expiring-modal': false,
+                        'ilos-submissions': false,
+                    },
+                })
+
+                expect(
+                    await screen.findByRole('heading', {
+                        name: /Page not found/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('tab', { name: 'ILOS' })
+                ).not.toBeInTheDocument()
+            }
+        )
+    })
+
+    describe('new submission with only the ILOS flag on', () => {
+        it('creates a health plan draft from /submissions/new/health-plan', async () => {
+            const draft = mockContractPackageDraft({ id: 'new-draft-id' })
+            let testLocation: Location | undefined
+
+            renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                routerProvider: { route: '/submissions/new' },
+                location: (location) => (testLocation = location),
+                apolloProvider: {
+                    mocks: [
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        fetchCurrentUserMock({ statusCode: 200 }),
+                        {
+                            request: {
+                                query: CreateContractDocument,
+                                variables: ({
+                                    input,
+                                }: CreateContractMutationVariables) =>
+                                    input.contractSubmissionType ===
+                                    'HEALTH_PLAN',
+                            },
+                            result: {
+                                data: {
+                                    createContract: { contract: draft },
+                                },
+                            },
+                        },
+                    ],
+                },
+                featureFlags: {
+                    'session-expiring-modal': false,
+                    'ilos-submissions': true,
+                    'eqro-submissions': false,
+                    sdp: false,
+                    'enrollment-broker-submissions': false,
+                },
+            })
+
+            await userEvent.click(
+                await screen.findByRole('radio', { name: /Health plan/ })
+            )
+            await userEvent.click(screen.getByRole('button', { name: 'Start' }))
+
+            expect(
+                await screen.findByRole('form', {
+                    name: 'New Submission Form',
+                })
+            ).toBeInTheDocument()
+            expect(testLocation?.pathname).toBe('/submissions/new/health-plan')
+
+            await userEvent.click(await screen.findByText('Medicaid'))
+            await userEvent.click(
+                await screen.findByRole('combobox', {
+                    name: 'Programs this contract action covers (required)',
+                })
+            )
+            await userEvent.click(await screen.findByText('PMAP'))
+            await userEvent.click(
+                await screen.findByText('Contract action only')
+            )
+            await userEvent.click(await screen.findByText('Base contract'))
+            const riskBasedContract = screen.getByText(
+                /Is this a risk-based contract/
+            ).parentElement
+            await userEvent.click(
+                within(riskBasedContract!).getByLabelText('No')
+            )
+            await userEvent.type(
+                screen.getByRole('textbox', {
+                    name: 'Submission description',
+                }),
+                'A submitted submission'
+            )
+            await userEvent.click(
+                screen.getByRole('button', { name: 'Save & Continue' })
+            )
+
+            await waitFor(() => {
+                expect(testLocation?.pathname).toBe(
+                    '/submissions/health-plan/new-draft-id/edit/contract-details'
+                )
+            })
+        })
     })
 })

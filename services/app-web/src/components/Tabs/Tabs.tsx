@@ -1,4 +1,4 @@
-import React, { useState, type JSX } from 'react'
+import React, { startTransition, useState, type JSX } from 'react'
 import classnames from 'classnames'
 
 import styles from './Tabs.module.scss'
@@ -29,8 +29,16 @@ export const Tabs = ({
     }))
 
     const handleClick = (name: string, route?: string) => {
-        if (route) navigate(route)
-        setActiveTab(name)
+        if (!route) {
+            setActiveTab(name)
+            return
+        }
+        // navigate changes the URL in a transition. Selecting the tab in the same
+        // transition renders both together, so the tab content mounts once.
+        startTransition(() => {
+            navigate(route)
+            setActiveTab(name)
+        })
     }
 
     const [activeTab, setActiveTab] = useState(defaultActiveTab || tabs[0].name)

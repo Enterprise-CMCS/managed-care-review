@@ -25,8 +25,14 @@ import type { MutationResolvers, State } from '../../gen/gqlServer'
 import {
     parseContract,
     parseEQROContract,
+    parseILOSContract,
 } from '../../domain-models/contractAndRates/dataValidatorHelpers'
-import type { UpdateInfoType, PackageStatusType } from '../../domain-models'
+import type {
+    UpdateInfoType,
+    PackageStatusType,
+    ContractType,
+} from '../../domain-models'
+import type { Context } from '../../handlers/apollo_gql'
 import type { UpdateDraftContractRatesArgsType } from '../../postgres/contractAndRates/updateDraftContractRates'
 import {
     isCHIPOnly,
@@ -59,6 +65,174 @@ const validateStatusAndUpdateInfo = (
                 cause: 'INVALID_PACKAGE_STATUS',
             },
         })
+    }
+}
+
+// A submission sent as CONTRACT_ONLY may still have rates attached: a health plan
+// switched from contract and rates, or an EQRO with a linked rate.
+// Prune them at submission time so the submission is clean.
+// ILOS is always CONTRACT_AND_RATES, so it never reaches this.
+const removeRatesFromContractOnlySubmission = async (
+    parsedContract: ContractType,
+    store: Store,
+    context: Context
+) => {
+    if (
+        parsedContract.draftRevision?.formData.submissionType !==
+            'CONTRACT_ONLY' ||
+        !parsedContract.draftRates ||
+        parsedContract.draftRates.length === 0
+    ) {
+        return
+    }
+
+    const rateUpdates: UpdateDraftContractRatesArgsType = {
+        contractID: parsedContract.id,
+        rateUpdates: {
+            create: [],
+            update: [],
+            link: [],
+            unlink: [],
+            delete: [],
+        },
+    }
+
+    for (const draftRate of parsedContract.draftRates) {
+        if (draftRate.revisions.length === 0) {
+            if (draftRate.parentContractID !== parsedContract.id) {
+                const errMessage =
+                    'This never submitted rate is not parented to this contract'
+                logResolverError('submitContract', errMessage, context)
+                console.error(errMessage, parsedContract.id, draftRate.id)
+                throw new GraphQLError(errMessage, {
+                    extensions: {
+                        code: 'INTERNAL_SERVER_ERROR',
+                        cause: 'DB_ERROR',
+                    },
+                })
+            }
+
+            // this is a child draft rate, delete it
+            rateUpdates.rateUpdates.delete.push({
+                rateID: draftRate.id,
+            })
+        } else {
+            // this is a linked rate, unlink it
+            rateUpdates.rateUpdates.unlink.push({
+                rateID: draftRate.id,
+            })
+        }
+    }
+    const rateResult = await store.updateDraftContractRates(rateUpdates)
+    if (rateResult instanceof Error) {
+        const errMessage =
+            'Error while attempting to clean up rates from a now CONTRACT_ONLY submission'
+        logResolverError('submitContract', errMessage, context)
+        throw new GraphQLError(errMessage, {
+            extensions: {
+                code: 'INTERNAL_SERVER_ERROR',
+                cause: 'DB_ERROR',
+            },
+        })
+    }
+}
+
+// A health plan submitted as CONTRACT_AND_RATES must include rates, none of
+// them withdrawn. When dsnp is false, child rates lose rateMedicaidPopulations.
+// ILOS rate rules live in parseILOSContract instead.
+const validateHealthPlanContractAndRates = async (
+    parsedContract: ContractType,
+    isDsnp: boolean | undefined,
+    store: Store,
+    context: Context
+) => {
+    if (
+        parsedContract.contractSubmissionType !== 'HEALTH_PLAN' ||
+        parsedContract.draftRevision?.formData.submissionType !==
+            'CONTRACT_AND_RATES'
+    ) {
+        return
+    }
+
+    //Ensure a contract and rates contract includes rates
+    if (!parsedContract.draftRates || parsedContract.draftRates.length === 0) {
+        const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
+        logResolverError('submitContract', errMessage, context)
+        throw createUserInputError(errMessage, 'contractID', parsedContract.id)
+    }
+
+    //Ensure included rates are in a valid state
+    if (parsedContract.draftRates && parsedContract.draftRates.length > 0) {
+        for (const draftRate of parsedContract.draftRates) {
+            if (['WITHDRAWN'].includes(draftRate.consolidatedStatus)) {
+                const errMessage = `Attempted to submit a contract with a withdrawn rate. Rate id: ${draftRate.id}`
+                logResolverError('submitContract', errMessage, context)
+                throw createUserInputError(errMessage, 'rateID', draftRate.id)
+            }
+        }
+    }
+
+    //Ensure the rate is updated if dsnp is now false
+    if (
+        !isDsnp &&
+        parsedContract.draftRates &&
+        parsedContract.draftRates.length > 0
+    ) {
+        const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
+            []
+        const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
+            []
+
+        parsedContract.draftRates.forEach((rate, idx) => {
+            if (rate.parentContractID !== parsedContract.id) {
+                // keep linked rates
+                linkRates.push({
+                    rateID: rate.id,
+                    ratePosition: idx + 1,
+                })
+            }
+            if (rate.parentContractID === parsedContract.id) {
+                // update if it's a child rate and clear off rateMedicaidPopulations
+                if (rate.draftRevision?.formData) {
+                    rate.draftRevision.formData.rateMedicaidPopulations = []
+                }
+                updateRates.push({
+                    rateID: rate.id,
+                    formData: {
+                        ...rate.draftRevision?.formData,
+                    },
+                    ratePosition: idx + 1,
+                })
+            }
+        })
+
+        const rateUpdates: UpdateDraftContractRatesArgsType = {
+            contractID: parsedContract.id,
+            rateUpdates: {
+                create: [],
+                update: [...updateRates],
+                link: [
+                    ...linkRates.sort(
+                        (a, b) => a.ratePosition - b.ratePosition
+                    ),
+                ],
+                unlink: [],
+                delete: [],
+            },
+        }
+
+        const rateUpdateResult =
+            await store.updateDraftContractRates(rateUpdates)
+        if (rateUpdateResult instanceof Error) {
+            const errMessage = `Failed to update rates on a child rate when dsnp false with ID: ${parsedContract.id}; ${rateUpdateResult.message}`
+            logResolverError('submitContract', errMessage, context)
+            throw new GraphQLError(errMessage, {
+                extensions: {
+                    code: 'INTERNAL_SERVER_ERROR',
+                    cause: 'DB_ERROR',
+                },
+            })
+        }
     }
 }
 
@@ -99,7 +273,7 @@ export function submitContract(
                     })
                 }
 
-                const { submittedReason, contractID } = input
+                const { submittedReason } = input
                 //Set updateInfo default to initial submission
                 const updateInfo: UpdateInfoType = {
                     updatedAt: new Date(),
@@ -149,6 +323,8 @@ export function submitContract(
 
                 const isEQRO =
                     contractWithHistory.contractSubmissionType === 'EQRO'
+                const isILOS =
+                    contractWithHistory.contractSubmissionType === 'ILOS'
 
                 // Validate user authorized to fetch state
                 if (contractWithHistory.stateCode !== stateFromCurrentUser) {
@@ -235,24 +411,37 @@ export function submitContract(
                     formData: initialFormData,
                 }
 
-                contractToParse.draftRates = draftRatesWithoutLinkedRates
+                // ILOS rates are all linked, so parseILOSContract needs the full list.
+                contractToParse.draftRates = isILOS
+                    ? contractWithHistory.draftRates
+                    : draftRatesWithoutLinkedRates
 
                 // MCR-5970 if user changes DSNP, ensure rate medicaidPopulations is cleared out
                 const isDsnp = initialFormData.dsnpContract
 
-                const parsedContract = isEQRO
-                    ? parseEQROContract(
-                          contractToParse,
-                          contractWithHistory.stateCode,
-                          store,
-                          featureFlags
-                      )
-                    : parseContract(
-                          contractToParse,
-                          contractWithHistory.stateCode,
-                          store,
-                          featureFlags
-                      )
+                let parsedContract
+                if (isEQRO) {
+                    parsedContract = parseEQROContract(
+                        contractToParse,
+                        contractWithHistory.stateCode,
+                        store,
+                        featureFlags
+                    )
+                } else if (isILOS) {
+                    parsedContract = parseILOSContract(
+                        contractToParse,
+                        contractWithHistory.stateCode,
+                        store,
+                        featureFlags
+                    )
+                } else {
+                    parsedContract = parseContract(
+                        contractToParse,
+                        contractWithHistory.stateCode,
+                        store,
+                        featureFlags
+                    )
+                }
 
                 if (parsedContract instanceof Error) {
                     const errMessage = parsedContract.message
@@ -265,189 +454,18 @@ export function submitContract(
                 }
                 // add all rates (including any linked rates) back in
                 parsedContract.draftRates = contractWithHistory.draftRates
-                const parsedSubmissionType =
-                    parsedContract.draftRevision?.formData.submissionType
 
-                // If this contract is being submitted as CONTRACT_ONLY but still has associations with rates
-                // we need to prune those rates at submission time to make the submission clean
-                if (
-                    parsedSubmissionType === 'CONTRACT_ONLY' &&
-                    parsedContract.draftRates &&
-                    parsedContract.draftRates.length > 0
-                ) {
-                    const rateUpdates: UpdateDraftContractRatesArgsType = {
-                        contractID: parsedContract.id,
-                        rateUpdates: {
-                            create: [],
-                            update: [],
-                            link: [],
-                            unlink: [],
-                            delete: [],
-                        },
-                    }
-
-                    for (const draftRate of parsedContract.draftRates) {
-                        if (draftRate.revisions.length === 0) {
-                            if (
-                                draftRate.parentContractID !== parsedContract.id
-                            ) {
-                                const errMessage =
-                                    'This never submitted rate is not parented to this contract'
-                                logResolverError(
-                                    'submitContract',
-                                    errMessage,
-                                    context
-                                )
-                                console.error(
-                                    errMessage,
-                                    parsedContract.id,
-                                    draftRate.id
-                                )
-                                throw new GraphQLError(errMessage, {
-                                    extensions: {
-                                        code: 'INTERNAL_SERVER_ERROR',
-                                        cause: 'DB_ERROR',
-                                    },
-                                })
-                            }
-
-                            // this is a child draft rate, delete it
-                            rateUpdates.rateUpdates.delete.push({
-                                rateID: draftRate.id,
-                            })
-                        } else {
-                            // this is a linked rate, unlink it
-                            rateUpdates.rateUpdates.unlink.push({
-                                rateID: draftRate.id,
-                            })
-                        }
-                    }
-                    const rateResult =
-                        await store.updateDraftContractRates(rateUpdates)
-                    if (rateResult instanceof Error) {
-                        const errMessage =
-                            'Error while attempting to clean up rates from a now CONTRACT_ONLY submission'
-                        logResolverError('submitContract', errMessage, context)
-                        throw new GraphQLError(errMessage, {
-                            extensions: {
-                                code: 'INTERNAL_SERVER_ERROR',
-                                cause: 'DB_ERROR',
-                            },
-                        })
-                    }
-                }
-
-                //Contract and rates rate verification
-                if (parsedSubmissionType === 'CONTRACT_AND_RATES') {
-                    //Ensure a contract and rates contract includes rates
-                    if (
-                        !parsedContract.draftRates ||
-                        parsedContract.draftRates.length === 0
-                    ) {
-                        const errMessage = `Attempted to submit a contract and rates contract without rates: ${parsedContract.id}`
-                        logResolverError('submitContract', errMessage, context)
-                        throw createUserInputError(
-                            errMessage,
-                            'contractID',
-                            contractID
-                        )
-                    }
-
-                    //Ensure included rates are in a valid state
-                    if (
-                        parsedContract.draftRates &&
-                        parsedContract.draftRates.length > 0
-                    ) {
-                        for (const draftRate of parsedContract.draftRates) {
-                            if (
-                                ['WITHDRAWN'].includes(
-                                    draftRate.consolidatedStatus
-                                )
-                            ) {
-                                const errMessage = `Attempted to submit a contract with a withdrawn rate. Rate id: ${draftRate.id}`
-                                logResolverError(
-                                    'submitContract',
-                                    errMessage,
-                                    context
-                                )
-                                throw createUserInputError(
-                                    errMessage,
-                                    'rateID',
-                                    draftRate.id
-                                )
-                            }
-                        }
-                    }
-
-                    //Ensure the rate is updated if dsnp is now false
-                    if (
-                        !isDsnp &&
-                        parsedContract.draftRates &&
-                        parsedContract.draftRates.length > 0
-                    ) {
-                        const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
-                            []
-                        const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
-                            []
-
-                        parsedContract.draftRates.forEach((rate, idx) => {
-                            if (rate.parentContractID !== parsedContract.id) {
-                                // keep linked rates
-                                linkRates.push({
-                                    rateID: rate.id,
-                                    ratePosition: idx + 1,
-                                })
-                            }
-                            if (rate.parentContractID === parsedContract.id) {
-                                // update if it's a child rate and clear off rateMedicaidPopulations
-                                if (rate.draftRevision?.formData) {
-                                    rate.draftRevision.formData.rateMedicaidPopulations =
-                                        []
-                                }
-                                updateRates.push({
-                                    rateID: rate.id,
-                                    formData: {
-                                        ...rate.draftRevision?.formData,
-                                    },
-                                    ratePosition: idx + 1,
-                                })
-                            }
-                        })
-
-                        const rateUpdates: UpdateDraftContractRatesArgsType = {
-                            contractID: parsedContract.id,
-                            rateUpdates: {
-                                create: [],
-                                update: [...updateRates],
-                                link: [
-                                    ...linkRates.sort(
-                                        (a, b) =>
-                                            a.ratePosition - b.ratePosition
-                                    ),
-                                ],
-                                unlink: [],
-                                delete: [],
-                            },
-                        }
-
-                        const rateUpdateResult =
-                            await store.updateDraftContractRates(rateUpdates)
-                        if (rateUpdateResult instanceof Error) {
-                            const errMessage = `Failed to update rates on a child rate when dsnp false with ID: ${parsedContract.id}; ${rateUpdateResult.message}`
-                            logResolverError(
-                                'submitContract',
-                                errMessage,
-                                context
-                            )
-                            throw new GraphQLError(errMessage, {
-                                extensions: {
-                                    code: 'INTERNAL_SERVER_ERROR',
-                                    cause: 'DB_ERROR',
-                                },
-                            })
-                        }
-                    }
-                }
+                await removeRatesFromContractOnlySubmission(
+                    parsedContract,
+                    store,
+                    context
+                )
+                await validateHealthPlanContractAndRates(
+                    parsedContract,
+                    isDsnp,
+                    store,
+                    context
+                )
 
                 const updateResult = await store.updateDraftContractWithRates({
                     contractID: input.contractID,

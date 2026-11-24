@@ -183,6 +183,10 @@ function packageName(
     if (submissionType === 'EQRO') {
         return `MCR-EQRO-${stateCode.toUpperCase()}-${padNumber}`
     }
+    // ILOS names will carry a rating period year once that field exists on the submission.
+    if (submissionType === 'ILOS') {
+        return `MCR-ILOS-${stateCode.toUpperCase()}-${padNumber}`
+    }
     const pNames = programNames(statePrograms, programIDs)
     const formattedProgramNames = pNames
         .sort(naturalSort)

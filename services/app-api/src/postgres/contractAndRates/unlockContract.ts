@@ -50,6 +50,21 @@ async function unlockContractInsideTransaction(
                     position: 'asc',
                 },
             },
+            ilosDocuments: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+            ilosExternalRates: {
+                orderBy: {
+                    position: 'asc',
+                },
+            },
+            contract: {
+                select: {
+                    contractSubmissionType: true,
+                },
+            },
             revisionOverrides: {
                 orderBy: {
                     createdAt: 'desc',
@@ -315,20 +330,56 @@ async function unlockContractInsideTransaction(
                 currentRev.ebPreviousAmendmentInMCReview,
             ebAmendmentNumber: currentRev.ebAmendmentNumber,
             ebStateContractIdentifier: currentRev.ebStateContractIdentifier,
+
+            // ILOS submission fields only
+            ilosRateDateStart: currentRev.ilosRateDateStart,
+            ilosRateDateEnd: currentRev.ilosRateDateEnd,
+            ilosDocuments: {
+                create: currentRev.ilosDocuments.map((d) => ({
+                    position: d.position,
+                    name: d.name,
+                    s3URL: d.s3URL,
+                    s3BucketName: d.s3BucketName,
+                    s3Key: d.s3Key,
+                    sha256: d.sha256,
+                    dateAdded: d.dateAdded,
+                })),
+            },
+            ilosExternalRates: {
+                create: currentRev.ilosExternalRates.map((er) => ({
+                    position: er.position,
+                    rateControlName: er.rateControlName,
+                    rateDateStart: er.rateDateStart,
+                    rateDateEnd: er.rateDateEnd,
+                })),
+            },
         },
     })
 
     // connect draftRates
-    let position = 1
-    const joins = relatedRateIDs.map((id) => {
-        const thisPosition = position
-        position++
-        return {
+    let joins: { contractID: string; rateID: string; ratePosition: number }[]
+
+    if (currentRev.contract.contractSubmissionType === 'ILOS') {
+        // ILOS linked rates share one position sequence with the external
+        // rates copied above, so each linked rate keeps the position it was
+        // submitted at.
+        joins = thisContractsRatePackages.map((p) => ({
             contractID: currentRev.contractID,
-            rateID: id,
-            ratePosition: thisPosition,
-        }
-    })
+            rateID: p.rateRevision.rateID,
+            ratePosition: p.ratePosition,
+        }))
+    } else {
+        let position = 1
+        joins = relatedRateIDs.map((id) => {
+            const thisPosition = position
+            position++
+            return {
+                contractID: currentRev.contractID,
+                rateID: id,
+                ratePosition: thisPosition,
+            }
+        })
+    }
 
     await tx.draftRateJoinTable.createMany({
         data: joins,

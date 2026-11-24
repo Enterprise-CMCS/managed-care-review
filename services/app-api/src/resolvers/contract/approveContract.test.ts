@@ -9,6 +9,8 @@ import {
     createTestContract,
     unlockTestContract,
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContract,
+    fetchTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { testS3Client } from '../../testHelpers'
 import { sharedTestPrismaClient } from '../../testHelpers/storeHelpers'
@@ -311,6 +313,50 @@ describe('approveContract', () => {
         expect(approveContractResult.errors[0].message).toContain(
             'Attempted to approve contract with invalid approval release date'
         )
+    })
+
+    it('errors if the contract is an ILOS submission', async () => {
+        const stateServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+        })
+
+        const cmsServer = await constructTestPostgresServer({
+            s3Client: mockS3,
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const ilosSubmission =
+            await createAndSubmitTestILOSContract(stateServer)
+
+        const approveContractResult = await executeGraphQLOperation(cmsServer, {
+            query: ApproveContractDocument,
+            variables: {
+                input: {
+                    contractID: ilosSubmission.id,
+                    dateApprovalReleasedToState: '2024-12-12',
+                },
+            },
+        })
+
+        expect(approveContractResult.errors).toBeDefined()
+        if (approveContractResult.errors === undefined) {
+            throw new Error('type narrow')
+        }
+
+        expect(approveContractResult.errors[0].extensions?.code).toBe(
+            'BAD_USER_INPUT'
+        )
+        expect(approveContractResult.errors[0].message).toBe(
+            'ILOS submissions cannot be approved'
+        )
+
+        const fetchedILOS = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+        expect(fetchedILOS.consolidatedStatus).toBe('SUBMITTED')
     })
 
     it('errors if a non CMS/CMS Approver/Admin user calls it', async () => {

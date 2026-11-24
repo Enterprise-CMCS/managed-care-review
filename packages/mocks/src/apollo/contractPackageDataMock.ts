@@ -334,6 +334,10 @@ function mockContractRevision(
             eqroProvisionNewMcoEqrRelatedActivities: null,
             eqroProvisionChipEqrRelatedActivities: null,
             eqroProvisionMcoEqrOrRelatedActivities: null,
+            ilosRateDateStart: null,
+            ilosRateDateEnd: null,
+            ilosDocuments: [],
+            ilosExternalRates: [],
         },
         ...partial,
     }
@@ -704,6 +708,10 @@ function mockContractPackageSubmittedWithQuestions(
                         eqroProvisionNewMcoEqrRelatedActivities: null,
                         eqroProvisionChipEqrRelatedActivities: null,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                 },
                 rateRevisions: [
@@ -878,6 +886,10 @@ function mockContractWithLinkedRateDraft(
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
+                ilosRateDateStart: null,
+                ilosRateDateEnd: null,
+                ilosDocuments: [],
+                ilosExternalRates: [],
             },
         },
 
@@ -1164,6 +1176,10 @@ function mockContractWithLinkedRateSubmitted(
                         eqroProvisionNewMcoEqrRelatedActivities: null,
                         eqroProvisionChipEqrRelatedActivities: null,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                 },
                 rateRevisions: [
@@ -1371,6 +1387,10 @@ function mockContractPackageSubmitted(partial?: Partial<Contract>): Contract {
                         eqroProvisionNewMcoEqrRelatedActivities: null,
                         eqroProvisionChipEqrRelatedActivities: null,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                 },
                 rateRevisions: [
@@ -1636,6 +1656,10 @@ function mockContractPackageApproved(
                         eqroProvisionNewMcoEqrRelatedActivities: null,
                         eqroProvisionChipEqrRelatedActivities: null,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                 },
                 rateRevisions: [
@@ -2025,6 +2049,8 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                             modifiedNetworkAdequacyStandards: null,
                             modifiedLengthOfContract: null,
                             modifiedNonRiskPaymentArrangements: null,
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                             __typename: 'ContractFormData',
                         },
                         __typename: 'ContractRevision',
@@ -2120,6 +2146,8 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                         modifiedNetworkAdequacyStandards: null,
                         modifiedLengthOfContract: null,
                         modifiedNonRiskPaymentArrangements: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         __typename: 'ContractFormData',
                     },
                     __typename: 'ContractRevision',
@@ -2213,6 +2241,8 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                             modifiedNetworkAdequacyStandards: null,
                             modifiedLengthOfContract: null,
                             modifiedNonRiskPaymentArrangements: null,
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                             __typename: 'ContractFormData',
                         },
                         __typename: 'ContractRevision',
@@ -2288,6 +2318,8 @@ function mockContractPackageWithDifferentProgramsInRevisions(): Contract {
                         modifiedNetworkAdequacyStandards: null,
                         modifiedLengthOfContract: null,
                         modifiedNonRiskPaymentArrangements: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                         __typename: 'ContractFormData',
                     },
                     __typename: 'ContractRevision',
@@ -2399,6 +2431,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
+                ilosRateDateStart: null,
+                ilosRateDateEnd: null,
+                ilosDocuments: [],
+                ilosExternalRates: [],
             },
         },
 
@@ -2580,6 +2616,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                             eqroProvisionNewMcoEqrRelatedActivities: null,
                             eqroProvisionChipEqrRelatedActivities: null,
                             eqroProvisionMcoEqrOrRelatedActivities: null,
+                            ilosRateDateStart: null,
+                            ilosRateDateEnd: null,
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                         },
                     },
                 ],
@@ -2653,6 +2693,10 @@ function mockContractPackageUnlockedWithUnlockedType(
                         eqroProvisionNewMcoEqrRelatedActivities: null,
                         eqroProvisionChipEqrRelatedActivities: null,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                 },
                 rateRevisions: [
@@ -2846,6 +2890,10 @@ function mockContractFormData(
         eqroProvisionNewMcoEqrRelatedActivities: null,
         eqroProvisionChipEqrRelatedActivities: null,
         eqroProvisionMcoEqrOrRelatedActivities: null,
+        ilosRateDateStart: null,
+        ilosRateDateEnd: null,
+        ilosDocuments: [],
+        ilosExternalRates: [],
         ...partial,
     }
 }
@@ -2877,6 +2925,7 @@ function mockUpdateContractDraftRevisionInput(
 ): ContractDraftRevisionFormDataInput {
     const {
         __typename, // strip out __typename. arguments could contain them, but input type errors when present
+        ilosExternalRates: _ilosExternalRates, // output-only, external rates are managed through updateDraftContractRates
         ...formData
     } = partial ?? ({} as any)
 
@@ -3381,6 +3430,10 @@ function mockEqroContractSubmittedUnderReview(
                             eqroProvisionNewMcoEqrRelatedActivities: true,
                             eqroProvisionChipEqrRelatedActivities: true,
                             eqroProvisionMcoEqrOrRelatedActivities: null,
+                            ilosRateDateStart: null,
+                            ilosRateDateEnd: null,
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                         },
                         documentZipPackages: [
                             {
@@ -3478,6 +3531,10 @@ function mockEqroContractSubmittedUnderReview(
                         eqroProvisionNewMcoEqrRelatedActivities: true,
                         eqroProvisionChipEqrRelatedActivities: true,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                     documentZipPackages: [
                         {
@@ -3638,6 +3695,10 @@ function mockEqroContractSubmittedNotSubjectToReview(
                             eqroProvisionNewMcoEqrRelatedActivities: null,
                             eqroProvisionChipEqrRelatedActivities: null,
                             eqroProvisionMcoEqrOrRelatedActivities: null,
+                            ilosRateDateStart: null,
+                            ilosRateDateEnd: null,
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                         },
                         documentZipPackages: [
                             {
@@ -3736,6 +3797,10 @@ function mockEqroContractSubmittedNotSubjectToReview(
                         eqroProvisionNewMcoEqrRelatedActivities: null,
                         eqroProvisionChipEqrRelatedActivities: null,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                     documentZipPackages: [
                         {
@@ -3919,6 +3984,10 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                             eqroProvisionNewMcoEqrRelatedActivities: true,
                             eqroProvisionChipEqrRelatedActivities: null,
                             eqroProvisionMcoEqrOrRelatedActivities: null,
+                            ilosRateDateStart: null,
+                            ilosRateDateEnd: null,
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                         },
                         documentZipPackages: [
                             {
@@ -4030,6 +4099,10 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                         eqroProvisionNewMcoEqrRelatedActivities: true,
                         eqroProvisionChipEqrRelatedActivities: null,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                     documentZipPackages: [
                         {
@@ -4147,6 +4220,10 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                             eqroProvisionNewMcoEqrRelatedActivities: null,
                             eqroProvisionChipEqrRelatedActivities: null,
                             eqroProvisionMcoEqrOrRelatedActivities: null,
+                            ilosRateDateStart: null,
+                            ilosRateDateEnd: null,
+                            ilosDocuments: [],
+                            ilosExternalRates: [],
                         },
                         documentZipPackages: [
                             {
@@ -4245,6 +4322,10 @@ function mockEqroContractResubmittedWithReviewStatusChange(
                         eqroProvisionNewMcoEqrRelatedActivities: null,
                         eqroProvisionChipEqrRelatedActivities: null,
                         eqroProvisionMcoEqrOrRelatedActivities: null,
+                        ilosRateDateStart: null,
+                        ilosRateDateEnd: null,
+                        ilosDocuments: [],
+                        ilosExternalRates: [],
                     },
                     documentZipPackages: [
                         {
@@ -4311,8 +4392,6 @@ const mockContractStripped = (
             populationCovered: 'MEDICAID',
             submissionType: 'CONTRACT_AND_RATES',
             contractType: 'BASE',
-            contractDateStart: new Date('2024-01-01'),
-            contractDateEnd: new Date('2025-01-01'),
             managedCareEntities: ['MCO'],
         },
     },
@@ -4351,9 +4430,48 @@ const mockEQROContractStripped = (
                 populationCovered: 'MEDICAID_AND_CHIP',
                 submissionType: 'CONTRACT_ONLY',
                 contractType: 'BASE',
-                contractDateStart: new Date('2024-01-01'),
-                contractDateEnd: new Date('2025-01-01'),
                 managedCareEntities: ['MCO'],
+            },
+        },
+        ...partial,
+    })
+
+// A submitted ILOS submission as returned by indexIlosSubmissionsStripped.
+const mockILOSContractStripped = (
+    partial?: Partial<ContractStripped>
+): ContractStripped =>
+    mockContractStripped({
+        id: 'test-stripped-ilos-123',
+        contractSubmissionType: 'ILOS',
+        latestSubmittedRevision: {
+            __typename: 'ContractRevisionStripped',
+            id: 'test-stripped-ilos-revision-123',
+            contractID: 'test-stripped-ilos-123',
+            createdAt: new Date('2024-01-15'),
+            updatedAt: new Date('2024-01-15'),
+            contractName: 'MCR-ILOS-MN-0005',
+            submitInfo: {
+                __typename: 'UpdateInformation',
+                updatedAt: '2024-01-15T00:00:00.000Z',
+                updatedBy: {
+                    __typename: 'UpdatedBy',
+                    email: 'example@state.com',
+                    role: 'STATE_USER',
+                    givenName: 'John',
+                    familyName: 'Vila',
+                },
+                updatedReason: 'Initial ILOS submission',
+            },
+            unlockInfo: null,
+            formData: {
+                __typename: 'ContractFormDataStripped',
+                programIDs: ['d95394e5-44d1-45df-8151-1cc1ee66f100'],
+                populationCovered: null,
+                submissionType: 'CONTRACT_AND_RATES',
+                contractType: 'BASE',
+                managedCareEntities: [],
+                ilosRateDateStart: new Date('2023-07-01'),
+                ilosRateDateEnd: new Date('2024-06-30'),
             },
         },
         ...partial,
@@ -4393,8 +4511,6 @@ const mockUnlockedContractStripped = (
                 populationCovered: 'MEDICAID',
                 submissionType: 'CONTRACT_AND_RATES',
                 contractType: 'BASE',
-                contractDateStart: new Date('2024-01-01'),
-                contractDateEnd: new Date('2025-01-01'),
                 managedCareEntities: ['MCO'],
             },
         },
@@ -4424,5 +4540,6 @@ export {
     mockEqroContractResubmittedWithReviewStatusChange,
     mockContractStripped,
     mockEQROContractStripped,
+    mockILOSContractStripped,
     mockUnlockedContractStripped,
 }

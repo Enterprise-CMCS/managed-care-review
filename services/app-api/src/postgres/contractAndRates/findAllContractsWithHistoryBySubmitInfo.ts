@@ -4,7 +4,7 @@ import { NotFoundError } from '../postgresErrors'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import type { ContractOrErrorArrayType } from './findAllContractsWithHistoryByState'
-import type { ContractType } from '../../domain-models/contractAndRates'
+import type { ContractType } from '../../domain-models'
 import { parseErrorToError } from '@mc-review/helpers'
 
 type WithLatest = {
@@ -32,6 +32,8 @@ async function findAllContractsWithHistoryBySubmitInfoInsideTransaction(
     try {
         const whereClause: any = {
             revisions: { some: { submitInfoID: { not: null } } },
+            // ILOS submissions are served by indexIlosSubmissionsStripped
+            contractSubmissionType: { not: 'ILOS' },
         }
 
         if (process.env.stage === 'prod') {
