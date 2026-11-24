@@ -11,6 +11,8 @@ export class ResourceNames {
         resource: string,
         stage: string
     ): string => `${service}-${stage}-${resource}-cdk`
+    static guardDutyMalwareProtectionRoleName = (stage: string): string =>
+        `GuardDutyMalwareProtectionPassRole-${stage}`
     static apiName = (service: string, stage: string): string =>
         `${service}-${stage}-cdk`
 }

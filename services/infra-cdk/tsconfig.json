@@ -19,5 +19,5 @@
             "@stacks/*": ["./lib/stacks/*"]
         }
     },
-    "include": ["src", "bin", "lib", "test"]
+    "include": ["src", "bin", "lib", "test", "tests"]
 }
