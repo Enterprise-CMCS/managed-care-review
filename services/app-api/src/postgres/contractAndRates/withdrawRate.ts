@@ -1,12 +1,15 @@
 import type { PrismaTransactionType } from '../prismaTypes'
 import type { RateType } from '../../domain-models'
+import type { ILOSExternalRateType } from '../../domain-models/contractAndRates'
 import { findRateWithHistory } from './findRateWithHistory'
+import { includeRateRevisionWithRelatedSubmissionContracts } from './prismaSubmittedRateHelpers'
 import { includeFullContract } from './prismaFullContractRateHelpers'
 import {
     getConsolidatedContractStatus,
     getLatestActiveRevision,
     getContractRateStatus,
     getContractReviewStatus,
+    getRelatedContracts,
 } from './prismaSharedContractRateHelpers'
 import { unlockContractInsideTransaction } from './unlockContract'
 import { NotFoundError, UserInputPostgresError } from '../postgresErrors'
@@ -15,12 +18,14 @@ import { updateDraftContractRatesInsideTransaction } from './updateDraftContract
 import type { SubmitContractArgsType } from './submitContract'
 import {
     healthPlanContractReviewDeterminationAction,
+    ilosContractReviewAction,
     submitContractInsideTransaction,
 } from './submitContract'
 import { submitRateInsideTransaction } from './submitRate'
 import { parseContractWithHistory } from './parseContractWithHistory'
 import type { ExtendedPrismaClient } from '../prismaClient'
 import { runTransactionWithRowLock } from '../prismaHelpers'
+import { repositionDraftRates } from './repositionDraftRates'
 
 type WithdrawRateArgsType = {
     rateID: string
@@ -64,16 +69,8 @@ const withdrawRateInsideTransaction = async (
                 orderBy: {
                     createdAt: 'desc',
                 },
-                include: {
-                    relatedSubmissions: {
-                        orderBy: {
-                            updatedAt: 'desc',
-                        },
-                        include: {
-                            submittedContracts: true,
-                        },
-                    },
-                },
+                // needed by getRelatedContracts
+                include: includeRateRevisionWithRelatedSubmissionContracts,
             },
             reviewStatusActions: {
                 orderBy: {
@@ -102,12 +99,11 @@ const withdrawRateInsideTransaction = async (
         throw new Error(`Could not find active revision for rate ${rateID}`)
     }
 
-    // collect all contracts submitted with this rate
-    const submittedContractsIds = latestRateRev.relatedSubmissions
-        .map((sub) =>
-            sub.submittedContracts.map((contract) => contract.contractID)
-        )
-        .flat()
+    // collect the contracts last submitted with this rate. A contract that
+    // linked the rate and was later resubmitted without it is not one of them.
+    const submittedContractsIds = getRelatedContracts(rate).map(
+        (contract) => contract.id
+    )
 
     // collect all draft contracts linked to this rate
     const draftContractsIds = rate.draftContracts.map(
@@ -149,12 +145,9 @@ const withdrawRateInsideTransaction = async (
             )
         }
 
-        const updateRates: UpdateDraftContractRatesArgsType['rateUpdates']['update'] =
-            []
-        const linkRates: UpdateDraftContractRatesArgsType['rateUpdates']['link'] =
-            []
-
         let previousRates = []
+        // ILOS submissions only. External rates share one position sequence with the linked rates.
+        let ilosExternalRates: ILOSExternalRateType[] = []
 
         // If the contract is locked, unlock it and set previousRates.
         if (
@@ -173,6 +166,8 @@ const withdrawRateInsideTransaction = async (
             }
 
             previousRates = unlockedContract.draftRates
+            ilosExternalRates =
+                unlockedContract.draftRevision.formData.ilosExternalRates
 
             // Add contract to connect on withdrawn rate join table
             withdrawnFromContracts.push({ contractID: contract.id })
@@ -190,6 +185,16 @@ const withdrawRateInsideTransaction = async (
                 )
             }
 
+            // The contract was last submitted with the rate, but it is
+            // unlocked and the rate is already removed from its draft. There
+            // is nothing to remove and it is not a withdrawn rate on the contract.
+            const draftHasRate = parsedContract.draftRates.some(
+                (draftRate) => draftRate.id === rateID
+            )
+            if (!draftHasRate) {
+                continue
+            }
+
             const lastRecentSubmission = parsedContract.packageSubmissions[0]
 
             // Do not connect on withdrawn rate join table if contract has never been submitted with the rate to be withdrawn.
@@ -205,6 +210,8 @@ const withdrawRateInsideTransaction = async (
             }
 
             previousRates = parsedContract.draftRates
+            ilosExternalRates =
+                parsedContract.draftRevision?.formData.ilosExternalRates ?? []
         }
 
         const rateToWithdrawIndex = previousRates
@@ -221,50 +228,24 @@ const withdrawRateInsideTransaction = async (
         // remove the rate to withdraw from previousRates. Removing it here prevents gaps in ratePosition.
         previousRates.splice(rateToWithdrawIndex, 1)
 
-        // Collect rates we keep on the contract
-        previousRates.forEach((rate, idx) => {
-            if (rate.parentContractID !== contract.id) {
-                linkRates.push({
-                    rateID: rate.id,
-                    ratePosition: idx + 1,
-                })
-            } else {
-                // We unlocked any contract that was submitted. Now all rates are drafts so we use draftRevision to get form data.
-                if (!rate.draftRevision) {
-                    throw new Error(
-                        `Draft rate ${rate.id} is missing draft revision`
-                    )
-                }
+        // reposition all rates, after removing the withdrawn rates.
+        const repositionedRates = repositionDraftRates(
+            contract.id,
+            previousRates,
+            ilosExternalRates
+        )
 
-                const formData = rate.draftRevision?.formData
-
-                updateRates.push({
-                    rateID: rate.id,
-                    formData: {
-                        ...formData,
-                    },
-                    ratePosition: idx + 1,
-                })
-            }
-        })
-
-        // arrange rate data for update draft contract rates
+        // arrange rate data for update draft contract rates. Renumbering the
+        // rates we keep closes the gap the withdrawn rate leaves.
         const updateContractRatesArgs: UpdateDraftContractRatesArgsType = {
             contractID: contract.id,
             rateUpdates: {
                 create: [],
-                update: [
-                    //  keep any already added child rates
-                    ...updateRates,
-                ],
                 delete: [],
                 unlink: [],
-                link: [
-                    // keep any other already added linked rates
-                    ...linkRates.sort(
-                        (a, b) => a.ratePosition - b.ratePosition
-                    ),
-                ],
+                update: repositionedRates.update, // health plan submission only
+                link: repositionedRates.link,
+                external: repositionedRates.external, //ilos submission only
             },
         }
 
@@ -304,11 +285,14 @@ const withdrawRateInsideTransaction = async (
             // review helper intentionally rejects currently withdrawn review
             // status.
             if (['SUBMITTED', 'RESUBMITTED'].includes(consolidatedStatus)) {
+                // ILOS submissions are always under review, so add action
                 const reviewDetermination =
-                    await healthPlanContractReviewDeterminationAction(
-                        tx,
-                        resubmitResult
-                    )
+                    contract.contractSubmissionType === 'ILOS'
+                        ? await ilosContractReviewAction(tx, resubmitResult)
+                        : await healthPlanContractReviewDeterminationAction(
+                              tx,
+                              resubmitResult
+                          )
 
                 if (reviewDetermination instanceof Error) {
                     throw reviewDetermination

@@ -16,7 +16,10 @@ import {
     unlockTestContract,
     errorUndoWithdrawTestContract,
     createAndSubmitTestContractWithRate,
+    createAndSubmitTestILOSContract,
+    createAndSubmitTestILOSContractWithLinkedRates,
     createAndUpdateTestEQROContract,
+    fetchTestContract,
 } from '../../testHelpers/gqlContractHelpers'
 import { fetchTestRateById, must } from '../../testHelpers'
 import {
@@ -981,6 +984,156 @@ describe('undoWithdrawContract', () => {
             chipTableRow?.reviewStatusActions[0].updatedAt
         )
     })
+
+    it('restores a child rate on the ILOS submission it was withdrawn from', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        const contractA = await createAndSubmitTestContractWithRate(stateServer)
+        const rateID = contractA.packageSubmissions[0].rateRevisions[0].rateID
+        const contractB = await createAndSubmitTestContractWithRate(stateServer)
+        const otherRateID =
+            contractB.packageSubmissions[0].rateRevisions[0].rateID
+
+        // EXT-1 at 1, contract A's rate at 2, EXT-2 at 3, the other rate at 4
+        const ilosSubmission =
+            await createAndSubmitTestILOSContractWithLinkedRates(stateServer, [
+                rateID,
+                otherRateID,
+            ])
+
+        // the ILOS submission cannot be the parent, so the rate is withdrawn with contract A
+        await withdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'withdraw contract A'
+        )
+
+        const unwithdrawnContractA = await undoWithdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'undo withdraw contract A'
+        )
+        expect(unwithdrawnContractA.consolidatedStatus).toBe('RESUBMITTED')
+
+        const rate = await fetchTestRateById(cmsServer, rateID)
+        expect(rate.consolidatedStatus).toBe('RESUBMITTED')
+        expect(rate.parentContractID).toBe(contractA.id)
+        expect(rate.withdrawnFromContracts).toHaveLength(0)
+
+        const restoredILOS = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+
+        // the rate is no longer one of the ILOS submission's withdrawn rates
+        expect(restoredILOS.withdrawnRates).toHaveLength(0)
+
+        // the rate is back on the ILOS submission, after the rates already on it
+        expect(restoredILOS.consolidatedStatus).toBe('RESUBMITTED')
+        const latestSubmission = restoredILOS.packageSubmissions[0]
+        expect(latestSubmission.rateRevisions).toHaveLength(2)
+        expect(latestSubmission.rateRevisions[0].rateID).toBe(otherRateID)
+        expect(latestSubmission.rateRevisions[0].ratePosition).toBe(3)
+        expect(latestSubmission.rateRevisions[1].rateID).toBe(rateID)
+        expect(latestSubmission.rateRevisions[1].ratePosition).toBe(4)
+        expect(
+            latestSubmission.contractRevision.formData.ilosExternalRates
+        ).toMatchObject([
+            { rateControlName: 'EXT-1', position: 1 },
+            { rateControlName: 'EXT-2', position: 2 },
+        ])
+    })
+
+    it('resubmits an ILOS submission once when several child rates are restored on it', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: stateUser,
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: cmsUser,
+            },
+        })
+
+        // contract A has two child rates
+        const draftContractA =
+            await createAndUpdateTestContractWithRate(stateServer)
+        await addNewRateToTestContract(stateServer, draftContractA)
+        const contractA = await submitTestContract(
+            stateServer,
+            draftContractA.id
+        )
+        const rateOneID =
+            contractA.packageSubmissions[0].rateRevisions[0].rateID
+        const rateTwoID =
+            contractA.packageSubmissions[0].rateRevisions[1].rateID
+        const contractB = await createAndSubmitTestContractWithRate(stateServer)
+        const otherRateID =
+            contractB.packageSubmissions[0].rateRevisions[0].rateID
+
+        // EXT-1 at 1, rate one at 2, EXT-2 at 3, rate two at 4, the other rate at 5
+        const ilosSubmission =
+            await createAndSubmitTestILOSContractWithLinkedRates(stateServer, [
+                rateOneID,
+                rateTwoID,
+                otherRateID,
+            ])
+
+        // both rates are withdrawn with contract A and removed from the ILOS submission
+        await withdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'withdraw contract A'
+        )
+
+        const unwithdrawnContractA = await undoWithdrawTestContract(
+            cmsServer,
+            contractA.id,
+            'undo withdraw contract A'
+        )
+        expect(unwithdrawnContractA.consolidatedStatus).toBe('RESUBMITTED')
+
+        const restoredILOS = await fetchTestContract(
+            stateServer,
+            ilosSubmission.id
+        )
+
+        // neither rate is one of the ILOS submission's withdrawn rates anymore
+        expect(restoredILOS.withdrawnRates).toHaveLength(0)
+
+        // one resubmit for the withdraw and one for the undo
+        expect(restoredILOS.consolidatedStatus).toBe('RESUBMITTED')
+        expect(restoredILOS.packageSubmissions).toHaveLength(3)
+
+        // both rates are back on the ILOS submission, after the rates already on it
+        const latestSubmission = restoredILOS.packageSubmissions[0]
+        expect(
+            latestSubmission.rateRevisions.map((rr) => ({
+                rateID: rr.rateID,
+                ratePosition: rr.ratePosition,
+            }))
+        ).toEqual([
+            { rateID: otherRateID, ratePosition: 3 },
+            { rateID: rateOneID, ratePosition: 4 },
+            { rateID: rateTwoID, ratePosition: 5 },
+        ])
+        expect(
+            latestSubmission.contractRevision.formData.ilosExternalRates
+        ).toMatchObject([
+            { rateControlName: 'EXT-1', position: 1 },
+            { rateControlName: 'EXT-2', position: 2 },
+        ])
+    })
 })
 
 describe('undoWithdrawContract error handling', () => {
@@ -1062,6 +1215,33 @@ describe('undoWithdrawContract error handling', () => {
 
         expect(unlockedContractWithdrawErrors[0].message).toBe(
             'Attempted to undo a submission withdrawal with invalid contract status of UNLOCKED'
+        )
+    })
+
+    it('returns an error when undoing the withdrawal of an ILOS submission', async () => {
+        const stateServer = await constructTestPostgresServer({
+            context: {
+                user: testStateUser(),
+            },
+        })
+        const cmsServer = await constructTestPostgresServer({
+            context: {
+                user: testCMSUser(),
+            },
+        })
+
+        const ilosSubmission =
+            await createAndSubmitTestILOSContract(stateServer)
+
+        const undoWithdrawErrors = await errorUndoWithdrawTestContract(
+            cmsServer,
+            ilosSubmission.id,
+            'undo withdraw ILOS submission'
+        )
+
+        expect(undoWithdrawErrors[0].extensions?.code).toBe('BAD_USER_INPUT')
+        expect(undoWithdrawErrors[0].message).toBe(
+            'ILOS submission withdrawals cannot be undone'
         )
     })
 })
