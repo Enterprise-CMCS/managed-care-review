@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import {
+    Cell,
+    Row,
     ColumnFiltersState,
     createColumnHelper,
     flexRender,
@@ -69,7 +71,7 @@ export type ContractTableProps = {
     filterCountClassName?: string
 }
 
-function submissionURL(
+export function submissionURL(
     id: ContractInDashboardType['id'],
     status: ContractInDashboardType['status'],
     contractSubmissionType: ContractInDashboardType['contractSubmissionType'],
@@ -324,6 +326,35 @@ export const programsFilterFn = (
     return cellValue.some((program) => filterValue.includes(program.name))
 }
 
+type ContractTableRowProps = {
+    row: Row<ContractInDashboardType>
+    visibleCells: Cell<ContractInDashboardType, unknown>[]
+}
+
+/**
+ * One row of the table. Memoized so a state update in ContractTable, like the caption
+ * or the filter analytics, does not render every row again.
+ */
+const ContractTableRow = React.memo(function ContractTableRow({
+    row,
+    visibleCells,
+}: ContractTableRowProps): React.ReactElement {
+    return (
+        <tr data-testid={`row-${row.original.id}`}>
+            {visibleCells.map((cell) => (
+                <RowCellElement
+                    key={cell.id}
+                    data-testid={cell.column.columnDef.meta?.dataTestID}
+                    className={getColumnClassName(cell.column.id)}
+                    element={cell.column.id === 'ID' ? 'th' : 'td'}
+                >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </RowCellElement>
+            ))}
+        </tr>
+    )
+})
+
 export const ContractTable = ({
     caption,
     tableData,
@@ -517,6 +548,16 @@ export const ContractTable = ({
         [eqroSubmissions, isNotStateUser, tableConfig.rowIDName]
     )
 
+    // Memoized so the visible cells of a row keep their identity between renders.
+    const columnVisibility = React.useMemo(
+        () => ({
+            stateName: isNotStateUser,
+            submissionType: isNotStateUser,
+            contractSubmissionType: eqroSubmissions,
+        }),
+        [isNotStateUser, eqroSubmissions]
+    )
+
     const setColumnFilters = React.useCallback(
         (updater: Updater<ColumnFiltersState>) => {
             const nextFilters =
@@ -543,11 +584,7 @@ export const ContractTable = ({
         getCoreRowModel: getCoreRowModel(),
         state: {
             columnFilters,
-            columnVisibility: {
-                stateName: isNotStateUser,
-                submissionType: isNotStateUser,
-                contractSubmissionType: eqroSubmissions,
-            },
+            columnVisibility,
         },
         onColumnFiltersChange: setColumnFilters,
         getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -916,33 +953,11 @@ export const ContractTable = ({
                         </thead>
                         <tbody>
                             {filteredRows.map((row) => (
-                                <tr
+                                <ContractTableRow
                                     key={row.id}
-                                    data-testid={`row-${row.original.id}`}
-                                >
-                                    {row.getVisibleCells().map((cell) => (
-                                        <RowCellElement
-                                            key={cell.id}
-                                            data-testid={
-                                                cell.column.columnDef.meta
-                                                    ?.dataTestID
-                                            }
-                                            className={getColumnClassName(
-                                                cell.column.id
-                                            )}
-                                            element={
-                                                cell.column.id === 'ID'
-                                                    ? 'th'
-                                                    : 'td'
-                                            }
-                                        >
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </RowCellElement>
-                                    ))}
-                                </tr>
+                                    row={row}
+                                    visibleCells={row.getVisibleCells()}
+                                />
                             ))}
                         </tbody>
                         {tableCaption}

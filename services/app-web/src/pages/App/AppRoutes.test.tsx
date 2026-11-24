@@ -18,6 +18,8 @@ import {
     mockContractPackageDraft,
     mockContractPackageUnlockedWithUnlockedType,
     indexContractsStrippedMockSuccess,
+    indexIlosSubmissionsStrippedMockSuccess,
+    mockValidStateUser,
 } from '@mc-review/mocks'
 
 // Routing and routes configuration tested here, best layer for testing behaviors that cross several pages
@@ -754,6 +756,92 @@ describe('AppRoutes and routing configuration', () => {
                         })
                     ).toBeInTheDocument()
                 })
+            }
+        )
+    })
+
+    describe('/dashboard/ilos', () => {
+        const ilosDashboardUsers = [
+            {
+                userType: 'state user',
+                mockUser: mockValidStateUser,
+                dashboardTestID: 'state-dashboard-page',
+            },
+            {
+                userType: 'CMS user',
+                mockUser: mockValidCMSUser,
+                dashboardTestID: 'cms-dashboard-page',
+            },
+        ]
+
+        it.each(ilosDashboardUsers)(
+            'shows the ILOS tab of the dashboard to a $userType when the ilos-submissions flag is on',
+            async ({ mockUser, dashboardTestID }) => {
+                renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockUser(),
+                            }),
+                            indexContractsStrippedMockSuccess(),
+                            indexIlosSubmissionsStrippedMockSuccess(),
+                        ],
+                    },
+                    routerProvider: { route: '/dashboard/ilos' },
+                    featureFlags: {
+                        'session-expiring-modal': false,
+                        'ilos-submissions': true,
+                    },
+                })
+
+                expect(
+                    await screen.findByRole('heading', {
+                        level: 2,
+                        name: 'ILOS actuarial reports',
+                    })
+                ).toBeInTheDocument()
+                expect(screen.getByTestId(dashboardTestID)).toBeInTheDocument()
+                expect(
+                    screen.getByRole('tab', { name: 'ILOS' })
+                ).toHaveAttribute('aria-selected', 'true')
+                expect(
+                    await screen.findByRole('link', {
+                        name: 'MCR-ILOS-MN-0005',
+                    })
+                ).toBeInTheDocument()
+            }
+        )
+
+        it.each(ilosDashboardUsers)(
+            'shows the 404 page to a $userType when the ilos-submissions flag is off',
+            async ({ mockUser }) => {
+                renderWithProviders(<AppRoutes authMode={'AWS_COGNITO'} />, {
+                    apolloProvider: {
+                        mocks: [
+                            fetchCurrentUserMock({
+                                statusCode: 200,
+                                user: mockUser(),
+                            }),
+                            indexContractsStrippedMockSuccess(),
+                        ],
+                    },
+                    routerProvider: { route: '/dashboard/ilos' },
+                    featureFlags: {
+                        'session-expiring-modal': false,
+                        'ilos-submissions': false,
+                    },
+                })
+
+                expect(
+                    await screen.findByRole('heading', {
+                        name: /Page not found/i,
+                        level: 1,
+                    })
+                ).toBeInTheDocument()
+                expect(
+                    screen.queryByRole('tab', { name: 'ILOS' })
+                ).not.toBeInTheDocument()
             }
         )
     })

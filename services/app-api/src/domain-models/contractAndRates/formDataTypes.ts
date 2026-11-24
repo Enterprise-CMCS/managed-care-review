@@ -598,13 +598,12 @@ const strippedContractFormDataSchema = contractFormDataSchema.pick({
     programIDs: true,
     populationCovered: true,
     submissionType: true,
-    submissionDescription: true,
     contractType: true,
-    contractExecutionStatus: true,
     contractDateStart: true,
     contractDateEnd: true,
     managedCareEntities: true,
-    federalAuthorities: true,
+    ilosRateDateStart: true,
+    ilosRateDateEnd: true,
 })
 
 const submittableRateFormDataSchema = genericRateFormDataSchema.extend({

@@ -33,11 +33,11 @@ query indexIlosSubmissionsStripped($input: IndexContractsStrippedInput) {
                 }
 
                 draftRevision {
-                    ...strippedContractRevisionFragment
+                    ...strippedIlosRevisionFragment
                 }
 
                 latestSubmittedRevision {
-                    ...strippedContractRevisionFragment
+                    ...strippedIlosRevisionFragment
                 }
             }
         }

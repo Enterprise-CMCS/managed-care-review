@@ -1,4 +1,5 @@
 import { screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import {
     fetchCurrentUserMock,
     iterableCmsUsersMockData,
@@ -7,9 +8,12 @@ import {
     mockContractStripped,
     mockEQROContractStripped,
     indexContractsStrippedMockSuccess,
+    indexIlosSubmissionsStrippedMockSuccess,
+    mockILOSContractStripped,
 } from '@mc-review/mocks'
 import { renderWithProviders } from '../../testHelpers'
 import { CMSDashboard, RateReviewsDashboard, SubmissionsDashboard } from './'
+import { ILOSDashboard } from '../ILOSDashboard'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import {
     RoutesRecord,
@@ -26,6 +30,7 @@ const CMSDashboardNestedRoutes = () => (
             />
             <Route path={`submissions`} element={<SubmissionsDashboard />} />
             <Route path={'rate-reviews'} element={<RateReviewsDashboard />} />
+            <Route path={'ilos'} element={<ILOSDashboard />} />
         </Route>
     </Routes>
 )
@@ -69,6 +74,112 @@ describe('CMSDashboard', () => {
                     'data-tabname',
                     'Rate reviews'
                 )
+            })
+
+            describe(`Tests ILOS tab`, () => {
+                it('does not show the ILOS tab when the ilos-submissions flag is off', async () => {
+                    renderWithProviders(<CMSDashboardNestedRoutes />, {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    statusCode: 200,
+                                    user: mockUser(),
+                                }),
+                                indexContractsStrippedMockSuccess([]),
+                            ],
+                        },
+                        routerProvider: { route: '/dashboard/submissions' },
+                        featureFlags: { 'ilos-submissions': false },
+                    })
+
+                    expect(
+                        await screen.findByRole('tab', { name: 'Submissions' })
+                    ).toBeInTheDocument()
+                    expect(
+                        screen.queryByRole('tab', { name: 'ILOS' })
+                    ).not.toBeInTheDocument()
+                })
+
+                it('loads on the ILOS tab with the ILOS table when the flag is on', async () => {
+                    renderWithProviders(<CMSDashboardNestedRoutes />, {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    statusCode: 200,
+                                    user: mockUser(),
+                                }),
+                                indexIlosSubmissionsStrippedMockSuccess([
+                                    mockILOSContractStripped({
+                                        id: 'test-ilos-submitted',
+                                    }),
+                                ]),
+                            ],
+                        },
+                        routerProvider: { route: '/dashboard/ilos' },
+                        featureFlags: { 'ilos-submissions': true },
+                    })
+
+                    expect(
+                        await screen.findByRole('tab', { name: 'ILOS' })
+                    ).toHaveAttribute('aria-selected', 'true')
+                    expect(
+                        await screen.findByRole('heading', {
+                            level: 2,
+                            name: 'ILOS actuarial reports',
+                        })
+                    ).toBeInTheDocument()
+                    expect(screen.getByRole('tabpanel')).toHaveAttribute(
+                        'data-tabname',
+                        'ILOS'
+                    )
+
+                    const row = within(
+                        screen.getByTestId('row-test-ilos-submitted')
+                    )
+                    expect(
+                        row.getByRole('link', { name: 'MCR-ILOS-MN-0005' })
+                    ).toHaveAttribute(
+                        'href',
+                        '/submissions/ilos/test-ilos-submitted'
+                    )
+                    expect(
+                        row.getByTestId('ilos-submission-stateName')
+                    ).toBeInTheDocument()
+                })
+
+                it('shows the ILOS table after clicking the ILOS tab', async () => {
+                    const user = userEvent.setup()
+                    renderWithProviders(<CMSDashboardNestedRoutes />, {
+                        apolloProvider: {
+                            mocks: [
+                                fetchCurrentUserMock({
+                                    statusCode: 200,
+                                    user: mockUser(),
+                                }),
+                                indexContractsStrippedMockSuccess([]),
+                                indexIlosSubmissionsStrippedMockSuccess([
+                                    mockILOSContractStripped({
+                                        id: 'test-ilos-submitted',
+                                    }),
+                                ]),
+                            ],
+                        },
+                        routerProvider: { route: '/dashboard/submissions' },
+                        featureFlags: { 'ilos-submissions': true },
+                    })
+
+                    await user.click(
+                        await screen.findByRole('tab', { name: 'ILOS' })
+                    )
+
+                    expect(
+                        await screen.findByTestId('row-test-ilos-submitted')
+                    ).toBeInTheDocument()
+                    expect(screen.getByRole('tabpanel')).toHaveAttribute(
+                        'data-tabname',
+                        'ILOS'
+                    )
+                })
             })
 
             describe(`Tests submissions tab`, () => {
@@ -169,8 +280,6 @@ describe('CMSDashboard', () => {
                                 populationCovered: 'MEDICAID',
                                 submissionType: 'CONTRACT_ONLY',
                                 contractType: 'BASE',
-                                contractDateStart: new Date('2024-01-01'),
-                                contractDateEnd: new Date('2025-01-01'),
                                 managedCareEntities: ['MCO'],
                             },
                         },
@@ -323,8 +432,6 @@ describe('CMSDashboard', () => {
                                 populationCovered: 'MEDICAID',
                                 submissionType: 'CONTRACT_AND_RATES',
                                 contractType: 'BASE',
-                                contractDateStart: new Date('2024-01-01'),
-                                contractDateEnd: new Date('2025-01-01'),
                                 managedCareEntities: ['MCO'],
                             },
                         },

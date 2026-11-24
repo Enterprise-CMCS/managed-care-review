@@ -2679,6 +2679,10 @@ type ContractFormDataStripped {
     Options are MCO, PIHP, PAHP, and PCCM
     """
     managedCareEntities: [ManagedCareEntity!]!
+    "Start of the rating period covered by the ILOS submission. Only set on ILOS submissions"
+    ilosRateDateStart: Date
+    "End of the rating period covered by the ILOS submission. Only set on ILOS submissions"
+    ilosRateDateEnd: Date
 }
 
 """
