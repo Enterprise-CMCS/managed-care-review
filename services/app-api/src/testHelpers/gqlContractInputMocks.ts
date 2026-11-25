@@ -66,7 +66,7 @@ const mockGqlContractDraftRevisionFormDataInput = (
               },
           ]
 
-    return {
+    const input = {
         programIDs: [programIDs[0]],
         populationCovered: 'MEDICAID',
         submissionType: 'CONTRACT_ONLY',
@@ -102,7 +102,9 @@ const mockGqlContractDraftRevisionFormDataInput = (
         contractDocuments: contractDocs,
         supportingDocuments: supportingDocs,
         stateContacts: stateContacts,
-    }
+    } as ContractDraftRevisionFormDataInput & { ebContractor?: unknown }
+    delete input.ebContractor
+    return input
 }
 
 export { mockGqlContractDraftRevisionFormDataInput }

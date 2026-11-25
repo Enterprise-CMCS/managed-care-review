@@ -158,13 +158,20 @@ const useContractForm = (contractID?: string): UseContractForm => {
             )
         }
 
+        // Related contractor details are returned for display, but are not editable.
+        const formData = { ...input.formData } as typeof input.formData & {
+            ebContractor?: unknown
+            __typename?: string
+        }
+        delete formData.ebContractor
+        delete formData.__typename
         try {
             const updateResult = await updateFormData({
                 variables: {
                     input: {
                         contractID: contractID ?? 'new-draft',
                         lastSeenUpdatedAt: input.lastSeenUpdatedAt,
-                        formData: input.formData,
+                        formData,
                     },
                 },
             })

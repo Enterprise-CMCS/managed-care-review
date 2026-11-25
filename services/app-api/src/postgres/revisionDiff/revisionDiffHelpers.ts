@@ -117,6 +117,7 @@ const fieldConfigOverrides: Partial<
 }
 
 const excludedFieldPaths = new Set<keyof ContractFormData>([
+    'ebContractor',
     'stateContacts',
     'supportingDocuments',
     'contractDocuments',

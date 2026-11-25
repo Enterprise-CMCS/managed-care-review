@@ -47,6 +47,12 @@ function mockStoreThatErrors(): Store {
                 'UNEXPECTED_EXCEPTION: This error came from the generic store with errors mock'
             )
         },
+        findEBContractors: async () => {
+            return genericError
+        },
+        findEBContractorByID: async () => {
+            return genericError
+        },
         findAllStatePrograms: async () => {
             return genericError
         },

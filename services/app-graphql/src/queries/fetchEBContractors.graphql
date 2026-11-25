@@ -1,0 +1,12 @@
+query fetchEBContractors($input: FetchEBContractorsInput! = {}) {
+    fetchEBContractors(input: $input) {
+        totalCount
+        edges {
+            node {
+                id
+                name
+                isDeprecated
+            }
+        }
+    }
+}

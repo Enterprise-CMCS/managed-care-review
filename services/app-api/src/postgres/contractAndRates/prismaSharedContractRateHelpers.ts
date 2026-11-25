@@ -10,6 +10,7 @@ import type {
     DocumentType,
 } from '../../domain-models/contractAndRates'
 import { findStatePrograms } from '../state'
+import { selectEBContractor } from '../ebContractors'
 import { packageName } from '@mc-review/submissions'
 import { logError } from '../../logger'
 import type {
@@ -57,6 +58,7 @@ interface RevisionStatusInfo {
 const DRAFT_PARENT_PLACEHOLDER = 'DRAFT_PARENT_REPLACE_ME'
 
 const includeContractFormData = {
+    ebContractor: { select: selectEBContractor },
     unlockInfo: includeUpdateInfo,
     undoUnlockInfo: includeUpdateInfo,
     submitInfo: includeUpdateInfo,
@@ -878,6 +880,7 @@ function contractFormDataToDomainModel(
         eqroProvisionMcoEqrOrRelatedActivities:
             contractRevision.eqroProvisionMcoEqrOrRelatedActivities ??
             undefined,
+
         ebNewContractor: contractRevision.ebNewContractor ?? undefined,
         ebBaseContractInMCReview:
             contractRevision.ebBaseContractInMCReview ?? undefined,
@@ -886,6 +889,12 @@ function contractFormDataToDomainModel(
         ebAmendmentNumber: contractRevision.ebAmendmentNumber ?? undefined,
         ebStateContractIdentifier:
             contractRevision.ebStateContractIdentifier ?? undefined,
+        ebContractor: contractRevision.ebContractor ?? undefined,
+        ebContractorID: contractRevision.ebContractorID ?? undefined,
+        ebLinkedBaseContractID:
+            contractRevision.ebLinkedBaseContractID ?? undefined,
+        ebLinkedPreviousAmendmentID:
+            contractRevision.ebLinkedPreviousAmendmentID ?? undefined,
     }
 }
 

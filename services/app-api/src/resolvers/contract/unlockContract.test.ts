@@ -1105,20 +1105,26 @@ describe('unlockContract', () => {
                         context: { user: mockUser() },
                         s3Client: mockS3,
                     })
-                    const draft =
-                        await createAndUpdateTestEBContract(stateServer)
+                    const expectedEBFields = mockEBContractFormData()
+                    const draft = await createAndUpdateTestEBContract(
+                        stateServer,
+                        'FL',
+                        expectedEBFields
+                    )
                     const submitted = await submitTestContract(
                         stateServer,
                         draft.id
                     )
                     const submittedRevision =
                         submitted.packageSubmissions[0].contractRevision
+                    expect(submittedRevision.formData).toEqual(
+                        expect.objectContaining(expectedEBFields)
+                    )
                     const unlocked = await unlockTestContract(
                         cmsServer,
                         submitted.id,
                         'Correct Enrollment Broker submission'
                     )
-                    const expectedEBFields = mockEBContractFormData()
                     expect(unlocked.contractSubmissionType).toBe(
                         'ENROLLMENT_BROKER'
                     )
@@ -1147,6 +1153,12 @@ describe('unlockContract', () => {
                     expect(fetched.draftRevision?.formData).toEqual(
                         expect.objectContaining(expectedEBFields)
                     )
+                    expect(
+                        fetched.packageSubmissions[0].contractRevision.id
+                    ).toBe(submittedRevision.id)
+                    expect(
+                        fetched.packageSubmissions[0].contractRevision.formData
+                    ).toEqual(expect.objectContaining(expectedEBFields))
                 })
             }
         )
