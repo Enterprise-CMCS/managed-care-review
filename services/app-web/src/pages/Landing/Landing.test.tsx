@@ -58,4 +58,40 @@ describe('Landing', () => {
             screen.queryByText(/You have been logged out due to inactivity/)
         ).toBeNull()
     })
+
+    it('displays ILOS content when ilos-submissions flag is on', async () => {
+        renderWithProviders(<Landing />, {
+            routerProvider: { route: '/' },
+            featureFlags: {
+                'eqro-submissions': true,
+                'ilos-submissions': true,
+            },
+        })
+        expect(
+            await screen.findByRole('heading', {
+                name: 'Submit your managed care contracts and documents to CMS for review',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.getByText(/In Lieu of Services \(ILOS\) actuarial reports/)
+        ).toBeInTheDocument()
+    })
+
+    it('hides ILOS content when ilos-submissions flag is off', async () => {
+        renderWithProviders(<Landing />, {
+            routerProvider: { route: '/' },
+            featureFlags: {
+                'eqro-submissions': true,
+                'ilos-submissions': false,
+            },
+        })
+        expect(
+            await screen.findByRole('heading', {
+                name: 'Submit your managed care contracts to CMS for review',
+            })
+        ).toBeInTheDocument()
+        expect(
+            screen.queryByText(/In Lieu of Services \(ILOS\) actuarial reports/)
+        ).toBeNull()
+    })
 })

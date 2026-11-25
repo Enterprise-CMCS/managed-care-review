@@ -39,6 +39,11 @@ export const Landing = (): React.ReactElement => {
         featureFlags.ENROLLMENT_BROKER_SUBMISSIONS.defaultValue
     )
 
+    const ilosFlag: boolean = ldClient?.variation(
+        featureFlags.ILOS_SUBMISSIONS.flag,
+        featureFlags.ILOS_SUBMISSIONS.defaultValue
+    )
+
     const maybeMaintenaceBanner = maintenanceBannerForVariation(
         siteUnderMaintenanceBannerFlag
     )
@@ -103,8 +108,9 @@ export const Landing = (): React.ReactElement => {
                             </Grid>
                             <Grid tablet={{ col: 6 }}>
                                 <h2 className="mcr-homepage-h2-bold margin-top-0">
-                                    Submit your managed care contracts to CMS
-                                    for review
+                                    {ilosFlag
+                                        ? 'Submit your managed care contracts and documents to CMS for review'
+                                        : 'Submit your managed care contracts to CMS for review'}
                                 </h2>
                                 <h5 className="margin-bottom-0">
                                     MC-Review accepts
@@ -159,6 +165,20 @@ export const Landing = (): React.ReactElement => {
                                             </li>
                                         </ul>
                                     </li>
+                                    {ilosFlag && (
+                                        <li>
+                                            In Lieu of Services (ILOS) actuarial
+                                            reports
+                                            <ul>
+                                                <li>
+                                                    States submit their final
+                                                    ILOS cost percentage report
+                                                    (ILOS actuarial report)
+                                                    submission.
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    )}
                                     {enrollmentBrokerFlag && (
                                         <li>
                                             Enrollment Broker (EB) submissions,
