@@ -96,6 +96,11 @@ fragment submittableRevisionsFieldsFragment on SubmittableRevision {
             ebAmendmentNumber
             ebStateContractIdentifier
             ebContractorID
+            ebContractor {
+                id
+                name
+                isDeprecated
+            }
         }
     }
     ... on RateRevision {

@@ -2,6 +2,10 @@ import { v4 as uuidv4 } from 'uuid'
 import { mockContractRevision } from '../../testHelpers/contractDataMocks'
 import { mockRateRevision } from '../../testHelpers/rateDataMocks'
 import {
+    contractFormDataSchema,
+    updateDraftContractFormDataSchema,
+} from '../../domain-models/contractAndRates/formDataTypes'
+import {
     getContractRateStatus,
     contractFormDataToDomainModel,
     rateFormDataToDomainModel,
@@ -11,6 +15,39 @@ import type { ContractRevisionTableWithFormData } from './prismaSharedContractRa
 
 describe('prismaToDomainModel', () => {
     describe('contractFormDataToDomainModel', () => {
+        it.each([false, true])(
+            'preserves joined contractor details when isDeprecated=%s',
+            (isDeprecated) => {
+                const contractor = {
+                    id: '161a7110-e8fc-43d3-b859-8c75f4680a3b',
+                    name: 'Selected contractor',
+                    isDeprecated,
+                }
+                const revision = mockContractRevision(undefined, {
+                    ebContractorID: contractor.id,
+                    ebContractor: contractor,
+                })
+                const formData = contractFormDataSchema.parse(
+                    contractFormDataToDomainModel(revision)
+                )
+
+                expect(formData.ebContractorID).toBe(contractor.id)
+                expect(formData.ebContractor).toEqual(contractor)
+                // Display data must not become an editable form answer.
+                const input = updateDraftContractFormDataSchema.parse(formData)
+                expect(input.ebContractorID).toBe(contractor.id)
+                expect(input).not.toHaveProperty('ebContractor')
+            }
+        )
+
+        it('omits contractor details when no contractor is selected', () => {
+            const formData = contractFormDataToDomainModel(
+                mockContractRevision()
+            )
+            expect(formData.ebContractorID).toBeUndefined()
+            expect(formData.ebContractor).toBeUndefined()
+        })
+
         it('correctly adds document categories to each document', () => {
             const contractRevision = mockContractRevision()
 

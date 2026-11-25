@@ -8,7 +8,7 @@ import { createForbiddenError, createInternalServerError } from '../errorUtils'
 export function fetchEBContractorsResolver(
     store: Store
 ): QueryResolvers['fetchEBContractors'] {
-    return async (_parent, { includeDeprecated }, context) =>
+    return async (_parent, { input }, context) =>
         withResolverSpan(
             context,
             'fetchEBContractors',
@@ -21,7 +21,7 @@ export function fetchEBContractorsResolver(
                     )
                 }
                 const contractors = await store.findEBContractors(
-                    includeDeprecated ?? false
+                    input.includeDeprecated ?? false
                 )
                 if (contractors instanceof Error) {
                     logResolverError(
@@ -35,7 +35,10 @@ export function fetchEBContractorsResolver(
                     )
                 }
                 logResolverSuccess('fetchEBContractors', context)
-                return contractors
+                return {
+                    totalCount: contractors.length,
+                    edges: contractors.map((node) => ({ node })),
+                }
             }
         )
 }

@@ -22,16 +22,24 @@ describe('fetchEBContractors', () => {
     const resolver = fetchEBContractorsResolver({
         findEBContractors,
     } as unknown as Store)
-    const execute = async (ctx = context, includeDeprecated = false) => {
+    const execute = async (
+        ctx = context,
+        includeDeprecated?: boolean | null
+    ) => {
         if (typeof resolver !== 'function')
             throw new Error('Expected resolver function')
         const result = await resolver(
             {},
-            { includeDeprecated },
+            {
+                input:
+                    includeDeprecated === undefined
+                        ? {}
+                        : { includeDeprecated },
+            },
             ctx,
             {} as GraphQLResolveInfo
         )
-        return Promise.all(result)
+        return result
     }
     beforeEach(() => {
         findEBContractors.mockReset()
@@ -39,11 +47,14 @@ describe('fetchEBContractors', () => {
     })
 
     it('allows state users to read the contractor list from the store', async () => {
-        expect(await execute()).toEqual(contractors)
+        expect(await execute()).toEqual({
+            totalCount: contractors.length,
+            edges: contractors.map((node) => ({ node })),
+        })
         expect(findEBContractors).toHaveBeenCalledOnce()
         expect(findEBContractors).toHaveBeenCalledWith(false)
     })
-    it.each([false, true])(
+    it.each([undefined, null, false, true])(
         'passes includeDeprecated=%s to the store',
         async (includeDeprecated) => {
             await execute(context, includeDeprecated)
@@ -54,7 +65,7 @@ describe('fetchEBContractors', () => {
     )
     it('returns an empty list when the table is empty', async () => {
         findEBContractors.mockResolvedValue([])
-        expect(await execute()).toEqual([])
+        expect(await execute()).toEqual({ totalCount: 0, edges: [] })
     })
     it('allows CMS users and OAuth clients with read access', async () => {
         const cmsContext: Context = {
@@ -75,7 +86,10 @@ describe('fetchEBContractors', () => {
                 isDelegatedUser: false,
             },
         }
-        expect(await execute(cmsContext)).toEqual(contractors)
+        expect(await execute(cmsContext)).toEqual({
+            totalCount: contractors.length,
+            edges: contractors.map((node) => ({ node })),
+        })
     })
     it('rejects OAuth clients without read access before querying the table', async () => {
         await expect(

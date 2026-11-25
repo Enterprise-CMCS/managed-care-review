@@ -11,9 +11,24 @@ type EBContractor {
     isDeprecated: Boolean!
 }
 
+type EBContractorEdge {
+    node: EBContractor!
+}
+
+input FetchEBContractorsInput {
+    includeDeprecated: Boolean = false
+}
+
+type FetchEBContractorsPayload {
+    totalCount: Int!
+    edges: [EBContractorEdge!]!
+}
+
 type Query {
     "Enrollment Broker contractors; deprecated entries are excluded unless explicitly requested."
-    fetchEBContractors(includeDeprecated: Boolean = false): [EBContractor!]!
+    fetchEBContractors(
+        input: FetchEBContractorsInput!
+    ): FetchEBContractorsPayload!
 
     """
     fetchCurrentUser returns user information for the currently logged in User
@@ -1985,6 +2000,8 @@ type ContractFormData {
     ebStateContractIdentifier: String
     "The ID of the selected Enrollment Broker contractor"
     ebContractorID: String
+    "The selected contractor details from the reference table (read-only)."
+    ebContractor: EBContractor
 }
 
 "Either new capitation rates (NEW) or updates to previously certified capitation rates (AMENDMENT)"

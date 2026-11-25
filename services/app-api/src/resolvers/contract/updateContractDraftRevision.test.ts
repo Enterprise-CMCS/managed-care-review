@@ -2,6 +2,7 @@ import { NewPostgresStore } from '../../postgres'
 import {
     UpdateContractDraftRevisionDocument,
     FetchEbContractorsDocument,
+    type FetchEbContractorsQuery,
 } from '../../gen/gqlClient'
 import {
     mockStoreThatErrors,
@@ -104,6 +105,7 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 eqroProvisionNewMcoEqrRelatedActivities: null,
                 eqroProvisionChipEqrRelatedActivities: null,
                 eqroProvisionMcoEqrOrRelatedActivities: null,
+                ebContractor: null,
                 ebContractorID: null,
                 ebNewContractor: null,
                 ebBaseContractInMCReview: null,
@@ -583,41 +585,59 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                     name: contractor.name,
                     isDeprecated,
                 }
-                const list = await executeGraphQLOperation(server, {
-                    query: FetchEbContractorsDocument,
-                    variables: { includeDeprecated: true },
-                })
+                const list =
+                    await executeGraphQLOperation<FetchEbContractorsQuery>(
+                        server,
+                        {
+                            query: FetchEbContractorsDocument,
+                            variables: { input: { includeDeprecated: true } },
+                        }
+                    )
                 expect(list.errors).toBeUndefined()
-                expect(list.data?.fetchEBContractors).toEqual(
-                    expect.arrayContaining([expected])
+                expect(
+                    list.data?.fetchEBContractors.edges.map((edge) => edge.node)
+                ).toEqual(expect.arrayContaining([expected]))
+                expect(list.data?.fetchEBContractors.totalCount).toBe(
+                    list.data?.fetchEBContractors.edges.length
                 )
-                const activeList = await executeGraphQLOperation(server, {
-                    query: FetchEbContractorsDocument,
-                })
+                const activeList =
+                    await executeGraphQLOperation<FetchEbContractorsQuery>(
+                        server,
+                        {
+                            query: FetchEbContractorsDocument,
+                        }
+                    )
                 expect(activeList.errors).toBeUndefined()
+                expect(activeList.data?.fetchEBContractors.totalCount).toBe(
+                    activeList.data?.fetchEBContractors.edges.length
+                )
                 if (isDeprecated) {
-                    expect(activeList.data?.fetchEBContractors).not.toEqual(
-                        expect.arrayContaining([expected])
-                    )
+                    expect(
+                        activeList.data?.fetchEBContractors.edges.map(
+                            (edge) => edge.node
+                        )
+                    ).not.toEqual(expect.arrayContaining([expected]))
                 } else {
-                    expect(activeList.data?.fetchEBContractors).toEqual(
-                        expect.arrayContaining([expected])
-                    )
+                    expect(
+                        activeList.data?.fetchEBContractors.edges.map(
+                            (edge) => edge.node
+                        )
+                    ).toEqual(expect.arrayContaining([expected]))
                 }
                 expect(draft.draftRevision?.formData.ebContractorID).toBe(
                     contractor.id
                 )
                 expect(draft.draftRevision).not.toHaveProperty('ebContractor')
-                expect(draft.draftRevision?.formData).not.toHaveProperty(
-                    'ebContractor'
+                expect(draft.draftRevision?.formData.ebContractor).toEqual(
+                    expected
                 )
                 const fetched = await fetchTestContract(server, draft.id)
                 expect(fetched.draftRevision?.formData.ebContractorID).toBe(
                     contractor.id
                 )
                 expect(fetched.draftRevision).not.toHaveProperty('ebContractor')
-                expect(fetched.draftRevision?.formData).not.toHaveProperty(
-                    'ebContractor'
+                expect(fetched.draftRevision?.formData.ebContractor).toEqual(
+                    expected
                 )
 
                 const submitted = await submitTestContract(server, draft.id)
@@ -630,7 +650,8 @@ describe(`Tests UpdateContractDraftRevision`, () => {
                 ).not.toHaveProperty('ebContractor')
                 expect(
                     submitted.packageSubmissions[0].contractRevision.formData
-                ).not.toHaveProperty('ebContractor')
+                        .ebContractor
+                ).toEqual(expected)
             }
         )
 

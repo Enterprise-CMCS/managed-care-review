@@ -3,14 +3,16 @@
 
 ### November 19, 2026
 #### Added
-- New query `fetchEBContractors(includeDeprecated: Boolean = false)` returns Enrollment Broker contractors from the database.
-    - Returns a non-null list of `EBContractor` objects with `id: ID!`, `name: String!`, and `isDeprecated: Boolean!`.
-    - Deprecated contractors are excluded by default. Pass `includeDeprecated: true` to include them.
+- New query `fetchEBContractors(input: FetchEBContractorsInput!)` returns Enrollment Broker contractors from the database.
+    - Returns `FetchEBContractorsPayload` with `totalCount: Int!` and `edges: [EBContractorEdge!]!`. Each edge contains an `EBContractor` under `node`, with `id: ID!`, `name: String!`, and `isDeprecated: Boolean!`.
+    - `totalCount` is the number of contractors returned after filtering; this query does not paginate.
+    - `FetchEBContractorsInput` contains optional `includeDeprecated: Boolean = false`. Deprecated contractors are excluded by default; pass `input: { includeDeprecated: true }` to include them.
     - Results are ordered by name, then ID.
     - Available to authenticated users, including State users, and OAuth clients with the `client_credentials` grant.
     - Returns `FORBIDDEN` for OAuth clients without read access and `INTERNAL_SERVER_ERROR` if the database lookup fails.
 - Nullable `ebContractorID` String field added to `ContractFormData` and `ContractDraftRevisionFormDataInput` to store the selected Enrollment Broker contractor ID.
     - Returned in contract revision form data and preserved through submission, unlock, and resubmission.
+- Nullable, read-only `ebContractor: EBContractor` added to `ContractFormData`, returning details for the selected contractor alongside its ID. It is included in contract reads, excluded from draft mutation inputs, and ignored by revision diffs; selection changes are tracked through `ebContractorID`.
 
 #### Updated
 - `updateContractDraftRevision` validates non-null `ebContractorID` values against the contractor table.
